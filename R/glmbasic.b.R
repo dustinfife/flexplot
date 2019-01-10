@@ -1,0 +1,176 @@
+
+# This file is a generated template, your changes will not be overwritten
+
+glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+    "glmbasicClass",
+    inherit = glmbasicBase,
+    private = list(
+        .run = function() {
+        	
+        	if (length(self$options$out)>0 & length(self$options$preds)>0){
+        	#### write formula for glinmod
+            formula <- jmvcore::constructFormula(self$options$out, self$options$preds)
+            formula <- as.formula(formula)
+        
+        	#### output results
+            results <- glinmod(formula, self$data, plot=F)
+        
+        	#### save formula/dataset to a file (to be used for plotting)
+        	if (length(self$options$preds)>0){
+				output = list(formula=formula, data=self$data)
+				image <- self$results$plot
+				image$setState(output)
+				
+				image2 <- self$results$assumpplot
+				image2$setState(output)			
+			}
+
+			#### prepare r square output
+			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p)
+			private$.rsq(rsq_out)		
+
+			#### prepopulate table
+            table = self$results$glmcat			
+            
+            #### format factor summary to look nice
+			f = function(x){ x[is.na(x)] = "-"; x}
+			
+
+           
+			#### if there are factors, report those results....           
+			if (!is.na(results$factor.summary)){           
+				
+				#### prepoulate first row with label
+				table$addRow(rowKey=1, values=list(
+					var = "Factors (Estimates reported are means)",
+					levels="",
+					means="",
+					lower="",
+					upper="",
+					std.estimate="",
+					std.lower="",
+					std.upper="",
+					df.spent="",
+					df.remaining=""																																												
+				))
+					
+
+    	    		#### make output for categorical predictors
+
+	            results$factor.summary[,3:ncol(results$factor.summary)] = apply(results$factor.summary[,3:ncol(results$factor.summary)], 2, round, digits=2)
+	            results$factor.summary[,3:ncol(results$factor.summary)] = apply(results$factor.summary[,3:ncol(results$factor.summary)], 2, f)
+	                        
+	                        ### loop through all rows in summary
+	            for (i in 3:(nrow(results$factor.summary)+2)){
+	            
+	            
+					table$addRow(rowKey = i, values=list(
+					    var=paste0("", as.character(results$factor.summary$variables[i-2])),
+					    levels=results$factor.summary$levels[i-2],
+						means = results$factor.summary[,"LS Means"][i-2],
+						lower = results$factor.summary$lower[i-2],
+						upper = results$factor.summary$upper[i-2],				
+						std.estimate = results$factor.summary$std.estimate[i-2],
+						std.lower = results$factor.summary$std.lower[i-2],
+						std.upper = results$factor.summary$std.upper[i-2],												
+						df.spent = results$factor.summary$df.spent[i-2],
+						df.remaining = results$factor.summary$df.remaining[i-2]
+					))
+				}  
+				
+			} 
+
+			m = nrow(table)
+			
+			####  if there are numbers, report those results.... 
+			if (!is.na(results$numbers.summary)){
+							
+				#### prepoulate first row with label
+				table$addRow(rowKey=m+1, values=list(
+					var = "Numeric Variables (Estimates reported are slopes/intercepts)",
+					levels="",
+					means="",
+					lower="",
+					upper="",
+					std.estimate="",
+					std.lower="",
+					std.upper="",
+					df.spent="",
+					df.remaining=""																																												
+				))
+							
+				rows.tot = ifelse(is.na(results$factor.summary), 2, nrow(results$factor.summary)+2)
+				rows.all = seq(from=rows.tot, to=(rows.tot + nrow(results$numbers.summary) - 1))
+				#table2 = self$results$glmnum				
+	            results$numbers.summary[,3:ncol(results$numbers.summary)] = apply(results$numbers.summary[,3:ncol(results$numbers.summary)], 2, round, digits=2)
+	            results$numbers.summary[,3:ncol(results$numbers.summary)] = apply(results$numbers.summary[,3:ncol(results$numbers.summary)], 2, f)			
+				i = 1
+	     		for (j in rows.all){
+	            
+	            	
+					table$addRow(rowKey = j, values=list(
+					    var=as.character(results$numbers.summary$variables[i]),
+					    levels = "", 
+						means = results$numbers.summary$estimate[i],
+						lower = results$numbers.summary$lower[i],
+						upper = results$numbers.summary$upper[i],				
+						std.estimate = results$numbers.summary$std.estimate[i],
+						std.lower = results$numbers.summary$std.lower[i],
+						std.upper = results$numbers.summary$std.upper[i],												
+						df.spent = results$numbers.summary$df.spent[i],
+						df.remaining = results$numbers.summary$df.remaining[i]
+					))
+				i = i+1
+				} 
+			}
+						  	        
+            # `self$data` contains the data
+            # `self$options` contains the options
+            # `self$results` contains the results object (to populate)
+        }},
+		.plot = function(image, ...){
+            if (is.null(image$state))
+                return(FALSE)
+            se.type = subsetString(self$options$center," + ", position=2)   			
+			formula = image$state$formula
+			data = image$state$data
+            mod = lm(formula, data=data)
+            plot = visualize(mod, plot="bivariate", se=self$options$se, method=self$options$line, spread=se.type)	+ theme(plot.background = element_rect(fill = "white", colour = NA)) 
+			print(plot)
+			TRUE
+			},
+
+		.assumpplot = function(image, ...){
+            if (is.null(image$state))
+                return(FALSE)
+                
+			formula = image$state$formula
+			data = image$state$data
+			# plot = plot(data$motivation, data$income, main=as.character(formula))
+			# print(plot)
+			# TRUE			
+            mod = lm(formula, data=data)
+            plot = visualize(mod, plot="residuals") + theme(plot.background = element_rect(fill = "white", colour = NA))
+			print(plot)
+			TRUE
+			},			
+			
+			
+		.rsq = function(l){
+			
+			table <- self$results$rsq
+			
+			for (i in 1:(length(l$semi.p)+1)){
+				if (i == 1){
+					row = list('var' = 'model', 'Estimate' = l$rsq[1])
+				} else {
+					row = list('var' = names(l$semi.p)[i-1], 'Estimate' = l$semi.p[i-1])
+				}
+				table$addRow(rowKey=i, values=row)
+			}
+		}
+
+       # head(exercise_data)
+        
+        )
+)
