@@ -184,38 +184,47 @@ estimates.lm = function(object){
 	nms = row.names(anova(object))[min:max]	
 	names(semi.p) = nms
 	
-		#### FACTORS FIRST
-	if (length(factors)>0){
+if (length(factors)>0){
 		#### generate table with names
 		if (length(factors)==1){
 			factor.names = levels(d[,factors])
 			num.rows = length(factor.names)
+			a = length(unique(factor.names))
+			num.rows2 = (a*(a-1))/2
 		} else {
 			factor.names = unlist(lapply(d[,factors], levels))
 			num.rows = sum(unlist(apply(d[,factors], 2, function(x) { length(unique(x))})))			
+			num.rows2 = apply(d[,factors], 2, function(x){ a = length(unique(x)); (a*(a-1))/2})
 		}
 
 	
 			#### create empty matrix with variable names
 			#### identify the number of rows
-			coef.matrix = data.frame(variables = rep("", num.rows), levels=NA, estimate=NA, lower=NA, upper=NA, std.estimate=0, std.lower=NA, std.upper=NA, df.spent=NA, df.remaining=NA)
+			coef.matrix = data.frame(variables = rep("", num.rows), levels=NA, estimate=NA, lower=NA, upper=NA, df.spent=NA, df.remaining=NA)
 			coef.matrix$variables = factor(coef.matrix$variables, levels=c("", factors))		
 				#### write variable names/levels/df
-			coef.matrix$df.spent = NA	
+			coef.matrix$df.spent = NA
 			
+				#### difference.matrix
+				
+			difference.matrix = data.frame(variables = 1:num.rows2, comparison = NA, difference=NA, 
+					lower=NA, upper=NA, cohens.d=NA)	
+			#difference.matrix$variables = factor(difference.matrix$variables, levels=c("", factors))		
 				#### compute standardized estimates
-			coef.std = standardized.beta(object, se=T)
-			#### remove those that are numeric
-			if (length(numbers)>0){
-				coef.std$beta = coef.std$beta[-which(names(coef.std$beta) %in% numbers)]
-				coef.std$se = coef.std$se[-which(names(coef.std$se) %in% numbers)]			
-			}
-			p = 1; i=1
+			# coef.std = standardized.beta(object, se=T)
+			# #### remove those that are numeric
+			# if (length(numbers)>0){
+				# coef.std$beta = coef.std$beta[-which(names(coef.std$beta) %in% numbers)]
+				# coef.std$se = coef.std$se[-which(names(coef.std$se) %in% numbers)]			
+			# }
+			p = 1; p2=1; i=1
 			for (i in 1:length(factors)){
 				
 				#### populate df based on levels
 				levs = length(levels(d[,factors[i]]))
+				levs2 = (levs*(levs-1))/2
 				current.rows = p:(p+levs-1)
+				current.rows2 = p2:(p2 + levs2-1)
 				coef.matrix$levels[current.rows] = levels(d[,factors[i]])
 				coef.matrix$df.spent[p] = levs-1
 				
@@ -230,29 +239,38 @@ estimates.lm = function(object){
 				coef.matrix$upper[current.rows] = est$prediction.upr
 				
 				#### populate standardized estimates
-				names(coef.std$beta) = gsub(factors[i], "", names(coef.std$beta))
-				names(coef.std$se) = gsub(factors[i], "", names(coef.std$se))				
+				# names(coef.std$beta) = gsub(factors[i], "", names(coef.std$beta))
+				# names(coef.std$se) = gsub(factors[i], "", names(coef.std$se))				
 				#### populate the df
 				coef.matrix$df.remaining = object$df
+				
+				#### fill in the difference matrix
+				difference.matrix$variables[p2] = factors[i]
+				tk = data.frame(TukeyHSD(aov(object))[factors[i]])
+				difference.matrix$comparison[current.rows2] = row.names(tk)
+				difference.matrix[current.rows2,c("difference", "lower", "upper")] = tk[,1:3]
+				
+				difference.matrix$cohens.d[current.rows2] = difference.matrix$difference/summary(object)$sigma
+
 				#### increment the counter
 				p = p + levs
+				p2 = p2+levs2
+				
 			}	
-
-
+			
+			
+			# std.rows = 	coef.matrix$levels %in% names(coef.std$beta)
+			# coef.matrix$std.estimate[std.rows] = coef.std$beta[-1]
+			# lower.limits = coef.std$beta[-1] - 1.96*coef.std$se[-1]
+			# upper.limits = coef.std$beta[-1] + 1.96*coef.std$se[-1]
+			# coef.matrix$std.lower[std.rows] = lower.limits
+			# coef.matrix$std.upper[std.rows] = upper.limits
 
 			
-			std.rows = 	coef.matrix$levels %in% names(coef.std$beta)
-			coef.matrix$std.estimate[std.rows] = coef.std$beta[-1]
-			lower.limits = coef.std$beta[-1] - 1.96*coef.std$se[-1]
-			upper.limits = coef.std$beta[-1] + 1.96*coef.std$se[-1]
-			coef.matrix$std.lower[std.rows] = lower.limits
-			coef.matrix$std.upper[std.rows] = upper.limits
-				names(coef.matrix)[3] = "LS Means"
-		
 	} else {
 		coef.matrix = NA
-	}
-	
+		difference.matrix=NA
+	}	
 	#### NUMERIC VARIABLES
 	if (length(numbers)>0){
 		vars = c("(Intercept)", numbers)
@@ -302,7 +320,7 @@ estimates.lm = function(object){
 	# }
 	# cat(paste("\nsigma = ", round(summary(object)$sigma, digits=4), "\n\n"))
 	
-	ret = list(r.squared=r.squared, semi.p=semi.p, factor.summary = coef.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, sigma=summary(object)$sigma)
+	ret = list(r.squared=r.squared, semi.p=semi.p, factor.summary = coef.matrix, difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, sigma=summary(object)$sigma)
 	attr(ret, "class") = "estimates"
 	return(ret)
 }

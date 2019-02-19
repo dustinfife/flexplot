@@ -75,13 +75,20 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 	#### plot residuals
 	histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
 	if (length(numbers)>0){
-		res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + 
-		theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
+		#res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + 
+		#theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
+		res.dep = flexplot(residuals~fitted, data=d) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
+		
 	} else {
 		res.dep = NULL
 	}
-	sl = ggplot2::ggplot(data=d, aes(y=abs.res, x=fitted)) + geom_point(alpha=.5, size=.75) + geom_smooth(method= "loess") +
-			theme_bw() + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
+	if (length(unique(d$fitted))<7){
+	sl = flexplot(abs.res~fitted, data=d, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			
+	} else {
+	sl = flexplot(abs.res~fitted, data=d, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			
+	}
+	#sl = flexplot(abs.res~fitted, data=d, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	#ggplot2::ggplot(data=d, aes(y=abs.res, x=fitted)) + geom_point(alpha=.5, size=.75) + geom_smooth(method= "loess") +
+			#theme_bw() + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
 	
 	
 	#### use flexplot to visualize

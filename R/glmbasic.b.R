@@ -8,13 +8,17 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
         	
         	if (length(self$options$out)>0 & length(self$options$preds)>0){
+        		
+        		
         	#### write formula for glinmod
             formula <- jmvcore::constructFormula(self$options$out, self$options$preds)
             formula <- as.formula(formula)
         
         	#### output results
             results <- glinmod(formula, self$data, plot=F)
-        
+            res <- estimates(lm(formula, self$data))
+
+			#glinmod::estimates(lm(weight.loss~gender, data=exercise_data))
         	#### save formula/dataset to a file (to be used for plotting)
         	if (length(self$options$preds)>0){
 				output = list(formula=formula, data=self$data)
@@ -27,7 +31,12 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 			#### prepare r square output
 			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p)
-			private$.rsq(rsq_out)		
+			private$.rsq(rsq_out)	
+			
+			#### prepare difference scores output
+			diff.out = list(diff = res$difference.matrix)
+			private$.diff(diff.out)		
+									
 
 			#### prepopulate table
             table = self$results$glmcat			
@@ -67,7 +76,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					table$addRow(rowKey = i, values=list(
 					    var=paste0("", as.character(results$factor.summary$variables[i-2])),
 					    levels=results$factor.summary$levels[i-2],
-						means = results$factor.summary[,"LS Means"][i-2],
+						means = results$factor.summary$estimate[i-2],
 						lower = results$factor.summary$lower[i-2],
 						upper = results$factor.summary$upper[i-2],				
 						std.estimate = results$factor.summary$std.estimate[i-2],
@@ -153,22 +162,41 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot = visualize(mod, plot="residuals") + theme(plot.background = element_rect(fill = "white", colour = NA))
 			print(plot)
 			TRUE
-			},			
+			},	
 			
 			
-		.rsq = function(l){
+			.diff = function(l){
+				
+				table <- self$results$diff
+
+				#for (i in 1:(length(l$variables))){
+						row = list('variables' = unlist(l)[1], 
+								'comparison' = unlist(l)[2], 
+								'diff' = round(as.numeric(unlist(l)[3]), digits=2), 
+								'lower' = round(as.numeric(unlist(l)[4]), digits=2), 
+								'upper' = round(as.numeric(unlist(l)[5]),  digits=2), 																					
+								"cohensd" = round(as.numeric(unlist(l)[6]), digits=2))
+					table$addRow(rowKey=1, values=row)
+				#}
+
+			},		
 			
-			table <- self$results$rsq
-			
-			for (i in 1:(length(l$semi.p)+1)){
-				if (i == 1){
-					row = list('var' = 'model', 'Estimate' = l$rsq[1])
-				} else {
-					row = list('var' = names(l$semi.p)[i-1], 'Estimate' = l$semi.p[i-1])
+			.rsq = function(l){
+				
+				table <- self$results$rsq
+				
+				for (i in 1:(length(l$semi.p)+1)){
+					if (i == 1){
+						row = list('var' = 'model', 'Estimate' = l$rsq[1])
+					} else {
+						row = list('var' = names(l$semi.p)[i-1], 'Estimate' = l$semi.p[i-1])
+					}
+					table$addRow(rowKey=i, values=row)
 				}
-				table$addRow(rowKey=i, values=row)
 			}
-		}
+		
+			
+
 
        # head(exercise_data)
         

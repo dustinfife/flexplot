@@ -141,11 +141,14 @@ flexplota <- function(
     if ( ! requireNamespace('jmvcore'))
         stop('flexplota requires jmvcore to be installed (restart may be required)')
 
+    if ( ! missing(out)) out <- jmvcore:::resolveQuo(jmvcore:::enquo(out))
+    if ( ! missing(preds)) preds <- jmvcore:::resolveQuo(jmvcore:::enquo(preds))
     if (missing(data))
         data <- jmvcore:::marshalData(
             parent.frame(),
             `if`( ! missing(out), out, NULL),
             `if`( ! missing(preds), preds, NULL))
+
 
     options <- flexplotaOptions$new(
         out = out,

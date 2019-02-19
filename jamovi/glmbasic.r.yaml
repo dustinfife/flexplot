@@ -52,6 +52,30 @@ items:
         - name: df.remaining
           type: integer
       visible: (estimates)
+      
+    - name:  diff
+      title: Difference Between Factor Levels for Categorical Predictors
+      type: Table
+      columns:
+        - name: variables
+          title: 'Variable'
+          type: text      
+        - name: comparison
+          title: 'Comparison'
+          type: text                
+        - name: diff
+          title: 'Difference'        
+          type: number
+        - name: lower
+          title: 'Lower'        
+          type: number
+        - name: upper
+          title: 'Upper'        
+          type: number
+        - name: cohensd
+          title: "Cohen's d"
+          type: number
+      visible: (estimates)      
           
     - name:  rsq
       title: R Squared and Semi-Partial R Squared Estimates
@@ -62,4 +86,5 @@ items:
           type: text                     
         - name: Estimate
           type: number                                                          
+      visible: (estimates)   
 ...

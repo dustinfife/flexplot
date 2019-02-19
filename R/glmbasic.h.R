@@ -96,6 +96,7 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         assumpplot = function() private$.items[["assumpplot"]],
         plot = function() private$.items[["plot"]],
         glmcat = function() private$.items[["glmcat"]],
+        diff = function() private$.items[["diff"]],
         rsq = function() private$.items[["rsq"]]),
     private = list(),
     public=list(
@@ -164,6 +165,36 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 visible="(estimates)"))
             self$add(jmvcore::Table$new(
                 options=options,
+                name="diff",
+                title="Difference Between Factor Levels for Categorical Predictors",
+                columns=list(
+                    list(
+                        `name`="variables", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="diff", 
+                        `title`="Difference", 
+                        `type`="number"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper", 
+                        `type`="number"),
+                    list(
+                        `name`="cohensd", 
+                        `title`="Cohen's d", 
+                        `type`="number")),
+                visible="(estimates)"))
+            self$add(jmvcore::Table$new(
+                options=options,
                 name="rsq",
                 title="R Squared and Semi-Partial R Squared Estimates",
                 columns=list(
@@ -173,7 +204,8 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="Estimate", 
-                        `type`="number"))))}))
+                        `type`="number")),
+                visible="(estimates)"))}))
 
 glmbasicBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "glmbasicBase",
@@ -212,6 +244,7 @@ glmbasicBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$assumpplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$glmcat} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$diff} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rsq} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
@@ -236,11 +269,14 @@ glmbasic <- function(
     if ( ! requireNamespace('jmvcore'))
         stop('glmbasic requires jmvcore to be installed (restart may be required)')
 
+    if ( ! missing(out)) out <- jmvcore:::resolveQuo(jmvcore:::enquo(out))
+    if ( ! missing(preds)) preds <- jmvcore:::resolveQuo(jmvcore:::enquo(preds))
     if (missing(data))
         data <- jmvcore:::marshalData(
             parent.frame(),
             `if`( ! missing(out), out, NULL),
             `if`( ! missing(preds), preds, NULL))
+
 
     options <- glmbasicOptions$new(
         out = out,
