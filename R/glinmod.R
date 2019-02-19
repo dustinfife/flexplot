@@ -32,7 +32,7 @@ glinmod = function(f, data, plot=T, ...){
 	mod = lm(f, data)
 	
 	#### compute the estimates		
-	est = estimates(mod)
+	est = glinmod::estimates(mod)
 	
 	#### visualize that succa
 	if (plot){
