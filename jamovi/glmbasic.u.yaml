@@ -1,0 +1,62 @@
+title: General Linear Model
+name: glmbasic
+jus: '2.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: out
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Predictor Variable(s)
+        children:
+          - type: VariablesListBox
+            name: preds
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        cell:
+          column: 0
+          row: 0
+        children:
+          - type: Label
+            label: Output Options
+            children:
+              - type: CheckBox
+                name: graphic
+              - type: CheckBox
+                name: graphicassump
+              - type: CheckBox
+                name: estimates
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        cell:
+          column: 0
+          row: 0
+        children:
+          - type: Label
+            label: Graphic Options    
+            children:
+              - type: CheckBox
+                name: se            
+              - type: ComboBox
+                name: line
+              - type: ComboBox
+                name: center

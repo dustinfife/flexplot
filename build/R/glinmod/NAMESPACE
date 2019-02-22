@@ -23,3 +23,11 @@ export(subsetString)
 export(uni.plot)
 export(visualize)
 import(ggplot2)
+
+export(glmbasic)
+export(glmbasicClass)
+export(glmbasicOptions)
+
+export(flexplota)
+export(flexplotaClass)
+export(flexplotaOptions)
