@@ -16,8 +16,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         	#### output results
             results <- glinmod(formula, self$data, plot=F)
-            res <- glinmod::estimates(lm(formula, self$data))
-         
+            res <- estimates(lm(formula, self$data))
 
 			#glinmod::estimates(lm(weight.loss~gender, data=exercise_data))
         	#### save formula/dataset to a file (to be used for plotting)
@@ -31,10 +30,12 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			}
 
 			#### prepare r square output
-			rsq_out = list(rsq = res$r.squared, semi.p = res$semi.p, correlation=res$correlation)
+			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p)
 			private$.rsq(rsq_out)	
 			
-
+			#### prepare difference scores output
+			diff.out = list(diff = res$difference.matrix)
+			private$.diff(diff.out)		
 									
 
 			#### prepopulate table
@@ -46,11 +47,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
            
 			#### if there are factors, report those results....           
-			if (!is.na(results$factor.summary)){        
-				
-			#### prepare difference scores output
-			diff.out = list(diff = res$difference.matrix)
-			private$.diff(diff.out)						   
+			if (!is.na(results$factor.summary)){           
 				
 				#### prepoulate first row with label
 				table$addRow(rowKey=1, values=list(
@@ -196,10 +193,6 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					}
 					table$addRow(rowKey=i, values=row)
 				}
-				
-				#if (length(l$correlation)>0){
-					table$addRow(rowKey=i+1, values=list('var' = "Correlation Coefficient", 'Estimate' = l$correlation))
-				#}
 			}
 		
 			

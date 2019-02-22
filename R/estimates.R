@@ -306,13 +306,6 @@ if (length(factors)>0){
 	se.r = sqrt((4*r.squared*(1-r.squared)^2*(n-1-1)^2)/((n^2-1)*(n+3)))		### from cohen, cohen, west, aiken, page 88
 	r.squared = c(r.squared, r.squared-t.crit*se.r, r.squared+t.crit*se.r)
 	r.squared = round(r.squared, digits=4)
-	
-	#### report correlation
-	if (length(numbers)==1 & length(factors)==0){
-		correlation = cor(d)[1,2]
-	} else {
-		correlation = NA
-	}
 
 	# #### print summary
 	# cat(paste("Model R squared:\n", round(r.squared[1], digits=3), " (", round(r.squared[2], digits=2),", ", round(r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
@@ -327,7 +320,7 @@ if (length(factors)>0){
 	# }
 	# cat(paste("\nsigma = ", round(summary(object)$sigma, digits=4), "\n\n"))
 	
-	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, sigma=summary(object)$sigma)
+	ret = list(r.squared=r.squared, semi.p=semi.p, factor.summary = coef.matrix, difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, sigma=summary(object)$sigma)
 	attr(ret, "class") = "estimates"
 	return(ret)
 }
@@ -344,9 +337,6 @@ print.estimates = function(x,...){
 	#### print summary
 	cat(paste("Model R squared:\n", round(x$r.squared[1], digits=3), " (", round(x$r.squared[2], digits=2),", ", round(x$r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
 	print(round(x$semi.p, digits=3))
-	
-	#### print correlation
-	cat(paste("Correlation:\n", round(x$correlation[1], digits=3)))
 	
 	#### replace NA with - 
 	f = function(x){ x[is.na(x)] = "-"; x}
