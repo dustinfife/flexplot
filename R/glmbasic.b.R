@@ -50,7 +50,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				
 			#### prepare difference scores output
 			diff.out = list(diff = res$difference.matrix)
-			private$.diff(diff.out)						   
+			private$.diff(res$difference.matrix)						   
 				
 				#### prepoulate first row with label
 				table$addRow(rowKey=1, values=list(
@@ -172,15 +172,15 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				
 				table <- self$results$diff
 
-				#for (i in 1:(length(l$variables))){
-						row = list('variables' = unlist(l)[1], 
-								'comparison' = unlist(l)[2], 
-								'diff' = round(as.numeric(unlist(l)[3]), digits=2), 
-								'lower' = round(as.numeric(unlist(l)[4]), digits=2), 
-								'upper' = round(as.numeric(unlist(l)[5]),  digits=2), 																					
-								"cohensd" = round(as.numeric(unlist(l)[6]), digits=2))
-					table$addRow(rowKey=1, values=row)
-				#}
+				for (i in 1:(nrow(l))){
+						row = list('variables' = l$variables[i], 
+								'comparison' = l$comparison[i], 
+								'diff' = round(l$difference[i], digits=2), 
+								'lower' = round(l$lower[i], digits=2), 
+								'upper' = round(l$upper[i],  digits=2), 																					
+								"cohensd" = round(l$cohens.d[i], digits=2))
+					table$addRow(rowKey=i, values=row)
+				}
 
 			},		
 			

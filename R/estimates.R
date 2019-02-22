@@ -208,7 +208,8 @@ if (length(factors)>0){
 				#### difference.matrix
 				
 			difference.matrix = data.frame(variables = 1:num.rows2, comparison = NA, difference=NA, 
-					lower=NA, upper=NA, cohens.d=NA)	
+					lower=NA, upper=NA, cohens.d=NA)
+			difference.matrix$variables[2:num.rows2] = ""						
 			#difference.matrix$variables = factor(difference.matrix$variables, levels=c("", factors))		
 				#### compute standardized estimates
 			# coef.std = standardized.beta(object, se=T)
