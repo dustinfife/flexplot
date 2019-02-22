@@ -11,16 +11,6 @@ type: R
 description: >-
   More about what it does (maybe more than one line) Use four spaces when
   indenting paragraphs within the Description.
-analyses:
-  - title: General Linear Model
-    name: glmbasic
-    ns: glinmod
-    menuGroup: glinmod
-    menuTitle: General Linear Model
-  - title: Flexplot
-    name: flexplota
-    ns: glinmod
-    menuGroup: glinmod
-    menuTitle: Flexplot
+analyses: []
 
 ...
