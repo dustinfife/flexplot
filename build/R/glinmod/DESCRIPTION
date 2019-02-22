@@ -11,4 +11,4 @@ Encoding: UTF-8
 LazyData: true
 Imports: jmvcore (>= 0.8.5), R6, cowplot
 RoxygenNote: 6.1.0
-Built: R 3.3.0; ; 2019-02-19 18:48:10 UTC; unix
+Built: R 3.3.0; ; 2019-02-19 15:54:25 UTC; unix
