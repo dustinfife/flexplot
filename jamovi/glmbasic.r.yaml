@@ -1,0 +1,90 @@
+---
+name:  glmbasic
+title: General Linear Model
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: General Linear Model
+      type:  Preformatted
+      
+    - name: assumpplot
+      title: Residual (Diagnostic) Plot(s)
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .assumpplot       
+      visible: (graphicassump)
+      
+    - name: plot
+      title: Analysis Plot
+      type: Image
+      width:  800
+      height: 600
+      renderFun: .plot 
+      visible: (graphic)
+      
+      
+    - name:  glmcat
+      title: Estimates and Effect Sizes for Categorical Predictors
+      type: Table
+      columns:
+        - name: var
+          title: 'Variable'
+          type: text      
+        - name: levels
+          title: 'Level'
+          type: text                
+        - name: means
+          type: number
+        - name: lower
+          type: number
+        - name: upper
+          type: number
+        - name: std.estimate
+          type: number
+        - name: std.lower
+          type: number
+        - name: std.upper
+          type: number   
+        - name: df.spent
+          type: integer
+        - name: df.remaining
+          type: integer
+      visible: (estimates)
+      
+    - name:  diff
+      title: Difference Between Factor Levels for Categorical Predictors
+      type: Table
+      columns:
+        - name: variables
+          title: 'Variable'
+          type: text      
+        - name: comparison
+          title: 'Comparison'
+          type: text                
+        - name: diff
+          title: 'Difference'        
+          type: number
+        - name: lower
+          title: 'Lower'        
+          type: number
+        - name: upper
+          title: 'Upper'        
+          type: number
+        - name: cohensd
+          title: "Cohen's d"
+          type: number
+      visible: (estimates)      
+          
+    - name:  rsq
+      title: R Squared and Semi-Partial R Squared Estimates
+      type: Table
+      columns:
+        - name: var
+          title: 'Source'
+          type: text                     
+        - name: Estimate
+          type: number                                                          
+      visible: (estimates)   
+...
