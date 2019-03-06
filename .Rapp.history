@@ -1,0 +1,1473 @@
+d$Profession
+d$Profession %in% c("Clinical", "Professor")
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .25,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .25, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 1, 2,Inf), labels=c("Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .25,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .25, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, -1, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)
+g = d$Grad.School + 9; prob = (g/sum(g))
+prob = (prob*400)^4;
+Grad.School[runif(nrow(d))<prob] = 1
+table(Grad.School, d$Profession)
+head(d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .25,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .25, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, -1, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = Grad.School#
+#
+		#### round 'n stuff#
+head(d)
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA)
+d$Income = round(d$Income, digits=1)
+visualize(lm(Income~Grad.School, data=d))
+estimates(lm(Income~Grad.School, data=d))
+install_github("dustinfife/fifer")
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .25,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .25, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, -1, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA)#
+d$Income = round(d$Income, digits=1)#
+		#### look at relationships#
+estimates(lm(Income~Grad.School, data=d))
+visualize(lm(Income~Grad.School, data=d))
+flexplot(Grad.School~1, data=d)
+flexplot(Income~1, data=d)
+flexplot(Profession~1, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .25,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .25, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA)#
+d$Income = round(d$Income, digits=1)#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)
+flexplot(Years~1, data=d)
+min(d$Years)
+flexplot(GPA~1, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .25,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .25, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)
+d$GPA[d$GPA>4] = 4
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .25,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .25, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)
+flexplot(Income~Grad.School, data=d)
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15000#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + rnorm(length(which(d$Profession=="Other")), 0, 8)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + rnorm(length(which(d$Profession=="Other")), 0, 10)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + rnorm(length(which(d$Profession=="Other")), 0, 20)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+rnorm(length(which(d$Profession=="Other")), 0, 10)^2
+hist(rnorm(length(which(d$Profession=="Other")), 0, 10)^2)
+hist(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .1*hist(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .2*hist(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .4*hist(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, 0,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, 0, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .4*(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+flexplot(Grad.School~1, data=d)
+flexplot(Income~1, data=d)
+flexplot(Profession~1, data=d)
+flexplot(Years~1, data=d)
+flexplot(GPA~1, data=d)
+flexplot(Income~Grad.School, data=d)
+flexplot(Income~Profession, data=d)
+flexplot(Income~Years, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, .2,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, .2, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .4*(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)#
+flexplot(Income~Years, data=d)
+estimates(lm(Income~Years, data=d))
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, .2,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, .2, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .4*(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+d$Years[d$Years<0] = 0#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)#
+flexplot(Income~Years, data=d)
+flexplot(Income~GPA, data=d)
+estimates(lm(Income~GPA, data=d))
+estimates(lm(Income~Years, data=d))
+estimates(lm(Income~Professions, data=d))
+estimates(lm(Income~Profession, data=d))
+estimates(lm(Income~Grad.School, data=d))
+clear()#
+set.seed(12112)#
+source("research/RPackages/fifer/R/make.data.R")#
+a = read.csv("school/Spring 2019/Intro/Week 7 - Putting it all together/cities.csv", header=F); names(a) = "City"#
+d = make.data(means=c(16.5, 18.2, 18.7), sds=c(10, 14, 9), n=c(10, 10, 10), names=c("Revenue", "Ad"), groups=c("Organic", "Meat", "Friendly"), digits=2)#
+d$AirTime = 5.5 + .2*d$Revenue + rnorm(nrow(d), 0, 3); d$AirTime[d$AirTime<1] = 1#
+d$AirTime = round(d$AirTime, 2)#
+#
+d$City = a#
+d$Ad[15] = NA#
+d$Revenue[28] = -999#
+flexplot(Ad~1, data=d)#
+d$Revenue[28] = NA#
+flexplot(Revenue~1, data=d)#
+flexplot(Revenue ~Ad, data=d)#
+estimates(lm(Revenue~Ad, data=d))#
+aggregate(Revenue~Ad, data=d, FUN=mean)#
+#d$City = as.character(d$City)#
+d#
+write.csv(d, "school/Spring 2019/Intro/Week 7 - Putting it all together/ad_final.csv", row.names=F)#
+#
+flexplot(AirTime~1, data=d)#
+flexplot(Revenue~AirTime, data=d, method="lm")#
+estimates(lm(Revenue~AirTime, data=d))#
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, .2,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, .2, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .4*(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+d$Years[d$Years<0] = 0#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)#
+flexplot(Income~Years, data=d)#
+estimates(lm(Income~GPA, data=d))#
+estimates(lm(Income~Years, data=d))#
+estimates(lm(Income~Profession, data=d))#
+estimates(lm(Income~Grad.School, data=d))#
+write.csv(d, "school/Spring 2019/Intro/Week 7 - Putting it all together/school_choices.csv", row.names=F)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, .2,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, .2, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+is.na(d$Income)
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .4*(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)
+is.na(d$Income)
+hist(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)
+hist(rnorm(length(which(d$Profession=="Other")), 0, 10)^2)
+hist(rnorm(length(which(d$Profession=="Other")), 0, 10)^1.5)
+hist(rnorm(length(which(d$Profession=="Other")), 0, 10)^2)
+hist(.5*rnorm(length(which(d$Profession=="Other")), 0, 10)^2)
+hist(.1*rnorm(length(which(d$Profession=="Other")), 0, 10)^2)
+hist(.05*rnorm(length(which(d$Profession=="Other")), 0, 10)^2)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, .2,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, .2, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+hist(.05*rnorm(length(which(d$Profession=="Other")), 0, 10)^2)#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .05*(rnorm(length(which(d$Profession=="Other")), 0, 10)^2)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+d$Years[d$Years<0] = 0#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)
+flexplot(Grad.School~1, data=d)
+flexplot(Income~1, data=d)
+flexplot(Profession~1, data=d)
+flexplot(Years~1, data=d)
+flexplot(GPA~1, data=d)
+flexplot(Income~Grad.School, data=d)
+flexplot(Income~Profession, data=d)
+flexplot(Income~Years, data=d)
+estimates(lm(Income~GPA, data=d))
+estimates(lm(Income~Years, data=d))
+estimates(lm(Income~Profession, data=d))
+estimates(lm(Income~Grad.School, data=d))
+write.csv(d, "school/Spring 2019/Intro/Week 7 - Putting it all together/school_choices.csv", row.names=F)
+data(relationship_satisfaction)
+d = relationship_satisfaction
+head(d)
+flexplot(satisfaction~honesty, data=d)
+flexplot(satisfaction~gender, data=d)
+flexplot(satisfaction~separated, data=d)
+clear()#
+set.seed(12112)#
+	# •	#
+	# •	#
+	# •	•	Graduate School: Did that student attend graduate school#
+	# •	•	Professions: The profession each former student chose#
+	# •	•	Years: Years since they graduated#
+	# •	•	GPA: Their final college GPA#
+	# ⁃	Income: Annual Income#
+#
+m = matrix(c(1, .4, 0, .5, .3,#
+			.4, 1, 0, .3, .55,#
+			0, 0, 1, 0, .2,#
+			.5, .3, 0, 1, .4,#
+			.3, .55, .2, .4, 1), nrow=5)#
+cov = cor2cov(m, c(1, 1, 2, .3, 15))			#
+d = data.frame(mvrnorm(n=1104, mu=c(0, 0, 7, 3.2, 70), Sigma=cov))#
+names(d) = c("Grad.School", "Profession", "Years", "GPA", "Income")#
+		#### categorize variables#
+d$Profession = cut(d$Profession, breaks=c(-Inf, 0, 1, 2,Inf), labels=c("Other", "Social Worker", "Clinical", "Professor"))#
+flexplot(Profession ~1, data=d)#
+d$Income[d$Profession=="Professor"] = d$Income[d$Profession=="Professor"]-15#
+d$Income[d$Profession=="Social Worker"] = d$Income[d$Profession=="Social Worker"]-10#
+hist(.05*rnorm(length(which(d$Profession=="Other")), 0, 10)^2)#
+d$Income[d$Profession=="Other"] = d$Income[d$Profession=="Other"] + .05*(rnorm(length(which(d$Profession=="Other")), 0, 10)^2)#
+#
+		#### categorize grad school#
+Grad.School = rep(0, times=nrow(d));#
+Grad.School[d$Profession == "Clinical" | d$Profession == "Professor"] = 1#
+table(Grad.School, d$Profession)#
+g = d$Grad.School + 9; prob = (g/sum(g))#
+prob = (prob*400)^4; #
+Grad.School[runif(nrow(d))<prob] = 1#
+table(Grad.School, d$Profession)#
+d$Grad.School = factor(Grad.School, levels=c(0,1), labels=c("No", "Yes"))#
+#
+		#### round 'n stuff#
+d$Years = round(d$Years)#
+d$GPA = round(d$GPA, digits=2)#
+d$Income = round(d$Income, digits=1)#
+#
+		#### set limits#
+d$GPA[d$GPA>4] = 4#
+d$Years[d$Years<0] = 0#
+		#### univariates#
+flexplot(Grad.School~1, data=d)#
+flexplot(Income~1, data=d)#
+flexplot(Profession~1, data=d)#
+flexplot(Years~1, data=d)#
+flexplot(GPA~1, data=d)#
+		#### bivariates#
+flexplot(Income~Grad.School, data=d)#
+flexplot(Income~Profession, data=d)#
+flexplot(Income~Years, data=d)#
+estimates(lm(Income~GPA, data=d))#
+estimates(lm(Income~Years, data=d))#
+estimates(lm(Income~Profession, data=d))#
+estimates(lm(Income~Grad.School, data=d))#
+write.csv(d, "school/Spring 2019/Intro/Week 7 - Putting it all together/school_choices.csv", row.names=F)#
+graduate_income = d#
+save(graduate_income, file="research/RPackages/fifer/data/graduate_income.rda")
+devtools::install("research/RPackages/R/fifer")
+devtools::install("research/RPackages/fifer")
+data(graduate_income)
+a = graduate_income
+d$gender
+head(d)
+data(relationship_satisfaction)
+d = relationship_satisfaction
+d$gender
+d = d[-which(d$gender=="Mantis religiosa"),]#
+head(d)
+flexplot(satisfaction~honesty, data=d)
+flexplot(satisfaction~gender, data=d)
+data(relationship_satisfaction)#
+data(graduate_income)#
+a = graduate_income#
+d = relationship_satisfaction#
+d = d[-which(d$gender=="Mantis religiosa"),]#
+head(d)#
+		### simple regression#
+flexplot(satisfaction~honesty, data=d)#
+#
+		### t-test#
+flexplot(satisfaction~gender, data=d)#
+#
+		### anova#
+		head(a)
+flexplot(Income~Profession, data=d)
+flexplot(Income~Profession, data=a)
+flexplot(Income~Profession + Grad.School, data=a)
+flexplot(Income~Profession | Grad.School, data=a)
+flexplot(Income~GPA | Grad.School, data=a)
+flexplot(Income~GPA | Grad.School, data=a, method="lm", ghost.reference=list(Grad.School="No"))
+flexplot(Income~GPA | Grad.School, data=a, method="lm", ghost.line="gray",ghost.reference=list(Grad.School="No"))
+data(alcuse)
+head(alcuse)
+b = alcuse[-which(d$Age==15),]
+head(b)
+data(alcuse)
+b = alcuse[-which(b$Age==15),]
+data(alcuse)#
+b = alcuse[-which(alcuse$Age==15),]
+head(b)
+data(alcuse)
+alcuse[-which(alcuse$Age==15),]
+data(alcuse)
+alcuse$Age
+data(alcuse)#
+b = alcuse[-which(alcuse$AGE==15),]
+head(b)
+flexplot(AlCUSE~AGE, data=b, related=T)
+data(alcuse)#
+b = alcuse[-which(alcuse$AGE==15),]#
+flexplot(AlCUSE~AGE, data=b, related=T)
+b$AlCUSE
+data(alcuse)#
+b = alcuse[-which(alcuse$AGE==15),]#
+b
+flexplot(ALCUSE~1, data=b, related=T)
+flexplot(AGE~1, data=b, related=T)
+flexplot(ALCUSE~AGE, data=b)
+flexplot(ALCUSE~AGE, data=b, related=T)
+b$AGE
+data(alcuse)
+b = alcuse[-which(alcuse$AGE==15),]
+b$AGE
+b$AGE = factor(b$AGE)
+flexplot(ALCUSE~AGE, data=b, related=T)
+head(d)
+flexplot(satisfaction~honesty | communication + interests, data=d)
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F)
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm")
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", thost.reference=list(communication==30, interests=55))
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", ghost.line="gray",ghost.reference=list(communication==30, interests=55))
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", ghost.line="gray")
+data(relationship_satisfaction)#
+data(graduate_income)#
+a = graduate_income#
+d = relationship_satisfaction#
+d = d[-which(d$gender=="Mantis religiosa"),]#
+head(d)#
+		### simple regression#
+flexplot(satisfaction~honesty, data=d)#
+#
+		### t-test#
+flexplot(satisfaction~gender, data=d)#
+#
+		### anova#
+flexplot(Income~Profession, data=a)		#
+#
+		### factorial anova#
+flexplot(Income~Profession + Grad.School, data=a)		#
+flexplot(Income~Profession | Grad.School, data=a)		#
+#
+		## ancova#
+flexplot(Income~GPA | Grad.School, data=a, method="lm")#
+		## add a ghost line#
+flexplot(Income~GPA | Grad.School, data=a, method="lm", ghost.line="gray",ghost.reference=list(Grad.School="No"))#
+#
+		## related t#
+data(alcuse)#
+b = alcuse[-which(alcuse$AGE==15),]#
+b$AGE = factor(b$AGE)#
+flexplot(ALCUSE~AGE, data=b, related=T)#
+#
+		## multiple regression
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", ghost.line="gray"),ghost.reference=list(communication==30, interests=55))
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", ghost.line="gray",ghost.reference=list(communication==30, interests=55))
+flexplot(satisfaction~honesty | communication + interests, data=d)
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm")
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", ghost.line="gray")
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", ghost.line="gray",ghost.reference=list(communication==30, interests=55, honesty=40))
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", ghost.line="gray",ghost.reference=list(communication=30, interests=55, honesty=40))
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", ghost.line="gray",ghost.reference=list(communication=30, interests=55))
+flexplot(satisfaction~honesty | communication + interests, data=d, se=F, method="lm", ghost.line="gray",ghost.reference=list(communication=30, interests=55), bins=3)
+rand.intercept = lmer(ALCUSE~1 + AGE_14 + (1|ID), data=b)
+require(lme4)
+rand.intercept = lmer(ALCUSE~1 + AGE_14 + (1|ID), data=b)
+rand.intercept
+summary(rand.intercept)
+mixed.mod.visual(ALCUSE~AGE_14, data=d, rand.intercept)
+mixed.mod.visual(ALCUSE~AGE_14, data=b, rand.intercept)
+data(math)
+head(math)
+rand.intercept = lmer(MatchAch~ SES + (SES|ID), data=b)
+rand.intercept = lmer(MatchAch~ SES + (SES|ID), data=math)
+require(lme4)		#
+data(math)#
+rand.intercept = lmer(MatchAch~ SES + (SES|ID), data=math
+)
+rand.intercept = lmer(MathAch~ SES + (SES|ID), data=math)
+rand.intercept = lmer(MathAch~ SES + (SES|School), data=math)
+mixed.mod.visual(MathAch~SES, data=math, rand.intercept)
+data(relationship_satisfaction)#
+data(graduate_income)#
+a = graduate_income#
+d = relationship_satisfaction#
+d = d[-which(d$gender=="Mantis religiosa"),]#
+head(d)#
+		### simple regression#
+flexplot(satisfaction~honesty, data=d)
+flexplot(satisfaction~gender, data=d)
+flexplot(Income~Profession, data=a)
+data(alcuse)#
+b = alcuse[-which(alcuse$AGE==15),]#
+b$AGE = factor(b$AGE)#
+flexplot(ALCUSE~AGE, data=b, related=T)
+q = flexplot(ALCUSE~AGE, data=b, related=T)
+q = flexplot(ALCUSE~AGE, data=b, related=T)#
+q2 = flexplot(ALCUSE~AGE, data=b, related=F)
+cowplot(q, q2)
+plot_grid::cowplot(q, q2)
+cowplot::plot_grid(q, q2)
+flexplot(Income~Profession + Grad.School, data=a)
+flexplot(Income~Profession | Grad.School, data=a)
+flexplot(Income~GPA | Grad.School, data=a, method="lm")
+flexplot(Income~GPA + Grad.School, data=a, method="lm")
+flexplot(Income~GPA | Grad.School, data=a, method="lm", ghost.line="gray",ghost.reference=list(Grad.School="No"))
+require(lme4)		#
+data(math)#
+rand.intercept = lmer(MathAch~ SES + (SES|School), data=math)#
+mixed.mod.visual(MathAch~SES, data=math, rand.intercept)
+head(graduate_income)
+data(graduate_income)
+mod  = lm(Income~Grad.School, data=graduate_income)
+glinmod::estimates(mod)
+mod
+traceback()
+devtools::install("research/RPackages/glinmod")
+mod
+glinmod::estimates(mod)
+glinmod::estimates
+glinmod::estimates.lm
+source("research/RPackages/glinmod/estimates.R")
+source("research/RPackages/glinmod/R/estimates.R")
+estimates(mod)
+estimates(mod)
+source("research/RPackages/glinmod/R/estimates.R")
+estimates(mod)
+setwd("research/RPackages/glinmod")
+jmvtools::install()
+mod  = lm(Income~Profession, data=graduate_income)
+mod
+m = compare.fits(Income~Profession, data=graduate_income, mod)
+m
+m = compare.fits(Income~Profession, data=graduate_income, model1=mod, model2=mod)
+mod
+mod  = lm(Income~Profession, data=graduate_income)
+object  = lm(Income~Profession, data=graduate_income)
+n = nrow(model.frame(object)) #
+	#### generate list of coefficients#
+	terms = attr(terms(object), "term.labels")#
+	variables = all.vars(formula(object))#
+    outcome = variables[1]#
+    #### look for interaction terms#
+	interaction = length(grep(":", terms))>0#
+	#### get dataset#
+	d = object$model#
+	#### identify factors#
+	if (length(terms)>1){#
+		factors = names(which(unlist(lapply(d[,terms], is.factor))));#
+		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));#
+	} else {#
+		factors = terms[which(is.factor(d[,terms]))]#
+		numbers = terms[which(is.numeric(d[,terms]))]#
+	}#
+	#### compute change in r squared#
+	ssr = drop1(aov(object))[-1,"Sum of Sq"]#
+	if (length(ssr)<(nrow(anova(object))-1)){#
+		cat("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. To obtain main effect sizes, drop the interaction from your model. \n\n")#
+	}#
+	sst = sum(anova(object)[,"Sum Sq"])#
+	semi.p = ssr/sst	#
+	max = nrow(anova(object))-1#
+	min = max-length(semi.p)+1#
+	nms = row.names(anova(object))[min:max]	#
+	names(semi.p) = nms
+if (length(factors)==1){#
+			factor.names = levels(d[,factors])#
+			num.rows = length(factor.names)#
+			a = length(unique(factor.names))#
+			num.rows2 = (a*(a-1))/2#
+		} else {#
+			factor.names = unlist(lapply(d[,factors], levels))#
+			num.rows = sum(unlist(apply(d[,factors], 2, function(x) { length(unique(x))})))			#
+			num.rows2 = apply(d[,factors], 2, function(x){ a = length(unique(x)); (a*(a-1))/2})#
+		}
+#### create empty matrix with variable names#
+			#### identify the number of rows#
+			coef.matrix = data.frame(variables = rep("", num.rows), levels=NA, estimate=NA, lower=NA, upper=NA, df.spent=NA, df.remaining=NA)#
+			coef.matrix$variables = factor(coef.matrix$variables, levels=c("", factors))		#
+				#### write variable names/levels/df#
+			coef.matrix$df.spent = NA
+coef.matrix
+difference.matrix = data.frame(variables = NA, comparison = 1:num.rows2, difference=NA, #
+					lower=NA, upper=NA, cohens.d=NA)#
+			#difference.matrix$variables[1:num.rows2] = ""						#
+			#difference.matrix$variables = factor(difference.matrix$variables, levels=c("", factors))		#
+				#### compute standardized estimates#
+			# coef.std = standardized.beta(object, se=T)#
+			# #### remove those that are numeric#
+			# if (length(numbers)>0){#
+				# coef.std$beta = coef.std$beta[-which(names(coef.std$beta) %in% numbers)]#
+				# coef.std$se = coef.std$se[-which(names(coef.std$se) %in% numbers)]			#
+			# }#
+			p = 1; p2=1; i=1
+levs = length(levels(d[,factors[i]]))
+levs
+levs2 = (levs*(levs-1))/2
+levs2
+current.rows = p:(p+levs-1)
+current.rows
+current.rows2 = p2:(p2 + levs2-1)
+current.rows2
+current.rows
+d[,factors[i]]
+coef.matrix$df.spent[p] = levs-1
+coef.matrix$variables[p] = factors[i]
+coef.matrix
+f = make.formula(outcome, factors[i])
+est = compare.fits(f, data=d, object, return.preds=T, silent=T)
+est
+coef.matrix$levels[current.rows] = est[,1]
+coef.matrix$estimate[current.rows] = est$prediction.fit
+coef.matrix$lower[current.rows] = est$prediction.lwr
+coef.matrix$upper[current.rows] = est$prediction.upr
+coef.matrix
+est[,1]
+coef.matrix$levels[current.rows] = as.character(est[,1])
+coef.matrix
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()

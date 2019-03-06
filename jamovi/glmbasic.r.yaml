@@ -36,6 +36,7 @@ items:
           title: 'Level'
           type: text                
         - name: means
+          title: 'Estimate'
           type: number
         - name: lower
           type: number

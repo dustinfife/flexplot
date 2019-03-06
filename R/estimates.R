@@ -184,7 +184,7 @@ estimates.lm = function(object){
 	nms = row.names(anova(object))[min:max]	
 	names(semi.p) = nms
 	
-if (length(factors)>0){
+	if (length(factors)>0){
 		#### generate table with names
 		if (length(factors)==1){
 			factor.names = levels(d[,factors])
@@ -207,9 +207,9 @@ if (length(factors)>0){
 			
 				#### difference.matrix
 				
-			difference.matrix = data.frame(variables = 1:num.rows2, comparison = NA, difference=NA, 
+			difference.matrix = data.frame(variables = NA, comparison = 1:num.rows2, difference=NA, 
 					lower=NA, upper=NA, cohens.d=NA)
-			difference.matrix$variables[2:num.rows2] = ""						
+			#difference.matrix$variables[1:num.rows2] = ""						
 			#difference.matrix$variables = factor(difference.matrix$variables, levels=c("", factors))		
 				#### compute standardized estimates
 			# coef.std = standardized.beta(object, se=T)
@@ -226,15 +226,16 @@ if (length(factors)>0){
 				levs2 = (levs*(levs-1))/2
 				current.rows = p:(p+levs-1)
 				current.rows2 = p2:(p2 + levs2-1)
-				coef.matrix$levels[current.rows] = levels(d[,factors[i]])
+				#coef.matrix$levels[current.rows] = levels(d[,factors[i]])
 				coef.matrix$df.spent[p] = levs-1
 				
 				#### populate variable names
 				coef.matrix$variables[p] = factors[i]
-	
+
 				#### populate the estimates/lower/upper
 				f = make.formula(outcome, factors[i])			
 				est = compare.fits(f, data=d, object, return.preds=T, silent=T)
+				coef.matrix$levels[current.rows] = as.character(est[,1])
 				coef.matrix$estimate[current.rows] = est$prediction.fit
 				coef.matrix$lower[current.rows] = est$prediction.lwr
 				coef.matrix$upper[current.rows] = est$prediction.upr
@@ -357,6 +358,9 @@ print.estimates = function(x,...){
 		x$factor.summary[,3:ncol(x$factor.summary)] = apply(x$factor.summary[,3:ncol(x$factor.summary)], 2, f)
 		#print(round(x$numbers.summary, digits=2))		
 		print(x$factor.summary)
+		cat(paste0("\n\nMean Differences:\n"))
+		x$difference.matrix[,3:ncol(x$difference.matrix)] = round(x$difference.matrix[,3:ncol(x$difference.matrix)], digits=2)
+		print(x$difference.matrix)		
 	}
 	if (length(x$numbers)>0){
 		cat(paste("\n\nEstimates for Numeric Variables = \n"))

@@ -15,9 +15,9 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             formula <- as.formula(formula)
         
         	#### output results
-            results <- glinmod(formula, self$data, plot=F)
-            res <- glinmod::estimates(lm(formula, self$data))
-         
+            results <- glinmod::estimates(lm(formula, self$data))
+            
+         	
 
 			#glinmod::estimates(lm(weight.loss~gender, data=exercise_data))
         	#### save formula/dataset to a file (to be used for plotting)
@@ -31,7 +31,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			}
 
 			#### prepare r square output
-			rsq_out = list(rsq = res$r.squared, semi.p = res$semi.p, correlation=res$correlation)
+			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p, correlation=results$correlation)
 			private$.rsq(rsq_out)	
 			
 
@@ -49,8 +49,8 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			if (!is.na(results$factor.summary)){        
 				
 			#### prepare difference scores output
-			diff.out = list(diff = res$difference.matrix)
-			private$.diff(res$difference.matrix)						   
+			diff.out = list(diff = results$difference.matrix)
+			private$.diff(results$difference.matrix)						   
 				
 				#### prepoulate first row with label
 				table$addRow(rowKey=1, values=list(
@@ -119,9 +119,13 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				i = 1
 	     		for (j in rows.all){
 	            
-	            	
+	            	if (i ==1){
+	            		levs = "Intercept"
+	            	} else {
+	            		levs = paste0("Slope: ", as.character(results$numbers.summary$variables[i]))
+	            	}
 					table$addRow(rowKey = j, values=list(
-					    var=as.character(results$numbers.summary$variables[i]),
+					    var=levs,
 					    levels = "", 
 						means = results$numbers.summary$estimate[i],
 						lower = results$numbers.summary$lower[i],

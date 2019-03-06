@@ -140,6 +140,7 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="means", 
+                        `title`="Estimate", 
                         `type`="number"),
                     list(
                         `name`="lower", 
