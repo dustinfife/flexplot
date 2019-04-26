@@ -25,7 +25,7 @@ options:
     - name: graphicassump
       title: Plot Diagnostics
       type: Bool
-      default: true      
+      default: false      
      
     - name: estimates
       title: Report Estimates and Effect Sizes

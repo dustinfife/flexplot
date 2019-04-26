@@ -3,7 +3,7 @@
 
 'use strict';
 
-const options = [{"name":"data","type":"Data"},{"name":"out","title":"Outcome Variable","type":"Variable"},{"name":"preds","title":"Predictor Variable(s)","type":"Variables"},{"name":"graphic","title":"Visualize the Analysis","type":"Bool","default":true},{"name":"graphicassump","title":"Plot Diagnostics","type":"Bool","default":true},{"name":"estimates","title":"Report Estimates and Effect Sizes","type":"Bool","default":true},{"name":"se","title":"Plot Standard Errors","type":"Bool","default":true},{"name":"line","title":"Fitted line (for scatterplots)","type":"List","options":["loess","lm","logistic"],"default":"loess"},{"name":"center","title":"Center/Spread (for dot plots)","type":"List","options":["median + quartiles","mean + sterr","mean + stdev"],"default":"median + quartiles"}];
+const options = [{"name":"data","type":"Data"},{"name":"out","title":"Outcome Variable","type":"Variable"},{"name":"preds","title":"Predictor Variable(s)","type":"Variables"},{"name":"graphic","title":"Visualize the Analysis","type":"Bool","default":true},{"name":"graphicassump","title":"Plot Diagnostics","type":"Bool","default":false},{"name":"estimates","title":"Report Estimates and Effect Sizes","type":"Bool","default":true},{"name":"se","title":"Plot Standard Errors","type":"Bool","default":true},{"name":"line","title":"Fitted line (for scatterplots)","type":"List","options":["loess","lm","logistic"],"default":"loess"},{"name":"center","title":"Center/Spread (for dot plots)","type":"List","options":["median + quartiles","mean + sterr","mean + stdev"],"default":"median + quartiles"}];
 
 const view = View.extend({
     jus: "2.0",

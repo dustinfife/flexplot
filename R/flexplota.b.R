@@ -10,6 +10,9 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			if (length(self$options$out)>0 & length(self$options$preds)>0){
 		        	#### write formula for flexplot
 		            formula <- jmvcore::constructFormula(self$options$out, self$options$preds)
+		            if (length(self$options$given)>0){
+			            formula <- paste0(self$options$out, "~", paste0(self$options$preds, collapse="+"), "|", paste0(self$options$given, collapse="+"))		            	
+		            }
 		            formula <- as.formula(formula)
 	
 					output = list(formula=formula, data=self$data)

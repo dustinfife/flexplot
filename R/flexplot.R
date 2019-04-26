@@ -18,15 +18,17 @@
 ##' @param method The method to be used to draw the lines. Defaults to loess
 ##' @param se Should standard errors be drawn?
 ##' @param ghost.line Should a ghost line be drawn? If so, user must specify a color. Default is NULL (in which case, the ghost line isn't shown). 
-##' @param ghost.group What should the reference group be (from which to draw the ghost line)? The user can specify up to two values as a vector. See examples. 
 ##' @param spread How should standard errors be drawn? Defaults to quartiles
 ##' @param jitter Should values be jittered?
 ##' @param raw.data Should raw data be plotted?
 ##' @param sample Should a sample of the data be plotted? Defaults to Inf (for all variables). 
+##' @param ghost.reference What groups should be referenced for the ghost line? See examples. 
+##' @param prediction Predicted values for a prediction line. Defaults to NULL
+##' @param suppress_smooth Should a fitted line be repressed? Defaults to FALSE
+##' @param alpha The transparency of the datapoints. 
 ##' @author Dustin Fife
 ##' @export
 ##' @examples
-#' clear()
 #' data(exercise_data)
 #' d = exercise_data
 #'
@@ -35,35 +37,31 @@
 ##' flexplot(gender~1, data=d)
 #'
 #'	# ### scatter plot
-##' source("research/RPackages/fifer/R/flexplot.R")
-##' flexplot(weight.change~motivation, data=d)	
-##' flexplot(weight.change~motivation, data=d, method="lm", se=F)	#### with regression line and without standard error	
+##' flexplot(weight.loss~motivation, data=d)	
+##' flexplot(weight.loss~motivation, data=d, method="lm", se=FALSE)	#### with regression line and without standard error	
 #'
 #'	# ### mean plots
-##' flexplot(weight.change~therapy.type, data=d)
-##' flexplot(weight.change~therapy.type, data=d, raw.data=F)		## without raw data
+##' flexplot(weight.loss~therapy.type, data=d)
+##' flexplot(weight.loss~therapy.type, data=d, raw.data=FALSE)		## without raw data
 #'
 #'	# ### CHI SQUARE PLOT
 ##' flexplot(therapy.type~gender, data=d)	
 #'			
 #'	# ### INTERACTION PLOT			
-##' flexplot(weight.change~therapy.type + gender, data=d)
-##' flexplot(weight.change~therapy.type + gender, data=d, sample=50)	#### sampling 50 people instead (to make it less noisy)
+##' flexplot(weight.loss~therapy.type + gender, data=d)
+##' flexplot(weight.loss~therapy.type + gender, data=d, sample=50)	#### sampling 50 people instead (to make it less noisy)
 #'
 #'	# #### ANCOVA PLOT
-##' flexplot(weight.change~motivation + gender, data=d, se=F)	### remove se
+##' flexplot(weight.loss~motivation + gender, data=d, se=FALSE)	### remove se
 #'
 #'	# #### 2N PLOT (2 NUMERIC VARIABLE PLOTS)
-##' flexplot(weight.change~motivation + income, data=d, se=F, method="lm")
-##' flexplot(weight.change~motivation + income, data=d, se=F, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))		### change labels for income
+##' flexplot(weight.loss~motivation + income, data=d, se=FALSE, method="lm")
+##' flexplot(weight.loss~motivation + income, data=d, se=FALSE, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))		### change labels for income
 #'
 #'	# #### 3N plot
-##' flexplot(weight.change~motivation + income + health, data=d, se=F, method="lm")	## different lines for income
-##' flexplot(weight.change~motivation | income + health, data=d, se=F, method="lm")	## different panels for income
-##' flexplot(weight.change~motivation | income + health, data=d, se=F, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))	## relabel income
-#'
-#'	# #### three categorical variables (multiway dot plot)
-##' flexplot(weight.change~gender + therapy.type + rewards, data=d, raw.data=F)
+##' flexplot(weight.loss~motivation + income + health, data=d, se=FALSE, method="lm")	## different lines for income
+##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm")	## different panels for income
+##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))	## relabel income
 flexplot = function(formula, data, related=F,
 		color=NULL, symbol=NULL, linetype=NULL, 
 		bins = 4, labels=NULL, breaks=NULL,
@@ -275,7 +273,7 @@ flexplot = function(formula, data, related=F,
 	# }
 	##### CHI SQUARE PLOT
 	} else if (length(outcome) == 1 & length(predictors)==1 & is.na(given) & !is.numeric(data[,predictors]) & !is.numeric(data[,outcome])){
-		m = as.data.frame(table(d[,predictors], d[,outcome])); names(m)[1:2] = c(predictors, outcome)
+		m = as.data.frame(table(data[,predictors], data[,outcome])); names(m)[1:2] = c(predictors, outcome)
 		Freq = 'Freq'
 		p = ggplot(data=m, aes_string(x=predictors, y=Freq, fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()
 
@@ -325,7 +323,7 @@ flexplot = function(formula, data, related=F,
 				# theme_bw()							
 		# }
 	###### MULTIWAY DOT PLOT FOR THREE CATEGORICAL PREDICTORS
-	} else if (length(outcome)==1 & length(predictors)==3 & length(categories)==3){
+	} else if (length(outcome)==1 & length(predictors)==3 & length(categories)==3 & is.na(given)){
 
 	
 		#### figure out which variable has the largest effect
@@ -398,11 +396,14 @@ flexplot = function(formula, data, related=F,
 		### identify the number of binned variables we need
 		if (length(axis)>1 & axis[2] %in% numbers){ 
 			binned.vars = c(axis[2], numbers[which((numbers) %in% given)])
-		} else {
-			binned.vars = numbers[which((numbers) %in% given)]
+		} else{
+			binned.vars = predictors[which((predictors) %in% given)]
 		}
+		
+		#### identify which binned variables are categorical
+		binned.numeric = numbers[which((numbers) %in% given)]
 
-		if (length(binned.vars)>0){
+		if (length(binned.numeric)>0){
 			msg = paste0("The following variables are going to be binned: ", paste0(binned.vars, collapse=", "), "\n")
 			cat(msg)
 		}
@@ -421,39 +422,42 @@ flexplot = function(formula, data, related=F,
 		if (length(binned.vars)>0){
 			for (i in 1:length(binned.vars)){
 				
-				break.current = unlist(breaks[i])
-				if (!is.null(unlist(labels[i])) & length(unlist(labels[i])) != bins[i]){
-					stop(paste0("The label vectors (", paste0(unlist(labels[i]), collapse=", "), ") is not the same length as the bin length (", bins[i], ")", sep=""))
-				}
-				
-				### if they supply the breaks...
-				if (!is.null(break.current)){
-					#### give min as breaks, if the user doesn't
-					if (min(break.current)>min(data[,binned.vars[i]])){
-						break.current = c(-Inf, break.current)
-					}
-					if (max(break.current,na.rm=T)<max(data[,binned.vars[i]])){
-						break.current = c(break.current, Inf)
+				if (is.numeric(data[,binned.vars[i]])){
+					break.current = unlist(breaks[i])
+					if (!is.null(unlist(labels[i])) & length(unlist(labels[i])) != bins[i]){
+						stop(paste0("The label vectors (", paste0(unlist(labels[i]), collapse=", "), ") is not the same length as the bin length (", bins[i], ")", sep=""))
 					}
 					
-					quants = unlist(break.current)
-				} else {
-					quants = quantile(data[,binned.vars[i]], seq(from=0, to=1, length.out=bins[i]+1))
-				}
+					### if they supply the breaks...
+					
+					if (data[,binned.vars[i]])
+					if (!is.null(break.current)){
+						#### give min as breaks, if the user doesn't
+						if (min(break.current)>min(data[,binned.vars[i]])){
+							break.current = c(-Inf, break.current)
+						}
+						if (max(break.current,na.rm=T)<max(data[,binned.vars[i]])){
+							break.current = c(break.current, Inf)
+						}
+						
+						quants = unlist(break.current)
+					} else {
+						quants = quantile(data[,binned.vars[i]], seq(from=0, to=1, length.out=bins[i]+1))
+					}
+		
+					data[,paste0(binned.vars[i])] = cut(data[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)
 	
-				data[,paste0(binned.vars[i])] = cut(data[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)
-
-				#### if they're making a ghost reference, bin that too
-				if (!is.null(ghost.reference) & binned.vars[i] %in% names(ghost.reference)){
-					val = as.numeric(ghost.reference[binned.vars[i]])
-					ghost.reference[binned.vars[i]] = as.character(cut(val, quants, labels=unlist(labels[i]), include.lowest=T, include.highest=T))
+					#### if they're making a ghost reference, bin that too
+					if (!is.null(ghost.reference) & binned.vars[i] %in% names(ghost.reference)){
+						val = as.numeric(ghost.reference[binned.vars[i]])
+						ghost.reference[binned.vars[i]] = as.character(cut(val, quants, labels=unlist(labels[i]), include.lowest=T, include.highest=T))
+					}
+					
+					if (!is.null(prediction)){
+						prediction[,paste0(binned.vars[i])] = cut(prediction[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)
 				}
-				
-				if (!is.null(prediction)){
-					prediction[,paste0(binned.vars[i])] = cut(prediction[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)
-
 				}
-				
+
 			}
 
 			if (!is.null(prediction)){
@@ -493,19 +497,46 @@ flexplot = function(formula, data, related=F,
 
 		
 		if (length(axis)>1){
+			
+			if (!is.numeric(data[,axis[1]])){
+				p = ggplot(data=data, aes_string(x=axis[1], y=outcome, shape=axis[2], linetype=axis[2], color=axis[2]))+
+					gm + 
+					jit + 
+					giv + 
+					summary1 + summary2 + 
+					sum.line +
+					theme_bw()
+			
+
+
+			} else {
 
 			p = ggplot(data=data, aes_string(x=axis[1], y=outcome, shape=axis[2], linetype=axis[2], color=axis[2]))+
 					gm + 
 					jit + 
 					giv + 
 					theme_bw()
+			}		
 		} else {
+			if (!is.numeric(data[,axis[1]])){
+				p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+
+					gm + 
+					jit + 
+					giv + 
+					summary1 + summary2 + 
+					sum.line +
+					theme_bw()
+			
 
-			p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+
-				jit + 
-				gm +
-				giv + 
-				theme_bw()	
+
+			} else {
+
+				p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+
+					jit + 
+					gm +
+					giv + 
+					theme_bw()	
+				}
 		
 		}
 
@@ -566,7 +597,9 @@ flexplot = function(formula, data, related=F,
 			
 			p = p + geom_line(data= prediction, aes(linetype=model, y=prediction, color=model), size=2)			
 		} else {
-			p = p + geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2))
+			prediction
+			p = p + geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_errorbar(data=prediction, aes(y=NULL, ymin=lower, ymax=upper, color=model, width=.4))
+		
 		}
 		return(p)
 	} else {

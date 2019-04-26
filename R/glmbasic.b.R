@@ -58,12 +58,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					levels="",
 					means="",
 					lower="",
-					upper="",
-					std.estimate="",
-					std.lower="",
-					std.upper="",
-					df.spent="",
-					df.remaining=""																																												
+					upper=""
 				))
 					
 
@@ -81,12 +76,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					    levels=results$factor.summary$levels[i-2],
 						means = results$factor.summary$estimate[i-2],
 						lower = results$factor.summary$lower[i-2],
-						upper = results$factor.summary$upper[i-2],				
-						std.estimate = results$factor.summary$std.estimate[i-2],
-						std.lower = results$factor.summary$std.lower[i-2],
-						std.upper = results$factor.summary$std.upper[i-2],												
-						df.spent = results$factor.summary$df.spent[i-2],
-						df.remaining = results$factor.summary$df.remaining[i-2]
+						upper = results$factor.summary$upper[i-2]			
 					))
 				}  
 				
@@ -104,11 +94,6 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					means="",
 					lower="",
 					upper="",
-					std.estimate="",
-					std.lower="",
-					std.upper="",
-					df.spent="",
-					df.remaining=""																																												
 				))
 							
 				rows.tot = ifelse(is.na(results$factor.summary), 2, nrow(results$factor.summary)+2)
@@ -129,12 +114,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					    levels = "", 
 						means = results$numbers.summary$estimate[i],
 						lower = results$numbers.summary$lower[i],
-						upper = results$numbers.summary$upper[i],				
-						std.estimate = results$numbers.summary$std.estimate[i],
-						std.lower = results$numbers.summary$std.lower[i],
-						std.upper = results$numbers.summary$std.upper[i],												
-						df.spent = results$numbers.summary$df.spent[i],
-						df.remaining = results$numbers.summary$df.remaining[i]
+						upper = results$numbers.summary$upper[i]				
 					))
 				i = i+1
 				} 

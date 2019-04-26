@@ -9,7 +9,7 @@ glmbasicOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             out = NULL,
             preds = NULL,
             graphic = TRUE,
-            graphicassump = TRUE,
+            graphicassump = FALSE,
             estimates = TRUE,
             se = TRUE,
             line = "loess",
@@ -34,7 +34,7 @@ glmbasicOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..graphicassump <- jmvcore::OptionBool$new(
                 "graphicassump",
                 graphicassump,
-                default=TRUE)
+                default=FALSE)
             private$..estimates <- jmvcore::OptionBool$new(
                 "estimates",
                 estimates,
@@ -147,22 +147,7 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="upper", 
-                        `type`="number"),
-                    list(
-                        `name`="std.estimate", 
-                        `type`="number"),
-                    list(
-                        `name`="std.lower", 
-                        `type`="number"),
-                    list(
-                        `name`="std.upper", 
-                        `type`="number"),
-                    list(
-                        `name`="df.spent", 
-                        `type`="integer"),
-                    list(
-                        `name`="df.remaining", 
-                        `type`="integer")),
+                        `type`="number")),
                 visible="(estimates)"))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -261,7 +246,7 @@ glmbasic <- function(
     out,
     preds,
     graphic = TRUE,
-    graphicassump = TRUE,
+    graphicassump = FALSE,
     estimates = TRUE,
     se = TRUE,
     line = "loess",

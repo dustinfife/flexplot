@@ -17,6 +17,10 @@ options:
       title: Predictor Variable(s)
       type: Variables
       
+    - name: given
+      title: Paneled Variable(s)
+      type: Variables      
+      
     - name: se
       title: Plot Confidence Bands (for scatterplots)
       type: Bool

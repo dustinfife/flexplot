@@ -42,16 +42,6 @@ items:
           type: number
         - name: upper
           type: number
-        - name: std.estimate
-          type: number
-        - name: std.lower
-          type: number
-        - name: std.upper
-          type: number   
-        - name: df.spent
-          type: integer
-        - name: df.remaining
-          type: integer
       visible: (estimates)
       
     - name:  diff

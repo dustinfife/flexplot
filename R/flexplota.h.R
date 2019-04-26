@@ -8,6 +8,7 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             out = NULL,
             preds = NULL,
+            given = NULL,
             se = TRUE,
             line = "loess",
             center = "median + quartiles",
@@ -25,6 +26,9 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..preds <- jmvcore::OptionVariables$new(
                 "preds",
                 preds)
+            private$..given <- jmvcore::OptionVariables$new(
+                "given",
+                given)
             private$..se <- jmvcore::OptionBool$new(
                 "se",
                 se,
@@ -54,6 +58,7 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
+            self$.addOption(private$..given)
             self$.addOption(private$..se)
             self$.addOption(private$..line)
             self$.addOption(private$..center)
@@ -62,6 +67,7 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         out = function() private$..out$value,
         preds = function() private$..preds$value,
+        given = function() private$..given$value,
         se = function() private$..se$value,
         line = function() private$..line$value,
         center = function() private$..center$value,
@@ -69,6 +75,7 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         ..out = NA,
         ..preds = NA,
+        ..given = NA,
         ..se = NA,
         ..line = NA,
         ..center = NA,
@@ -119,6 +126,7 @@ flexplotaBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data .
 #' @param out .
 #' @param preds .
+#' @param given .
 #' @param se .
 #' @param line .
 #' @param center .
@@ -133,6 +141,7 @@ flexplota <- function(
     data,
     out,
     preds,
+    given,
     se = TRUE,
     line = "loess",
     center = "median + quartiles",
@@ -143,16 +152,19 @@ flexplota <- function(
 
     if ( ! missing(out)) out <- jmvcore:::resolveQuo(jmvcore:::enquo(out))
     if ( ! missing(preds)) preds <- jmvcore:::resolveQuo(jmvcore:::enquo(preds))
+    if ( ! missing(given)) given <- jmvcore:::resolveQuo(jmvcore:::enquo(given))
     if (missing(data))
         data <- jmvcore:::marshalData(
             parent.frame(),
             `if`( ! missing(out), out, NULL),
-            `if`( ! missing(preds), preds, NULL))
+            `if`( ! missing(preds), preds, NULL),
+            `if`( ! missing(given), given, NULL))
 
 
     options <- flexplotaOptions$new(
         out = out,
         preds = preds,
+        given = given,
         se = se,
         line = line,
         center = center,

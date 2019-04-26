@@ -21,6 +21,12 @@ children:
           - type: VariablesListBox
             name: preds
             isTarget: true
+      - type: TargetLayoutBox
+        label: Paneled Variable(s)
+        children:
+          - type: VariablesListBox
+            name: given
+            isTarget: true            
   - type: LayoutBox
     margin: large
     children:
@@ -43,3 +49,4 @@ children:
               - type: TextBox
                 name: alpha
                 format: number
+

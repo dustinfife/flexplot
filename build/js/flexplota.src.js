@@ -3,7 +3,7 @@
 
 'use strict';
 
-const options = [{"name":"data","type":"Data"},{"name":"out","title":"Outcome Variable","type":"Variable"},{"name":"preds","title":"Predictor Variable(s)","type":"Variables"},{"name":"se","title":"Plot Confidence Bands (for scatterplots)","type":"Bool","default":true},{"name":"line","title":"Fitted line (for scatterplots)","type":"List","options":["loess","lm","logistic"],"default":"loess"},{"name":"center","title":"Center/Spread (for dot plots)","type":"List","options":["median + quartiles","mean + sterr","mean + stdev"],"default":"median + quartiles"},{"name":"alpha","title":"Transparency of Dots","type":"Number","min":0,"max":1,"default":0.5}];
+const options = [{"name":"data","type":"Data"},{"name":"out","title":"Outcome Variable","type":"Variable"},{"name":"preds","title":"Predictor Variable(s)","type":"Variables"},{"name":"given","title":"Paneled Variable(s)","type":"Variables"},{"name":"se","title":"Plot Confidence Bands (for scatterplots)","type":"Bool","default":true},{"name":"line","title":"Fitted line (for scatterplots)","type":"List","options":["loess","lm","logistic"],"default":"loess"},{"name":"center","title":"Center/Spread (for dot plots)","type":"List","options":["median + quartiles","mean + sterr","mean + stdev"],"default":"median + quartiles"},{"name":"alpha","title":"Transparency of Dots","type":"Number","min":0,"max":1,"default":0.5}];
 
 const view = View.extend({
     jus: "2.0",
@@ -45,6 +45,17 @@ view.layout = ui.extend({
 						{
 							type: DefaultControls.VariablesListBox,
 							name: "preds",
+							isTarget: true
+						}
+					]
+				},
+				{
+					type: DefaultControls.TargetLayoutBox,
+					label: "Paneled Variable(s)",
+					controls: [
+						{
+							type: DefaultControls.VariablesListBox,
+							name: "given",
 							isTarget: true
 						}
 					]
