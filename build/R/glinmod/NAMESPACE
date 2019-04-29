@@ -31,3 +31,7 @@ export(glmbasicOptions)
 export(flexplota)
 export(flexplotaClass)
 export(flexplotaOptions)
+
+export(modelcomp)
+export(modelcompClass)
+export(modelcompOptions)

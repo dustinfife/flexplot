@@ -1,0 +1,25 @@
+---
+name:  modelcomp
+title: Model Comparison
+menuGroup: glinmod
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+
+    - name: pred
+      title: Predictor Variable(s) for Model 1
+      type: Variables
+
+    - name: pred2
+      title: Predictor Variable(s) for Model 2
+      type: Variables      
+
+
+...

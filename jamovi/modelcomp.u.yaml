@@ -1,0 +1,33 @@
+title: Model Comparison
+name: modelcomp
+jus: '2.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Dependent Variable
+        children:
+          - type: VariablesListBox
+            name: dep
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Predictor Variable(s) for Model 1
+        children:
+          - type: VariablesListBox
+            name: pred
+            isTarget: true
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Predictor Variable(s) for Model 2
+        children:
+          - type: VariablesListBox
+            name: pred2
+            isTarget: true

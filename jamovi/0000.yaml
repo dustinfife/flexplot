@@ -22,5 +22,10 @@ analyses:
     ns: glinmod
     menuGroup: glinmod
     menuTitle: Flexplot
+  - title: Model Comparison
+    name: modelcomp
+    ns: glinmod
+    menuGroup: glinmod
+    menuTitle: Model Comparison
 
 ...
