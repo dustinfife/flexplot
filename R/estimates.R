@@ -248,15 +248,26 @@ estimates.lm = function(object){
 				
 				#### fill in the difference matrix
 				difference.matrix$variables[p2] = factors[i]
-				tk = data.frame(TukeyHSD(aov(object))[factors[i]])
-				difference.matrix$comparison[current.rows2] = row.names(tk)
-				difference.matrix[current.rows2,c("difference", "lower", "upper")] = tk[,1:3]
-				
-				difference.matrix$cohens.d[current.rows2] = difference.matrix$difference/summary(object)$sigma
+				center = outer(est$prediction.fit, est$prediction.fit, "-")
+				keep <- lower.tri(center)
+				center <- center[keep]
+				n = table(d[,factors[i]])
+				df = nrow(d) - length(coef(object))
+				width = qtukey(.95, levs, df) *
+					 summary(object)$sigma * 
+					 sqrt(outer(1/n, 1/n, "+"))[keep]
+				difference.names = outer(as.character(est[,1]), 
+										as.character(est[,1]), 
+										paste, sep = "-")[keep]
+				difference.matrix$comparison[current.rows2] = difference.names
+				difference.matrix[current.rows2,c("difference", "lower", "upper")] = 
+						c(center, center-width, center+width)				
+				difference.matrix$cohens.d[current.rows2] = difference.matrix$difference[current.rows2]/summary(object)$sigma
 
 				#### increment the counter
 				p = p + levs
 				p2 = p2+levs2
+
 				
 			}	
 			

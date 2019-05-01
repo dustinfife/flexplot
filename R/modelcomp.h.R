@@ -97,11 +97,11 @@ modelcomp <- function(
     if ( ! requireNamespace('jmvcore'))
         stop('modelcomp requires jmvcore to be installed (restart may be required)')
 
-    if ( ! missing(dep)) dep <- jmvcore:::resolveQuo(jmvcore:::enquo(dep))
-    if ( ! missing(pred)) pred <- jmvcore:::resolveQuo(jmvcore:::enquo(pred))
-    if ( ! missing(pred2)) pred2 <- jmvcore:::resolveQuo(jmvcore:::enquo(pred2))
+    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
+    if ( ! missing(pred)) pred <- jmvcore::resolveQuo(jmvcore::enquo(pred))
+    if ( ! missing(pred2)) pred2 <- jmvcore::resolveQuo(jmvcore::enquo(pred2))
     if (missing(data))
-        data <- jmvcore:::marshalData(
+        data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(pred), pred, NULL),

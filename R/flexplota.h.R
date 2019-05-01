@@ -150,11 +150,11 @@ flexplota <- function(
     if ( ! requireNamespace('jmvcore'))
         stop('flexplota requires jmvcore to be installed (restart may be required)')
 
-    if ( ! missing(out)) out <- jmvcore:::resolveQuo(jmvcore:::enquo(out))
-    if ( ! missing(preds)) preds <- jmvcore:::resolveQuo(jmvcore:::enquo(preds))
-    if ( ! missing(given)) given <- jmvcore:::resolveQuo(jmvcore:::enquo(given))
+    if ( ! missing(out)) out <- jmvcore::resolveQuo(jmvcore::enquo(out))
+    if ( ! missing(preds)) preds <- jmvcore::resolveQuo(jmvcore::enquo(preds))
+    if ( ! missing(given)) given <- jmvcore::resolveQuo(jmvcore::enquo(given))
     if (missing(data))
-        data <- jmvcore:::marshalData(
+        data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(out), out, NULL),
             `if`( ! missing(preds), preds, NULL),

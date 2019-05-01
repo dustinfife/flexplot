@@ -9,11 +9,13 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         	
         	if (length(self$options$out)>0 & length(self$options$preds)>0){
         		
-        		
+        	# if (length(self$options$preds)==0){
+        		# formula = paste0(self$options$out, "~1")
+        	# } else {
         	#### write formula for glinmod
-            formula <- jmvcore::constructFormula(self$options$out, self$options$preds)
-            formula <- as.formula(formula)
-        
+	            formula <- jmvcore::constructFormula(self$options$out, self$options$preds)
+            	formula <- as.formula(formula)
+#			}        
         	#### output results
             results <- glinmod::estimates(lm(formula, self$data))
             
@@ -32,7 +34,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 			#### prepare r square output
 			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p, correlation=results$correlation)
-			private$.rsq(rsq_out)	
+			private$.rsq(rsq_out, preds = self$options$preds)	
 			
 
 									
@@ -93,10 +95,11 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					levels="",
 					means="",
 					lower="",
-					upper="",
+					upper=""
 				))
 							
-				rows.tot = ifelse(is.na(results$factor.summary), 2, nrow(results$factor.summary)+2)
+				rows.tot = ifelse(is.na(results$factor.summary)[1], 2, nrow(results$factor.summary)+2)
+
 				rows.all = seq(from=rows.tot, to=(rows.tot + nrow(results$numbers.summary) - 1))
 				#table2 = self$results$glmnum				
 	            results$numbers.summary[,3:ncol(results$numbers.summary)] = apply(results$numbers.summary[,3:ncol(results$numbers.summary)], 2, round, digits=2)
@@ -168,8 +171,9 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 			},		
 			
-			.rsq = function(l){
+			.rsq = function(l, preds){
 				
+				if (length(preds)>0){
 				table <- self$results$rsq
 				
 				for (i in 1:(length(l$semi.p)+1)){
@@ -184,7 +188,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				#if (length(l$correlation)>0){
 					table$addRow(rowKey=i+1, values=list('var' = "Correlation Coefficient", 'Estimate' = l$correlation))
 				#}
-			}
+			}}
 		
 			
 
