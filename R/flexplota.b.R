@@ -77,11 +77,10 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				
 				### rename columns
 				names(d_smooth)[names(d_smooth)=="x"] = as.character(self$options$preds[1]); names(d_smooth)[names(d_smooth)=="y"] = self$options$out; 
-				save(data, d_smooth, k, ghost.given, g0, file="/Users/amber/Dropbox/jamovitest.rda")
 	
 				## add line to existing plot   
 	            plot = plot + theme(plot.background = element_rect(fill = "transparent",colour = NA)) +
-	        	    	theme_bw(base_size = 16) + ylab(paste0(as.character(formula), collapse=",")) +
+	        	    	theme_bw(base_size = 16) +
 						geom_line(data=d_smooth, aes_string(x=self$options$preds[1], y= self$options$out), color="gray")
 
             } else {	
