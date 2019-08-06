@@ -54,9 +54,36 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             	plot = added.plot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha)	
             	### if they choose to do a ghost line	
             } else if (length(self$options$given)>0 & self$options$ghost==TRUE){
-	            plot = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha, ghost.line="darkgray") + 
-	            		theme(plot.background = element_rect(fill = "transparent",colour = NA)) +
-	            		theme_bw(base_size = 16)
+            		
+            	#### first create initial plot
+            	p = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha, data_output=T) 
+            	plot = p$plot
+            	
+            	#### now add the ghost line (have to do it separately because of environment conflicts)
+            	#### first get ghost.reference
+            	k = p$data
+            	ghost.reference = list()
+            	for (i in 1:length(self$options$given)){
+            		condition = k[1,self$options$given[i]]
+            		k = k[k[,self$options$given[i]]==condition,]
+            	}
+				
+			
+				### identify which variables are in the given category
+				ghost.given = self$options$given
+				g0 = ggplot(data=k, aes_string(x=self$options$preds[1], y=self$options$out))+geom_smooth(method=line, se=self$options$se)
+
+				d_smooth = ggplot_build(g0)$data[[1]]; 
+				
+				### rename columns
+				names(d_smooth)[names(d_smooth)=="x"] = as.character(self$options$preds[1]); names(d_smooth)[names(d_smooth)=="y"] = self$options$out; 
+				save(data, d_smooth, k, ghost.given, g0, file="/Users/amber/Dropbox/jamovitest.rda")
+	
+				## add line to existing plot   
+	            plot = plot + theme(plot.background = element_rect(fill = "transparent",colour = NA)) +
+	        	    	theme_bw(base_size = 16) + ylab(paste0(as.character(formula), collapse=",")) +
+						geom_line(data=d_smooth, aes_string(x=self$options$preds[1], y= self$options$out), color="gray")
+
             } else {	
             	plot = flexplot(formula, data=data, se=self$options$se, spread=se.type,method=line,  alpha = self$options$alpha) + 
 	            		theme(plot.background = element_rect(fill = "transparent",colour = NA)) +

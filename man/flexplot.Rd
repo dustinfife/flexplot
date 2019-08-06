@@ -9,7 +9,7 @@ flexplot(formula, data, related = F, color = NULL, symbol = NULL,
   method = "loess", se = T, ghost.line = NULL,
   ghost.reference = NULL, spread = c("quartiles", "stdev", "sterr"),
   jitter = FALSE, raw.data = T, sample = Inf, prediction = NULL,
-  suppress_smooth = F, alpha = 0.99977)
+  suppress_smooth = F, alpha = 0.99977, data_output = F)
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}
@@ -51,6 +51,8 @@ flexplot(formula, data, related = F, color = NULL, symbol = NULL,
 \item{suppress_smooth}{Should a fitted line be repressed? Defaults to FALSE}
 
 \item{alpha}{The transparency of the datapoints.}
+
+\item{data_output}{Should the data be outputted?}
 }
 \description{
 Create a flexible plot

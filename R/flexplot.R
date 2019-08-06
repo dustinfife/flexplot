@@ -26,6 +26,7 @@
 ##' @param prediction Predicted values for a prediction line. Defaults to NULL
 ##' @param suppress_smooth Should a fitted line be repressed? Defaults to FALSE
 ##' @param alpha The transparency of the datapoints. 
+##' @param data_output Should the data be outputted?
 ##' @author Dustin Fife
 ##' @export
 ##' @examples
@@ -69,7 +70,7 @@ flexplot = function(formula, data, related=F,
 		ghost.line=NULL, ghost.reference=NULL,
 		spread=c('quartiles', 'stdev', 'sterr'), jitter=FALSE, raw.data=T,
 		sample=Inf, 
-		prediction = NULL, suppress_smooth=F, alpha=.99977){
+		prediction = NULL, suppress_smooth=F, alpha=.99977, data_output=F){
 			
 
 	##### use the following to debug flexplot
@@ -423,7 +424,7 @@ flexplot = function(formula, data, related=F,
 			for (i in 1:length(binned.vars)){
 				
 				### check length of binned variables. If <= breaks, treat as categorical
-				if (length(unique(data[,binned.vars[i]]))<=bins){
+				if (length(unique(data[,binned.vars[i]]))<=bins[i]){
 					data[,binned.vars[i]] = factor(data[,binned.vars[i]], ordered=T)
 				}
 				
@@ -558,12 +559,11 @@ flexplot = function(formula, data, related=F,
 
 					#### if they don't specify a reference group, choose one
 			if (is.null(ghost.reference)){
-				l = data[1,given]
 				ghost.reference=list()
 				for (b in 1:length(given)){
+					l = data[1,given[b]]					
 					ghost.reference[[given[b]]]=l
 				}
-
 			} 
 
 			### make sure the reference groups are all in the data
@@ -578,7 +578,7 @@ flexplot = function(formula, data, related=F,
 				# if (length(ghost.reference)!=length(given)){
 					# stop("When referencing a 'ghost line,' you must specify the value for each 'given' variable.")
 				# }
-				
+	
 	
 			ghost.names = names(ghost.reference)
 			##### select those columns in d specified
@@ -602,6 +602,7 @@ flexplot = function(formula, data, related=F,
 			}
 
 			d_smooth = ggplot_build(g0)$data[[1]]; 
+
 			### rename columns
 			names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 
 
@@ -627,8 +628,18 @@ flexplot = function(formula, data, related=F,
 			p = p + geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_errorbar(data=prediction, aes(y=NULL, ymin=lower, ymax=upper, color=model, width=.4))
 		
 		}
-		return(p)
-	} else {
+		if (data_output){
+			ret = list(plot=p, data=data)
+			return(ret)
+		} else {
 			return(p)
+		}			
+	} else {
+		if (data_output){
+			ret = list(plot=p, data=data)
+			return(ret)
+		} else {
+			return(p)
+		}
 	}
 }
