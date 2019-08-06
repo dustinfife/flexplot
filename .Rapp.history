@@ -1,3 +1,416 @@
+d
+hw = grep("Week", names(d), value=T)
+d[,hw]
+ncol(d[,hw])
+require(fifer)#
+d = read.csv("Dropbox/grades/intro")#
+	#### get homework names#
+hw = grep("Week", names(d), value=T)#
+ncol(d[,hw])
+d[,hw]
+require(fifer)#
+d = read.csv("Dropbox/grades/intro")#
+	#### get homework names#
+hw = grep("Week", names(d), value=T)#
+	#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### conver to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 5#
+}
+d[,hw]
+d = read.csv("Dropbox/grades/intro")#
+	#### get homework names#
+hw = grep("Week", names(d), value=T)#
+#
+d[,hw]
+d = read.csv("Dropbox/grades/intro")#
+names(d) = subsetString(names(d), "..", 1)
+hw = grep("Week", names(d), value=T)
+d
+d[,hw]
+d$Week.14 = NULL
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 5#
+}#
+d[,hw]
+d = read.csv("Dropbox/grades/intro")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+hw = grep("Week", names(d), value=T)#
+d$Week.14 = NULL#
+#
+	#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 5#
+}#
+d[,hw]
+d = read.csv("Dropbox/grades/intro")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+d$Week.14 = NULL#
+hw = grep("Week", names(d), value=T)
+#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 5#
+}#
+d[,hw]
+d = read.csv("Dropbox/grades/intro")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+d$Week.14 = NULL#
+hw = grep("Week", names(d), value=T)#
+ncol(d[,hw])
+#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 5#
+}#
+ncol(d[,hw])
+d = read.csv("Dropbox/grades/intro")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+d$Week.14 = NULL#
+hw = grep("Week", names(d), value=T)#
+ncol(d[,hw])#
+#
+	#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 10#
+}
+d
+require(fifer)#
+d = read.csv("Dropbox/grades/intro")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+d$Week.14 = NULL#
+hw = grep("Week", names(d), value=T)#
+ncol(d[,hw])#
+#
+	#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 10#
+}#
+#
+for (i in 1:nrow(d)){#
+	sorted.scores = sort(d[i,hw], decreasing=T)#
+	d$Homework[i] = sum(sorted.scores[1:10])#
+}#
+#
+d$total.score = (d$Homework + d$Final.Exam + d$Midterm)#
+d$total.score
+d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)
+d$total.score
+#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 10#
+}#
+#
+for (i in 1:nrow(d)){#
+	sorted.scores = sort(d[i,hw], decreasing=T)#
+	d$Homework[i] = sum(sorted.scores[1:10])#
+}#
+#
+d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
+d$total.score
+head(d)
+d[,c("Last.Name", "First.Name", "total.score")]
+d = read.csv("Dropbox/grades/intro")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+d$Week.14 = NULL#
+hw = grep("Week", names(d), value=T)#
+d$Final.Exam[d$Last.Name=="Batie"] = 0#
+#
+	#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 10#
+}#
+#
+for (i in 1:nrow(d)){#
+	sorted.scores = sort(d[i,hw], decreasing=T)#
+	d$Homework[i] = sum(sorted.scores[1:10])#
+}#
+#
+d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
+d$total.score#
+d[,c("Last.Name", "First.Name", "total.score")]
+d$Univariate.Midterm[is.na(d$Univariate.Midterm)]
+is.na(d$Univariate.Midterm)
+d$Final.Exam[is.na(d$Final.Exam)]=0
+d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150
+d[,c("Last.Name", "First.Name", "total.score")]
+d = read.csv("Dropbox/grades/intro")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+d$Week.14 = NULL#
+hw = grep("Week", names(d), value=T)#
+d$Final.Exam[d$Last.Name=="Batie"] = 0#
+#
+	#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 10#
+}#
+#
+for (i in 1:nrow(d)){#
+	sorted.scores = sort(d[i,hw], decreasing=T)#
+	d$Homework[i] = sum(sorted.scores[1:10])#
+}#
+d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
+d$Final.Exam[is.na(d$Final.Exam)]=0#
+#
+d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
+d$total.score#
+d[,c("Last.Name", "First.Name", "total.score")]
+cut(d$letter.grade*100, c(0, 60, 63, 70, 73, 80, 83, 90, 93,))
+cut(d$letter.grade*100, c(0, 60, 63, 70, 73, 80, 83, 90, 93,100))
+cut(d$letter.grade*100, c(0, 60, 63, 70, 73, 80, 83, 90, 93,100), include.lowest=T)
+?cut
+cut(d$letter.grade*100, c(0, 60, 63, 70, 73, 80, 83, 90, 93,100), right=F)
+cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))
+d$letter.grade
+d$letter.grade = d$total.score
+d$letter.grade
+cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))
+d[,c("Last.Name", "First.Name", "total.score", "letter.grade")]
+d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
+d$total.score#
+d$letter.grade = d$total.score#
+d$letter.grade = cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))#
+d[,c("Last.Name", "First.Name", "total.score", "letter.grade")]
+d = read.csv("Dropbox/grades/univariate")
+names(d) = subsetString(names(d), "..", 1)
+hw = grep("Week", names(d), value=T)
+d[,hw]
+require(fifer)#
+d = read.csv("Dropbox/grades/univariate")#
+names(d) = subsetString(names(d), "..", 1)
+hw = grep("Week", names(d), value=T)
+d[,hw]
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 10#
+}
+d
+for (i in 1:nrow(d)){#
+	sorted.scores = sort(d[i,hw], decreasing=T)#
+	d$Homework[i] = sum(sorted.scores[1:10])#
+}
+d = read.csv("Dropbox/grades/univariate")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+hw = grep("Week", names(d), value=T)#
+d[,hw]#
+#
+	#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 5#
+}#
+d
+for (i in 1:nrow(d)){#
+	sorted.scores = sort(d[i,hw], decreasing=T)#
+	d$Homework[i] = sum(sorted.scores[1:10])#
+}
+d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
+d$Final.Exam[is.na(d$Final.Exam)]=0
+d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm+25)
+d$total.score
+require(fifer)#
+d = read.csv("Dropbox/grades/univariate")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+hw = grep("Week", names(d), value=T)#
+d[,hw]#
+#
+	#### loop through them succas to convert to 5 total#
+for (i in 1:length(hw)){#
+	#### convert to numeric#
+	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
+	#### convert NA to zero#
+	missing.vals = which(is.na(d[,hw[i]]))#
+	d[missing.vals, hw[i]] = 0#
+#
+	#### scale to total 5#
+	max.score = max(d[,hw[i]])#
+	d[,hw[i]] = d[,hw[i]]/max.score * 5#
+}#
+d#
+#
+for (i in 1:nrow(d)){#
+	sorted.scores = sort(d[i,hw], decreasing=T)#
+	d$Homework[i] = sum(sorted.scores[1:10])#
+}#
+d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
+d$Final.Exam[is.na(d$Final.Exam)]=0#
+#
+d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm+25)#
+d$total.score
+d = read.csv("Dropbox/grades/univariate")#
+names(d) = subsetString(names(d), "..", 1)#
+	#### get homework names#
+hw = grep("Week", names(d), value=T)#
+d
+d = read.csv("Dropbox/grades/finalexam.csv")
+head(d)
+names(d) = subsetString(names(d), "..", 1)
+head(d)
+names(d)
+d = read.csv("Dropbox/grades/finalexam.csv", sep=",")
+d
+names(d) = subsetString(names(d), "..", 1)
+names(d)
+d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
+names(d)
+d = d[,c("Last.Name", "Question.ID", "Auto.Score")]
+head(d)
+tidyr::spread(d, Question.ID, Auto.Score)
+cor(d[,2:ncol(d)])
+d[,2:ncol(d)]
+ncol(d)
+d
+d = tidyr::spread(d, Question.ID, Auto.Score)
+cor(d[,2:ncol(d)])
+cor(d[,2:ncol(d)], use="pairwise.complete.obs")
+d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
+d = d[,c("Last.Name", "Question.ID", "Auto.Score")]#
+d = tidyr::spread(d, Question.ID, Auto.Score)#
+d
+cor.bests = 1:nrow(d)
+cor.bests = 1:nrow(d)#
+for (i in 1:nrow(d)){#
+	person = d[,i]#
+	diam = d[,1]#
+	cor.bests[i] =cor(person, diam, use="pairwise.complete.obs")#
+}
+person
+d[,i]
+person = d[i,]
+person
+person = d[i,]
+diam = d[1,]
+cor.bests = 1:nrow(d)#
+for (i in 1:nrow(d)){#
+	person = d[i,]#
+	diam = d[1,]#
+	cor.bests[i] =cor(person, diam, use="pairwise.complete.obs")#
+}
+diam
+person
+cor(person, diam, use="pairwise.complete.obs")
+is.numeric(person)
+as.numeric(person)
+person = as.numeric(d[i,])#
+	diam = as.numeric(d[1,])#
+	cor.bests[i] =cor(person, diam, use="pairwise.complete.obs")
+cor.bests = 1:nrow(d)#
+for (i in 1:nrow(d)){#
+	person = as.numeric(d[i,])#
+	diam = as.numeric(d[1,])#
+	cor.bests[i] =cor(person, diam, use="pairwise.complete.obs")#
+}
+cor.bests
+cor.bests = data.frame(person=d$Last.Name, correlation=1:nrow(d))#
+for (i in 1:nrow(d)){#
+	person = as.numeric(d[i,])#
+	diam = as.numeric(d[1,])#
+	cor.bests$correlation[i] =cor(person, diam, use="pairwise.complete.obs")#
+}
+cor.bests
+cor.bests = cor.bests[order(cor.bests$correlation),]
+cor.bests
+d
 she.got.wrong = which(diam==0)
 she.got.wrong
 they.got.wrong = which(person==0)
@@ -609,1129 +1022,137 @@ d$region = factor(d$region, levels=c(1,2,3,4), labels=c("North", "South", "East"
 d$industry = factor(d$industry, levels=c(1,2,3), labels=c("Government", "Commercial", "Academic"))#
 head(d)
 write.csv(d, "Dropbox/Sales.csv", row.names=F)
-setwd("Dropbox/research/RPackages/glinmod")
-data(ToothGrowth)
-devtools::install()
-glinmod::flexplot(len~supp|dose, data=d)
-traceback()
-d = ToothGrowth
-glinmod::flexplot(len~supp|dose, data=d)
-jmvtools::install()
-glinmod::flexplot(len~supp|dose, data=d, ghost.line="gray")
-ghost.line="gray"
-formula = formula(weight.loss~therapy.type + rewards); related=T; data=d; color=NULL; symbol=NULL; linetype=NULL; bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=FALSE; raw.data=T; ghost.line="gray"; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=1#
-formula = len~supp|dose; data=d#
-ghost.line="gray"
-require(fifer)
-spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-		#### extract outcome, predictors, and given variables#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-		#### identify the non given variables#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = unlist(strsplit(axis, " + ", fixed=T))#
-	#### identify the correct line#
-	if (suppress_smooth){#
-		gm = theme_bw()#
-	} else if (method=="logistic") {#
-#
-		#### make sure there's only two levels#
-		if (length(unique(data[,outcome]))!=2){#
-			stop("To fit a logistic curve, you must have only two levels of your outcome variable.")#
-		}#
-		#### convert outcome to numeric (if necessary)#
-		if (!is.numeric(data[,outcome])){#
-			data[,outcome] = as.numeric(data[,outcome])-1#
-		}#
-		#### specify the curve#
-		gm = geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)#
-	} else if (method=="poisson" | method=="Gamma") {#
-		#### specify the curve#
-		gm = geom_smooth(method = "glm", method.args = list(family = method), se = se)#
-	} else {#
-		gm = geom_smooth(method=method, se=se)#
-	}#
-	#if (is.na(given)){given=NULL}#
-	### create custom function to sample data#
-	sample.subset = function(sample, data){#
-		if (sample!=Inf){#
-			m = data[sample(1:nrow(data), size=sample),]#
-		} else {#
-			m = data#
-		}#
-	}#
-#
-	### if they don't want raw data, just make alpha = 0#
-	raw.alph.func = function(raw.data,alpha=1){#
-		if (raw.data){#
-			alpha.raw = alpha#
-		} else {#
-			alpha.raw = 0#
-		}	#
-	}#
-#
-	if (!is.null(jitter)){#
-			if (jitter[1]==T & !is.numeric(jitter)[1]){#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)#
-			} else if (jitter[1] == F & !is.numeric(jitter)[1]){#
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-			} else {#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])#
-			}#
-		} else {#
-			jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-	}#
-#
-	if (spread=="stdev"){#
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, size = 1.25, width=.2, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2))#
-	} else if (spread=="sterr"){	#
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2)) 	#
-	} else if (spread == "quartiles"){	#
-		summary1 = stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="median", position=position_dodge(width=.2)) 	#
-	}
-require(tidyverse)
-spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-		#### extract outcome, predictors, and given variables#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-		#### identify the non given variables#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = unlist(strsplit(axis, " + ", fixed=T))#
-	#### identify the correct line#
-	if (suppress_smooth){#
-		gm = theme_bw()#
-	} else if (method=="logistic") {#
-#
-		#### make sure there's only two levels#
-		if (length(unique(data[,outcome]))!=2){#
-			stop("To fit a logistic curve, you must have only two levels of your outcome variable.")#
-		}#
-		#### convert outcome to numeric (if necessary)#
-		if (!is.numeric(data[,outcome])){#
-			data[,outcome] = as.numeric(data[,outcome])-1#
-		}#
-		#### specify the curve#
-		gm = geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)#
-	} else if (method=="poisson" | method=="Gamma") {#
-		#### specify the curve#
-		gm = geom_smooth(method = "glm", method.args = list(family = method), se = se)#
-	} else {#
-		gm = geom_smooth(method=method, se=se)#
-	}#
-	#if (is.na(given)){given=NULL}#
-	### create custom function to sample data#
-	sample.subset = function(sample, data){#
-		if (sample!=Inf){#
-			m = data[sample(1:nrow(data), size=sample),]#
-		} else {#
-			m = data#
-		}#
-	}#
-#
-	### if they don't want raw data, just make alpha = 0#
-	raw.alph.func = function(raw.data,alpha=1){#
-		if (raw.data){#
-			alpha.raw = alpha#
-		} else {#
-			alpha.raw = 0#
-		}	#
-	}#
-#
-	if (!is.null(jitter)){#
-			if (jitter[1]==T & !is.numeric(jitter)[1]){#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)#
-			} else if (jitter[1] == F & !is.numeric(jitter)[1]){#
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-			} else {#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])#
-			}#
-		} else {#
-			jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-	}#
-#
-	if (spread=="stdev"){#
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, size = 1.25, width=.2, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2))#
-	} else if (spread=="sterr"){	#
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2)) 	#
-	} else if (spread == "quartiles"){	#
-		summary1 = stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="median", position=position_dodge(width=.2)) 	#
-	}
-spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-		#### extract outcome, predictors, and given variables#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-		#### identify the non given variables#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = unlist(strsplit(axis, " + ", fixed=T))#
-	#### identify the correct line#
-	if (suppress_smooth){#
-		gm = theme_bw()#
-	} else if (method=="logistic") {#
-#
-		#### make sure there's only two levels#
-		if (length(unique(data[,outcome]))!=2){#
-			stop("To fit a logistic curve, you must have only two levels of your outcome variable.")#
-		}#
-		#### convert outcome to numeric (if necessary)#
-		if (!is.numeric(data[,outcome])){#
-			data[,outcome] = as.numeric(data[,outcome])-1#
-		}#
-		#### specify the curve#
-		gm = geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)#
-	} else if (method=="poisson" | method=="Gamma") {#
-		#### specify the curve#
-		gm = geom_smooth(method = "glm", method.args = list(family = method), se = se)#
-	} else {#
-		gm = geom_smooth(method=method, se=se)#
-	}#
-	#if (is.na(given)){given=NULL}#
-	### create custom function to sample data#
-	sample.subset = function(sample, data){#
-		if (sample!=Inf){#
-			m = data[sample(1:nrow(data), size=sample),]#
-		} else {#
-			m = data#
-		}#
-	}#
-#
-	### if they don't want raw data, just make alpha = 0#
-	raw.alph.func = function(raw.data,alpha=1){#
-		if (raw.data){#
-			alpha.raw = alpha#
-		} else {#
-			alpha.raw = 0#
-		}	#
-	}#
-#
-	if (!is.null(jitter)){#
-			if (jitter[1]==T & !is.numeric(jitter)[1]){#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)#
-			} else if (jitter[1] == F & !is.numeric(jitter)[1]){#
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-			} else {#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])#
-			}#
-		} else {#
-			jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-	}#
-#
-	if (spread=="stdev"){#
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, size = 1.25, width=.2, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2))#
-	} else if (spread=="sterr"){	#
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2)) 	#
-	} else if (spread == "quartiles"){	#
-		summary1 = stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="median", position=position_dodge(width=.2)) 	#
-	}		#
-	### BEGIN THE MEGA PLOTTING IFS!#
-	### PLOT UNIVARIATE PLOTS#
-		### if there's no predictors, use the "uni.plot" function#
-	if (length(outcome)==1 & length(predictors)==0){#
-		##### reorder according to columns lengths (if it's not an ordered factor)#
-		if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){#
-			counts = sort(table(data[,outcome]), decreasing=T)#
-			names(counts)#
-			data[,outcome] = factor(data[,outcome], levels=names(counts))#
-		}#
-		p = uni.plot(outcome, d=data)#
-	### related t plot#
-	} else if (related){#
-		if (length(predictors)!=1){#
-			stop("Currently, the 'related' option is only available when there's a single predictor.")#
-		} #
-		#### extract levels of the predictors#
-		levs = levels(data[,predictors])#
-		if (length(levs)!=2){#
-			stop("Sorry, I can only accept two levels of the grouping variable when related=T.")#
-		}#
-#
-		#### create difference scores#
-		g1 = data[data[,predictors]==levs[1], outcome]#
-		g2 = data[data[,predictors]==levs[2], outcome]		#
-		if (length(g1) != length(g2)){#
-			stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")#
-		}#
-		lab = paste0("Difference (",levs[2], "-", levs[1], ')')#
-		d2 = data.frame(Difference=g2-g1)#
-		if (spread == "stdev"){ summary2 = stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=mean, size = 1.25, width=.12, position=position_dodge(width=.2))}#
-		if (spread == "sterr"){ summary2 = stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, fun.y=mean, color=rgb(1,0,0,.25), width=.12, size = 1.25, position=position_dodge(width=.2))}#
-		if (spread == "quartiles"){ summary2 = stat_summary(geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.12, position=position_dodge(width=.2))}				#
-												#stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, color='red', width=.2)#
-		p = ggplot(d2, aes(y=Difference, x=1)) +#
-			geom_jitter(data=sample.subset(sample, d2), alpha=raw.alph.func(raw.data, .15), width=.05) +#
-			summary1 + summary2 + #
-			gm +#
-			geom_hline(yintercept=0, col="lightgray") +#
-			labs(x=lab) +#
-			theme_bw() +#
-			theme(axis.ticks.x=element_blank(), axis.text.x=element_blank()) +#
-			coord_cartesian(xlim=c(.75, 1.25))#
-	#### SCATTERPLOT	#
-	} else if (length(outcome)==1 & length(predictors)==1 & is.na(given) & (is.numeric(data[,predictors]) & is.numeric(data[,outcome]))){				#
-		p = ggplot(data=data, aes_string(x=predictors, y=outcome))+#
-			jit + #geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha)) +#
-			gm +#
-			theme_bw()						#
-#
-	##### MEAN PLOT#
-	} else if (length(outcome)==1 & length(predictors)==1 & is.na(given) & (is.numeric(data[,predictors]) | is.numeric(data[,outcome]))){		#
-		#### reorder if it's not already ordered#
-		if (!is.ordered(data[,predictors[1]])){#
-			if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}#
-			ord = aggregate(data[,outcome]~data[,predictors], FUN=fn, na.rm=T)#
-			ord = ord[order(ord[,2], decreasing=T),]#
-			data[,predictors] = factor(data[,predictors], levels=ord[,1])#
-		}#
-#
-		#### set default alpha#
-		if(alpha==.99977){#
-			alpha = .2#
-		}#
-		p = ggplot(data=data, aes_string(x=predictors, y=outcome)) +#
-			geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha), size=.75, width=.05) + #
-			summary1 + summary2 + #
-			theme_bw()						#
-	##### logistic regression plot#
-	# } else if (){#
-	# }#
-	##### CHI SQUARE PLOT#
-	} else if (length(outcome) == 1 & length(predictors)==1 & is.na(given) & !is.numeric(data[,predictors]) & !is.numeric(data[,outcome])){#
-		m = as.data.frame(table(data[,predictors], data[,outcome])); names(m)[1:2] = c(predictors, outcome)#
-		Freq = 'Freq'#
-		p = ggplot(data=m, aes_string(x=predictors, y=Freq, fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()#
-#
-	##### INTERACTION PLOT#
-	} else if (length(outcome)==1 & length(predictors)==2 & (is.character(data[,predictors[1]]) | is.factor(data[,predictors[1]])) & (is.character(data[,predictors[2]]) | is.factor(data[,predictors[2]]))){#
-					#### set default alpha#
-		if(alpha==.99977){#
-			alpha = .2	#
-		}#
-		#### identify if given is na#
-		if (!is.na(given)){#
-#
-			p = ggplot(data=data, aes_string(x=predictors[1], y=outcome)) +#
-				geom_jitter(data=sample.subset(sample, data), alpha = raw.alph.func(raw.data, alpha), size = .75, width=.2) +#
-				facet_wrap(as.formula(paste("~", predictors[2]))) +#
-				summary1 + summary2 +#
-				labs(x=predictors[1], y=outcome) +#
-				theme_bw()#
-		} else {#
-			p = ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=predictors[2], linetype=predictors[2], shape=predictors[2])) +#
-				geom_jitter(data=sample.subset(sample, data), alpha = raw.alph.func(raw.data, alpha), size=.75,  position= position_jitterdodge(jitter.width=.2, dodge.width=.2)) +#
-				summary1 + summary2 + #
-				sum.line + #
-				labs(x=predictors[1], y=outcome) +#
-				theme_bw()			#
-		}#
-#
-	#### ANCOVA PLOT		#
-	# } else if (length(predictors)==2 & length(categories)==1 & length(given)<1){#
-		# ### if they're supplying a prediction, put the covariate in the "given" area#
-		# if (!is.null(prediction)){#
-			# given.as.string = paste0("~", categories)#
-			# p = ggplot(data=data, aes_string(x=numbers, y=outcome))+#
-				# geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha)) +#
-				# gm +#
-				# facet_grid(as.formula(given.as.string),labeller = labeller(.rows = label_both, .cols=label_both)) +#
-				# theme_bw()	#
-		# } else {	#
-			# p = ggplot(data=d, aes_string(x=numbers, y=outcome, group=categories, linetype=categories, color=categories)) +#
-				# geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha)) +#
-				# gm +#
-				# theme_bw()							#
-		# }#
-	###### MULTIWAY DOT PLOT FOR THREE CATEGORICAL PREDICTORS#
-	} else if (length(outcome)==1 & length(predictors)==3 & length(categories)==3 & is.na(given)){#
-		#### figure out which variable has the largest effect#
-		mod = lm(formula, data=data)#
-#
-		order = order(anova(mod)[-length(coef(mod)),"F value"], decreasing=F)#
-		ordered.predictors = row.names(anova(mod))[order]#
-		new.formula = make.formula(outcome, ordered.predictors)#
-		#### reorder the means#
-		means = aggregate(new.formula, data=data, FUN=mean)#
-		names(means)[ncol(means)]="mean"#
-		ser = aggregate(new.formula, data=data, FUN=function(x){sd(x)})#
-		means$ser = ser[,outcome]#
-		means$lower = means$mean - means$ser#
-		means$upper = means$mean + means$ser#
-#
-		#### combine with previous dataset#
-		d = merge(data, means, by=ordered.predictors)#
-		if (se){#
-			p = ggplot(data=d, aes_string(x= ordered.predictors[1], y=outcome, col=ordered.predictors[1])) + #
-				geom_jitter(data=sample.subset(sample, d), alpha = raw.alph.func(raw.data, .15)) +#
-				geom_point(aes_string(y="mean")) + #
-				geom_errorbar(aes_string(ymin="lower", ymax= "upper", col=ordered.predictors), width=.2) +#
-				coord_flip() + #
-				facet_grid(as.formula(paste0(ordered.predictors[2]," +", ordered.predictors[3],"~."))) +#
-				theme_bw()#
-		} else {#
-			p = ggplot(data=d, aes_string(x= ordered.predictors[1], y=outcome, col=ordered.predictors[1])) + #
-				geom_jitter(data=sample.subset(sample, d), alpha = raw.alph.func(raw.data, .15)) +#
-				geom_point(aes_string(y="mean")) + #
-				coord_flip() + #
-				facet_grid(as.formula(paste0(ordered.predictors[2]," +", ordered.predictors[3],"~."))) +#
-				theme_bw()			#
-		}				#
-	##### FOR VARAIBLES THAT WILL BE BINNED...#
-	} else {#
-#
-		##### only allow two "given" variables#
-		if (length(given)>2){#
-			stop("Only two 'given' variables are allowed.")#
-		}#
-#
-		#### modify given (if needed)#
-		if (length(given)>0 & !is.na(given)){#
-		if (regexpr("+", given)){#
-			given = unlist(strsplit(given, " + ", fixed=T))#
-		}#
-		}		#
-		#### see if more than two variables are shown at the left of the given sign#
-		if ((length(predictors) - length(given))>2){#
-			stop("Only two 'axis' variables are allowed.")#
-		}#
-		#### make given variables ggplot friendly (for facet_grid)#
-		given.as.string = ifelse(length(given)>1 & !is.na(given),paste0(rev(given), collapse="~"), paste0("~",given))#
-#
-		#### if a category is "given", leave it alone#
-		# if (length(which(given %in% categories))>0){#
-			# given = given[-which(given %in% categories)]#
-		# }#
-		### identify the number of binned variables we need#
-		if (length(axis)>1 & axis[2] %in% numbers){ #
-			binned.vars = c(axis[2], numbers[which((numbers) %in% given)])#
-		} else{#
-			binned.vars = predictors[which((predictors) %in% given)]#
-		}#
-		#### identify which binned variables are categorical#
-		binned.numeric = numbers[which((numbers) %in% given)]#
-#
-		if (length(binned.numeric)>0){#
-			msg = paste0("The following variables are going to be binned: ", paste0(binned.vars, collapse=", "), "\n")#
-			cat(msg)#
-		}#
-		### repeat the bins the number of bins there are#
-		if (length(bins) != length(binned.vars) & length(bins)>1){#
-			warning("You haven't specified enough bins to cover all the binned variables. I'm making a guess for the rest of the variables")#
-			bins = matrix(bins, nrow=1, ncol=length(binned.vars))#
-		}#
-		if (length(bins)==1){#
-			bins = rep(bins, times=length(binned.vars))#
-		}#
-#
-		#### bin the binned variables#
-		if (length(binned.vars)>0){#
-			for (i in 1:length(binned.vars)){#
-				### check length of binned variables. If <= breaks, treat as categorical#
-				if (length(unique(data[,binned.vars[i]]))<=bins){#
-					data[,binned.vars[i]] = factor(data[,binned.vars[i]], ordered=T)#
-				}#
-				if (is.numeric(data[,binned.vars[i]])){#
-					break.current = unlist(breaks[i])#
-					if (!is.null(unlist(labels[i])) & length(unlist(labels[i])) != bins[i]){#
-						stop(paste0("The label vectors (", paste0(unlist(labels[i]), collapse=", "), ") is not the same length as the bin length (", bins[i], ")", sep=""))#
-					}#
-					### if they supply the breaks...#
-					#if (data[,binned.vars[i]])#
-					if (!is.null(break.current)){#
-						#### give min as breaks, if the user doesn't#
-						if (min(break.current)>min(data[,binned.vars[i]])){#
-							break.current = c(-Inf, break.current)#
-						}#
-						if (max(break.current,na.rm=T)<max(data[,binned.vars[i]])){#
-							break.current = c(break.current, Inf)#
-						}#
-						quants = unlist(break.current)#
-					} else {#
-						quants = quantile(data[,binned.vars[i]], seq(from=0, to=1, length.out=bins[i]+1), na.rm=T)#
-						quants = quants[!duplicated(quants)]#
-					}#
-					data[,paste0(binned.vars[i])] = cut(data[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)#
-					#### if they're making a ghost reference, bin that too#
-					if (!is.null(ghost.reference) & binned.vars[i] %in% names(ghost.reference)){#
-						val = as.numeric(ghost.reference[binned.vars[i]])#
-						ghost.reference[binned.vars[i]] = as.character(cut(val, quants, labels=unlist(labels[i]), include.lowest=T, include.highest=T))#
-					}#
-					if (!is.null(prediction)){#
-						prediction[,paste0(binned.vars[i])] = cut(prediction[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)#
-				}#
-				}#
-#
-			}#
-#
-			if (!is.null(prediction)){#
-							#### average the predictions within bin#
-				f = make.formula("prediction", c("model",#
-														predictors[-which(predictors==binned.vars[i])],#
-														binned.vars[i]#
-														)#
-									)			#
-				prediction = aggregate(f, data=prediction, FUN=median)#
-#
-			}			#
-		}#
-				#### add code for "given" variable#
-		if (!is.na(given[1])){#
-			giv = facet_grid(as.formula(given.as.string),labeller = labeller(.rows = label_both, .cols=label_both))#
-		} else {#
-			giv = theme_bw()#
-		}#
-		#### repeat this (otherwise it references the old dataset, before things were binned)#
-		if (!is.null(jitter)){#
-				if (jitter[1]==T){#
-					jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)#
-				} else if (jitter[1] == F){#
-					jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-				} else {#
-					jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])#
-				}#
-			} else {#
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-		}#
-		if (length(axis)>1){#
-			if (!is.numeric(data[,axis[1]])){#
-				p = ggplot(data=data, aes_string(x=axis[1], y=outcome, shape=axis[2], linetype=axis[2], color=axis[2]))+#
-					gm + #
-					jit + #
-					giv + #
-					summary1 + summary2 + #
-					sum.line +#
-					theme_bw()#
-			} else {#
-#
-			p = ggplot(data=data, aes_string(x=axis[1], y=outcome, shape=axis[2], linetype=axis[2], color=axis[2]))+#
-					gm + #
-					jit + #
-					giv + #
-					theme_bw()#
-			}		#
-		} else {#
-			if (!is.numeric(data[,axis[1]])){#
-				p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+#
-					gm + #
-					jit + #
-					giv + #
-					summary1 + summary2 + #
-					sum.line +#
-					theme_bw()#
-			} else {#
-#
-				p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+#
-					jit + #
-					gm +#
-					giv + #
-					theme_bw()	#
-				}#
-		}
-p
-if (!is.null(ghost.line)){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068#
-#
-			### quit if they try to do two axes#
-			if (!is.na(axis[2])){#
-				stop("Sorry. I can't plot a second variable on the x axis. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")#
-			}#
-			### make sure the reference groups are all in the data#
-			if (sum(names(ghost.reference) %in%  variables) != length(ghost.reference)){#
-				missing.var = names(ghost.reference[!(names(ghost.reference) %in% variables)])#
-				msg = paste0("Sorry. One of your variables (", missing.var, ") is not in your formula.")#
-				stop(msg)#
-			}#
-					#### if they don't specify a reference group, choose one#
-			if (is.null(ghost.reference)){#
-				l = data[1,given]#
-				ghost.reference=list()#
-				for (b in 1:length(given)){#
-					ghost.reference[[given[b]]]=l#
-				}#
-#
-			} #
-				# if (length(ghost.reference)!=length(given)){#
-					# stop("When referencing a 'ghost line,' you must specify the value for each 'given' variable.")#
-				# }#
-			ghost.names = names(ghost.reference)#
-			##### select those columns in d specified#
-			k = data#
-			for (s in 1:length(ghost.reference)){#
-				k = k[k[,ghost.names[s]]==unlist(ghost.reference[s]),]#
-			}				#
-			### identify which variables are in the given category#
-			ghost.given = which(ghost.names %in% given)#
-			g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+gm#
-			d_smooth = ggplot_build(g0)$data[[1]]; #
-			### rename columns#
-			names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; #
-			## add line to existing plot   #
-			p = p + geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)#
-		}		#
-	}
-if (length(given)>2){#
-			stop("Only two 'given' variables are allowed.")#
-		}#
-#
-		#### modify given (if needed)#
-		if (length(given)>0 & !is.na(given)){#
-		if (regexpr("+", given)){#
-			given = unlist(strsplit(given, " + ", fixed=T))#
-		}#
-		}		#
-		#### see if more than two variables are shown at the left of the given sign#
-		if ((length(predictors) - length(given))>2){#
-			stop("Only two 'axis' variables are allowed.")#
-		}#
-		#### make given variables ggplot friendly (for facet_grid)#
-		given.as.string = ifelse(length(given)>1 & !is.na(given),paste0(rev(given), collapse="~"), paste0("~",given))#
-#
-		#### if a category is "given", leave it alone#
-		# if (length(which(given %in% categories))>0){#
-			# given = given[-which(given %in% categories)]#
-		# }#
-		### identify the number of binned variables we need#
-		if (length(axis)>1 & axis[2] %in% numbers){ #
-			binned.vars = c(axis[2], numbers[which((numbers) %in% given)])#
-		} else{#
-			binned.vars = predictors[which((predictors) %in% given)]#
-		}
-#### identify which binned variables are categorical#
-		binned.numeric = numbers[which((numbers) %in% given)]#
-#
-		if (length(binned.numeric)>0){#
-			msg = paste0("The following variables are going to be binned: ", paste0(binned.vars, collapse=", "), "\n")#
-			cat(msg)#
-		}#
-		### repeat the bins the number of bins there are#
-		if (length(bins) != length(binned.vars) & length(bins)>1){#
-			warning("You haven't specified enough bins to cover all the binned variables. I'm making a guess for the rest of the variables")#
-			bins = matrix(bins, nrow=1, ncol=length(binned.vars))#
-		}#
-		if (length(bins)==1){#
-			bins = rep(bins, times=length(binned.vars))#
-		}
-length(binned.vars)>0
-i=1
-### check length of binned variables. If <= breaks, treat as categorical#
-				if (length(unique(data[,binned.vars[i]]))<=bins){#
-					data[,binned.vars[i]] = factor(data[,binned.vars[i]], ordered=T)#
-				}#
-				if (is.numeric(data[,binned.vars[i]])){#
-					break.current = unlist(breaks[i])#
-					if (!is.null(unlist(labels[i])) & length(unlist(labels[i])) != bins[i]){#
-						stop(paste0("The label vectors (", paste0(unlist(labels[i]), collapse=", "), ") is not the same length as the bin length (", bins[i], ")", sep=""))#
-					}#
-					### if they supply the breaks...#
-					#if (data[,binned.vars[i]])#
-					if (!is.null(break.current)){#
-						#### give min as breaks, if the user doesn't#
-						if (min(break.current)>min(data[,binned.vars[i]])){#
-							break.current = c(-Inf, break.current)#
-						}#
-						if (max(break.current,na.rm=T)<max(data[,binned.vars[i]])){#
-							break.current = c(break.current, Inf)#
-						}#
-						quants = unlist(break.current)#
-					} else {#
-						quants = quantile(data[,binned.vars[i]], seq(from=0, to=1, length.out=bins[i]+1), na.rm=T)#
-						quants = quants[!duplicated(quants)]#
-					}#
-					data[,paste0(binned.vars[i])] = cut(data[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)#
-					#### if they're making a ghost reference, bin that too#
-					if (!is.null(ghost.reference) & binned.vars[i] %in% names(ghost.reference)){#
-						val = as.numeric(ghost.reference[binned.vars[i]])#
-						ghost.reference[binned.vars[i]] = as.character(cut(val, quants, labels=unlist(labels[i]), include.lowest=T, include.highest=T))#
-					}#
-					if (!is.null(prediction)){#
-						prediction[,paste0(binned.vars[i])] = cut(prediction[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)#
-				}#
-				}
-if (!is.na(given[1])){#
-			giv = facet_grid(as.formula(given.as.string),labeller = labeller(.rows = label_both, .cols=label_both))#
-		} else {#
-			giv = theme_bw()#
-		}
-if (!is.null(jitter)){#
-				if (jitter[1]==T){#
-					jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)#
-				} else if (jitter[1] == F){#
-					jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-				} else {#
-					jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])#
-				}#
-			} else {#
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-		}
-jitter
-if (!is.null(jitter)){#
-			if (jitter[1]==T & !is.numeric(jitter)[1]){#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)#
-			} else if (jitter[1] == F & !is.numeric(jitter)[1]){#
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-			} else {#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])#
-			}#
-		} else {#
-			jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-		}
-length(axis)>1
-!is.numeric(data[,axis[1]])
-ggplot(data=data, aes_string(x=axis[1], y=outcome))+#
-					gm + #
-					jit + #
-					giv + #
-					summary1 + summary2 + #
-					sum.line +#
-					theme_bw()
-is.null(jitter)
-!is.null(jitter)
-jitter[1]
-jitter[1]==T & !is.numeric(jitter)[1]
-jitter[1] == F & !is.numeric(jitter)[1]
-jitter
-if (!is.na(axis[2])){#
-				stop("Sorry. I can't plot a second variable on the x axis. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")#
-			}#
-			### make sure the reference groups are all in the data#
-			if (sum(names(ghost.reference) %in%  variables) != length(ghost.reference)){#
-				missing.var = names(ghost.reference[!(names(ghost.reference) %in% variables)])#
-				msg = paste0("Sorry. One of your variables (", missing.var, ") is not in your formula.")#
-				stop(msg)#
-			}
-ghost.line
-#### if they don't specify a reference group, choose one#
-			if (is.null(ghost.reference)){#
-				l = data[1,given]#
-				ghost.reference=list()#
-				for (b in 1:length(given)){#
-					ghost.reference[[given[b]]]=l#
-				}#
-#
-			}
-ghost.reference
-is.null(ghost.reference)
-given
-formula = len~supp|dose; data=d; ghost.reference=NULL
-is.null(ghost.reference)
-l = data[1,given]
-l
-given
-ghost.reference=list()
-for (b in 1:length(given)){#
-					ghost.reference[[given[b]]]=l#
-				}
-ghost.reference
-sum(names(ghost.reference) %in%  variables) != length(ghost.reference)
-ghost.names = names(ghost.reference)
-ghost.names
-k = data
-for (s in 1:length(ghost.reference)){#
-				k = k[k[,ghost.names[s]]==unlist(ghost.reference[s]),]#
-			}
-k
-ghost.given = which(ghost.names %in% given)#
-			g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+gm#
-			d_smooth = ggplot_build(g0)$data[[1]];
-d_smooth
-ghost.given = which(ghost.names %in% given)
-ghost.given
-g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+gm
-g0
-k
-axis[1]
-outcome
-gm
-g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+gm
-ggplot_build(g0)$data[[1]]
-k
-g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))#+gm
-g0
-gm
-is.numeric(k[,axis[1]])
-g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+gsummary1 + summary2 + #
-					sum.line
-g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+summary1 + summary2 + #
-					sum.line
-g0
-d_smooth = ggplot_build(g0)$data[[1]]; #
-			### rename columns#
-			names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome;
-p = p + geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)
-p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+#
-					gm + #
-					jit + #
-					giv + #
-					summary1 + summary2 + #
-					sum.line +#
-					theme_bw()
-p
-p = p + geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)
-p
-!is.numeric(data[,axis[1]])
-jit
-!is.null(jitter)
-jitter
-formula = formula(weight.loss~therapy.type + rewards); related=T; data=d; color=NULL; symbol=NULL; linetype=NULL; bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=TRUE; raw.data=T; ghost.line="gray"; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=1#
-formula = len~supp|dose; data=d; ghost.reference=NULL
-jitter[1]==T & !is.numeric(jitter)[1]
-jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)
-jit
-p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+#
-					gm + #
-					jit + #
-					giv + #
-					summary1 + summary2 + #
-					sum.line +#
-					theme_bw()
-p
-devtools::install()
-glinmod::flexplot(len~supp|dose, data=d, ghost.line="gray")
-clear()
-data(ToothGrowth)
-d = ToothGrowth
-formula = formula(weight.loss~therapy.type + rewards); related=T; data=d; color=NULL; symbol=NULL; linetype=NULL; bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=TRUE; raw.data=T; ghost.line="gray"; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=1#
-formula = len~supp|dose; data=d; ghost.reference=NULL#
-ghost.line="gray"
-spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-		#### extract outcome, predictors, and given variables#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-		#### identify the non given variables#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = unlist(strsplit(axis, " + ", fixed=T))#
-	#### identify the correct line#
-	if (suppress_smooth){#
-		gm = theme_bw()#
-	} else if (method=="logistic") {#
-#
-		#### make sure there's only two levels#
-		if (length(unique(data[,outcome]))!=2){#
-			stop("To fit a logistic curve, you must have only two levels of your outcome variable.")#
-		}#
-		#### convert outcome to numeric (if necessary)#
-		if (!is.numeric(data[,outcome])){#
-			data[,outcome] = as.numeric(data[,outcome])-1#
-		}#
-		#### specify the curve#
-		gm = geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)#
-	} else if (method=="poisson" | method=="Gamma") {#
-		#### specify the curve#
-		gm = geom_smooth(method = "glm", method.args = list(family = method), se = se)#
-	} else {#
-		gm = geom_smooth(method=method, se=se)#
-	}
-### create custom function to sample data#
-	sample.subset = function(sample, data){#
-		if (sample!=Inf){#
-			m = data[sample(1:nrow(data), size=sample),]#
-		} else {#
-			m = data#
-		}#
-	}#
-#
-	### if they don't want raw data, just make alpha = 0#
-	raw.alph.func = function(raw.data,alpha=1){#
-		if (raw.data){#
-			alpha.raw = alpha#
-		} else {#
-			alpha.raw = 0#
-		}	#
-	}#
-#
-	if (!is.null(jitter)){#
-			if (jitter[1]==T & !is.numeric(jitter)[1]){#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)#
-			} else if (jitter[1] == F & !is.numeric(jitter)[1]){#
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-			} else {#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])#
-			}#
-		} else {#
-			jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-	}#
-#
-	if (spread=="stdev"){#
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, size = 1.25, width=.2, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2))#
-	} else if (spread=="sterr"){	#
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2)) 	#
-	} else if (spread == "quartiles"){	#
-		summary1 = stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.2)) #
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.2))#
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="median", position=position_dodge(width=.2)) 	#
-	}
-##### only allow two "given" variables#
-		if (length(given)>2){#
-			stop("Only two 'given' variables are allowed.")#
-		}#
-#
-		#### modify given (if needed)#
-		if (length(given)>0 & !is.na(given)){#
-		if (regexpr("+", given)){#
-			given = unlist(strsplit(given, " + ", fixed=T))#
-		}#
-		}		#
-		#### see if more than two variables are shown at the left of the given sign#
-		if ((length(predictors) - length(given))>2){#
-			stop("Only two 'axis' variables are allowed.")#
-		}#
-		#### make given variables ggplot friendly (for facet_grid)#
-		given.as.string = ifelse(length(given)>1 & !is.na(given),paste0(rev(given), collapse="~"), paste0("~",given))#
-#
-		#### if a category is "given", leave it alone#
-		# if (length(which(given %in% categories))>0){#
-			# given = given[-which(given %in% categories)]#
-		# }#
-		### identify the number of binned variables we need#
-		if (length(axis)>1 & axis[2] %in% numbers){ #
-			binned.vars = c(axis[2], numbers[which((numbers) %in% given)])#
-		} else{#
-			binned.vars = predictors[which((predictors) %in% given)]#
-		}
-#### identify which binned variables are categorical#
-		binned.numeric = numbers[which((numbers) %in% given)]#
-#
-		if (length(binned.numeric)>0){#
-			msg = paste0("The following variables are going to be binned: ", paste0(binned.vars, collapse=", "), "\n")#
-			cat(msg)#
-		}#
-		### repeat the bins the number of bins there are#
-		if (length(bins) != length(binned.vars) & length(bins)>1){#
-			warning("You haven't specified enough bins to cover all the binned variables. I'm making a guess for the rest of the variables")#
-			bins = matrix(bins, nrow=1, ncol=length(binned.vars))#
-		}#
-		if (length(bins)==1){#
-			bins = rep(bins, times=length(binned.vars))#
-		}
-#### bin the binned variables#
-		if (length(binned.vars)>0){#
-			for (i in 1:length(binned.vars)){#
-				### check length of binned variables. If <= breaks, treat as categorical#
-				if (length(unique(data[,binned.vars[i]]))<=bins){#
-					data[,binned.vars[i]] = factor(data[,binned.vars[i]], ordered=T)#
-				}#
-				if (is.numeric(data[,binned.vars[i]])){#
-					break.current = unlist(breaks[i])#
-					if (!is.null(unlist(labels[i])) & length(unlist(labels[i])) != bins[i]){#
-						stop(paste0("The label vectors (", paste0(unlist(labels[i]), collapse=", "), ") is not the same length as the bin length (", bins[i], ")", sep=""))#
-					}#
-					### if they supply the breaks...#
-					#if (data[,binned.vars[i]])#
-					if (!is.null(break.current)){#
-						#### give min as breaks, if the user doesn't#
-						if (min(break.current)>min(data[,binned.vars[i]])){#
-							break.current = c(-Inf, break.current)#
-						}#
-						if (max(break.current,na.rm=T)<max(data[,binned.vars[i]])){#
-							break.current = c(break.current, Inf)#
-						}#
-						quants = unlist(break.current)#
-					} else {#
-						quants = quantile(data[,binned.vars[i]], seq(from=0, to=1, length.out=bins[i]+1), na.rm=T)#
-						quants = quants[!duplicated(quants)]#
-					}#
-					data[,paste0(binned.vars[i])] = cut(data[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)#
-					#### if they're making a ghost reference, bin that too#
-					if (!is.null(ghost.reference) & binned.vars[i] %in% names(ghost.reference)){#
-						val = as.numeric(ghost.reference[binned.vars[i]])#
-						ghost.reference[binned.vars[i]] = as.character(cut(val, quants, labels=unlist(labels[i]), include.lowest=T, include.highest=T))#
-					}#
-					if (!is.null(prediction)){#
-						prediction[,paste0(binned.vars[i])] = cut(prediction[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)#
-				}#
-				}#
-#
-			}#
-#
-			if (!is.null(prediction)){#
-							#### average the predictions within bin#
-				f = make.formula("prediction", c("model",#
-														predictors[-which(predictors==binned.vars[i])],#
-														binned.vars[i]#
-														)#
-									)			#
-				prediction = aggregate(f, data=prediction, FUN=median)#
-#
-			}			#
-		}
-!is.na(given[1])
-giv = facet_grid(as.formula(given.as.string),labeller = labeller(.rows = label_both, .cols=label_both))
-if (!is.null(jitter)){#
-			if (jitter[1]==T & !is.numeric(jitter)[1]){#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)#
-			} else if (jitter[1] == F & !is.numeric(jitter)[1]){#
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-			} else {#
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])#
-			}#
-		} else {#
-			jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))#
-		}
-!is.numeric(data[,axis[1]])
-p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+#
-					gm + #
-					jit + #
-					giv + #
-					summary1 + summary2 + #
-					sum.line +#
-					theme_bw()
-p
-!is.null(ghost.line)
-### quit if they try to do two axes#
-			if (!is.na(axis[2])){#
-				stop("Sorry. I can't plot a second variable on the x axis. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")#
-			}#
-					#### if they don't specify a reference group, choose one#
-			if (is.null(ghost.reference)){#
-				l = data[1,given]#
-				ghost.reference=list()#
-				for (b in 1:length(given)){#
-					ghost.reference[[given[b]]]=l#
-				}#
-#
-			}
-if (sum(names(ghost.reference) %in%  variables) != length(ghost.reference)){#
-				missing.var = names(ghost.reference[!(names(ghost.reference) %in% variables)])#
-				msg = paste0("Sorry. One of your variables (", missing.var, ") is not in your formula.")#
-				stop(msg)#
-			}
-ghost.names = names(ghost.reference)#
-			##### select those columns in d specified#
-			k = data#
-			for (s in 1:length(ghost.reference)){#
-				k = k[k[,ghost.names[s]]==unlist(ghost.reference[s]),]#
-			}
-ghost.names
-length(ghost.reference)
-ghost.names[s]
-unlist(ghost.reference[s])
-k[,ghost.names[s]]
-k[,ghost.names[s]]==unlist(ghost.reference[s])
-unlist(ghost.reference[s])
-unlist(ghost.reference[s])
-k[,ghost.names[s]]
-k[,ghost.names[s]]
-k[,ghost.names[s]]
-as.character(k[,ghost.names[s]])==unlist(ghost.reference[s])
-ghost.names[s]
-!is.numeric(data[,ghost.names[s]])
-for (s in 1:length(ghost.reference)){#
-				if (!is.numeric(data[,ghost.names[s]])){#
-					k = k[as.character(k[,ghost.names[s]])==unlist(ghost.reference[s]),]				#
-				} else {#
-					k = k[k[,ghost.names[s]]==unlist(ghost.reference[s]),]					#
-				}#
-			}
-k
-ghost.given = which(ghost.names %in% given)#
-			if (is.numeric(k[,axis[1]])){#
-				g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+gm				#
-			} else {#
-				g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+summary1 + summary2 + #
-					sum.line				#
-			}#
-#
-			d_smooth = ggplot_build(g0)$data[[1]]; #
-			### rename columns#
-			names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; #
-			## add line to existing plot   #
-			p = p + geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)
-p
-clear()
-devtools::install()
-glinmod::flexplot(len~supp|dose, data=d, ghost.line="gray")
+require(fifer)#
 clear()#
-jmvtools::install()#
+#jmvtools::install()#
+#devtools::install()#
 data(ToothGrowth)#
 d = ToothGrowth#
-#setwd("Dropbox/research/RPackages/glinmod")#
-#
+require(glinmod)#
+d$dose = factor(d$dose)#
+glinmod::glinmod(len~supp+dose, data=d)
+traceback()
+options(warn=2)
+glinmod::glinmod(len~supp+dose, data=d)
+traceback()
+require(fifer)#
+clear()#
+#jmvtools::install()#
 #devtools::install()#
-glinmod::flexplot(len~supp|dose, data=d, ghost.line="gray")
-glinmod::flexplot
+data(ToothGrowth)#
+d = ToothGrowth#
+require(glinmod)#
+d$dose = factor(d$dose)#
+glinmod::glinmod(len~supp+dose, data=d)#
+traceback()#
+f = len~supp+dose; data=d#
+object = lm(f, data=d)
+plot="all"
+terms = attr(terms(object), "term.labels")
+d = object$model#
+	#### identify factors#
+	if (length(terms)>1){#
+		factors = names(which(unlist(lapply(d[,terms], is.factor))));#
+		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));#
+	} else {#
+		factors = terms[which(is.factor(d[,terms]))]#
+		numbers = terms[which(is.numeric(d[,terms]))]#
+	}
+factors
+levels = apply(d, 2, FUN=function(x) length(unique(x)))#
+	#### if there's too few levels and it's not categorical#
+	factors = !sapply(d, is.factor)#
+	if (any(levels<5 & factors)){#
+		cat("Note: one or more of your variables has less than 5 values, yet they're treated as numeric.\n\n")#
+	}
+x.names = names(d)[-1] #
+	y.name = names(d)[1]
+#### export residuals#
+	d$residuals = residuals(object)#
+	d$abs.res = abs(d$residuals)#
+	d$fitted = fitted(object)
+histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")#
+	if (length(numbers)>0){#
+		#res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + #
+		#theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
+		res.dep = flexplot(residuals~fitted, data=d) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
+	} else {#
+		res.dep = NULL#
+	}#
+	if (length(unique(d$fitted))<7){#
+	sl = flexplot(abs.res~fitted, data=d, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
+	} else {#
+	sl = flexplot(abs.res~fitted, data=d, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
+	}
+histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
+require(tidyverse)
+histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
+if (length(numbers)>0){#
+		#res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + #
+		#theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
+		res.dep = flexplot(residuals~fitted, data=d) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
+	} else {#
+		res.dep = NULL#
+	}
+if (length(unique(d$fitted))<7){#
+	sl = flexplot(abs.res~fitted, data=d, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
+	} else {#
+	sl = flexplot(abs.res~fitted, data=d, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
+	}
+(plot=="all" | plot == "bivariate" ) & is.null(formula)
+is.null(formula)
+is.null(formula)
+data = object$model#
+		#### extract the terms from each model#
+		terms = attr(terms(object), "term.labels")
+##### extract variable names#
+		variables = all.vars(formula(object))#
+	    outcome = variables[1]#
+	    predictors = variables[-1]#
+	    ##### look for interactions and remove them#
+		if (length(grep(":", terms))>0){#
+			terms = terms[-grep(":", terms)]#
+		}#
+		##### look for polynomials and remove them#
+		if (length(grep("^2", terms, fixed=T, value=T))>0){#
+			terms = terms[-grep("^2", terms, fixed=T)]#
+		}#
+		#### figure out variable types#
+		if (length(terms)>1){#
+			numb = names(which(unlist(lapply(data[,terms], is.numeric))))#
+			cat = names(which(!(unlist(lapply(data[,terms], is.numeric)))))#
+		} else {#
+			numb = ifelse(is.numeric(data[,terms]), terms, NA)#
+			cat = ifelse(is.factor(data[,terms]), terms, NA)		#
+		}
+cat
+if (length(terms)>4){#
+			cat("Note: I can't plot more than four variables")#
+		}
+is.na(cat)
+if ((!is.na(cat[1]) | length(cat[1])!=0) & (!is.na(cat[1]) | length(cat[1])!=0)){#
+			### remove terms with first numb and first cat#
+			t2 = terms[-which(terms==numb[1] | terms==cat[1])]#
+			t2 = c(numb[1],cat[1], t2)#
+		#### otherwise, if length is greater than #
+		} else {#
+			t2 = terms[1:min(length(terms), 4)]#
+		}
 devtools::install()
-glinmod::flexplot(len~supp|dose, data=d, ghost.line="gray")
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
+setwd("Dropbox/research/RPackages/glinmod")
+devtools::install()
+data(ToothGrowth)
+d = ToothGrowth
+require(glinmod)
+d$dose = factor(d$dose)
+glinmod::glinmod(len~supp+dose, data=d)
+require(fifer)#
+clear()#
+#jmvtools::install()#
+#devtools::install()#
+#setwd("Dropbox/research/RPackages/glinmod")#
+data(ToothGrowth)#
+d = ToothGrowth#
+require(glinmod)#
+d$dose = factor(d$dose)#
+glinmod::glinmod(len~supp+dose, data=d)

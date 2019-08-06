@@ -194,7 +194,7 @@ estimates.lm = function(object){
 		} else {
 			factor.names = unlist(lapply(d[,factors], levels))
 			num.rows = sum(unlist(apply(d[,factors], 2, function(x) { length(unique(x))})))			
-			num.rows2 = apply(d[,factors], 2, function(x){ a = length(unique(x)); (a*(a-1))/2})
+			num.rows2 = sum(apply(d[,factors], 2, function(x){ a = length(unique(x)); (a*(a-1))/2}))
 		}
 
 	

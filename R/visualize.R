@@ -71,7 +71,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 	d$residuals = residuals(object)
 	d$abs.res = abs(d$residuals)
 	d$fitted = fitted(object)
-	
+
 	#### plot residuals
 	histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
 	if (length(numbers)>0){
@@ -132,7 +132,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 		} 
 		
 		#### if both numeric and factor, put numeric on x axis and factor as color/line
-		if ((!is.na(cat) | length(cat)!=0) & (!is.na(cat) | length(cat)!=0)){
+		if ((!is.na(cat[1]) | length(cat[1])!=0) & (!is.na(cat[1]) | length(cat[1])!=0)){
 			### remove terms with first numb and first cat
 			t2 = terms[-which(terms==numb[1] | terms==cat[1])]
 			t2 = c(numb[1],cat[1], t2)

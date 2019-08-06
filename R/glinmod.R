@@ -33,7 +33,7 @@ glinmod = function(f, data, plot=T, ...){
 	
 	#### compute the estimates		
 	est = glinmod::estimates(mod)
-	est$difference.matrix$variables = as.character(est$difference.matrix$variables)
+	
 	
 	#### visualize that succa
 	if (plot){
