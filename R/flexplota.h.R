@@ -10,8 +10,10 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             preds = NULL,
             given = NULL,
             se = TRUE,
-            line = "loess",
-            center = "median + quartiles",
+            line = "Loess",
+            ghost = TRUE,
+            resid = FALSE,
+            center = "Median + quartiles",
             alpha = 0.5, ...) {
 
             super$initialize(
@@ -37,18 +39,26 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "line",
                 line,
                 options=list(
-                    "loess",
-                    "lm",
-                    "logistic"),
-                default="loess")
+                    "Loess",
+                    "Regression",
+                    "Logistic"),
+                default="Loess")
+            private$..ghost <- jmvcore::OptionBool$new(
+                "ghost",
+                ghost,
+                default=TRUE)
+            private$..resid <- jmvcore::OptionBool$new(
+                "resid",
+                resid,
+                default=FALSE)
             private$..center <- jmvcore::OptionList$new(
                 "center",
                 center,
                 options=list(
-                    "median + quartiles",
-                    "mean + sterr",
-                    "mean + stdev"),
-                default="median + quartiles")
+                    "Median + quartiles",
+                    "Mean + sterr",
+                    "Mean + stdev"),
+                default="Median + quartiles")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -61,6 +71,8 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..given)
             self$.addOption(private$..se)
             self$.addOption(private$..line)
+            self$.addOption(private$..ghost)
+            self$.addOption(private$..resid)
             self$.addOption(private$..center)
             self$.addOption(private$..alpha)
         }),
@@ -70,6 +82,8 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         given = function() private$..given$value,
         se = function() private$..se$value,
         line = function() private$..line$value,
+        ghost = function() private$..ghost$value,
+        resid = function() private$..resid$value,
         center = function() private$..center$value,
         alpha = function() private$..alpha$value),
     private = list(
@@ -78,6 +92,8 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..given = NA,
         ..se = NA,
         ..line = NA,
+        ..ghost = NA,
+        ..resid = NA,
         ..center = NA,
         ..alpha = NA)
 )
@@ -97,8 +113,8 @@ flexplotaResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="plot",
                 title="Analysis Plot",
-                width=800,
-                height=600,
+                width=600,
+                height=400,
                 renderFun=".plot"))}))
 
 flexplotaBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -129,6 +145,8 @@ flexplotaBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param given .
 #' @param se .
 #' @param line .
+#' @param ghost .
+#' @param resid .
 #' @param center .
 #' @param alpha .
 #' @return A results object containing:
@@ -143,8 +161,10 @@ flexplota <- function(
     preds,
     given,
     se = TRUE,
-    line = "loess",
-    center = "median + quartiles",
+    line = "Loess",
+    ghost = TRUE,
+    resid = FALSE,
+    center = "Median + quartiles",
     alpha = 0.5) {
 
     if ( ! requireNamespace('jmvcore'))
@@ -167,11 +187,10 @@ flexplota <- function(
         given = given,
         se = se,
         line = line,
+        ghost = ghost,
+        resid = resid,
         center = center,
         alpha = alpha)
-
-    results <- flexplotaResults$new(
-        options = options)
 
     analysis <- flexplotaClass$new(
         options = options,

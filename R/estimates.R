@@ -269,7 +269,7 @@ estimates.lm = function(object){
 				p2 = p2+levs2
 
 				
-			}	
+			}
 			
 			
 			# std.rows = 	coef.matrix$levels %in% names(coef.std$beta)

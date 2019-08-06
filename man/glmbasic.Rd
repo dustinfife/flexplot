@@ -4,9 +4,9 @@
 \alias{glmbasic}
 \title{General Linear Model}
 \usage{
-glmbasic(data, out, preds, graphic = TRUE, graphicassump = TRUE,
-  estimates = TRUE, se = TRUE, line = "loess",
-  center = "median + quartiles")
+glmbasic(data, out, preds, graphic = TRUE, graphicassump = FALSE,
+  estimates = TRUE, se = TRUE, line = "Loess",
+  center = "Median + quartiles")
 }
 \arguments{
 \item{data}{.}
@@ -30,10 +30,10 @@ glmbasic(data, out, preds, graphic = TRUE, graphicassump = TRUE,
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$assumpplot} \tab \tab \tab \tab \tab an image \cr
   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
   \code{results$glmcat} \tab \tab \tab \tab \tab a table \cr
+  \code{results$diff} \tab \tab \tab \tab \tab a table \cr
   \code{results$rsq} \tab \tab \tab \tab \tab a table \cr
 }
 

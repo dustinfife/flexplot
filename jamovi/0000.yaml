@@ -1,16 +1,19 @@
 ---
-title: What the Package Does (Title Case)
+title: Graphically Based Data Analysis
 name: glinmod
-version: 0.0.0
+version: 0.0.1
 jms: '1.0'
 authors:
-  - Who wrote it
-maintainer: The package maintainer <yourself@somewhere.net>
-date: '1970-01-01'
+  - Dustin Fife
+maintainer: Dustin Fife <fife.dustin@gmail.com>
+date: '2019-08-05'
 type: R
 description: >-
-  More about what it does (maybe more than one line) Use four spaces when
-  indenting paragraphs within the Description.
+  The glinmod suite is a graphically-based set of tools for doing data analysis.
+  Flexplot allows users to specify a formula and the software automatically
+  choses what sort of graphic to present. glinmod allows linear modeling and,
+  like flexplot,  chooses an appropriate graphic to present alongside the
+  statistical 
 analyses:
   - title: General Linear Model
     name: glmbasic
@@ -22,10 +25,5 @@ analyses:
     ns: glinmod
     menuGroup: glinmod
     menuTitle: Flexplot
-  - title: Model Comparison
-    name: modelcomp
-    ns: glinmod
-    menuGroup: glinmod
-    menuTitle: Model Comparison
 
 ...

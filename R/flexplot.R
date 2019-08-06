@@ -75,7 +75,7 @@ flexplot = function(formula, data, related=F,
 	##### use the following to debug flexplot
 	#formula = formula(weight.loss~therapy.type + rewards); related=T; data=d; color=NULL; symbol=NULL; linetype=NULL; bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=FALSE; raw.data=T; ghost.line="gray"; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=1
 
-		
+
 	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
 	
 		#### extract outcome, predictors, and given variables
@@ -422,6 +422,11 @@ flexplot = function(formula, data, related=F,
 		if (length(binned.vars)>0){
 			for (i in 1:length(binned.vars)){
 				
+				### check length of binned variables. If <= breaks, treat as categorical
+				if (length(unique(data[,binned.vars[i]]))<=bins){
+					data[,binned.vars[i]] = factor(data[,binned.vars[i]], ordered=T)
+				}
+				
 				if (is.numeric(data[,binned.vars[i]])){
 					break.current = unlist(breaks[i])
 					if (!is.null(unlist(labels[i])) & length(unlist(labels[i])) != bins[i]){
@@ -430,7 +435,7 @@ flexplot = function(formula, data, related=F,
 					
 					### if they supply the breaks...
 					
-					if (data[,binned.vars[i]])
+					#if (data[,binned.vars[i]])
 					if (!is.null(break.current)){
 						#### give min as breaks, if the user doesn't
 						if (min(break.current)>min(data[,binned.vars[i]])){
@@ -442,7 +447,8 @@ flexplot = function(formula, data, related=F,
 						
 						quants = unlist(break.current)
 					} else {
-						quants = quantile(data[,binned.vars[i]], seq(from=0, to=1, length.out=bins[i]+1))
+						quants = quantile(data[,binned.vars[i]], seq(from=0, to=1, length.out=bins[i]+1), na.rm=T)
+						quants = quants[!duplicated(quants)]
 					}
 		
 					data[,paste0(binned.vars[i])] = cut(data[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)
@@ -481,20 +487,21 @@ flexplot = function(formula, data, related=F,
 			giv = theme_bw()
 		}
 		
-		#### repeat this (otherwise it references the old dataset, before things were binned)
-		if (!is.null(jitter)){
-				if (jitter[1]==T){
-					jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)
-				} else if (jitter[1] == F){
-					jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))
-				} else {
-					jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])
-				}
-				
-			} else {
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))
-		}
 
+
+		if (!is.null(jitter)){
+			if (jitter[1]==T & !is.numeric(jitter)[1]){
+				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)
+			} else if (jitter[1] == F & !is.numeric(jitter)[1]){
+				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))
+			} else {
+				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])
+			}
+			
+		} else {
+			jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))
+		}
+	
 		
 		if (length(axis)>1){
 			
@@ -548,6 +555,17 @@ flexplot = function(formula, data, related=F,
 				stop("Sorry. I can't plot a second variable on the x axis. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")
 			}
 			
+
+					#### if they don't specify a reference group, choose one
+			if (is.null(ghost.reference)){
+				l = data[1,given]
+				ghost.reference=list()
+				for (b in 1:length(given)){
+					ghost.reference[[given[b]]]=l
+				}
+
+			} 
+
 			### make sure the reference groups are all in the data
 			if (sum(names(ghost.reference) %in%  variables) != length(ghost.reference)){
 				missing.var = names(ghost.reference[!(names(ghost.reference) %in% variables)])
@@ -556,10 +574,7 @@ flexplot = function(formula, data, related=F,
 			}
 
 
-			#### if they don't specify a reference group, choose one
-			if (is.null(ghost.reference)){
-				l = data[1,given]
-			} 
+
 				# if (length(ghost.reference)!=length(given)){
 					# stop("When referencing a 'ghost line,' you must specify the value for each 'given' variable.")
 				# }
@@ -569,12 +584,23 @@ flexplot = function(formula, data, related=F,
 			##### select those columns in d specified
 			k = data
 			for (s in 1:length(ghost.reference)){
-				k = k[k[,ghost.names[s]]==ghost.reference[s],]
+				if (!is.numeric(data[,ghost.names[s]])){
+					k = k[as.character(k[,ghost.names[s]])==unlist(ghost.reference[s]),]				
+				} else {
+					k = k[k[,ghost.names[s]]==unlist(ghost.reference[s]),]					
+				}
 			}				
+		
 
 			### identify which variables are in the given category
 			ghost.given = which(ghost.names %in% given)
-			g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+gm
+			if (is.numeric(k[,axis[1]])){
+				g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+gm				
+			} else {
+				g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+summary1 + summary2 + 
+					sum.line				
+			}
+
 			d_smooth = ggplot_build(g0)$data[[1]]; 
 			### rename columns
 			names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 

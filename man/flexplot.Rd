@@ -36,6 +36,8 @@ flexplot(formula, data, related = F, color = NULL, symbol = NULL,
 
 \item{ghost.line}{Should a ghost line be drawn? If so, user must specify a color. Default is NULL (in which case, the ghost line isn't shown).}
 
+\item{ghost.reference}{What groups should be referenced for the ghost line? See examples.}
+
 \item{spread}{How should standard errors be drawn? Defaults to quartiles}
 
 \item{jitter}{Should values be jittered?}
@@ -44,7 +46,11 @@ flexplot(formula, data, related = F, color = NULL, symbol = NULL,
 
 \item{sample}{Should a sample of the data be plotted? Defaults to Inf (for all variables).}
 
-\item{ghost.group}{What should the reference group be (from which to draw the ghost line)? The user can specify up to two values as a vector. See examples.}
+\item{prediction}{Predicted values for a prediction line. Defaults to NULL}
+
+\item{suppress_smooth}{Should a fitted line be repressed? Defaults to FALSE}
+
+\item{alpha}{The transparency of the datapoints.}
 }
 \description{
 Create a flexible plot
@@ -56,7 +62,6 @@ after ~, the second (and third) will be binned. No more than four variables are 
  I recommend they create separate plots, one for each level of the new variable (or a binned level of a numeric variable).
 }
 \examples{
-clear()
 data(exercise_data)
 d = exercise_data
 
@@ -65,35 +70,31 @@ flexplot(income~1, data=d)
 flexplot(gender~1, data=d)
 
 # ### scatter plot
-source("research/RPackages/fifer/R/flexplot.R")
-flexplot(weight.change~motivation, data=d)	
-flexplot(weight.change~motivation, data=d, method="lm", se=F)	#### with regression line and without standard error	
+flexplot(weight.loss~motivation, data=d)	
+flexplot(weight.loss~motivation, data=d, method="lm", se=FALSE)	#### with regression line and without standard error	
 
 # ### mean plots
-flexplot(weight.change~therapy.type, data=d)
-flexplot(weight.change~therapy.type, data=d, raw.data=F)		## without raw data
+flexplot(weight.loss~therapy.type, data=d)
+flexplot(weight.loss~therapy.type, data=d, raw.data=FALSE)		## without raw data
 
 # ### CHI SQUARE PLOT
 flexplot(therapy.type~gender, data=d)	
 		
 # ### INTERACTION PLOT			
-flexplot(weight.change~therapy.type + gender, data=d)
-flexplot(weight.change~therapy.type + gender, data=d, sample=50)	#### sampling 50 people instead (to make it less noisy)
+flexplot(weight.loss~therapy.type + gender, data=d)
+flexplot(weight.loss~therapy.type + gender, data=d, sample=50)	#### sampling 50 people instead (to make it less noisy)
 
 # #### ANCOVA PLOT
-flexplot(weight.change~motivation + gender, data=d, se=F)	### remove se
+flexplot(weight.loss~motivation + gender, data=d, se=FALSE)	### remove se
 
 # #### 2N PLOT (2 NUMERIC VARIABLE PLOTS)
-flexplot(weight.change~motivation + income, data=d, se=F, method="lm")
-flexplot(weight.change~motivation + income, data=d, se=F, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))		### change labels for income
+flexplot(weight.loss~motivation + income, data=d, se=FALSE, method="lm")
+flexplot(weight.loss~motivation + income, data=d, se=FALSE, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))		### change labels for income
 
 # #### 3N plot
-flexplot(weight.change~motivation + income + health, data=d, se=F, method="lm")	## different lines for income
-flexplot(weight.change~motivation | income + health, data=d, se=F, method="lm")	## different panels for income
-flexplot(weight.change~motivation | income + health, data=d, se=F, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))	## relabel income
-
-# #### three categorical variables (multiway dot plot)
-flexplot(weight.change~gender + therapy.type + rewards, data=d, raw.data=F)
+flexplot(weight.loss~motivation + income + health, data=d, se=FALSE, method="lm")	## different lines for income
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm")	## different panels for income
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))	## relabel income
 }
 \author{
 Dustin Fife

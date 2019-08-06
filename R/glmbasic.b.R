@@ -166,6 +166,9 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 								'lower' = round(l$lower[i], digits=2), 
 								'upper' = round(l$upper[i],  digits=2), 																					
 								"cohensd" = round(l$cohens.d[i], digits=2))
+						if (is.na(row$variables)){
+							row$variables = ""
+						}		
 					table$addRow(rowKey=i, values=row)
 				}
 

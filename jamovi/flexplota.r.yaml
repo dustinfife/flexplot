@@ -7,8 +7,8 @@ items:
     - name: plot
       title: Analysis Plot
       type: Image
-      width:  800
-      height: 600
+      width:  600
+      height: 400
       renderFun: .plot   
 
 ...

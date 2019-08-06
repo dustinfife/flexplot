@@ -3,30 +3,26 @@ name:  glmbasic
 title: General Linear Model
 jrs:   '1.1'
 
-items:
-    - name:  text
-      title: General Linear Model
-      type:  Preformatted
-      
+items:      
     - name: assumpplot
-      title: Residual (Diagnostic) Plot(s)
+      title: Residual (diagnostic) plots
       type: Image
-      width:  800
-      height: 600
+      width:  600
+      height: 400
       renderFun: .assumpplot       
       visible: (graphicassump)
       
     - name: plot
-      title: Analysis Plot
+      title: Analysis plot
       type: Image
-      width:  800
-      height: 600
+      width:  600
+      height: 400
       renderFun: .plot 
       visible: (graphic)
       
       
     - name:  glmcat
-      title: Estimates and Effect Sizes for Categorical Predictors
+      title: Estimates and effect sizes for categorical predictors
       type: Table
       columns:
         - name: var
@@ -45,7 +41,7 @@ items:
       visible: (estimates)
       
     - name:  diff
-      title: Difference Between Factor Levels for Categorical Predictors
+      title: Difference between factor levels for categorical predictors
       type: Table
       columns:
         - name: variables
@@ -69,7 +65,7 @@ items:
       visible: (estimates)      
           
     - name:  rsq
-      title: R Squared and Semi-Partial R Squared Estimates
+      title: R squared and semi-partial R squared estimates
       type: Table
       columns:
         - name: var

@@ -4,8 +4,9 @@
 \alias{flexplota}
 \title{Flexplot}
 \usage{
-flexplota(data, out, preds, se = TRUE, line = "loess",
-  center = "median + quartiles")
+flexplota(data, out, preds, given, se = TRUE, line = "Loess",
+  ghost = TRUE, resid = FALSE, center = "Median + quartiles",
+  alpha = 0.5)
 }
 \arguments{
 \item{data}{.}
@@ -14,16 +15,23 @@ flexplota(data, out, preds, se = TRUE, line = "loess",
 
 \item{preds}{.}
 
+\item{given}{.}
+
 \item{se}{.}
 
 \item{line}{.}
 
+\item{ghost}{.}
+
+\item{resid}{.}
+
 \item{center}{.}
+
+\item{alpha}{.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 }

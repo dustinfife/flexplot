@@ -12,8 +12,8 @@ glmbasicOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             graphicassump = FALSE,
             estimates = TRUE,
             se = TRUE,
-            line = "loess",
-            center = "median + quartiles", ...) {
+            line = "Loess",
+            center = "Median + quartiles", ...) {
 
             super$initialize(
                 package='glinmod',
@@ -47,18 +47,18 @@ glmbasicOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "line",
                 line,
                 options=list(
-                    "loess",
-                    "lm",
-                    "logistic"),
-                default="loess")
+                    "Loess",
+                    "Regression",
+                    "Logistic"),
+                default="Loess")
             private$..center <- jmvcore::OptionList$new(
                 "center",
                 center,
                 options=list(
-                    "median + quartiles",
-                    "mean + sterr",
-                    "mean + stdev"),
-                default="median + quartiles")
+                    "Median + quartiles",
+                    "Mean + sterr",
+                    "Mean + stdev"),
+                default="Median + quartiles")
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -92,7 +92,6 @@ glmbasicOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]],
         assumpplot = function() private$.items[["assumpplot"]],
         plot = function() private$.items[["plot"]],
         glmcat = function() private$.items[["glmcat"]],
@@ -105,30 +104,26 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=options,
                 name="",
                 title="General Linear Model")
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text",
-                title="General Linear Model"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="assumpplot",
-                title="Residual (Diagnostic) Plot(s)",
-                width=800,
-                height=600,
+                title="Residual (diagnostic) plots",
+                width=600,
+                height=400,
                 renderFun=".assumpplot",
                 visible="(graphicassump)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Analysis Plot",
-                width=800,
-                height=600,
+                title="Analysis plot",
+                width=600,
+                height=400,
                 renderFun=".plot",
                 visible="(graphic)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="glmcat",
-                title="Estimates and Effect Sizes for Categorical Predictors",
+                title="Estimates and effect sizes for categorical predictors",
                 columns=list(
                     list(
                         `name`="var", 
@@ -152,7 +147,7 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="diff",
-                title="Difference Between Factor Levels for Categorical Predictors",
+                title="Difference between factor levels for categorical predictors",
                 columns=list(
                     list(
                         `name`="variables", 
@@ -182,7 +177,7 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rsq",
-                title="R Squared and Semi-Partial R Squared Estimates",
+                title="R squared and semi-partial R squared estimates",
                 columns=list(
                     list(
                         `name`="var", 
@@ -226,7 +221,6 @@ glmbasicBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param center .
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$assumpplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$glmcat} \tab \tab \tab \tab \tab a table \cr
@@ -249,8 +243,8 @@ glmbasic <- function(
     graphicassump = FALSE,
     estimates = TRUE,
     se = TRUE,
-    line = "loess",
-    center = "median + quartiles") {
+    line = "Loess",
+    center = "Median + quartiles") {
 
     if ( ! requireNamespace('jmvcore'))
         stop('glmbasic requires jmvcore to be installed (restart may be required)')
@@ -273,9 +267,6 @@ glmbasic <- function(
         se = se,
         line = line,
         center = center)
-
-    results <- glmbasicResults$new(
-        options = options)
 
     analysis <- glmbasicClass$new(
         options = options,

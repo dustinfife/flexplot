@@ -10,46 +10,58 @@ options:
       type: Data
 
     - name: out
-      title: Outcome Variable
+      title: Dependent variable
       type: Variable
 
     - name: preds
-      title: Predictor Variable(s)
+      title: Predictor variable
       type: Variables
       
     - name: given
-      title: Paneled Variable(s)
+      title: Paneled variable
       type: Variables      
       
     - name: se
-      title: Plot Confidence Bands (for scatterplots)
+      title: Confidence bands (for scatterplots)
       type: Bool
       default: true           
-       
+
     - name: line
       title: Fitted line (for scatterplots)
       type: List
       options:
-        - "loess"
-        - "lm"
-        - "logistic"
-      default: "loess"           
-      
+        - "Loess"
+        - "Regression"
+        - "Logistic"
+      default: "Loess"           
+  
+    - name: ghost
+      title: Ghost line
+      type: Bool
+      default: true  
+
+    - name: resid
+      title: Residualize predictor variable
+      type: Bool
+      default: false    
+           
     - name: center
-      title: Center/Spread (for dot plots)
+      title: Center/spread (for dot plots)
       type: List
       options:
-        - "median + quartiles"
-        - "mean + sterr"
-        - "mean + stdev"
-      default: "median + quartiles" 
+        - "Median + quartiles"
+        - "Mean + sterr"
+        - "Mean + stdev"
+      default: "Median + quartiles" 
       
     - name: alpha
-      title: Transparency of Dots
+      title: Transparency of dots
       type: Number
       min: 0
       max: 1
       default: .5
+      
+  
                         
       
       

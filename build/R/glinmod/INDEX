@@ -1,5 +1,7 @@
+added.plot              Create an added variable plot
 anchor.predictions      Generate Predictions for a Model
 auto.layout             Automatically select the layout.
+bf.bic                  Compute Bayes Factor from BICs
 compare.fits            Compare the fits of two models
 estimates               Report Estimates (effect sizes and parameters)
 estimates.default       Output APA style statistical significance from
@@ -17,7 +19,10 @@ flexplota               Flexplot
 glinmod                 Perform a general linear model
 glmbasic                General Linear Model
 make.formula            Convert strings to a formula
+model.comparison        Perform a model comparison
+modelcomp               Model Comparison
 print.estimates         Print estimates Summary
+sensitivity.table       Compute sensitivity/specificity/etc.
 standardized.beta       Compute standardized betas on a linear model
                         object
 subsetString            Extract only part of a string

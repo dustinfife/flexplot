@@ -9,24 +9,24 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Outcome Variable
+        label: Outcome variable
         children:
           - type: VariablesListBox
             name: out
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Predictor Variable(s)
+        label: Predictor variable
         children:
           - type: VariablesListBox
             name: preds
             isTarget: true
       - type: TargetLayoutBox
-        label: Paneled Variable(s)
+        label: Paneled variable
         children:
           - type: VariablesListBox
             name: given
-            isTarget: true            
+            isTarget: true
   - type: LayoutBox
     margin: large
     children:
@@ -42,6 +42,10 @@ children:
             children:
               - type: CheckBox
                 name: se
+              - type: CheckBox
+                name: ghost
+              - type: CheckBox
+                name: resid
               - type: ComboBox
                 name: line
               - type: ComboBox
@@ -49,4 +53,3 @@ children:
               - type: TextBox
                 name: alpha
                 format: number
-
