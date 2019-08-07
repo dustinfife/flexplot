@@ -78,7 +78,7 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					g0 = ggplot(data=k, aes_string(x=self$options$preds[1], y=self$options$out))+p$summary1 + p$summary2 + p$sum.line
 				}
 				d_smooth = ggplot_build(g0)$data[[1]]; 
-				save(d_smooth, k, data, file="/Users/amber/Dropbox/jamovitest.rda")				
+					
 				### rename columns
 				names(d_smooth)[names(d_smooth)=="x"] = as.character(self$options$preds[1]); names(d_smooth)[names(d_smooth)=="y"] = self$options$out; 
 	
