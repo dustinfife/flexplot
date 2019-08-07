@@ -134,7 +134,9 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			formula = image$state$formula
 			data = image$state$data
             mod = lm(formula, data=data)
-            plot = visualize(mod, plot="bivariate", se=self$options$se, method=self$options$line, spread=se.type)	+ theme(plot.background = element_rect(fill = "white", colour = NA)) 
+            plot = visualize(mod, plot="bivariate", se=self$options$se, method=self$options$line, spread=se.type)	+ theme(plot.background = element_rect(fill = "white", colour = NA)) +
+        		theme_bw(base_size = 16) +
+				theme(plot.background = element_rect(fill = "transparent",colour = NA))
 			print(plot)
 			TRUE
 			},
@@ -149,7 +151,9 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			# print(plot)
 			# TRUE			
             mod = lm(formula, data=data)
-            plot = visualize(mod, plot="residuals") + theme(plot.background = element_rect(fill = "white", colour = NA))
+            plot = visualize(mod, plot="residuals") + theme(plot.background = element_rect(fill = "white", colour = NA))+
+        		theme_bw(base_size = 16) +
+				theme(plot.background = element_rect(fill = "transparent",colour = NA))
 			print(plot)
 			TRUE
 			},	
@@ -188,9 +192,9 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					table$addRow(rowKey=i, values=row)
 				}
 				
-				#if (length(l$correlation)>0){
-					table$addRow(rowKey=i+1, values=list('var' = "Correlation Coefficient", 'Estimate' = l$correlation))
-				#}
+				if (!is.na(l$correlation)){
+					table$addRow(rowKey=i+1, values=list('var' = "Correlation coefficient", 'Estimate' = l$correlation))
+				}
 			}}
 		
 			

@@ -139,9 +139,13 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number"),
                     list(
                         `name`="upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number")),
                 visible="(estimates)"))
             self$add(jmvcore::Table$new(
@@ -164,10 +168,12 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     list(
                         `name`="lower", 
                         `title`="Lower", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number"),
                     list(
                         `name`="upper", 
                         `title`="Upper", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number"),
                     list(
                         `name`="cohensd", 
@@ -177,7 +183,7 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rsq",
-                title="R squared and semi-partial R squared estimates",
+                title="R[2] and semi-partial R squared estimates",
                 columns=list(
                     list(
                         `name`="var", 

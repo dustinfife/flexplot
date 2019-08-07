@@ -51,12 +51,12 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			
 				### if they choose to residualize it
 			if (length(self$options$given)>0 & self$options$resid==TRUE) {
-            	plot = added.plot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha)	
+            	plot = added.plot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01)	
             	### if they choose to do a ghost line	
             } else if (length(self$options$given)>0 & self$options$ghost==TRUE){
             		
             	#### first create initial plot
-            	p = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha, data_output=T) 
+            	p = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, data_output=T) 
             	plot = p$plot
             	
             	#### now add the ghost line (have to do it separately because of environment conflicts)
@@ -85,14 +85,15 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 	
 				## add line to existing plot   
-	            plot = plot + theme(plot.background = element_rect(fill = "transparent",colour = NA)) +
-	        	    	theme_bw(base_size = 16) +
+	            plot = plot + theme_bw(base_size = 16) +
+	            		theme(plot.background = element_rect(fill = "transparent",colour = NA)) +
 						geom_line(data=d_smooth, aes_string(x=self$options$preds[1], y= self$options$out), color="gray")
 
             } else {	
-            	plot = flexplot(formula, data=data, se=self$options$se, spread=se.type,method=line,  alpha = self$options$alpha) + 
-	            		theme(plot.background = element_rect(fill = "transparent",colour = NA)) +
-	            		theme_bw(base_size = 16)
+            	plot = flexplot(formula, data=data, se=self$options$se, spread=se.type,method=line,  alpha = self$options$alpha*.01) + 
+	            		theme_bw(base_size = 16) +
+	            		theme(plot.background = element_rect(fill = "transparent",colour = NA))
+
             }
 			print(plot)
 			TRUE

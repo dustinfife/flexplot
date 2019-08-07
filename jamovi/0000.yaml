@@ -1,5 +1,5 @@
 ---
-title: Flexplot: Graphically Based Data Analysis
+title: Flexplot
 name: glinmod
 version: 0.0.1
 jms: '1.0'
@@ -9,11 +9,11 @@ maintainer: Dustin Fife <fife.dustin@gmail.com>
 date: '2019-08-05'
 type: R
 description: >-
-  The flexplot suite is a graphically-based set of tools for doing data analysis.
-  Flexplot allows users to specify a formula and the software automatically
-  choses what sort of graphic to present. glinmod allows linear modeling and,
-  like flexplot,  chooses an appropriate graphic to present alongside the
-  statistical 
+  The flexplot suite is a graphically-based set of tools for doing data
+  analysis. Flexplot allows users to specify a formula and the software
+  automatically choses what sort of graphic to present. glinmod allows linear
+  modeling and, like flexplot,  chooses an appropriate graphic to present
+  alongside the statistical 
 analyses:
   - title: General Linear Model
     name: glmbasic

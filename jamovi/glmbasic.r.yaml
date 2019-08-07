@@ -35,8 +35,12 @@ items:
           title: 'Estimate'
           type: number
         - name: lower
+          title: 'Lower'
+          superTitle: '95% Confidence Interval'
           type: number
         - name: upper
+          title: 'Upper'
+          superTitle: '95% Confidence Interval'
           type: number
       visible: (estimates)
       
@@ -54,10 +58,12 @@ items:
           title: 'Difference'        
           type: number
         - name: lower
-          title: 'Lower'        
+          title: 'Lower'  
+          superTitle: '95% Confidence Interval'      
           type: number
         - name: upper
           title: 'Upper'        
+          superTitle: '95% Confidence Interval'
           type: number
         - name: cohensd
           title: "Cohen's d"
@@ -65,7 +71,7 @@ items:
       visible: (estimates)      
           
     - name:  rsq
-      title: R squared and semi-partial R squared estimates
+      title: R[2] and semi-partial R squared estimates
       type: Table
       columns:
         - name: var

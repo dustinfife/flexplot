@@ -14,7 +14,7 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             ghost = TRUE,
             resid = FALSE,
             center = "Median + quartiles",
-            alpha = 0.5, ...) {
+            alpha = 50, ...) {
 
             super$initialize(
                 package='glinmod',
@@ -63,8 +63,8 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "alpha",
                 alpha,
                 min=0,
-                max=1,
-                default=0.5)
+                max=100,
+                default=50)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -165,7 +165,7 @@ flexplota <- function(
     ghost = TRUE,
     resid = FALSE,
     center = "Median + quartiles",
-    alpha = 0.5) {
+    alpha = 50) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('flexplota requires jmvcore to be installed (restart may be required)')
