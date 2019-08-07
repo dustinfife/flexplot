@@ -629,14 +629,14 @@ flexplot = function(formula, data, related=F,
 		
 		}
 		if (data_output){
-			ret = list(plot=p, data=data)
+			ret = list(plot=p, data=data, gm=gm, summary1=summary1, summary2=summary2, sum.ine=sum.line)
 			return(ret)
 		} else {
 			return(p)
 		}			
 	} else {
 		if (data_output){
-			ret = list(plot=p, data=data)
+			ret = list(plot=p, data=data, gm=gm, summary1=summary1, summary2=summary2, sum.ine=sum.line)
 			return(ret)
 		} else {
 			return(p)
