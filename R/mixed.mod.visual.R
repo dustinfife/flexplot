@@ -5,7 +5,7 @@
 ##' This function samples the ID variable and plots the bivariate relationship, depending on the mixed model chosen
 ##' @param formula A flexplot friendly formula, though it can only include one predictor
 ##' @param data The dataset
-##' @param model The lme4 model
+##' @param model The model
 ##' @param n The number of IDs to sample and put in different panels
 ##' @param jitter Should the data be jittered?
 ##' @return A plot
