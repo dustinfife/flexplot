@@ -633,6 +633,7 @@ flexplot = function(formula, data, related=F,
 			return(ret)
 		} else {
 			return(p)
+			
 		}			
 	} else {
 		if (data_output){
