@@ -95,7 +95,7 @@ flexplot = function(formula, data, related=F,
 	variables = all.vars(formula)
 	outcome = variables[1]
 	predictors = variables[-1]
-	given = unlist(fifer2::subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
+	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
 
 
 	#### identify which variables are numeric and which are factors
@@ -115,7 +115,7 @@ flexplot = function(formula, data, related=F,
 	
 
 		#### identify the non given variables
-	axis = unlist(fifer2::subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
+	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
 	axis = unlist(strsplit(axis, " + ", fixed=T))
 	
 		

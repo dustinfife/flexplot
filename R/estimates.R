@@ -126,7 +126,7 @@ estimates.zeroinfl = function(object){
 	coef.matrix = data.frame(A = coef(object)[1:(length(terms)+1)], 
 							B = coef(object)[(length(terms)+2):length(coef(object))])
 	names(coef.matrix) = c(object$dist, object$link)
-	row.names(coef.matrix) = fifer2::subsetString(row.names(coef.matrix), "_", 2)
+	row.names(coef.matrix) = subsetString(row.names(coef.matrix), "_", 2)
 	coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
 	
 	coef.matrix

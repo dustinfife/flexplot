@@ -11,7 +11,7 @@ mixed.mod.visual(formula, data, model, n = 6, jitter = F)
 
 \item{data}{The dataset}
 
-\item{model}{The lme4 model}
+\item{model}{The model}
 
 \item{n}{The number of IDs to sample and put in different panels}
 
