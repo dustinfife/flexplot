@@ -10,6 +10,7 @@
 ##' @param return.preds Should the function return the predictions instead of a graphic? Defaults to F
 ##' @param silent Should R tell you how it's handling the variables in the model that are not in the formula? Defaults to F. 
 ##' @param report.se Should standard errors be reported alongside the estimates? Defaults to F. 
+##' @param ... Other parameters passed to flexplot
 ##' @author Dustin Fife
 ##' @export
 ##' @examples

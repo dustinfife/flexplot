@@ -73,30 +73,41 @@ flexplot(gender~1, data=d)
 
 # ### scatter plot
 flexplot(weight.loss~motivation, data=d)	
-flexplot(weight.loss~motivation, data=d, method="lm", se=FALSE)	#### with regression line and without standard error	
+flexplot(weight.loss~motivation, data=d, method="lm", se=FALSE)	
+	#### with regression line and without standard error	
 
 # ### mean plots
 flexplot(weight.loss~therapy.type, data=d)
-flexplot(weight.loss~therapy.type, data=d, raw.data=FALSE)		## without raw data
+flexplot(weight.loss~therapy.type, data=d, raw.data=FALSE)		
+	## without raw data
 
 # ### CHI SQUARE PLOT
 flexplot(therapy.type~gender, data=d)	
 		
 # ### INTERACTION PLOT			
 flexplot(weight.loss~therapy.type + gender, data=d)
-flexplot(weight.loss~therapy.type + gender, data=d, sample=50)	#### sampling 50 people instead (to make it less noisy)
+flexplot(weight.loss~therapy.type + gender, data=d, sample=50)	
+ #### sampling 50 people instead (to make it less noisy)
 
 # #### ANCOVA PLOT
 flexplot(weight.loss~motivation + gender, data=d, se=FALSE)	### remove se
 
 # #### 2N PLOT (2 NUMERIC VARIABLE PLOTS)
 flexplot(weight.loss~motivation + income, data=d, se=FALSE, method="lm")
-flexplot(weight.loss~motivation + income, data=d, se=FALSE, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))		### change labels for income
+flexplot(weight.loss~motivation + income, data=d, se=FALSE, method="lm", 
+	breaks = list(c(95000, 100000, 105000)),
+	labels=list(c("<95K", "<100K", "<105K", ">105K")))		
+		### change labels for income
 
 # #### 3N plot
-flexplot(weight.loss~motivation + income + health, data=d, se=FALSE, method="lm")	## different lines for income
-flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm")	## different panels for income
-flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", breaks = list(c(95000, 100000, 105000)),labels=list(c("<95K", "<100K", "<105K", ">105K")))	## relabel income
+flexplot(weight.loss~motivation + income + health, data=d, se=FALSE, method="lm")	
+		## different lines for income
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm")	
+		## different panels for income
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
+	breaks = list(c(95000, 100000, 105000)),
+	labels=list(c("<95K", "<100K", "<105K", ">105K")))	
+		## relabel income
 }
 \author{
 Dustin Fife

@@ -1,17 +1,15 @@
 #' Report Estimates (effect sizes and parameters)
 #'
 #' Report object Estimates
-#' @aliases estimates.regression estimates estimates.ttest estimates.default
 #' @param object a object
 #' @export
-estimates = function(object,...){
+estimates = function(object){
 	UseMethod("estimates")
 }
 
 #' Output APA style statistical significance from an object 
 #'
 #' Output APA style statistical significance from an object
-#' @aliases report.regression report report.ttest report.default
 #' @param object a object
 #' @export
 estimates.default = function(object){
@@ -23,7 +21,6 @@ estimates.default = function(object){
 #' Report regression object Estimates (effect sizes and parameters)
 #'
 #' Report regression object Estimates
-#' @aliases estimates.regression estimates
 #' @param object a regression object
 #' @export
 estimates.regression = function(object){
@@ -37,7 +34,6 @@ estimates.regression = function(object){
 #' Report glm object Estimates (effect sizes and parameters)
 #'
 #' Report glm object Estimates
-#' @aliases estimates.glm estimates
 #' @param object a glm object
 #' @export
 estimates.glm = function(object){
@@ -106,7 +102,6 @@ estimates.glm = function(object){
 #' Report zeroinfl object Estimates (effect sizes and parameters)
 #'
 #' Report zeroinfl object Estimates
-#' @aliases estimates.zeroinfl estimates
 #' @param object a zeroinfl object
 #' @export
 estimates.zeroinfl = function(object){
@@ -131,7 +126,7 @@ estimates.zeroinfl = function(object){
 	coef.matrix = data.frame(A = coef(object)[1:(length(terms)+1)], 
 							B = coef(object)[(length(terms)+2):length(coef(object))])
 	names(coef.matrix) = c(object$dist, object$link)
-	row.names(coef.matrix) = subsetString(row.names(coef.matrix), "_", 2)
+	row.names(coef.matrix) = fifer2::subsetString(row.names(coef.matrix), "_", 2)
 	coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
 	
 	coef.matrix
@@ -142,7 +137,6 @@ estimates.zeroinfl = function(object){
 #' Report lm object Estimates (effect sizes and parameters)
 #'
 #' Report lm object Estimates
-#' @aliases estimates.lm estimates
 #' @param object a lm object
 #' @export
 estimates.lm = function(object){

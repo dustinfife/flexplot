@@ -17,7 +17,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             	formula <- as.formula(formula)
 #			}        
         	#### output results
-            results <- glinmod::estimates(lm(formula, self$data))
+            results <- estimates(lm(formula, self$data))
             
          	
 
@@ -130,7 +130,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 		.plot = function(image, ...){
             if (is.null(image$state))
                 return(FALSE)
-            se.type = subsetString(self$options$center," + ", position=2)   			
+            se.type = unlist(strsplit(self$options$center," + ", fixed=T))[2]			
 			formula = image$state$formula
 			data = image$state$data
             mod = lm(formula, data=data)

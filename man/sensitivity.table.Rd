@@ -7,7 +7,7 @@
 sensitivity.table(object)
 }
 \arguments{
-\item{an}{object that can be predicted (e.g., glm). Note the thing to be predicted must have only two outcomes}
+\item{object}{an object that can be predicted (e.g., glm). Note the thing to be predicted must have only two outcomes}
 }
 \description{
 Compute sensitivity/specificity/etc.

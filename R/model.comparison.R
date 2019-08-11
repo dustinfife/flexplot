@@ -76,7 +76,7 @@ model.comparison = function(model1, model2){
 ##'	
 ##' This function computes sensitivity, specificity, positive/negative predictive value and accuracy and reports
 ##' them as a list. 
-##' @param an object that can be predicted (e.g., glm). Note the thing to be predicted must have only two outcomes
+##' @param object an object that can be predicted (e.g., glm). Note the thing to be predicted must have only two outcomes
 ##' @author Dustin Fife
 ##' @export
 sensitivity.table = function(object){

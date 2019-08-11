@@ -13,7 +13,7 @@
 ##' @export
 ##' @examples
 ##' data(exercise_data)
-##' added.plot(weight.loss~motivation + therapy.type, data=d)
+##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
 added.plot = function(formula, data, ...){
 
 	#### identify variable types

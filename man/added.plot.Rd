@@ -23,7 +23,7 @@ then the function plots the residuals against the second variable.
 }
 \examples{
 data(exercise_data)
-added.plot(weight.loss~motivation + therapy.type, data=d)
+added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
 }
 \seealso{
 \code{\link{flexplot}}

@@ -2,21 +2,19 @@
 % Please edit documentation in R/visualize.R
 \name{visualize.default}
 \alias{visualize.default}
-\alias{visualize}
-\alias{visualize.lm}
 \title{Visualize a fitted model}
 \usage{
 \method{visualize}{default}(object, plot = c("all", "residuals",
-  "bivariate"))
+  "bivariate"), formula = NULL, ...)
 }
 \arguments{
-\item{object}{a object}
+\item{object}{a lmer object}
 
 \item{plot}{what should be plotted? Residuals? Bivariate plot? All of them?}
 
 \item{formula}{A flexplot-style formula}
 
-\item{linetype}{What time of smoothing line should be drawn? Defaults to loess.}
+\item{...}{Other arguments passed to flexplot}
 }
 \description{
 Visualize a fitted model

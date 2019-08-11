@@ -2,7 +2,6 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.glm}
 \alias{estimates.glm}
-\alias{estimates}
 \title{Report glm object Estimates (effect sizes and parameters)}
 \usage{
 \method{estimates}{glm}(object)

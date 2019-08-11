@@ -2,7 +2,6 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.regression}
 \alias{estimates.regression}
-\alias{estimates}
 \title{Report regression object Estimates (effect sizes and parameters)}
 \usage{
 \method{estimates}{regression}(object)

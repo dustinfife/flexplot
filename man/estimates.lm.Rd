@@ -2,7 +2,6 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.lm}
 \alias{estimates.lm}
-\alias{estimates}
 \title{Report lm object Estimates (effect sizes and parameters)}
 \usage{
 \method{estimates}{lm}(object)

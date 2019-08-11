@@ -2,10 +2,6 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.default}
 \alias{estimates.default}
-\alias{report.regression}
-\alias{report}
-\alias{report.ttest}
-\alias{report.default}
 \title{Output APA style statistical significance from an object}
 \usage{
 \method{estimates}{default}(object)

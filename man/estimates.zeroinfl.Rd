@@ -2,7 +2,6 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.zeroinfl}
 \alias{estimates.zeroinfl}
-\alias{estimates}
 \title{Report zeroinfl object Estimates (effect sizes and parameters)}
 \usage{
 \method{estimates}{zeroinfl}(object)

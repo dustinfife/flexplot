@@ -1,27 +1,25 @@
 #' Visualize a fitted model 
 #'
 #' Visualize a fitted model
-#' @aliases visualize visualize.lm visualize.default
-#' @param object a object
+#' @param object a lmer object
 #' @param plot what should be plotted? Residuals? Bivariate plot? All of them?
 #' @param formula A flexplot-style formula
-#' @param linetype What time of smoothing line should be drawn? Defaults to loess. 
+#' @param ... Other arguments passed to flexplot
 #' @import ggplot2 
 #' @export
-visualize = function(object, plot=c("all", "residuals", "bivariate"),...){
+visualize = function(object, plot=c("all", "residuals", "bivariate"),formula=NULL,...){
 	UseMethod("visualize")
 }
 
 #' Visualize a fitted model 
 #'
 #' Visualize a fitted model
-#' @aliases visualize visualize.lm visualize.default
-#' @param object a object
+#' @param object a lmer object
 #' @param plot what should be plotted? Residuals? Bivariate plot? All of them?
 #' @param formula A flexplot-style formula
-#' @param linetype What time of smoothing line should be drawn? Defaults to loess. 
+#' @param ... Other arguments passed to flexplot
 #' @export
-visualize.default = function(object, plot=c("all", "residuals", "bivariate")){
+visualize.default = function(object, plot=c("all", "residuals", "bivariate"),formula=NULL,...){
 	class(object) = "visualize"
 	plot(object)
 }
@@ -29,8 +27,7 @@ visualize.default = function(object, plot=c("all", "residuals", "bivariate")){
 #' Visualize a fitted model 
 #'
 #' Visualize a fitted model
-#' @aliases visualize visualize.lm visualize.default
-#' @param object a lm object
+#' @param object a lmer object
 #' @param plot what should be plotted? Residuals? Bivariate plot? All of them?
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
@@ -174,13 +171,12 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 #' Visualize a fitted model 
 #'
 #' Visualize a fitted model
-#' @aliases visualize visualize.lmer visualize.default
 #' @param object a lmer object
 #' @param plot what should be plotted? Residuals? Bivariate plot? All of them?
+#' @param ... Other arguments passed to flexplot
 #' @param formula A flexplot-style formula
-#' @param linetype What time of smoothing line should be drawn? Defaults to loess. 
 #' @export
-visualize.lmerMod = function(object, plot=c("residuals", "all", "bivariate"), linetype="loess", formula=NULL, ...){
+visualize.lmerMod = function(object, plot=c("residuals", "all", "bivariate"), formula=NULL, ...){
 	
 
 	plot = match.arg(plot, c("all", "residuals", "bivariate"))

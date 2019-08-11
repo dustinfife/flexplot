@@ -6,7 +6,7 @@
 \usage{
 flexplota(data, out, preds, given, se = TRUE, line = "Loess",
   ghost = TRUE, resid = FALSE, center = "Median + quartiles",
-  alpha = 0.5)
+  alpha = 50)
 }
 \arguments{
 \item{data}{.}

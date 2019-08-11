@@ -21,6 +21,8 @@ compare.fits(formula, data, model1, model2 = NULL, return.preds = F,
 \item{silent}{Should R tell you how it's handling the variables in the model that are not in the formula? Defaults to F.}
 
 \item{report.se}{Should standard errors be reported alongside the estimates? Defaults to F.}
+
+\item{...}{Other parameters passed to flexplot}
 }
 \description{
 Compare the fits of two models

@@ -45,7 +45,7 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 						
             if (is.null(image$state))
                 return(FALSE)
-            se.type = subsetString(self$options$center," + ", position=2)   			
+            se.type = unlist(strsplit(self$options$center," + ", fixed=T))[2]			
 			formula = image$state$formula
 			data = image$state$data
 			

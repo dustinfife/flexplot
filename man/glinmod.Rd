@@ -7,13 +7,13 @@
 glinmod(f, data, plot = T, ...)
 }
 \arguments{
+\item{f}{An equation of the form y~x1 + x2 + x3, etc.}
+
 \item{data}{The dataset containing the variables the user wishes to model}
 
+\item{plot}{Should results be plotted?}
+
 \item{...}{Other parameters passed to \code{\link{visualize}} (which is then passed to \code{\link{flexplot}})}
-
-\item{formula}{An equation of the form y~x1 + x2 + x3, etc.}
-
-\item{output}{Specify the type of output to return, either "estimates", "graphics", or "both"}
 }
 \value{
 An object containing the information from \code{\link{estimates}}
@@ -34,11 +34,13 @@ glinmod(weight.loss~gender, data=exercise_data, output="estimates")
 glinmod(weight.loss~gender, data=exercise_data, output="graphics")
 glinmod(weight.loss~gender, data=exercise_data, output="both")
 ## pass parameters to visualize (here, just plot residuals)
-glinmod(weight.loss~gender + motivation, data=exercise_data, output="both", plot="residuals")
+glinmod(weight.loss~gender + motivation,
+	data=exercise_data, output="both", plot="residuals")
 ## pass parameters to visualize (here, plot the model...yes, I know...bivariate is a misnomer)
 glinmod(weight.loss~gender+ motivation, data=exercise_data, output="both", plot="bivariate")
 ## pass parameters to flexplot
-glinmod(weight.loss~gender + motivation, data=exercise_data, output="both", plot="bivariate", se=F, method="lm")
+glinmod(weight.loss~gender + motivation, data=exercise_data, output="both", 
+	plot="bivariate", se=F, method="lm")
 }
 \seealso{
 \code{\link{estimates}}, \code{\link{visualize}}, \code{\link{flexplot}}, \code{\link{model.comparison}}

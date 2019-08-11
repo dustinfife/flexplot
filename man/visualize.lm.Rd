@@ -2,15 +2,13 @@
 % Please edit documentation in R/visualize.R
 \name{visualize.lm}
 \alias{visualize.lm}
-\alias{visualize}
-\alias{visualize.default}
 \title{Visualize a fitted model}
 \usage{
 \method{visualize}{lm}(object, plot = c("all", "residuals", "bivariate"),
   formula = NULL, ...)
 }
 \arguments{
-\item{object}{a lm object}
+\item{object}{a lmer object}
 
 \item{plot}{what should be plotted? Residuals? Bivariate plot? All of them?}
 
