@@ -1,13 +1,12 @@
-Package: glinmod
+Package: flexplot
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.0.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Flexplot - Graphically Based Data Analysis
+Version: 0.1.0
+Author: Dustin Fife
+Maintainer: Dustin Fife <fife.dustin@gmail.com>
+Description:   The flexplot suite is a graphically-based set of tools for doing data. analysis. Flexplot allows users to specify a formula and the software automatically choses what sort of graphic to present. glinmod allows linear modeling and, like flexplot,  chooses an appropriate graphic to present alongside the statistical results. 
+License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Imports: jmvcore (>= 0.8.5), R6, cowplot
+Imports: jmvcore (>= 0.8.5), R6, cowplot, fifer2
 RoxygenNote: 6.1.1
