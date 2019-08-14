@@ -86,13 +86,13 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 	
 				## add line to existing plot   
 	            plot = plot + theme_bw(base_size = 16) +
-	            		theme(plot.background = element_rect(fill = "transparent",colour = NA)) +
+	            		theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA)) +
 						geom_line(data=d_smooth, aes_string(x=self$options$preds[1], y= self$options$out), color="gray")
 
             } else {	
             	plot = flexplot(formula, data=data, se=self$options$se, spread=se.type,method=line,  alpha = self$options$alpha*.01) + 
 	            		theme_bw(base_size = 16) +
-	            		theme(plot.background = element_rect(fill = "transparent",colour = NA))
+	            		theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
 
             }
 			print(plot)

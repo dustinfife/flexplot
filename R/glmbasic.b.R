@@ -136,7 +136,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mod = lm(formula, data=data)
             plot = visualize(mod, plot="bivariate", se=self$options$se, method=self$options$line, spread=se.type)	+ theme(plot.background = element_rect(fill = "white", colour = NA)) +
         		theme_bw(base_size = 16) +
-				theme(plot.background = element_rect(fill = "transparent",colour = NA))
+           		theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA)) 
 			print(plot)
 			TRUE
 			},
@@ -153,7 +153,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mod = lm(formula, data=data)
             plot = visualize(mod, plot="residuals") + theme(plot.background = element_rect(fill = "white", colour = NA))+
         		theme_bw(base_size = 16) +
-				theme(plot.background = element_rect(fill = "transparent",colour = NA))
+           		theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
 			print(plot)
 			TRUE
 			},	
