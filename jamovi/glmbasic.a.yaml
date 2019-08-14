@@ -1,7 +1,7 @@
 ---
 name:  glmbasic
 title: General Linear Model
-menuGroup: glinmod
+menuGroup: Flexplot
 version: '1.0.0'
 jas: '1.2'
 

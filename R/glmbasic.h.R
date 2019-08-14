@@ -16,7 +16,7 @@ glmbasicOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             center = "Median + quartiles", ...) {
 
             super$initialize(
-                package='glinmod',
+                package='flexplot',
                 name='glmbasic',
                 requiresData=TRUE,
                 ...)
@@ -183,7 +183,7 @@ glmbasicResults <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rsq",
-                title="R[2] and semi-partial R squared estimates",
+                title="R\u00B2 and semi-partial R\u00B2 estimates",
                 columns=list(
                     list(
                         `name`="var", 
@@ -200,7 +200,7 @@ glmbasicBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = 'glinmod',
+                package = 'flexplot',
                 name = 'glmbasic',
                 version = c(1,0,0),
                 options = options,
@@ -273,6 +273,9 @@ glmbasic <- function(
         se = se,
         line = line,
         center = center)
+
+    results <- glmbasicResults$new(
+        options = options)
 
     analysis <- glmbasicClass$new(
         options = options,

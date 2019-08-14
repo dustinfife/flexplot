@@ -17,7 +17,7 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             alpha = 50, ...) {
 
             super$initialize(
-                package='glinmod',
+                package='flexplot',
                 name='flexplota',
                 requiresData=TRUE,
                 ...)
@@ -123,7 +123,7 @@ flexplotaBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = 'glinmod',
+                package = 'flexplot',
                 name = 'flexplota',
                 version = c(1,0,0),
                 options = options,
@@ -191,6 +191,9 @@ flexplota <- function(
         resid = resid,
         center = center,
         alpha = alpha)
+
+    results <- flexplotaResults$new(
+        options = options)
 
     analysis <- flexplotaClass$new(
         options = options,

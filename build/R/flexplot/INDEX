@@ -1,0 +1,34 @@
+added.plot              Create an added variable plot
+anchor.predictions      Generate Predictions for a Model
+auto.layout             Automatically select the layout.
+bf.bic                  Compute Bayes Factor from BICs
+compare.fits            Compare the fits of two models
+estimates               Report Estimates (effect sizes and parameters)
+estimates.default       Output APA style statistical significance from
+                        an object
+estimates.glm           Report glm object Estimates (effect sizes and
+                        parameters)
+estimates.lm            Report lm object Estimates (effect sizes and
+                        parameters)
+estimates.regression    Report regression object Estimates (effect
+                        sizes and parameters)
+estimates.zeroinfl      Report zeroinfl object Estimates (effect sizes
+                        and parameters)
+flexplot                Create a "flexible plot" or flexplot
+flexplota               Flexplot
+glinmod                 Perform a general linear model
+glmbasic                General Linear Model
+make.formula            Convert strings to a formula
+mixed.mod.visual        Display a graphic of a mixed model
+model.comparison        Perform a model comparison
+modelcomp               Model Comparison
+print.estimates         Print estimates Summary
+sensitivity.table       Compute sensitivity/specificity/etc.
+standardized.beta       Compute standardized betas on a linear model
+                        object
+subsetString            Extract only part of a string
+uni.plot                Plot univariate distribution of a variable
+visualize               Visualize a fitted model
+visualize.default       Visualize a fitted model
+visualize.lm            Visualize a fitted model
+visualize.lmerMod       Visualize a fitted model

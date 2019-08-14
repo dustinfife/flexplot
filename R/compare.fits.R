@@ -122,15 +122,19 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= model1.type)		
 	} else if (model1.type == "polr"){
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="class", re.form=NA), model= model1.type)		
-	} else  {
+	} else  if (model1.type == "lm"){
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values), model=model1.type)
+	} else {	
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", interval="confidence"), model= model1.type)		
 	}
-	
+
 
 	if (model2.type == "lmerMod" | model2.type == "glmerMod"){
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response", re.form=NA), model= model2.type)		
 	} else if (model2.type == "polr"){
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="class", re.form=NA), model= model2.type)		
+	} else if (model2.type == "lm"){
+		pred.mod1 = data.frame(prediction = predict(model2), model=model2.type)
 	} else {
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= model2.type, se.fit= report.se)		
 	}
@@ -141,16 +145,17 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		pred.mod1$prediction = as.numeric(as.character(pred.mod1$prediction))
 		pred.mod2$prediction = as.numeric(as.character(pred.mod2$prediction))		
 	}
-	
+
 	
 	#### report one or two coefficients, depending on if they supplied it
 	if (old.mod==0){
-		prediction.model = rbind(pred.mod1, pred.mod2)
-		prediction.model = cbind(pred.values, prediction.model)
+		prediction.model = rbind(pred.mod1[,c("prediction", "model")], pred.mod2[,c("prediction", "model")])
+		prediction.model = cbind(pred.values, prediction.model[,c("prediction", "model")])
 	} else {
 		prediction.model = pred.mod1
 		prediction.model = cbind(pred.values, prediction.model)
 	}
+
 
 	#### eliminate those predictions that are higher than the range of the data
 	if (!is.factor(data[,outcome])){

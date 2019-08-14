@@ -71,7 +71,7 @@ items:
       visible: (estimates)      
           
     - name:  rsq
-      title: R[2] and semi-partial R squared estimates
+      title: R² and semi-partial R² estimates
       type: Table
       columns:
         - name: var

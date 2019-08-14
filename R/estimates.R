@@ -152,7 +152,9 @@ estimates.lm = function(object){
     
     #### look for interaction terms
 	interaction = length(grep(":", terms))>0
-	
+	if (interaction){
+		terms = terms[-grep(":", terms)]
+	}
 	#### get dataset
 	d = object$model
 	
