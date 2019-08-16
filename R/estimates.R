@@ -160,10 +160,19 @@ estimates.lm = function(object){
 	
 	#### identify factors
 	if (length(terms)>1){
+		### convert characters to factors
+		chars = names(which(unlist(lapply(d[,terms], is.character))));
+		d[,chars] = lapply(d[,terms], as.factor)
 		factors = names(which(unlist(lapply(d[,terms], is.factor))));
 		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));
 	} else {
-		factors = terms[which(is.factor(d[,terms]))]
+
+		### convert characters to factors
+		chars = terms[which(is.character(d[,terms]))]
+		if (length(chars)>0){
+			d[,chars] = as.factor(d[,chars])
+		}
+		factors = terms[which(is.factor(d[,terms]) | is.character(d[,terms]))]
 		numbers = terms[which(is.numeric(d[,terms]))]
 	}
 
@@ -229,8 +238,10 @@ estimates.lm = function(object){
 				coef.matrix$variables[p] = factors[i]
 
 				#### populate the estimates/lower/upper
-				f = make.formula(outcome, factors[i])			
-				est = compare.fits(f, data=d, object, return.preds=T, silent=T)
+				f = make.formula(outcome, factors[i])		
+				est = compare.fits(f, data=d, object, return.preds=T, silent=T, report.se=T)
+
+				
 				coef.matrix$levels[current.rows] = as.character(est[,1])
 				coef.matrix$estimate[current.rows] = est$prediction.fit
 				coef.matrix$lower[current.rows] = est$prediction.lwr

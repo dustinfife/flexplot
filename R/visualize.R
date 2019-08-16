@@ -150,6 +150,12 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 			f = as.formula(x)		
 	
 			step3 = flexplot(f, data=data, ...)
+			
+			### if they have more than two variables, also include a added variable plot
+			if (length(terms)>1){
+				step3b = added.plot(f, data=d,...)
+				step3 = cowplot::plot_grid(step3, step3b, rel_widths=c(.6, .4))
+			}
 		}
 		
 	} else if (plot=="all" | plot=="bivariate"){
@@ -168,7 +174,19 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 			cowplot::plot_grid(histo, sl, ncol=1)
 		}
 	} else {
-		cowplot::plot_grid(step3, histo, res.dep, sl)
+		
+		if (length(terms)==1){
+			cowplot::plot_grid(step3, histo, res.dep, sl)
+		} else {
+			if (length(numbers)>0){
+				bottom.row = cowplot::plot_grid(histo, res.dep, sl, ncol=3)
+			} else {
+				bottom.row = cowplot::plot_grid(NULL, histo, sl, NULL, ncol=4, rel_widths=c(.1, .4, .4, .1))
+			}
+		}	
+		
+		cowplot::plot_grid(step3, bottom.row, nrow=2, rel_heights=c(.7, .3))		
+		
 }
 }
 

@@ -11,4 +11,4 @@ LazyData: true
 Depends: stats
 Imports: jmvcore (>= 0.8.5), R6, cowplot, ggplot2
 RoxygenNote: 6.1.1
-Built: R 3.3.0; ; 2019-08-14 14:46:04 UTC; unix
+Built: R 3.3.0; ; 2019-08-16 19:38:21 UTC; unix
