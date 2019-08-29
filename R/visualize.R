@@ -40,6 +40,10 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 	
 	terms = attr(terms(object), "term.labels")
 	
+	#### remove interaction and polynomial terms from "terms"
+	terms = grep("[/^:]", terms, value=T, invert=T)
+	
+	
 	#### get dataset
 	d = object$model
 	

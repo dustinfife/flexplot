@@ -86,7 +86,8 @@ flexplot = function(formula, data, related=F,
 			
 
 	##### use the following to debug flexplot
-	#formula = formula(weight.loss~therapy.type + rewards); related=T; data=d; color=NULL; symbol=NULL; linetype=NULL; bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=FALSE; raw.data=T; ghost.line="gray"; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=1
+	#formula = formula(weight.loss~therapy.type + rewards); related=T; data=d; 
+	#color=NULL; symbol=NULL; linetype=NULL; bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=FALSE; raw.data=T; ghost.line=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=1
 
 
 	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
@@ -285,7 +286,8 @@ flexplot = function(formula, data, related=F,
 		
 	# }
 	##### CHI SQUARE PLOT
-	} else if (length(outcome) == 1 & length(predictors)==1 & is.na(given) & !is.numeric(data[,predictors]) & !is.numeric(data[,outcome])){
+
+	} else if (length(outcome) == 1 & length(predictors)==1 & is.na(given) & !is.numeric(data[[outcome]]) & !is.numeric(data[[outcome]])){
 		m = as.data.frame(table(data[,predictors], data[,outcome])); names(m)[1:2] = c(predictors, outcome)
 		Freq = 'Freq'
 		p = ggplot(data=m, aes_string(x=predictors, y=Freq, fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()
@@ -439,7 +441,7 @@ flexplot = function(formula, data, related=F,
 				if (length(unique(data[,binned.vars[i]]))<=bins[i]){
 					data[,binned.vars[i]] = factor(data[,binned.vars[i]], ordered=T)
 				}
-				
+
 				if (is.numeric(data[,binned.vars[i]])){
 					break.current = unlist(breaks[i])
 					if (!is.null(unlist(labels[i])) & length(unlist(labels[i])) != bins[i]){
@@ -469,24 +471,24 @@ flexplot = function(formula, data, related=F,
 					#### if they're making a ghost reference, bin that too
 					if (!is.null(ghost.reference) & binned.vars[i] %in% names(ghost.reference)){
 						val = as.numeric(ghost.reference[binned.vars[i]])
-						ghost.reference[binned.vars[i]] = as.character(cut(val, quants, labels=unlist(labels[i]), include.lowest=T, include.highest=T))
+						ghost.reference[binned.vars[i]] = cut(val, quants, labels=unlist(labels[i]), include.lowest=T, include.highest=T)
 					}
-					
+										
 					if (!is.null(prediction)){
-						prediction[,paste0(binned.vars[i])] = cut(prediction[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)
-				}
+						prediction[,binned.vars[i]] = cut(prediction[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T, na.rm=T)
+					}
 				}
 
 			}
 
 			if (!is.null(prediction)){
 							#### average the predictions within bin
-				f = make.formula("prediction", c("model",
+				f = make.formula("prediction.fit", c("model",
 														predictors[-which(predictors==binned.vars[i])],
 														binned.vars[i]
 														)
 									)			
-				prediction = aggregate(f, data=prediction, FUN=median)
+				prediction = aggregate(f, data=prediction, FUN=median, na.rm=T)
 
 			}			
 			
@@ -633,11 +635,11 @@ flexplot = function(formula, data, related=F,
 		
 		#### check if first variable is a continuous predictor
 		if (is.numeric(data[,predictors[1]])){
-			
-			p = p + geom_line(data= prediction, aes(linetype=model, y=prediction, color=model), size=2)			
+		
+			p = p + geom_line(data= prediction, aes(linetype=model, y=prediction.fit, color=model), size=2)			
 		} else {
-			prediction
-			p = p + geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_errorbar(data=prediction, aes(y=NULL, ymin=lower, ymax=upper, color=model, width=.4))
+			
+			p = p + geom_point(data=prediction, aes(y=prediction.fit, color=model), position=position_dodge(width=.2)) + geom_errorbar(data=prediction, aes(y=NULL, ymin=lower, ymax=upper, color=model, width=.4))
 		
 		}
 		if (data_output){
@@ -655,4 +657,5 @@ flexplot = function(formula, data, related=F,
 			return(p)
 		}
 	}
+
 }
