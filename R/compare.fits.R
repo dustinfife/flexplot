@@ -30,9 +30,9 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	terms.mod2 = attr(terms(model2), "term.labels")
 		
 	#### check if models have the same terms
-	if (length(which(!(terms.mod1 %in% terms.mod2)))>0 | length(which(!(terms.mod2 %in% terms.mod1)))>0){
-		warning("You should probably have the same predictors in both models for a better comparison.")
-	}
+	# if (length(which(!(terms.mod1 %in% terms.mod2)))>0 | length(which(!(terms.mod2 %in% terms.mod1)))>0){
+		# warning("You should probably have the same predictors in both models for a better comparison.")
+	# }
 
 	##### extract variable names
 	variables = all.vars(formula)
@@ -115,7 +115,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 			}
 		}
 	}
-	
+
 
 	#### generate predictions
 	if (model1.type == "lmerMod" | model1.type == "glmerMod"){
@@ -123,7 +123,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	} else if (model1.type == "polr"){
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="class", re.form=NA), model= model1.type)		
 	} else  if (model1.type == "lm"){
-		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval="confidence"), model=model1.type)
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval="confidence")[,1], model=model1.type)
 	} else {	
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", interval="confidence"), model= model1.type)		
 	}
@@ -133,8 +133,8 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response", re.form=NA), model= model2.type)		
 	} else if (model2.type == "polr"){
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="class", re.form=NA), model= model2.type)		
-	} else if (model2.type == "lm"){
-		pred.mod2 = data.frame(prediction = predict(model2, pred.values, interval="confidence"), model=model2.type)
+	} else if (model2.type == "lm" | model2.type == "polynomial" | model2.type=="interaction"){
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, interval="confidence")[,1], model=model2.type)
 	} else {
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= model2.type)		
 	}
@@ -167,6 +167,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		#### if they supply a factor, convert it to a number!!!!!
 		prediction.model$prediction = as.numeric(as.character(prediction.model$prediction))
 	}
+
 
 
 

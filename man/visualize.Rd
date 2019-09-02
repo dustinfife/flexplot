@@ -8,7 +8,7 @@ visualize(object, plot = c("all", "residuals", "bivariate"),
   formula = NULL, ...)
 }
 \arguments{
-\item{object}{a lmer object}
+\item{object}{a fitted object}
 
 \item{plot}{what should be plotted? Residuals? Bivariate plot? All of them?}
 

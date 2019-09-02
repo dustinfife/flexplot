@@ -12,6 +12,7 @@
 ##' if the string is c("...call..ID", "...call..Gender", "ethnicity"), if \code{flexible} is false, it will search for the string "...call.." in the string "ethnicity", and, not 
 ##' finding it, will return NA. To overcome this, \code{flexible} tells the function to only perform the operation on those parts of the vector that contain the string \code{sep}.
 ##' @author Dustin Fife
+##' @export
 ##' @examples
 ##' barcode = c("Case-001-B", "Control-001-A", "Case-002-A", "001")
 ##' subsetString(barcode, sep="-", position=2, flexible=TRUE)

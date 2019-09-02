@@ -60,14 +60,14 @@ uni.plot = function(variable, d=NULL, numeric=NULL){
 		
 		### now create the code that created it
 		output = paste0("R Code to generate plots: \n\n ggplot(data=", deparse(substitute(d)), ", aes(", variable, ")) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x='", variable, "')")
-		cat(output)
+		#cat(output)
 
 		return(p)
 
 	} else {
 		p = ggplot(data=d, aes_string(variable)) + geom_bar() + theme_bw() + labs(x=variable)
 		output = paste0("R Code to generate plots: \n\n ggplot(data=", deparse(substitute(d)), ", aes(", variable, ")) + geom_bar() + theme_bw() + labs(x='", variable, "')")
-		cat(output)		
+		#cat(output)		
 		return(p)			
 	} 
 

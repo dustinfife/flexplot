@@ -4,12 +4,12 @@
 \alias{flexplot}
 \title{Create a "flexible plot" or flexplot}
 \usage{
-flexplot(formula, data, related = F, color = NULL, symbol = NULL,
-  linetype = NULL, bins = 4, labels = NULL, breaks = NULL,
-  method = "loess", se = T, ghost.line = NULL,
+flexplot(formula, data, related = F, bins = 4, labels = NULL,
+  breaks = NULL, method = "loess", se = T, ghost.line = NULL,
   ghost.reference = NULL, spread = c("quartiles", "stdev", "sterr"),
-  jitter = FALSE, raw.data = T, sample = Inf, prediction = NULL,
-  suppress_smooth = F, alpha = 0.99977, data_output = F)
+  jitter = NULL, raw.data = T, sample = Inf, prediction = NULL,
+  suppress_smooth = F, alpha = 0.99977, data_output = F,
+  silent = F)
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}
@@ -18,29 +18,24 @@ flexplot(formula, data, related = F, color = NULL, symbol = NULL,
 
 \item{related}{Are variables related? If so, it will show a plot of difference scores, rather than the raw scores (for a related t test).}
 
-\item{color}{Color values to be used for the categorical variables}
-
-\item{symbol}{The symbols to be used for the categorical variables}
-
-\item{linetype}{The linetype to be used for the categorical variables}
-
-\item{bins}{The number of bins used when putting quantitative variables into categories. A list can be used if different amounts are wanted for different variables}
+\item{bins}{The preferred number of bins used when putting quantitative variables into categories. A list can be used if different amounts are wanted for different variables. However, sometimes flexplot cannot 
+have that number of bins, but it will try to make it work.}
 
 \item{labels}{A list of the same length as bins}
 
-\item{breaks}{The breaks to be used for the bins}
+\item{breaks}{The breaks to be used for the bins.}
 
 \item{method}{The method to be used to draw the lines. Defaults to loess}
 
 \item{se}{Should standard errors be drawn?}
 
-\item{ghost.line}{Should a ghost line be drawn? If so, user must specify a color. Default is NULL (in which case, the ghost line isn't shown).}
+\item{ghost.line}{Color of the ghost line. Default is NULL (in which case, the ghost line isn't shown).}
 
 \item{ghost.reference}{What groups should be referenced for the ghost line? See examples.}
 
-\item{spread}{How should standard errors be drawn? Defaults to quartiles}
+\item{spread}{Specifies how the "whiskers" of the plots should be draw. Can be "quartiles", "stdev", or "sterr." Defaults to quartiles}
 
-\item{jitter}{Should values be jittered?}
+\item{jitter}{Can be either T/F, or a vector of length two, specifying the degree of jitter for the x and y axis, respectively.}
 
 \item{raw.data}{Should raw data be plotted?}
 
@@ -53,6 +48,8 @@ flexplot(formula, data, related = F, color = NULL, symbol = NULL,
 \item{alpha}{The transparency of the datapoints.}
 
 \item{data_output}{Should the data be outputted?}
+
+\item{silent}{Should all messages be suppressed? Defaults to F.}
 }
 \description{
 Create a flexible plot

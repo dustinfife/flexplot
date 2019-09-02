@@ -1,3 +1,191 @@
+prep.breaks = function(variable, data, breaks=NULL, bins=4){
+
+		breaks = unlist(breaks)	
+
+		if (is.null(breaks)){
+			quants = quantile(data[[variable]], seq(from=0, to=1, length.out=bins+1), na.rm=T)
+			breaks = quants[!duplicated(quants)]
+		} else {			
+			#### give min as breaks, if the user doesn't
+			if (min(breaks)>min(data[[variable]])){
+				breaks = c(-Inf, breaks)
+			}
+			if (max(breaks,na.rm=T)<max(data[[variable]])){
+				breaks = c(breaks, Inf)
+			}	
+		}
+		
+		return(breaks)
+		
+}
+bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE){
+
+	bins = ifelse(is.null(bins), 4, bins)
+	
+	### if they come as a list, unlist them
+	if (is.list(breaks)){
+		breaks = unlist(breaks)
+	}
+	if (is.list(labels)){
+		labels = unlist(labels)
+	}	
+
+	### check length of binned variables. If <= breaks, treat as categorical
+	# if (length(unique(data[[variable]]))<=bins){
+		# data[[variable]] = factor(data[[variable]], ordered=T)
+	# }
+	
+	### error if their labels are not the same length as the bin length
+	if (!is.null(labels) & length(labels) != bins){
+		stop(paste0("The label vectors (", paste0(unlist(labels), collapse=", "), ") is not the same length as the bin length (", bins, ")", sep=""))
+	}
+
+	#### if they supply breaks, make sure there's a good min/max value	
+	if (!is.null(breaks) & check.breaks){
+		breaks = prep.breaks(variable, data, breaks)
+	} 
+
+	binned.variable = cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
+	binned.variable
+	
+}
+
+
+	### create custom function to sample data
+sample.subset = function(sample, data){
+	if (sample!=Inf){
+		m = data[sample(1:nrow(data), size=sample),]
+	} else {
+		m = data
+	}
+}
+
+	### if they don't want raw data, just make alpha = 0
+raw.alph.func = function(raw.data,alpha=1){
+	if (raw.data){
+		alpha.raw = alpha
+	} else {
+		alpha.raw = 0
+	}	
+}
+
+	#### points = the datapoints
+points.func = function(axis.var, data, jitter){
+	
+	### if they specified something for jitter
+	if (!is.null(jitter)){
+	
+		#### if they don't specify both vectors for jitter, warn them
+		if (is.numeric(jitter)[1] & length(jitter)<2){
+			warning("You're supposed to supply TWO values for jitter (one for x axis, one for y axis). You only supplied one. I'm going to assume the value you gave is for the x axis, then I'll set the y axis to 0.")
+			jitter[2] = 0
+		}
+	
+	
+		#### if they said jitter=T
+		if (jitter[1]==T & !is.numeric(jitter)[1]){
+			#### I'm putting the command as a string to avoid environment problems
+			jit = paste0("geom_jitter(data=sample.subset(sample,", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)")
+			
+		#### if they said jitter=F	
+		} else if (jitter[1] == F & !is.numeric(jitter)[1]){
+			jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha))")
+		} else {
+			jit = paste0("geom_jitter(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])")				
+		}
+	
+	#### if they left jitter at the default	
+	} else {
+	
+		### if x axis is categorical, jitter it by .2
+		if (!is.numeric(data[[axis.var[1]]])){
+			jit = paste0("geom_jitter(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2)")				
+			
+		### if x axis is numeric, don't jitter it	
+		} else {
+			jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha))")
+		}
+	}
+	
+	
+	#### return the jittered string
+	return(jit)		
+}
+	
+	
+#### identify the correct "fit"
+fit.function = function(outcome, predictors, data, suppress_smooth, method, spread, mean.line=F, categorical=FALSE){
+	
+	if (is.numeric(data[,predictors]) & !categorical){
+		
+		
+		if (suppress_smooth){
+			fit.string = "xxxx"
+		} else if (method=="logistic") {
+	
+			#### make sure there's only two levels
+			if (length(unique(data[,outcome]))!=2){
+				stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
+			}
+			
+			#### convert outcome to numeric (if necessary)		#### MUST DEAL WITH THIS LATER!!!
+			if (!is.numeric(data[,outcome])){
+				fit.string = paste0(deparse(substitute(data)), "[,outcome] = as.numeric(", deparse(substitute(data)), "[,outcome])-1")
+			}
+			
+			#### specify the curve
+			fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)'
+		} else if (method=="poisson" | method=="Gamma") {
+			#### specify the curve
+			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se)'
+		} else {
+			fit.string = 'geom_smooth(method=method, se=se)'
+		}
+		
+
+		
+	} else {
+		
+		if (suppress_smooth){
+			summary1="xxxx"
+			summary2="xxxx"
+			sum.line="xxxx"						
+		} else if (spread=="stdev"){
+			summary1 = "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2))" 
+			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, size = 1.25, width=.2, position=position_dodge(width=.2))"
+			if (mean.line){
+				sum.line = 'stat_summary(aes_string(group= axis[2]), geom="line", fun.y="mean", position=position_dodge(width=.2))'
+			} else {
+				sum.line='xxxx'
+			}
+		} else if (spread=="sterr"){	
+			summary1 = "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2))"
+			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2))"
+			if (mean.line){
+				sum.line = 'stat_summary(aes_string(group= axis[2]), geom="line", fun.y="mean", position=position_dodge(width=.2))'
+			} else {
+				sum.line='xxxx'
+			}
+
+		} else if (spread == "quartiles"){	
+			summary1 = "stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.2))" 
+			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.2))"
+			if (mean.line){
+				sum.line = 'stat_summary(aes_string(group=axis[2]), geom="line", fun.y="median", position=position_dodge(width=.2))'
+			} else {
+				sum.line='xxxx'
+			}
+
+		}
+		
+		fit.string = paste0(summary1, "+",summary2, "+", sum.line)			
+		
+	}
+	
+	return(fit.string)
+	
+}
+
 ##' Create a "flexible plot" or flexplot
 ##'
 ##' Create a flexible plot 
@@ -9,17 +197,15 @@
 ##' @param formula A formula of the form  y~x + a | b + z
 ##' @param data The dataset
 ##' @param related Are variables related? If so, it will show a plot of difference scores, rather than the raw scores (for a related t test). 
-##' @param color Color values to be used for the categorical variables
-##' @param symbol The symbols to be used for the categorical variables
-##' @param linetype The linetype to be used for the categorical variables
-##' @param bins The number of bins used when putting quantitative variables into categories. A list can be used if different amounts are wanted for different variables
+##' @param bins The preferred number of bins used when putting quantitative variables into categories. A list can be used if different amounts are wanted for different variables. However, sometimes flexplot cannot 
+##'		have that number of bins, but it will try to make it work. 
 ##' @param labels A list of the same length as bins
-##' @param breaks The breaks to be used for the bins
+##' @param breaks The breaks to be used for the bins.
 ##' @param method The method to be used to draw the lines. Defaults to loess
 ##' @param se Should standard errors be drawn?
-##' @param ghost.line Should a ghost line be drawn? If so, user must specify a color. Default is NULL (in which case, the ghost line isn't shown). 
-##' @param spread How should standard errors be drawn? Defaults to quartiles
-##' @param jitter Should values be jittered?
+##' @param ghost.line Color of the ghost line. Default is NULL (in which case, the ghost line isn't shown). 
+##' @param spread Specifies how the "whiskers" of the plots should be draw. Can be "quartiles", "stdev", or "sterr." Defaults to quartiles
+##' @param jitter Can be either T/F, or a vector of length two, specifying the degree of jitter for the x and y axis, respectively. 
 ##' @param raw.data Should raw data be plotted?
 ##' @param sample Should a sample of the data be plotted? Defaults to Inf (for all variables). 
 ##' @param ghost.reference What groups should be referenced for the ghost line? See examples. 
@@ -27,6 +213,7 @@
 ##' @param suppress_smooth Should a fitted line be repressed? Defaults to FALSE
 ##' @param alpha The transparency of the datapoints. 
 ##' @param data_output Should the data be outputted?
+##' @param silent Should all messages be suppressed? Defaults to F.
 ##' @author Dustin Fife
 ##' @import ggplot2
 ##' @export
@@ -76,28 +263,39 @@
 ##' 	labels=list(c("<95K", "<100K", "<105K", ">105K")))	
 ##' 		## relabel income
 flexplot = function(formula, data, related=F,
-		color=NULL, symbol=NULL, linetype=NULL, 
 		bins = 4, labels=NULL, breaks=NULL,
 		method="loess", se=T, 
 		ghost.line=NULL, ghost.reference=NULL,
-		spread=c('quartiles', 'stdev', 'sterr'), jitter=FALSE, raw.data=T,
+		spread=c('quartiles', 'stdev', 'sterr'), jitter=NULL, raw.data=T,
 		sample=Inf, 
-		prediction = NULL, suppress_smooth=F, alpha=.99977, data_output=F){
+		prediction = NULL, suppress_smooth=F, alpha=.99977, data_output=F, silent=F){
 			
-
+	#d = exercise_data
 	##### use the following to debug flexplot
 	#formula = formula(weight.loss~therapy.type + rewards); related=T; data=d; 
-	#color=NULL; symbol=NULL; linetype=NULL; bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=FALSE; raw.data=T; ghost.line=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=1
+	#bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F
+	#data(exercise_data)
+	#d = exercise_data
+	#formula = formula(weight.loss~rewards+gender|income); data=d; 
+	#ghost.reference = list(income=90000)
+	
+
+
 
 
 	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
-	
+
+
 		#### extract outcome, predictors, and given variables
 	variables = all.vars(formula)
 	outcome = variables[1]
 	predictors = variables[-1]
 	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
-
+	given = gsub(" ", "", given)		
+	given = unlist(strsplit(given, "+", fixed=T))	
+	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
+	axis = gsub(" ", "", axis)			
+	axis = unlist(strsplit(axis, "+", fixed=T))	
 
 	#### identify which variables are numeric and which are factors
 	if (length(predictors)>0){
@@ -108,102 +306,27 @@ flexplot = function(formula, data, related=F,
 		### remove missing values
 	if (length(predictors)>0){
 		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){
-			
 			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))
 			data = data[-delete.me,]
 		}
 	}
-	
-
-		#### identify the non given variables
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
-	axis = unlist(strsplit(axis, " + ", fixed=T))
-	
 		
-	#### identify the correct line
-	if (suppress_smooth){
-		gm = theme_bw()
-	} else if (method=="logistic") {
+	#### get the breaks for the needed variables
+	break.me = predictors[unlist(lapply(data[,predictors], FUN=is.numeric)) & ((predictors %in% given) | (axis[2] %in% predictors))]	
 
-		#### make sure there's only two levels
-		if (length(unique(data[,outcome]))!=2){
-			stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
+		#### create a list of breaks
+	if (length(break.me)>0 ){
+		breaks = ifelse(is.null(breaks),list(), breaks)
+			#### now make the breaks and convert the data
+		for (i in 1:length(break.me)){
+			breaks[[break.me[i]]] = prep.breaks(break.me[i], data, breaks[[break.me[i]]], bins)					
 		}
-		
-		#### convert outcome to numeric (if necessary)
-		if (!is.numeric(data[,outcome])){
-			data[,outcome] = as.numeric(data[,outcome])-1
-		}
-		
-		#### specify the curve
-		gm = geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)
-	} else if (method=="poisson" | method=="Gamma") {
-		#### specify the curve
-		gm = geom_smooth(method = "glm", method.args = list(family = method), se = se)
-	} else {
-		gm = geom_smooth(method=method, se=se)
-	}
-
-
-	
-
-	#if (is.na(given)){given=NULL}
-	
-
-	
-
-	
-	### create custom function to sample data
-	sample.subset = function(sample, data){
-		if (sample!=Inf){
-			m = data[sample(1:nrow(data), size=sample),]
-		} else {
-			m = data
-		}
-	}
-
-	### if they don't want raw data, just make alpha = 0
-	raw.alph.func = function(raw.data,alpha=1){
-		if (raw.data){
-			alpha.raw = alpha
-		} else {
-			alpha.raw = 0
-		}	
-	}
-
-	if (!is.null(jitter)){
-			if (jitter[1]==T & !is.numeric(jitter)[1]){
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)
-			} else if (jitter[1] == F & !is.numeric(jitter)[1]){
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))
-			} else {
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])
-			}
-			
-		} else {
-			jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))
-	}
-
-	if (spread=="stdev"){
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) 
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, size = 1.25, width=.2, position=position_dodge(width=.2))
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2))
-	} else if (spread=="sterr"){	
-		summary1 = stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.2)) 
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2))
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="mean", position=position_dodge(width=.2)) 	
-	} else if (spread == "quartiles"){	
-		summary1 = stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.2)) 
-		summary2 = stat_summary(aes_string(x=predictors[1], y=outcome), geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.2))
-		sum.line = stat_summary(aes_string(group=predictors[2]), geom="line", fun.y="median", position=position_dodge(width=.2)) 	
-	}		
-		
-
-
+	} 
 
 	### BEGIN THE MEGA PLOTTING IFS!
+	
+	
 	### PLOT UNIVARIATE PLOTS
-		### if there's no predictors, use the "uni.plot" function
 	if (length(outcome)==1 & length(predictors)==0){
 		
 		##### reorder according to columns lengths (if it's not an ordered factor)
@@ -212,24 +335,74 @@ flexplot = function(formula, data, related=F,
 			names(counts)
 			data[,outcome] = factor(data[,outcome], levels=names(counts))
 		}
-		p = uni.plot(outcome, d=data)
 		
-	### related t plot
-	} else if (related){
+		
+		### figure out how many levels for the variable
+		levels = length(unique(d[,outcome]))	
+		
+		#### if numeric, do a histogram
+		if (is.numeric(data[,outcome])){
+			p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
+		} else {
+			p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
+		} 
+		
+		points = "xxxx"
+		fitted = "xxxx"		
+
+	### BIVARIATE PLOTS
+	} else if (length(outcome)==1 & length(axis)==1 & !related){
+		
+		#### if both are categorical, do chi square
+		if (!is.numeric(data[[outcome]]) & !is.numeric(data[[outcome]])){
+			m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
+			Freq = 'Freq'
+			p = "ggplot(data=m, aes_string(x=axis, y=Freq, fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+			points = "xxxx"
+			fitted = "xxxx"
+		} else {
+
+			### reorder axis and alter default alpha if categorical
+			if (!is.numeric(data[,axis])){
+				#### reorder if it's not already ordered
+				if (!is.ordered(data[, axis[1]])){
+					if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
+					ord = aggregate(data[,outcome]~data[, axis], FUN=fn, na.rm=T)
+					ord = ord[order(ord[,2], decreasing=T),]
+					data[,axis] = factor(data[, axis], levels=ord[,1])
+				}
+		
+				#### set default alpha
+				if(alpha==.99977){
+					alpha = .2
+				}		
+			}
+			
+			p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
+			points = points.func(axis.var=axis, data=data, jitter=jitter)
+			fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
+		}	
+	
+	### RELATED T-TEST
+	} else if (related){		
+		
+		
+		#### extract levels of the predictors
+		levs = levels(data[,axis[1]])
+
+		#### create difference scores
+		g1 = data[data[, axis[1]]==levs[1], outcome]
+		g2 = data[data[, axis[1]]==levs[2], outcome]				
+
+		
+		### error checking
 		if (length(predictors)!=1){
 			stop("Currently, the 'related' option is only available when there's a single predictor.")
 		} 
 		
-		#### extract levels of the predictors
-		levs = levels(data[,predictors])
-		
 		if (length(levs)!=2){
 			stop("Sorry, I can only accept two levels of the grouping variable when related=T.")
 		}
-
-		#### create difference scores
-		g1 = data[data[,predictors]==levs[1], outcome]
-		g2 = data[data[,predictors]==levs[2], outcome]		
 		
 		if (length(g1) != length(g2)){
 			stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")
@@ -238,424 +411,201 @@ flexplot = function(formula, data, related=F,
 		lab = paste0("Difference (",levs[2], "-", levs[1], ')')
 		d2 = data.frame(Difference=g2-g1)
 		
-		if (spread == "stdev"){ summary2 = stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=mean, size = 1.25, width=.12, position=position_dodge(width=.2))}
-		if (spread == "sterr"){ summary2 = stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, fun.y=mean, color=rgb(1,0,0,.25), width=.12, size = 1.25, position=position_dodge(width=.2))}
-		if (spread == "quartiles"){ summary2 = stat_summary(geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.12, position=position_dodge(width=.2))}				
-												#stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, color='red', width=.2)
 		
-		p = ggplot(d2, aes(y=Difference, x=1)) +
-			geom_jitter(data=sample.subset(sample, d2), alpha=raw.alph.func(raw.data, .15), width=.05) +
-			summary1 + summary2 + 
-			gm +
-			geom_hline(yintercept=0, col="lightgray") +
-			labs(x=lab) +
-			theme_bw() +
-			theme(axis.ticks.x=element_blank(), axis.text.x=element_blank()) +
-			coord_cartesian(xlim=c(.75, 1.25))
-	#### SCATTERPLOT	
-	} else if (length(outcome)==1 & length(predictors)==1 & is.na(given) & (is.numeric(data[,predictors]) & is.numeric(data[,outcome]))){				
-		
-
-		p = ggplot(data=data, aes_string(x=predictors, y=outcome))+
-			jit + #geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha)) +
-			gm +
-			theme_bw()						
-
-	##### MEAN PLOT
-	} else if (length(outcome)==1 & length(predictors)==1 & is.na(given) & (is.numeric(data[,predictors]) | is.numeric(data[,outcome]))){		
-		
-		
-		#### reorder if it's not already ordered
-		if (!is.ordered(data[,predictors[1]])){
-			if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
-			ord = aggregate(data[,outcome]~data[,predictors], FUN=fn, na.rm=T)
-			ord = ord[order(ord[,2], decreasing=T),]
-			data[,predictors] = factor(data[,predictors], levels=ord[,1])
-		}
-
-		#### set default alpha
-		if(alpha==.99977){
-			alpha = .2
-		}
-		p = ggplot(data=data, aes_string(x=predictors, y=outcome)) +
-			geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha), size=.75, width=.05) + 
-			summary1 + summary2 + 
-			theme_bw()						
-	##### logistic regression plot
-	# } else if (){
-		
-	# }
-	##### CHI SQUARE PLOT
-
-	} else if (length(outcome) == 1 & length(predictors)==1 & is.na(given) & !is.numeric(data[[outcome]]) & !is.numeric(data[[outcome]])){
-		m = as.data.frame(table(data[,predictors], data[,outcome])); names(m)[1:2] = c(predictors, outcome)
-		Freq = 'Freq'
-		p = ggplot(data=m, aes_string(x=predictors, y=Freq, fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()
-
-	##### INTERACTION PLOT
-	} else if (length(outcome)==1 & length(predictors)==2 & (is.character(data[,predictors[1]]) | is.factor(data[,predictors[1]])) & (is.character(data[,predictors[2]]) | is.factor(data[,predictors[2]]))){
-
-
-					#### set default alpha
-		if(alpha==.99977){
-			alpha = .2	
-		}
-		
-				
-		#### identify if given is na
-		if (!is.na(given)){
-
-			p = ggplot(data=data, aes_string(x=predictors[1], y=outcome)) +
-				geom_jitter(data=sample.subset(sample, data), alpha = raw.alph.func(raw.data, alpha), size = .75, width=.2) +
-				facet_wrap(as.formula(paste("~", predictors[2]))) +
-				summary1 + summary2 +
-				labs(x=predictors[1], y=outcome) +
-				theme_bw()
-		} else {
-			p = ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=predictors[2], linetype=predictors[2], shape=predictors[2])) +
-				geom_jitter(data=sample.subset(sample, data), alpha = raw.alph.func(raw.data, alpha), size=.75,  position= position_jitterdodge(jitter.width=.2, dodge.width=.2)) +
-				summary1 + summary2 + 
-				sum.line + 
-				labs(x=predictors[1], y=outcome) +
-				theme_bw()			
-		}
-
-	#### ANCOVA PLOT		
-	# } else if (length(predictors)==2 & length(categories)==1 & length(given)<1){
-		# ### if they're supplying a prediction, put the covariate in the "given" area
-		# if (!is.null(prediction)){
-			# given.as.string = paste0("~", categories)
-			# p = ggplot(data=data, aes_string(x=numbers, y=outcome))+
-				# geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha)) +
-				# gm +
-				# facet_grid(as.formula(given.as.string),labeller = labeller(.rows = label_both, .cols=label_both)) +
-				# theme_bw()	
-				
-		# } else {	
-			# p = ggplot(data=d, aes_string(x=numbers, y=outcome, group=categories, linetype=categories, color=categories)) +
-				# geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha)) +
-				# gm +
-				# theme_bw()							
-		# }
-	###### MULTIWAY DOT PLOT FOR THREE CATEGORICAL PREDICTORS
-	} else if (length(outcome)==1 & length(predictors)==3 & length(categories)==3 & is.na(given)){
-
+		p = "ggplot(d2, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x=lab) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())"
 	
-		#### figure out which variable has the largest effect
-		mod = lm(formula, data=data)
+		#### modify default jitter
+		if (is.null(jitter)){
+			jitter = c(.05, 0)
+		} 
+		points = points.func(axis.var="Difference", data=d2, jitter=jitter)
+		fitted = paste0(fit.function(outcome, "Difference", data=d2, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
 
-		order = order(anova(mod)[-length(coef(mod)),"F value"], decreasing=F)
-		ordered.predictors = row.names(anova(mod))[order]
-		new.formula = make.formula(outcome, ordered.predictors)
+	##### if they have two axis variables
+	} else if (length(axis)>1){
+
+		#### if the second variable is numeric, bin it
+		if (is.numeric(data[,axis[2]])){
+			binned.name = paste0(axis[2], "_binned")
+			data[[binned.name]] = bin.me(axis[2], data, bins, labels, breaks[[axis[2]]])
+			axis[2] = binned.name
+		}
 		
-		#### reorder the means
-		means = aggregate(new.formula, data=data, FUN=mean)
-		names(means)[ncol(means)]="mean"
-		ser = aggregate(new.formula, data=data, FUN=function(x){sd(x)})
-		means$ser = ser[,outcome]
-		means$lower = means$mean - means$ser
-		means$upper = means$mean + means$ser
-
-		#### combine with previous dataset
-		d = merge(data, means, by=ordered.predictors)
-		if (se){
-			p = ggplot(data=d, aes_string(x= ordered.predictors[1], y=outcome, col=ordered.predictors[1])) + 
-				geom_jitter(data=sample.subset(sample, d), alpha = raw.alph.func(raw.data, .15)) +
-				geom_point(aes_string(y="mean")) + 
-				geom_errorbar(aes_string(ymin="lower", ymax= "upper", col=ordered.predictors), width=.2) +
-				coord_flip() + 
-				facet_grid(as.formula(paste0(ordered.predictors[2]," +", ordered.predictors[3],"~."))) +
-				theme_bw()
+		### if they supply predictions, do not vary color
+		if (!is.null(prediction)){
+			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color=predictors[2], shape=predictors[2])'
 		} else {
-			p = ggplot(data=d, aes_string(x= ordered.predictors[1], y=outcome, col=ordered.predictors[1])) + 
-				geom_jitter(data=sample.subset(sample, d), alpha = raw.alph.func(raw.data, .15)) +
-				geom_point(aes_string(y="mean")) + 
-				coord_flip() + 
-				facet_grid(as.formula(paste0(ordered.predictors[2]," +", ordered.predictors[3],"~."))) +
-				theme_bw()			
-		}				
-		
-	##### FOR VARAIBLES THAT WILL BE BINNED...
-	} else {
-
-		##### only allow two "given" variables
-		if (length(given)>2){
-			stop("Only two 'given' variables are allowed.")
-		}
-
-		#### modify given (if needed)
-		if (length(given)>0 & !is.na(given)){
-		if (regexpr("+", given)){
-			given = unlist(strsplit(given, " + ", fixed=T))
-		}
-		}		
-		
-		#### see if more than two variables are shown at the left of the given sign
-		if ((length(predictors) - length(given))>2){
-			stop("Only two 'axis' variables are allowed.")
-		}
-			
-		
-		
-		#### make given variables ggplot friendly (for facet_grid)
-		given.as.string = ifelse(length(given)>1 & !is.na(given),paste0(rev(given), collapse="~"), paste0("~",given))
-
-		#### if a category is "given", leave it alone
-		# if (length(which(given %in% categories))>0){
-			# given = given[-which(given %in% categories)]
-		# }
-
-
-		
-			
-		### identify the number of binned variables we need
-		if (length(axis)>1 & axis[2] %in% numbers){ 
-			binned.vars = c(axis[2], numbers[which((numbers) %in% given)])
-		} else{
-			binned.vars = predictors[which((predictors) %in% given)]
+			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color=predictors[2], linetype=predictors[2], shape=predictors[2])'
 		}
 		
-		#### identify which binned variables are categorical
-		binned.numeric = numbers[which((numbers) %in% given)]
-
-		if (length(binned.numeric)>0){
-			msg = paste0("The following variables are going to be binned: ", paste0(binned.vars, collapse=", "), "\n")
-			cat(msg)
-		}
-		
-		### repeat the bins the number of bins there are
-		if (length(bins) != length(binned.vars) & length(bins)>1){
-			warning("You haven't specified enough bins to cover all the binned variables. I'm making a guess for the rest of the variables")
-			bins = matrix(bins, nrow=1, ncol=length(binned.vars))
-		}
-		
-		if (length(bins)==1){
-			bins = rep(bins, times=length(binned.vars))
-		}
-
-		#### bin the binned variables
-		if (length(binned.vars)>0){
-			for (i in 1:length(binned.vars)){
-				
-				### check length of binned variables. If <= breaks, treat as categorical
-				if (length(unique(data[,binned.vars[i]]))<=bins[i]){
-					data[,binned.vars[i]] = factor(data[,binned.vars[i]], ordered=T)
-				}
-
-				if (is.numeric(data[,binned.vars[i]])){
-					break.current = unlist(breaks[i])
-					if (!is.null(unlist(labels[i])) & length(unlist(labels[i])) != bins[i]){
-						stop(paste0("The label vectors (", paste0(unlist(labels[i]), collapse=", "), ") is not the same length as the bin length (", bins[i], ")", sep=""))
-					}
-					
-					### if they supply the breaks...
-					
-					#if (data[,binned.vars[i]])
-					if (!is.null(break.current)){
-						#### give min as breaks, if the user doesn't
-						if (min(break.current)>min(data[,binned.vars[i]])){
-							break.current = c(-Inf, break.current)
-						}
-						if (max(break.current,na.rm=T)<max(data[,binned.vars[i]])){
-							break.current = c(break.current, Inf)
-						}
-						
-						quants = unlist(break.current)
-					} else {
-						quants = quantile(data[,binned.vars[i]], seq(from=0, to=1, length.out=bins[i]+1), na.rm=T)
-						quants = quants[!duplicated(quants)]
-					}
-		
-					data[,paste0(binned.vars[i])] = cut(data[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T)
-	
-					#### if they're making a ghost reference, bin that too
-					if (!is.null(ghost.reference) & binned.vars[i] %in% names(ghost.reference)){
-						val = as.numeric(ghost.reference[binned.vars[i]])
-						ghost.reference[binned.vars[i]] = cut(val, quants, labels=unlist(labels[i]), include.lowest=T, include.highest=T)
-					}
-										
-					if (!is.null(prediction)){
-						prediction[,binned.vars[i]] = cut(prediction[,binned.vars[i]], quants, labels= unlist(labels[i]), include.lowest=T, include.highest=T, na.rm=T)
-					}
-				}
-
-			}
-
-			if (!is.null(prediction)){
-							#### average the predictions within bin
-				f = make.formula("prediction.fit", c("model",
-														predictors[-which(predictors==binned.vars[i])],
-														binned.vars[i]
-														)
-									)			
-				prediction = aggregate(f, data=prediction, FUN=median, na.rm=T)
-
-			}			
-			
-		}
-
-
-				#### add code for "given" variable
-		if (!is.na(given[1])){
-			giv = facet_grid(as.formula(given.as.string),labeller = labeller(.rows = label_both, .cols=label_both))
-		} else {
-			giv = theme_bw()
-		}
-		
-
-
-		if (!is.null(jitter)){
-			if (jitter[1]==T & !is.numeric(jitter)[1]){
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)
-			} else if (jitter[1] == F & !is.numeric(jitter)[1]){
-				jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))
-			} else {
-				jit = geom_jitter(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])
-			}
-			
-		} else {
-			jit = geom_point(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha))
-		}
-	
-		
-		if (length(axis)>1){
-			
-			if (!is.numeric(data[,axis[1]])){
-				p = ggplot(data=data, aes_string(x=axis[1], y=outcome, shape=axis[2], linetype=axis[2], color=axis[2]))+
-					gm + 
-					jit + 
-					giv + 
-					summary1 + summary2 + 
-					sum.line +
-					theme_bw()
-			
-
-
-			} else {
-
-			p = ggplot(data=data, aes_string(x=axis[1], y=outcome, shape=axis[2], linetype=axis[2], color=axis[2]))+
-					gm + 
-					jit + 
-					giv + 
-					theme_bw()
-			}		
-		} else {
-			if (!is.numeric(data[,axis[1]])){
-				p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+
-					gm + 
-					jit + 
-					giv + 
-					summary1 + summary2 + 
-					sum.line +
-					theme_bw()
-			
-
-
-			} else {
-
-				p = ggplot(data=data, aes_string(x=axis[1], y=outcome))+
-					jit + 
-					gm +
-					giv + 
-					theme_bw()	
-				}
-		
-		}
-
-
-		if (!is.null(ghost.line)){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
-
-			### quit if they try to do two axes
-			if (!is.na(axis[2])){
-				stop("Sorry. I can't plot a second variable on the x axis. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")
-			}
-			
-
-					#### if they don't specify a reference group, choose one
-			if (is.null(ghost.reference)){
-				ghost.reference=list()
-				for (b in 1:length(given)){
-					l = data[1,given[b]]					
-					ghost.reference[[given[b]]]=l
-				}
-			} 
-
-			### make sure the reference groups are all in the data
-			if (sum(names(ghost.reference) %in%  variables) != length(ghost.reference)){
-				missing.var = names(ghost.reference[!(names(ghost.reference) %in% variables)])
-				msg = paste0("Sorry. One of your variables (", missing.var, ") is not in your formula.")
-				stop(msg)
-			}
-
-
-
-				# if (length(ghost.reference)!=length(given)){
-					# stop("When referencing a 'ghost line,' you must specify the value for each 'given' variable.")
-				# }
-	
-	
-			ghost.names = names(ghost.reference)
-			##### select those columns in d specified
-			k = data
-			for (s in 1:length(ghost.reference)){
-				if (!is.numeric(data[,ghost.names[s]])){
-					k = k[as.character(k[,ghost.names[s]])==unlist(ghost.reference[s]),]				
-				} else {
-					k = k[k[,ghost.names[s]]==unlist(ghost.reference[s]),]					
-				}
-			}				
-		
-
-			### identify which variables are in the given category
-			ghost.given = which(ghost.names %in% given)
-			if (is.numeric(k[,axis[1]])){
-				g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+gm				
-			} else {
-				g0 = ggplot(data=k, aes_string(x=axis[1], y=outcome))+summary1 + summary2 + 
-					sum.line				
-			}
-
-			d_smooth = ggplot_build(g0)$data[[1]]; 
-
-			### rename columns
-			names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 
-
-
-			## add line to existing plot   
-			p = p + geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)
-			
-		}		
-
-		
-	
-
-	}	
-
-	if (!is.null(prediction)){	
-		
-		#### check if first variable is a continuous predictor
-		if (is.numeric(data[,predictors[1]])){
-		
-			p = p + geom_line(data= prediction, aes(linetype=model, y=prediction.fit, color=model), size=2)			
-		} else {
-			
-			p = p + geom_point(data=prediction, aes(y=prediction.fit, color=model), position=position_dodge(width=.2)) + geom_errorbar(data=prediction, aes(y=NULL, ymin=lower, ymax=upper, color=model, width=.4))
-		
-		}
-		if (data_output){
-			ret = list(plot=p, data=data, gm=gm, summary1=summary1, summary2=summary2, sum.ine=sum.line)
-			return(ret)
-		} else {
-			return(p)
-			
-		}			
-	} else {
-		if (data_output){
-			ret = list(plot=p, data=data, gm=gm, summary1=summary1, summary2=summary2, sum.ine=sum.line)
-			return(ret)
-		} else {
-			return(p)
-		}
+		points = points.func(axis.var=axis[1], data=data, jitter=jitter)
+		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)
 	}
 
-}
+	#### all the above should take care of ALL possible plots, but now we add paneling
+	
+	#### add panels (if they were specified)
+	if (!is.na(given[1])){
+		for (i in 1:length(given)){
+
+			binned.name = paste0(given[i], "_binned")
+
+			if (is.numeric(data[,given[i]])){
+				data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])
+			} else {
+				### duplicate categorical variables and give a new name for binned ones
+				data[,binned.name] = data[,given[i]]
+			}
+		}
+
+		#### prep the given variables to be stringed together
+		given2 = given
+		if (length(break.me)>0){
+			given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")
+		}	
+		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
+		
+		#### make a custom labeller that removes "_binned"
+		custom.labeler = function(x){
+			lapply(names(x),function(y){
+			paste0(gsub("_binned", "", y),": ", x[[y]])
+			})
+		}
+		facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			
+	} else {
+		facets = "xxxx"
+	}
+
+
+	
+
+	if (!is.null(ghost.line)){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
+
+		### quit if they try to do two axes
+		if (!is.na(axis[2])){
+			stop("Sorry. I can't plot ghost lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")
+		}
+
+				### bin the ghost reference if it's not null
+		if (!is.null(ghost.reference)){
+			for (i in 1:length(given)){
+
+			binned.name = paste0(given[i], "_binned")
+			### if the ghost reference is null, randomly fill something in
+			if (is.null(ghost.reference[[given[i]]])){
+				rand.val = sample(1:nrow(data), 1)
+				ghost.reference[[given[i]]] = data[rand.val,binned.name]
+				location = which(names(ghost.reference)==given[i])
+				names(ghost.reference)[location] = binned.name
+				if (!silent){cat(paste0("Note: You didn't choose ghost.reference values for ", given[i], ". I'm going to choose one at random.\n"))}
+			} else {
+				#k[nrow(k), given[i]] = as.numeric(ghost.reference[[given[i]]])
+				#k[,binned.name] = bin.me(given[i], k, bins, labels[i], brks)
+				
+				ghost.reference[[binned.name]] = bin.me(variable=given[i], data=ghost.reference, bins=bins, labels=labels[i], breaks=breaks[[given[i]]], check.breaks=F)
+	
+				#location = which(names(ghost.reference)==given[i])
+				#names(ghost.reference)[location] = binned.name						
+				}
+			}
+		} else {
+						
+			#### if they don't specify any reference group, choose one
+
+			ghost.reference=list()
+			for (b in 1:length(given)){
+				given.bin = paste0(given[b], "_binned")
+				### format given as a binned variable
+				l = data[,given.bin]
+
+				ghost.reference[[given.bin]]=sample(l, 1)
+			}
+
+			if (!silent){cat(paste0("Note: You didn't specify a reference for the ghost line. I'm going to choose it at random.\n"))}
+
+		#### if they specify a reference group for some of them, but not all
+		}
+		
+		
+		##### select those columns in d specified
+		k = data
+		s=1
+		for (s in 1:length(given)){
+			binned.name = paste0(given[s], "_binned")
+			k = k[(k[,binned.name])==unlist(ghost.reference[[binned.name]]),]				
+		}				
+
+		#### is k gone???
+		if (nrow(k)==0){
+			stop("there was an error in generating the ghost line. Please email the developer: fife.dustin@gmail.com")
+		}
+
+
+		### create ggplot object to extract the fit for the ghost line
+		g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome))+', fitted)				
+		g0 = gsub("+xxxx", "", g0, fixed=T)
+		g0 = eval(parse(text=g0))
+		d_smooth = ggplot_build(g0)$data[[1]]; 
+
+		### rename columns
+		names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 
+
+
+		## add line to existing plot   
+		ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)'
+		
+	} else {
+		ghost = "xxxx"
+	}	
+
+
+	### add prediction lines
+	if (!is.null(prediction)){
+	
+		if (!is.na(axis[2])){
+			stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")
+		}
+
+
+		#### bin the predictions, where needed
+		if (length(break.me)>0){
+			for (i in 1:length(break.me)){
+				### find that variable in the model and bin it
+				prediction[[break.me[i]]] = bin.me(break.me[i], prediction, bins, labels[i], breaks[[break.me[i]]])
+				names(prediction)[names(prediction)==break.me[i]] = paste0(break.me[i], "_binned")
+				
+				### now average fit within bin
+				groups = c("model", paste0(break.me[i], "_binned"), predictors[-which(predictors==break.me[i])])
+				prediction = prediction %>% group_by_at(groups) %>% summarize(prediction = mean(prediction))
+			}
+		}
+
+		#### check if first variable is a continuous predictor
+		if (is.numeric(data[[predictors[1]]])){
+		
+			pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 
+			                         
+		} else {
+
+			pred.line = 'geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))'
+		
+		}
+		prediction
+		
+		#### remove linetype from the plot
+		
+		
+	} else {
+		pred.line = "xxxx"
+	}
+
+	theme = "theme_bw()"
+
+	#### evaluate the plot
+
+	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
+	### remove +xxxx (happens when I've made an element blank)
+	total.call = gsub("+xxxx","",total.call, fixed=T)
+	final = eval(parse(text=total.call))
+	return(final)
+}	

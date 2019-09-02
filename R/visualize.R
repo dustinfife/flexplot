@@ -1,7 +1,7 @@
 #' Visualize a fitted model 
 #'
 #' Visualize a fitted model
-#' @param object a lmer object
+#' @param object a fitted object
 #' @param plot what should be plotted? Residuals? Bivariate plot? All of them?
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
@@ -132,7 +132,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 			cat("Note: to visualize more than four variables, I'm going to do an 'added variable plot.'")
 			
 			f = object$call[[2]]
-			step3 = added.plot(f, data=d, ...)
+			step3 = added.plot(f, data=d, ...) + labs(title="Analysis Plot")
 		} else {
 		
 			#### if both numeric and factor, put numeric on x axis and factor as color/line
@@ -153,11 +153,11 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 			x = gsub("+|", "", x, fixed=T)
 			f = as.formula(x)		
 	
-			step3 = flexplot(f, data=data, ...)
+			step3 = flexplot(f, data=data, ...)+ labs(title="Analysis Plot")
 			
 			### if they have more than two variables, also include a added variable plot
 			if (length(terms)>1){
-				step3b = added.plot(f, data=d,...)
+				step3b = added.plot(f, data=d,...)+ labs(title="Added Variable Plot")
 				step3 = cowplot::plot_grid(step3, step3b, rel_widths=c(.6, .4))
 			}
 		}
@@ -178,76 +178,88 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 			cowplot::plot_grid(histo, sl, ncol=1)
 		}
 	} else {
-		
 		if (length(terms)==1){
-			cowplot::plot_grid(step3, histo, res.dep, sl)
+			if (length(numbers)>0){
+				top.row = cowplot::plot_grid(step3, histo)
+				bottom.row = cowplot::plot_grid(res.dep, sl, ncol=2)
+				heights = c(.5, .5)
+			} else {
+				top.row = cowplot::plot_grid(NULL, step3, NULL, ncol=3, rel_widths=c(.25, .5, .25))
+				bottom.row = cowplot::plot_grid(histo, sl, ncol=2)
+				heights = c(.6, .4)
+			}
+
 		} else {
 			if (length(numbers)>0){
+				top.row = step3
 				bottom.row = cowplot::plot_grid(histo, res.dep, sl, ncol=3)
+				heights = c(.7, .3)				
 			} else {
-				bottom.row = cowplot::plot_grid(NULL, histo, sl, NULL, ncol=4, rel_widths=c(.1, .4, .4, .1))
+				top.row = step3
+				bottom.row = cowplot::plot_grid(histo, sl, ncol=2)
+				heights = c(.7, .3)								
 			}
 		}	
 		
-		cowplot::plot_grid(step3, bottom.row, nrow=2, rel_heights=c(.7, .3))		
+		cowplot::plot_grid(top.row, bottom.row, nrow=2, rel_heights=heights)		
 		
 }
 }
 
-#' Visualize a fitted model 
-#'
-#' Visualize a fitted model
-#' @param object a lmer object
-#' @param plot what should be plotted? Residuals? Bivariate plot? All of them?
-#' @param ... Other arguments passed to flexplot
-#' @param formula A flexplot-style formula
-#' @export
-visualize.lmerMod = function(object, plot=c("residuals", "all", "bivariate"), formula=NULL, ...){
+# #' Visualize a fitted model 
+# #'
+# #' Visualize a fitted model
+# #' @param object a lmer object
+# #' @param plot what should be plotted? Residuals? Bivariate plot? All of them?
+# #' @param ... Other arguments passed to flexplot
+# #' @param formula A flexplot-style formula
+# #' @export
+# visualize.lmerMod = function(object, plot=c("residuals", "all", "bivariate"), formula=NULL, ...){
 	
 
-	plot = match.arg(plot, c("all", "residuals", "bivariate"))
-	#### figure out what is numeric
-	d = object@frame
-	levels = apply(d, 2, FUN=function(x) length(unique(x)))
+	# plot = match.arg(plot, c("all", "residuals", "bivariate"))
+	# #### figure out what is numeric
+	# d = object@frame
+	# levels = apply(d, 2, FUN=function(x) length(unique(x)))
 	
-	#### if there's too few levels and it's not categorical
-	factors = !sapply(d, is.factor)
-	if (any(levels<5 & factors)){
-		cat("Note: one or more of your variables has less than 5 values, yet they're treated as numeric.\n\n")
-	}
+	# #### if there's too few levels and it's not categorical
+	# factors = !sapply(d, is.factor)
+	# if (any(levels<5 & factors)){
+		# cat("Note: one or more of your variables has less than 5 values, yet they're treated as numeric.\n\n")
+	# }
 	
-	#### extract names
-	x.names = names(d)[-1] 
-	y.name = names(d)[1]
+	# #### extract names
+	# x.names = names(d)[-1] 
+	# y.name = names(d)[1]
 	
-	#### export residuals
-	d$residuals = residuals(object)
-	d$abs.res = abs(d$residuals)
-	d$fitted = fitted(object)
+	# #### export residuals
+	# d$residuals = residuals(object)
+	# d$abs.res = abs(d$residuals)
+	# d$fitted = fitted(object)
 	
-	#### plot residuals
-	histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
-	res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point(alpha = .35, size=.75) + geom_smooth(method="loess") + 
-		theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
-	sl = ggplot2::ggplot(data=d, aes(y=abs.res, x=fitted)) + geom_point(alpha=.35, size=.75) + geom_smooth(method= linetype) +
-			theme_bw() + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
+	# #### plot residuals
+	# histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
+	# res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point(alpha = .35, size=.75) + geom_smooth(method="loess") + 
+		# theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
+	# sl = ggplot2::ggplot(data=d, aes(y=abs.res, x=fitted)) + geom_point(alpha=.35, size=.75) + geom_smooth(method= linetype) +
+			# theme_bw() + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
 	
 
-	#### use flexplot to visualize
-	if (plot=="all" | plot=="bivariate" & is.null(formula)){
-		warning("You must provide a formula argument to plot the data. I'm just returning the residual plots.")
-	} else if (plot=="all"){
-		step3 = flexplot(formula, data=d, ...)
-	}
+	# #### use flexplot to visualize
+	# if (plot=="all" | plot=="bivariate" & is.null(formula)){
+		# warning("You must provide a formula argument to plot the data. I'm just returning the residual plots.")
+	# } else if (plot=="all"){
+		# step3 = flexplot(formula, data=d, ...)
+	# }
 
-	#### return the plots
-	if (plot=="bivariate"){
-		return(step3)
-	} else if (plot=="residuals"){
-		top.row = plot_grid(histo, res.dep,ncol=2)
-		bottom.row = plot_grid(NULL, sl, NULL, ncol=3, rel_widths=c(.25, .5, .25))
-		cowplot::plot_grid(top.row, bottom.row, ncol=1)
-	} else {
-		cowplot::plot_grid(step3, histo, res.dep, sl)
-	}
-}
+	# #### return the plots
+	# if (plot=="bivariate"){
+		# return(step3)
+	# } else if (plot=="residuals"){
+		# top.row = plot_grid(histo, res.dep,ncol=2)
+		# bottom.row = plot_grid(NULL, sl, NULL, ncol=3, rel_widths=c(.25, .5, .25))
+		# cowplot::plot_grid(top.row, bottom.row, ncol=1)
+	# } else {
+		# cowplot::plot_grid(step3, histo, res.dep, sl)
+	# }
+# }
