@@ -28,6 +28,10 @@ added.plot = function(formula, data, ...){
 		# stop("You must have exactly two predictor variables")
 	# }
 	
+	if (is.tibble(data)){
+		data = data.frame(data)
+	}
+	
 	#### remove missing data
 	miss.vals = sapply(data[,variables], function(x) sum(is.na(x)))
 	miss.vals = miss.vals[miss.vals>0]

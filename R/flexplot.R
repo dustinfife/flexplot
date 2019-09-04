@@ -77,7 +77,7 @@ points.func = function(axis.var, data, jitter){
 	
 		#### if they don't specify both vectors for jitter, warn them
 		if (is.numeric(jitter)[1] & length(jitter)<2){
-			warning("You're supposed to supply TWO values for jitter (one for x axis, one for y axis). You only supplied one. I'm going to assume the value you gave is for the x axis, then I'll set the y axis to 0.")
+			cat("You're supposed to supply TWO values for jitter (one for x axis, one for y axis). You only supplied one. I'm going to assume the value you gave is for the x axis, then I'll set the y axis to 0.\n")
 			jitter[2] = 0
 		}
 	
@@ -91,7 +91,7 @@ points.func = function(axis.var, data, jitter){
 		} else if (jitter[1] == F & !is.numeric(jitter)[1]){
 			jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha))")
 		} else {
-			jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])")				
+			jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=", jitter[1], ", height=", jitter[2], ")")				
 		}
 	
 	#### if they left jitter at the default	
@@ -277,15 +277,16 @@ flexplot = function(formula, data, related=F,
 			
 	#d = exercise_data
 	##### use the following to debug flexplot
-	#formula = formula(weight.loss~therapy.type + rewards); related=T; data=d; 
+	#formula = formula(weight.loss~therapy.type + rewards); data=d; 
 	#bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F
 	#data(exercise_data)
 	#d = exercise_data
 	#formula = formula(weight.loss~rewards+gender|income); data=d; 
 	#ghost.reference = list(income=90000)
 	
-
-
+	if (is.tibble(data)){
+		data = as.data.frame(data)
+	}
 
 
 	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
@@ -333,7 +334,7 @@ flexplot = function(formula, data, related=F,
 	
 	### PLOT UNIVARIATE PLOTS
 	if (length(outcome)==1 & length(predictors)==0){
-		
+
 		##### reorder according to columns lengths (if it's not an ordered factor)
 		if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){
 			counts = sort(table(data[,outcome]), decreasing=T)
@@ -343,7 +344,7 @@ flexplot = function(formula, data, related=F,
 		
 		
 		### figure out how many levels for the variable
-		levels = length(unique(d[,outcome]))	
+		levels = length(unique(data[,outcome]))	
 		
 		#### if numeric, do a histogram
 		if (is.numeric(data[,outcome])){
@@ -351,7 +352,6 @@ flexplot = function(formula, data, related=F,
 		} else {
 			p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
 		} 
-		
 		points = "xxxx"
 		fitted = "xxxx"		
 
@@ -369,6 +369,7 @@ flexplot = function(formula, data, related=F,
 
 			### reorder axis and alter default alpha if categorical
 			if (!is.numeric(data[,axis])){
+
 				#### reorder if it's not already ordered
 				if (!is.ordered(data[, axis[1]])){
 					if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
