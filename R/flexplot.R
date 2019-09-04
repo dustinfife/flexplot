@@ -85,13 +85,13 @@ points.func = function(axis.var, data, jitter){
 		#### if they said jitter=T
 		if (jitter[1]==T & !is.numeric(jitter)[1]){
 			#### I'm putting the command as a string to avoid environment problems
-			jit = paste0("geom_jitter(data=sample.subset(sample,", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)")
+			jit = paste0("geom_jitterd(data=sample.subset(sample,", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=.2)")
 			
 		#### if they said jitter=F	
 		} else if (jitter[1] == F & !is.numeric(jitter)[1]){
 			jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha))")
 		} else {
-			jit = paste0("geom_jitter(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])")				
+			jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=jitter[1], height=jitter[2])")				
 		}
 	
 	#### if they left jitter at the default	
@@ -99,7 +99,7 @@ points.func = function(axis.var, data, jitter){
 	
 		### if x axis is categorical, jitter it by .2
 		if (!is.numeric(data[[axis.var[1]]])){
-			jit = paste0("geom_jitter(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2)")				
+			jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2)")				
 			
 		### if x axis is numeric, don't jitter it	
 		} else {
@@ -135,7 +135,10 @@ fit.function = function(outcome, predictors, data, suppress_smooth, method, spre
 			
 			#### specify the curve
 			fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)'
-		} else if (method=="poisson" | method=="Gamma") {
+		} else if (method=="rlm"){
+			require(MASS)
+			fit.string = 'geom_smooth(method = "rlm", se = se)'
+		}else if (method=="poisson" | method=="Gamma") {
 			#### specify the curve
 			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se)'
 		} else {
@@ -214,6 +217,7 @@ fit.function = function(outcome, predictors, data, suppress_smooth, method, spre
 ##' @param alpha The transparency of the datapoints. 
 ##' @param data_output Should the data be outputted?
 ##' @param silent Should all messages be suppressed? Defaults to F.
+##' @param third.eye Should the "third eye" be employed? The third eye will 
 ##' @author Dustin Fife
 ##' @import ggplot2
 ##' @export
@@ -268,7 +272,8 @@ flexplot = function(formula, data, related=F,
 		ghost.line=NULL, ghost.reference=NULL,
 		spread=c('quartiles', 'stdev', 'sterr'), jitter=NULL, raw.data=T,
 		sample=Inf, 
-		prediction = NULL, suppress_smooth=F, alpha=.99977, data_output=F, silent=F){
+		prediction = NULL, suppress_smooth=F, alpha=.99977, data_output=F, silent=F,
+		third.eye=F){
 			
 	#d = exercise_data
 	##### use the following to debug flexplot
@@ -598,6 +603,10 @@ flexplot = function(formula, data, related=F,
 	} else {
 		pred.line = "xxxx"
 	}
+	
+	
+	##### do third eye if they choose to
+	#if (third.eye)
 
 	theme = "theme_bw()"
 

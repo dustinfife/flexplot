@@ -36,7 +36,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 	
 
 	plot = match.arg(plot, c("all", "residuals", "bivariate"))
-	
+
 	
 	terms = attr(terms(object), "term.labels")
 	
@@ -74,7 +74,9 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 	d$fitted = fitted(object)
 
 	#### plot residuals
-	histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
+	levels = length(unique(round(d[,"residuals"], digits=2)))		
+	
+	histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black', bins=min(30, round(levels/2))) + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
 	if (length(numbers)>0){
 		#res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + 
 		#theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
@@ -203,7 +205,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "bivariate"), formula
 		
 		cowplot::plot_grid(top.row, bottom.row, nrow=2, rel_heights=heights)		
 		
-}
+	}
 }
 
 # #' Visualize a fitted model 

@@ -9,7 +9,7 @@ flexplot(formula, data, related = F, bins = 4, labels = NULL,
   ghost.reference = NULL, spread = c("quartiles", "stdev", "sterr"),
   jitter = NULL, raw.data = T, sample = Inf, prediction = NULL,
   suppress_smooth = F, alpha = 0.99977, data_output = F,
-  silent = F)
+  silent = F, third.eye = F)
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}
@@ -50,6 +50,8 @@ have that number of bins, but it will try to make it work.}
 \item{data_output}{Should the data be outputted?}
 
 \item{silent}{Should all messages be suppressed? Defaults to F.}
+
+\item{third.eye}{Should the "third eye" be employed? The third eye will}
 }
 \description{
 Create a flexible plot
