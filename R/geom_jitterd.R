@@ -16,6 +16,7 @@
 #'     distribution of a variable
 #'  \link[ggplot2]{geom_jitter()} for standard jittering
 #' @export
+#' @import tidyverse
 #' @examples
 #' p <- ggplot(mpg, aes(cyl, hwy))
 #' p + geom_point()
@@ -91,6 +92,7 @@ position <- position_jitterd(width = width, height = height, quad.points=quad.po
 #'   Use `NULL` to use the current random seed and also avoid resetting
 #'   (the behaviour of \pkg{ggplot} 2.2.1 and earlier).
 #' @export
+#' @import tidyverse
 #' @examples
 #' # Jittering is useful when you have a discrete position, and a relatively
 #' # small number of points
@@ -126,9 +128,9 @@ position_jitterd <- function(width = NULL, height = NULL, quad.points=10
   )
 }
 
+#' @import tidyverse
 PositionJitterd <- ggproto("PositionJitterd", Position,
   required_aes = c("x", "y"),
-
   setup_params = function(self, data) {
     list(
       width = self$width %||% (resolution(data$x, zero = FALSE) * 0.4),

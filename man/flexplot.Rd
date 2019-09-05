@@ -9,7 +9,7 @@ flexplot(formula, data, related = F, bins = 4, labels = NULL,
   ghost.reference = NULL, spread = c("quartiles", "stdev", "sterr"),
   jitter = NULL, raw.data = T, sample = Inf, prediction = NULL,
   suppress_smooth = F, alpha = 0.99977, data_output = F,
-  silent = F, third.eye = F)
+  silent = F, third.eye = NULL)
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}
