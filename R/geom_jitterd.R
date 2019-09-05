@@ -155,11 +155,16 @@ with_seed_null <- function(seed, code) {
 }
 
 mp.density = function(y){
-	dens = density(y)
-	#### match densities with values
-	densities = as.numeric(as.character(cut(y, dens$x, labels=dens$y[-1])))
-	densities = densities/max(densities)	
-	return(densities)
+	
+	if (length(y)>3){
+		dens = density(y)
+		#### match densities with values
+		densities = as.numeric(as.character(cut(y, dens$x, labels=dens$y[-1])))
+		densities = densities/max(densities)	
+		return(densities)
+	} else {
+		densities = rep(.1, times=length(y))
+	}
 }
 
 jitterd = function(x, y, quad.points, amount=NULL){
@@ -172,8 +177,11 @@ jitterd = function(x, y, quad.points, amount=NULL){
 	if (is.numeric(k$x)){
 		k$x = round(k$x, digits=2)
 	}
+	
 
 	k = k%>% group_by(as.factor(x)) %>% mutate(density=mp.density(y))
 	k$x = k$x + runif(length(k$x), -amount*k$density, amount*k$density)
+
 	return(k$x)
+	
 }

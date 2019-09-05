@@ -28,7 +28,7 @@ added.plot = function(formula, data, ...){
 		# stop("You must have exactly two predictor variables")
 	# }
 	
-	if (is.tibble(data)){
+	if (tibble::is_tibble(data)){
 		data = data.frame(data)
 	}
 	

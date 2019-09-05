@@ -1,3 +1,97 @@
+
+permutations <- function(n){
+    if(n==1){
+        return(matrix(1))
+    } else {
+        sp <- permutations(n-1)
+        p <- nrow(sp)
+        A <- matrix(nrow=n*p,ncol=n)
+        for(i in 1:n){
+            A[(i-1)*p+1:p,] <- cbind(i,sp+(sp>=i))
+        }
+        return(A)
+    }
+}
+
+rotate.view = function(formula, third.eye){
+
+	variables = all.vars(formula)
+	outcome = variables[1]
+	predictors = variables[-1]
+	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
+	given = gsub(" ", "", given)		
+	given = unlist(strsplit(given, "+", fixed=T))	
+	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
+	axis = gsub(" ", "", axis)			
+	axis = unlist(strsplit(axis, "+", fixed=T))	
+	
+	if (!is.null(third.eye) & length(predictors)>1){
+		
+		### if their list is longer than the number of variables, delete the last ones
+		if (length(third.eye)>4){
+			cat("You provided more slots in third.eye than possible. I'm deleting the latter ones.\n")
+			third.eye = third.eye[1:4]
+		
+		### if their list is shorter than the number of variables, assume the rest are free to vary		
+		} else if (length(third.eye)<4){
+			cat("Third.eye expects four slots (two axes, two panels). You provided less, but I'll assume you want to vary the locations of the other slots as well.\n")
+			a = rep(T, times=4)
+			a[1:length(third.eye)] = third.eye
+			third.eye = a
+		}
+		
+		### make a vector of all slots
+		all.vars = rep("", times=4)
+		all.vars[1:length(axis)] = axis
+		if (!is.na(given[1])){
+			all.vars[3:(2+length(given))] = given			
+		}
+		all.nums = 1:4; if (sum(third.eye)!=4) all.nums = all.nums[-which(!third.eye)]
+		
+		#### specify which slots are allowed to vary and which are fixed
+		fixed = all.vars[!third.eye]
+		free = all.vars[which(!(all.vars %in% fixed))]
+	
+		#### figure out numbers of slots allowed to vary
+		slots.to.randomize = which(!(all.vars %in% fixed))
+	
+		#### find all possible permutations
+		perms = matrix(slots.to.randomize[permutations(length(slots.to.randomize))], ncol=length(slots.to.randomize))
+		
+		#### remove perms rows that are the same ordering
+		same.order = which(paste0(all.nums, collapse=",") == apply(perms, 1, paste0, collapse=","))
+		perms = perms[-same.order,]
+		
+		### make sure axis[1] is not random
+		if (third.eye[1]){
+			### find those where ""
+			mis = which(free=="")
+			
+			#### remove those situations where mis (missing value) is given a 1 in perm
+			good.bye=which(perms[,mis] == 1)
+			if (length(good.bye)>0) perms = perms[-good.bye,]
+		}
+		
+		#### randomly decide permutation
+		rand.row = sample(1:nrow(perms), size=1)
+	
+		#### create new formula
+		new.allvars = all.vars
+		new.allvars[perms[rand.row,]] = free
+		
+		new.allvars[new.allvars==""] = "xxx"
+		stay = which(new.allvars!="")
+		symbols = c("~", "+", "|", "+")
+		f = paste0(symbols, new.allvars, collapse="")
+		f = gsub("xxx+", "", f, fixed=T)
+		f = gsub("+xxx", "", f, fixed=T)		
+		formula = formula(paste0(outcome, f, collapse=""))
+		return(formula)
+	} else {
+		return(formula)
+	}
+}
+
 prep.breaks = function(variable, data, breaks=NULL, bins=4){
 
 		breaks = unlist(breaks)	
@@ -106,7 +200,7 @@ points.func = function(axis.var, data, jitter){
 			jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha))")
 		}
 	}
-	
+
 	
 	#### return the jittered string
 	return(jit)		
@@ -219,7 +313,7 @@ fit.function = function(outcome, predictors, data, suppress_smooth, method, spre
 ##' @param silent Should all messages be suppressed? Defaults to F.
 ##' @param third.eye Should the "third eye" be employed? The third eye will 
 ##' @author Dustin Fife
-##' @import ggplot2
+##' @import tidyverse
 ##' @export
 ##' @examples
 #' data(exercise_data)
@@ -273,29 +367,39 @@ flexplot = function(formula, data, related=F,
 		spread=c('quartiles', 'stdev', 'sterr'), jitter=NULL, raw.data=T,
 		sample=Inf, 
 		prediction = NULL, suppress_smooth=F, alpha=.99977, data_output=F, silent=F,
-		third.eye=F){
+		third.eye=NULL){
 			
 	#d = exercise_data
 	##### use the following to debug flexplot
 	#formula = formula(weight.loss~therapy.type + rewards); data=d; 
-	#bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F
+	#bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
 	#data(exercise_data)
 	#d = exercise_data
-	#formula = formula(weight.loss~rewards+gender|income); data=d; 
+	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
 	#ghost.reference = list(income=90000)
 	
-	if (is.tibble(data)){
+	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
+	if (tibble::is_tibble(data)){
 		data = as.data.frame(data)
 	}
-
+	
 
 	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
 
 
-		#### extract outcome, predictors, and given variables
+		
 	variables = all.vars(formula)
 	outcome = variables[1]
 	predictors = variables[-1]
+	
+		# #### extract outcome, predictors, and given variables
+	# if (!is.null(third.eye) & length(predictors)>2){
+		# formula = rotate.view(formula = formula, third.eye= third.eye)
+		# variables = all.vars(formula)
+		# outcome = variables[1]
+		# predictors = variables[-1]		
+	# }
+		
 	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
 	given = gsub(" ", "", given)		
 	given = unlist(strsplit(given, "+", fixed=T))	
@@ -328,6 +432,8 @@ flexplot = function(formula, data, related=F,
 			breaks[[break.me[i]]] = prep.breaks(break.me[i], data, breaks[[break.me[i]]], bins)					
 		}
 	} 
+	
+	
 
 	### BEGIN THE MEGA PLOTTING IFS!
 	
@@ -383,10 +489,11 @@ flexplot = function(formula, data, related=F,
 					alpha = .2
 				}		
 			}
-			
+
 			p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
 			points = points.func(axis.var=axis, data=data, jitter=jitter)
 			fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
+
 		}	
 	
 	### RELATED T-TEST
