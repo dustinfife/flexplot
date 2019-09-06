@@ -132,6 +132,7 @@ position_jitterd <- function(width = NULL, height = NULL, quad.points=10
 PositionJitterd <- ggproto("PositionJitterd", Position,
   required_aes = c("x", "y"),
   setup_params = function(self, data) {
+	require(tidyverse)
     list(
       width = self$width %||% (resolution(data$x, zero = FALSE) * 0.4),
       height = self$height %||% (resolution(data$y, zero = FALSE) * 0.4),
