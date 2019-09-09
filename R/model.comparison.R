@@ -31,7 +31,7 @@ model.comparison = function(model1, model2){
 		anova.res = anova(model1, model2)
 		names(anova.res)
 		p = unlist(anova.res["Pr(>F)"])[2]
-		r.squared = c(summary(a)$r.squared, summary(b)$r.squared)
+		r.squared = c(summary(model1)$r.squared, summary(model2)$r.squared)
 		#1-pchisq( abs(anova.res$Deviance[2]), abs(anova.res$Df[2]))
 	} else {
 		p = NA
