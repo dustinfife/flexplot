@@ -11,6 +11,7 @@
 ##' @return A plot
 ##' @author Dustin Fife
 ##' @export
+##' @import ggplot2
 ##' @examples
 ##' distress = sample(1:10, size=22, replace=T)
 ##' uni.plot(distress, numeric=T, d=NULL)

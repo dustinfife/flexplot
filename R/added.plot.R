@@ -11,13 +11,21 @@
 ##' @seealso \code{\link{flexplot}}
 ##' @author Dustin Fife
 ##' @export
+##' @import tidyverse tibble
 ##' @examples
 ##' data(exercise_data)
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
 added.plot = function(formula, data, ...){
 
+
+
 	#### identify variable types
 	variables = all.vars(formula)
+		#### make sure all variables in in data
+	missing.preds = variables[which(!(variables %in% names(data)))]
+	if (length(missing.preds)>0){
+		stop(paste0("One or more of your predictor variables: ", paste0(missing.preds, collapse=","), " are missing. Did you specify the right dataset and spell the variables correctly?"))
+	}	
 	outcome = variables[1]
 	predictors = variables[-1]
 	res.variable = predictors[length(predictors)]

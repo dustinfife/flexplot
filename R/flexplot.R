@@ -28,7 +28,7 @@
 ##' @param silent Should all messages be suppressed? Defaults to F.
 ##' @param third.eye Should the "third eye" be employed? The third eye will 
 ##' @author Dustin Fife
-##' @import tidyverse
+##' @import tidyverse tibble ggplot2
 ##' @export
 ##' @examples
 #' data(exercise_data)
@@ -148,6 +148,12 @@ flexplot = function(formula, data, related=F,
 		}
 	} 
 	
+	#### if they only have a few levels on the x axis, jitter convert it to categorical
+	if (length(predictors)>0){
+		if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){
+			data[,axis[1]] = factor(data[,axis[1]], ordered=T)
+		}
+	}
 	
 
 	### BEGIN THE MEGA PLOTTING IFS!
@@ -291,7 +297,7 @@ flexplot = function(formula, data, related=F,
 		if (length(break.me)>0){
 			given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")
 		}	
-		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
+		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0((given2), collapse="~"), paste0("~",given2))
 		
 		#### make a custom labeller that removes "_binned"
 		custom.labeler = function(x){

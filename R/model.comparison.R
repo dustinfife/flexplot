@@ -31,9 +31,11 @@ model.comparison = function(model1, model2){
 		anova.res = anova(model1, model2)
 		names(anova.res)
 		p = unlist(anova.res["Pr(>F)"])[2]
+		r.squared = c(summary(a)$r.squared, summary(b)$r.squared)
 		#1-pchisq( abs(anova.res$Deviance[2]), abs(anova.res$Df[2]))
 	} else {
 		p = NA
+		r.squared = c(NA, NA)
 	}
 	
 	m1.name = deparse(substitute(model1))
@@ -42,7 +44,7 @@ model.comparison = function(model1, model2){
 	bic = c(BIC(model1), BIC(model2))
 	bayes.factor = bf.bic(model1, model2)
 	
-	model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, NA), p.value=c(p, NA))
+	model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, NA), p.value=c(p, NA), r.squared=r.squared)
 	row.names(model.table) = c(m1.name, m2.name)
 
 	#### compute difference in predicted value (scaled)
@@ -61,9 +63,9 @@ model.comparison = function(model1, model2){
 		}
 		predictions = data.frame(rbind(predictions, difference)); row.names(predictions)[3] = "Difference"
 	
-		list(statistics=model.table, predictions=predictions, pred.difference = differences)
+		list(statistics=round(model.table, digits=4), predictions=predictions, pred.difference = differences)
 	} else {
-		list(statistics=model.table, pred.difference = differences)
+		list(statistics=round(model.table, digits=4), pred.difference = differences)
 	}
 	
 	

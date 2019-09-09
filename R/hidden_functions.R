@@ -165,6 +165,9 @@ raw.alph.func = function(raw.data,alpha=1){
 	#### points = the datapoints
 points.func = function(axis.var, data, jitter){
 	
+	### jitter if it's numeric BUT only a few levels
+
+	
 	### if they specified something for jitter
 	if (!is.null(jitter)){
 	
@@ -204,7 +207,9 @@ points.func = function(axis.var, data, jitter){
 	#### return the jittered string
 	return(jit)		
 }
-	
+
+
+##' @import MASS	
 #### identify the correct "fit"
 fit.function = function(outcome, predictors, data, suppress_smooth, method, spread, mean.line=F, categorical=FALSE){
 	

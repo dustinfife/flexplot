@@ -25,20 +25,31 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		old.mod = 0
 	}
 
+	#### get type of model
+	model1.type = class(model1)[1]
+	model2.type = class(model2)[1]	
+
 	#### extract the terms from each model
+	### if random forest...
+	if (model1.type=="randomForest" | model1.type=="randomForest.formula"){
+		testme = attr(model1$terms, "term.labels")		
+	} else {
+		testme = all.vars(model1$call)
+	}
+	
 	terms.mod1 = attr(terms(model1), "term.labels")
 	terms.mod2 = attr(terms(model2), "term.labels")
 		
-	#### check if models have the same terms
-	# if (length(which(!(terms.mod1 %in% terms.mod2)))>0 | length(which(!(terms.mod2 %in% terms.mod1)))>0){
-		# warning("You should probably have the same predictors in both models for a better comparison.")
-	# }
-
 	##### extract variable names
 	variables = all.vars(formula)
     outcome = variables[1]
     predictors = variables[-1]
     
+    ##### make sure they're putting the same variables from formula in terms
+	if (!(all(predictors %in% testme))){
+		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%terms.mod1)], collapse=",")))
+	}
+
 
 	#### create random column just to make the applies work (yeah, it's hacky, but it works)
     data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)
@@ -71,9 +82,8 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	all.vars = all.vars[-rejects]
 	pred.values = expand.grid(all.vars)
 	
-	
-	model1.type = class(model1)[1]
-	model2.type = class(model2)[1]
+
+
 
 
 	##### look for interactions and remove them
@@ -122,10 +132,12 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= model1.type)		
 	} else if (model1.type == "polr"){
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="class", re.form=NA), model= model1.type)		
-	} else  if (model1.type == "lm"){
-		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval="confidence")[,1], model=model1.type)
+	} else if (model1.type == "lm" | model1.type == "polynomial" | model1.type=="interaction"){
+		int = ifelse(report.se, "confidence", "none")
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval=int), model=model1.type)
 	} else {	
-		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", interval="confidence"), model= model1.type)		
+		int = ifelse(report.se, "confidence", "none")
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", interval=int), model= model1.type)		
 	}
 
 
@@ -134,6 +146,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	} else if (model2.type == "polr"){
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="class", re.form=NA), model= model2.type)		
 	} else if (model2.type == "lm" | model2.type == "polynomial" | model2.type=="interaction"){
+		int = ifelse(report.se, "confidence", "none")
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, interval="confidence")[,1], model=model2.type)
 	} else {
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= model2.type)		
@@ -160,9 +173,9 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	#### eliminate those predictions that are higher than the range of the data
 	if (!is.factor(data[,outcome])){
 	min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)
-	if (length(which(prediction.model$prediction>max.dat)>0 | length(which(prediction.model$prediction<min.dat)))){
-		prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]
-	}
+		if (length(which(prediction.model$prediction>max.dat)>0 | length(which(prediction.model$prediction<min.dat)))){
+			prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]
+		}
 	} else {
 		#### if they supply a factor, convert it to a number!!!!!
 		prediction.model$prediction = as.numeric(as.character(prediction.model$prediction))

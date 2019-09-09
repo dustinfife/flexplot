@@ -1,7 +1,7 @@
 Package: flexplot
 Type: Package
 Title: Flexplot - Graphically Based Data Analysis
-Version: 0.4.3
+Version: 0.4.4
 Author: Dustin Fife
 Maintainer: Dustin Fife <fife.dustin@gmail.com>
 Description:   The flexplot suite is a graphically-based set of tools for doing data. analysis. Flexplot allows users to specify a formula and the software automatically choses what sort of graphic to present. General Linear Model allows linear modeling and, like flexplot,  chooses an appropriate graphic to present alongside the statistical results. 
@@ -9,5 +9,5 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Depends: stats
-Imports: jmvcore (>= 0.8.5), R6, cowplot, tidyverse
+Imports: jmvcore (>= 0.8.5), R6, cowplot, tidyverse, ggplot2, MASS, tibble, withr
 RoxygenNote: 6.1.1

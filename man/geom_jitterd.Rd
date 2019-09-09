@@ -87,22 +87,6 @@ a mix between geom_jitter and geom_violin. It reduces
 overplotting caused by discreteness in smaller datasets. This
 function was adapted from geom_jitter within ggplot2
 }
-\examples{
-p <- ggplot(mpg, aes(cyl, hwy))
-p + geom_point()
-p + geom_jitterd()
-
-# Add aesthetic mappings
-p + geom_jitterd(aes(colour = class))
-
-# Use smaller width/height to emphasise categories
-ggplot(mpg, aes(cyl, hwy)) + geom_jitterd()
-ggplot(mpg, aes(cyl, hwy)) + geom_jitterd(width = 0.25)
-
-# Use larger width/height to completely smooth away discreteness
-ggplot(mpg, aes(cty, hwy)) + geom_jitterd()
-ggplot(mpg, aes(cty, hwy)) + geom_jitterd(width = 0.5, height = 0.5)
-}
 \seealso{
 \link[ggplot2]{geom_point()} for regular, unjittered points,
   \link[ggplot2]{geom_boxplot()} for another way of looking at the conditional

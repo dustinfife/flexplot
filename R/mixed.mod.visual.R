@@ -10,6 +10,7 @@
 ##' @param jitter Should the data be jittered?
 ##' @return A plot
 ##' @author Dustin Fife
+##' @import ggplot2
 ##' @export
 mixed.mod.visual = function(formula, data, model, n=6, jitter=F){
 	

@@ -27,7 +27,7 @@ The anchor.predictions model generates the actual predicted values, depending on
 }
 \examples{
 data(exercise_data)
-linear.model = lm(weight.loss~health + gender, data=d)
+linear.model = lm(weight.loss~health + gender, data= exercise_data)
 # generate predictions for males/females
 anchor.predictions(linear.model, "gender")
 # generate predictions for health (+/- 1 sd from the mean)
