@@ -42,28 +42,31 @@ often aesthetics, used to set an aesthetic to a fixed value, like
 to the paired geom/stat.}
 
 \item{width}{Amount of vertical and horizontal jitter. The jitter
-  is added in both positive and negative directions, so the total spread
-  is twice the value specified here. However, that amount of jittering depends
+ is added in both positive and negative directions, so the total spread
+ is twice the value specified here. However, that amount of jittering depends
      on the density. The location of highest density in the dataset will have 
   jittering equal to the amount the user specifies, otherwise, jittering is a 
   fraction of that. 
 
-  If omitted, defaults to 40\% of the resolution of the data: this means the
-  jitter values will occupy 80\% of the implied bins for the highest density. Categorical data
-  is aligned on the integers, so a width or height of 0.5 will spread the
-  data so it's not possible to see the distinction between the categories.}
+ If omitted, defaults to 40\% of the resolution of the data: this means the
+ jitter values will occupy 80\% of the implied bins for the highest density. Categorical data
+ is aligned on the integers, so a width or height of 0.5 will spread the
+ data so it's not possible to see the distinction between the categories.}
 
 \item{height}{Amount of vertical and horizontal jitter. The jitter
-  is added in both positive and negative directions, so the total spread
-  is twice the value specified here. However, that amount of jittering depends
+ is added in both positive and negative directions, so the total spread
+ is twice the value specified here. However, that amount of jittering depends
      on the density. The location of highest density in the dataset will have 
   jittering equal to the amount the user specifies, otherwise, jittering is a 
   fraction of that. 
 
-  If omitted, defaults to 40\% of the resolution of the data: this means the
-  jitter values will occupy 80\% of the implied bins for the highest density. Categorical data
-  is aligned on the integers, so a width or height of 0.5 will spread the
-  data so it's not possible to see the distinction between the categories.}
+ If omitted, defaults to 40\% of the resolution of the data: this means the
+ jitter values will occupy 80\% of the implied bins for the highest density. Categorical data
+ is aligned on the integers, so a width or height of 0.5 will spread the
+ data so it's not possible to see the distinction between the categories.}
+
+\item{quad.points}{The number of "quadriture points" for the density function. 
+Higher numbers yield a more detailed jittered density plot}
 
 \item{na.rm}{If \code{FALSE}, the default, missing values are removed with
 a warning. If \code{TRUE}, missing values are silently removed.}
@@ -82,14 +85,14 @@ the default plot specification, e.g. \code{\link[=borders]{borders()}}.}
 \description{
 The jitterd geom adds a small amount of random
 variation to the location of each point, but that amount
-of noise is proportional to the density. In some ways, it's 
+of noise is proportional to the density. In some ways, it's
 a mix between geom_jitter and geom_violin. It reduces
 overplotting caused by discreteness in smaller datasets. This
 function was adapted from geom_jitter within ggplot2
 }
 \seealso{
 \link[ggplot2]{geom_point()} for regular, unjittered points,
-  \link[ggplot2]{geom_boxplot()} for another way of looking at the conditional
-    distribution of a variable
-  \link[ggplot2]{geom_jitter()} for standard jittering
+\link[ggplot2]{geom_boxplot} for another way of looking at the conditional
+  distribution of a variable
+\link[ggplot2]{geom_jitter()} for standard jittering
 }

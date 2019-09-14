@@ -63,9 +63,9 @@ model.comparison = function(model1, model2){
 		}
 		predictions = data.frame(rbind(predictions, difference)); row.names(predictions)[3] = "Difference"
 	
-		list(statistics=round(model.table, digits=4), predictions=predictions, pred.difference = differences)
+		list(statistics=model.table, predictions=predictions, pred.difference = differences)
 	} else {
-		list(statistics=round(model.table, digits=4), pred.difference = differences)
+		list(statistics=model.table, pred.difference = differences)
 	}
 	
 	

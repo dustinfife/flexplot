@@ -34,7 +34,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	if (model1.type=="randomForest" | model1.type=="randomForest.formula"){
 		testme = attr(model1$terms, "term.labels")		
 	} else {
-		testme = all.vars(model1$call)
+		testme = attr(model1$terms, "term.labels")		
 	}
 	
 	terms.mod1 = attr(terms(model1), "term.labels")
@@ -49,7 +49,15 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	if (!(all(predictors %in% testme))){
 		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%terms.mod1)], collapse=",")))
 	}
-
+	
+	##### make sure they're using the right dataset
+	if (!(all(predictors %in% names(data)))){
+		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
+	}	
+	# if (!(all(testme %in% names(data)))){
+		# stop(paste0("Sorry, but some variables in model don't match what's in the dataset. Specifically: ", paste0(variables[!(testme%in%data)], collapse=","), ". Did you input the wrong dataset?"))
+	# }		
+	
 
 	#### create random column just to make the applies work (yeah, it's hacky, but it works)
     data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)

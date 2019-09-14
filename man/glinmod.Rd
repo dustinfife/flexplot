@@ -4,7 +4,7 @@
 \alias{glinmod}
 \title{Perform a general linear model}
 \usage{
-glinmod(f, data, plot = T, ...)
+glinmod(f, data, plot = TRUE, ...)
 }
 \arguments{
 \item{f}{An equation of the form y~x1 + x2 + x3, etc.}
@@ -30,17 +30,10 @@ or categorical and generate estimates and graphics accordingly.
 ## load the exercise dataset
 data(exercise_data)
 data = exercise_data
-glinmod(weight.loss~gender, data=exercise_data, output="estimates")
-glinmod(weight.loss~gender, data=exercise_data, output="graphics")
-glinmod(weight.loss~gender, data=exercise_data, output="both")
-## pass parameters to visualize (here, just plot residuals)
-glinmod(weight.loss~gender + motivation,
-	data=exercise_data, output="both", plot="residuals")
-## pass parameters to visualize (here, plot the model...yes, I know...bivariate is a misnomer)
-glinmod(weight.loss~gender+ motivation, data=exercise_data, output="both", plot="bivariate")
+glinmod(weight.loss~gender, data=exercise_data)
 ## pass parameters to flexplot
-glinmod(weight.loss~gender + motivation, data=exercise_data, output="both", 
-	plot="bivariate", se=F, method="lm")
+glinmod(weight.loss~gender + motivation, data=exercise_data, 
+	se=FALSE, method="lm")
 }
 \seealso{
 \code{\link{estimates}}, \code{\link{visualize}}, \code{\link{flexplot}}, \code{\link{model.comparison}}

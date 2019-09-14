@@ -12,30 +12,24 @@
 ##' @seealso \code{\link{estimates}}, \code{\link{visualize}}, \code{\link{flexplot}}, \code{\link{model.comparison}}
 ##' @return An object containing the information from \code{\link{estimates}}
 ##' @author Dustin Fife
+##' @import stats
 ##' @export
 ##' @examples
 ##' ## load the exercise dataset
 ##' data(exercise_data)
 ##' data = exercise_data
-##' glinmod(weight.loss~gender, data=exercise_data, output="estimates")
-##' glinmod(weight.loss~gender, data=exercise_data, output="graphics")
-##' glinmod(weight.loss~gender, data=exercise_data, output="both")
-##' ## pass parameters to visualize (here, just plot residuals)
-##' glinmod(weight.loss~gender + motivation,
-##'		data=exercise_data, output="both", plot="residuals")
-##' ## pass parameters to visualize (here, plot the model...yes, I know...bivariate is a misnomer)
-##' glinmod(weight.loss~gender+ motivation, data=exercise_data, output="both", plot="bivariate")
+##' glinmod(weight.loss~gender, data=exercise_data)
 ##' ## pass parameters to flexplot
-##' glinmod(weight.loss~gender + motivation, data=exercise_data, output="both", 
-##'		plot="bivariate", se=F, method="lm")
-glinmod = function(f, data, plot=T, ...){
+##' glinmod(weight.loss~gender + motivation, data=exercise_data, 
+##'		se=FALSE, method="lm")
+glinmod = function(f, data, plot=TRUE, ...){
 
 	#### run the lm
 	mod = lm(f, data)
 	
 	#### compute the estimates		
 	est = estimates(mod)
-	
+
 	
 	#### visualize that succa
 	if (plot){

@@ -28,7 +28,7 @@
 ##' @param silent Should all messages be suppressed? Defaults to F.
 ##' @param third.eye Should the "third eye" be employed? The third eye will 
 ##' @author Dustin Fife
-##' @import tidyverse tibble ggplot2
+##' @import tibble ggplot2
 ##' @export
 ##' @examples
 #' data(exercise_data)
@@ -92,11 +92,19 @@ flexplot = function(formula, data, related=F,
 	#d = exercise_data
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
 	#ghost.reference = list(income=90000)
+
+
+	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error
+	df = data.frame()
+	ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))
 	
 	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
 	if (tibble::is_tibble(data)){
 		data = as.data.frame(data)
 	}
+	
+
+	
 	
 
 	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
@@ -106,6 +114,13 @@ flexplot = function(formula, data, related=F,
 	variables = all.vars(formula)
 	outcome = variables[1]
 	predictors = variables[-1]
+	
+	
+	#### make sure all names are in the dataset
+	if (!all(variables %in% names(data))){
+		not.there = variables[which(!(variables %in% names(data)))]
+		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))
+	}
 	
 		# #### extract outcome, predictors, and given variables
 	# if (!is.null(third.eye) & length(predictors)>2){
@@ -152,6 +167,12 @@ flexplot = function(formula, data, related=F,
 	if (length(predictors)>0){
 		if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){
 			data[,axis[1]] = factor(data[,axis[1]], ordered=T)
+		}
+		### do the same for the second axis
+		if (length(axis)>1){
+		if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){
+			data[,axis[2]] = factor(data[,axis[2]], ordered=T)
+		}		
 		}
 	}
 	
@@ -286,6 +307,12 @@ flexplot = function(formula, data, related=F,
 
 			if (is.numeric(data[,given[i]])){
 				data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])
+				
+				
+				### reorder levels of bin 2
+				if (i==2){
+					data[,binned.name] = forcats::fct_rev(data[,binned.name])
+				}
 			} else {
 				### duplicate categorical variables and give a new name for binned ones
 				data[,binned.name] = data[,given[i]]
@@ -297,7 +324,7 @@ flexplot = function(formula, data, related=F,
 		if (length(break.me)>0){
 			given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")
 		}	
-		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0((given2), collapse="~"), paste0("~",given2))
+		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
 		
 		#### make a custom labeller that removes "_binned"
 		custom.labeler = function(x){

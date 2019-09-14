@@ -209,7 +209,7 @@ points.func = function(axis.var, data, jitter){
 }
 
 
-##' @import MASS	
+##' @importFrom MASS rlm	
 #### identify the correct "fit"
 fit.function = function(outcome, predictors, data, suppress_smooth, method, spread, mean.line=F, categorical=FALSE){
 	
@@ -233,7 +233,6 @@ fit.function = function(outcome, predictors, data, suppress_smooth, method, spre
 			#### specify the curve
 			fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)'
 		} else if (method=="rlm"){
-			require(MASS)
 			fit.string = 'geom_smooth(method = "rlm", se = se)'
 		}else if (method=="poisson" | method=="Gamma") {
 			#### specify the curve

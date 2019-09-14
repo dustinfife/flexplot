@@ -22,6 +22,7 @@ estimates.default = function(object){
 #'
 #' Report lm object Estimates
 #' @param object a lm object
+#' @import dplyr
 #' @export
 estimates.lm = function(object){
 
@@ -29,7 +30,8 @@ estimates.lm = function(object){
 	
 	#### generate list of coefficients
 	terms = attr(terms(object), "term.labels")
-	variables = all.vars(object$call); variables = variables[-length(variables)]
+	
+	variables = as.character(attr(terms(object), "variables")); variables = variables[-1]
 	outcome = variables[1]
 	predictors = variables[-1]
 	    
@@ -40,12 +42,13 @@ estimates.lm = function(object){
 	}
 	#### get dataset
 	d = object$model
-	
+
 	#### identify factors
 	if (length(terms)>1){
 		### convert characters to factors
-		chars = names(which(unlist(lapply(d[,terms], is.character))));
-		d[,chars] = lapply(d[,terms], as.factor)
+		chars = d %>% summarize_at(terms, is.character) %>% unlist
+		chars = names(chars)[chars]
+		if (length(chars)==1) d[,chars] = as.factor(d[,chars]) else d[,chars] = lapply(d[,chars], as.factor)
 		factors = names(which(unlist(lapply(d[,terms], is.factor))));
 		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));
 	} else {
@@ -122,7 +125,7 @@ estimates.lm = function(object){
 
 				#### populate the estimates/lower/upper
 				f = as.formula(paste0(outcome, "~", factors[i]))
-				est = compare.fits(f, data=d, object, return.preds=T, silent=T, report.se=T)
+				est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, silent=T, report.se=T)
 
 				
 				coef.matrix$levels[current.rows] = as.character(est[,1])

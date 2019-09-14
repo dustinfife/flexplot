@@ -25,8 +25,8 @@ Omitting that, the function will decide for the user. If the variable is coded a
 it will generate a histogram. If the variable is a factor OR it has five or less unique values, it will output a barchart.
 }
 \examples{
-distress = sample(1:10, size=22, replace=T)
-uni.plot(distress, numeric=T, d=NULL)
+distress = sample(1:10, size=22, replace=TRUE)
+uni.plot(distress, numeric=TRUE, d=NULL)
 }
 \author{
 Dustin Fife

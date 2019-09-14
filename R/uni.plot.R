@@ -13,8 +13,8 @@
 ##' @export
 ##' @import ggplot2
 ##' @examples
-##' distress = sample(1:10, size=22, replace=T)
-##' uni.plot(distress, numeric=T, d=NULL)
+##' distress = sample(1:10, size=22, replace=TRUE)
+##' uni.plot(distress, numeric=TRUE, d=NULL)
 uni.plot = function(variable, d=NULL, numeric=NULL){
 	
 	#### first try to find the variable
