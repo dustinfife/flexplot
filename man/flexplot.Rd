@@ -4,7 +4,7 @@
 \alias{flexplot}
 \title{Create a "flexible plot" or flexplot}
 \usage{
-flexplot(formula, data, related = F, bins = 4, labels = NULL,
+flexplot(formula, data, related = F, bins = 3, labels = NULL,
   breaks = NULL, method = "loess", se = T, ghost.line = NULL,
   ghost.reference = NULL, spread = c("quartiles", "stdev", "sterr"),
   jitter = NULL, raw.data = T, sample = Inf, prediction = NULL,
@@ -25,7 +25,7 @@ have that number of bins, but it will try to make it work.}
 
 \item{breaks}{The breaks to be used for the bins.}
 
-\item{method}{The method to be used to draw the lines. Defaults to loess}
+\item{method}{The method to be used to draw the lines. Defaults to loess, but it could be "lm", "logistic", "polynomial", "cubic", "rlm", or "glm".}
 
 \item{se}{Should standard errors be drawn?}
 

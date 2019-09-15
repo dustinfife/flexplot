@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<meta name="date" content="2018-01-27" />
+
+<title>Unpacking Assignment</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Unpacking Assignment</h1>
+<h4 class="date"><em>2018-01-27</em></h4>
+
+
+
+<section id="getting-started" class="level2">
+<h2>Getting Started</h2>
+<p>The <em>zeallot</em> package defines an operator for <em>unpacking assignment</em>, sometimes called <em>parallel assignment</em> or <em>destructuring assignment</em> in other programming languages. The operator is written as <code>%&lt;-%</code> and used like this.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">c</span>(lat, lng) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">list</span>(<span class="fl">38.061944</span>, <span class="fl">-122.643889</span>)</a></code></pre></div>
+<p>The result is that the list is unpacked into its elements, and the elements are assigned to <code>lat</code> and <code>lng</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">lat</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="co">#&gt; [1] 38.06194</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">lng</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co">#&gt; [1] -122.6439</span></a></code></pre></div>
+<p>You can also unpack the elements of a vector.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">c</span>(lat, lng) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">c</span>(<span class="fl">38.061944</span>, <span class="fl">-122.643889</span>)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">lat</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">#&gt; [1] 38.06194</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">lng</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="co">#&gt; [1] -122.6439</span></a></code></pre></div>
+<p>You can unpack much longer structures, too, of course, such as the 6-part summary of a vector.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">c</span>(min_wt, q1_wt, med_wt, mean_wt, q3_wt, max_wt) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">summary</span>(mtcars<span class="op">$</span>wt)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">min_wt</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="co">#&gt; [1] 1.513</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">q1_wt</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="co">#&gt; [1] 2.58125</span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">med_wt</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7"><span class="co">#&gt; [1] 3.325</span></a>
+<a class="sourceLine" id="cb4-8" data-line-number="8">mean_wt</a>
+<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="co">#&gt; [1] 3.21725</span></a>
+<a class="sourceLine" id="cb4-10" data-line-number="10">q3_wt</a>
+<a class="sourceLine" id="cb4-11" data-line-number="11"><span class="co">#&gt; [1] 3.61</span></a>
+<a class="sourceLine" id="cb4-12" data-line-number="12">max_wt</a>
+<a class="sourceLine" id="cb4-13" data-line-number="13"><span class="co">#&gt; [1] 5.424</span></a></code></pre></div>
+<p>If the left-hand side and right-hand sides do not match, an error is raised. This guards against missing or unexpected values.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">c</span>(stg1, stg2, stg3) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">list</span>(<span class="st">&quot;Moe&quot;</span>, <span class="st">&quot;Donald&quot;</span>)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="co">#&gt; Error: invalid `%&lt;-%` right-hand side, incorrect number of values</span></a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">c</span>(stg1, stg2, stg3) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">list</span>(<span class="st">&quot;Moe&quot;</span>, <span class="st">&quot;Larry&quot;</span>, <span class="st">&quot;Curley&quot;</span>, <span class="st">&quot;Donald&quot;</span>)</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="co">#&gt; Error: invalid `%&lt;-%` right-hand side, incorrect number of values</span></a></code></pre></div>
+<section id="unpacking-a-returned-value" class="level3">
+<h3>Unpacking a returned value</h3>
+<p>A common use-case is when a function returns a list of values and you want to extract the individual values. In this example, the list of values returned by <code>coords_list()</code> is unpacked into the variables <code>lat</code> and <code>lng</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co">#</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="co"># A function which returns a list of 2 numeric values.</span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="co"># </span></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">coords_list &lt;-<span class="st"> </span><span class="cf">function</span>() {</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">  <span class="kw">list</span>(<span class="fl">38.061944</span>, <span class="fl">-122.643889</span>)</a>
+<a class="sourceLine" id="cb7-6" data-line-number="6">}</a>
+<a class="sourceLine" id="cb7-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb7-8" data-line-number="8"><span class="kw">c</span>(lat, lng) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">coords_list</span>()</a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">lat</a>
+<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="co">#&gt; [1] 38.06194</span></a>
+<a class="sourceLine" id="cb7-11" data-line-number="11">lng</a>
+<a class="sourceLine" id="cb7-12" data-line-number="12"><span class="co">#&gt; [1] -122.6439</span></a></code></pre></div>
+<p>In this next example, we call a function that returns a vector.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co">#</span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="co"># Convert cartesian coordinates to polar</span></a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="co">#</span></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">to_polar =<span class="st"> </span><span class="cf">function</span>(x, y) {</a>
+<a class="sourceLine" id="cb8-5" data-line-number="5">  <span class="kw">c</span>(<span class="kw">sqrt</span>(x<span class="op">^</span><span class="dv">2</span> <span class="op">+</span><span class="st"> </span>y<span class="op">^</span><span class="dv">2</span>), <span class="kw">atan</span>(y <span class="op">/</span><span class="st"> </span>x))</a>
+<a class="sourceLine" id="cb8-6" data-line-number="6">}</a>
+<a class="sourceLine" id="cb8-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb8-8" data-line-number="8"><span class="kw">c</span>(radius, angle) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">to_polar</span>(<span class="dv">12</span>, <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb8-9" data-line-number="9">radius</a>
+<a class="sourceLine" id="cb8-10" data-line-number="10"><span class="co">#&gt; [1] 13</span></a>
+<a class="sourceLine" id="cb8-11" data-line-number="11">angle</a>
+<a class="sourceLine" id="cb8-12" data-line-number="12"><span class="co">#&gt; [1] 0.3947911</span></a></code></pre></div>
+</section>
+<section id="example-intercept-and-slope-of-regression" class="level3">
+<h3>Example: Intercept and slope of regression</h3>
+<p>You can directly unpack the coefficients of a simple linear regression into the intercept and slope.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">c</span>(inter, slope) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">coef</span>(<span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>cyl, <span class="dt">data =</span> mtcars))</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">inter</a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="co">#&gt; [1] 37.88458</span></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4">slope</a>
+<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="co">#&gt; [1] -2.87579</span></a></code></pre></div>
+</section>
+<section id="example-unpacking-the-result-of-safely" class="level3">
+<h3>Example: Unpacking the result of <code>safely</code></h3>
+<p>The <em>purrr</em> package includes the <code>safely</code> function. It wraps a given function to create a new, “safe” version of the original function.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">safe_log &lt;-<span class="st"> </span>purrr<span class="op">::</span><span class="kw">safely</span>(log)</a></code></pre></div>
+<p>The safe version returns a list of two items. The first item is the result of calling the original function, assuming no error occurred; or <code>NULL</code> if an error did occur. The second item is the error, if an error occurred; or <code>NULL</code> if no error occurred. Whether or not the original function would have thrown an error, the safe version will never throw an error.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">pair &lt;-<span class="st"> </span><span class="kw">safe_log</span>(<span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">pair<span class="op">$</span>result</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="co">#&gt; [1] 2.302585</span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4">pair<span class="op">$</span>error</a>
+<a class="sourceLine" id="cb11-5" data-line-number="5"><span class="co">#&gt; NULL</span></a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">pair &lt;-<span class="st"> </span><span class="kw">safe_log</span>(<span class="st">&quot;donald&quot;</span>)</a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">pair<span class="op">$</span>result</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3"><span class="co">#&gt; NULL</span></a>
+<a class="sourceLine" id="cb12-4" data-line-number="4">pair<span class="op">$</span>error</a>
+<a class="sourceLine" id="cb12-5" data-line-number="5"><span class="co">#&gt; &lt;simpleError in log(x = x, base = base): non-numeric argument to mathematical function&gt;</span></a></code></pre></div>
+<p>You can tighten and clarify calls to the safe function by using <code>%&lt;-%</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">c</span>(res, err) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">safe_log</span>(<span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb13-2" data-line-number="2">res</a>
+<a class="sourceLine" id="cb13-3" data-line-number="3"><span class="co">#&gt; [1] 2.302585</span></a>
+<a class="sourceLine" id="cb13-4" data-line-number="4">err</a>
+<a class="sourceLine" id="cb13-5" data-line-number="5"><span class="co">#&gt; NULL</span></a></code></pre></div>
+</section>
+</section>
+<section id="unpacking-a-data-frame" class="level2">
+<h2>Unpacking a data frame</h2>
+<p>A data frame is simply a list of columns, so the <em>zeallot</em> assignment does what you expect. It unpacks the data frame into individual columns.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="kw">c</span>(mpg, cyl, disp, hp) <span class="op">%&lt;-%</span><span class="st"> </span>mtcars[, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb14-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb14-3" data-line-number="3"><span class="kw">head</span>(mpg)</a>
+<a class="sourceLine" id="cb14-4" data-line-number="4"><span class="co">#&gt; [1] 21.0 21.0 22.8 21.4 18.7 18.1</span></a>
+<a class="sourceLine" id="cb14-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb14-6" data-line-number="6"><span class="kw">head</span>(cyl)</a>
+<a class="sourceLine" id="cb14-7" data-line-number="7"><span class="co">#&gt; [1] 6 6 4 6 8 6</span></a>
+<a class="sourceLine" id="cb14-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb14-9" data-line-number="9"><span class="kw">head</span>(disp)</a>
+<a class="sourceLine" id="cb14-10" data-line-number="10"><span class="co">#&gt; [1] 160 160 108 258 360 225</span></a>
+<a class="sourceLine" id="cb14-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb14-12" data-line-number="12"><span class="kw">head</span>(hp)</a>
+<a class="sourceLine" id="cb14-13" data-line-number="13"><span class="co">#&gt; [1] 110 110  93 110 175 105</span></a></code></pre></div>
+<section id="example-list-of-data-frames" class="level3">
+<h3>Example: List of data frames</h3>
+<p>Bear in mind that a list of data frames is still just a list. The assignment will extract the list elements (which are data frames) but not unpack the data frames themselves.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1">quartet &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="cf">function</span>(i) anscombe[, <span class="kw">c</span>(i, i <span class="op">+</span><span class="st"> </span><span class="dv">4</span>)])</a>
+<a class="sourceLine" id="cb15-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb15-3" data-line-number="3"><span class="kw">c</span>(an1, an2, an3, an4) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">lapply</span>(quartet, head, <span class="dt">n =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb15-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb15-5" data-line-number="5">an1</a>
+<a class="sourceLine" id="cb15-6" data-line-number="6"><span class="co">#&gt;   x1   y1</span></a>
+<a class="sourceLine" id="cb15-7" data-line-number="7"><span class="co">#&gt; 1 10 8.04</span></a>
+<a class="sourceLine" id="cb15-8" data-line-number="8"><span class="co">#&gt; 2  8 6.95</span></a>
+<a class="sourceLine" id="cb15-9" data-line-number="9"><span class="co">#&gt; 3 13 7.58</span></a>
+<a class="sourceLine" id="cb15-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb15-11" data-line-number="11">an2</a>
+<a class="sourceLine" id="cb15-12" data-line-number="12"><span class="co">#&gt;   x2   y2</span></a>
+<a class="sourceLine" id="cb15-13" data-line-number="13"><span class="co">#&gt; 1 10 9.14</span></a>
+<a class="sourceLine" id="cb15-14" data-line-number="14"><span class="co">#&gt; 2  8 8.14</span></a>
+<a class="sourceLine" id="cb15-15" data-line-number="15"><span class="co">#&gt; 3 13 8.74</span></a>
+<a class="sourceLine" id="cb15-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb15-17" data-line-number="17">an3</a>
+<a class="sourceLine" id="cb15-18" data-line-number="18"><span class="co">#&gt;   x3    y3</span></a>
+<a class="sourceLine" id="cb15-19" data-line-number="19"><span class="co">#&gt; 1 10  7.46</span></a>
+<a class="sourceLine" id="cb15-20" data-line-number="20"><span class="co">#&gt; 2  8  6.77</span></a>
+<a class="sourceLine" id="cb15-21" data-line-number="21"><span class="co">#&gt; 3 13 12.74</span></a>
+<a class="sourceLine" id="cb15-22" data-line-number="22"></a>
+<a class="sourceLine" id="cb15-23" data-line-number="23">an4</a>
+<a class="sourceLine" id="cb15-24" data-line-number="24"><span class="co">#&gt;   x4   y4</span></a>
+<a class="sourceLine" id="cb15-25" data-line-number="25"><span class="co">#&gt; 1  8 6.58</span></a>
+<a class="sourceLine" id="cb15-26" data-line-number="26"><span class="co">#&gt; 2  8 5.76</span></a>
+<a class="sourceLine" id="cb15-27" data-line-number="27"><span class="co">#&gt; 3  8 7.71</span></a></code></pre></div>
+<p>The <code>%&lt;-%</code> operator assigned four data frames to four variables, leaving the data frames intact.</p>
+</section>
+</section>
+<section id="unpacking-nested-values" class="level2">
+<h2>Unpacking nested values</h2>
+<p>In addition to unpacking flat lists, you can unpack lists of lists.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw">c</span>(a, <span class="kw">c</span>(b, d), e) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">list</span>(<span class="st">&quot;begin&quot;</span>, <span class="kw">list</span>(<span class="st">&quot;middle1&quot;</span>, <span class="st">&quot;middle2&quot;</span>), <span class="st">&quot;end&quot;</span>)</a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">a</a>
+<a class="sourceLine" id="cb16-3" data-line-number="3"><span class="co">#&gt; [1] &quot;begin&quot;</span></a>
+<a class="sourceLine" id="cb16-4" data-line-number="4">b</a>
+<a class="sourceLine" id="cb16-5" data-line-number="5"><span class="co">#&gt; [1] &quot;middle1&quot;</span></a>
+<a class="sourceLine" id="cb16-6" data-line-number="6">d</a>
+<a class="sourceLine" id="cb16-7" data-line-number="7"><span class="co">#&gt; [1] &quot;middle2&quot;</span></a>
+<a class="sourceLine" id="cb16-8" data-line-number="8">e</a>
+<a class="sourceLine" id="cb16-9" data-line-number="9"><span class="co">#&gt; [1] &quot;end&quot;</span></a></code></pre></div>
+<p>Not only does this simplify extracting individual elements, it also adds a level of checking. If the described list structure does not match the actual list structure, an error is raised.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">c</span>(a, <span class="kw">c</span>(b, d, e), f) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">list</span>(<span class="st">&quot;begin&quot;</span>, <span class="kw">list</span>(<span class="st">&quot;middle1&quot;</span>, <span class="st">&quot;middle2&quot;</span>), <span class="st">&quot;end&quot;</span>)</a>
+<a class="sourceLine" id="cb17-2" data-line-number="2"><span class="co">#&gt; Error: invalid `%&lt;-%` right-hand side, incorrect number of values</span></a></code></pre></div>
+</section>
+<section id="splitting-a-value-into-its-parts" class="level2">
+<h2>Splitting a value into its parts</h2>
+<p>The previous examples dealt with unpacking a list or vector into its elements. You can also split certain kinds of individual values into subvalues.</p>
+<section id="character-vectors" class="level3">
+<h3>Character vectors</h3>
+<p>You can assign individual characters of a string to variables.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">c</span>(ch1, ch2, ch3) <span class="op">%&lt;-%</span><span class="st"> &quot;abc&quot;</span></a>
+<a class="sourceLine" id="cb18-2" data-line-number="2">ch1</a>
+<a class="sourceLine" id="cb18-3" data-line-number="3"><span class="co">#&gt; [1] &quot;a&quot;</span></a>
+<a class="sourceLine" id="cb18-4" data-line-number="4">ch2</a>
+<a class="sourceLine" id="cb18-5" data-line-number="5"><span class="co">#&gt; [1] &quot;b&quot;</span></a>
+<a class="sourceLine" id="cb18-6" data-line-number="6">ch3</a>
+<a class="sourceLine" id="cb18-7" data-line-number="7"><span class="co">#&gt; [1] &quot;c&quot;</span></a></code></pre></div>
+</section>
+<section id="dates" class="level3">
+<h3>Dates</h3>
+<p>You can split a Date into its year, month, and day, and assign the parts to variables.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">c</span>(y, m, d) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">Sys.Date</span>()</a>
+<a class="sourceLine" id="cb19-2" data-line-number="2">y</a>
+<a class="sourceLine" id="cb19-3" data-line-number="3"><span class="co">#&gt; [1] 2018</span></a>
+<a class="sourceLine" id="cb19-4" data-line-number="4">m</a>
+<a class="sourceLine" id="cb19-5" data-line-number="5"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb19-6" data-line-number="6">d</a>
+<a class="sourceLine" id="cb19-7" data-line-number="7"><span class="co">#&gt; [1] 27</span></a></code></pre></div>
+</section>
+<section id="class-objects" class="level3">
+<h3>Class objects</h3>
+<p><em>zeallot</em> includes implementations of <code>destructure</code> for character strings, complex numbers, data frames, date objects, and linear model summaries. However, because <code>destructure</code> is a generic function, you can define new implementations for custom classes. When defining a new implementation keep in mind the implementation needs to return a list so that values are properly unpacked.</p>
+</section>
+</section>
+<section id="trailing-values-the-everything-else-clause" class="level2">
+<h2>Trailing values: the “everything else” clause</h2>
+<p>In some cases, you want the first few elements of a list or vector but do not care about the trailing elements. The <code>summary</code> function of <code>lm</code>, for example, returns a list of 11 values, and you might want only the first few. Fortunately, there is a way to capture those first few and say “don’t worry about everything else”.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1">f &lt;-<span class="st"> </span><span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>cyl, <span class="dt">data =</span> mtcars)</a>
+<a class="sourceLine" id="cb20-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb20-3" data-line-number="3"><span class="kw">c</span>(fcall, fterms, resids, ...rest) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">summary</span>(f)</a>
+<a class="sourceLine" id="cb20-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb20-5" data-line-number="5">fcall</a>
+<a class="sourceLine" id="cb20-6" data-line-number="6"><span class="co">#&gt; lm(formula = mpg ~ cyl, data = mtcars)</span></a>
+<a class="sourceLine" id="cb20-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb20-8" data-line-number="8">fterms</a>
+<a class="sourceLine" id="cb20-9" data-line-number="9"><span class="co">#&gt; mpg ~ cyl</span></a>
+<a class="sourceLine" id="cb20-10" data-line-number="10"><span class="co">#&gt; attr(,&quot;variables&quot;)</span></a>
+<a class="sourceLine" id="cb20-11" data-line-number="11"><span class="co">#&gt; list(mpg, cyl)</span></a>
+<a class="sourceLine" id="cb20-12" data-line-number="12"><span class="co">#&gt; attr(,&quot;factors&quot;)</span></a>
+<a class="sourceLine" id="cb20-13" data-line-number="13"><span class="co">#&gt;     cyl</span></a>
+<a class="sourceLine" id="cb20-14" data-line-number="14"><span class="co">#&gt; mpg   0</span></a>
+<a class="sourceLine" id="cb20-15" data-line-number="15"><span class="co">#&gt; cyl   1</span></a>
+<a class="sourceLine" id="cb20-16" data-line-number="16"><span class="co">#&gt; attr(,&quot;term.labels&quot;)</span></a>
+<a class="sourceLine" id="cb20-17" data-line-number="17"><span class="co">#&gt; [1] &quot;cyl&quot;</span></a>
+<a class="sourceLine" id="cb20-18" data-line-number="18"><span class="co">#&gt; attr(,&quot;order&quot;)</span></a>
+<a class="sourceLine" id="cb20-19" data-line-number="19"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb20-20" data-line-number="20"><span class="co">#&gt; attr(,&quot;intercept&quot;)</span></a>
+<a class="sourceLine" id="cb20-21" data-line-number="21"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb20-22" data-line-number="22"><span class="co">#&gt; attr(,&quot;response&quot;)</span></a>
+<a class="sourceLine" id="cb20-23" data-line-number="23"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb20-24" data-line-number="24"><span class="co">#&gt; attr(,&quot;.Environment&quot;)</span></a>
+<a class="sourceLine" id="cb20-25" data-line-number="25"><span class="co">#&gt; &lt;environment: R_GlobalEnv&gt;</span></a>
+<a class="sourceLine" id="cb20-26" data-line-number="26"><span class="co">#&gt; attr(,&quot;predvars&quot;)</span></a>
+<a class="sourceLine" id="cb20-27" data-line-number="27"><span class="co">#&gt; list(mpg, cyl)</span></a>
+<a class="sourceLine" id="cb20-28" data-line-number="28"><span class="co">#&gt; attr(,&quot;dataClasses&quot;)</span></a>
+<a class="sourceLine" id="cb20-29" data-line-number="29"><span class="co">#&gt;       mpg       cyl </span></a>
+<a class="sourceLine" id="cb20-30" data-line-number="30"><span class="co">#&gt; &quot;numeric&quot; &quot;numeric&quot;</span></a>
+<a class="sourceLine" id="cb20-31" data-line-number="31"></a>
+<a class="sourceLine" id="cb20-32" data-line-number="32"><span class="kw">head</span>(resids)</a>
+<a class="sourceLine" id="cb20-33" data-line-number="33"><span class="co">#&gt;         Mazda RX4     Mazda RX4 Wag        Datsun 710    Hornet 4 Drive </span></a>
+<a class="sourceLine" id="cb20-34" data-line-number="34"><span class="co">#&gt;         0.3701643         0.3701643        -3.5814159         0.7701643 </span></a>
+<a class="sourceLine" id="cb20-35" data-line-number="35"><span class="co">#&gt; Hornet Sportabout           Valiant </span></a>
+<a class="sourceLine" id="cb20-36" data-line-number="36"><span class="co">#&gt;         3.8217446        -2.5298357</span></a></code></pre></div>
+<p>Here, <code>rest</code> will capture everything else.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="kw">str</span>(rest)</a>
+<a class="sourceLine" id="cb21-2" data-line-number="2"><span class="co">#&gt; List of 8</span></a>
+<a class="sourceLine" id="cb21-3" data-line-number="3"><span class="co">#&gt;  $ coefficients : num [1:2, 1:4] 37.885 -2.876 2.074 0.322 18.268 ...</span></a>
+<a class="sourceLine" id="cb21-4" data-line-number="4"><span class="co">#&gt;   ..- attr(*, &quot;dimnames&quot;)=List of 2</span></a>
+<a class="sourceLine" id="cb21-5" data-line-number="5"><span class="co">#&gt;   .. ..$ : chr [1:2] &quot;(Intercept)&quot; &quot;cyl&quot;</span></a>
+<a class="sourceLine" id="cb21-6" data-line-number="6"><span class="co">#&gt;   .. ..$ : chr [1:4] &quot;Estimate&quot; &quot;Std. Error&quot; &quot;t value&quot; &quot;Pr(&gt;|t|)&quot;</span></a>
+<a class="sourceLine" id="cb21-7" data-line-number="7"><span class="co">#&gt;  $ aliased      : Named logi [1:2] FALSE FALSE</span></a>
+<a class="sourceLine" id="cb21-8" data-line-number="8"><span class="co">#&gt;   ..- attr(*, &quot;names&quot;)= chr [1:2] &quot;(Intercept)&quot; &quot;cyl&quot;</span></a>
+<a class="sourceLine" id="cb21-9" data-line-number="9"><span class="co">#&gt;  $ sigma        : num 3.21</span></a>
+<a class="sourceLine" id="cb21-10" data-line-number="10"><span class="co">#&gt;  $ df           : int [1:3] 2 30 2</span></a>
+<a class="sourceLine" id="cb21-11" data-line-number="11"><span class="co">#&gt;  $ r.squared    : num 0.726</span></a>
+<a class="sourceLine" id="cb21-12" data-line-number="12"><span class="co">#&gt;  $ adj.r.squared: num 0.717</span></a>
+<a class="sourceLine" id="cb21-13" data-line-number="13"><span class="co">#&gt;  $ fstatistic   : Named num [1:3] 79.6 1 30</span></a>
+<a class="sourceLine" id="cb21-14" data-line-number="14"><span class="co">#&gt;   ..- attr(*, &quot;names&quot;)= chr [1:3] &quot;value&quot; &quot;numdf&quot; &quot;dendf&quot;</span></a>
+<a class="sourceLine" id="cb21-15" data-line-number="15"><span class="co">#&gt;  $ cov.unscaled : num [1:2, 1:2] 0.4185 -0.0626 -0.0626 0.0101</span></a>
+<a class="sourceLine" id="cb21-16" data-line-number="16"><span class="co">#&gt;   ..- attr(*, &quot;dimnames&quot;)=List of 2</span></a>
+<a class="sourceLine" id="cb21-17" data-line-number="17"><span class="co">#&gt;   .. ..$ : chr [1:2] &quot;(Intercept)&quot; &quot;cyl&quot;</span></a>
+<a class="sourceLine" id="cb21-18" data-line-number="18"><span class="co">#&gt;   .. ..$ : chr [1:2] &quot;(Intercept)&quot; &quot;cyl&quot;</span></a></code></pre></div>
+<p>The assignment operator noticed that <code>...rest</code> is prefixed with <code>...</code>, and it created a variable called <code>rest</code> for the trailing values of the list. If you omitted the “everything else” prefix, there would be an error because the lengths of the left- and right-hand sides of the assignment would be mismatched.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1"><span class="kw">c</span>(fcall, fterms, resids, rest) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">summary</span>(f)</a>
+<a class="sourceLine" id="cb22-2" data-line-number="2"><span class="co">#&gt; Error: invalid `%&lt;-%` right-hand side, incorrect number of values</span></a></code></pre></div>
+<p>If multiple collector variables are specified at a particular depth it is ambiguous which values to assign to which collector and an error will be raised.</p>
+</section>
+<section id="leading-values-and-middle-values" class="level2">
+<h2>Leading values and middle values</h2>
+<p>In addition to collecting trailing values, you can also collect initial values and assign specific remaining values.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1"><span class="kw">c</span>(...skip, e, f) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">list</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb23-2" data-line-number="2">skip</a>
+<a class="sourceLine" id="cb23-3" data-line-number="3"><span class="co">#&gt; [[1]]</span></a>
+<a class="sourceLine" id="cb23-4" data-line-number="4"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb23-5" data-line-number="5"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb23-6" data-line-number="6"><span class="co">#&gt; [[2]]</span></a>
+<a class="sourceLine" id="cb23-7" data-line-number="7"><span class="co">#&gt; [1] 2</span></a>
+<a class="sourceLine" id="cb23-8" data-line-number="8"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb23-9" data-line-number="9"><span class="co">#&gt; [[3]]</span></a>
+<a class="sourceLine" id="cb23-10" data-line-number="10"><span class="co">#&gt; [1] 3</span></a>
+<a class="sourceLine" id="cb23-11" data-line-number="11">e</a>
+<a class="sourceLine" id="cb23-12" data-line-number="12"><span class="co">#&gt; [1] 4</span></a>
+<a class="sourceLine" id="cb23-13" data-line-number="13">f</a>
+<a class="sourceLine" id="cb23-14" data-line-number="14"><span class="co">#&gt; [1] 5</span></a></code></pre></div>
+<p>Or you can assign the first value, skip values, and then assign the last value.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="kw">c</span>(begin, ...middle, end) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">list</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb24-2" data-line-number="2">begin</a>
+<a class="sourceLine" id="cb24-3" data-line-number="3"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb24-4" data-line-number="4">middle</a>
+<a class="sourceLine" id="cb24-5" data-line-number="5"><span class="co">#&gt; [[1]]</span></a>
+<a class="sourceLine" id="cb24-6" data-line-number="6"><span class="co">#&gt; [1] 2</span></a>
+<a class="sourceLine" id="cb24-7" data-line-number="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb24-8" data-line-number="8"><span class="co">#&gt; [[2]]</span></a>
+<a class="sourceLine" id="cb24-9" data-line-number="9"><span class="co">#&gt; [1] 3</span></a>
+<a class="sourceLine" id="cb24-10" data-line-number="10"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb24-11" data-line-number="11"><span class="co">#&gt; [[3]]</span></a>
+<a class="sourceLine" id="cb24-12" data-line-number="12"><span class="co">#&gt; [1] 4</span></a>
+<a class="sourceLine" id="cb24-13" data-line-number="13">end</a>
+<a class="sourceLine" id="cb24-14" data-line-number="14"><span class="co">#&gt; [1] 5</span></a></code></pre></div>
+</section>
+<section id="skipped-values-anonymous-elements" class="level2">
+<h2>Skipped values: anonymous elements</h2>
+<p>You can skip one or more values without raising an error by using a period (<code>.</code>) instead of a variable name. For example, you might care only about the min, mean, and max values of a vector’s <code>summary</code>.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1"><span class="kw">c</span>(min_wt, ., ., mean_wt, ., max_wt) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">summary</span>(mtcars<span class="op">$</span>wt)</a>
+<a class="sourceLine" id="cb25-2" data-line-number="2">min_wt</a>
+<a class="sourceLine" id="cb25-3" data-line-number="3"><span class="co">#&gt; [1] 1.513</span></a>
+<a class="sourceLine" id="cb25-4" data-line-number="4">mean_wt</a>
+<a class="sourceLine" id="cb25-5" data-line-number="5"><span class="co">#&gt; [1] 3.21725</span></a>
+<a class="sourceLine" id="cb25-6" data-line-number="6">max_wt</a>
+<a class="sourceLine" id="cb25-7" data-line-number="7"><span class="co">#&gt; [1] 5.424</span></a></code></pre></div>
+<p>By combining an anonymous element (<code>.</code>) with the collector prefix, (<code>...</code>), you can ignore whole sublists.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="kw">c</span>(begin, ..., end) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">list</span>(<span class="st">&quot;hello&quot;</span>, <span class="st">&quot;blah&quot;</span>, <span class="kw">list</span>(<span class="st">&quot;blah&quot;</span>), <span class="st">&quot;blah&quot;</span>, <span class="st">&quot;world!&quot;</span>)</a>
+<a class="sourceLine" id="cb26-2" data-line-number="2">begin</a>
+<a class="sourceLine" id="cb26-3" data-line-number="3"><span class="co">#&gt; [1] &quot;hello&quot;</span></a>
+<a class="sourceLine" id="cb26-4" data-line-number="4">end</a>
+<a class="sourceLine" id="cb26-5" data-line-number="5"><span class="co">#&gt; [1] &quot;world!&quot;</span></a></code></pre></div>
+<p>You can mix periods and collectors together to selectively keep and discard elements.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1"><span class="kw">c</span>(begin, ., ...middle, end) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">as.list</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb27-2" data-line-number="2">begin</a>
+<a class="sourceLine" id="cb27-3" data-line-number="3"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb27-4" data-line-number="4">middle</a>
+<a class="sourceLine" id="cb27-5" data-line-number="5"><span class="co">#&gt; [[1]]</span></a>
+<a class="sourceLine" id="cb27-6" data-line-number="6"><span class="co">#&gt; [1] 3</span></a>
+<a class="sourceLine" id="cb27-7" data-line-number="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb27-8" data-line-number="8"><span class="co">#&gt; [[2]]</span></a>
+<a class="sourceLine" id="cb27-9" data-line-number="9"><span class="co">#&gt; [1] 4</span></a>
+<a class="sourceLine" id="cb27-10" data-line-number="10">end</a>
+<a class="sourceLine" id="cb27-11" data-line-number="11"><span class="co">#&gt; [1] 5</span></a></code></pre></div>
+<p>It is important to note that although value(s) are skipped they are still expected. The next section touches on how to handle missing values.</p>
+</section>
+<section id="default-values-handle-missing-values" class="level2">
+<h2>Default values: handle missing values</h2>
+<p>You can specify a default value for a left-hand side variable using <code>=</code>, similar to specifying the default value of a function argument. This comes in handy when the number of elements returned by a function cannot be guaranteed. <code>tail</code> for example may return fewer elements than asked for.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1">nums &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb28-2" data-line-number="2"><span class="kw">c</span>(x, y) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">tail</span>(nums, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb28-3" data-line-number="3">x</a>
+<a class="sourceLine" id="cb28-4" data-line-number="4"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb28-5" data-line-number="5">y</a>
+<a class="sourceLine" id="cb28-6" data-line-number="6"><span class="co">#&gt; [1] 2</span></a></code></pre></div>
+<p>However, if we tried to get 3 elements and assign them an error would be raised because <code>tail(nums, 3)</code> still returns only 2 values.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" data-line-number="1"><span class="kw">c</span>(x, y, z) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">tail</span>(nums, <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb29-2" data-line-number="2"><span class="co">#&gt; Error: invalid `%&lt;-%` right-hand side, incorrect number of values</span></a></code></pre></div>
+<p>We can fix the problem and resolve the error by specifying a default value for <code>z</code>.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="kw">c</span>(x, y, <span class="dt">z =</span> <span class="ot">NULL</span>) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">tail</span>(nums, <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb30-2" data-line-number="2">x</a>
+<a class="sourceLine" id="cb30-3" data-line-number="3"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb30-4" data-line-number="4">y</a>
+<a class="sourceLine" id="cb30-5" data-line-number="5"><span class="co">#&gt; [1] 2</span></a>
+<a class="sourceLine" id="cb30-6" data-line-number="6">z</a>
+<a class="sourceLine" id="cb30-7" data-line-number="7"><span class="co">#&gt; NULL</span></a></code></pre></div>
+</section>
+<section id="swapping-values" class="level2">
+<h2>Swapping values</h2>
+<p>A handy trick is swapping values without the use of a temporary variable.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" data-line-number="1"><span class="kw">c</span>(first, last) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Ai&quot;</span>, <span class="st">&quot;Genly&quot;</span>)</a>
+<a class="sourceLine" id="cb31-2" data-line-number="2">first</a>
+<a class="sourceLine" id="cb31-3" data-line-number="3"><span class="co">#&gt; [1] &quot;Ai&quot;</span></a>
+<a class="sourceLine" id="cb31-4" data-line-number="4">last</a>
+<a class="sourceLine" id="cb31-5" data-line-number="5"><span class="co">#&gt; [1] &quot;Genly&quot;</span></a>
+<a class="sourceLine" id="cb31-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb31-7" data-line-number="7"><span class="kw">c</span>(first, last) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">c</span>(last, first)</a>
+<a class="sourceLine" id="cb31-8" data-line-number="8">first</a>
+<a class="sourceLine" id="cb31-9" data-line-number="9"><span class="co">#&gt; [1] &quot;Genly&quot;</span></a>
+<a class="sourceLine" id="cb31-10" data-line-number="10">last</a>
+<a class="sourceLine" id="cb31-11" data-line-number="11"><span class="co">#&gt; [1] &quot;Ai&quot;</span></a></code></pre></div>
+<p>or</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">cat &lt;-<span class="st"> &quot;meow&quot;</span></a>
+<a class="sourceLine" id="cb32-2" data-line-number="2">dog &lt;-<span class="st"> &quot;bark&quot;</span></a>
+<a class="sourceLine" id="cb32-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb32-4" data-line-number="4"><span class="kw">c</span>(cat, dog, fish) <span class="op">%&lt;-%</span><span class="st"> </span><span class="kw">c</span>(dog, cat, dog)</a>
+<a class="sourceLine" id="cb32-5" data-line-number="5">cat</a>
+<a class="sourceLine" id="cb32-6" data-line-number="6"><span class="co">#&gt; [1] &quot;bark&quot;</span></a>
+<a class="sourceLine" id="cb32-7" data-line-number="7">dog</a>
+<a class="sourceLine" id="cb32-8" data-line-number="8"><span class="co">#&gt; [1] &quot;meow&quot;</span></a>
+<a class="sourceLine" id="cb32-9" data-line-number="9">fish</a>
+<a class="sourceLine" id="cb32-10" data-line-number="10"><span class="co">#&gt; [1] &quot;bark&quot;</span></a></code></pre></div>
+</section>
+<section id="right-operator" class="level2">
+<h2>Right operator</h2>
+<p>The <code>magrittr</code> package provides a pipe operator <code>%&gt;%</code> which allows functions to be called in succession instead of nested. The left operator <code>%&lt;-%</code> does not work well with these function chains. Instead, the right operator <code>%-&gt;%</code> is recommended. The below example is adapted from the <code>magrittr</code> readme.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" data-line-number="1"><span class="kw">library</span>(magrittr)</a>
+<a class="sourceLine" id="cb33-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb33-3" data-line-number="3">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb33-4" data-line-number="4"><span class="st">  </span><span class="kw">subset</span>(hp <span class="op">&gt;</span><span class="st"> </span><span class="dv">100</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb33-5" data-line-number="5"><span class="st">  </span><span class="kw">aggregate</span>(. <span class="op">~</span><span class="st"> </span>cyl, <span class="dt">data =</span> ., <span class="dt">FUN =</span> . <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mean</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">round</span>(<span class="dv">2</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb33-6" data-line-number="6"><span class="st">  </span><span class="kw">transform</span>(<span class="dt">kpl =</span> mpg <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">multiply_by</span>(<span class="fl">0.4251</span>)) <span class="op">%-&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb33-7" data-line-number="7"><span class="st">  </span><span class="kw">c</span>(cyl, mpg, ...rest)</a>
+<a class="sourceLine" id="cb33-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb33-9" data-line-number="9">cyl</a>
+<a class="sourceLine" id="cb33-10" data-line-number="10"><span class="co">#&gt; [1] 4 6 8</span></a>
+<a class="sourceLine" id="cb33-11" data-line-number="11">mpg</a>
+<a class="sourceLine" id="cb33-12" data-line-number="12"><span class="co">#&gt; [1] 25.90 19.74 15.10</span></a>
+<a class="sourceLine" id="cb33-13" data-line-number="13">rest</a>
+<a class="sourceLine" id="cb33-14" data-line-number="14"><span class="co">#&gt; $disp</span></a>
+<a class="sourceLine" id="cb33-15" data-line-number="15"><span class="co">#&gt; [1] 108.05 183.31 353.10</span></a>
+<a class="sourceLine" id="cb33-16" data-line-number="16"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb33-17" data-line-number="17"><span class="co">#&gt; $hp</span></a>
+<a class="sourceLine" id="cb33-18" data-line-number="18"><span class="co">#&gt; [1] 111.00 122.29 209.21</span></a>
+<a class="sourceLine" id="cb33-19" data-line-number="19"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb33-20" data-line-number="20"><span class="co">#&gt; $drat</span></a>
+<a class="sourceLine" id="cb33-21" data-line-number="21"><span class="co">#&gt; [1] 3.94 3.59 3.23</span></a>
+<a class="sourceLine" id="cb33-22" data-line-number="22"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb33-23" data-line-number="23"><span class="co">#&gt; $wt</span></a>
+<a class="sourceLine" id="cb33-24" data-line-number="24"><span class="co">#&gt; [1] 2.15 3.12 4.00</span></a>
+<a class="sourceLine" id="cb33-25" data-line-number="25"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb33-26" data-line-number="26"><span class="co">#&gt; $qsec</span></a>
+<a class="sourceLine" id="cb33-27" data-line-number="27"><span class="co">#&gt; [1] 17.75 17.98 16.77</span></a>
+<a class="sourceLine" id="cb33-28" data-line-number="28"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb33-29" data-line-number="29"><span class="co">#&gt; $vs</span></a>
+<a class="sourceLine" id="cb33-30" data-line-number="30"><span class="co">#&gt; [1] 1.00 0.57 0.00</span></a>
+<a class="sourceLine" id="cb33-31" data-line-number="31"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb33-32" data-line-number="32"><span class="co">#&gt; $am</span></a>
+<a class="sourceLine" id="cb33-33" data-line-number="33"><span class="co">#&gt; [1] 1.00 0.43 0.14</span></a>
+<a class="sourceLine" id="cb33-34" data-line-number="34"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb33-35" data-line-number="35"><span class="co">#&gt; $gear</span></a>
+<a class="sourceLine" id="cb33-36" data-line-number="36"><span class="co">#&gt; [1] 4.50 3.86 3.29</span></a>
+<a class="sourceLine" id="cb33-37" data-line-number="37"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb33-38" data-line-number="38"><span class="co">#&gt; $carb</span></a>
+<a class="sourceLine" id="cb33-39" data-line-number="39"><span class="co">#&gt; [1] 2.00 3.43 3.50</span></a>
+<a class="sourceLine" id="cb33-40" data-line-number="40"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb33-41" data-line-number="41"><span class="co">#&gt; $kpl</span></a>
+<a class="sourceLine" id="cb33-42" data-line-number="42"><span class="co">#&gt; [1] 11.010090  8.391474  6.419010</span></a></code></pre></div>
+</section>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

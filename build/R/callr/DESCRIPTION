@@ -1,0 +1,34 @@
+Package: callr
+Title: Call R from R
+Version: 3.3.1
+Authors@R: c(
+    person("Gábor", "Csárdi", role = c("aut", "cre", "cph"),
+           email = "csardi.gabor@gmail.com",
+	   comment = c(ORCID = "0000-0001-7098-9676")),
+    person("Winston", "Chang", role = "aut"),
+    person("RStudio", role = c("cph", "fnd")),
+    person("Mango Solutions", role  = c("cph", "fnd")))
+Description: It is sometimes useful to perform a computation in a
+    separate R process, without affecting the current R process at all.
+    This packages does exactly that.
+License: MIT + file LICENSE
+LazyData: true
+URL: https://github.com/r-lib/callr#readme
+BugReports: https://github.com/r-lib/callr/issues
+RoxygenNote: 6.1.1
+Imports: processx (>= 3.4.0), R6, utils
+Suggests: cliapp, covr, crayon, knitr, pingr, ps, rmarkdown, rprojroot,
+        spelling, testthat, tibble, withr
+Encoding: UTF-8
+VignetteBuilder: knitr
+Language: en-US
+NeedsCompilation: no
+Packaged: 2019-07-16 14:55:00 UTC; gaborcsardi
+Author: Gábor Csárdi [aut, cre, cph] (<https://orcid.org/0000-0001-7098-9676>),
+  Winston Chang [aut],
+  RStudio [cph, fnd],
+  Mango Solutions [cph, fnd]
+Maintainer: Gábor Csárdi <csardi.gabor@gmail.com>
+Repository: CRAN
+Date/Publication: 2019-07-18 06:36:10 UTC
+Built: R 3.3.0; ; 2019-09-14 19:22:48 UTC; unix

@@ -1,0 +1,31 @@
+Package: selectr
+Type: Package
+Title: Translate CSS Selectors to XPath Expressions
+Version: 0.4-1
+Date: 2018-04-05
+Authors@R: c(person("Simon", "Potter",
+                    role = c("aut", "trl", "cre"),
+                    email = "simon@sjp.co.nz"),
+             person("Simon", "Sapin", role = "aut"),
+             person("Ian", "Bicking", role = "aut"))
+License: BSD_3_clause + file LICENCE
+Depends: R (>= 3.0)
+Imports: methods, stringr, R6
+Suggests: testthat, XML, xml2
+URL: https://sjp.co.nz/projects/selectr
+BugReports: https://github.com/sjp/selectr/issues
+Description: Translates a CSS3 selector into an equivalent XPath
+  expression. This allows us to use CSS selectors when working with
+  the XML package as it can only evaluate XPath expressions. Also
+  provided are convenience functions useful for using CSS selectors on
+  XML nodes. This package is a port of the Python package 'cssselect'
+  (<https://cssselect.readthedocs.io/>).
+NeedsCompilation: no
+Packaged: 2018-04-06 00:16:15 UTC; simon
+Author: Simon Potter [aut, trl, cre],
+  Simon Sapin [aut],
+  Ian Bicking [aut]
+Maintainer: Simon Potter <simon@sjp.co.nz>
+Repository: CRAN
+Date/Publication: 2018-04-06 04:14:27 UTC
+Built: R 3.3.0; ; 2019-09-14 19:19:45 UTC; unix

@@ -41,7 +41,9 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options=list(
                     "Loess",
                     "Regression",
-                    "Logistic"),
+                    "Logistic",
+                    "Polynomial",
+                    "Cubic"),
                 default="Loess")
             private$..ghost <- jmvcore::OptionBool$new(
                 "ghost",

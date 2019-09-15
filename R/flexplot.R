@@ -13,7 +13,7 @@
 ##'		have that number of bins, but it will try to make it work. 
 ##' @param labels A list of the same length as bins
 ##' @param breaks The breaks to be used for the bins.
-##' @param method The method to be used to draw the lines. Defaults to loess
+##' @param method The method to be used to draw the lines. Defaults to loess, but it could be "lm", "logistic", "polynomial", "cubic", "rlm", or "glm".
 ##' @param se Should standard errors be drawn?
 ##' @param ghost.line Color of the ghost line. Default is NULL (in which case, the ghost line isn't shown). 
 ##' @param spread Specifies how the "whiskers" of the plots should be draw. Can be "quartiles", "stdev", or "sterr." Defaults to quartiles
@@ -76,7 +76,7 @@
 ##' 	labels=list(c("<95K", "<100K", "<105K", ">105K")))	
 ##' 		## relabel income
 flexplot = function(formula, data, related=F,
-		bins = 4, labels=NULL, breaks=NULL,
+		bins = 3, labels=NULL, breaks=NULL,
 		method="loess", se=T, 
 		ghost.line=NULL, ghost.reference=NULL,
 		spread=c('quartiles', 'stdev', 'sterr'), jitter=NULL, raw.data=T,
@@ -87,7 +87,7 @@ flexplot = function(formula, data, related=F,
 	#d = exercise_data
 	##### use the following to debug flexplot
 	#formula = formula(weight.loss~therapy.type + rewards); data=d; 
-	#bins = 4; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
+	#bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
 	#data(exercise_data)
 	#d = exercise_data
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
@@ -152,16 +152,48 @@ flexplot = function(formula, data, related=F,
 	}
 		
 	#### get the breaks for the needed variables
-	break.me = predictors[unlist(lapply(data[,predictors], FUN=is.numeric)) & ((predictors %in% given) | (axis[2] %in% predictors))]	
+	break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	
+
+	#### did they provide a named break?
+	if (!is.null(breaks)) {
+		named.breaks = names(breaks)
+	} else {
+		named.breaks = NA
+	}	
 
 		#### create a list of breaks
 	if (length(break.me)>0 ){
-		breaks = ifelse(is.null(breaks),list(), breaks)
+		
+		#### bark at them if they forgot to name their breaks
+		if (is.null(named.breaks)){	
+			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")
+		
+		#### make sure they spelled breaks right and such
+		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){
+			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")
+		}
+		
+		#### make an empty list if they don't provide breaks
+		if (is.null(breaks)){
+			breaks = rep(list(NULL),length(break.me))
+			#names(breaks) = break.me
+		}
+
+
 			#### now make the breaks and convert the data
 		for (i in 1:length(break.me)){
-			breaks[[break.me[i]]] = prep.breaks(break.me[i], data, breaks[[break.me[i]]], bins)					
+
+			if ((i-1)<length(breaks)){
+				#### if they don't name the breaks, bark at them
+				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){
+					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")
+				}
+			}
+						
+			breaks[[break.me[i]]] = prep.breaks(break.me[i], data, breaks[[break.me[i]]], bins)
 		}
 	} 
+
 	
 	#### if they only have a few levels on the x axis, jitter convert it to categorical
 	if (length(predictors)>0){
@@ -282,7 +314,7 @@ flexplot = function(formula, data, related=F,
 		#### if the second variable is numeric, bin it
 		if (is.numeric(data[,axis[2]])){
 			binned.name = paste0(axis[2], "_binned")
-			data[[binned.name]] = bin.me(axis[2], data, bins, labels, breaks[[axis[2]]])
+			data[[binned.name]] = bin.me(axis[2], data, bins, unlist(labels), breaks[[axis[2]]])
 			axis[2] = binned.name
 		}
 		
@@ -300,6 +332,7 @@ flexplot = function(formula, data, related=F,
 	#### all the above should take care of ALL possible plots, but now we add paneling
 	
 	#### add panels (if they were specified)
+
 	if (!is.na(given[1])){
 		for (i in 1:length(given)){
 
@@ -423,8 +456,11 @@ flexplot = function(formula, data, related=F,
 	### add prediction lines
 	if (!is.null(prediction)){
 	
-		if (!is.na(axis[2])){
-			stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")
+		### see how many models are being compared
+		num.models = unique(prediction$model)
+	
+		if (!is.na(axis[2]) & length(num.models)>1){
+			stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z), or choose to display only one model")
 		}
 
 
@@ -433,25 +469,34 @@ flexplot = function(formula, data, related=F,
 			for (i in 1:length(break.me)){
 				### find that variable in the model and bin it
 				prediction[[break.me[i]]] = bin.me(break.me[i], prediction, bins, labels[i], breaks[[break.me[i]]])
-				names(prediction)[names(prediction)==break.me[i]] = paste0(break.me[i], "_binned")
 				
-				### now average fit within bin
-				groups = c("model", paste0(break.me[i], "_binned"), predictors[-which(predictors==break.me[i])])
-				prediction = prediction %>% group_by_at(groups) %>% summarize(prediction = mean(prediction))
+				### bin it if it's binned in the original
+
+				names(prediction)[names(prediction)==break.me[i]] = paste0(break.me[i], "_binned")
 			}
+							### now average fit within bin
+				groups = c("model", paste0(break.me, "_binned"), predictors[-which(predictors%in%break.me)])
+				prediction = prediction %>% group_by_at(groups) %>% summarize(prediction = mean(prediction)) %>% as.data.frame
+
 		}
 
 		#### check if first variable is a continuous predictor
 		if (is.numeric(data[[predictors[1]]])){
-		
-			pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 
+					
+			##### if they specify an axis[2], modify the "fitted" string
+			if (!is.na(axis[2])){
+				pred.line = 'geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)' 				
+				fitted = "xxxx"
+			} else {
+				pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				
+			}
 			                         
 		} else {
 
 			pred.line = 'geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))'
 		
 		}
-		prediction
+		
 		
 		#### remove linetype from the plot
 		
@@ -459,8 +504,7 @@ flexplot = function(formula, data, related=F,
 	} else {
 		pred.line = "xxxx"
 	}
-	
-	
+
 	##### do third eye if they choose to
 	#if (third.eye)
 
@@ -472,5 +516,6 @@ flexplot = function(formula, data, related=F,
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
 	final = eval(parse(text=total.call))
+	
 	return(final)
 }	

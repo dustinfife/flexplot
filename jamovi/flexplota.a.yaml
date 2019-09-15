@@ -33,6 +33,8 @@ options:
         - "Loess"
         - "Regression"
         - "Logistic"
+        - "Polynomial"
+        - "Cubic"
       default: "Loess"           
   
     - name: ghost

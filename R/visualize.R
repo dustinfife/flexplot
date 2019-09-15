@@ -5,7 +5,7 @@
 #' @param plot what should be plotted? Residuals? Bivariate plot? All of them?
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
-#' @import tidyverse ggplot2
+#' @import ggplot2
 #' @export
 visualize = function(object, plot=c("all", "residuals", "bivariate"),formula=NULL,...){
 	UseMethod("visualize")

@@ -97,23 +97,24 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	##### look for interactions and remove them
 	if (length(grep(":", terms.mod1))>0){
 		terms.mod1 = terms.mod1[-grep(":", terms.mod1)]
-		model1.type = "interaction"
+		model1.type = ifelse(model1.type=="lm", "interaction", model1.type)
 	}
 	if (length(grep(":", terms.mod2))>0){
 		terms.mod2 = terms.mod2[-grep(":", terms.mod1)]
-		model2.type = "interaction"
+		model2.type = ifelse(model2.type=="lm", "interaction", model2.type)
 	}	
 	
 	##### look for polynomials and remove them
-	if (length(grep("^2", terms.mod1, fixed=T, value=T))>0){
+	if (length(grep("^2", terms.mod1, fixed=T, value=T))>0 ){
 		terms.mod1 = terms.mod1[-grep("^2", terms.mod1, fixed=T)]
-		model1.type="polynomial"
+		model1.type = ifelse(model1.type=="lm", "polynomial", model1.type)
 	}
-	if (length(grep("^2", terms.mod2, fixed=T, value=T))>0){
+	if (length(grep("^2", terms.mod2, fixed=T, value=T))>0 & model1.type=="lm"){
 		terms.mod2 = terms.mod2[-grep("^2", terms.mod1, fixed=T)]
-		model2.type="polynomial"
+		model2.type = ifelse(model2.type=="lm", "polynomial", model2.type)
 	}	
 	
+
 	
 	#### if the outcome is an ordered factor...
 		
@@ -167,6 +168,11 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		pred.mod2$prediction = as.numeric(as.character(pred.mod2$prediction))		
 	}
 
+		#### if they have the same name, just call them model1 and model2
+	if (model1.type==model2.type){
+		pred.mod1$model = paste0(model1.type, " - Model 1", collapse="")
+		pred.mod2$model = paste0(model1.type, " - Model 2", collapse="")		
+	}
 	
 	#### report one or two coefficients, depending on if they supplied it
 	if (old.mod==0){

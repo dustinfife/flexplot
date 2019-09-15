@@ -42,6 +42,8 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			if (self$options$line=="Loess"){line="loess"}
 			if (self$options$line=="Regression"){line ="lm"}
 			if (self$options$line=="Logistic"){line ="logistic"}
+			if (self$options$line=="Polynomial"){line ="polynomial"}
+			if (self$options$line=="Cubic"){line ="cubic"}						
 						
             if (is.null(image$state))
                 return(FALSE)

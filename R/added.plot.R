@@ -11,7 +11,7 @@
 ##' @seealso \code{\link{flexplot}}
 ##' @author Dustin Fife
 ##' @export
-##' @import tidyverse tibble
+##' @import tibble
 ##' @examples
 ##' data(exercise_data)
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data)

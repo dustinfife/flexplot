@@ -46,21 +46,3 @@
 #' \item{age}{Age of book}
 #' }
 "authors"
-
-
-
-
-#' Brief description of the data
-#'
-#' This is a longer descreiption of the data. 
-#'
-#' @format A data frame with xx rows and xx variables:
-#' \describe{
-#'   \item{variable1}{description 1}
-#'   \item{variable2}{description2}
-#' }
-"datasetnameexactly"
-
-ls = data(package="flexplot")
-
-paste0(names(tablesaw.injury), collapse=",")

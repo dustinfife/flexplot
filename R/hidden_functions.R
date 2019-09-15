@@ -91,9 +91,10 @@ rotate.view = function(formula, third.eye){
 	}
 }
 
-prep.breaks = function(variable, data, breaks=NULL, bins=4){
+prep.breaks = function(variable, data, breaks=NULL, bins=3){
 
 		breaks = unlist(breaks)	
+
 
 		if (is.null(breaks)){
 			quants = quantile(data[[variable]], seq(from=0, to=1, length.out=bins+1), na.rm=T)
@@ -111,32 +112,59 @@ prep.breaks = function(variable, data, breaks=NULL, bins=4){
 		return(breaks)
 		
 }
+
+
 bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE){
 
-	bins = ifelse(is.null(bins), 4, bins)
-	
+
 	### if they come as a list, unlist them
 	if (is.list(breaks)){
 		breaks = unlist(breaks)
 	}
 	if (is.list(labels)){
 		labels = unlist(labels)
-	}	
+	}
+	
+	
+	### error if their labels are not the same length as the breaks + 1
+	# if (!is.null(labels) & !is.null(breaks) & length(labels) != (length(breaks))){
+		# stop(paste0("The label vectors (", paste0(unlist(labels), collapse=", "), ") needs to be equal to the number of breaks (", paste0(breaks, collapse="-"), ") + 1. Either change the breaks or the number of labels"))
+	# }
+	
+	#### if they provide labels or breaks, choose the number of bins
+	if (!is.null(labels)){
+		bins = length(labels)
+	} else if (!is.null(breaks)){
+		bins = length(breaks)+1
+	#### otherwise, set bins to 3
+	} else {
+		bins = 3
+	}
+
+	
+	
 
 	### check length of binned variables. If <= breaks, treat as categorical
 	# if (length(unique(data[[variable]]))<=bins){
 		# data[[variable]] = factor(data[[variable]], ordered=T)
 	# }
 	
-	### error if their labels are not the same length as the bin length
-	if (!is.null(labels) & length(labels) != bins){
-		stop(paste0("The label vectors (", paste0(unlist(labels), collapse=", "), ") is not the same length as the bin length (", bins, ")", sep=""))
-	}
+
 
 	#### if they supply breaks, make sure there's a good min/max value	
 	if (!is.null(breaks) & check.breaks){
 		breaks = prep.breaks(variable, data, breaks)
 	} 
+	
+	### if they don't provide labels, make them easier to read (than R's native bin labels)\
+
+	if (!is.null(breaks)){
+	labels = 1:(length(breaks)-1)		
+	for (i in 1:(length(breaks)-1)){
+		labels[i] = paste0(round(breaks[i], digits=1), "-", round(breaks[i+1], digits=1))
+	}
+	}
+
 
 	binned.variable = cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
 	binned.variable
@@ -237,6 +265,10 @@ fit.function = function(outcome, predictors, data, suppress_smooth, method, spre
 		}else if (method=="poisson" | method=="Gamma") {
 			#### specify the curve
 			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se)'
+		} else if (method=="polynomial"){
+			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 2, raw=TRUE))'
+		} else if (method=="cubic"){
+			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 3, raw=TRUE))'
 		} else {
 			fit.string = 'geom_smooth(method=method, se=se)'
 		}

@@ -80,7 +80,6 @@ position <- position_jitterd(width = width, height = height, quad.points=quad.po
 #'  Use `NULL` to use the current random seed and also avoid resetting
 #'  (the behaviour of \pkg{ggplot} 2.2.1 and earlier).
 #' @export
-#' @import tidyverse
 position_jitterd<-function(width=NULL,height=NULL,quad.points=100,seed=NA) {
 if(!is.null(seed) &&is.na(seed)) {
  seed<-sample.int(.Machine$integer.max,1L)
