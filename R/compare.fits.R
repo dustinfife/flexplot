@@ -38,7 +38,22 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	}
 	
 	terms.mod1 = attr(terms(model1), "term.labels")
+	
+	#### for splines...
+	if (length(grep("bs(", terms.mod1, fixed=T))>0){
+		terms.mod1 = gsub("bs(", "", terms.mod1, fixed=T)		
+		terms.mod1 = unlist(lapply(terms.mod1, FUN=function(x) unlist(strsplit(x, ","))[1]))
+		terms.mod1 = unique(terms.mod1)	
+		testme = terms.mod1	
+	}
+	
 	terms.mod2 = attr(terms(model2), "term.labels")
+	if (length(grep("bs(", terms.mod2, fixed=T))>0){
+		terms.mod2 = gsub("bs(", "", terms.mod2, fixed=T)		
+		terms.mod2 = unlist(lapply(terms.mod2, FUN=function(x) unlist(strsplit(x, ","))[1]))
+		terms.mod2 = unique(terms.mod2)		
+		testme = terms.mod1
+	}	
 		
 	##### extract variable names
 	variables = all.vars(formula)
@@ -71,7 +86,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
     var.mins = apply(data[, numb], 2, min, na.rm=T)
     var.max = apply(data[, numb], 2, max, na.rm=T)    
     min.max = data.frame(var.mins, var.max)
-	f = function(d){seq(from=d[1], to=d[2], length.out=10)}
+	f = function(d){seq(from=d[1], to=d[2], length.out=50)}
 	min.max = as.list(as.data.frame((apply(min.max, 1, f))))
 
     #### get unique values for categorical vars
