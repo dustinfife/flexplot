@@ -94,7 +94,7 @@ rotate.view = function(formula, third.eye){
 prep.breaks = function(variable, data, breaks=NULL, bins=3){
 
 		breaks = unlist(breaks)	
-
+		if (is.null(bins)){bins=3}
 
 		if (is.null(breaks)){
 			quants = quantile(data[[variable]], seq(from=0, to=1, length.out=bins+1), na.rm=T)
@@ -114,7 +114,7 @@ prep.breaks = function(variable, data, breaks=NULL, bins=3){
 }
 
 
-bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE){
+bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE, return.breaks=FALSE){
 
 
 	### if they come as a list, unlist them
@@ -165,9 +165,12 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
 	}
 	}
 
-
-	binned.variable = cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
-	binned.variable
+	if (return.breaks){
+		breaks
+	} else {
+		binned.variable = cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
+		binned.variable
+	}
 	
 }
 

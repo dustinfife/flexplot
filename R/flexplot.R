@@ -87,7 +87,7 @@ flexplot = function(formula, data, related=F,
 	#d = exercise_data
 	##### use the following to debug flexplot
 	#formula = formula(weight.loss~therapy.type + rewards); data=d; 
-	#bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
+	#bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
 	#data(exercise_data)
 	#d = exercise_data
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
@@ -190,7 +190,7 @@ flexplot = function(formula, data, related=F,
 				}
 			}
 						
-			breaks[[break.me[i]]] = prep.breaks(break.me[i], data, breaks[[break.me[i]]], bins)
+			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)
 		}
 	} 
 
@@ -340,7 +340,7 @@ flexplot = function(formula, data, related=F,
 
 			if (is.numeric(data[,given[i]])){
 				data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])
-				
+
 				
 				### reorder levels of bin 2
 				if (i==2){
@@ -389,14 +389,20 @@ flexplot = function(formula, data, related=F,
 			if (is.null(ghost.reference[[given[i]]])){
 				rand.val = sample(1:nrow(data), 1)
 				ghost.reference[[given[i]]] = data[rand.val,binned.name]
-				location = which(names(ghost.reference)==given[i])
-				names(ghost.reference)[location] = binned.name
+				#location = which(names(ghost.reference)==given[i])
+				#names(ghost.reference)[location] = binned.name
 				if (!silent){cat(paste0("Note: You didn't choose ghost.reference values for ", given[i], ". I'm going to choose one at random.\n"))}
+			#### when they supply ghost reference information
 			} else {
 				#k[nrow(k), given[i]] = as.numeric(ghost.reference[[given[i]]])
 				#k[,binned.name] = bin.me(given[i], k, bins, labels[i], brks)
-				
-				ghost.reference[[binned.name]] = bin.me(variable=given[i], data=ghost.reference, bins=bins, labels=labels[i], breaks=breaks[[given[i]]], check.breaks=F)
+
+				if (is.numeric(ghost.reference[[given[i]]])){
+					#brks = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]], return.breaks=T)
+					ghost.reference[[given[i]]] = bin.me(variable=given[i], data=ghost.reference, bins=bins, labels=labels[i], breaks=breaks[[given[i]]], check.breaks=F)
+				} else {
+					ghost.reference[[given[i]]] = unlist(ghost.reference)
+				}
 	
 				#location = which(names(ghost.reference)==given[i])
 				#names(ghost.reference)[location] = binned.name						
@@ -412,7 +418,7 @@ flexplot = function(formula, data, related=F,
 				### format given as a binned variable
 				l = data[,given.bin]
 
-				ghost.reference[[given.bin]]=sample(l, 1)
+				ghost.reference[[given[b]]]=sample(l, 1)
 			}
 
 			if (!silent){cat(paste0("Note: You didn't specify a reference for the ghost line. I'm going to choose it at random.\n"))}
@@ -426,7 +432,8 @@ flexplot = function(formula, data, related=F,
 		s=1
 		for (s in 1:length(given)){
 			binned.name = paste0(given[s], "_binned")
-			k = k[(k[,binned.name])==unlist(ghost.reference[[binned.name]]),]				
+			k = k[(k[,binned.name])==unlist(ghost.reference[[given[s]]]),]				
+
 		}				
 
 		#### is k gone???
