@@ -428,11 +428,24 @@ flexplot = function(formula, data, related=F,
 		
 		
 		##### select those columns in d specified
-		k = data
+		
+		#### if they specified a prediction, extract data from prediction model
+		if (!is.null(prediction)){
+			k = prediction
+		} else {
+			k = data
+		}
 		s=1
 		for (s in 1:length(given)){
 			binned.name = paste0(given[s], "_binned")
-			k = k[(k[,binned.name])==unlist(ghost.reference[[given[s]]]),]				
+			
+			### specify k based on whether they supply a prediction
+			if (is.null(prediction)){
+				k = k[(k[,binned.name])==unlist(ghost.reference[[given[s]]]),]				
+			} else {
+				k = k[(k[,given[s]])==unlist(ghost.reference[[given[s]]]),]
+				names(k)[names(k)=="prediction"] = outcome
+			}
 
 		}				
 
@@ -443,18 +456,28 @@ flexplot = function(formula, data, related=F,
 
 
 		### create ggplot object to extract the fit for the ghost line
-		g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome))+', fitted)				
+		if (!is.null(prediction)){
+			g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome, linetype="model", group="model"))+', fitted)							
+		} else {
+			g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome))+', fitted)				
+		}
 		g0 = gsub("+xxxx", "", g0, fixed=T)
 		g0 = eval(parse(text=g0))
 		d_smooth = ggplot_build(g0)$data[[1]]; 
 
+
 		### rename columns
 		names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 
+head(d_smooth)
 
+		## add line to existing plot 
+		if (is.null(prediction)){  
+			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)'
+		} else {
+			d_smooth$model = factor(d_smooth$group, labels=levels(prediction$model))
+			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line)'
+		}
 
-		## add line to existing plot   
-		ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)'
-		
 	} else {
 		ghost = "xxxx"
 	}	
@@ -495,7 +518,14 @@ flexplot = function(formula, data, related=F,
 				pred.line = 'geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)' 				
 				fitted = "xxxx"
 			} else {
-				pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				
+				
+				
+				#### if they supply more than two models to compare...
+				if (length(unique(prediction$model))>2){
+					pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)' 									
+				} else {
+					pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				
+				}
 			}
 			                         
 		} else {
@@ -523,6 +553,6 @@ flexplot = function(formula, data, related=F,
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
 	final = eval(parse(text=total.call))
-	
+	final
 	return(final)
 }	
