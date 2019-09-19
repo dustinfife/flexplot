@@ -468,14 +468,13 @@ flexplot = function(formula, data, related=F,
 
 		### rename columns
 		names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 
-head(d_smooth)
 
 		## add line to existing plot 
-		if (is.null(prediction)){  
-			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)'
-		} else {
+		if (!is.null(prediction) & length(levels(prediction$model)>1)){  
 			d_smooth$model = factor(d_smooth$group, labels=levels(prediction$model))
-			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line)'
+			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line)'			
+		} else {
+			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)'
 		}
 
 	} else {
