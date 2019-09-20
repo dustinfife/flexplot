@@ -149,7 +149,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 			}
 		}
 	}
-
+ 
 
 	#### generate predictions
 	if (model1.type == "lmerMod" | model1.type == "glmerMod"){
@@ -217,6 +217,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	if (return.preds){
 		prediction.model
 	} else {
+		
 		flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...)
 	}	
 

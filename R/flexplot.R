@@ -1,6 +1,7 @@
 ##' Create a "flexible plot" or flexplot
 ##'
-##' Create a flexible plot 
+##' Create a flexible plot. Flexplot will allow users to create histograms, barcharts, jittered density plots, paneled plots, scatterplots, etc.  
+##' Much of the decision-making is automated, which is pretty freaking awesome. 
 ##'	
 ##' Formula takes the form of y~x + a | b + z. Everything on the right of | will occur in panels (in this case, b will be in the columns and z will be in the rows). Any numeric
 ##' variables between ~ and | will fall on the x axis and categorical predictors will be color-coded/symbol-coded/line-coded (if user specifies). If more than one numeric variable is specified
@@ -13,20 +14,21 @@
 ##'		have that number of bins, but it will try to make it work. 
 ##' @param labels A list of the same length as bins
 ##' @param breaks The breaks to be used for the bins.
-##' @param method The method to be used to draw the lines. Defaults to loess, but it could be "lm", "logistic", "polynomial", "cubic", "rlm", or "glm".
-##' @param se Should standard errors be drawn?
+##' @param method The method to be used to draw the lines. Defaults to loess, but it could be "lm", "logistic", "polynomial", "cubic", "rlm", or "glm". Although you could always try something else. Sometimes
+##' flexplot possesses superhuman intelligence. 
+##' @param se Should standard errors be drawn? Defaults to T. 
 ##' @param ghost.line Color of the ghost line. Default is NULL (in which case, the ghost line isn't shown). 
 ##' @param spread Specifies how the "whiskers" of the plots should be draw. Can be "quartiles", "stdev", or "sterr." Defaults to quartiles
 ##' @param jitter Can be either T/F, or a vector of length two, specifying the degree of jitter for the x and y axis, respectively. 
-##' @param raw.data Should raw data be plotted?
-##' @param sample Should a sample of the data be plotted? Defaults to Inf (for all variables). 
-##' @param ghost.reference What groups should be referenced for the ghost line? See examples. 
-##' @param prediction Predicted values for a prediction line. Defaults to NULL
+##' @param raw.data Should raw data be plotted? Defaults to yeaaaaahhhhh-buddy! (i.e., T)
+##' @param sample Should a sample of the data be plotted? Defaults to NOT sampling (for all variables). 
+##' @param ghost.reference What groups should be referenced for the ghost line? See examples for how to specify this. 
+##' @param prediction Predicted values for a prediction line. Defaults to NULL. This is generally NOT used when just using flexplot, but it's helpful with the wrapper function \link{compare.fits}
 ##' @param suppress_smooth Should a fitted line be repressed? Defaults to FALSE
 ##' @param alpha The transparency of the datapoints. 
-##' @param data_output Should the data be outputted?
+##' @param data_output Should the data be outputted? You probably won't ever use this. The only reason this is here is so I can make plots work in Jamovi and Jasp. You're welcome. 
 ##' @param silent Should all messages be suppressed? Defaults to F.
-##' @param third.eye Should the "third eye" be employed? The third eye will 
+##' @param third.eye Should the "third eye" be employed? The third eye will be implemented shortly. 
 ##' @author Dustin Fife
 ##' @import tibble ggplot2
 ##' @export
@@ -75,7 +77,16 @@
 ##' 	breaks = list(c(95000, 100000, 105000)),
 ##' 	labels=list(c("<95K", "<100K", "<105K", ">105K")))	
 ##' 		## relabel income
-flexplot = function(formula, data, related=F,
+##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",
+##' 	breaks = list(income = c(95000, 100000, 105000)),
+##'  	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	
+##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
+##' 	ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	
+##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
+##' 	ghost.line="red", ghost.reference=list("health"=31))
+##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
+##' 	ghost.line="red", ghost.reference=list("health"=31, "income"=90000, "motivation"=10))	
+flexplot = function(formula, data=NULL, related=F,
 		bins = 3, labels=NULL, breaks=NULL,
 		method="loess", se=T, 
 		ghost.line=NULL, ghost.reference=NULL,
@@ -93,6 +104,10 @@ flexplot = function(formula, data, related=F,
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
 	#ghost.reference = list(income=90000)
 
+
+	if (is.null(data)){
+		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
+	}
 
 	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error
 	df = data.frame()
@@ -114,6 +129,11 @@ flexplot = function(formula, data, related=F,
 	variables = all.vars(formula)
 	outcome = variables[1]
 	predictors = variables[-1]
+	
+	if (!all(variables %in% names(data))){
+		not.there = variables[which(!(variables %in% names(data)))]
+		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))
+	}
 	
 	
 	#### make sure all names are in the dataset
@@ -150,10 +170,16 @@ flexplot = function(formula, data, related=F,
 			data = data[-delete.me,]
 		}
 	}
-		
-	#### get the breaks for the needed variables
-	break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	
 
+	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)
+	#### also, lapply fails when there's just one additional predictor, hence the if statement
+	if (length(predictors)>2){
+		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	
+	} else {
+		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	
+	}
+	
+	
 	#### did they provide a named break?
 	if (!is.null(breaks)) {
 		named.breaks = names(breaks)
@@ -332,7 +358,6 @@ flexplot = function(formula, data, related=F,
 	#### all the above should take care of ALL possible plots, but now we add paneling
 	
 	#### add panels (if they were specified)
-
 	if (!is.na(given[1])){
 		for (i in 1:length(given)){
 
@@ -340,8 +365,11 @@ flexplot = function(formula, data, related=F,
 
 			if (is.numeric(data[,given[i]])){
 				data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])
-
 				
+				### if they specified prediction, bin those too
+				if (!is.null(prediction)){
+					prediction[,binned.name] = bin.me(given[i], prediction, bins, labels[i], breaks[[given[i]]])
+				}				
 				### reorder levels of bin 2
 				if (i==2){
 					data[,binned.name] = forcats::fct_rev(data[,binned.name])
@@ -349,6 +377,12 @@ flexplot = function(formula, data, related=F,
 			} else {
 				### duplicate categorical variables and give a new name for binned ones
 				data[,binned.name] = data[,given[i]]
+				
+				
+				### if they specified prediction, bin those too (because later when doing ghost lines, I randomly choose a prediction value from a data value, and they need to be binned before that)
+				if (!is.null(prediction)){
+					prediction[,binned.name] = prediction[,given[i]]
+				}					
 			}
 		}
 
@@ -418,6 +452,7 @@ flexplot = function(formula, data, related=F,
 				### format given as a binned variable
 				l = data[,given.bin]
 
+
 				ghost.reference[[given[b]]]=sample(l, 1)
 			}
 
@@ -436,18 +471,25 @@ flexplot = function(formula, data, related=F,
 			k = data
 		}
 		s=1
+
 		for (s in 1:length(given)){
 			binned.name = paste0(given[s], "_binned")
-			
+
 			### specify k based on whether they supply a prediction
 			if (is.null(prediction)){
 				k = k[(k[,binned.name])==unlist(ghost.reference[[given[s]]]),]				
 			} else {
-				k = k[(k[,given[s]])==unlist(ghost.reference[[given[s]]]),]
+				#### find the closest value to the one specified in ghost.reference
+				#closest.val = which.min(abs(k[,given[s]]-ghost.reference[[given[s]]]))[1]
+				rows = which(k[,binned.name]==unlist(ghost.reference[[given[s]]]))
+				k = k[rows,]
+
 				names(k)[names(k)=="prediction"] = outcome
+
 			}
 
-		}				
+		}			
+
 
 		#### is k gone???
 		if (nrow(k)==0){
@@ -457,6 +499,13 @@ flexplot = function(formula, data, related=F,
 
 		### create ggplot object to extract the fit for the ghost line
 		if (!is.null(prediction)){
+			
+			#### ghost line needs a FITTED LINE, otherwise it generates weird zigzags. When you do a prediction line with no fitted line, that's a problem.
+			#### each given variable still has multiple entries, so average across those entires
+			
+			#### average within the binned values
+			grouped.vars = c("model", predictors[(!(predictors %in% given))])
+			k = k %>% group_by_at(vars(one_of(grouped.vars))) %>% summarize_at(.vars = outcome, .funs=mean)
 			g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome, linetype="model", group="model"))+', fitted)							
 		} else {
 			g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome))+', fitted)				
@@ -464,6 +513,7 @@ flexplot = function(formula, data, related=F,
 		g0 = gsub("+xxxx", "", g0, fixed=T)
 		g0 = eval(parse(text=g0))
 		d_smooth = ggplot_build(g0)$data[[1]]; 
+
 
 
 		### rename columns
@@ -481,7 +531,6 @@ flexplot = function(formula, data, related=F,
 		ghost = "xxxx"
 	}	
 
-
 	### add prediction lines
 	if (!is.null(prediction)){
 	
@@ -498,10 +547,7 @@ flexplot = function(formula, data, related=F,
 			for (i in 1:length(break.me)){
 				### find that variable in the model and bin it
 				prediction[[break.me[i]]] = bin.me(break.me[i], prediction, bins, labels[i], breaks[[break.me[i]]])
-				
-				### bin it if it's binned in the original
 
-				names(prediction)[names(prediction)==break.me[i]] = paste0(break.me[i], "_binned")
 			}
 							### now average fit within bin
 				groups = c("model", paste0(break.me, "_binned"), predictors[-which(predictors%in%break.me)])
@@ -547,7 +593,6 @@ flexplot = function(formula, data, related=F,
 	theme = "theme_bw()"
 
 	#### evaluate the plot
-
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)

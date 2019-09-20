@@ -4,12 +4,12 @@
 \alias{flexplot}
 \title{Create a "flexible plot" or flexplot}
 \usage{
-flexplot(formula, data, related = F, bins = 3, labels = NULL,
-  breaks = NULL, method = "loess", se = T, ghost.line = NULL,
-  ghost.reference = NULL, spread = c("quartiles", "stdev", "sterr"),
-  jitter = NULL, raw.data = T, sample = Inf, prediction = NULL,
-  suppress_smooth = F, alpha = 0.99977, data_output = F,
-  silent = F, third.eye = NULL)
+flexplot(formula, data = NULL, related = F, bins = 3,
+  labels = NULL, breaks = NULL, method = "loess", se = T,
+  ghost.line = NULL, ghost.reference = NULL, spread = c("quartiles",
+  "stdev", "sterr"), jitter = NULL, raw.data = T, sample = Inf,
+  prediction = NULL, suppress_smooth = F, alpha = 0.99977,
+  data_output = F, silent = F, third.eye = NULL)
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}
@@ -25,36 +25,38 @@ have that number of bins, but it will try to make it work.}
 
 \item{breaks}{The breaks to be used for the bins.}
 
-\item{method}{The method to be used to draw the lines. Defaults to loess, but it could be "lm", "logistic", "polynomial", "cubic", "rlm", or "glm".}
+\item{method}{The method to be used to draw the lines. Defaults to loess, but it could be "lm", "logistic", "polynomial", "cubic", "rlm", or "glm". Although you could always try something else. Sometimes
+flexplot possesses superhuman intelligence.}
 
-\item{se}{Should standard errors be drawn?}
+\item{se}{Should standard errors be drawn? Defaults to T.}
 
 \item{ghost.line}{Color of the ghost line. Default is NULL (in which case, the ghost line isn't shown).}
 
-\item{ghost.reference}{What groups should be referenced for the ghost line? See examples.}
+\item{ghost.reference}{What groups should be referenced for the ghost line? See examples for how to specify this.}
 
 \item{spread}{Specifies how the "whiskers" of the plots should be draw. Can be "quartiles", "stdev", or "sterr." Defaults to quartiles}
 
 \item{jitter}{Can be either T/F, or a vector of length two, specifying the degree of jitter for the x and y axis, respectively.}
 
-\item{raw.data}{Should raw data be plotted?}
+\item{raw.data}{Should raw data be plotted? Defaults to yeaaaaahhhhh-buddy! (i.e., T)}
 
-\item{sample}{Should a sample of the data be plotted? Defaults to Inf (for all variables).}
+\item{sample}{Should a sample of the data be plotted? Defaults to NOT sampling (for all variables).}
 
-\item{prediction}{Predicted values for a prediction line. Defaults to NULL}
+\item{prediction}{Predicted values for a prediction line. Defaults to NULL. This is generally NOT used when just using flexplot, but it's helpful with the wrapper function \link{compare.fits}}
 
 \item{suppress_smooth}{Should a fitted line be repressed? Defaults to FALSE}
 
 \item{alpha}{The transparency of the datapoints.}
 
-\item{data_output}{Should the data be outputted?}
+\item{data_output}{Should the data be outputted? You probably won't ever use this. The only reason this is here is so I can make plots work in Jamovi and Jasp. You're welcome.}
 
 \item{silent}{Should all messages be suppressed? Defaults to F.}
 
-\item{third.eye}{Should the "third eye" be employed? The third eye will}
+\item{third.eye}{Should the "third eye" be employed? The third eye will be implemented shortly.}
 }
 \description{
-Create a flexible plot
+Create a flexible plot. Flexplot will allow users to create histograms, barcharts, jittered density plots, paneled plots, scatterplots, etc.  
+Much of the decision-making is automated, which is pretty freaking awesome.
 }
 \details{
 Formula takes the form of y~x + a | b + z. Everything on the right of | will occur in panels (in this case, b will be in the columns and z will be in the rows). Any numeric
@@ -107,6 +109,15 @@ flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm"
 	breaks = list(c(95000, 100000, 105000)),
 	labels=list(c("<95K", "<100K", "<105K", ">105K")))	
 		## relabel income
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",
+	breaks = list(income = c(95000, 100000, 105000)),
+ 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
+	ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
+	ghost.line="red", ghost.reference=list("health"=31))
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
+	ghost.line="red", ghost.reference=list("health"=31, "income"=90000, "motivation"=10))	
 }
 \author{
 Dustin Fife
