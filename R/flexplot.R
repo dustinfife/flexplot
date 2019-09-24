@@ -54,7 +54,7 @@
 ##' flexplot(therapy.type~gender, data=d)	
 #'			
 #'	# ### INTERACTION PLOT			
-##' flexplot(weight.loss~therapy.type + gender, data=d)
+##' \dontrun{flexplot(weight.loss~therapy.type + gender, data=d)
 ##' flexplot(weight.loss~therapy.type + gender, data=d, sample=50)	
 ##'  #### sampling 50 people instead (to make it less noisy)
 #'
@@ -81,7 +81,7 @@
 ##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
 ##' 	ghost.line="red", ghost.reference=list("health"=31))
 ##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
-##' 	ghost.line="red", ghost.reference=list("health"=31, "income"=90000, "motivation"=10))	
+##' 	ghost.line="red", ghost.reference=list("health"=31, "income"=90000, "motivation"=10))}	
 flexplot = function(formula, data=NULL, related=F,
 		bins = 3, labels=NULL, breaks=NULL,
 		method="loess", se=T, 

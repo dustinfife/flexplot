@@ -1,193 +1,3 @@
-sample(1:10, size=pm*p)
-data[,cols] = NA
-head(data)
-cols
-cols = sample(1:10, size=pm*p)
-data[,cols] = NA
-head(data)
-cors(data)
-cor(data, use="complete.obs")
-data
-cor(data, use="complete.obs")
-data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)
-cols = sample(1:10, size=pm*p)
-data[1:10,cols] = NA
-cor(data, use="complete.obs")
-cor.mat = cor(data)
-cols = sample(1:10, size=pm*p)
-cor.mat[cols, cols] = NA
-cor.mat
-#### 2. Simulate k studies#
-studies = array(dim=c(p,p,k))#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[,,i] = cor.mat#
-}
-studies
-studies = data.frame(study=1:k, estimate=paste0("V", 1:unique.cors))
-studies = data.frame(matrix(NA, nrow=k, ncol=paste0("V", 1:unique.cors) + 1))
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))
-studies
-names(studies) = c("study", paste0("cor", 1:p))
-studies
-names(studies) = c("study", paste0("cor", 1:unique.cors))
-studies
-require(Matrix)
-vechs(cor.mat)
-require(OpenMx)
-vechs(cor.mat)
-cor.mat
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,] = vechs(cor.mat)#
-}
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .4#
-p = 10	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 50#
-priors = c(0, .5)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}
-studies
-studies_prior = matrix(nrow=weight*2*k, ncol=ncol(studies))
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .4#
-p = 10	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 50#
-priors = c(0, .5)	### limits of priors#
-weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create the prior matrix#
-studies_prior = matrix(nrow=weight*2*k, ncol=ncol(studies))
-studies_prior
-studies_prior = matrix(runif(rows*ncol(studies), priors[1], priors[5]), nrow=weight*2*k, ncol=ncol(studies))
-rows = weight*2*k
-studies_prior = matrix(runif(rows*ncol(studies), priors[1], priors[5]), nrow=weight*2*k, ncol=ncol(studies))
-rows
-rows*ncol(studies)
-priors
-runif(rows*ncol(studies), priors[1], priors[5])
-rows*ncol(studies)
-runif(n=rows*ncol(studies), min=priors[1], max=priors[5])
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])
-random.cors
-studies_prior = matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies))
-studies_prior
-posterior_cors = cbind(studies, studies_prior)
-posterior_cors
-require(mice)
-?mice
-imputated.dataset = mice(data, m=imps, method="rf")
-pool(imputed.dataset)
-pool(imputated.dataset)
-fit = with(data=imputated.dataset, colMeans())
-fit = with(data=imputated.dataset, colMeans(imputated.dataset))
-fit = with(data=imputated.dataset, colMeans(.))
-?with
-fit = with(data=imputated.dataset, colMeans(x))
-studies_prior
-names(imputated.dataset)
-id = mice(data, m=imps, method="rf")
-id$imp
-names(id)
-?mice
-id$imp$V1
-id = mice(posterior_cors, m=imps, method="rf")
-posterior_cors
-names(posterior_cors) = names(studies)
-posterior_cors = data.frame(cbind(studies, studies_prior))
-names(posterior_cors) = names(studies)
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")
-names(studies)
-posterior_cors = data.frame(cbind(studies, studies_prior))
-names(posterior_cors)
-dim(studies)
-unique.cors
-dim(posterior_cors)
-posterior_cors = data.frame(rbind(studies, studies_prior))
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))
-names(studies_prior) = names(studies)
-posterior_cors = data.frame(rbind(studies, studies_prior))
-posterior_cors
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")
-id$imp$V1
-names(id)
 id$data
 names(id)
 id$imp
@@ -1056,130 +866,254 @@ m2$health.rating#
 plot_grid(reduced_coplot, reduced_avp, nrow=1)
 full_coplot = compare.fits(distress~MI | health.rating, data=m, mod_rf, jitter=c(0, .4), alpha=.2, ghost.line="black", ghost.reference=list(health.rating="good"))+ theme(legend.position="none")+ facet_grid(~health.rating)		### just look at RF model
 full_coplot
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines() %>% length()) %>%#
-  sum()
-require(dplyr)#
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines() %>% length()) %>%#
-  sum()
-require(tidyverse)#
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines() %>% length()) %>%#
-  sum()
-require(tidyverse)#
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines() %>% length())
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines() %>% length()) %>% length
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][jpg]$") %>%#
-  sapply(function(x) x %>% readLines() %>% length()) %>% length
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][pdf]$") %>%#
-  sapply(function(x) x %>% readLines() %>% length()) %>% length
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][png]$") %>%#
-  sapply(function(x) x %>% readLines() %>% length()) %>% length
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][png]$")
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][pdf]$")
-list.files(path = "research/Collaborations", pattern="pdf$", full.names = TRUE, recursive = TRUE) %>% length
-list.files(path = "research/Collaborations", pattern="jpg$", full.names = TRUE, recursive = TRUE) %>% length
-list.files(path = "research/Collaborations", pattern="png$", full.names = TRUE, recursive = TRUE) %>% length
-list.files(path = "research/Collaborations", pattern="png$", full.names = TRUE, recursive = TRUE)
-list.files(path = "research/Collaborations", pattern="pdf$", full.names = TRUE, recursive = TRUE)
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines()
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines()
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines()
-}}
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines())
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>%#
-  sapply(function(x) x %>% readLines()) %>%#
-  sum()
-require(tidyverse)#
-list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
-  str_subset("[.][R]$") %>% length()
-data(exercise_data)
-d = exercise_data
+library("readxl")
+getwd()
+files = list.files("research/Collaborations/literacy")
+files
+files = list.files("research/Collaborations/literacy", full.names=T)
+read_excel(files[3], sheet=1)
+?read_excel
+sheets = excel_sheets(files[3])
+sheets
+data = read_excel(files[3], sheet=sheets[1])
+data = read_excel(files[3], sheet=sheets[1]) %>% data.frame()
+require(dplyr)
+data = read_excel(files[3], sheet=sheets[1]) %>% data.frame()
+data
+flexplot(Scripture.on.own.or.with.help.~1, data=data)
 require(flexplot)
-data(exercise_data)
-d = exercise_data
-b = flexplot(weight.loss~motivation, data=d)
-a = flexplot(weight.loss~therapy.type, data=d)#
-b = flexplot(weight.loss~motivation, data=d)#
-cowplot::plot_grid(a,b)
-b = flexplot(weight.loss~motivation, data=d, method="lm")
-cowplot::plot_grid(a,b)
-jmvtools::install("research/RPackages/flexplot")
-getwd()
-jmvtools::install("research/RPackages/flexplot")
-jmvtools::install("research/RPackages/flexplot")
-getwd()
-setwd("research/RPackages/flexplot")
-jmvtools::install("research/RPackages/flexplot")
-jmvtools::install("")
-jmvtools::install()
-data(blood_pressure)
-head(blood_pressure)
-jmvtools::install()
-clear()
-load("/Users/fife/Dropbox/jamovi.Rda")
-ls()
-fifer::clear()
-load("/Users/fife/Dropbox/jamovi.Rda")
-ls()
-head(k)
-head(p)
-p
-ls()
-head(ghost.given)
-head(d_smooth)
+flexplot(Scripture.on.own.or.with.help.~1, data=data)
+flexplot(Age~1, data=data)
+files[3]
+nrow(data)
+d = read.csv("research/Collaborations/literacy/progress.csv")
+head(d)
+d = read.csv("research/Collaborations/literacy/progress.csv") #
+d = d[-1:2,]#
+head(d)
+d[,6]
+d[,19]
+d[,38]
+d[,37]
+names(d)[6] = "start"
+d = read.csv("research/Collaborations/literacy/progress.csv") #
+d = d[-1:2,]#
+names(d)[6] = "start"#
+names(d)[19] = "before.class"#
+names(d)[37] = "after.class"
+head(d)
+d$start
+d$before.class
+d$before.class = as.numeric(d$before.class)
+d$before.class
+d = read.csv("research/Collaborations/literacy/progress.csv")
+d = d[-1:2,]
+d$before.class = as.numeric(as.character(d$before.class))
+d = read.csv("research/Collaborations/literacy/progress.csv")
+names(d)[6] = "start"#
+names(d)[19] = "before.class"#
+names(d)[37] = "after.class"#
+d$before.class = as.numeric(as.character(d$before.class))
+d$before.class
+d = read.csv("research/Collaborations/literacy/progress.csv")
+d = d[-1:2,]
+names(d)[6] = "start"
+names(d)[19] = "before.class"
+names(d)[37] = "after.class"
+d$before.class
+d$before.class = factor(d$before.class, levels=c("1", ""), labels=c("yes", "no"))
+d$before.class
+d$after.class = factor(d$after.class, levels=c("1", ""), labels=c("yes", "no"))
+d[,c("before.class", "after.class")]
+d = read.csv("research/Collaborations/literacy/progress.csv") #
+d = d[-1:2,]#
+names(d)[6] = "start"#
+names(d)[19] = "before.class"#
+names(d)[37] = "after.class"#
+d$before.class[d$before.class==""] = 0
+d = read.csv("research/Collaborations/literacy/progress.csv", stringAsFactors=F)
+d = read.csv("research/Collaborations/literacy/progress.csv", StringAsFactors=F)
+?read.csv
+d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F)
+d = d[-1:2,]#
+names(d)[6] = "start"#
+names(d)[19] = "before.class"#
+names(d)[37] = "after.class"#
+d$before.class[d$before.class==""] = 0
+d$before.class
+d$before.class = as.numeric(d$before.class)
+d$before.class
+d$after.class[d$after.class ==""] = 0#
+d$after.class = as.numeric(d$after.class)
+d$change = d$after.class - d$before.class
+d$change
+d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
+d = d[-1:2,]#
+d[3,c(6,19,37)]
+d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
+head(d)
+d[,17]
+d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
+d[,17]
+d[,35]
+d[3,c(6,35,35+18)]
+35+18
+d[3,c(6,35,53)]
+c(6,35,53)
+fifer::excel.cols("BA")
+contents("fifer")
+require(fifer)
+contents("fifer")
+fifer::excelCols("BA")
+?fifer::excelCols("BA")
+fifer::excelMatch("BA")
+fifer::excelMatch
+fifer::excelMatch("BA")
+fifer::excelMatch("BA", names(d))
+names(d)
+d[3,c(6,35,41)]
+d[3,c(6,35,53)]
+d[1:10,c(6,35,53)]
+d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F)
+d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
+d = d[-1:2,]#
+contents("fifer")#
+d[1:10,c(6,35,53)]#
+names(d)[6] = "start"#
+names(d)[35] = "before.class"#
+names(d)[53] = "after.class"#
+d$before.class[d$before.class==""] = 0#
+d$before.class = as.numeric(d$before.class)#
+d$after.class[d$after.class ==""] = 0#
+d$after.class = as.numeric(d$after.class)#
+d$change = d$after.class - d$before.class
+d$change
+flexplot(change~1, data=d)
+require(tidyverse)
+flexplot(change~1, data=d)
+remove.packages("fifer")
+flexplot(change~1, data=d)
+flexplot::flexplot(change~1, data=d)
+d$change = factor(d$after.class - d$before.class, levels=c(-1,0,1), labels=c("Worse", "Same", "Improved"))
+flexplot::flexplot(change~1, data=d)
+flexplot::flexplot(change~1, data=d) + labs(x="Read Scriptures By Themselves")
+flexplot::flexplot(start~1, data=d)
+flexplot::flexplot(start~change, data=d)
+flexplot::flexplot(start~change, data=d, jitter=c(.2, .3))
+flexplot::flexplot(start~change, data=d, jitter=c(.2, .4))
+devtools::install("research/RPackages/flexplot")
+flexplot::flexplot(start~change, data=d, jitter=c(.2, .4))  + labs(x="Difference Pre to Post In Read Scriptures Solo")
+flexplot::flexplot(start~change, data=d, jitter=c(.2, .4))  + labs(x="Difference Pre to Post In Read Scriptures Solo", y="Years in Program")
+d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
+d = d[-1:2,]#
+names(d)[6] = "start"#
+names(d)[35] = "before.class"#
+names(d)[53] = "after.class"#
+d$before.class[d$before.class==""] = 0#
+d$before.class = as.numeric(d$before.class)#
+d$after.class[d$after.class ==""] = 0#
+d$after.class = as.numeric(d$after.class)#
+d$change = factor(d$after.class - d$before.class, levels=c(-1,0,1), labels=c("Worse", "Same", "Improved"))#
+require(tidyverse)#
+flexplot::flexplot(change~1, data=d) + labs(x="Read Scriptures By Themselves")
+flexplot::flexplot(change~1, data=d) + labs(x="Read Scriptures By Themselves")
+flexplot::flexplot(start~change, data=d, jitter=c(.2, .4))  + labs(x="Difference Pre to Post In Read Scriptures Solo", y="Years in Program")
+flexplot::flexplot(change~1, data=d) + labs(x="Read Scriptures By Themselves")
+require(fifer2)
+make.data(means=c(10, 15), sds=10, names=c("Treatment", "Outcome"), groups=c("Treatment", "Control"))
+make.data(means=c(10, 15), sds=10, names=c("Treatment", "Outcome"), groups=c("Treatment", "Control"), n=30)
+make.data(means=c(10, 15), sds=c(10,10), names=c("Treatment", "Outcome"), groups=c("Treatment", "Control"), n=c(15, 15))
+make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))
+data = make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))
+t.test(Outcome~Treatment, data=data)
+t.test(Outcome~Treatment, data=data)$p.value
+data = make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))#
+t.test(Outcome~Treatment, data=data)$p.value
+require(fifer2)#
+#
+p.vals = 1:10#
+for (i in 1:length(p.vals)){#
+data = make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))#
+p.vals[i] = t.test(Outcome~Treatment, data=data)$p.value#
+}
+p.vals
+p.vals = data.frame(p.vals)
+flexplot(p.vals~1, data=p.vals)
+flexplot::flexplot(p.vals~1, data=p.vals)
+p.vals = 1:1000#
+for (i in 1:length(p.vals)){#
+data = make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))#
+p.vals[i] = t.test(Outcome~Treatment, data=data)$p.value#
+}#
+p.vals = data.frame(p.vals)#
+#
+flexplot::flexplot(p.vals~1, data=p.vals)
+length(which(p.vals<0.05))
+length(which(p.vals<0.05))/length(p.vals)
+length(p.vals)
+length(which(p.vals<0.05))/nrow(p.vals)
+flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications")
+flexplot::flexplot(p.vals~1, data=p.vals) + lab(x="Computed P-Value From 1,000 Replications")
+require(tidyverse)
+flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications")
+flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies")
+?geom_text
+flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies") +#
+  annotate("text", label = "plot mpg vs. wt", x = .75, y = 100, size = 8, colour = "red")
+length(which(p.vals<0.05))/nrow(p.vals)
+annotate("text", label = "# of Significance p-values: 252", x = .75, y = 100, size = 8, colour = "red")
+require(tidyverse)#
+flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies") +#
+  annotate("text", label = "# of Significance p-values: 252", x = .75, y = 100, size = 8, colour = "red")
+annotate("text", label = "# of Significance p-values:\n 252", x = .75, y = 100, size = 8, colour = "red")
+flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies") +#
+  annotate("text", label = "# of Significance p-values:\n 252", x = .75, y = 100, size = 8, colour = "red")
+require(tidyverse)#
+flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies") +#
+  annotate("text", label = "# of Significance p-values:\n 252", x = .55, y = 100, size = 8, colour = "red")
+devtools::check("research/RPackages/flexplot")
 data(birthweight)
 head(birthweight)
-jmvtools::install()
-jmvtools::install()
-fifer::clear()
-load("/Users/fife/Dropbox/jamovi.Rda")
-ls()
-p
-head(k)
-warnings()
-fifer::clear()
-load("/Users/fife/Dropbox/jamovi.Rda")
-ls()
-head(k)
-p
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
 data(nsduh)
 head(nsduh)
+devtools::check("research/RPackages/flexplot")
+devtools::document("research/RPackages/flexplot")
+devtools::check("research/RPackages/flexplot")
+devtools::check("research/RPackages/flexplot")
+setwd("research/RPackages/flexplot")
+devtools::build()
 devtools::check()
 devtools::check()
-data(tablesaw_injury)
-head(tablesaw_injury)
-load("/Users/fife/Dropbox/research/RPackages/flexplot/data/tablesaw_injury.rda")
-fifer::clear()
-load("/Users/fife/Dropbox/research/RPackages/flexplot/data/tablesaw_injury.rda")
-ls()
+data(nsduh)
+names(nsduh)
+names(nsduh)[14]
+names(nsduh)[15]
+names(nsduh)[15] = "whodas.impairment"
+save(ndsuh, "data/nsduh.Rdat")
+save(ndsuh, list="data/nsduh.Rdat")
+save(ndsuh, file="data/nsduh.Rdat")
+save(nsduh, file="data/nsduh.Rdat")
 devtools::check()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
+save(nsduh, file="data/nsduh.rda")
+devtools::check()
+save(nsduh, file="data/nsduh.rda")
+devtools::check()
+a=c("gender","health","income","motivation","muscle.gain","muscle.gain.missing","rewards","satisfaction","six.mo.weight","therapy.type","weight.loss")
+a
+b=c("gender","health","income","motivation","muscle.gain","muscle.gain.missing", "rewards","satisfaction","six.mo.weight","therapy.type","weight","loss")
+a %in% b
+a = c("MI","age","alc.freq","alc.rec","attend.rel.serv","cig.freq","cig.rec", "coc.rec","cocain.freq","county","dep.pas.yr","distress","education", "health.rating","her.rec","heroin.freq","income","inpatient","major.dep","military","moves.past5","outpatient","race","rel.inf.dec","sex", "whodas.impairment")#
+#
+b = c("MI","age","alc.freq","alc.rec","attend.rel.serv","cig.freq","cig.rec",#
+"coc.rec","cocain.freq","country","dep.pas.yr","distress","education",#
+"health.rating","her.rec","heroin.freq","income","inpatient","major.dep",#
+"military","moves.past5","outpatient","race","rel.inf.dec","sex",#
+"whodas.impairment")
+a %in% b
+a[!(a %in% b)]
+devtools::check()
+devtools::check()
+devtools::use_build_ignore("build")
+?devtools::use_build_ignore("build")
+devtools::check()
+?build
