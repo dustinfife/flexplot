@@ -25,7 +25,7 @@ uni.plot = function(variable, d=NULL, numeric=NULL){
 			tryCatch(d[,variable], error=function(error){paste0("I couldn't find '", variable, "' in your dataset")})
 			out = tryCatch(length(d[,variable])>0, error=function(error){paste0("I couldn't find '", variable,"' in your dataset"); return(FALSE)})			
 			if (!out){
-				stop(paste0("I couldn't find either '", x, "' or '", y , "' in your dataset"))
+				stop(paste0("I couldn't find variable '", variable, "' in your dataset"))
 			}			
 		} else if (is.null(d[,variable]) & !is.character(variable)){
 			d = data.frame(variable); names(d) = deparse(substitute(variable))

@@ -274,9 +274,6 @@ glmbasic <- function(
         line = line,
         center = center)
 
-    results <- glmbasicResults$new(
-        options = options)
-
     analysis <- glmbasicClass$new(
         options = options,
         data = data)

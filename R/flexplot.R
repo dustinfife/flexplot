@@ -30,7 +30,7 @@
 ##' @param silent Should all messages be suppressed? Defaults to F.
 ##' @param third.eye Should the "third eye" be employed? The third eye will be implemented shortly. 
 ##' @author Dustin Fife
-##' @import tibble ggplot2
+##' @import tibble ggplot2 R6
 ##' @export
 ##' @examples
 #' data(exercise_data)
@@ -64,18 +64,14 @@
 #'	# #### 2N PLOT (2 NUMERIC VARIABLE PLOTS)
 ##' flexplot(weight.loss~motivation + income, data=d, se=FALSE, method="lm")
 ##' flexplot(weight.loss~motivation + income, data=d, se=FALSE, method="lm", 
-##' 	breaks = list(c(95000, 100000, 105000)),
-##' 	labels=list(c("<95K", "<100K", "<105K", ">105K")))		
+##' 	breaks = list(income = c(95000, 100000, 105000)),
+##' 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))		
 ##' 		### change labels for income
 #'
 #'	# #### 3N plot
 ##' flexplot(weight.loss~motivation + income + health, data=d, se=FALSE, method="lm")	
 ##' 		## different lines for income
 ##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm")	
-##' 		## different panels for income
-##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
-##' 	breaks = list(c(95000, 100000, 105000)),
-##' 	labels=list(c("<95K", "<100K", "<105K", ">105K")))	
 ##' 		## relabel income
 ##' flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",
 ##' 	breaks = list(income = c(95000, 100000, 105000)),

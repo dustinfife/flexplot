@@ -91,8 +91,8 @@ overplotting caused by discreteness in smaller datasets. This
 function was adapted from geom_jitter within ggplot2
 }
 \seealso{
-\link[ggplot2]{geom_point()} for regular, unjittered points,
+\link[ggplot2]{geom_point} for regular, unjittered points,
 \link[ggplot2]{geom_boxplot} for another way of looking at the conditional
   distribution of a variable
-\link[ggplot2]{geom_jitter()} for standard jittering
+\link[ggplot2]{geom_jitter} for standard jittering
 }

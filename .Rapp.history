@@ -1,1158 +1,1185 @@
-d
-hw = grep("Week", names(d), value=T)
-d[,hw]
-ncol(d[,hw])
-require(fifer)#
-d = read.csv("Dropbox/grades/intro")#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-ncol(d[,hw])
-d[,hw]
-require(fifer)#
-d = read.csv("Dropbox/grades/intro")#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### conver to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}
-d[,hw]
-d = read.csv("Dropbox/grades/intro")#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-#
-d[,hw]
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)
-hw = grep("Week", names(d), value=T)
-d
-d[,hw]
-d$Week.14 = NULL
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-d[,hw]
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d$Week.14 = NULL#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-d[,hw]
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-d$Week.14 = NULL#
-hw = grep("Week", names(d), value=T)
-#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-d[,hw]
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-d$Week.14 = NULL#
-hw = grep("Week", names(d), value=T)#
-ncol(d[,hw])
-#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-ncol(d[,hw])
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-d$Week.14 = NULL#
-hw = grep("Week", names(d), value=T)#
-ncol(d[,hw])#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 10#
-}
-d
-require(fifer)#
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-d$Week.14 = NULL#
-hw = grep("Week", names(d), value=T)#
-ncol(d[,hw])#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 10#
-}#
-#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Midterm)#
-d$total.score
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)
-d$total.score
-#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 10#
-}#
-#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
-d$total.score
-head(d)
-d[,c("Last.Name", "First.Name", "total.score")]
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-d$Week.14 = NULL#
-hw = grep("Week", names(d), value=T)#
-d$Final.Exam[d$Last.Name=="Batie"] = 0#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 10#
-}#
-#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
-d$total.score#
-d[,c("Last.Name", "First.Name", "total.score")]
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]
-is.na(d$Univariate.Midterm)
-d$Final.Exam[is.na(d$Final.Exam)]=0
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150
-d[,c("Last.Name", "First.Name", "total.score")]
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-d$Week.14 = NULL#
-hw = grep("Week", names(d), value=T)#
-d$Final.Exam[d$Last.Name=="Batie"] = 0#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 10#
-}#
-#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
-d$Final.Exam[is.na(d$Final.Exam)]=0#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
-d$total.score#
-d[,c("Last.Name", "First.Name", "total.score")]
-cut(d$letter.grade*100, c(0, 60, 63, 70, 73, 80, 83, 90, 93,))
-cut(d$letter.grade*100, c(0, 60, 63, 70, 73, 80, 83, 90, 93,100))
-cut(d$letter.grade*100, c(0, 60, 63, 70, 73, 80, 83, 90, 93,100), include.lowest=T)
-?cut
-cut(d$letter.grade*100, c(0, 60, 63, 70, 73, 80, 83, 90, 93,100), right=F)
-cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))
-d$letter.grade
-d$letter.grade = d$total.score
-d$letter.grade
-cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))
-d[,c("Last.Name", "First.Name", "total.score", "letter.grade")]
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
-d$total.score#
-d$letter.grade = d$total.score#
-d$letter.grade = cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))#
-d[,c("Last.Name", "First.Name", "total.score", "letter.grade")]
-d = read.csv("Dropbox/grades/univariate")
-names(d) = subsetString(names(d), "..", 1)
-hw = grep("Week", names(d), value=T)
-d[,hw]
-require(fifer)#
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)
-hw = grep("Week", names(d), value=T)
-d[,hw]
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 10#
-}
-d
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d[,hw]#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-d
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
-d$Final.Exam[is.na(d$Final.Exam)]=0
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm+25)
-d$total.score
-require(fifer)#
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d[,hw]#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-d#
-#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
-d$Final.Exam[is.na(d$Final.Exam)]=0#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm+25)#
-d$total.score
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d
-d = read.csv("Dropbox/grades/finalexam.csv")
-head(d)
-names(d) = subsetString(names(d), "..", 1)
-head(d)
-names(d)
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")
-d
-names(d) = subsetString(names(d), "..", 1)
-names(d)
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
-names(d)
-d = d[,c("Last.Name", "Question.ID", "Auto.Score")]
-head(d)
-tidyr::spread(d, Question.ID, Auto.Score)
-cor(d[,2:ncol(d)])
-d[,2:ncol(d)]
-ncol(d)
-d
-d = tidyr::spread(d, Question.ID, Auto.Score)
-cor(d[,2:ncol(d)])
-cor(d[,2:ncol(d)], use="pairwise.complete.obs")
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
-d = d[,c("Last.Name", "Question.ID", "Auto.Score")]#
-d = tidyr::spread(d, Question.ID, Auto.Score)#
-d
-cor.bests = 1:nrow(d)
-cor.bests = 1:nrow(d)#
-for (i in 1:nrow(d)){#
-	person = d[,i]#
-	diam = d[,1]#
-	cor.bests[i] =cor(person, diam, use="pairwise.complete.obs")#
-}
-person
-d[,i]
-person = d[i,]
-person
-person = d[i,]
-diam = d[1,]
-cor.bests = 1:nrow(d)#
-for (i in 1:nrow(d)){#
-	person = d[i,]#
-	diam = d[1,]#
-	cor.bests[i] =cor(person, diam, use="pairwise.complete.obs")#
-}
-diam
-person
-cor(person, diam, use="pairwise.complete.obs")
-is.numeric(person)
-as.numeric(person)
-person = as.numeric(d[i,])#
-	diam = as.numeric(d[1,])#
-	cor.bests[i] =cor(person, diam, use="pairwise.complete.obs")
-cor.bests = 1:nrow(d)#
-for (i in 1:nrow(d)){#
-	person = as.numeric(d[i,])#
-	diam = as.numeric(d[1,])#
-	cor.bests[i] =cor(person, diam, use="pairwise.complete.obs")#
-}
-cor.bests
-cor.bests = data.frame(person=d$Last.Name, correlation=1:nrow(d))#
-for (i in 1:nrow(d)){#
-	person = as.numeric(d[i,])#
-	diam = as.numeric(d[1,])#
-	cor.bests$correlation[i] =cor(person, diam, use="pairwise.complete.obs")#
-}
-cor.bests
-cor.bests = cor.bests[order(cor.bests$correlation),]
-cor.bests
-d
-she.got.wrong = which(diam==0)
-she.got.wrong
-they.got.wrong = which(person==0)
-they.got.wrong
-they.got.wrong %in% she.got.wrong
-all(they.got.wrong %in% she.got.wrong)
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
-d = d[,c("Last.Name", "Question.ID", "Auto.Score")]#
-d = tidyr::spread(d, Question.ID, Auto.Score)#
-d#
-cor(d[,2:ncol(d)], use="pairwise.complete.obs")#
-#
-cor.bests = data.frame(person=d$Last.Name, correlation=1:nrow(d), flagged=0)#
-for (i in 1:nrow(d)){#
-	person = as.numeric(d[i,])#
-	diam = as.numeric(d[1,])#
-	#### see if they got one right that she got wrong#
-	#### all wrong she has are the same they got wrong#
-	she.got.wrong = which(diam==0)#
-	they.got.wrong = which(person==0)#
-	### now flag it if they shared all the same wrong ones, but they got more#
-	if (all(they.got.wrong %in% she.got.wrong) & length(they.got.wrong)>length(she.got.wrong)){#
-		cor.bests$flagged[i]=1#
+sample(1:10, size=pm*p)
+data[,cols] = NA
+head(data)
+cols
+cols = sample(1:10, size=pm*p)
+data[,cols] = NA
+head(data)
+cors(data)
+cor(data, use="complete.obs")
+data
+cor(data, use="complete.obs")
+data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)
+cols = sample(1:10, size=pm*p)
+data[1:10,cols] = NA
+cor(data, use="complete.obs")
+cor.mat = cor(data)
+cols = sample(1:10, size=pm*p)
+cor.mat[cols, cols] = NA
+cor.mat
+#### 2. Simulate k studies#
+studies = array(dim=c(p,p,k))#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
 	}#
-	cor.bests$correlation[i] =cor(person, diam, use="pairwise.complete.obs")#
-}#
-cor.bests = cor.bests[order(cor.bests$correlation),]#
-cor.bests
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
-d = d[,c("Last.Name", "Question.ID", "Auto.Score")]#
-d = tidyr::spread(d, Question.ID, Auto.Score)#
-d#
-cor(d[,2:ncol(d)], use="pairwise.complete.obs")#
-#
-cor.bests = data.frame(person=d$Last.Name, correlation=1:nrow(d), flagged=0)#
-for (i in 1:nrow(d)){#
-	person = as.numeric(d[i,])#
-	diam = as.numeric(d[1,])#
-	#### see if they got one right that she got wrong#
-	#### all wrong she has are the same they got wrong#
-	she.got.wrong = which(diam==0)#
-	they.got.wrong = which(person==0)#
-	### now flag it if they shared all the same wrong ones, but they got more#
-	if (all(she.got.wrong %in% they.got.wrong ) & length(they.got.wrong)>length(she.got.wrong)){#
-		cor.bests$flagged[i]=1#
+	### put in matrix#
+	studies[,,i] = cor.mat#
+}
+studies
+studies = data.frame(study=1:k, estimate=paste0("V", 1:unique.cors))
+studies = data.frame(matrix(NA, nrow=k, ncol=paste0("V", 1:unique.cors) + 1))
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))
+studies
+names(studies) = c("study", paste0("cor", 1:p))
+studies
+names(studies) = c("study", paste0("cor", 1:unique.cors))
+studies
+require(Matrix)
+vechs(cor.mat)
+require(OpenMx)
+vechs(cor.mat)
+cor.mat
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
 	}#
-	cor.bests$correlation[i] =cor(person, diam, use="pairwise.complete.obs")#
-}#
-cor.bests = cor.bests[order(cor.bests$correlation),]#
-cor.bests
-she.got.wrong
-they.got.wrong
-all(she.got.wrong %in% they.got.wrong )
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
-d = d[,c("Last.Name", "Question.ID", "Auto.Score")]#
-d = tidyr::spread(d, Question.ID, Auto.Score)#
-d#
-cor(d[,2:ncol(d)], use="pairwise.complete.obs")#
+	### put in matrix#
+	studies[i,] = vechs(cor.mat)#
+}
+require(OpenMx)#
 #
-cor.bests = data.frame(person=d$Last.Name, correlation=1:nrow(d), flagged=0)#
-for (i in 1:nrow(d)){#
-	person = as.numeric(d[i,])#
-	diam = as.numeric(d[1,])#
-	#### see if they got one right that she got wrong#
-	#### all wrong she has are the same they got wrong#
-	she.got.wrong = which(diam==0)#
-	they.got.wrong = which(person==0)#
-	### now flag it if they shared all the same wrong ones, but they got more#
-	if (all(she.got.wrong %in% they.got.wrong )){#
-		cor.bests$flagged[i]=1#
+		#### set parameters#
+a = b= c = .4#
+p = 10	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 50#
+priors = c(0, .5)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
 	}#
-	cor.bests$correlation[i] =cor(person, diam, use="pairwise.complete.obs")#
-}#
-cor.bests = cor.bests[order(cor.bests$correlation),]#
-cor.bests
-d[d$person=="Priestley" | d$person == "Batie",]
-d$person == "Batie"
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
-d = d[,c("Last.Name", "Question.ID", "Auto.Score")]#
-d = tidyr::spread(d, Question.ID, Auto.Score)#
-d
-d[c(1,14),]
-i=14
-person = as.numeric(d[i,])
-person
-diam = as.numeric(d[1,])
-diam
-person = as.numeric(d[i,])
-person
-she.got.wrong = which(diam==0)
-she.got.wrong
-they.got.wrong = which(person==0)
-they.got.wrong
-person = as.numeric(d[i,])
-person
-she.got.wrong = which(diam==0)
-diam
-person==0
-which(person==0)
-diam
-person
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
-d = d[,c("Last.Name", "Question.ID", "Auto.Score")]#
-d = tidyr::spread(d, Question.ID, Auto.Score)#
-d[c(1,14),]#
-cor(d[,2:ncol(d)], use="pairwise.complete.obs")#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}
+studies
+studies_prior = matrix(nrow=weight*2*k, ncol=ncol(studies))
+require(OpenMx)#
 #
-cor.bests = data.frame(person=d$Last.Name, correlation=1:nrow(d), flagged=0)#
-i=14#
-for (i in 1:nrow(d)){#
-	person = as.numeric(d[i,])#
-	diam = as.numeric(d[1,])#
-	#### see if they got one right that she got wrong#
-	#### all wrong she has are the same they got wrong#
-	she.got.wrong = which(diam==0)#
-	they.got.wrong = which(person==0)#
-	### now flag it if they shared all the same wrong ones, but they got more#
-	if (all(she.got.wrong %in% they.got.wrong )){#
-		cor.bests$flagged[i]=1#
+		#### set parameters#
+a = b= c = .4#
+p = 10	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 50#
+priors = c(0, .5)	### limits of priors#
+weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
 	}#
-	cor.bests$correlation[i] =cor(person, diam, use="pairwise.complete.obs")#
-}#
-cor.bests = cor.bests[order(cor.bests$correlation),]#
-cor.bests
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
-d = d[,c("Last.Name", "Question.ID", "Auto.Score")]#
-d = tidyr::spread(d, Question.ID, Auto.Score)#
-d[c(1,14),]#
-cor(d[,2:ncol(d)], use="pairwise.complete.obs")#
-#
-cor.bests = data.frame(person=d$Last.Name, correlation=1:nrow(d), flagged=0)#
-i=14#
-for (i in 1:nrow(d)){#
-	person = as.numeric(d[i,])#
-	diam = as.numeric(d[1,])#
-	#### see if they got one right that she got wrong#
-	#### all wrong she has are the same they got wrong#
-	she.got.wrong = which(diam==0)#
-	they.got.wrong = which(person==0)#
-	### now flag it if they shared all the same wrong ones, but they got more#
-	if (all(they.got.wrong %in% she.got.wrong )){#
-		cor.bests$flagged[i]=1#
-	}#
-	cor.bests$correlation[i] =cor(person, diam, use="pairwise.complete.obs")#
-}#
-cor.bests = cor.bests[order(cor.bests$correlation),]#
-cor.bests
-i=3
-person = as.numeric(d[i,])
-diam = as.numeric(d[1,])
-person
-she.got.wrong = which(diam==0)
-they.got.wrong = which(person==0)
-she.got.wrong
-they.got.wrong
-d = read.csv("Dropbox/grades/finalexam.csv", sep=",")#
-d = d[,c("Last.Name", "Question.ID", "Auto.Score")]#
-d = tidyr::spread(d, Question.ID, Auto.Score)#
-d[c(1,14),]#
-cor(d[,2:ncol(d)], use="pairwise.complete.obs")#
-#
-cor.bests = data.frame(person=d$Last.Name, correlation=1:nrow(d), flagged=0)#
-i=14#
-for (i in 1:nrow(d)){#
-	person = as.numeric(d[i,])#
-	diam = as.numeric(d[1,])#
-	#### see if they got one right that she got wrong#
-	#### all wrong she has are the same they got wrong#
-	she.got.wrong = which(diam==0)#
-	they.got.wrong = which(person==0)#
-	### now flag it if they shared all the same wrong ones, but they got more#
-	if (all(she.got.wrong %in% they.got.wrong )){#
-		cor.bests$flagged[i]=1#
-	}#
-	cor.bests$correlation[i] =cor(person, diam, use="pairwise.complete.obs")#
-}#
-cor.bests = cor.bests[order(cor.bests$correlation),]#
-cor.bests
-length(person)
-require(fifer)#
-d = read.csv("Dropbox/grades/rm.csv")#
-#
-	#### get rid of junk in names#
-names(d) = subsetString(names(d), "..", 1)#
-d$Week.4 = NULL#
-d$Benchmark = NULL#
-d$Benchmark = NULL#
-d$Benchmark = NULL#
-#
-d#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
 }#
 #
-d$Final.Exam = (d$Final.Exam/25)*15#
-	#### give points for doing benchmarks#
-d$benchmark = 5#
-	##### loop through and drop lowest scores#
-	i=1#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Midterm + d$benchmark + 10)/90#
-d#
-#
-require(fifer)#
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-d$Week.14 = NULL#
-hw = grep("Week", names(d), value=T)#
-d$Final.Exam[d$Last.Name=="Batie"] = 0#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 10#
-}#
-#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
-d$Final.Exam[is.na(d$Final.Exam)]=0#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
-d$total.score#
-d$letter.grade = d$total.score#
-d$letter.grade = cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))#
-d[,c("Last.Name", "First.Name", "total.score", "letter.grade")]
-require(fifer)#
-d = read.csv("Dropbox/grades/rm.csv")#
-#
-	#### get rid of junk in names#
-names(d) = subsetString(names(d), "..", 1)#
-d$Week.4 = NULL#
-d$Benchmark = NULL#
-d$Benchmark = NULL#
-d$Benchmark = NULL#
-#
-d#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-#
-d$Final.Exam = (d$Final.Exam/25)*15#
-	#### give points for doing benchmarks#
-d$benchmark = 5#
-	##### loop through and drop lowest scores#
-	i=1#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Midterm + d$benchmark + 10)/90#
-d#
-#
-require(fifer)#
-d = read.csv("Dropbox/grades/intro")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-d$Week.14 = NULL#
-hw = grep("Week", names(d), value=T)#
-#d$Final.Exam[d$Last.Name=="Batie"] = 0#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 10#
-}#
-#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
-d$Final.Exam[is.na(d$Final.Exam)]=0#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/150#
-d$total.score#
-d$letter.grade = d$total.score#
-d$letter.grade = cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))#
-d[,c("Last.Name", "First.Name", "total.score", "letter.grade")]
-require(fifer)#
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-d#
-#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
-d$Final.Exam[is.na(d$Final.Exam)]=0#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm+25)#
-d$total.score
-require(fifer)#
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-d#
-#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
-d$Final.Exam[is.na(d$Final.Exam)]=0#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)#
-d$total.score
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/75#
-d$total.score
-require(fifer)#
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d
-d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))
-missing.vals = which(is.na(d[,hw[i]]))
-missing.vals
-d[missing.vals, hw[i]] = 0
-max(d[,hw[i]])
-require(fifer)#
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d
+	#### create the prior matrix#
+studies_prior = matrix(nrow=weight*2*k, ncol=ncol(studies))
+studies_prior
+studies_prior = matrix(runif(rows*ncol(studies), priors[1], priors[5]), nrow=weight*2*k, ncol=ncol(studies))
+rows = weight*2*k
+studies_prior = matrix(runif(rows*ncol(studies), priors[1], priors[5]), nrow=weight*2*k, ncol=ncol(studies))
+rows
+rows*ncol(studies)
+priors
+runif(rows*ncol(studies), priors[1], priors[5])
+rows*ncol(studies)
+runif(n=rows*ncol(studies), min=priors[1], max=priors[5])
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])
+random.cors
+studies_prior = matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies))
+studies_prior
+posterior_cors = cbind(studies, studies_prior)
+posterior_cors
+require(mice)
+?mice
+imputated.dataset = mice(data, m=imps, method="rf")
+pool(imputed.dataset)
+pool(imputated.dataset)
+fit = with(data=imputated.dataset, colMeans())
+fit = with(data=imputated.dataset, colMeans(imputated.dataset))
+fit = with(data=imputated.dataset, colMeans(.))
+?with
+fit = with(data=imputated.dataset, colMeans(x))
+studies_prior
+names(imputated.dataset)
+id = mice(data, m=imps, method="rf")
+id$imp
+names(id)
+?mice
+id$imp$V1
+id = mice(posterior_cors, m=imps, method="rf")
+posterior_cors
+names(posterior_cors) = names(studies)
+posterior_cors = data.frame(cbind(studies, studies_prior))
+names(posterior_cors) = names(studies)
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")
+names(studies)
+posterior_cors = data.frame(cbind(studies, studies_prior))
+names(posterior_cors)
+dim(studies)
+unique.cors
+dim(posterior_cors)
+posterior_cors = data.frame(rbind(studies, studies_prior))
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))
+names(studies_prior) = names(studies)
+posterior_cors = data.frame(rbind(studies, studies_prior))
+posterior_cors
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")
+id$imp$V1
+names(id)
+id$data
+names(id)
+id$imp
+with(id, colMeans)
+with(id, colMeans())
+mean.cors = 1:unique.cors
+id$imp
+?complete
 i=1
-max.score = max(d[,hw[i]])
-max.score
-require(fifer)#
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-d
-d[,hw]
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
+newd = complete(id, i)
+newd
+colMeans(newd)
+mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)
+newd = complete(id, i)
+mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)#
+for (i in 1:length(mean.cores)){#
+	newd = complete(id, i)#
+	mean.cores[,i] = colMeans(newd)#
 }
-d$Homework
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0
-d$Univariate.Midterm
-d$Final.Exam[is.na(d$Final.Exam)]=0
-d$Final.Exam
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/85
-d$total.score
-require(fifer)#
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d#
+mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)#
+for (i in 1:length(mean.cores)){#
+	newd = complete(id, i)#
+	mean.cors[,i] = colMeans(newd)#
+}
+for (i in 1:length(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[,i] = colMeans(newd)#
+}
+mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)#
+for (i in 1:length(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[,i] = colMeans(newd[-1])#
+}
+mean.cors
+mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)#
+for (i in 1:length(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,1] = colMeans(newd[-1])#
+	mean.cors[i,2] = i#
+}
+mean.cors = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=imps))
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))
+mean.cors
+i = 1
+newd = complete(id, i)
+newd
+colMeans(newd[-1])
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:length(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[-1])#
+}
+mean.cors
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[-1])#
+}
+mean.cors
+colMeans(mean.cors)
+rho
+colMeans(mean.cors)[c(1,2,10)]
+require(OpenMx)#
 #
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
+		#### set parameters#
+a = b= c = .5#
+p = 10	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 50#
+priors = c(0, .5)	### limits of priors#
+weight = .25			### confidence of bayesian estimate (.5 means you give equal weight to the prior)#
 #
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
-d$Final.Exam[is.na(d$Final.Exam)]=0#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
 #
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/85#
-d$total.score
-d[,c("Last.Name", "First.Name", "Homework", "Final.Exam", "Univariate.Midterm","total.score", "letter.grade")]
-require(fifer)#
-d = read.csv("Dropbox/grades/univariate")#
-names(d) = subsetString(names(d), "..", 1)#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-d#
-#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert to numeric#
-	d[,hw[i]] = as.numeric(as.character(d[,hw[i]]))#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-d$Univariate.Midterm[is.na(d$Univariate.Midterm)]=0#
-d$Final.Exam[is.na(d$Final.Exam)]=0#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Univariate.Midterm)/85#
-d$total.score#
-d$letter.grade = d$total.score#
-d$letter.grade = cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))#
-d[,c("Last.Name", "First.Name", "Homework", "Final.Exam", "Univariate.Midterm","total.score", "letter.grade")]
-require(fifer)#
-d = read.csv("Dropbox/grades/rm.csv")#
-#
-	#### get rid of junk in names#
-names(d) = subsetString(names(d), "..", 1)#
-d$Week.4 = NULL#
-d$Benchmark = NULL#
-d$Benchmark = NULL#
-d$Benchmark = NULL#
-#
-d#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-#
-d$Final.Exam = (d$Final.Exam/25)*15#
-	#### give points for doing benchmarks#
-d$benchmark = 5#
-	##### loop through and drop lowest scores#
-	i=1#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Midterm + d$benchmark + 10)/90#
-d
-require(fifer)#
-d = read.csv("Dropbox/grades/rm.csv")#
-#
-	#### get rid of junk in names#
-names(d) = subsetString(names(d), "..", 1)#
-d$Week.4 = NULL#
-d$Benchmark = NULL#
-d$Benchmark = NULL#
-d$Benchmark = NULL#
-#
-d#
-	#### get homework names#
-hw = grep("Week", names(d), value=T)#
-	#### loop through them succas to convert to 5 total#
-for (i in 1:length(hw)){#
-	#### convert NA to zero#
-	missing.vals = which(is.na(d[,hw[i]]))#
-	d[missing.vals, hw[i]] = 0#
-#
-	#### scale to total 5#
-	max.score = max(d[,hw[i]])#
-	d[,hw[i]] = d[,hw[i]]/max.score * 5#
-}#
-#
-d$Final.Exam = (d$Final.Exam/25)*15#
-	#### give points for doing benchmarks#
-d$benchmark = 5#
-	##### loop through and drop lowest scores#
-	i=1#
-for (i in 1:nrow(d)){#
-	sorted.scores = sort(d[i,hw], decreasing=T)#
-	d$Homework[i] = sum(sorted.scores[1:10])#
-}#
-#
-d$total.score = (d$Homework + d$Final.Exam + d$Midterm + d$benchmark + 10)/90#
-d$letter.grade = d$total.score#
-d$letter.grade = cut(d$letter.grade*100, c(0, 60, 63, 67, 70, 73, 76, 80, 83, 86, 90, 93,100), right=F, labels=c("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A"))#
-d[,c("Last.Name", "First.Name", "total.score", "letter.grade")]
-inches = 8:15#
-weight = c(18, 21, 25, 28, 30, 32, 35, 37)#
-#
-plot(inches, weight)
-predict(lm(weight~inches), list(inches=30))
-install.packages("haven")
-require(haven)
-d = read.csv("Sales.sav")
-get.wd()
-getwd()
-d = read.csv("Dropbox/Sales.sav")
-require(foreign)
-d = read.sav("Dropbox/Sales.sav")
-require(haven)
-d = read_sav("Dropbox/Sales.sav")
-head(d)
-write.csv(d, "Sales.csv")
-write.csv(d, "Dropbox/Sales.csv")
-write.csv(d, "Dropbox/Sales.csv", row.names=F)
-?read_sav
-d$customer
-d$customer = factor(d$customer, levels=c(1,2), labels=c("Regular customer", "Preferred customer"))
-d$customer
-head(d)
-d$support
-d$support = factor(d$customer, levels=c(1,2,3,4), labels=c("< 1 Minute", "1-2 Minutes", "2-4 Minutes", "> 4 Minutes"))
-d$region
-d$industry
-d$industry = factor(d$customer, levels=c(1,2,3), labels=c("Government", "Commercial", "Academic"))
-require(haven)#
-d = read_sav("Dropbox/Sales.sav")#
-d$customer = factor(d$customer, levels=c(1,2), labels=c("Regular customer", "Preferred customer"))#
-d$support = factor(d$customer, levels=c(1,2,3,4), labels=c("< 1 Minute", "1-2 Minutes", "2-4 Minutes", "> 4 Minutes"))#
-d$region = factor(d$customer, levels=c(1,2,3,4), labels=c("North", "South", "East", "West"))#
-d$industry = factor(d$customer, levels=c(1,2,3), labels=c("Government", "Commercial", "Academic"))#
-head(d)
-require(haven)#
-d = read_sav("Dropbox/Sales.sav")#
-d$customer = factor(d$customer, levels=c(1,2), labels=c("Regular customer", "Preferred customer"))#
-d$support = factor(d$support, levels=c(1,2,3,4), labels=c("< 1 Minute", "1-2 Minutes", "2-4 Minutes", "> 4 Minutes"))#
-d$region = factor(d$region, levels=c(1,2,3,4), labels=c("North", "South", "East", "West"))#
-d$industry = factor(d$industry, levels=c(1,2,3), labels=c("Government", "Commercial", "Academic"))#
-head(d)
-write.csv(d, "Dropbox/Sales.csv", row.names=F)
-require(fifer)#
-clear()#
-#jmvtools::install()#
-#devtools::install()#
-data(ToothGrowth)#
-d = ToothGrowth#
-require(glinmod)#
-d$dose = factor(d$dose)#
-glinmod::glinmod(len~supp+dose, data=d)
-traceback()
-options(warn=2)
-glinmod::glinmod(len~supp+dose, data=d)
-traceback()
-require(fifer)#
-clear()#
-#jmvtools::install()#
-#devtools::install()#
-data(ToothGrowth)#
-d = ToothGrowth#
-require(glinmod)#
-d$dose = factor(d$dose)#
-glinmod::glinmod(len~supp+dose, data=d)#
-traceback()#
-f = len~supp+dose; data=d#
-object = lm(f, data=d)
-plot="all"
-terms = attr(terms(object), "term.labels")
-d = object$model#
-	#### identify factors#
-	if (length(terms)>1){#
-		factors = names(which(unlist(lapply(d[,terms], is.factor))));#
-		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));#
-	} else {#
-		factors = terms[which(is.factor(d[,terms]))]#
-		numbers = terms[which(is.numeric(d[,terms]))]#
-	}
-factors
-levels = apply(d, 2, FUN=function(x) length(unique(x)))#
-	#### if there's too few levels and it's not categorical#
-	factors = !sapply(d, is.factor)#
-	if (any(levels<5 & factors)){#
-		cat("Note: one or more of your variables has less than 5 values, yet they're treated as numeric.\n\n")#
-	}
-x.names = names(d)[-1] #
-	y.name = names(d)[1]
-#### export residuals#
-	d$residuals = residuals(object)#
-	d$abs.res = abs(d$residuals)#
-	d$fitted = fitted(object)
-histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")#
-	if (length(numbers)>0){#
-		#res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + #
-		#theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
-		res.dep = flexplot(residuals~fitted, data=d) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
-	} else {#
-		res.dep = NULL#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
 	}#
-	if (length(unique(d$fitted))<7){#
-	sl = flexplot(abs.res~fitted, data=d, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
-	} else {#
-	sl = flexplot(abs.res~fitted, data=d, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[-1])#
+}#
+colMeans(mean.cors)[c(1,2,10)]
+apply(mean.cors,2,sd)[c(1,2,10)]
+newd
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}
+sd.cors
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+colMeans(mean.cors)[c(1,2,10)]
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 10	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.3, .7)	### limits of priors (vary the bias?)#
+weight = .25			### confidence of bayesian estimate (.5 means you give equal weight to the prior)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,10)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 10	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.3, .7)	### limits of priors (vary the bias?)#
+weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,10)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 10	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.1, .5)	### limits of priors (vary the bias?)#
+weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,10)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 5	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.1, .5)	### limits of priors (vary the bias?)#
+weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,10)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+#### set parameters#
+a = b= c = .5#
+p = 5	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.1, .5)	### limits of priors (vary the bias?)#
+weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)
+#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))
+data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk
+if (runif(1)<pk){#
+		cols = sample(1:10, size=pm*p)#
+		cor.mat[cols, cols] = NA#
 	}
-histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
-require(tidyverse)
-histo = ggplot2::ggplot(data=d, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black') + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
-if (length(numbers)>0){#
-		#res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + #
-		#theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
-		res.dep = flexplot(residuals~fitted, data=d) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
-	} else {#
-		res.dep = NULL#
-	}
-if (length(unique(d$fitted))<7){#
-	sl = flexplot(abs.res~fitted, data=d, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
-	} else {#
-	sl = flexplot(abs.res~fitted, data=d, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
-	}
-(plot=="all" | plot == "bivariate" ) & is.null(formula)
-is.null(formula)
-is.null(formula)
-data = object$model#
-		#### extract the terms from each model#
-		terms = attr(terms(object), "term.labels")
-##### extract variable names#
-		variables = all.vars(formula(object))#
-	    outcome = variables[1]#
-	    predictors = variables[-1]#
-	    ##### look for interactions and remove them#
-		if (length(grep(":", terms))>0){#
-			terms = terms[-grep(":", terms)]#
-		}#
-		##### look for polynomials and remove them#
-		if (length(grep("^2", terms, fixed=T, value=T))>0){#
-			terms = terms[-grep("^2", terms, fixed=T)]#
-		}#
-		#### figure out variable types#
-		if (length(terms)>1){#
-			numb = names(which(unlist(lapply(data[,terms], is.numeric))))#
-			cat = names(which(!(unlist(lapply(data[,terms], is.numeric)))))#
-		} else {#
-			numb = ifelse(is.numeric(data[,terms]), terms, NA)#
-			cat = ifelse(is.factor(data[,terms]), terms, NA)		#
-		}
-cat
-if (length(terms)>4){#
-			cat("Note: I can't plot more than four variables")#
-		}
-is.na(cat)
-if ((!is.na(cat[1]) | length(cat[1])!=0) & (!is.na(cat[1]) | length(cat[1])!=0)){#
-			### remove terms with first numb and first cat#
-			t2 = terms[-which(terms==numb[1] | terms==cat[1])]#
-			t2 = c(numb[1],cat[1], t2)#
-		#### otherwise, if length is greater than #
-		} else {#
-			t2 = terms[1:min(length(terms), 4)]#
-		}
-devtools::install()
-setwd("Dropbox/research/RPackages/glinmod")
-devtools::install()
-data(ToothGrowth)
-d = ToothGrowth
-require(glinmod)
-d$dose = factor(d$dose)
-glinmod::glinmod(len~supp+dose, data=d)
-require(fifer)#
+cols = sample(1:p, size=pm*p)
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 5	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.1, .5)	### limits of priors (vary the bias?)#
+weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:p, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,10)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 5	#### number of variables#
+dij = .3#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.1, .5)	### limits of priors (vary the bias?)#
+weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:p, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,10)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 5	#### number of variables#
+dij = .1#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.1, .5)	### limits of priors (vary the bias?)#
+weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:p, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,10)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+colMeans(mean.cors)[c(1,2,p)]
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 5	#### number of variables#
+dij = .1#
+k = 30#
+N = 1000#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.1, .5)	### limits of priors (vary the bias?)#
+weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:p, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,p)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 5	#### number of variables#
+dij = .1#
+k = 30#
+N = 200#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.1, .5)	### limits of priors (vary the bias?)#
+weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:p, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,p)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+require(OpenMx)#
+#
+		#### set parameters#
+a = b= c = .5#
+p = 5	#### number of variables#
+dij = .1#
+k = 10#
+N = 200#
+pm = .5#
+pk = .9#
+imps = 10#
+priors = c(.1, .5)	### limits of priors (vary the bias?)#
+weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
+#
+	#### 1. create variance/covariance matrix#
+unique.cors = p*(p-1)/2	#
+devechs = rep(dij, times=unique.cors-3)#
+rho = matrix(dij, nrow=p, ncol=p)#
+diag(rho) = 1#
+rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
+rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
+	#### 2. Simulate k studies#
+studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
+names(studies) = c("study", paste0("cor", 1:unique.cors))#
+#
+for (i in 1:k){#
+	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
+	cor.mat = cor(data)#
+	#### delete data if random number < pk#
+	if (runif(1)<pk){#
+		cols = sample(1:p, size=pm*p)#
+		cor.mat[cols, cols] = NA#
+	}#
+	### put in matrix#
+	studies[i,1] = i#
+	studies[i,-1] = vechs(cor.mat)#
+}#
+#
+	#### create and populate the prior matrix#
+rows = weight*2*k	#
+random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
+studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
+names(studies_prior) = names(studies)#
+#
+	#### combine the matrices#
+posterior_cors = data.frame(rbind(studies, studies_prior))#
+	#### impute the RF#
+require(mice)#
+id = mice(posterior_cors, m=imps, method="rf")#
+	#### loop through and average the correlations#
+mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
+i = 1#
+for (i in 1:nrow(mean.cors)){#
+	newd = complete(id, i)#
+	mean.cors[i,] = colMeans(newd[,-1])#
+	sd.cors[i,] = apply(newd[,-1], 2, sd)#
+}#
+colMeans(mean.cors)[c(1,2,p)]#
+apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
+install.packages("BRugs")
+if(!require(R2OpenBUGS)) install.packages("R2OpenBUGS")
+install.packages("R2OpenBUGS")
+require(R2OpenBugs)
+require(R2OpenBUGS)
+data(schools)
+install.packages("BRugs")
+install.packages("rjags")
 clear()#
-#jmvtools::install()#
-#devtools::install()#
-#setwd("Dropbox/research/RPackages/glinmod")#
-data(ToothGrowth)#
-d = ToothGrowth#
-require(glinmod)#
-d$dose = factor(d$dose)#
-glinmod::glinmod(len~supp+dose, data=d)
+#
+require(flexplot)#
+require(cowplot)#
+require(tidyverse)#
+#
+		#### data preparation#
+d = read.csv("research/9 steps/data/nsduh_ninsteps.csv")#
+		#### just note who does drugs vs. not, then subset#
+m= d %>% mutate(drugs = ifelse(her.rec=="past 30 days" | her.rec == ">30 < 12 mo", "yes", "no")) %>% #
+	filter(drugs=="yes") %>%#
+	mutate(health.rating = factor(health.rating, levels=rev(1:5), labels=c("poor", "fair", "good", "very good", "excellent"), ordered=T))#
+	### report statistical significance#
+mod = (lm(distress~health.rating + MI, data=m))#
+anova(mod)#
+rel = m %>% select(k6_1:k6_6) %>% filter_all(all_vars(. < 6))#
+require(psych)#
+require(lavaan)#
+		#### type of estimate for reliability depends on number of factors. See how many there are#
+f1 = fa(rel, nfactors=1)	#
+f2 = fa(rel, nfactors=2, rotate="promax")#
+f2	#### find the factors with EFA#
+#
+		### do cfa#
+model1 = '#
+	g =~ k6_1 + k6_2 + k6_3 + k6_4 + k6_5 + k6_6 #
+'#
+model2 = '#
+	g1 =~ k6_2 + k6_4 + k6_5 + k6_6 #
+	g2 =~ k6_1 + k6_3 	#
+	g1~~g2#
+'#
+#
+fit1 = cfa(model1, data=rel)#
+fit2 = cfa(model2, data=rel)#
+options(scipen=10)#
+cbind(m1=inspect(fit1, 'fit.measures'), m2=inspect(fit2, 'fit.measures'))#
+	### nearly all measures agree on a two factor solution		#
+	#### look at various says to estimate reliability#
+cronbach = alpha(rel); #
+omeg2 = omega(rel, nfactors=2); #
+cronbach$total$raw_alpha#
+omeg2$omega.tot#
+	#### fairly similar and high#
+		### univariate plots#
+flexplot(distress~1, data=m)#
+flexplot(health.rating~1, data=m)#
+flexplot(MI~1, data=m)#
+#
+		#### bivariate plots#
+bivar1 = flexplot(distress~MI | health.rating, data=m)		#
+#
+		#### let's combine these datasets since they're sparse at the end#
+m2 = m; levels(m2$health.rating) = c("fair", "fair", "good", "very good", "very good")#
+	#### results from aggregating#
+	flexplot(health.rating~1, data=m2)#
+			#### now re-visualize#
+	bivar2 = flexplot(distress~MI | health.rating, data=m2)				#
+	plot_grid(bivar1, bivar2)#
+			#### now visualize residuals of lm (even though it's a bad idea to do LM)#
+	visualize(mod, "residuals")		#
+			#### compare various models#
+	require(splines)#
+	mod_polyt = MASS::polr(distress~MI * health.rating, data=m2 %>% mutate(distress = factor(distress)))#
+	mod_gam = glm(distress~MI * health.rating + I(MI^2), data=m2 %>% mutate(distress = distress+1), family=Gamma(link="log"))#
+	mod_rf = randomForest::randomForest(distress~MI * health.rating, data=m2 %>% mutate(distress = distress+1))#
+	mod_spline = glm(distress~bs(MI, knots=.125, degree=2)*health.rating, data=m2 %>% mutate(distress = distress+1), family=Gamma(link="log"))#
+			#### show the models#
+	compare.fits(distress~MI | health.rating, data=m2, mod_polyt, mod_gam, jitter=c(0, .4), alpha=.2)		### two bad models#
+	compare.fits(distress~MI | health.rating, data=m2, mod_rf, mod_spline, jitter=c(0, .4), alpha=.2, ghost.line="black")		### two good models#
+	reduced_coplot= compare.fits(distress~MI | health.rating, data=m2, mod_rf, jitter=c(0, .4), alpha=.2, ghost.line="black")+ theme(legend.position="none") + facet_grid(~health.rating) 	### just look at RF model#
+		####  now residualize the effect of MI#
+	m2 = m2 %>% mutate(rf_residuals =  distress - predict(mod_rf) + mean(distress))#
+	reduced_avp	= flexplot(rf_residuals~health.rating, data=m2) + labs(x="Health Rating", y="Distress | MI")#
+#
+### give parameter estimates#
+means1 = predict(mod_rf, m2 %>% mutate(MI = quantile(MI, .1))%>% filter(health.rating=="fair" | health.rating=="very good")) %>% unique()#
+#
+m2$health.rating#
+#### results from not aggregating#
+#### results from aggregating#
+			#### compare various models#
+	require(splines)#
+	mod_polyt = MASS::polr(distress~MI * health.rating, data=m %>% mutate(distress = factor(distress)))#
+	mod_gam = glm(distress~MI * health.rating + I(MI^2), data=m %>% mutate(distress = distress+1), family=Gamma(link="log"))#
+	mod_rf = randomForest::randomForest(distress~MI * health.rating, data=m %>% mutate(distress = distress+1))#
+	mod_spline = glm(distress~bs(MI, knots=.125, degree=2)*health.rating, data=m %>% mutate(distress = distress+1), family=Gamma(link="log"))#
+			#### show the models#
+	compare.fits(distress~MI | health.rating, data=m, mod_polyt, mod_gam, jitter=c(0, .4), alpha=.2)		### two bad models#
+	compare.fits(distress~MI | health.rating, data=m, mod_rf, mod_spline, jitter=c(0, .4), alpha=.2, ghost.line="black")		### two good models#
+	full_coplot = compare.fits(distress~MI | health.rating, data=m, mod_rf, jitter=c(0, .4), alpha=.2, ghost.line="black")+ theme(legend.position="none")+ facet_grid(~health.rating)		### just look at RF model#
+		####  now residualize the effect of MI#
+	m = m %>% mutate(rf_residuals =  distress - predict(mod_rf) + mean(distress))#
+	full_avp = flexplot(rf_residuals~health.rating, data=m) + labs(x="Health Rating", y="Distress | MI")
+plot_grid(reduced_coplot, reduced_avp, nrow=1)
+full_coplot = compare.fits(distress~MI | health.rating, data=m, mod_rf, jitter=c(0, .4), alpha=.2, ghost.line="black", ghost.reference=list(health.rating="good"))+ theme(legend.position="none")+ facet_grid(~health.rating)		### just look at RF model
+full_coplot
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines() %>% length()) %>%#
+  sum()
+require(dplyr)#
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines() %>% length()) %>%#
+  sum()
+require(tidyverse)#
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines() %>% length()) %>%#
+  sum()
+require(tidyverse)#
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines() %>% length())
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines() %>% length()) %>% length
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][jpg]$") %>%#
+  sapply(function(x) x %>% readLines() %>% length()) %>% length
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][pdf]$") %>%#
+  sapply(function(x) x %>% readLines() %>% length()) %>% length
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][png]$") %>%#
+  sapply(function(x) x %>% readLines() %>% length()) %>% length
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][png]$")
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][pdf]$")
+list.files(path = "research/Collaborations", pattern="pdf$", full.names = TRUE, recursive = TRUE) %>% length
+list.files(path = "research/Collaborations", pattern="jpg$", full.names = TRUE, recursive = TRUE) %>% length
+list.files(path = "research/Collaborations", pattern="png$", full.names = TRUE, recursive = TRUE) %>% length
+list.files(path = "research/Collaborations", pattern="png$", full.names = TRUE, recursive = TRUE)
+list.files(path = "research/Collaborations", pattern="pdf$", full.names = TRUE, recursive = TRUE)
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines()
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines()
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines()
+}}
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines())
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>%#
+  sapply(function(x) x %>% readLines()) %>%#
+  sum()
+require(tidyverse)#
+list.files(path = "research/Collaborations", recursive = T, full.names = T) %>%#
+  str_subset("[.][R]$") %>% length()
+data(exercise_data)
+d = exercise_data
+require(flexplot)
+data(exercise_data)
+d = exercise_data
+b = flexplot(weight.loss~motivation, data=d)
+a = flexplot(weight.loss~therapy.type, data=d)#
+b = flexplot(weight.loss~motivation, data=d)#
+cowplot::plot_grid(a,b)
+b = flexplot(weight.loss~motivation, data=d, method="lm")
+cowplot::plot_grid(a,b)
+jmvtools::install("research/RPackages/flexplot")
+getwd()
+jmvtools::install("research/RPackages/flexplot")
+jmvtools::install("research/RPackages/flexplot")
+getwd()
+setwd("research/RPackages/flexplot")
+jmvtools::install("research/RPackages/flexplot")
+jmvtools::install("")
+jmvtools::install()
+data(blood_pressure)
+head(blood_pressure)
+jmvtools::install()
+clear()
+load("/Users/fife/Dropbox/jamovi.Rda")
+ls()
+fifer::clear()
+load("/Users/fife/Dropbox/jamovi.Rda")
+ls()
+head(k)
+head(p)
+p
+ls()
+head(ghost.given)
+head(d_smooth)
+data(birthweight)
+head(birthweight)
+jmvtools::install()
+jmvtools::install()
+fifer::clear()
+load("/Users/fife/Dropbox/jamovi.Rda")
+ls()
+p
+head(k)
+warnings()
+fifer::clear()
+load("/Users/fife/Dropbox/jamovi.Rda")
+ls()
+head(k)
+p
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+data(nsduh)
+head(nsduh)
+devtools::check()
+devtools::check()
+data(tablesaw_injury)
+head(tablesaw_injury)
+load("/Users/fife/Dropbox/research/RPackages/flexplot/data/tablesaw_injury.rda")
+fifer::clear()
+load("/Users/fife/Dropbox/research/RPackages/flexplot/data/tablesaw_injury.rda")
+ls()
+devtools::check()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()

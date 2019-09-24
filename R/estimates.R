@@ -22,7 +22,7 @@ estimates.default = function(object){
 #'
 #' Report lm object Estimates
 #' @param object a lm object
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(filter, lag))
 #' @export
 estimates.lm = function(object){
 
@@ -325,6 +325,9 @@ estimates.glm = function(object){
 #' @param object a zeroinfl object
 #' @export
 estimates.zeroinfl = function(object){
+	
+	#### get dataset
+	d = object$model
 	
 	#### generate list of coefficients
 	terms = attr(terms(object), "term.labels")

@@ -23,7 +23,8 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					output = list(formula=formula, data=self$data)
 					image <- self$results$plot
 					image$setState(output)
-			} else if (length(self$options$out)>0 & length(self$options$preds)==0){
+			#### run if they do univariate stuff		
+			} else if (length(self$options$out)>0 & length(self$options$preds)==0 & length(self$options$given)==0){
 		        	#### write formula for flexplot
 		            formula <- paste0(self$options$out, "~1")
 		            formula <- as.formula(formula)
@@ -31,6 +32,8 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					output = list(formula=formula, data=self$data)
 					image <- self$results$plot
 					image$setState(output)
+			} else if (length(self$options$out)>0 & length(self$options$preds)>1 & length(self$options$given)>0 & self$options$ghost==TRUE){
+					jmvcore::reject("Sorry! You can't do ghost lines when you have two variables in the 'Predictor variables' box. Try putting one in the 'Paneled variables' box.")
 			}
 			return(formula)
 		}
@@ -58,38 +61,39 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (length(self$options$given)>0 & self$options$ghost==TRUE){
             		
             	#### first create initial plot
-            	p = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, data_output=T) 
-            	plot = p$plot
+            	plot = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="gray") 
+            	# plot = p$plot
+
             	
-            	#### now add the ghost line (have to do it separately because of environment conflicts)
-            	#### first get ghost.reference
-            	k = p$data
-            	ghost.reference = list()
-            	for (i in 1:length(self$options$given)){
-            		condition = k[1,self$options$given[i]]
-            		k = k[k[,self$options$given[i]]==condition,]
-            	}
+# #             	#### now add the ghost line (have to do it separately because of environment conflicts)
+            	# #### first get ghost.reference
+            	# k = p$data
+            	# ghost.reference = list()
+            	# for (i in 1:length(self$options$given)){
+            		# condition = k[1,self$options$given[i]]
+            		# k = k[k[,self$options$given[i]]==condition,]
+            	# }
 				
 			
-				### identify which variables are in the given category
-				ghost.given = self$options$given
+				# ### identify which variables are in the given category
+				# ghost.given = self$options$given
 				
-				if (is.numeric(data[,self$options$preds[1]])){
-					g0 = ggplot(data=k, aes_string(x=self$options$preds[1], y=self$options$out))+geom_smooth(method=line, se=self$options$se)
-				} else {
-					g0 = ggplot(data=k, aes_string(x=self$options$preds[1], y=self$options$out))+p$summary1 + p$summary2 + p$sum.line
-				}
-				d_smooth = ggplot_build(g0)$data[[1]]; 
+				# if (is.numeric(data[,self$options$preds[1]])){
+					# g0 = ggplot(data=k, aes_string(x=self$options$preds[1], y=self$options$out))+geom_smooth(method=line, se=self$options$se)
+				# } else {
+					# g0 = ggplot(data=k, aes_string(x=self$options$preds[1], y=self$options$out))+p$summary1 + p$summary2 + p$sum.line
+				# }
+				# d_smooth = ggplot_build(g0)$data[[1]]; 
 					
-				### rename columns
-				names(d_smooth)[names(d_smooth)=="x"] = as.character(self$options$preds[1]); names(d_smooth)[names(d_smooth)=="y"] = self$options$out; 
+				# ### rename columns
+				# names(d_smooth)[names(d_smooth)=="x"] = as.character(self$options$preds[1]); names(d_smooth)[names(d_smooth)=="y"] = self$options$out; 
 	
-
+            	# save(p,k, ghost.given, d_smooth, file="/Users/fife/Dropbox/jamovi.Rda")
 	
-				## add line to existing plot   
-	            plot = plot + theme_bw(base_size = 16) +
-	            		theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA)) +
-						geom_line(data=d_smooth, aes_string(x=self$options$preds[1], y= self$options$out), color="gray")
+				# ## add line to existing plot   
+	            # plot = plot + theme_bw(base_size = 16) +
+	            		# theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA)) +
+						# geom_line(data=d_smooth, aes_string(x=self$options$preds[1], y= self$options$out), color="gray")
 
             } else {	
             	plot = flexplot(formula, data=data, se=self$options$se, spread=se.type,method=line,  alpha = self$options$alpha*.01) + 

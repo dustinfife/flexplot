@@ -13,10 +13,10 @@
 #' @param quad.points The number of "quadriture points" for the density function. 
 #' Higher numbers yield a more detailed jittered density plot
 #' @seealso
-#' \link[ggplot2]{geom_point()} for regular, unjittered points,
+#' \link[ggplot2]{geom_point} for regular, unjittered points,
 #' \link[ggplot2]{geom_boxplot} for another way of looking at the conditional
 #'   distribution of a variable
-#' \link[ggplot2]{geom_jitter()} for standard jittering
+#' \link[ggplot2]{geom_jitter} for standard jittering
 #' @export
 #' @importFrom magrittr "%>%" 
 #' @importFrom purrr "%||%"

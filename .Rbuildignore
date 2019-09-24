@@ -1,4 +1,6 @@
 ^README\.Rmd$       # An Rmarkdown file used to generate README.md
 ^jamovi$	    
-^icon$       # An Rmarkdown file used to generate README.md
-^\.jmo$       # An Rmarkdown file used to generate README.md
+^build$
+^icon\.png$       # An Rmarkdown file used to generate README.md
+^icon\.svg$       # An Rmarkdown file used to generate README.md
+^flexplot\.jmo$       # An Rmarkdown file used to generate README.md

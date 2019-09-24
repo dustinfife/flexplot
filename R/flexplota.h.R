@@ -194,9 +194,6 @@ flexplota <- function(
         center = center,
         alpha = alpha)
 
-    results <- flexplotaResults$new(
-        options = options)
-
     analysis <- flexplotaClass$new(
         options = options,
         data = data)
