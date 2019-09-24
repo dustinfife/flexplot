@@ -1,0 +1,70 @@
+---
+name:  flexplota
+title: Flexplot
+menuGroup: Flexplot
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: out
+      title: Dependent variable
+      type: Variable
+
+    - name: preds
+      title: Predictor variable
+      type: Variables
+      
+    - name: given
+      title: Paneled variable
+      type: Variables      
+      
+    - name: se
+      title: Confidence bands (for scatterplots)
+      type: Bool
+      default: true           
+
+    - name: line
+      title: Fitted line (for scatterplots)
+      type: List
+      options:
+        - "Loess"
+        - "Regression"
+        - "Logistic"
+        - "Polynomial"
+        - "Cubic"
+      default: "Loess"           
+  
+    - name: ghost
+      title: Ghost line
+      type: Bool
+      default: true  
+
+    - name: resid
+      title: Residualize predictor variable
+      type: Bool
+      default: false    
+           
+    - name: center
+      title: Center/spread (for dot plots)
+      type: List
+      options:
+        - "Median + quartiles"
+        - "Mean + sterr"
+        - "Mean + stdev"
+      default: "Median + quartiles" 
+      
+    - name: alpha
+      title: Transparency of dots (%)
+      type: Number
+      min: 0
+      max: 100
+      default: 50
+      
+  
+                        
+      
+      
+...

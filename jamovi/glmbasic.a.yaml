@@ -1,0 +1,60 @@
+---
+name:  glmbasic
+title: General Linear Model
+menuGroup: Flexplot
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: out
+      title: Dependent variable
+      type: Variable
+
+    - name: preds
+      title: Predictor variable
+      type: Variables
+
+    - name: graphic
+      title: Analysis graphs
+      type: Bool
+      default: true
+      
+    - name: graphicassump
+      title: Diagnostics
+      type: Bool
+      default: false      
+     
+    - name: estimates
+      title: Estimates and effect eizes
+      type: Bool
+      default: true 
+      
+    - name: se
+      title: Standard errors
+      type: Bool
+      default: true           
+       
+    - name: line
+      title: Fitted line (for scatterplots)
+      type: List
+      options:
+        - "Loess"
+        - "Regression"
+        - "Logistic"
+      default: "Loess"           
+      
+    - name: center
+      title: Center/spread (for dot plots)
+      type: List
+      options:
+        - "Median + quartiles"
+        - "Mean + sterr"
+        - "Mean + stdev"
+      default: "Median + quartiles"                 
+      
+            
+           
+...

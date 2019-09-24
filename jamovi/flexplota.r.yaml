@@ -1,0 +1,14 @@
+---
+name:  flexplota
+title: Flexplot
+jrs:   '1.1'
+
+items:      
+    - name: plot
+      title: Analysis Plot
+      type: Image
+      width:  600
+      height: 400
+      renderFun: .plot   
+
+...
