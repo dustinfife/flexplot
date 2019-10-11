@@ -9,7 +9,7 @@ flexplot(formula, data = NULL, related = F, bins = 3,
   ghost.line = NULL, ghost.reference = NULL, spread = c("quartiles",
   "stdev", "sterr"), jitter = NULL, raw.data = T, sample = Inf,
   prediction = NULL, suppress_smooth = F, alpha = 0.99977,
-  data_output = F, silent = F, third.eye = NULL)
+  plot.string = F, silent = F, third.eye = NULL)
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}
@@ -48,7 +48,8 @@ flexplot possesses superhuman intelligence.}
 
 \item{alpha}{The transparency of the datapoints.}
 
-\item{data_output}{Should the data be outputted? You probably won't ever use this. The only reason this is here is so I can make plots work in Jamovi and Jasp. You're welcome.}
+\item{plot.string}{Should the code to generate the plot be outputted? In the background, flexplot is creating a bunch of strings before it evaluates the model. 
+Users can export the string, in case they want to modify the ggplot object}
 
 \item{silent}{Should all messages be suppressed? Defaults to F.}
 
@@ -86,7 +87,7 @@ flexplot(weight.loss~therapy.type, data=d, raw.data=FALSE)
 flexplot(therapy.type~gender, data=d)	
 		
 # ### INTERACTION PLOT			
-flexplot(weight.loss~therapy.type + gender, data=d)
+\dontrun{flexplot(weight.loss~therapy.type + gender, data=d)
 flexplot(weight.loss~therapy.type + gender, data=d, sample=50)	
  #### sampling 50 people instead (to make it less noisy)
 
@@ -113,7 +114,7 @@ flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm"
 flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
 	ghost.line="red", ghost.reference=list("health"=31))
 flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", 
-	ghost.line="red", ghost.reference=list("health"=31, "income"=90000, "motivation"=10))	
+	ghost.line="red", ghost.reference=list("health"=31, "income"=90000, "motivation"=10))}	
 }
 \author{
 Dustin Fife

@@ -39,4 +39,7 @@ at least one discrete position. Jittering based on density ensures that
 the amount of random noise only increases as the probability of overlap
 increases.
 }
+\seealso{
+Other position adjustments: \code{\link{position_jitterddodge}}
+}
 \concept{position adjustments}

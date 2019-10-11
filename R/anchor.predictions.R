@@ -56,7 +56,7 @@ anchor.predictions = function(model, reference, shutup=F){
 		averages = lapply(not.included, temp.func, factors=factors, d=d)
 		average.predictions = setNames(as.list(averages), not.included)
 		if (!shutup){
-			cat(paste0("\nNote: You didn't specify predictions for:\n      ", paste0(not.included, collapse=","), "\nI'm going to predict the average for quantitative variables and take the first level of categorical predictors.\n\n"))
+			message(paste0("\nNote: You didn't specify predictions for:\n      ", paste0(not.included, collapse=","), "\nI'm going to predict the average for quantitative variables and take the first level of categorical predictors.\n\n"))
 		}	
 	} else {
 		average.predictions = NA

@@ -4,13 +4,13 @@
 \alias{visualize.lm}
 \title{Visualize a fitted model}
 \usage{
-\method{visualize}{lm}(object, plot = c("all", "residuals", "bivariate"),
+\method{visualize}{lm}(object, plot = c("all", "residuals", "model"),
   formula = NULL, ...)
 }
 \arguments{
-\item{object}{a lmer object}
+\item{object}{a lm object}
 
-\item{plot}{what should be plotted? Residuals? Bivariate plot? All of them?}
+\item{plot}{what should be plotted? Residuals? Model plot? All of them?}
 
 \item{formula}{A flexplot-style formula}
 

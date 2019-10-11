@@ -1,3 +1,4 @@
+#bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
 ##' Create a "flexible plot" or flexplot
 ##'
 ##' Create a flexible plot. Flexplot will allow users to create histograms, barcharts, jittered density plots, paneled plots, scatterplots, etc.  
@@ -26,7 +27,8 @@
 ##' @param prediction Predicted values for a prediction line. Defaults to NULL. This is generally NOT used when just using flexplot, but it's helpful with the wrapper function \link{compare.fits}
 ##' @param suppress_smooth Should a fitted line be repressed? Defaults to FALSE
 ##' @param alpha The transparency of the datapoints. 
-##' @param data_output Should the data be outputted? You probably won't ever use this. The only reason this is here is so I can make plots work in Jamovi and Jasp. You're welcome. 
+##' @param plot.string Should the code to generate the plot be outputted? In the background, flexplot is creating a bunch of strings before it evaluates the model. 
+##' Users can export the string, in case they want to modify the ggplot object
 ##' @param silent Should all messages be suppressed? Defaults to F.
 ##' @param third.eye Should the "third eye" be employed? The third eye will be implemented shortly. 
 ##' @author Dustin Fife
@@ -88,7 +90,7 @@ flexplot = function(formula, data=NULL, related=F,
 		ghost.line=NULL, ghost.reference=NULL,
 		spread=c('quartiles', 'stdev', 'sterr'), jitter=NULL, raw.data=T,
 		sample=Inf, 
-		prediction = NULL, suppress_smooth=F, alpha=.99977, data_output=F, silent=F,
+		prediction = NULL, suppress_smooth=F, alpha=.99977, plot.string=F, silent=F,
 		third.eye=NULL){
 			
 	#d = exercise_data
@@ -105,9 +107,11 @@ flexplot = function(formula, data=NULL, related=F,
 		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
 	}
 
+
+
 	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error
-	df = data.frame()
-	ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))
+	#df = data.frame()
+	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))
 	
 	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
 	if (tibble::is_tibble(data)){
@@ -152,6 +156,16 @@ flexplot = function(formula, data=NULL, related=F,
 	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
 	axis = gsub(" ", "", axis)			
 	axis = unlist(strsplit(axis, "+", fixed=T))	
+	
+	
+	
+	#### give an error if they try to visualize logistic with a categorical x axis
+	if (method=="logistic" & length(predictors)>0){
+		if (!is.numeric(data[,axis[1]])){
+			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n
+				Best of luck on your statistical journeys."))
+		}	
+	}
 
 	#### identify which variables are numeric and which are factors
 	if (length(predictors)>0){
@@ -224,9 +238,9 @@ flexplot = function(formula, data=NULL, related=F,
 		}
 		### do the same for the second axis
 		if (length(axis)>1){
-		if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){
-			data[,axis[2]] = factor(data[,axis[2]], ordered=T)
-		}		
+			if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){
+				data[,axis[2]] = factor(data[,axis[2]], ordered=T)
+			}		
 		}
 	}
 	
@@ -261,10 +275,14 @@ flexplot = function(formula, data=NULL, related=F,
 	} else if (length(outcome)==1 & length(axis)==1 & !related){
 		
 		#### if both are categorical, do chi square
-		if (!is.numeric(data[[outcome]]) & !is.numeric(data[[outcome]])){
+		if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
+			
 			m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
-			Freq = 'Freq'
-			p = "ggplot(data=m, aes_string(x=axis, y=Freq, fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+			chi = chisq.test(data[,axis], data[,outcome])
+			obs.exp = (chi$observed - chi$expected)/chi$expected
+			m$Freq = as.vector(obs.exp)
+			names(m)[names(m)=="Freq"] = "Proportion"
+			p = "ggplot(data=m, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
 			points = "xxxx"
 			fitted = "xxxx"
 		} else {
@@ -342,13 +360,21 @@ flexplot = function(formula, data=NULL, related=F,
 		
 		### if they supply predictions, do not vary color
 		if (!is.null(prediction)){
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color=predictors[2], shape=predictors[2])'
+			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'
+			
 		} else {
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color=predictors[2], linetype=predictors[2], shape=predictors[2])'
+			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
+			### remove the default color if they have categorical variables		
 		}
 		
 		points = points.func(axis.var=axis[1], data=data, jitter=jitter)
 		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)
+		
+		
+		### remove the default color if they have something in the second axis
+		if (!is.numeric(data[,axis[2]])){
+			fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)
+		}	
 	}
 
 	#### all the above should take care of ALL possible plots, but now we add paneling
@@ -406,41 +432,51 @@ flexplot = function(formula, data=NULL, related=F,
 	if (!is.null(ghost.line)){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
 
 		### quit if they try to do two axes
-		if (!is.na(axis[2])){
-			stop("Sorry. I can't plot ghost lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")
-		}
+		# if (!is.na(axis[2])){
+			# stop("Sorry. I can't plot ghost lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")
+		# }
 
 				### bin the ghost reference if it's not null
 		if (!is.null(ghost.reference)){
-			for (i in 1:length(given)){
 
-			binned.name = paste0(given[i], "_binned")
-			### if the ghost reference is null, randomly fill something in
-			if (is.null(ghost.reference[[given[i]]])){
-				rand.val = sample(1:nrow(data), 1)
-				ghost.reference[[given[i]]] = data[rand.val,binned.name]
-				#location = which(names(ghost.reference)==given[i])
-				#names(ghost.reference)[location] = binned.name
-				if (!silent){cat(paste0("Note: You didn't choose ghost.reference values for ", given[i], ". I'm going to choose one at random.\n"))}
-			#### when they supply ghost reference information
+			### what needs a reference? all given and MAYBE axis[2]
+
+			if (axis[2] %in% names(ghost.reference)) {
+				to.ghost = c(given, axis[2])
 			} else {
-				#k[nrow(k), given[i]] = as.numeric(ghost.reference[[given[i]]])
-				#k[,binned.name] = bin.me(given[i], k, bins, labels[i], brks)
+				to.ghost = c(given)
+			}					
 
-				if (is.numeric(ghost.reference[[given[i]]])){
-					#brks = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]], return.breaks=T)
-					ghost.reference[[given[i]]] = bin.me(variable=given[i], data=ghost.reference, bins=bins, labels=labels[i], breaks=breaks[[given[i]]], check.breaks=F)
-				} else {
-					ghost.reference[[given[i]]] = unlist(ghost.reference)
-				}
+			#breaks.keep = names(which(!unlist(lapply(to.ghost,is.null))))
+			for (i in 1:length(to.ghost)){
+
+				binned.name = paste0(to.ghost[i], "_binned")
+
+				### if the ghost reference is null, fill with middle value
+				if (is.null(ghost.reference[[to.ghost[i]]])){
+					l = data[,binned.name]
 	
-				#location = which(names(ghost.reference)==given[i])
-				#names(ghost.reference)[location] = binned.name						
+					middle = levels(l); middle = middle[round((length(middle))/2)]
+					ghost.reference[[to.ghost[i]]] = middle
+	
+					if (!silent){message(paste0("Hey-yo: You didn't choose ghost.reference values for ", to.ghost[i], ", which means I get to chose it. That shows a lot of trust. I appreciate that. I won't let you down.\n"))}
+				#### when they supply ghost reference information
+				} else {
+		
+					if (is.numeric(ghost.reference[[to.ghost[i]]])){
+						ghost.reference[[to.ghost[i]]] = bin.me(variable= to.ghost[i], data=ghost.reference, bins=bins, labels=labels[i], breaks=breaks[[to.ghost[i]]], check.breaks=F)
+					} else {
+						ghost.reference[[to.ghost[i]]] = unlist(ghost.reference[[to.ghost[i]]])
+					}
+
 				}
 			}
+
+		
+			
 		} else {
 						
-			#### if they don't specify any reference group, choose one
+			#### if they don't specify any reference group, choose the middle one
 
 			ghost.reference=list()
 			for (b in 1:length(given)){
@@ -448,17 +484,23 @@ flexplot = function(formula, data=NULL, related=F,
 				### format given as a binned variable
 				l = data[,given.bin]
 
-
-				ghost.reference[[given[b]]]=sample(l, 1)
+				middle = levels(l); middle = middle[round((length(middle))/2)]
+				ghost.reference[[given[b]]]=middle
 			}
 
-			if (!silent){cat(paste0("Note: You didn't specify a reference for the ghost line. I'm going to choose it at random.\n"))}
+			#### if they have an axis[2], add that to the ghost reference
+			if (length(axis)>1){
+				ghost.reference[[axis[2]]] = data[,axis[2]]
+			}
+			
+			if (!silent){message(paste0("Note: You didn't specify a reference for the ghost line, which means I get to chose it. That shows a lot of trust. I appreciate that. I won't let you down."))}
 
 		#### if they specify a reference group for some of them, but not all
 		}
+
 		
-		
-		##### select those columns in d specified
+
+
 		
 		#### if they specified a prediction, extract data from prediction model
 		if (!is.null(prediction)){
@@ -468,6 +510,7 @@ flexplot = function(formula, data=NULL, related=F,
 		}
 		s=1
 
+		#### norrow down based on GIVEN, not the axis (because we're trying to find the right panel, then plot only the one group line)
 		for (s in 1:length(given)){
 			binned.name = paste0(given[s], "_binned")
 
@@ -504,11 +547,13 @@ flexplot = function(formula, data=NULL, related=F,
 			k = k %>% group_by_at(vars(one_of(grouped.vars))) %>% summarize_at(.vars = outcome, .funs=mean)
 			g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome, linetype="model", group="model"))+', fitted)							
 		} else {
-			g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome))+', fitted)				
+			g0 = paste0(gsub("data=[[:alnum:]]+,", "data=k,", p), "+",fitted)
+			#g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome))+', fitted)
+							
 		}
 		g0 = gsub("+xxxx", "", g0, fixed=T)
 		g0 = eval(parse(text=g0))
-		d_smooth = ggplot_build(g0)$data[[1]]; 
+		d_smooth = suppressMessages(ggplot_build(g0)$data[[1]])
 
 
 
@@ -518,9 +563,20 @@ flexplot = function(formula, data=NULL, related=F,
 		## add line to existing plot 
 		if (!is.null(prediction) & length(levels(prediction$model)>1)){  
 			d_smooth$model = factor(d_smooth$group, labels=levels(prediction$model))
-			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line)'			
-		} else {
-			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line)'
+			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line, show.legend=F)'			
+		} else if (length(axis)>1){	
+			d_smooth[,axis[2]] = factor(d_smooth$group, labels=levels(data[,axis[2]]))
+			
+			### if the ghost line specifies a specific line to plot...
+			axis2_notbinned = gsub("_binned", "",axis[2])
+			if (axis2_notbinned %in% names(ghost.reference)){
+				d_smooth = d_smooth[d_smooth[,axis[2]]==(ghost.reference[[axis2_notbinned]]),]
+				ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group=axis[2], linetype=axis[2]), color=ghost.line, show.legend=F)'								
+			} else {
+				ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group=axis[2], linetype=axis[2]), color=ghost.line, show.legend=F)'				
+			}
+		} else {	
+			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line, show.legend=F)'
 		}
 
 	} else {
@@ -588,11 +644,71 @@ flexplot = function(formula, data=NULL, related=F,
 
 	theme = "theme_bw()"
 
+	if (is.finite(sample) & is.numeric(data[,outcome])){
+		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
+	}
+	
+	
+	#### if they have a logistic, modify the p to reflect the data
+	if (method=="logistic" & !is.numeric(data[,outcome])){
+		p = gsub("data=[[:alnum:]]+,", "data=factor.to.logistic(data,outcome),", p)
+		points = gsub("data\\)", "factor.to.logistic(data,outcome))", points)		
+		
+		#### change the y axis labels
+		
+		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	
+	}
+
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
-	final = eval(parse(text=total.call))
-	final
-	return(final)
+	final = suppressMessages(eval(parse(text=total.call)))
+		### suppress messages only works for print messages, but print messages actually show the plot (even when i want to store it for laster use). Thus, I need both. Weird. 
+	#return(final)
+	#class(final) <- c("flexplot", class(final))
+
+	if(plot.string){
+		return(total.call)
+	} else {
+		return(final)
+	}
 }	
+
+#' Print flexplot object
+#'
+#' Print flexplot object
+#' @aliases print.flexplots
+#' @param x a flexplot object
+#' @param ... ignored
+#' @export
+# print.flexplot <- function(x,...) {
+  # suppressMessages(print.ggplot(x))
+# }
+
+
+# ### I am including the code below because CRAN does not permit :::
+# print.ggplot = function(x){
+	# function (x, newpage = is.null(vp), vp = NULL, ...) 
+# {
+    # set_last_plot(x)
+    # if (newpage) 
+        # grid::grid.newpage()
+    # grDevices::recordGraphics(requireNamespace("ggplot2", quietly = TRUE), 
+        # list(), getNamespace("ggplot2"))
+    # data <- ggplot_build(x)
+    # gtable <- ggplot_gtable(data)
+    # if (is.null(vp)) {
+        # grid::grid.draw(gtable)
+    # }
+    # else {
+        # if (is.character(vp)) 
+            # grid::seekViewport(vp)
+        # else grid::pushViewport(vp)
+        # grid::grid.draw(gtable)
+        # grid::upViewport()
+    # }
+    # invisible(x)
+# }
+# }
+#source("research/RPackages/flexplot/R/hidden_functions.R")

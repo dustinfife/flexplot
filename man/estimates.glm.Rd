@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{a glm object}
 }
+\value{
+One or more objects containing parameter estimates and effect sizes
+}
 \description{
 Report glm object Estimates
 }

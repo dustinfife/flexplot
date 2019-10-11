@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{a lm object}
 }
+\value{
+One or more objects containing parameter estimates and effect sizes
+}
 \description{
 Report lm object Estimates
 }

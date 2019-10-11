@@ -44,12 +44,19 @@ model.comparison = function(model1, model2){
 	bic = c(BIC(model1), BIC(model2))
 	bayes.factor = bf.bic(model1, model2)
 	
-	model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, NA), p.value=c(p, NA), r.squared=r.squared)
+	model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor), p.value=c(p, NA), r.squared=r.squared)
 	row.names(model.table) = c(m1.name, m2.name)
+	if (is.na(model.table$p.value[1])){
+		model.table = round(model.table[,!is.na(model.table[1,])], digits=3)	
+	} else {
+		model.table = round(model.table[,!is.na(model.table[1,])], digits=3)
+		model.table[is.na(model.table)] = ""
+		model.table$p.value[1] = format.pval(p, digits=3)
+	}
 
 	#### compute difference in predicted value (scaled)
 	mean.sigma = sqrt((sigma(model1)^2 + sigma(model2)^2)/2)
-	differences = (quantile(abs(predict(model1, type="response") - predict(model2, type="response"))))/mean.sigma
+	differences = round((quantile(abs(predict(model1, type="response") - predict(model2, type="response"))))/mean.sigma, digits=3)
 
 	
 	if (family(model1)$link=="logit" & family(model2)$link=="logit"){
@@ -61,6 +68,8 @@ model.comparison = function(model1, model2){
 		} else {
 			difference = predictions[2,] - predictions[1,]
 		}
+		
+
 		predictions = data.frame(rbind(predictions, difference)); row.names(predictions)[3] = "Difference"
 	
 		list(statistics=model.table, predictions=predictions, pred.difference = differences)

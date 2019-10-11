@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{a object}
 }
+\value{
+One or more objects containing parameter estimates and effect sizes
+}
 \description{
 Output APA style statistical significance from an object
 }

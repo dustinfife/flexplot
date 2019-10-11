@@ -11,6 +11,7 @@ estimates = function(object){
 #'
 #' Output APA style statistical significance from an object
 #' @param object a object
+#' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.default = function(object){
 	out = summary(object)
@@ -22,7 +23,7 @@ estimates.default = function(object){
 #'
 #' Report lm object Estimates
 #' @param object a lm object
-#' @rawNamespace import(dplyr, except = c(filter, lag))
+#' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.lm = function(object){
 
@@ -46,7 +47,7 @@ estimates.lm = function(object){
 	#### identify factors
 	if (length(terms)>1){
 		### convert characters to factors
-		chars = d %>% summarize_at(terms, is.character) %>% unlist
+		chars = unlist(lapply(d[,terms], is.character))
 		chars = names(chars)[chars]
 		if (length(chars)==1) d[,chars] = as.factor(d[,chars]) else d[,chars] = lapply(d[,chars], as.factor)
 		factors = names(which(unlist(lapply(d[,terms], is.factor))));
@@ -66,7 +67,7 @@ estimates.lm = function(object){
 	#### compute change in r squared
 	ssr = drop1(aov(object))[-1,"Sum of Sq"]
 	if (length(ssr)<(nrow(anova(object))-1)){
-		cat("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. To obtain main effect sizes, drop the interaction from your model. \n\n")
+		message("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. To obtain main effect sizes, drop the interaction from your model. \n\n")
 	}
 	sst = sum(anova(object)[,"Sum Sq"])
 	semi.p = ssr/sst	
@@ -91,10 +92,10 @@ estimates.lm = function(object){
 	
 			#### create empty matrix with variable names
 			#### identify the number of rows
-			coef.matrix = data.frame(variables = rep("", num.rows), levels=NA, estimate=NA, lower=NA, upper=NA, df.spent=NA, df.remaining=NA)
+			coef.matrix = data.frame(variables = rep("", num.rows), levels=NA, estimate=NA, lower=NA, upper=NA)#, df.spent=NA, df.remaining=NA)
 			coef.matrix$variables = factor(coef.matrix$variables, levels=c("", factors))		
 				#### write variable names/levels/df
-			coef.matrix$df.spent = NA
+			#coef.matrix$df.spent = NA
 			
 				#### difference.matrix
 				
@@ -118,7 +119,7 @@ estimates.lm = function(object){
 				current.rows = p:(p+levs-1)
 				current.rows2 = p2:(p2 + levs2-1)
 				#coef.matrix$levels[current.rows] = levels(d[,factors[i]])
-				coef.matrix$df.spent[p] = levs-1
+				#coef.matrix$df.spent[p] = levs-1
 				
 				#### populate variable names
 				coef.matrix$variables[p] = factors[i]
@@ -137,7 +138,7 @@ estimates.lm = function(object){
 				# names(coef.std$beta) = gsub(factors[i], "", names(coef.std$beta))
 				# names(coef.std$se) = gsub(factors[i], "", names(coef.std$se))				
 				#### populate the df
-				coef.matrix$df.remaining = object$df
+				#coef.matrix$df.remaining = object$df
 				
 				#### fill in the difference matrix
 				difference.matrix$variables[p2] = factors[i]
@@ -180,7 +181,7 @@ estimates.lm = function(object){
 	#### NUMERIC VARIABLES
 	if (length(numbers)>0){
 		vars = c("(Intercept)", numbers)
-		coef.matrix.numb = data.frame(variables=vars, estimate=NA, lower=NA, upper=NA, std.estimate=NA, std.lower=NA, std.upper=NA, df.spent=1, df.remaining=object$df)
+		coef.matrix.numb = data.frame(variables=vars, estimate=NA, lower=NA, upper=NA, std.estimate=NA, std.lower=NA, std.upper=NA)#, df.spent=1, df.remaining=object$df)
 		coef.matrix.numb$estimate = coef(object)[vars]
 		
 		#### get upper and lower using matrix multiplication
@@ -221,40 +222,30 @@ estimates.lm = function(object){
 	}
 
 	# #### print summary
-	# cat(paste("Model R squared:\n", round(r.squared[1], digits=3), " (", round(r.squared[2], digits=2),", ", round(r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
+	# message(paste("Model R squared:\n", round(r.squared[1], digits=3), " (", round(r.squared[2], digits=2),", ", round(r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
 	# print(semi.p)
 	# if (length(factors)>0){
-		# cat(paste("\nEstimates for Factors:\n"))
+		# message(paste("\nEstimates for Factors:\n"))
 		# print(coef.matrix)
 	# }
 	# if (length(numbers)>0){
-		# cat(paste("\n\nEstimates for Numeric Variables = \n"))
+		# message(paste("\n\nEstimates for Numeric Variables = \n"))
 		# print(coef.matrix.numb)		
 	# }
-	# cat(paste("\nsigma = ", round(summary(object)$sigma, digits=4), "\n\n"))
+	# message(paste("\nsigma = ", round(summary(object)$sigma, digits=4), "\n\n"))
 	
 	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, sigma=summary(object)$sigma)
 	attr(ret, "class") = "estimates"
 	return(ret)
 }
 
-#' Report regression object Estimates (effect sizes and parameters)
-#'
-#' Report regression object Estimates
-#' @param object a regression object
-#' @export
-estimates.regression = function(object){
-	file.name = deparse(substitute(object))
-	cat(paste("R squared:\n", round(object$R.squared[1], digits=3), " (", round(object$R.squared[2], digits=2),", ", round(object$R.squared[3], digits=2),")\n\nParameter Estimates:\n",sep=""))
-	print(object$Estimates)
-	cat(paste("\n\nr = ", round(object$r, digits=4), "\nsigma = ", round(object$Sigma, digits=4)))
-}
 
 
 #' Report glm object Estimates (effect sizes and parameters)
 #'
 #' Report glm object Estimates
 #' @param object a glm object
+#' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.glm = function(object){
 	#### generate list of coefficients
@@ -373,7 +364,9 @@ print.estimates = function(x,...){
 	print(round(x$semi.p, digits=3))
 	
 	#### print correlation
+	if (!is.na(x$correlation[1])){
 	cat(paste("Correlation:\n", round(x$correlation[1], digits=3), "\n"))
+	}
 	
 	#### replace NA with - 
 	f = function(x){ x[is.na(x)] = "-"; x}
@@ -385,6 +378,7 @@ print.estimates = function(x,...){
 		print(x$factor.summary)
 		cat(paste0("\n\nMean Differences:\n"))
 		x$difference.matrix[,3:ncol(x$difference.matrix)] = round(x$difference.matrix[,3:ncol(x$difference.matrix)], digits=2)
+		x$difference.matrix$variables[is.na(x$difference.matrix$variables)] = ""
 		print(x$difference.matrix)		
 	}
 	if (length(x$numbers)>0){
@@ -393,5 +387,5 @@ print.estimates = function(x,...){
 		#print(round(x$numbers.summary, digits=2))		
 		print(x$numbers.summary)		
 	}
-	cat(paste("\nsigma = ", round(x$sigma, digits=4), "\n\n"))
+	#cat(paste("\nsigma = ", round(x$sigma, digits=4), "\n\n"))
 }

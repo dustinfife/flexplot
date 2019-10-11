@@ -10,12 +10,14 @@
 ##' @param return.preds Should the function return the predictions instead of a graphic? Defaults to F
 ##' @param silent Should R tell you how it's handling the variables in the model that are not in the formula? Defaults to F. 
 ##' @param report.se Should standard errors be reported alongside the estimates? Defaults to F. 
+##' @param re Should random effects be predicted? Only applies to mixed models. Defaults to F. 
 ##' @param ... Other parameters passed to flexplot
 ##' @author Dustin Fife
+##' @return Either a graphic or the predictions for the specified model(s)
 ##' @export
 ##' @examples
 ##' #not yet
-compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F,...){
+compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F,...){
 
 	#### if mod2 is null..
 	if (is.null(model2)){
@@ -29,32 +31,13 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	model1.type = class(model1)[1]
 	model2.type = class(model2)[1]	
 
-	#### extract the terms from each model
-	### if random forest...
-	if (model1.type=="randomForest" | model1.type=="randomForest.formula"){
-		testme = attr(model1$terms, "term.labels")		
-	} else {
-		testme = attr(model1$terms, "term.labels")		
-	}
+
+	#### extract the terms from each MODEL
+	testme1 = formula(model1); terms.mod1=all.vars(testme1)[-1]
+	testme2 = formula(model2); terms.mod2=all.vars(testme2)[-1]
+	testme = unique(all.vars(testme1)[-1], all.vars(testme2)[-1])
 	
-	terms.mod1 = attr(terms(model1), "term.labels")
 	
-	#### for splines...
-	if (length(grep("bs(", terms.mod1, fixed=T))>0){
-		terms.mod1 = gsub("bs(", "", terms.mod1, fixed=T)		
-		terms.mod1 = unlist(lapply(terms.mod1, FUN=function(x) unlist(strsplit(x, ","))[1]))
-		terms.mod1 = unique(terms.mod1)	
-		testme = terms.mod1	
-	}
-	
-	terms.mod2 = attr(terms(model2), "term.labels")
-	if (length(grep("bs(", terms.mod2, fixed=T))>0){
-		terms.mod2 = gsub("bs(", "", terms.mod2, fixed=T)		
-		terms.mod2 = unlist(lapply(terms.mod2, FUN=function(x) unlist(strsplit(x, ","))[1]))
-		terms.mod2 = unique(terms.mod2)		
-		testme = terms.mod1
-	}	
-		
 	##### extract variable names
 	variables = all.vars(formula)
     outcome = variables[1]
@@ -69,9 +52,6 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	if (!(all(predictors %in% names(data)))){
 		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
 	}	
-	# if (!(all(testme %in% names(data)))){
-		# stop(paste0("Sorry, but some variables in model don't match what's in the dataset. Specifically: ", paste0(variables[!(testme%in%data)], collapse=","), ". Did you input the wrong dataset?"))
-	# }		
 	
 
 	#### create random column just to make the applies work (yeah, it's hacky, but it works)
@@ -81,13 +61,13 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
     #### get variable types
     numb = names(which(unlist(lapply(data[,predictors], is.numeric))))
     cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))
-    
+
     ##### make "quadriture" points for quant variables
     var.mins = apply(data[, numb], 2, min, na.rm=T)
     var.max = apply(data[, numb], 2, max, na.rm=T)    
-    min.max = data.frame(var.mins, var.max)
-	f = function(d){seq(from=d[1], to=d[2], length.out=50)}
-	min.max = as.list(as.data.frame((apply(min.max, 1, f))))
+    min.max = data.frame(var.mins, var.max); min.max$size = c(50, rep(10, nrow(min.max)-1))
+	f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}
+	min.max = as.list(apply(min.max, 1, f))
 
     #### get unique values for categorical vars
     if (length(cat)==1){
@@ -103,9 +83,8 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
     tot.vars = length(predictors)
     rejects = grep("reject", names(all.vars))
 	all.vars = all.vars[-rejects]
+	all.vars = lapply(all.vars, function(x) x[!is.na(x)])
 	pred.values = expand.grid(all.vars)
-	
-
 
 
 
@@ -140,11 +119,11 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		not.in.there = terms.mod1[which(!(terms.mod1 %in% predictors))]
 		for (i in 1:length(not.in.there)){
 			if (is.numeric(data[,not.in.there[i]])){
-				if (!silent){cat(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))}
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))}
 				pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)
 			} else {
 				val = unique(data[,not.in.there[i]])[1]
-				if (!silent){cat(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))}
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))}
 				pred.values[,not.in.there[i]] = val
 			}
 		}
@@ -153,7 +132,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 
 	#### generate predictions
 	if (model1.type == "lmerMod" | model1.type == "glmerMod"){
-		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= model1.type)		
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		
 	} else if (model1.type == "polr"){
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="class", re.form=NA), model= model1.type)		
 	} else if (model1.type == "lm" | model1.type == "polynomial" | model1.type=="interaction"){
@@ -162,11 +141,15 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	} else {	
 		int = ifelse(report.se, "confidence", "none")
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", interval=int), model= model1.type)		
+
 	}
-
-
-	if (model2.type == "lmerMod" | model2.type == "glmerMod"){
-		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response", re.form=NA), model= model2.type)		
+	
+	#### generate separate predictions for random effects
+	if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")	
+		old.mod=0	
+	} else if ((model2.type == "lmerMod" | model2.type == "glmerMod") & !re){
+		pred.mod2 = pred.mod1
 	} else if (model2.type == "polr"){
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="class", re.form=NA), model= model2.type)		
 	} else if (model2.type == "lm" | model2.type == "polynomial" | model2.type=="interaction"){
@@ -184,7 +167,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	}
 
 		#### if they have the same name, just call them model1 and model2
-	if (model1.type==model2.type){
+	if (pred.mod1$model[1]==pred.mod2$model[1]){
 		pred.mod1$model = paste0(model1.type, " - Model 1", collapse="")
 		pred.mod2$model = paste0(model1.type, " - Model 2", collapse="")		
 	}
@@ -197,6 +180,8 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		prediction.model = pred.mod1
 		prediction.model = cbind(pred.values, prediction.model)
 	}
+	
+
 
 
 	#### eliminate those predictions that are higher than the range of the data
@@ -207,7 +192,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		}
 	} else {
 		#### if they supply a factor, convert it to a number!!!!!
-		prediction.model$prediction = as.numeric(as.character(prediction.model$prediction))
+		prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
 	}
 
 
