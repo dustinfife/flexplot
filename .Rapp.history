@@ -1,1119 +1,2316 @@
-id$data
-names(id)
-id$imp
-with(id, colMeans)
-with(id, colMeans())
-mean.cors = 1:unique.cors
-id$imp
-?complete
-i=1
-newd = complete(id, i)
-newd
-colMeans(newd)
-mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)
-newd = complete(id, i)
-mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)#
-for (i in 1:length(mean.cores)){#
-	newd = complete(id, i)#
-	mean.cores[,i] = colMeans(newd)#
+rejects = grep("reject", names(all.vars))
+rejects
+all.vars = all.vars[-rejects]
+all.vars
+##' Compare the fits of two models#
+##'#
+##' Compare the fits of two models#
+##'	#
+##' Compare the fits of two models#
+##' @param formula A formula that can be used in flexplot. The variables inside must not include variables outside the fitted models. #
+##' @param data The dataset containing the variables in formula#
+##' @param model1 The fitted model object (e.g., lm) containing the variables specified in the formula#
+##' @param model2 The second fitted model object (e.g., lm) containing the variables specified in the formula#
+##' @param return.preds Should the function return the predictions instead of a graphic? Defaults to F#
+##' @param silent Should R tell you how it's handling the variables in the model that are not in the formula? Defaults to F. #
+##' @param report.se Should standard errors be reported alongside the estimates? Defaults to F. #
+##' @param re Should random effects be predicted? Only applies to mixed models. Defaults to F. #
+##' @param ... Other parameters passed to flexplot#
+##' @author Dustin Fife#
+##' @return Either a graphic or the predictions for the specified model(s)#
+##' @export#
+##' @examples#
+##' #not yet#
+compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F,...){#
+#
+	#### if mod2 is null..#
+	if (is.null(model2)){#
+		model2 = model1#
+		old.mod = 1#
+	} else {#
+		old.mod = 0#
+	}#
+#
+	#### get type of model#
+	model1.type = class(model1)[1]#
+	model2.type = class(model2)[1]	#
+	#### extract the terms from each MODEL#
+	testme1 = formula(model1)#
+	testme2 = formula(model2)#
+	testme = unique(all.vars(testme1)[-1], all.vars(testme2)[-1])#
+	##### extract variable names#
+	variables = all.vars(formula)#
+    outcome = variables[1]#
+    predictors = variables[-1]#
+    ##### make sure they're putting the same variables from formula in terms#
+	if (!(all(predictors %in% testme))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%terms.mod1)], collapse=",")))#
+	}#
+	##### make sure they're using the right dataset#
+	if (!(all(predictors %in% names(data)))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))#
+	}	#
+	#### create random column just to make the applies work (yeah, it's hacky, but it works)#
+    data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)#
+    predictors = c(predictors, "reject", "reject2")#
+#
+    #### get variable types#
+    numb = names(which(unlist(lapply(data[,predictors], is.numeric))))#
+    cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
+#
+    ##### make "quadriture" points for quant variables#
+    var.mins = apply(data[, numb], 2, min, na.rm=T)#
+    var.max = apply(data[, numb], 2, max, na.rm=T)    #
+    min.max = data.frame(var.mins, var.max); min.max$size = c(50, rep(10, nrow(min.max)-1))#
+	f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}#
+	min.max = as.list(apply(min.max, 1, f))#
+#
+    #### get unique values for categorical vars#
+    if (length(cat)==1){#
+    	un.vars = lapply(data[cat], unique)    	#
+    } else {#
+		un.vars =lapply(data[,cat], unique); names(un.vars) = cat#
+	}#
+    #### combine into one dataset#
+    all.vars = c(min.max, un.vars)    #
+    #### get rid of extra variables#
+    tot.vars = length(predictors)#
+    rejects = grep("reject", names(all.vars))#
+	all.vars = all.vars[-rejects]#
+	all.vars = lapply(all.vars, function(x) x[!is.na(x)])#
+	pred.values = expand.grid(all.vars)#
+	##### look for interactions and remove them#
+	if (length(grep(":", terms.mod1))>0){#
+		terms.mod1 = terms.mod1[-grep(":", terms.mod1)]#
+		model1.type = ifelse(model1.type=="lm", "interaction", model1.type)#
+	}#
+	if (length(grep(":", terms.mod2))>0){#
+		terms.mod2 = terms.mod2[-grep(":", terms.mod1)]#
+		model2.type = ifelse(model2.type=="lm", "interaction", model2.type)#
+	}	#
+	##### look for polynomials and remove them#
+	if (length(grep("^2", terms.mod1, fixed=T, value=T))>0 ){#
+		terms.mod1 = terms.mod1[-grep("^2", terms.mod1, fixed=T)]#
+		model1.type = ifelse(model1.type=="lm", "polynomial", model1.type)#
+	}#
+	if (length(grep("^2", terms.mod2, fixed=T, value=T))>0 & model1.type=="lm"){#
+		terms.mod2 = terms.mod2[-grep("^2", terms.mod1, fixed=T)]#
+		model2.type = ifelse(model2.type=="lm", "polynomial", model2.type)#
+	}	#
+	#### if the outcome is an ordered factor...#
+	#### if it's not in model 1:#
+	#### input the mean (if numeric) or a value (if categorical)#
+	if (length(which(!(terms.mod1 %in% predictors)))>0){#
+		not.in.there = terms.mod1[which(!(terms.mod1 %in% predictors))]#
+		for (i in 1:length(not.in.there)){#
+			if (is.numeric(data[,not.in.there[i]])){#
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))}#
+				pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)#
+			} else {#
+				val = unique(data[,not.in.there[i]])[1]#
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))}#
+				pred.values[,not.in.there[i]] = val#
+			}#
+		}#
+	}#
+	#### generate predictions#
+	if (model1.type == "lmerMod" | model1.type == "glmerMod"){#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		#
+	} else if (model1.type == "polr"){#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="class", re.form=NA), model= model1.type)		#
+	} else if (model1.type == "lm" | model1.type == "polynomial" | model1.type=="interaction"){#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval=int), model=model1.type)#
+	} else {	#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", interval=int), model= model1.type)		#
+#
+	}#
+	#### generate separate predictions for random effects#
+	if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")	#
+		old.mod=0	#
+	} else if ((model2.type == "lmerMod" | model2.type == "glmerMod") & !re){#
+		pred.mod2 = pred.mod1#
+	} else if (model2.type == "polr"){#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="class", re.form=NA), model= model2.type)		#
+	} else if (model2.type == "lm" | model2.type == "polynomial" | model2.type=="interaction"){#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, interval="confidence")[,1], model=model2.type)#
+	} else {#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= model2.type)		#
+	}#
+	#### convert polyr back to numeric (if applicable)#
+	if (model1.type == "polr" | model2.type == "polr"){#
+		data[,outcome] = as.numeric(as.character(data[,outcome]))		#
+		pred.mod1$prediction = as.numeric(as.character(pred.mod1$prediction))#
+		pred.mod2$prediction = as.numeric(as.character(pred.mod2$prediction))		#
+	}#
+#
+		#### if they have the same name, just call them model1 and model2#
+	if (pred.mod1$model[1]==pred.mod2$model[1]){#
+		pred.mod1$model = paste0(model1.type, " - Model 1", collapse="")#
+		pred.mod2$model = paste0(model1.type, " - Model 2", collapse="")		#
+	}#
+	#### report one or two coefficients, depending on if they supplied it#
+	if (old.mod==0){#
+		prediction.model = rbind(pred.mod1, pred.mod2)#
+		prediction.model = cbind(pred.values, prediction.model)#
+	} else {#
+		prediction.model = pred.mod1#
+		prediction.model = cbind(pred.values, prediction.model)#
+	}#
+	#### eliminate those predictions that are higher than the range of the data#
+	if (!is.factor(data[,outcome])){#
+	min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)#
+		if (length(which(prediction.model$prediction>max.dat)>0 | length(which(prediction.model$prediction<min.dat)))){#
+			prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]#
+		}#
+	} else {#
+		#### if they supply a factor, convert it to a number!!!!!#
+		prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)#
+	}#
+	#### create flexplot#
+	if (return.preds){#
+		prediction.model#
+	} else {#
+		flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...)#
+	}	#
+#
 }
-mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)#
-for (i in 1:length(mean.cores)){#
-	newd = complete(id, i)#
-	mean.cors[,i] = colMeans(newd)#
-}
-for (i in 1:length(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[,i] = colMeans(newd)#
-}
-mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)#
-for (i in 1:length(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[,i] = colMeans(newd[-1])#
-}
-mean.cors
-mean.cors = data.frame(estimate = names(studies[-1]), impnum = imps)#
-for (i in 1:length(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,1] = colMeans(newd[-1])#
-	mean.cors[i,2] = i#
-}
-mean.cors = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=imps))
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))
-mean.cors
-i = 1
-newd = complete(id, i)
-newd
-colMeans(newd[-1])
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:length(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[-1])#
-}
-mean.cors
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[-1])#
-}
-mean.cors
-colMeans(mean.cors)
-rho
-colMeans(mean.cors)[c(1,2,10)]
-require(OpenMx)#
+compare.fits(whodas.impariment~MI|health.rating, data=d, fit1, fit2)
+rm(list=ls())
+devtools::install("research/RPackages/flexplot")
+data(nsduh);d = nsduh#
+flexplot::flexplot(whodas.impariment~MI|health.rating, data=d)#
+flexplot::flexplot(whodas.impariment~MI|health.rating, data=d, jitter=T, se=F)#
+fit1 = lm(whodas.impariment~MI*health.rating, data=d)#
+fit2 = rlm(whodas.impariment~MI*health.rating, data=d)#
+flexplot::compare.fits(whodas.impariment~MI|health.rating, data=d, fit1, fit2)
+flexplot::compare.fits(whodas.impariment~MI|health.rating, data=d, fit1, fit2, return.preds=T)
+rm(list=ls())
+devtools::install("research/RPackages/flexplot")
+require(flexplot)#
+	#### previous bugs#
+data(birthweight)#
+d = birthweight#
+mod = lm(Birthweight~motherage + fheight + mheight + smoker, data=d)#
+flexplot(Birthweight~mheight+smoker|motherage, data=d)#
 #
-		#### set parameters#
-a = b= c = .5#
-p = 10	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 50#
-priors = c(0, .5)	### limits of priors#
-weight = .25			### confidence of bayesian estimate (.5 means you give equal weight to the prior)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[-1])#
-}#
-colMeans(mean.cors)[c(1,2,10)]
-apply(mean.cors,2,sd)[c(1,2,10)]
-newd
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}
-sd.cors
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-colMeans(mean.cors)[c(1,2,10)]
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 10	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.3, .7)	### limits of priors (vary the bias?)#
-weight = .25			### confidence of bayesian estimate (.5 means you give equal weight to the prior)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,10)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 10	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.3, .7)	### limits of priors (vary the bias?)#
-weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,10)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 10	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.1, .5)	### limits of priors (vary the bias?)#
-weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,10)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 5	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.1, .5)	### limits of priors (vary the bias?)#
-weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,10)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-#### set parameters#
-a = b= c = .5#
-p = 5	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.1, .5)	### limits of priors (vary the bias?)#
-weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)
-#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))
-data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk
-if (runif(1)<pk){#
-		cols = sample(1:10, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}
-cols = sample(1:p, size=pm*p)
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 5	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.1, .5)	### limits of priors (vary the bias?)#
-weight = .05			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:p, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,10)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 5	#### number of variables#
-dij = .3#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.1, .5)	### limits of priors (vary the bias?)#
-weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:p, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,10)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 5	#### number of variables#
-dij = .1#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.1, .5)	### limits of priors (vary the bias?)#
-weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:p, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,10)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-colMeans(mean.cors)[c(1,2,p)]
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 5	#### number of variables#
-dij = .1#
-k = 30#
-N = 1000#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.1, .5)	### limits of priors (vary the bias?)#
-weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:p, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,p)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 5	#### number of variables#
-dij = .1#
-k = 30#
-N = 200#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.1, .5)	### limits of priors (vary the bias?)#
-weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:p, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,p)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-require(OpenMx)#
-#
-		#### set parameters#
-a = b= c = .5#
-p = 5	#### number of variables#
-dij = .1#
-k = 10#
-N = 200#
-pm = .5#
-pk = .9#
-imps = 10#
-priors = c(.1, .5)	### limits of priors (vary the bias?)#
-weight = .5			### confidence of bayesian estimate (.5 means you give equal weight to the prior, less means more weight to the data)#
-#
-	#### 1. create variance/covariance matrix#
-unique.cors = p*(p-1)/2	#
-devechs = rep(dij, times=unique.cors-3)#
-rho = matrix(dij, nrow=p, ncol=p)#
-diag(rho) = 1#
-rho[1:3, 1:3][lower.tri(rho[1:3, 1:3])] = c(a,b,c)#
-rho[1:3, 1:3][upper.tri(rho[1:3, 1:3])] = c(a,b,c)#
-	#### 2. Simulate k studies#
-studies = data.frame(matrix(NA, nrow=k, ncol=unique.cors + 1))#
-names(studies) = c("study", paste0("cor", 1:unique.cors))#
-#
-for (i in 1:k){#
-	data = MASS::mvrnorm(N, mu=rep(0, times=p), Sigma = rho)#
-	cor.mat = cor(data)#
-	#### delete data if random number < pk#
-	if (runif(1)<pk){#
-		cols = sample(1:p, size=pm*p)#
-		cor.mat[cols, cols] = NA#
-	}#
-	### put in matrix#
-	studies[i,1] = i#
-	studies[i,-1] = vechs(cor.mat)#
-}#
-#
-	#### create and populate the prior matrix#
-rows = weight*2*k	#
-random.cors = runif(n=rows*ncol(studies), min=priors[1], max=priors[2])#
-studies_prior = data.frame(matrix(random.cors, nrow=weight*2*k, ncol=ncol(studies)))#
-names(studies_prior) = names(studies)#
-#
-	#### combine the matrices#
-posterior_cors = data.frame(rbind(studies, studies_prior))#
-	#### impute the RF#
-require(mice)#
-id = mice(posterior_cors, m=imps, method="rf")#
-	#### loop through and average the correlations#
-mean.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-sd.cors = data.frame(matrix(nrow=imps, ncol=unique.cors))#
-i = 1#
-for (i in 1:nrow(mean.cors)){#
-	newd = complete(id, i)#
-	mean.cors[i,] = colMeans(newd[,-1])#
-	sd.cors[i,] = apply(newd[,-1], 2, sd)#
-}#
-colMeans(mean.cors)[c(1,2,p)]#
-apply(mean.cors,2,sd)[c(1,2,10)] + colMeans(sd.cors)[c(1,2,10)]
-install.packages("BRugs")
-if(!require(R2OpenBUGS)) install.packages("R2OpenBUGS")
-install.packages("R2OpenBUGS")
-require(R2OpenBugs)
-require(R2OpenBUGS)
-data(schools)
-install.packages("BRugs")
-install.packages("rjags")
-clear()#
+d = read.csv("research/Statistical Framework/grants/CSM Seed Grant/data/classroom_method.csv")#
+d$instruction.method = relevel(d$instruction.method, ref="lecture")#
+flexplot(test.score~funding|instruction.method, data=d, se=F, alpha=.05, ghost.reference=list(instruction.method="lecture"), ghost.line="gray")#
+flexplot(test.score~instruction.method, data=d, sample=50)#
 #
 require(flexplot)#
-require(cowplot)#
-require(tidyverse)#
+data(exercise_data)	#
+d = exercise_data#
+glinmod(weight.loss~gender + motivation, data=exercise_data, se=F, method="lm")#
+model = lm(weight.loss~motivation+therapy.type, #
+           data=exercise_data)#
+visualize(model)#
+object = model#
 #
-		#### data preparation#
-d = read.csv("research/9 steps/data/nsduh_ninsteps.csv")#
-		#### just note who does drugs vs. not, then subset#
-m= d %>% mutate(drugs = ifelse(her.rec=="past 30 days" | her.rec == ">30 < 12 mo", "yes", "no")) %>% #
-	filter(drugs=="yes") %>%#
-	mutate(health.rating = factor(health.rating, levels=rev(1:5), labels=c("poor", "fair", "good", "very good", "excellent"), ordered=T))#
-	### report statistical significance#
-mod = (lm(distress~health.rating + MI, data=m))#
-anova(mod)#
-rel = m %>% select(k6_1:k6_6) %>% filter_all(all_vars(. < 6))#
-require(psych)#
-require(lavaan)#
-		#### type of estimate for reliability depends on number of factors. See how many there are#
-f1 = fa(rel, nfactors=1)	#
-f2 = fa(rel, nfactors=2, rotate="promax")#
-f2	#### find the factors with EFA#
+d = exercise_data#
 #
-		### do cfa#
-model1 = '#
-	g =~ k6_1 + k6_2 + k6_3 + k6_4 + k6_5 + k6_6 #
-'#
-model2 = '#
-	g1 =~ k6_2 + k6_4 + k6_5 + k6_6 #
-	g2 =~ k6_1 + k6_3 	#
-	g1~~g2#
-'#
+		# # #### histograms and barcharts#
 #
-fit1 = cfa(model1, data=rel)#
-fit2 = cfa(model2, data=rel)#
-options(scipen=10)#
-cbind(m1=inspect(fit1, 'fit.measures'), m2=inspect(fit2, 'fit.measures'))#
-	### nearly all measures agree on a two factor solution		#
-	#### look at various says to estimate reliability#
-cronbach = alpha(rel); #
-omeg2 = omega(rel, nfactors=2); #
-cronbach$total$raw_alpha#
-omeg2$omega.tot#
-	#### fairly similar and high#
-		### univariate plots#
-flexplot(distress~1, data=m)#
-flexplot(health.rating~1, data=m)#
-flexplot(MI~1, data=m)#
+flexplot(formula=income~1, data=d)#
+flexplot(gender~1, data=d)#
 #
-		#### bivariate plots#
-bivar1 = flexplot(distress~MI | health.rating, data=m)		#
+# ### scatter plot#
+require(MASS)#
+flexplot(weight.loss~motivation, data=d)	#
+flexplot(weight.loss~motivation, data=d, method="lm", se=FALSE)	#
+flexplot(weight.loss~motivation, data=d, method="rlm", se=FALSE)	#
+flexplot(weight.loss~motivation, data=d, method="rlm", se=FALSE, raw.data=F)	#
+flexplot(weight.loss~health, data=d, method="polynomial", se=FALSE)	#
+flexplot(weight.loss~health, data=d, method="cubic", se=FALSE)	#
+flexplot(gender~health, data=d, method="logistic", se=FALSE, jitter=c(0, .1))	#
+flexplot(weight.loss~therapy.type + gender, #
+    data=exercise_data, se=F, alpha=.3)#
+data("tablesaw.injury") ### also simulated data available in flexplot package#
+                        ### always remember to be safe and attentive when woodworking#
+flexplot(injury~attention, data=tablesaw.injury, #
+             method="logistic", jitter=c(0, .05))#
+# ### mean plots#
+flexplot(weight.loss~therapy.type, data=d)#
+data(relationship_satisfaction)#
+flexplot(satisfaction~separated, data=relationship_satisfaction)#
+flexplot(weight.loss~therapy.type, data=d, spread="stdev")#
+flexplot(weight.loss~therapy.type, data=d, spread="sterr")#
+flexplot(weight.loss~therapy.type, data=d, raw.data=FALSE)	#
+flexplot(weight.loss~therapy.type, data=d, jitter=F)		#
+flexplot(weight.loss~therapy.type, data=d, jitter=T)		#
+flexplot(weight.loss~therapy.type, data=d, jitter=c(.3,0))		#
+flexplot(weight.loss~therapy.type, data=d, jitter=c(.3))#
+flexplot(weight.loss~therapy.type, data=d, jitter=c(.3, .5))	#
+flexplot(gender~therapy.type, data=d, jitter=c(.3, .5), method="logistic")		#
+	### intentional error#
+## related T#
+k = d#
+deleteme = which(k$rewards=="no rewards")#
+k = k[-(deleteme[1:2]),]#
+table(k$rewards)#
+flexplot(weight.loss~rewards, data=k, related=T)#
+flexplot(weight.loss~rewards, data=k, related=T, jitter=F)#
+flexplot(weight.loss~rewards, data=k, related=T, jitter=T)#
+flexplot(weight.loss~rewards, data=k, related=T, jitter=c(.05,0))#
+ 	## without raw data#
 #
-		#### let's combine these datasets since they're sparse at the end#
-m2 = m; levels(m2$health.rating) = c("fair", "fair", "good", "very good", "very good")#
-	#### results from aggregating#
-	flexplot(health.rating~1, data=m2)#
-			#### now re-visualize#
-	bivar2 = flexplot(distress~MI | health.rating, data=m2)				#
-	plot_grid(bivar1, bivar2)#
-			#### now visualize residuals of lm (even though it's a bad idea to do LM)#
-	visualize(mod, "residuals")		#
-			#### compare various models#
-	require(splines)#
-	mod_polyt = MASS::polr(distress~MI * health.rating, data=m2 %>% mutate(distress = factor(distress)))#
-	mod_gam = glm(distress~MI * health.rating + I(MI^2), data=m2 %>% mutate(distress = distress+1), family=Gamma(link="log"))#
-	mod_rf = randomForest::randomForest(distress~MI * health.rating, data=m2 %>% mutate(distress = distress+1))#
-	mod_spline = glm(distress~bs(MI, knots=.125, degree=2)*health.rating, data=m2 %>% mutate(distress = distress+1), family=Gamma(link="log"))#
-			#### show the models#
-	compare.fits(distress~MI | health.rating, data=m2, mod_polyt, mod_gam, jitter=c(0, .4), alpha=.2)		### two bad models#
-	compare.fits(distress~MI | health.rating, data=m2, mod_rf, mod_spline, jitter=c(0, .4), alpha=.2, ghost.line="black")		### two good models#
-	reduced_coplot= compare.fits(distress~MI | health.rating, data=m2, mod_rf, jitter=c(0, .4), alpha=.2, ghost.line="black")+ theme(legend.position="none") + facet_grid(~health.rating) 	### just look at RF model#
-		####  now residualize the effect of MI#
-	m2 = m2 %>% mutate(rf_residuals =  distress - predict(mod_rf) + mean(distress))#
-	reduced_avp	= flexplot(rf_residuals~health.rating, data=m2) + labs(x="Health Rating", y="Distress | MI")#
+# ### CHI SQUARE PLOT (categorical on categorical)#
+flexplot(gender~rewards, data=d, jitter=c(.05,0))#
+# ### INTERACTION PLOT			#
+flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)#
+flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)#
+flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=c(.4,0))#
+flexplot(weight.loss~therapy.type + gender, data=d, sample=50)	#
+flexplot(weight.loss~therapy.type | gender, data=d, sample=50)	#
+flexplot(gender~weight.loss | therapy.type, data=d, sample=50, method="logistic")	#
+flexplot(gender~weight.loss + therapy.type, data=d, sample=50, method="logistic")	#
 #
-### give parameter estimates#
-means1 = predict(mod_rf, m2 %>% mutate(MI = quantile(MI, .1))%>% filter(health.rating=="fair" | health.rating=="very good")) %>% unique()#
+# #### ANCOVA PLOT#
+flexplot(weight.loss~motivation + gender, data=d, se=FALSE)	### remove se#
+added.plot(weight.loss~motivation + gender, data=d, se=FALSE)	### remove se#
+# #### 2N PLOT (2 NUMERIC VARIABLE PLOTS)#
+flexplot(formula = weight.loss~motivation + income, data=d, se=FALSE, method="lm", breaks=NULL, bins=3, labels=NULL)#
+#source("research/RPackages/flexplot/R/flexplot.R")#
+#source("research/RPackages/flexplot/R/hidden_functions.R")#
+flexplot(formula = weight.loss~motivation + income, data=d, se=FALSE, method="lm", #
+ 	breaks = list(income=c(95000, 100000, 105000)),#
+ 	labels=list(income=c("<95K", "<100K", "<105K", ">105K")))		#
+flexplot(formula = gender~motivation + income, data=d, se=FALSE, method="logistic", #
+ 	breaks = list(income=c(95000, 100000, 105000)),#
+ 	labels=list(income=c("<95K", "<100K", "<105K", ">105K")))#
 #
-m2$health.rating#
-#### results from not aggregating#
-#### results from aggregating#
-			#### compare various models#
-	require(splines)#
-	mod_polyt = MASS::polr(distress~MI * health.rating, data=m %>% mutate(distress = factor(distress)))#
-	mod_gam = glm(distress~MI * health.rating + I(MI^2), data=m %>% mutate(distress = distress+1), family=Gamma(link="log"))#
-	mod_rf = randomForest::randomForest(distress~MI * health.rating, data=m %>% mutate(distress = distress+1))#
-	mod_spline = glm(distress~bs(MI, knots=.125, degree=2)*health.rating, data=m %>% mutate(distress = distress+1), family=Gamma(link="log"))#
-			#### show the models#
-	compare.fits(distress~MI | health.rating, data=m, mod_polyt, mod_gam, jitter=c(0, .4), alpha=.2)		### two bad models#
-	compare.fits(distress~MI | health.rating, data=m, mod_rf, mod_spline, jitter=c(0, .4), alpha=.2, ghost.line="black")		### two good models#
-	full_coplot = compare.fits(distress~MI | health.rating, data=m, mod_rf, jitter=c(0, .4), alpha=.2, ghost.line="black")+ theme(legend.position="none")+ facet_grid(~health.rating)		### just look at RF model#
-		####  now residualize the effect of MI#
-	m = m %>% mutate(rf_residuals =  distress - predict(mod_rf) + mean(distress))#
-	full_avp = flexplot(rf_residuals~health.rating, data=m) + labs(x="Health Rating", y="Distress | MI")
-plot_grid(reduced_coplot, reduced_avp, nrow=1)
-full_coplot = compare.fits(distress~MI | health.rating, data=m, mod_rf, jitter=c(0, .4), alpha=.2, ghost.line="black", ghost.reference=list(health.rating="good"))+ theme(legend.position="none")+ facet_grid(~health.rating)		### just look at RF model
-full_coplot
-library("readxl")
-getwd()
-files = list.files("research/Collaborations/literacy")
-files
-files = list.files("research/Collaborations/literacy", full.names=T)
-read_excel(files[3], sheet=1)
-?read_excel
-sheets = excel_sheets(files[3])
-sheets
-data = read_excel(files[3], sheet=sheets[1])
-data = read_excel(files[3], sheet=sheets[1]) %>% data.frame()
-require(dplyr)
-data = read_excel(files[3], sheet=sheets[1]) %>% data.frame()
-data
-flexplot(Scripture.on.own.or.with.help.~1, data=data)
-require(flexplot)
-flexplot(Scripture.on.own.or.with.help.~1, data=data)
-flexplot(Age~1, data=data)
-files[3]
-nrow(data)
-d = read.csv("research/Collaborations/literacy/progress.csv")
-head(d)
-d = read.csv("research/Collaborations/literacy/progress.csv") #
-d = d[-1:2,]#
-head(d)
-d[,6]
-d[,19]
-d[,38]
-d[,37]
-names(d)[6] = "start"
-d = read.csv("research/Collaborations/literacy/progress.csv") #
-d = d[-1:2,]#
-names(d)[6] = "start"#
-names(d)[19] = "before.class"#
-names(d)[37] = "after.class"
-head(d)
-d$start
-d$before.class
-d$before.class = as.numeric(d$before.class)
-d$before.class
-d = read.csv("research/Collaborations/literacy/progress.csv")
-d = d[-1:2,]
-d$before.class = as.numeric(as.character(d$before.class))
-d = read.csv("research/Collaborations/literacy/progress.csv")
-names(d)[6] = "start"#
-names(d)[19] = "before.class"#
-names(d)[37] = "after.class"#
-d$before.class = as.numeric(as.character(d$before.class))
-d$before.class
-d = read.csv("research/Collaborations/literacy/progress.csv")
-d = d[-1:2,]
-names(d)[6] = "start"
-names(d)[19] = "before.class"
-names(d)[37] = "after.class"
-d$before.class
-d$before.class = factor(d$before.class, levels=c("1", ""), labels=c("yes", "no"))
-d$before.class
-d$after.class = factor(d$after.class, levels=c("1", ""), labels=c("yes", "no"))
-d[,c("before.class", "after.class")]
-d = read.csv("research/Collaborations/literacy/progress.csv") #
-d = d[-1:2,]#
-names(d)[6] = "start"#
-names(d)[19] = "before.class"#
-names(d)[37] = "after.class"#
-d$before.class[d$before.class==""] = 0
-d = read.csv("research/Collaborations/literacy/progress.csv", stringAsFactors=F)
-d = read.csv("research/Collaborations/literacy/progress.csv", StringAsFactors=F)
-?read.csv
-d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F)
-d = d[-1:2,]#
-names(d)[6] = "start"#
-names(d)[19] = "before.class"#
-names(d)[37] = "after.class"#
-d$before.class[d$before.class==""] = 0
-d$before.class
-d$before.class = as.numeric(d$before.class)
-d$before.class
-d$after.class[d$after.class ==""] = 0#
-d$after.class = as.numeric(d$after.class)
-d$change = d$after.class - d$before.class
-d$change
-d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
-d = d[-1:2,]#
-d[3,c(6,19,37)]
-d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
-head(d)
-d[,17]
-d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
-d[,17]
-d[,35]
-d[3,c(6,35,35+18)]
-35+18
-d[3,c(6,35,53)]
-c(6,35,53)
-fifer::excel.cols("BA")
-contents("fifer")
-require(fifer)
-contents("fifer")
-fifer::excelCols("BA")
-?fifer::excelCols("BA")
-fifer::excelMatch("BA")
-fifer::excelMatch
-fifer::excelMatch("BA")
-fifer::excelMatch("BA", names(d))
-names(d)
-d[3,c(6,35,41)]
-d[3,c(6,35,53)]
-d[1:10,c(6,35,53)]
-d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F)
-d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
-d = d[-1:2,]#
-contents("fifer")#
-d[1:10,c(6,35,53)]#
-names(d)[6] = "start"#
-names(d)[35] = "before.class"#
-names(d)[53] = "after.class"#
-d$before.class[d$before.class==""] = 0#
-d$before.class = as.numeric(d$before.class)#
-d$after.class[d$after.class ==""] = 0#
-d$after.class = as.numeric(d$after.class)#
-d$change = d$after.class - d$before.class
-d$change
-flexplot(change~1, data=d)
-require(tidyverse)
-flexplot(change~1, data=d)
-remove.packages("fifer")
-flexplot(change~1, data=d)
-flexplot::flexplot(change~1, data=d)
-d$change = factor(d$after.class - d$before.class, levels=c(-1,0,1), labels=c("Worse", "Same", "Improved"))
-flexplot::flexplot(change~1, data=d)
-flexplot::flexplot(change~1, data=d) + labs(x="Read Scriptures By Themselves")
-flexplot::flexplot(start~1, data=d)
-flexplot::flexplot(start~change, data=d)
-flexplot::flexplot(start~change, data=d, jitter=c(.2, .3))
-flexplot::flexplot(start~change, data=d, jitter=c(.2, .4))
-devtools::install("research/RPackages/flexplot")
-flexplot::flexplot(start~change, data=d, jitter=c(.2, .4))  + labs(x="Difference Pre to Post In Read Scriptures Solo")
-flexplot::flexplot(start~change, data=d, jitter=c(.2, .4))  + labs(x="Difference Pre to Post In Read Scriptures Solo", y="Years in Program")
-d = read.csv("research/Collaborations/literacy/progress.csv", stringsAsFactors =F) #
-d = d[-1:2,]#
-names(d)[6] = "start"#
-names(d)[35] = "before.class"#
-names(d)[53] = "after.class"#
-d$before.class[d$before.class==""] = 0#
-d$before.class = as.numeric(d$before.class)#
-d$after.class[d$after.class ==""] = 0#
-d$after.class = as.numeric(d$after.class)#
-d$change = factor(d$after.class - d$before.class, levels=c(-1,0,1), labels=c("Worse", "Same", "Improved"))#
-require(tidyverse)#
-flexplot::flexplot(change~1, data=d) + labs(x="Read Scriptures By Themselves")
-flexplot::flexplot(change~1, data=d) + labs(x="Read Scriptures By Themselves")
-flexplot::flexplot(start~change, data=d, jitter=c(.2, .4))  + labs(x="Difference Pre to Post In Read Scriptures Solo", y="Years in Program")
-flexplot::flexplot(change~1, data=d) + labs(x="Read Scriptures By Themselves")
-require(fifer2)
-make.data(means=c(10, 15), sds=10, names=c("Treatment", "Outcome"), groups=c("Treatment", "Control"))
-make.data(means=c(10, 15), sds=10, names=c("Treatment", "Outcome"), groups=c("Treatment", "Control"), n=30)
-make.data(means=c(10, 15), sds=c(10,10), names=c("Treatment", "Outcome"), groups=c("Treatment", "Control"), n=c(15, 15))
-make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))
-data = make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))
-t.test(Outcome~Treatment, data=data)
-t.test(Outcome~Treatment, data=data)$p.value
-data = make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))#
-t.test(Outcome~Treatment, data=data)$p.value
-require(fifer2)#
+# #### 3N plot#
+flexplot(weight.loss~motivation + income + health, data=d, se=FALSE, method="lm")	#
+ 		## different lines for income#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", third.eye=c(T))	#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="polynomial", third.eye=c(T))	#
+ 		## different panels for income#
+flexplot(formula = weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", #
+ 	breaks = list(income = c(95000, 100000, 105000)),#
+ 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	#
+#### ghost lines#
+flexplot(weight.loss~motivation + gender | satisfaction + health, #
+         data=exercise_data, #
+         method="lm", se=F, bins=2, ghost.line="black", alpha=.1,#
+         ghost.reference = list(c("satisfaction"=0, "health"=10)))#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",#
+	breaks = list(income = c(95000, 100000, 105000)),#
+ 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31))#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	#
+flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000, gender="female"))	#
+flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000))	#
+		#### VISUALIZE FUNCTIONS -- Linear Models#
+## t-test#
+mod = lm(weight.loss~rewards, data=d)#
+visualize(mod)#
+object = mod#
+### regression#
+mod = lm(weight.loss~motivation, data=d)#
+visualize(mod)#
+visualize(mod, plot="residuals")#
+visualize(mod, plot="model")#
 #
-p.vals = 1:10#
-for (i in 1:length(p.vals)){#
-data = make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))#
-p.vals[i] = t.test(Outcome~Treatment, data=data)$p.value#
-}
-p.vals
-p.vals = data.frame(p.vals)
-flexplot(p.vals~1, data=p.vals)
-flexplot::flexplot(p.vals~1, data=p.vals)
-p.vals = 1:1000#
-for (i in 1:length(p.vals)){#
-data = make.data(means=c(10, 15), sds=c(10,10), names=c("Outcome", "Treatment"), groups=c("Treatment", "Control"), n=c(15, 15))#
-p.vals[i] = t.test(Outcome~Treatment, data=data)$p.value#
+### ancova#
+mod = lm(weight.loss~motivation + rewards, data=d)#
+visualize(mod)#
+visualize(mod, plot="residuals")#
+visualize(mod, plot="model")#
+#
+### factorial anova#
+mod = lm(weight.loss~gender + rewards, data=d)#
+visualize(mod)#
+visualize(mod, plot="residuals")#
+visualize(mod, plot="model")#
+#
+### multiple regression#
+mod = lm(weight.loss~gender + rewards + motivation, data=d)#
+visualize(mod)#
+visualize(mod, plot="residuals")#
+visualize(mod, plot="model")#
+#
+data(birthweight)#
+k= birthweight#
+added.plot(Birthweight~mheight + fheight + motherage + smoker, data=k, method="lm")#
+mod = lm(Birthweight~mheight + fheight + motherage, data=k)#
+mod2 = lm(Birthweight~mheight + fheight + motherage, data=k)#
+visualize(mod, plot="residuals")#
+#
+	#### mixed models#
+require(flexplot)#
+require(lme4)#
+data(math)#
+model = lmer(MathAch~ SES + Sex + (SES|School), data=math)#
+visualize(model, formula = MathAch~ SES | Sex + School, plot="model")#
+visualize(model, formula = MathAch~ SES + School| Sex, sample=100)#
+object = model; formula = MathAch~ SES + School| Sex; sample=100 #
+visualize(model, formula = MathAch~ Sex | SES+ School, sample=3)#
+visualize(model, formula = MathAch~ Sex + School| SES, sample=30)#
+	#### COMPARE.FITS FUNCTIONS -- linear models#
+mod = lm(weight.loss~rewards, data=d)#
+require(MASS)#
+mod2 = rlm(weight.loss~rewards, data=d)#
+compare.fits(weight.loss~rewards, data=d, model1=mod)#
+formula = weight.loss~rewards; data=d; model1=mod#
+compare.fits(formula=weight.loss~rewards, data=d, model1=mod, model2=mod2)#
+#
+mod = lm(weight.loss~motivation, data=d)#
+compare.fits(weight.loss~motivation, data=d, model1=mod)#
+#
+	### compare interaction and non-interaction models#
+d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)#
+mod = lm(wl ~motivation+rewards, data=d)#
+mod2 = lm(wl ~motivation*rewards, data=d)#
+compare.fits(wl~motivation|rewards, data=d, model1=mod, model2=mod2)#
+#
+	### compare interaction and non-interaction models#
+d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)#
+mod = lm(wl ~gender+rewards, data=d)#
+mod2 = lm(wl ~gender*rewards, data=d)#
+compare.fits(wl~gender|rewards, data=d, model1=mod, model2=mod2)#
+#
+		##### compare predictions with random forest#
+require(randomForest)#
+model1 = randomForest(wl~motivation + gender + rewards, data=d)#
+model2 = lm(wl~motivation * gender * rewards, data=d)		### use the same predictors in both models#
+compare.fits(wl~motivation | gender + rewards, data=d, model1, model2)#
+#
+		##### predictions with generalize lidnear model#
+d$weight.loss = d$weight.loss + 1 + abs(min(d$weight.loss, na.rm=T))#
+mod1 = glm(weight.loss~motivation + health + gender, data=d, family="Gamma")#
+mod2 = lm(weight.loss~motivation + health + gender, data=d)#
+compare.fits(weight.loss~motivation | health + gender, data=d, mod1, mod2)#
+compare.fits(weight.loss ~ motivation | health, data=d, model1=mod1, ghost.line="blue")#
+compare.fits(weight.loss ~ motivation | health, data=d, model1=mod1, model2=mod2, ghost.line="red")#
+mod1 = lm(weight.loss~therapy.type * motivation * health * muscle.gain * I(motivation^2), data=d)#
+mod2 = lm(weight.loss~therapy.type + motivation + health + muscle.gain + I(motivation^2), data=d)#
+compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2)#
+compare.fits(weight.loss ~muscle.gain +therapy.type | motivation + health, data=d, model1=mod1)#
+require(fifer)#
+data(authors); d= authors[1:1000,]#
+mod1 = lm(Daily.Units.Sold~Sale.Price*Publisher, data=d)#
+mod2 = glm(Daily.Units.Sold~Sale.Price*Publisher, data=d, family=quasipoisson(link="log"))#
+flexplot::compare.fits(Daily.Units.Sold~Sale.Price|Publisher, data=d, mod1, mod2)#
+flexplot::third.eye(weight.loss~muscle.gain|motivation + health, data=d, which.perms=1:2, se=F, ghost.line="gray", method="lm")
+mod = lm(weight.loss~gender + rewards + motivation, data=d)#
+visualize(mod)#
+visualize(mod, plot="residuals")#
+visualize(mod, plot="model")
+require(flexplot)#
+require(lme4)#
+data(math)#
+model = lmer(MathAch~ SES + Sex + (SES|School), data=math)#
+visualize(model, formula = MathAch~ SES | Sex + School, plot="model")
+visualize(model, formula = MathAch~ SES + School| Sex, sample=100)
+object = model; formula = MathAch~ SES + School| Sex; sample=100
+visualize(model, formula = MathAch~ SES + School| Sex, sample=100)
+traceback()
+model
+object = model
+formula = MathAch~ SES + School| Sex
+sample=100
+#' Visualize a fitted model #
+#'#
+#' Visualize a fitted model#
+#' @param object a fitted object#
+#' @param plot what should be plotted? Residuals? Bivariate plot? All of them?#
+#' @param formula A flexplot-style formula#
+#' @param ... Other arguments passed to flexplot#
+#' @import ggplot2#
+#' @export#
+visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){#
+	UseMethod("visualize")#
 }#
-p.vals = data.frame(p.vals)#
 #
-flexplot::flexplot(p.vals~1, data=p.vals)
-length(which(p.vals<0.05))
-length(which(p.vals<0.05))/length(p.vals)
-length(p.vals)
-length(which(p.vals<0.05))/nrow(p.vals)
-flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications")
-flexplot::flexplot(p.vals~1, data=p.vals) + lab(x="Computed P-Value From 1,000 Replications")
-require(tidyverse)
-flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications")
-flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies")
-?geom_text
-flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies") +#
-  annotate("text", label = "plot mpg vs. wt", x = .75, y = 100, size = 8, colour = "red")
-length(which(p.vals<0.05))/nrow(p.vals)
-annotate("text", label = "# of Significance p-values: 252", x = .75, y = 100, size = 8, colour = "red")
-require(tidyverse)#
-flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies") +#
-  annotate("text", label = "# of Significance p-values: 252", x = .75, y = 100, size = 8, colour = "red")
-annotate("text", label = "# of Significance p-values:\n 252", x = .75, y = 100, size = 8, colour = "red")
-flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies") +#
-  annotate("text", label = "# of Significance p-values:\n 252", x = .75, y = 100, size = 8, colour = "red")
-require(tidyverse)#
-flexplot::flexplot(p.vals~1, data=p.vals) + labs(x="Computed P-Value From 1,000 Replications", y="Number of Studies") +#
-  annotate("text", label = "# of Significance p-values:\n 252", x = .55, y = 100, size = 8, colour = "red")
-devtools::check("research/RPackages/flexplot")
-data(birthweight)
-head(birthweight)
-data(nsduh)
-head(nsduh)
-devtools::check("research/RPackages/flexplot")
-devtools::document("research/RPackages/flexplot")
-devtools::check("research/RPackages/flexplot")
-devtools::check("research/RPackages/flexplot")
+#' Visualize a fitted model #
+#'#
+#' Visualize a fitted model#
+#' @param object a lmer object#
+#' @param plot what should be plotted? Residuals? model plot? All of them?#
+#' @param formula A flexplot-style formula#
+#' @param ... Other arguments passed to flexplot#
+#' @export#
+visualize.default = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){#
+	class(object) = "visualize"#
+	plot(object)#
+}#
+#' Visualize a fitted model #
+#'#
+#' Visualize a fitted model#
+#' @param object a lm object#
+#' @param plot what should be plotted? Residuals? Model plot? All of them?#
+#' @param formula A flexplot-style formula#
+#' @param ... Other arguments passed to flexplot#
+#' @export#
+visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL,...){#
+	plot = match.arg(plot, c("all", "residuals", "model"))#
+	d = object$model#
+	res.plots = residual.plots(d, object)#
+#
+	#### use flexplot to visualize a model#
+	if ((plot=="all" | plot == "model" ) & is.null(formula)){#
+		#### generate formula as best we can#
+		#### get dataset#
+		data = object$model#
+		#### extract the terms from each model#
+		terms = attr(terms(object), "term.labels")#
+		##### extract variable names#
+		variables = all.vars(formula(object))#
+	    outcome = variables[1]#
+	    predictors = variables[-1]#
+	    ##### look for interactions and remove them#
+		if (length(grep(":", terms))>0){#
+			terms = terms[-grep(":", terms)]#
+		}#
+		##### look for polynomials and remove them#
+		if (length(grep("^2", terms, fixed=T, value=T))>0){#
+			terms = terms[-grep("^2", terms, fixed=T)]#
+		}#
+		#### figure out variable types#
+		if (length(terms)>1){#
+			numb = names(which(unlist(lapply(data[,terms], is.numeric))))#
+			cat = names(which(!(unlist(lapply(data[,terms], is.numeric)))))#
+		} else {#
+			numb = ifelse(is.numeric(data[,terms]), terms, NA)#
+			cat = ifelse(is.factor(data[,terms]), terms, NA)		#
+		}#
+		#### now decide where things go#
+		if (length(terms)>4){#
+			message("Note: to visualize more than four variables, I'm going to do an 'added variable plot.'")#
+			f = object$call[[2]]#
+			step3 = added.plot(f, data=d, ...) + labs(title="Analysis Plot")#
+			class(step3) <- c("flexplot", class(step3))#
+			return(step3)#
+		} else {#
+			#### if both numeric and factor, put numeric on x axis and factor as color/line#
+			if ((!is.na(cat[1]) | length(cat[1])!=0) & (!is.na(cat[1]) | length(cat[1])!=0)){#
+				### remove terms with first numb and first cat#
+				t2 = terms[-which(terms==numb[1] | terms==cat[1])]#
+				t2 = c(numb[1],cat[1], t2)#
+			#### otherwise, if length is greater than #
+			} else {#
+				t2 = terms[1:min(length(terms), 4)]#
+			}#
+			#### now create formula#
+			x = c(outcome, "~",t2[1], t2[2], "|", t2[3], t2[4])#
+			x = x[-which(is.na(x))]#
+			x = paste0(x, collapse="+")#
+			x = gsub("+|+", "|", x, fixed=T);x = gsub("+~+", "~", x, fixed=T)#
+			x = gsub("+|", "", x, fixed=T)#
+			f = as.formula(x)		#
+			step3 = flexplot(f, data=data, ...)+ labs(title="Analysis Plot")#
+			#class(step3) <- c("flexplot", class(step3))#
+			#return(step3)			#
+			### if they have more than two variables, also include a added variable plot#
+			if (length(terms)>1){#
+				step3b = added.plot(f, data=d,...)+ labs(title="Added Variable Plot")#
+				step3 = cowplot::plot_grid(step3, step3b, rel_widths=c(.6, .4))#
+				#class(step3) <- c("flexplot", class(step3))#
+				#return(step3)				#
+			}#
+		}#
+	} else if (plot=="all" | plot=="model"){#
+		step3 = flexplot(formula, data=d, ...)#
+		### if they have more than two variables, also include a added variable plot#
+		if (length(terms)>1){#
+			step3b = added.plot(f, data=d,...)+ labs(title="Added Variable Plot")#
+			step3 = cowplot::plot_grid(step3, step3b, rel_widths=c(.6, .4))			#
+		}		#
+	}#
+	if (plot=="residuals"){#
+		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)#
+		return(p)#
+	} else if (plot=="model"){#
+		return(step3)#
+	} else {#
+		p = arrange.plot(res.plots$histo, res.plots$res.dep, res.plots$sl, step3, plot, res.plots$terms, res.plots$numbers)#
+		return(p)#
+	}#
+}#
+utils::globalVariables(c("model", "Value", "y"))#
+#' Visualize a fitted lmerMod model #
+#'#
+#' Visualize a fitted lmerMod model#
+#' @param object a lmer object#
+#' @param plot what should be plotted? Residuals? Model plot? All of them?#
+#' @param ... Other arguments passed to flexplot#
+#' @param formula A flexplot-style formula#
+#' @param sample The number of individuals' datapoints to sample as raw data. Defaults to 3#
+#' @rawNamespace import(dplyr, except = c(filter, lag))#
+#' @export#
+visualize.lmerMod = function(object, plot=c("residuals", "all", "model"), formula=NULL, #
+	sample = 3, ...){#
+#
+	#### figure out what is numeric#
+	d = object@frame#
+	plot = match.arg(plot, c("all", "residuals", "model"))#
+#
+	#### generate residuals plots#
+	res.plots = residual.plots(data=d, object)#
+	#### now generate a model plot#
+	levels = apply(d, 2, FUN=function(x) length(unique(x)))#
+	outcome = names(d)[1]#
+	#### extract formula#
+	form = as.character(formula(object))[3]#
+#
+	#### identify random effects#
+	term.re = trimws(substr(form, regexpr("\\|", form)[1]+1, regexpr("\\)", form)[1]-1))		#
+#
+	#### find remaining terms#
+	preds = names(d)[-1]#[which(!(names(d)[-1] %in% term.re))]#
+	#### randomly sample the re terms and convert to numeric#
+	samp = sample(unique(d[, term.re]), size=sample)#
+	k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])#
+#
+	### come up with formula#
+	if (is.null(formula)){#
+		slots = c(1,3,4)#
+		form.slots = rep(NA, times=4)#
+		for (i in 1:min(4,length(preds))){#
+			form.slots[slots[i]] = preds[i]#
+		}#
+		#form.slots[2] = term.re#
+		symbol.slots = c("~","+", "|", "+")#
+		formula = paste0(symbol.slots, form.slots, collapse="")#
+		formula = gsub("\\|NA", "", formula);formula = gsub("\\+NA", "", formula);#
+		formula = paste0(outcome, formula, collapse="")#
+		formula = formula(formula)#
+	} else {#
+		### figure out where random component is#
+		f.char = as.character(formula)[3]#
+		criteria = paste0("\\+.*", term.re, ".*\\|")#
+#
+		### if random component is in slot 2, modify the formula#
+		if (length(grep(criteria, f.char))>0){#
+			modify=T#
+			termses = gsub(criteria, "|", f.char)#
+			formula.new = make.formula(outcome, termses)			#
+		} else {#
+			modify = F#
+		}#
+	}#
+	terms = all.vars(formula)[-1]#
+	terms.fixed = terms[-which(terms %in% term.re)]#
+	##### generate fixed effects predictions#
+	#### if random is in NOT in the second slot#
+	if (!modify){#
+		step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T)#
+	} else {#
+		#### otherwise...#
+		prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	#
+#
+			### to prevent conflicts with base::filter#
+		newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = "MathAch"#
+		#newd = prediction %>% dplyr::filter(model=="random effects") %>% dplyr::mutate(MathAch = prediction)			#
+		step3 = flexplot(formula.new, data=k, suppress_smooth=T) #
+		#if axis 1 is numeric, do lines#
+		if (is.numeric(d[,terms[1]])){#
+				m = prediction[prediction$model=="fixed effects",]#
+				step3 = step3+ #
+				geom_line(data=m, #
+					aes_string(terms[1], "prediction", color=NA), linetype=1, lwd=2, col="black") +#
+				geom_line(data=newd, #
+					aes_string(terms[1], outcome, group="School", color="School"))#
+		#if axis 1 is categorical, plot means as dots#
+		} else {#
+			#### see if any variables are binned, then bin the same variables#
+			ggdata = step3$data#
+			binned.var = names(ggdata)[grep("_binned",names(step3$data))] #
+			unbinned.var = binned = gsub("_binned", "", binned.var)#
+#
+			if (length(binned)>0){#
+				### use ggplots data to find num bins and levels#
+				bin.levels = levels(step3$data[,binned.var])#
+				labs = levels(ggdata[,binned.var])			#
+				bins = length(labs)	#
+				newd[,binned] = bin.me(variable=binned, data=newd, bins=bins, labels=labs, breaks=NULL, check.breaks=F)				#
+				prediction[,binned] = bin.me(variable=binned, data= prediction, bins=bins, labels=labs, breaks=NULL, check.breaks=F)				#
+			}			#
+#
+			#### aggregate the means across variables		#
+			means = prediction %>% group_by_at(vars(one_of(c(terms, "model")))) %>% summarize(Value = mean(prediction))#
+			fixed.means = means[means$model=="fixed effects",]#
+			fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(terms.fixed))) %>% summarize(Value=mean(Value))#
+			means = means[means$model=="random effects",]#
+			#means = means %>% dplyr::filter(model=="random effects") #
+			names(means)[ncol(means)] = names(fixed.means)[ncol(fixed.means)] = outcome#
+			names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var#
+			names(means)[names(means)==unbinned.var] = binned.var			#
+			#### plot it#
+ 			step3 = step3 + #
+				### fixed effects#
+				geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3) +#
+				geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=1), lwd=2) +#
+#
+				### random effects#
+				geom_point(data=means, aes_string(x=terms[1], y=outcome), size=.5) +#
+				geom_line(data=means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=.5, linetype=2) 			#
+#
+		}	#
+			#### remove legend if n>10#
+			if (sample>10){#
+				step3 = step3 + theme(legend.position="none")#
+			}	#
+#
+	}#
+	#### now put them all together#
+	if (plot=="residuals"){#
+		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)#
+		return(p)#
+	} else if (plot=="model"){#
+		return(step3)#
+	} else {#
+		p = arrange.plot(res.plots$histo, res.plots$res.dep, res.plots$sl, step3, plot, res.plots$terms, res.plots$numbers)#
+		return(p)#
+	}	#
+#
+}#
+#
+arrange.plot  = function(histo, res.dep, sl, step3, plot, terms, numbers){#
+#
+	#### return the plots#
+	if (plot=="model"){#
+		plot = step3#
+	} else if (plot=="residuals"){#
+		if (length(numbers)>0){#
+			top.row =suppressMessages(cowplot::plot_grid(histo, res.dep,ncol=2))#
+			bottom.row =suppressMessages(cowplot::plot_grid(NULL, sl, NULL, ncol=3, rel_widths=c(.25, .5, .25)))#
+			plot = suppressMessages(cowplot::plot_grid(top.row, bottom.row, nrow=2))			#
+		} else {#
+			plot = suppressMessages(cowplot::plot_grid(histo, sl, ncol=1))#
+			class(plot) <- c("flexplot", class(plot))			#
+		}#
+	} else {#
+		if (length(terms)==1){#
+			if (length(numbers)>0){#
+				top.row = suppressMessages(cowplot::plot_grid(step3, histo))#
+				bottom.row = suppressMessages(cowplot::plot_grid(res.dep, sl, ncol=2))#
+				heights = c(.5, .5)#
+			} else {#
+				top.row = suppressMessages(cowplot::plot_grid(NULL, step3, NULL, ncol=3, rel_widths=c(.25, .5, .25)))#
+				bottom.row = suppressMessages(cowplot::plot_grid(histo, sl, ncol=2))#
+				heights = c(.6, .4)#
+			}#
+#
+		} else {#
+			if (length(numbers)>0){#
+				top.row = step3#
+				bottom.row = suppressMessages(cowplot::plot_grid(histo, res.dep, sl, ncol=3))#
+				heights = c(.7, .3)				#
+			} else {#
+				top.row = step3#
+				bottom.row = suppressMessages(cowplot::plot_grid(histo, sl, ncol=2))#
+				heights = c(.7, .3)								#
+			}#
+		}	#
+		plot = suppressMessages(cowplot::plot_grid(top.row, bottom.row, nrow=2, rel_heights=heights))#
+	}	#
+	class(plot) <- c("flexplot", class(plot))#
+	return(plot)#
+}#
+### this function just produces residual plots, so I can reuse it between methods#
+#
+residual.plots = function(data, object){#
+	terms = attr(terms(object), "term.labels")#
+	#### remove interaction and polynomial terms from "terms"#
+	terms = grep("[/^:]", terms, value=T, invert=T)#
+	#### identify factors#
+	if (length(terms)>1){#
+		factors = names(which(unlist(lapply(data[,terms], is.factor))));#
+		numbers = names(which(unlist(lapply(data[,terms], is.numeric))));#
+	} else {#
+		factors = terms[which(is.factor(data[,terms]))]#
+		numbers = terms[which(is.numeric(data[,terms]))]#
+	}#
+#
+		#### figure out what is numeric#
+	levels = apply(data, 2, FUN=function(x) length(unique(x)))#
+	#### if there's too few levels and it's not categorical#
+	factors = !sapply(data, is.factor)#
+	if (any(levels<5 & factors)){#
+		message("Note: one or more of your variables has less than 5 values, yet they're treated as numeric.\n\n")#
+	}#
+	#### extract names#
+	x.names = names(data)[-1] #
+	y.name = names(data)[1]#
+	#### export residuals#
+	data$residuals = residuals(object)#
+	data$abs.res = abs(data$residuals)#
+	data$fitted = fitted(object)#
+#
+	#### plot residuals#
+	levels = length(unique(round(data[,"residuals"], digits=2)))		#
+	histo = ggplot2::ggplot(data=data, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black', bins=min(30, round(levels/2))) + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")#
+	class(histo) = c("flexplot", class(histo))#
+	if (length(numbers)>0){#
+		#res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + #
+		#theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
+		res.dep = flexplot(residuals~fitted, data=data) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
+		class(res.dep) = c("flexplot", class(res.dep))		#
+	} else {#
+		res.dep = NULL#
+	}#
+	if (length(unique(data$fitted))<7){#
+		sl = flexplot(abs.res~fitted, data=data, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
+		class(sl) = c("flexplot", class(sl))		#
+	} else {#
+		sl = flexplot(abs.res~fitted, data=data, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
+		class(sl) = c("flexplot", class(sl))					#
+	}#
+	plots = list(histo=histo, res.dep=res.dep, sl=sl, terms=terms, factors=factors, numbers=numbers)#
+	return(plots)#
+	#class(plot) <- c("flexplot", class(plot))#
+	#return(plot)#
+}
+visualize(model, formula = MathAch~ SES + School| Sex, sample=100)
+#' Visualize a fitted model #
+#'#
+#' Visualize a fitted model#
+#' @param object a fitted object#
+#' @param plot what should be plotted? Residuals? Bivariate plot? All of them?#
+#' @param formula A flexplot-style formula#
+#' @param ... Other arguments passed to flexplot#
+#' @import ggplot2#
+#' @export#
+visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){#
+	UseMethod("visualize")#
+}#
+#
+#' Visualize a fitted model #
+#'#
+#' Visualize a fitted model#
+#' @param object a lmer object#
+#' @param plot what should be plotted? Residuals? model plot? All of them?#
+#' @param formula A flexplot-style formula#
+#' @param ... Other arguments passed to flexplot#
+#' @export#
+visualize.default = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){#
+	class(object) = "visualize"#
+	plot(object)#
+}#
+#' Visualize a fitted model #
+#'#
+#' Visualize a fitted model#
+#' @param object a lm object#
+#' @param plot what should be plotted? Residuals? Model plot? All of them?#
+#' @param formula A flexplot-style formula#
+#' @param ... Other arguments passed to flexplot#
+#' @export#
+visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL,...){#
+	plot = match.arg(plot, c("all", "residuals", "model"))#
+	d = object$model#
+	res.plots = residual.plots(d, object)#
+#
+	#### use flexplot to visualize a model#
+	if ((plot=="all" | plot == "model" ) & is.null(formula)){#
+		#### generate formula as best we can#
+		#### get dataset#
+		data = object$model#
+		#### extract the terms from each model#
+		terms = attr(terms(object), "term.labels")#
+		##### extract variable names#
+		variables = all.vars(formula(object))#
+	    outcome = variables[1]#
+	    predictors = variables[-1]#
+	    ##### look for interactions and remove them#
+		if (length(grep(":", terms))>0){#
+			terms = terms[-grep(":", terms)]#
+		}#
+		##### look for polynomials and remove them#
+		if (length(grep("^2", terms, fixed=T, value=T))>0){#
+			terms = terms[-grep("^2", terms, fixed=T)]#
+		}#
+		#### figure out variable types#
+		if (length(terms)>1){#
+			numb = names(which(unlist(lapply(data[,terms], is.numeric))))#
+			cat = names(which(!(unlist(lapply(data[,terms], is.numeric)))))#
+		} else {#
+			numb = ifelse(is.numeric(data[,terms]), terms, NA)#
+			cat = ifelse(is.factor(data[,terms]), terms, NA)		#
+		}#
+		#### now decide where things go#
+		if (length(terms)>4){#
+			message("Note: to visualize more than four variables, I'm going to do an 'added variable plot.'")#
+			f = object$call[[2]]#
+			step3 = added.plot(f, data=d, ...) + labs(title="Analysis Plot")#
+			class(step3) <- c("flexplot", class(step3))#
+			return(step3)#
+		} else {#
+			#### if both numeric and factor, put numeric on x axis and factor as color/line#
+			if ((!is.na(cat[1]) | length(cat[1])!=0) & (!is.na(cat[1]) | length(cat[1])!=0)){#
+				### remove terms with first numb and first cat#
+				t2 = terms[-which(terms==numb[1] | terms==cat[1])]#
+				t2 = c(numb[1],cat[1], t2)#
+			#### otherwise, if length is greater than #
+			} else {#
+				t2 = terms[1:min(length(terms), 4)]#
+			}#
+			#### now create formula#
+			x = c(outcome, "~",t2[1], t2[2], "|", t2[3], t2[4])#
+			x = x[-which(is.na(x))]#
+			x = paste0(x, collapse="+")#
+			x = gsub("+|+", "|", x, fixed=T);x = gsub("+~+", "~", x, fixed=T)#
+			x = gsub("+|", "", x, fixed=T)#
+			f = as.formula(x)		#
+			step3 = flexplot(f, data=data, ...)+ labs(title="Analysis Plot")#
+			#class(step3) <- c("flexplot", class(step3))#
+			#return(step3)			#
+			### if they have more than two variables, also include a added variable plot#
+			if (length(terms)>1){#
+				step3b = added.plot(f, data=d,...)+ labs(title="Added Variable Plot")#
+				step3 = cowplot::plot_grid(step3, step3b, rel_widths=c(.6, .4))#
+				#class(step3) <- c("flexplot", class(step3))#
+				#return(step3)				#
+			}#
+		}#
+	} else if (plot=="all" | plot=="model"){#
+		step3 = flexplot(formula, data=d, ...)#
+		### if they have more than two variables, also include a added variable plot#
+		if (length(terms)>1){#
+			step3b = added.plot(f, data=d,...)+ labs(title="Added Variable Plot")#
+			step3 = cowplot::plot_grid(step3, step3b, rel_widths=c(.6, .4))			#
+		}		#
+	}#
+	if (plot=="residuals"){#
+		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)#
+		return(p)#
+	} else if (plot=="model"){#
+		return(step3)#
+	} else {#
+		p = arrange.plot(res.plots$histo, res.plots$res.dep, res.plots$sl, step3, plot, res.plots$terms, res.plots$numbers)#
+		return(p)#
+	}#
+}#
+utils::globalVariables(c("model", "Value", "y"))#
+#' Visualize a fitted lmerMod model #
+#'#
+#' Visualize a fitted lmerMod model#
+#' @param object a lmer object#
+#' @param plot what should be plotted? Residuals? Model plot? All of them?#
+#' @param ... Other arguments passed to flexplot#
+#' @param formula A flexplot-style formula#
+#' @param sample The number of individuals' datapoints to sample as raw data. Defaults to 3#
+#' @rawNamespace import(dplyr, except = c(filter, lag))#
+#' @export#
+visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formula=NULL, #
+	sample = 3, ...){#
+#
+	#### figure out what is numeric#
+	d = object@frame#
+	plot = match.arg(plot, c("all", "residuals", "model"))#
+#
+	#### generate residuals plots#
+	res.plots = residual.plots(data=d, object)#
+	#### now generate a model plot#
+	levels = apply(d, 2, FUN=function(x) length(unique(x)))#
+	outcome = names(d)[1]#
+	#### extract formula#
+	form = as.character(formula(object))[3]#
+#
+	#### identify random effects#
+	term.re = trimws(substr(form, regexpr("\\|", form)[1]+1, regexpr("\\)", form)[1]-1))		#
+#
+	#### find remaining terms#
+	preds = names(d)[-1]#[which(!(names(d)[-1] %in% term.re))]#
+	#### randomly sample the re terms and convert to numeric#
+	samp = sample(unique(d[, term.re]), size=sample)#
+	k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])#
+#
+	### come up with formula#
+	if (is.null(formula)){#
+		slots = c(1,3,4)#
+		form.slots = rep(NA, times=4)#
+		for (i in 1:min(4,length(preds))){#
+			form.slots[slots[i]] = preds[i]#
+		}#
+		#form.slots[2] = term.re#
+		symbol.slots = c("~","+", "|", "+")#
+		formula = paste0(symbol.slots, form.slots, collapse="")#
+		formula = gsub("\\|NA", "", formula);formula = gsub("\\+NA", "", formula);#
+		formula = paste0(outcome, formula, collapse="")#
+		formula = formula(formula)#
+	} else {#
+		### figure out where random component is#
+		f.char = as.character(formula)[3]#
+		criteria = paste0("\\+.*", term.re, ".*\\|")#
+#
+		### if random component is in slot 2, modify the formula#
+		if (length(grep(criteria, f.char))>0){#
+			modify=T#
+			termses = gsub(criteria, "|", f.char)#
+			formula.new = make.formula(outcome, termses)			#
+		} else {#
+			modify = F#
+		}#
+	}#
+	terms = all.vars(formula)[-1]#
+	terms.fixed = terms[-which(terms %in% term.re)]#
+	##### generate fixed effects predictions#
+	#### if random is in NOT in the second slot#
+	if (!modify){#
+		step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T)#
+	} else {#
+		#### otherwise...#
+		prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	#
+#
+			### to prevent conflicts with base::filter#
+		newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = "MathAch"#
+		#newd = prediction %>% dplyr::filter(model=="random effects") %>% dplyr::mutate(MathAch = prediction)			#
+		step3 = flexplot(formula.new, data=k, suppress_smooth=T) #
+		#if axis 1 is numeric, do lines#
+		if (is.numeric(d[,terms[1]])){#
+				m = prediction[prediction$model=="fixed effects",]#
+				step3 = step3+ #
+				geom_line(data=m, #
+					aes_string(terms[1], "prediction", color=NA), linetype=1, lwd=2, col="black") +#
+				geom_line(data=newd, #
+					aes_string(terms[1], outcome, group="School", color="School"))#
+		#if axis 1 is categorical, plot means as dots#
+		} else {#
+			#### see if any variables are binned, then bin the same variables#
+			ggdata = step3$data#
+			binned.var = names(ggdata)[grep("_binned",names(step3$data))] #
+			unbinned.var = binned = gsub("_binned", "", binned.var)#
+#
+			if (length(binned)>0){#
+				### use ggplots data to find num bins and levels#
+				bin.levels = levels(step3$data[,binned.var])#
+				labs = levels(ggdata[,binned.var])			#
+				bins = length(labs)	#
+				newd[,binned] = bin.me(variable=binned, data=newd, bins=bins, labels=labs, breaks=NULL, check.breaks=F)				#
+				prediction[,binned] = bin.me(variable=binned, data= prediction, bins=bins, labels=labs, breaks=NULL, check.breaks=F)				#
+			}			#
+#
+			#### aggregate the means across variables		#
+			means = prediction %>% group_by_at(vars(one_of(c(terms, "model")))) %>% summarize(Value = mean(prediction))#
+			fixed.means = means[means$model=="fixed effects",]#
+			fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(terms.fixed))) %>% summarize(Value=mean(Value))#
+			means = means[means$model=="random effects",]#
+			#means = means %>% dplyr::filter(model=="random effects") #
+			names(means)[ncol(means)] = names(fixed.means)[ncol(fixed.means)] = outcome#
+			names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var#
+			names(means)[names(means)==unbinned.var] = binned.var			#
+			#### plot it#
+ 			step3 = step3 + #
+				### fixed effects#
+				geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3) +#
+				geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=1), lwd=2) +#
+#
+				### random effects#
+				geom_point(data=means, aes_string(x=terms[1], y=outcome), size=.5) +#
+				geom_line(data=means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=.5, linetype=2) 			#
+#
+		}	#
+			#### remove legend if n>10#
+			if (sample>10){#
+				step3 = step3 + theme(legend.position="none")#
+			}	#
+#
+	}#
+	#### now put them all together#
+	if (plot=="residuals"){#
+		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)#
+		return(p)#
+	} else if (plot=="model"){#
+		return(step3)#
+	} else {#
+		p = arrange.plot(res.plots$histo, res.plots$res.dep, res.plots$sl, step3, plot, res.plots$terms, res.plots$numbers)#
+		return(p)#
+	}	#
+#
+}#
+#
+arrange.plot  = function(histo, res.dep, sl, step3, plot, terms, numbers){#
+#
+	#### return the plots#
+	if (plot=="model"){#
+		plot = step3#
+	} else if (plot=="residuals"){#
+		if (length(numbers)>0){#
+			top.row =suppressMessages(cowplot::plot_grid(histo, res.dep,ncol=2))#
+			bottom.row =suppressMessages(cowplot::plot_grid(NULL, sl, NULL, ncol=3, rel_widths=c(.25, .5, .25)))#
+			plot = suppressMessages(cowplot::plot_grid(top.row, bottom.row, nrow=2))			#
+		} else {#
+			plot = suppressMessages(cowplot::plot_grid(histo, sl, ncol=1))#
+			class(plot) <- c("flexplot", class(plot))			#
+		}#
+	} else {#
+		if (length(terms)==1){#
+			if (length(numbers)>0){#
+				top.row = suppressMessages(cowplot::plot_grid(step3, histo))#
+				bottom.row = suppressMessages(cowplot::plot_grid(res.dep, sl, ncol=2))#
+				heights = c(.5, .5)#
+			} else {#
+				top.row = suppressMessages(cowplot::plot_grid(NULL, step3, NULL, ncol=3, rel_widths=c(.25, .5, .25)))#
+				bottom.row = suppressMessages(cowplot::plot_grid(histo, sl, ncol=2))#
+				heights = c(.6, .4)#
+			}#
+#
+		} else {#
+			if (length(numbers)>0){#
+				top.row = step3#
+				bottom.row = suppressMessages(cowplot::plot_grid(histo, res.dep, sl, ncol=3))#
+				heights = c(.7, .3)				#
+			} else {#
+				top.row = step3#
+				bottom.row = suppressMessages(cowplot::plot_grid(histo, sl, ncol=2))#
+				heights = c(.7, .3)								#
+			}#
+		}	#
+		plot = suppressMessages(cowplot::plot_grid(top.row, bottom.row, nrow=2, rel_heights=heights))#
+	}	#
+	class(plot) <- c("flexplot", class(plot))#
+	return(plot)#
+}#
+### this function just produces residual plots, so I can reuse it between methods#
+#
+residual.plots = function(data, object){#
+	terms = attr(terms(object), "term.labels")#
+	#### remove interaction and polynomial terms from "terms"#
+	terms = grep("[/^:]", terms, value=T, invert=T)#
+	#### identify factors#
+	if (length(terms)>1){#
+		factors = names(which(unlist(lapply(data[,terms], is.factor))));#
+		numbers = names(which(unlist(lapply(data[,terms], is.numeric))));#
+	} else {#
+		factors = terms[which(is.factor(data[,terms]))]#
+		numbers = terms[which(is.numeric(data[,terms]))]#
+	}#
+#
+		#### figure out what is numeric#
+	levels = apply(data, 2, FUN=function(x) length(unique(x)))#
+	#### if there's too few levels and it's not categorical#
+	factors = !sapply(data, is.factor)#
+	if (any(levels<5 & factors)){#
+		message("Note: one or more of your variables has less than 5 values, yet they're treated as numeric.\n\n")#
+	}#
+	#### extract names#
+	x.names = names(data)[-1] #
+	y.name = names(data)[1]#
+	#### export residuals#
+	data$residuals = residuals(object)#
+	data$abs.res = abs(data$residuals)#
+	data$fitted = fitted(object)#
+#
+	#### plot residuals#
+	levels = length(unique(round(data[,"residuals"], digits=2)))		#
+	histo = ggplot2::ggplot(data=data, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black', bins=min(30, round(levels/2))) + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")#
+	class(histo) = c("flexplot", class(histo))#
+	if (length(numbers)>0){#
+		#res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + #
+		#theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
+		res.dep = flexplot(residuals~fitted, data=data) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")#
+		class(res.dep) = c("flexplot", class(res.dep))		#
+	} else {#
+		res.dep = NULL#
+	}#
+	if (length(unique(data$fitted))<7){#
+		sl = flexplot(abs.res~fitted, data=data, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
+		class(sl) = c("flexplot", class(sl))		#
+	} else {#
+		sl = flexplot(abs.res~fitted, data=data, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			#
+		class(sl) = c("flexplot", class(sl))					#
+	}#
+	plots = list(histo=histo, res.dep=res.dep, sl=sl, terms=terms, factors=factors, numbers=numbers)#
+	return(plots)#
+	#class(plot) <- c("flexplot", class(plot))#
+	#return(plot)#
+}
+visualize(model, formula = MathAch~ SES + School| Sex, sample=100)
+devtools::install("research/RPackages/flexplot")
+require(flexplot)#
+require(lme4)#
+data(math)#
+model = lmer(MathAch~ SES + Sex + (SES|School), data=math)#
+visualize(model, formula = MathAch~ SES | Sex + School, plot="model")#
+visualize(model, formula = MathAch~ SES + School| Sex, sample=100)
+flexplot::visualize(model, formula = MathAch~ SES | Sex + School, plot="model")
+devtools::install("research/RPackages/flexplot")
+visualize(model)#
+object = model#
+#
+d = exercise_data#
+#
+		# # #### histograms and barcharts#
+#
+flexplot(formula=income~1, data=d)#
+flexplot(gender~1, data=d)#
+#
+# ### scatter plot#
+require(MASS)#
+flexplot(weight.loss~motivation, data=d)	#
+flexplot(weight.loss~motivation, data=d, method="lm", se=FALSE)	#
+flexplot(weight.loss~motivation, data=d, method="rlm", se=FALSE)	#
+flexplot(weight.loss~motivation, data=d, method="rlm", se=FALSE, raw.data=F)	#
+flexplot(weight.loss~health, data=d, method="polynomial", se=FALSE)	#
+flexplot(weight.loss~health, data=d, method="cubic", se=FALSE)	#
+flexplot(gender~health, data=d, method="logistic", se=FALSE, jitter=c(0, .1))
+require(flexplot)
+visualize(model)#
+object = model#
+#
+d = exercise_data#
+#
+		# # #### histograms and barcharts#
+#
+flexplot(formula=income~1, data=d)#
+flexplot(gender~1, data=d)#
+#
+# ### scatter plot#
+require(MASS)#
+flexplot(weight.loss~motivation, data=d)	#
+flexplot(weight.loss~motivation, data=d, method="lm", se=FALSE)	#
+flexplot(weight.loss~motivation, data=d, method="rlm", se=FALSE)	#
+flexplot(weight.loss~motivation, data=d, method="rlm", se=FALSE, raw.data=F)	#
+flexplot(weight.loss~health, data=d, method="polynomial", se=FALSE)	#
+flexplot(weight.loss~health, data=d, method="cubic", se=FALSE)	#
+flexplot(gender~health, data=d, method="logistic", se=FALSE, jitter=c(0, .1))	#
+flexplot(weight.loss~therapy.type + gender, #
+    data=exercise_data, se=F, alpha=.3)
+data("tablesaw.injury") ### also simulated data available in flexplot package#
+                        ### always remember to be safe and attentive when woodworking#
+flexplot(injury~attention, data=tablesaw.injury, #
+             method="logistic", jitter=c(0, .05))#
+# ### mean plots#
+flexplot(weight.loss~therapy.type, data=d)#
+data(relationship_satisfaction)#
+flexplot(satisfaction~separated, data=relationship_satisfaction)#
+flexplot(weight.loss~therapy.type, data=d, spread="stdev")#
+flexplot(weight.loss~therapy.type, data=d, spread="sterr")#
+flexplot(weight.loss~therapy.type, data=d, raw.data=FALSE)	#
+flexplot(weight.loss~therapy.type, data=d, jitter=F)		#
+flexplot(weight.loss~therapy.type, data=d, jitter=T)		#
+flexplot(weight.loss~therapy.type, data=d, jitter=c(.3,0))		#
+flexplot(weight.loss~therapy.type, data=d, jitter=c(.3))#
+flexplot(weight.loss~therapy.type, data=d, jitter=c(.3, .5))	#
+flexplot(gender~therapy.type, data=d, jitter=c(.3, .5), method="logistic")		#
+	### intentional error
+## related T#
+k = d#
+deleteme = which(k$rewards=="no rewards")#
+k = k[-(deleteme[1:2]),]#
+table(k$rewards)#
+flexplot(weight.loss~rewards, data=k, related=T)#
+flexplot(weight.loss~rewards, data=k, related=T, jitter=F)#
+flexplot(weight.loss~rewards, data=k, related=T, jitter=T)#
+flexplot(weight.loss~rewards, data=k, related=T, jitter=c(.05,0))#
+ 	## without raw data#
+#
+# ### CHI SQUARE PLOT (categorical on categorical)#
+flexplot(gender~rewards, data=d, jitter=c(.05,0))#
+# ### INTERACTION PLOT			#
+flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)#
+flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)#
+flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=c(.4,0))#
+flexplot(weight.loss~therapy.type + gender, data=d, sample=50)	#
+flexplot(weight.loss~therapy.type | gender, data=d, sample=50)	#
+flexplot(gender~weight.loss | therapy.type, data=d, sample=50, method="logistic")	#
+flexplot(gender~weight.loss + therapy.type, data=d, sample=50, method="logistic")	#
+#
+# #### ANCOVA PLOT#
+flexplot(weight.loss~motivation + gender, data=d, se=FALSE)	### remove se#
+added.plot(weight.loss~motivation + gender, data=d, se=FALSE)	### remove se#
+# #### 2N PLOT (2 NUMERIC VARIABLE PLOTS)#
+flexplot(formula = weight.loss~motivation + income, data=d, se=FALSE, method="lm", breaks=NULL, bins=3, labels=NULL)#
+#source("research/RPackages/flexplot/R/flexplot.R")#
+#source("research/RPackages/flexplot/R/hidden_functions.R")#
+flexplot(formula = weight.loss~motivation + income, data=d, se=FALSE, method="lm", #
+ 	breaks = list(income=c(95000, 100000, 105000)),#
+ 	labels=list(income=c("<95K", "<100K", "<105K", ">105K")))		#
+flexplot(formula = gender~motivation + income, data=d, se=FALSE, method="logistic", #
+ 	breaks = list(income=c(95000, 100000, 105000)),#
+ 	labels=list(income=c("<95K", "<100K", "<105K", ">105K")))#
+#
+# #### 3N plot#
+flexplot(weight.loss~motivation + income + health, data=d, se=FALSE, method="lm")	#
+ 		## different lines for income#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", third.eye=c(T))	#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="polynomial", third.eye=c(T))	#
+ 		## different panels for income#
+flexplot(formula = weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", #
+ 	breaks = list(income = c(95000, 100000, 105000)),#
+ 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	#
+#### ghost lines#
+flexplot(weight.loss~motivation + gender | satisfaction + health, #
+         data=exercise_data, #
+         method="lm", se=F, bins=2, ghost.line="black", alpha=.1,#
+         ghost.reference = list(c("satisfaction"=0, "health"=10)))#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",#
+	breaks = list(income = c(95000, 100000, 105000)),#
+ 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31))#
+flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	#
+flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000, gender="female"))	#
+flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000))	#
+		#### VISUALIZE FUNCTIONS -- Linear Models#
+## t-test#
+mod = lm(weight.loss~rewards, data=d)#
+visualize(mod)#
+object = mod#
+### regression#
+mod = lm(weight.loss~motivation, data=d)#
+visualize(mod)#
+visualize(mod, plot="residuals")#
+visualize(mod, plot="model")
+### ancova#
+mod = lm(weight.loss~motivation + rewards, data=d)#
+visualize(mod)#
+visualize(mod, plot="residuals")#
+visualize(mod, plot="model")#
+#
+### factorial anova#
+mod = lm(weight.loss~gender + rewards, data=d)#
+visualize(mod)#
+visualize(mod, plot="residuals")#
+visualize(mod, plot="model")#
+#
+### multiple regression#
+mod = lm(weight.loss~gender + rewards + motivation, data=d)#
+visualize(mod)#
+visualize(mod, plot="residuals")#
+visualize(mod, plot="model")
+data(birthweight)#
+k= birthweight#
+added.plot(Birthweight~mheight + fheight + motherage + smoker, data=k, method="lm")#
+mod = lm(Birthweight~mheight + fheight + motherage, data=k)#
+mod2 = lm(Birthweight~mheight + fheight + motherage, data=k)#
+visualize(mod, plot="residuals")#
+#
+	#### mixed models#
+require(flexplot)#
+require(lme4)#
+data(math)#
+model = lmer(MathAch~ SES + Sex + (SES|School), data=math)#
+flexplot::visualize(model, formula = MathAch~ SES | Sex + School, plot="model")
+mod = lm(weight.loss~rewards, data=d)#
+require(MASS)#
+mod2 = rlm(weight.loss~rewards, data=d)#
+compare.fits(weight.loss~rewards, data=d, model1=mod)
+formula = weight.loss~rewards; data=d; model1=mod
+formula = weight.loss~rewards; data=d; model1=mod; model2=NULL
+#### if mod2 is null..#
+	if (is.null(model2)){#
+		model2 = model1#
+		old.mod = 1#
+	} else {#
+		old.mod = 0#
+	}#
+#
+	#### get type of model#
+	model1.type = class(model1)[1]#
+	model2.type = class(model2)[1]	#
+	#### extract the terms from each MODEL#
+	testme1 = formula(model1)#
+	testme2 = formula(model2)#
+	testme = unique(all.vars(testme1)[-1], all.vars(testme2)[-1])#
+	##### extract variable names#
+	variables = all.vars(formula)#
+    outcome = variables[1]#
+    predictors = variables[-1]#
+    ##### make sure they're putting the same variables from formula in terms#
+	if (!(all(predictors %in% testme))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%terms.mod1)], collapse=",")))#
+	}#
+	##### make sure they're using the right dataset#
+	if (!(all(predictors %in% names(data)))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))#
+	}
+#### create random column just to make the applies work (yeah, it's hacky, but it works)#
+    data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)#
+    predictors = c(predictors, "reject", "reject2")#
+#
+    #### get variable types#
+    numb = names(which(unlist(lapply(data[,predictors], is.numeric))))#
+    cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
+#
+    ##### make "quadriture" points for quant variables#
+    var.mins = apply(data[, numb], 2, min, na.rm=T)#
+    var.max = apply(data[, numb], 2, max, na.rm=T)    #
+    min.max = data.frame(var.mins, var.max); min.max$size = c(50, rep(10, nrow(min.max)-1))#
+	f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}#
+	min.max = as.list(apply(min.max, 1, f))#
+#
+    #### get unique values for categorical vars#
+    if (length(cat)==1){#
+    	un.vars = lapply(data[cat], unique)    	#
+    } else {#
+		un.vars =lapply(data[,cat], unique); names(un.vars) = cat#
+	}
+#### combine into one dataset#
+    all.vars = c(min.max, un.vars)    #
+    #### get rid of extra variables#
+    tot.vars = length(predictors)#
+    rejects = grep("reject", names(all.vars))#
+	all.vars = all.vars[-rejects]#
+	all.vars = lapply(all.vars, function(x) x[!is.na(x)])#
+	pred.values = expand.grid(all.vars)
+testme1
+testme1 = formula(model1); terms.mod1=terms(testme1)
+testme2 = formula(model2); terms.mod2=terms(testme2)
+terms.mod2
+allvars(testme2)
+all.vars(testme2)
+testme1 = formula(model1); terms.mod1=all.vars(testme1)[-1]#
+	testme2 = formula(model2); terms.mod2=all.vars(testme2)[-1]#
+	testme = unique(all.vars(testme1)[-1], all.vars(testme2)[-1])#
+	##### extract variable names#
+	variables = all.vars(formula)#
+    outcome = variables[1]#
+    predictors = variables[-1]#
+    ##### make sure they're putting the same variables from formula in terms#
+	if (!(all(predictors %in% testme))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%terms.mod1)], collapse=",")))#
+	}#
+	##### make sure they're using the right dataset#
+	if (!(all(predictors %in% names(data)))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))#
+	}	#
+	#### create random column just to make the applies work (yeah, it's hacky, but it works)#
+    data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)#
+    predictors = c(predictors, "reject", "reject2")#
+#
+    #### get variable types#
+    numb = names(which(unlist(lapply(data[,predictors], is.numeric))))#
+    cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
+#
+    ##### make "quadriture" points for quant variables#
+    var.mins = apply(data[, numb], 2, min, na.rm=T)#
+    var.max = apply(data[, numb], 2, max, na.rm=T)    #
+    min.max = data.frame(var.mins, var.max); min.max$size = c(50, rep(10, nrow(min.max)-1))#
+	f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}#
+	min.max = as.list(apply(min.max, 1, f))#
+#
+    #### get unique values for categorical vars#
+    if (length(cat)==1){#
+    	un.vars = lapply(data[cat], unique)    	#
+    } else {#
+		un.vars =lapply(data[,cat], unique); names(un.vars) = cat#
+	}#
+    #### combine into one dataset#
+    all.vars = c(min.max, un.vars)    #
+    #### get rid of extra variables#
+    tot.vars = length(predictors)#
+    rejects = grep("reject", names(all.vars))#
+	all.vars = all.vars[-rejects]#
+	all.vars = lapply(all.vars, function(x) x[!is.na(x)])#
+	pred.values = expand.grid(all.vars)#
+	##### look for interactions and remove them#
+	if (length(grep(":", terms.mod1))>0){#
+		terms.mod1 = terms.mod1[-grep(":", terms.mod1)]#
+		model1.type = ifelse(model1.type=="lm", "interaction", model1.type)#
+	}#
+	if (length(grep(":", terms.mod2))>0){#
+		terms.mod2 = terms.mod2[-grep(":", terms.mod1)]#
+		model2.type = ifelse(model2.type=="lm", "interaction", model2.type)#
+	}	#
+	##### look for polynomials and remove them#
+	if (length(grep("^2", terms.mod1, fixed=T, value=T))>0 ){#
+		terms.mod1 = terms.mod1[-grep("^2", terms.mod1, fixed=T)]#
+		model1.type = ifelse(model1.type=="lm", "polynomial", model1.type)#
+	}#
+	if (length(grep("^2", terms.mod2, fixed=T, value=T))>0 & model1.type=="lm"){#
+		terms.mod2 = terms.mod2[-grep("^2", terms.mod1, fixed=T)]#
+		model2.type = ifelse(model2.type=="lm", "polynomial", model2.type)#
+	}
+#### if the outcome is an ordered factor...#
+	#### if it's not in model 1:#
+	#### input the mean (if numeric) or a value (if categorical)#
+	if (length(which(!(terms.mod1 %in% predictors)))>0){#
+		not.in.there = terms.mod1[which(!(terms.mod1 %in% predictors))]#
+		for (i in 1:length(not.in.there)){#
+			if (is.numeric(data[,not.in.there[i]])){#
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))}#
+				pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)#
+			} else {#
+				val = unique(data[,not.in.there[i]])[1]#
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))}#
+				pred.values[,not.in.there[i]] = val#
+			}#
+		}#
+	}#
+	#### generate predictions#
+	if (model1.type == "lmerMod" | model1.type == "glmerMod"){#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		#
+	} else if (model1.type == "polr"){#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="class", re.form=NA), model= model1.type)		#
+	} else if (model1.type == "lm" | model1.type == "polynomial" | model1.type=="interaction"){#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval=int), model=model1.type)#
+	} else {	#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", interval=int), model= model1.type)		#
+#
+	}#
+	#### generate separate predictions for random effects#
+	if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")	#
+		old.mod=0	#
+	} else if ((model2.type == "lmerMod" | model2.type == "glmerMod") & !re){#
+		pred.mod2 = pred.mod1#
+	} else if (model2.type == "polr"){#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="class", re.form=NA), model= model2.type)		#
+	} else if (model2.type == "lm" | model2.type == "polynomial" | model2.type=="interaction"){#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, interval="confidence")[,1], model=model2.type)#
+	} else {#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= model2.type)		#
+	}#
+	#### convert polyr back to numeric (if applicable)#
+	if (model1.type == "polr" | model2.type == "polr"){#
+		data[,outcome] = as.numeric(as.character(data[,outcome]))		#
+		pred.mod1$prediction = as.numeric(as.character(pred.mod1$prediction))#
+		pred.mod2$prediction = as.numeric(as.character(pred.mod2$prediction))		#
+	}#
+#
+		#### if they have the same name, just call them model1 and model2#
+	if (pred.mod1$model[1]==pred.mod2$model[1]){#
+		pred.mod1$model = paste0(model1.type, " - Model 1", collapse="")#
+		pred.mod2$model = paste0(model1.type, " - Model 2", collapse="")		#
+	}#
+	#### report one or two coefficients, depending on if they supplied it#
+	if (old.mod==0){#
+		prediction.model = rbind(pred.mod1, pred.mod2)#
+		prediction.model = cbind(pred.values, prediction.model)#
+	} else {#
+		prediction.model = pred.mod1#
+		prediction.model = cbind(pred.values, prediction.model)#
+	}#
+	#### eliminate those predictions that are higher than the range of the data#
+	if (!is.factor(data[,outcome])){#
+	min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)#
+		if (length(which(prediction.model$prediction>max.dat)>0 | length(which(prediction.model$prediction<min.dat)))){#
+			prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]#
+		}#
+	} else {#
+		#### if they supply a factor, convert it to a number!!!!!#
+		prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)#
+	}#
+	#### create flexplot#
+	if (return.preds){#
+		prediction.model#
+	} else {#
+		flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...)#
+	}
+##' Compare the fits of two models#
+##'#
+##' Compare the fits of two models#
+##'	#
+##' Compare the fits of two models#
+##' @param formula A formula that can be used in flexplot. The variables inside must not include variables outside the fitted models. #
+##' @param data The dataset containing the variables in formula#
+##' @param model1 The fitted model object (e.g., lm) containing the variables specified in the formula#
+##' @param model2 The second fitted model object (e.g., lm) containing the variables specified in the formula#
+##' @param return.preds Should the function return the predictions instead of a graphic? Defaults to F#
+##' @param silent Should R tell you how it's handling the variables in the model that are not in the formula? Defaults to F. #
+##' @param report.se Should standard errors be reported alongside the estimates? Defaults to F. #
+##' @param re Should random effects be predicted? Only applies to mixed models. Defaults to F. #
+##' @param ... Other parameters passed to flexplot#
+##' @author Dustin Fife#
+##' @return Either a graphic or the predictions for the specified model(s)#
+##' @export#
+##' @examples#
+##' #not yet#
+compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F,...){#
+#
+	#### if mod2 is null..#
+	if (is.null(model2)){#
+		model2 = model1#
+		old.mod = 1#
+	} else {#
+		old.mod = 0#
+	}#
+#
+	#### get type of model#
+	model1.type = class(model1)[1]#
+	model2.type = class(model2)[1]	#
+	#### extract the terms from each MODEL#
+	testme1 = formula(model1); terms.mod1=all.vars(testme1)[-1]#
+	testme2 = formula(model2); terms.mod2=all.vars(testme2)[-1]#
+	testme = unique(all.vars(testme1)[-1], all.vars(testme2)[-1])#
+	##### extract variable names#
+	variables = all.vars(formula)#
+    outcome = variables[1]#
+    predictors = variables[-1]#
+    ##### make sure they're putting the same variables from formula in terms#
+	if (!(all(predictors %in% testme))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%terms.mod1)], collapse=",")))#
+	}#
+	##### make sure they're using the right dataset#
+	if (!(all(predictors %in% names(data)))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))#
+	}	#
+	#### create random column just to make the applies work (yeah, it's hacky, but it works)#
+    data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)#
+    predictors = c(predictors, "reject", "reject2")#
+#
+    #### get variable types#
+    numb = names(which(unlist(lapply(data[,predictors], is.numeric))))#
+    cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
+#
+    ##### make "quadriture" points for quant variables#
+    var.mins = apply(data[, numb], 2, min, na.rm=T)#
+    var.max = apply(data[, numb], 2, max, na.rm=T)    #
+    min.max = data.frame(var.mins, var.max); min.max$size = c(50, rep(10, nrow(min.max)-1))#
+	f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}#
+	min.max = as.list(apply(min.max, 1, f))#
+#
+    #### get unique values for categorical vars#
+    if (length(cat)==1){#
+    	un.vars = lapply(data[cat], unique)    	#
+    } else {#
+		un.vars =lapply(data[,cat], unique); names(un.vars) = cat#
+	}#
+    #### combine into one dataset#
+    all.vars = c(min.max, un.vars)    #
+    #### get rid of extra variables#
+    tot.vars = length(predictors)#
+    rejects = grep("reject", names(all.vars))#
+	all.vars = all.vars[-rejects]#
+	all.vars = lapply(all.vars, function(x) x[!is.na(x)])#
+	pred.values = expand.grid(all.vars)#
+	##### look for interactions and remove them#
+	if (length(grep(":", terms.mod1))>0){#
+		terms.mod1 = terms.mod1[-grep(":", terms.mod1)]#
+		model1.type = ifelse(model1.type=="lm", "interaction", model1.type)#
+	}#
+	if (length(grep(":", terms.mod2))>0){#
+		terms.mod2 = terms.mod2[-grep(":", terms.mod1)]#
+		model2.type = ifelse(model2.type=="lm", "interaction", model2.type)#
+	}	#
+	##### look for polynomials and remove them#
+	if (length(grep("^2", terms.mod1, fixed=T, value=T))>0 ){#
+		terms.mod1 = terms.mod1[-grep("^2", terms.mod1, fixed=T)]#
+		model1.type = ifelse(model1.type=="lm", "polynomial", model1.type)#
+	}#
+	if (length(grep("^2", terms.mod2, fixed=T, value=T))>0 & model1.type=="lm"){#
+		terms.mod2 = terms.mod2[-grep("^2", terms.mod1, fixed=T)]#
+		model2.type = ifelse(model2.type=="lm", "polynomial", model2.type)#
+	}	#
+	#### if the outcome is an ordered factor...#
+	#### if it's not in model 1:#
+	#### input the mean (if numeric) or a value (if categorical)#
+	if (length(which(!(terms.mod1 %in% predictors)))>0){#
+		not.in.there = terms.mod1[which(!(terms.mod1 %in% predictors))]#
+		for (i in 1:length(not.in.there)){#
+			if (is.numeric(data[,not.in.there[i]])){#
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))}#
+				pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)#
+			} else {#
+				val = unique(data[,not.in.there[i]])[1]#
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))}#
+				pred.values[,not.in.there[i]] = val#
+			}#
+		}#
+	}#
+	#### generate predictions#
+	if (model1.type == "lmerMod" | model1.type == "glmerMod"){#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		#
+	} else if (model1.type == "polr"){#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="class", re.form=NA), model= model1.type)		#
+	} else if (model1.type == "lm" | model1.type == "polynomial" | model1.type=="interaction"){#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval=int), model=model1.type)#
+	} else {	#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", interval=int), model= model1.type)		#
+#
+	}#
+	#### generate separate predictions for random effects#
+	if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")	#
+		old.mod=0	#
+	} else if ((model2.type == "lmerMod" | model2.type == "glmerMod") & !re){#
+		pred.mod2 = pred.mod1#
+	} else if (model2.type == "polr"){#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="class", re.form=NA), model= model2.type)		#
+	} else if (model2.type == "lm" | model2.type == "polynomial" | model2.type=="interaction"){#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, interval="confidence")[,1], model=model2.type)#
+	} else {#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= model2.type)		#
+	}#
+	#### convert polyr back to numeric (if applicable)#
+	if (model1.type == "polr" | model2.type == "polr"){#
+		data[,outcome] = as.numeric(as.character(data[,outcome]))		#
+		pred.mod1$prediction = as.numeric(as.character(pred.mod1$prediction))#
+		pred.mod2$prediction = as.numeric(as.character(pred.mod2$prediction))		#
+	}#
+#
+		#### if they have the same name, just call them model1 and model2#
+	if (pred.mod1$model[1]==pred.mod2$model[1]){#
+		pred.mod1$model = paste0(model1.type, " - Model 1", collapse="")#
+		pred.mod2$model = paste0(model1.type, " - Model 2", collapse="")		#
+	}#
+	#### report one or two coefficients, depending on if they supplied it#
+	if (old.mod==0){#
+		prediction.model = rbind(pred.mod1, pred.mod2)#
+		prediction.model = cbind(pred.values, prediction.model)#
+	} else {#
+		prediction.model = pred.mod1#
+		prediction.model = cbind(pred.values, prediction.model)#
+	}#
+	#### eliminate those predictions that are higher than the range of the data#
+	if (!is.factor(data[,outcome])){#
+	min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)#
+		if (length(which(prediction.model$prediction>max.dat)>0 | length(which(prediction.model$prediction<min.dat)))){#
+			prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]#
+		}#
+	} else {#
+		#### if they supply a factor, convert it to a number!!!!!#
+		prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)#
+	}#
+	#### create flexplot#
+	if (return.preds){#
+		prediction.model#
+	} else {#
+		flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...)#
+	}	#
+#
+}
+compare.fits(weight.loss~rewards, data=d, model1=mod)
+compare.fits(formula=weight.loss~rewards, data=d, model1=mod, model2=mod2)
+devtools::install("research/RPackages/flexplot")
+mod = lm(weight.loss~motivation, data=d)#
+compare.fits(weight.loss~motivation, data=d, model1=mod)#
+#
+	### compare interaction and non-interaction models#
+d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)#
+mod = lm(wl ~motivation+rewards, data=d)#
+mod2 = lm(wl ~motivation*rewards, data=d)#
+compare.fits(wl~motivation|rewards, data=d, model1=mod, model2=mod2)#
+#
+	### compare interaction and non-interaction models#
+d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)#
+mod = lm(wl ~gender+rewards, data=d)#
+mod2 = lm(wl ~gender*rewards, data=d)#
+compare.fits(wl~gender|rewards, data=d, model1=mod, model2=mod2)#
+#
+		##### compare predictions with random forest#
+require(randomForest)#
+model1 = randomForest(wl~motivation + gender + rewards, data=d)#
+model2 = lm(wl~motivation * gender * rewards, data=d)		### use the same predictors in both models#
+compare.fits(wl~motivation | gender + rewards, data=d, model1, model2)
+##### predictions with generalize lidnear model#
+d$weight.loss = d$weight.loss + 1 + abs(min(d$weight.loss, na.rm=T))#
+mod1 = glm(weight.loss~motivation + health + gender, data=d, family="Gamma")#
+mod2 = lm(weight.loss~motivation + health + gender, data=d)#
+compare.fits(weight.loss~motivation | health + gender, data=d, mod1, mod2)#
+compare.fits(weight.loss ~ motivation | health, data=d, model1=mod1, ghost.line="blue")
+compare.fits(weight.loss ~ motivation | health, data=d, model1=mod1, model2=mod2, ghost.line="red")#
+mod1 = lm(weight.loss~therapy.type * motivation * health * muscle.gain * I(motivation^2), data=d)#
+mod2 = lm(weight.loss~therapy.type + motivation + health + muscle.gain + I(motivation^2), data=d)
+compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2)
+compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2, return.preds=T)
+p = compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2, return.preds=T)
+table(p)
+head(p)
+table(p$muscle.gain)
+length(table(p$muscle.gain))
+length(table(p$motivation))
+length(table(p$health))
+compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2, return.preds=T)
+compare.fits(weight.loss ~muscle.gain +therapy.type | motivation + health, data=d, model1=mod1)
+compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2)
+compare.fits(weight.loss ~muscle.gain +therapy.type | motivation + health, data=d, model1=mod1)
+require(fifer)#
+data(authors); d= authors[1:1000,]#
+mod1 = lm(Daily.Units.Sold~Sale.Price*Publisher, data=d)#
+mod2 = glm(Daily.Units.Sold~Sale.Price*Publisher, data=d, family=quasipoisson(link="log"))#
+flexplot::compare.fits(Daily.Units.Sold~Sale.Price|Publisher, data=d, mod1, mod2)
+(Daily.Units.Sold~Sale.Price|Publisher, data=d, mod1, mod2)
+compare.fits(Daily.Units.Sold~Sale.Price|Publisher, data=d, mod1, mod2)
+flexplot::third.eye(weight.loss~muscle.gain|motivation + health, data=d, which.perms=1:2, se=F, ghost.line="gray", method="lm")
+data(exercise_data)
+d = exercise_data
+missing.ld = which(d$motivation<quantile(d$motivation, .25))
+notmissing = which(!(1:nrow(d) %in% missing.ld))
+d$weight.change.missing = d$weight.change
+d$weight.change.missing[missing.ld] = NA
+mod = lm(weight.change.missing~motivation, data=d, model=T)
+model = mo
+model = mod
+predictors=NULL
+imputations=20
+silent=F
+#### set up data to perform the imputations#
+		if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}#
+#
+		#### figure out missing data pattern#
+		pattern = md.pattern(data)#
+#
+		#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}#
+		#### remove dataset in the call#
+		model$call$data=NULL#
+#
+		#### pool estimates#
+		fit = with(data=imputed.data,expr= eval(model$call))
+#### set up data to perform the imputations#
+		if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}
+data=d
+#### set up data to perform the imputations#
+		if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}#
+#
+		#### figure out missing data pattern#
+		pattern = md.pattern(data)#
+#
+		#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}
+model$call$data=NULL
+fit = with(data=imputed.data,expr= eval(model$call))
+if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}#
+#
+		#### figure out missing data pattern#
+		pattern = md.pattern(data)
+#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}
+model$call$data=NULL
+fit = with(data=imputed.data,expr= eval(model$call))
+model$call
+head(data)
+mod = lm(weight.change.missing~motivation, data=d)
+d = exercise_data
+missing.ld = which(d$motivation<quantile(d$motivation, .25))
+notmissing = which(!(1:nrow(d) %in% missing.ld))
+d$weight.change.missing = d$weight.change
+d$weight.change.missing[missing.ld] = NA
+d = exercise_data
+missing.ld = which(d$motivation<quantile(d$motivation, .25))
+notmissing = which(!(1:nrow(d) %in% missing.ld))
+d$weight.change.missing = d$weight.change
+d$weight.change.missing[missing.ld]
+d$weight.change.missing
+d$weight.change.missing = d$weight.loss
+d$weight.loss.missing = d$weight.loss
+d$weight.loss.missing[missing.ld] = NA
+mod = lm(weight.change.missing~motivation, data=d)
+predictors = c("muscle.gain.missing", "weight.change")
+#### set up data to perform the imputations#
+		if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}#
+		#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}
+#### remove dataset in the call#
+		model$call$data=NULL#
+#
+		#### pool estimates#
+		fit = with(data=imputed.data,expr= eval(model$call))#
+		head(data)
+imputed.data
+model = lm(weight.change.missing~motivation, data=d)
+fit = with(data=imputed.data,expr= eval(model$call))
+fit
+combined = pool(fit)
+combined = mice::pool(fit)
+combined
+mod.combined=pool(fit$analyses)
+mod.combined=mice::pool(fit$analyses)
+mod.combined
+(summary(combined))
+predict(combined)
+predict(fit)
+summary(model)
+summary(model)$coefficients
+combined
+summary(combined)
+summary(model)$coefficients = summary(combined)
+coef(summary(model))
+coef(summary(model)) = summary(combined)
+model$coefficients
+names(model)
+print.lm
+?print
+lm.coef
+summary(model)$coefficients
+summary(model)$coefficients = 1
+lm
+lm.print
+stats::print.lm
+stats:::print.lm
+stats:::summary.lm
+stats:::predict.lm
+combined$coefficients
+combined
+summary(combined)$coefficients
+summary(combined)
+model$coefficients
+summary(combined)[,1]
+model
+summary(model)$coefficients
+stats:::summary.lm
+model
+model = lm(weight.change.missing~motivation, data=d)
+model
+fit = with(data=imputed.data,expr= eval(model$call))
+combined = mice::pool(fit)
+combined
+mod.combined=mice::pool(fit$analyses)
+mod.combined
+pooled_mod = fit$analyses
+pooled_mod = fit$analyses[[1]]
+pooled_mod
+#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}#
+		#### remove dataset in the call#
+		model$call$data=NULL#
+#
+		#### pool estimates#
+		fit = with(data=imputed.data,expr= eval(model$call))#
+		pooled_mod = fit$analyses[[1]] #
+		combined = mice::pool(fit)#
+		pooled_lm$coefficients = summary(combined)$estimate	### from https://stackoverflow.com/questions/52713733/how-to-use-predict-function-with-my-pooled-results-from-mice
+d = exercise_data
+missing.ld = which(d$motivation<quantile(d$motivation, .25))
+notmissing = which(!(1:nrow(d) %in% missing.ld))
+d$weight.loss.missing = d$weight.loss
+d$weight.loss.missing[missing.ld] = NA
+model = lm(weight.change.missing~motivation, data=d)
+model = lm(weight.loss.missing~motivation, data=d)
+#### set up data to perform the imputations#
+		if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}#
+		#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}#
+		#### remove dataset in the call#
+		model$call$data=NULL#
+#
+		#### pool estimates#
+		fit = with(data=imputed.data,expr= eval(model$call))#
+		pooled_mod = fit$analyses[[1]] #
+		combined = mice::pool(fit)#
+		pooled_lm$coefficients = summary(combined)$estimate	### from https://stackoverflow.com/questions/52713733/how-to-use-predict-function-with-my-pooled-results-from-mice
+data=d
+#### set up data to perform the imputations#
+		if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}#
+		#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}#
+		#### remove dataset in the call#
+		model$call$data=NULL#
+#
+		#### pool estimates#
+		fit = with(data=imputed.data,expr= eval(model$call))#
+		pooled_mod = fit$analyses[[1]] #
+		combined = mice::pool(fit)#
+		pooled_lm$coefficients = summary(combined)$estimate	### from https://stackoverflow.com/questions/52713733/how-to-use-predict-function-with-my-pooled-results-from-mice
+pooled_mod$coefficients = summary(combined)$estimate	### from https://stackoverflow.com/questions/52713733/how-to-use-predict-function-with-my-pooled-results-from-mice
+clear()#
+devtools::document("research/RPackages/fifer")#
+devtools::install("research/RPackages/fifer")
+data(exercise_data)
+head(exercise_data)
+mod = lm(muscle.gain.missing~motivation+rewards, data=exercise_data)
+mod.imp = impute.me(mod)
+mod.imp = impute.me(mod, data=exercise_data, return.mod=T)
+mod.imp
+predict(mod.imp)
+##' Multiple Imputation on a Model#
+##'#
+##' Multiple Imputation on a Model#
+##'	#
+##' This is a wrapper function for both the mice function in the mice package, as well as for basic models in R (e.g., lm). As input,#
+##' it takes the model the user wishes to estimate using advanced missing data strategies, as well as a list of variables they wish to use#
+##' to impute the missing values. The function takes the raw data and performs MI using mice, then re-analyzes the dataset and outputs the#
+##' multiply imputed parameter estimates. #
+##' @param model An R-friendly model. Currently, it only allows lm objects, but will eventually allow other objects (e.g., glm). #
+##' @param data The dataset used for analysis. This dataset should contain predictors used to impute the missing values#
+##' @param predictors A list of predictors (as a character vector) that identify which variables to keep (or drop; see below argument). #
+##' @param keep Logical. Should the list of predictors be kept or dropped? Defaults to keep. #
+##' @param imputations The number of imputations to be performed. Defaults to 20. #
+##' @return.mod Should the model be returned?#
+##' @import mice#
+##' @author Dustin Fife#
+##' @export#
+##' @examples#
+##' data(exercise_data)#
+##' d = exercise_data#
+##' #
+##' 		##### create missing data in motivation#
+##' missing.ld = which(d$motivation<quantile(d$motivation, .25))#
+##' notmissing = which(!(1:nrow(d) %in% missing.ld))#
+##' d$weight.loss.missing = d$weight.loss#
+##' d$weight.loss.missing[missing.ld] = NA#
+##' #
+##' 		#### create model with missing data#
+##' model = lm(weight.loss.missing~motivation, data=d)#
+##' predictors = c("muscle.gain.missing", "weight.loss")#
+##' impute.me(mod, data=d, predictors=predictors, keep=F, imputations=5)#
+impute.me = function(model, data, predictors=NULL, keep=T, imputations=20, silent=F, return.mod=F){#
+#
+		#### set up data to perform the imputations#
+		if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}#
+		#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}#
+		#### remove dataset in the call#
+		model$call$data=NULL#
+#
+		#### pool estimates#
+		fit = with(data=imputed.data,expr= eval(model$call))#
+		pooled_mod = unlist(fit$analyses[[1]] )#
+		combined = mice::pool(fit)#
+		pooled_mod$coefficients = summary(combined)$estimate	### from https://stackoverflow.com/questions/52713733/how-to-use-predict-function-with-my-pooled-results-from-mice#
+#
+		if (!return.mod){#
+			estimates = (summary(combined))#
+		} else {#
+			list(pooled_mod)#
+		}#
+#
+}#
+#
+##' Compute Bayes Factor for a Imputed Model#
+##'#
+##' Compute Bayes Factor for a Imputed Model#
+##'	#
+##' blah blah blah#
+##' @param model1 The full model#
+##' @param model2 The reduced model#
+##' @param data The dataset used for analysis. This dataset should contain predictors used to impute the missing values#
+##' @param predictors A list of predictors (as a character vector) that identify which variables to keep (or drop; see below argument). #
+##' @param keep Logical. Should the list of predictors be kept or dropped? Defaults to keep. #
+##' @param imputations The number of imputations to be performed. Defaults to 20. #
+##' @return.mod Should the model be returned?#
+##' @import mice#
+##' @author Dustin Fife#
+##' @export#
+impute.model.comparison = function(model1, model2, data,predictors=NULL, keep=T, imputations=20, silent=F, invert=F){#
+	impute.me.full = impute.me(model1, data=data, predictors=predictors, keep=keep, imputations=imputations, silent=F, return.mod=T)#
+	impute.me.reduced = impute.me(model2, data=data, predictors=predictors, keep=keep, imputations=imputations, silent=F, return.mod=T)	#
+	compared = pool.compare(impute.me.full$models, impute.me.reduced$models, method="likelihood")#
+	bic.full = log(nrow(data))*length(compared$qbar1)-compared$deviances$dev1.M[1]#
+	bic.reduced = log(nrow(data))*length(compared$qbar0)-compared$deviances$dev0.M[1]#
+	bf = exp((bic.full-bic.reduced)/2)#
+	### do same for r squared#
+	rsq.full = pool.r.squared(impute.me.full$models)#
+	rsq.reduced = pool.r.squared(impute.me.reduced$models)	#
+	if (invert){#
+		1/bf#
+	} else {#
+		bf#
+	}#
+	### create a table#
+	results.table = data.frame(model=c("Full", "Reduced"), rsq = NA, BIC=NA, BF = NA, p=NA)#
+	results.table$rsq = c(rsq.full[1], rsq.reduced[1])#
+	results.table$BIC = c(bic.full, bic.reduced)#
+	results.table$BF[1] = bf#
+	results.table$p[1] = compared$pvalue#
+#
+	return(results.table)	#
+}
+mod.imp = impute.me(mod, data=exercise_data, return.mod=T)
+predict(mod.imp)
+mod.imp
+class(mod)
+##' Multiple Imputation on a Model#
+##'#
+##' Multiple Imputation on a Model#
+##'	#
+##' This is a wrapper function for both the mice function in the mice package, as well as for basic models in R (e.g., lm). As input,#
+##' it takes the model the user wishes to estimate using advanced missing data strategies, as well as a list of variables they wish to use#
+##' to impute the missing values. The function takes the raw data and performs MI using mice, then re-analyzes the dataset and outputs the#
+##' multiply imputed parameter estimates. #
+##' @param model An R-friendly model. Currently, it only allows lm objects, but will eventually allow other objects (e.g., glm). #
+##' @param data The dataset used for analysis. This dataset should contain predictors used to impute the missing values#
+##' @param predictors A list of predictors (as a character vector) that identify which variables to keep (or drop; see below argument). #
+##' @param keep Logical. Should the list of predictors be kept or dropped? Defaults to keep. #
+##' @param imputations The number of imputations to be performed. Defaults to 20. #
+##' @return.mod Should the model be returned?#
+##' @import mice#
+##' @author Dustin Fife#
+##' @export#
+##' @examples#
+##' data(exercise_data)#
+##' d = exercise_data#
+##' #
+##' 		##### create missing data in motivation#
+##' missing.ld = which(d$motivation<quantile(d$motivation, .25))#
+##' notmissing = which(!(1:nrow(d) %in% missing.ld))#
+##' d$weight.loss.missing = d$weight.loss#
+##' d$weight.loss.missing[missing.ld] = NA#
+##' #
+##' 		#### create model with missing data#
+##' model = lm(weight.loss.missing~motivation, data=d)#
+##' predictors = c("muscle.gain.missing", "weight.loss")#
+##' impute.me(mod, data=d, predictors=predictors, keep=F, imputations=5)#
+impute.me = function(model, data, predictors=NULL, keep=T, imputations=20, silent=F, return.mod=F){#
+#
+		#### set up data to perform the imputations#
+		if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}#
+		#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}#
+		#### remove dataset in the call#
+		model$call$data=NULL#
+#
+		#### pool estimates#
+		fit = with(data=imputed.data,expr= eval(model$call))#
+		pooled_mod = fit$analyses[[1]] #
+		combined = mice::pool(fit)#
+		pooled_mod$coefficients = summary(combined)$estimate	### from https://stackoverflow.com/questions/52713733/how-to-use-predict-function-with-my-pooled-results-from-mice#
+#
+		if (!return.mod){#
+			estimates = (summary(combined))#
+		} else {#
+			class(pooled_mod) = "lm"#
+			list(pooled_mod)#
+		}#
+#
+}#
+#
+##' Compute Bayes Factor for a Imputed Model#
+##'#
+##' Compute Bayes Factor for a Imputed Model#
+##'	#
+##' blah blah blah#
+##' @param model1 The full model#
+##' @param model2 The reduced model#
+##' @param data The dataset used for analysis. This dataset should contain predictors used to impute the missing values#
+##' @param predictors A list of predictors (as a character vector) that identify which variables to keep (or drop; see below argument). #
+##' @param keep Logical. Should the list of predictors be kept or dropped? Defaults to keep. #
+##' @param imputations The number of imputations to be performed. Defaults to 20. #
+##' @return.mod Should the model be returned?#
+##' @import mice#
+##' @author Dustin Fife#
+##' @export#
+impute.model.comparison = function(model1, model2, data,predictors=NULL, keep=T, imputations=20, silent=F, invert=F){#
+	impute.me.full = impute.me(model1, data=data, predictors=predictors, keep=keep, imputations=imputations, silent=F, return.mod=T)#
+	impute.me.reduced = impute.me(model2, data=data, predictors=predictors, keep=keep, imputations=imputations, silent=F, return.mod=T)	#
+	compared = pool.compare(impute.me.full$models, impute.me.reduced$models, method="likelihood")#
+	bic.full = log(nrow(data))*length(compared$qbar1)-compared$deviances$dev1.M[1]#
+	bic.reduced = log(nrow(data))*length(compared$qbar0)-compared$deviances$dev0.M[1]#
+	bf = exp((bic.full-bic.reduced)/2)#
+	### do same for r squared#
+	rsq.full = pool.r.squared(impute.me.full$models)#
+	rsq.reduced = pool.r.squared(impute.me.reduced$models)	#
+	if (invert){#
+		1/bf#
+	} else {#
+		bf#
+	}#
+	### create a table#
+	results.table = data.frame(model=c("Full", "Reduced"), rsq = NA, BIC=NA, BF = NA, p=NA)#
+	results.table$rsq = c(rsq.full[1], rsq.reduced[1])#
+	results.table$BIC = c(bic.full, bic.reduced)#
+	results.table$BF[1] = bf#
+	results.table$p[1] = compared$pvalue#
+#
+	return(results.table)	#
+}
+##' Multiple Imputation on a Model#
+##'#
+##' Multiple Imputation on a Model#
+##'	#
+##' This is a wrapper function for both the mice function in the mice package, as well as for basic models in R (e.g., lm). As input,#
+##' it takes the model the user wishes to estimate using advanced missing data strategies, as well as a list of variables they wish to use#
+##' to impute the missing values. The function takes the raw data and performs MI using mice, then re-analyzes the dataset and outputs the#
+##' multiply imputed parameter estimates. #
+##' @param model An R-friendly model. Currently, it only allows lm objects, but will eventually allow other objects (e.g., glm). #
+##' @param data The dataset used for analysis. This dataset should contain predictors used to impute the missing values#
+##' @param predictors A list of predictors (as a character vector) that identify which variables to keep (or drop; see below argument). #
+##' @param keep Logical. Should the list of predictors be kept or dropped? Defaults to keep. #
+##' @param imputations The number of imputations to be performed. Defaults to 20. #
+##' @return.mod Should the model be returned?#
+##' @import mice#
+##' @author Dustin Fife#
+##' @export#
+##' @examples#
+##' data(exercise_data)#
+##' d = exercise_data#
+##' #
+##' 		##### create missing data in motivation#
+##' missing.ld = which(d$motivation<quantile(d$motivation, .25))#
+##' notmissing = which(!(1:nrow(d) %in% missing.ld))#
+##' d$weight.loss.missing = d$weight.loss#
+##' d$weight.loss.missing[missing.ld] = NA#
+##' #
+##' 		#### create model with missing data#
+##' model = lm(weight.loss.missing~motivation, data=d)#
+##' predictors = c("muscle.gain.missing", "weight.loss")#
+##' impute.me(mod, data=d, predictors=predictors, keep=F, imputations=5)#
+impute.me = function(model, data, predictors=NULL, keep=T, imputations=20, silent=F, return.mod=F){#
+#
+		#### set up data to perform the imputations#
+		if (!is.null(predictors)){#
+			data = make.null(predictors, data=data, keep=keep)#
+		}#
+		#### do multiple imputations#
+		if (!silent){#
+			cat("Performing Imputations. \n\n")#
+			imputed.data= mice::mice(data=data, m=imputations)#
+		} else {#
+			imputed.data= mice::mice(data=data, m=imputations, quietly=T)#
+		}#
+		#### remove dataset in the call#
+		model$call$data=NULL#
+#
+		#### pool estimates#
+		fit = with(data=imputed.data,expr= eval(model$call))#
+		pooled_mod = fit$analyses[[1]] #
+		combined = mice::pool(fit)#
+		pooled_mod$coefficients = summary(combined)$estimate	### from https://stackoverflow.com/questions/52713733/how-to-use-predict-function-with-my-pooled-results-from-mice#
+#
+		if (!return.mod){#
+			estimates = (summary(combined))#
+		} else {#
+			#class(pooled_mod) = "lm"#
+			return(pooled_mod)#
+		}#
+#
+}#
+#
+##' Compute Bayes Factor for a Imputed Model#
+##'#
+##' Compute Bayes Factor for a Imputed Model#
+##'	#
+##' blah blah blah#
+##' @param model1 The full model#
+##' @param model2 The reduced model#
+##' @param data The dataset used for analysis. This dataset should contain predictors used to impute the missing values#
+##' @param predictors A list of predictors (as a character vector) that identify which variables to keep (or drop; see below argument). #
+##' @param keep Logical. Should the list of predictors be kept or dropped? Defaults to keep. #
+##' @param imputations The number of imputations to be performed. Defaults to 20. #
+##' @return.mod Should the model be returned?#
+##' @import mice#
+##' @author Dustin Fife#
+##' @export#
+impute.model.comparison = function(model1, model2, data,predictors=NULL, keep=T, imputations=20, silent=F, invert=F){#
+	impute.me.full = impute.me(model1, data=data, predictors=predictors, keep=keep, imputations=imputations, silent=F, return.mod=T)#
+	impute.me.reduced = impute.me(model2, data=data, predictors=predictors, keep=keep, imputations=imputations, silent=F, return.mod=T)	#
+	compared = pool.compare(impute.me.full$models, impute.me.reduced$models, method="likelihood")#
+	bic.full = log(nrow(data))*length(compared$qbar1)-compared$deviances$dev1.M[1]#
+	bic.reduced = log(nrow(data))*length(compared$qbar0)-compared$deviances$dev0.M[1]#
+	bf = exp((bic.full-bic.reduced)/2)#
+	### do same for r squared#
+	rsq.full = pool.r.squared(impute.me.full$models)#
+	rsq.reduced = pool.r.squared(impute.me.reduced$models)	#
+	if (invert){#
+		1/bf#
+	} else {#
+		bf#
+	}#
+	### create a table#
+	results.table = data.frame(model=c("Full", "Reduced"), rsq = NA, BIC=NA, BF = NA, p=NA)#
+	results.table$rsq = c(rsq.full[1], rsq.reduced[1])#
+	results.table$BIC = c(bic.full, bic.reduced)#
+	results.table$BF[1] = bf#
+	results.table$p[1] = compared$pvalue#
+#
+	return(results.table)	#
+}
+mod.imp = impute.me(mod, data=exercise_data, return.mod=T)#
+predict(mod.imp)
+compare.fits(muscle.gain.missing~motivation+rewards, data=exercise_data, mod, mod.imp)
+flexplot::compare.fits(muscle.gain.missing~motivation+rewards, data=exercise_data, mod, mod.imp)
+rm(list=ls())
+devtools::install("research/RPackages/flexplot")
 setwd("research/RPackages/flexplot")
-devtools::build()
-devtools::check()
-devtools::check()
-data(nsduh)
-names(nsduh)
-names(nsduh)[14]
-names(nsduh)[15]
-names(nsduh)[15] = "whodas.impairment"
-save(ndsuh, "data/nsduh.Rdat")
-save(ndsuh, list="data/nsduh.Rdat")
-save(ndsuh, file="data/nsduh.Rdat")
-save(nsduh, file="data/nsduh.Rdat")
-devtools::check()
-save(nsduh, file="data/nsduh.rda")
-devtools::check()
-save(nsduh, file="data/nsduh.rda")
-devtools::check()
-a=c("gender","health","income","motivation","muscle.gain","muscle.gain.missing","rewards","satisfaction","six.mo.weight","therapy.type","weight.loss")
-a
-b=c("gender","health","income","motivation","muscle.gain","muscle.gain.missing", "rewards","satisfaction","six.mo.weight","therapy.type","weight","loss")
-a %in% b
-a = c("MI","age","alc.freq","alc.rec","attend.rel.serv","cig.freq","cig.rec", "coc.rec","cocain.freq","county","dep.pas.yr","distress","education", "health.rating","her.rec","heroin.freq","income","inpatient","major.dep","military","moves.past5","outpatient","race","rel.inf.dec","sex", "whodas.impairment")#
-#
-b = c("MI","age","alc.freq","alc.rec","attend.rel.serv","cig.freq","cig.rec",#
-"coc.rec","cocain.freq","country","dep.pas.yr","distress","education",#
-"health.rating","her.rec","heroin.freq","income","inpatient","major.dep",#
-"military","moves.past5","outpatient","race","rel.inf.dec","sex",#
-"whodas.impairment")
-a %in% b
-a[!(a %in% b)]
-devtools::check()
-devtools::check()
-devtools::use_build_ignore("build")
-?devtools::use_build_ignore("build")
-devtools::check()
-?build
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()
+jmvtools::install()

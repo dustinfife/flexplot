@@ -14,7 +14,6 @@ estimates	estimates
 estimates.default	estimates.default
 estimates.glm	estimates.glm
 estimates.lm	estimates.lm
-estimates.regression	estimates.regression
 estimates.zeroinfl	estimates.zeroinfl
 exercise_data	exercise_data
 flexplot	flexplot
@@ -31,6 +30,7 @@ modelcomp	modelcomp
 nsduh	nsduh
 plant_growth	plant_growth
 position_jitterd	position_jitterd
+position_jitterddodge	position_jitterddodge
 print.estimates	print.estimates
 relationship_satisfaction	relationship_satisfaction
 secret_agent	secret_agent
@@ -38,7 +38,9 @@ sensitivity.table	sensitivity.table
 standardized.beta	standardized.beta
 subsetString	subsetString
 tablesaw.injury	tablesaw.injury
+third.eye	third.eye
 uni.plot	uni.plot
 visualize	visualize
 visualize.default	visualize.default
 visualize.lm	visualize.lm
+visualize.lmerMod	visualize.lmerMod

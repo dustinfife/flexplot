@@ -1,6 +1,6 @@
 title: Flexplot
 name: flexplota
-jus: '2.0'
+jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
@@ -27,29 +27,67 @@ children:
           - type: VariablesListBox
             name: given
             isTarget: true
+  - type: CollapseBox
+    label: Plot type
+    collapsed: true
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: CheckBox
+        name: resid
+      - type: CheckBox
+        name: thirdeye
+      - type: CheckBox
+        name: diff
+  - type: CollapseBox
+    label: Fit options
+    collapsed: true
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: CheckBox
+        name: se
+      - type: ComboBox
+        name: line
+      - type: CheckBox
+        name: suppr
+      - type: ComboBox
+        name: center
+      - type: ComboBox
+        name: plmethod
+  - type: CollapseBox
+    label: Point options
+    collapsed: true
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: TextBox
+        name: alpha
+        format: number
+      - type: TextBox
+        name: sample
+        format: number
+      - type: TextBox
+        name: jittx
+        format: number
+      - type: TextBox
+        name: jitty
+        format: number
+  - type: CollapseBox
+    label: Paneling options
+    collapsed: true
+    name: panel_box
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: CheckBox
+        name: ghost
+      - type: TextBox
+        name: bins
+        format: number
   - type: LayoutBox
     margin: large
     children:
-      - type: LayoutBox
-        margin: large
-        stretchFactor: 1
-        cell:
-          column: 0
-          row: 0
-        children:
-          - type: Label
-            label: Graphic Options
-            children:
-              - type: CheckBox
-                name: se
-              - type: CheckBox
-                name: ghost
-              - type: CheckBox
-                name: resid
-              - type: ComboBox
-                name: line
-              - type: ComboBox
-                name: center
-              - type: TextBox
-                name: alpha
-                format: number
+      - type: TextBox
+        name: text
+        format: string
