@@ -107,7 +107,10 @@ flexplot = function(formula, data=NULL, related=F,
 		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
 	}
 
-
+	##### make models into a factor if they supply predictions
+	if (!is.null(prediction)){
+		prediction$model = factor(prediction$model)
+	}
 
 	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error
 	#df = data.frame()
@@ -587,7 +590,7 @@ flexplot = function(formula, data=NULL, related=F,
 	if (!is.null(prediction)){
 	
 		### see how many models are being compared
-		num.models = unique(prediction$model)
+		num.models = levels(prediction$model)
 	
 		if (!is.na(axis[2]) & length(num.models)>1){
 			stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z), or choose to display only one model")
@@ -618,7 +621,7 @@ flexplot = function(formula, data=NULL, related=F,
 				
 				
 				#### if they supply more than two models to compare...
-				if (length(unique(prediction$model))>2){
+				if (length(levels(prediction$model))>2){
 					pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)' 									
 				} else {
 					pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				
@@ -631,7 +634,7 @@ flexplot = function(formula, data=NULL, related=F,
 
 		}
 		
-		
+
 		#### remove linetype from the plot
 		
 		
