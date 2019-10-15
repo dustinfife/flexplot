@@ -4,7 +4,7 @@
 \alias{visualize.lmerMod}
 \title{Visualize a fitted lmerMod model}
 \usage{
-\method{visualize}{lmerMod}(object, plot = c("residuals", "all",
+\method{visualize}{lmerMod}(object, plot = c("all", "residuals",
   "model"), formula = NULL, sample = 3, ...)
 }
 \arguments{
