@@ -18,15 +18,15 @@ const updateUI = function(ui, context) {
     if (columnName) {
 
         //request column info - dataType and measureType
-        let promise = context.requestData("column", { columnName: columnName, properties: ["dataType", "measureType"] });
+        let promise = context.requestData("column", { columnName: columnName, properties: ["dataType", "measureType"] })
         promise.then(rData => {
             if (rData.columnFound) {
                 console.log(rData.dataType);
                 console.log(rData.measureType);
 
-                //disable checkbox call 'suppr' when the dataType is not an integer
+                //disable checkbox call 'suppr' and 'line' when the dataType is not an integer
                 ui.suppr.setPropertyValue('enable', rData.dataType === 'integer' );
-                ui.line.setPropertyValue('enable', rData.dataType === 'integer' );
+                //ui.line.setPropertyValue('enable', rData.dataType === 'integer' );
             } 
         });
     }
