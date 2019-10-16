@@ -8,7 +8,10 @@ S3method(print,estimates)
 S3method(visualize,default)
 S3method(visualize,lm)
 S3method(visualize,lmerMod)
+<<<<<<< HEAD
 export(PositionJitterddodge)
+=======
+>>>>>>> master
 export(added.plot)
 export(anchor.predictions)
 export(bf.bic)

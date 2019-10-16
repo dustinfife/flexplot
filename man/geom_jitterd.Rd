@@ -42,28 +42,22 @@ often aesthetics, used to set an aesthetic to a fixed value, like
 to the paired geom/stat.}
 
 \item{width}{Amount of vertical and horizontal jitter. The jitter
- is added in both positive and negative directions, so the total spread
- is twice the value specified here. However, that amount of jittering depends
-     on the density. The location of highest density in the dataset will have 
-  jittering equal to the amount the user specifies, otherwise, jittering is a 
-  fraction of that. 
+is added in both positive and negative directions, so the total spread
+is twice the value specified here.
 
- If omitted, defaults to 40\% of the resolution of the data: this means the
- jitter values will occupy 80\% of the implied bins for the highest density. Categorical data
- is aligned on the integers, so a width or height of 0.5 will spread the
- data so it's not possible to see the distinction between the categories.}
+If omitted, defaults to 40\% of the resolution of the data: this means the
+jitter values will occupy 80\% of the implied bins. Categorical data
+is aligned on the integers, so a width or height of 0.5 will spread the
+data so it's not possible to see the distinction between the categories.}
 
 \item{height}{Amount of vertical and horizontal jitter. The jitter
- is added in both positive and negative directions, so the total spread
- is twice the value specified here. However, that amount of jittering depends
-     on the density. The location of highest density in the dataset will have 
-  jittering equal to the amount the user specifies, otherwise, jittering is a 
-  fraction of that. 
+is added in both positive and negative directions, so the total spread
+is twice the value specified here.
 
- If omitted, defaults to 40\% of the resolution of the data: this means the
- jitter values will occupy 80\% of the implied bins for the highest density. Categorical data
- is aligned on the integers, so a width or height of 0.5 will spread the
- data so it's not possible to see the distinction between the categories.}
+If omitted, defaults to 40\% of the resolution of the data: this means the
+jitter values will occupy 80\% of the implied bins. Categorical data
+is aligned on the integers, so a width or height of 0.5 will spread the
+data so it's not possible to see the distinction between the categories.}
 
 \item{quad.points}{The number of "quadriture points" for the density function. 
 Higher numbers yield a more detailed jittered density plot}
