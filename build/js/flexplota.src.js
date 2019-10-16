@@ -7,14 +7,18 @@ const options = [{"name":"data","type":"Data"},{"name":"out","title":"Dependent 
 
 const view = function() {
     
-    this.handlers = require('./flexplota')
+    
 
     View.extend({
-        jus: "3.0",
+        jus: "2.0",
 
         events: [
 
-	]
+	],
+
+	update: require('./flexplota.events').update,
+
+	remoteDataChanged: require('./flexplota.events').onRemoteDataChanged
 
     }).call(this);
 }
@@ -22,7 +26,7 @@ const view = function() {
 view.layout = ui.extend({
 
     label: "Flexplot",
-    jus: "3.0",
+    jus: "2.0",
     type: "root",
     stage: 0, //0 - release, 1 - development, 2 - proposed
     controls: [
@@ -55,7 +59,10 @@ view.layout = ui.extend({
 							type: DefaultControls.VariablesListBox,
 							typeName: 'VariablesListBox',
 							name: "preds",
-							isTarget: true
+							isTarget: true,
+							events: [
+								{ execute: require('./flexplota.events').onChange_preds }
+							]
 						}
 					]
 				},

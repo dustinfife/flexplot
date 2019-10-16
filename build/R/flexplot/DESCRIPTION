@@ -13,4 +13,4 @@ Imports: jmvcore (>= 0.8.5), R6, cowplot, ggplot2, MASS, tibble, withr,
         dplyr, magrittr, forcats, purrr, knitr, lme4
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
-Built: R 3.3.0; ; 2019-10-12 19:32:17 UTC; unix
+Built: R 3.3.0; ; 2019-10-16 00:55:11 UTC; unix

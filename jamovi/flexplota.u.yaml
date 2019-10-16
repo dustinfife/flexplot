@@ -1,8 +1,11 @@
 title: Flexplot
 name: flexplota
-jus: '3.0'
+jus: '2.0'
 stage: 0
 compilerMode: tame
+events:
+  update: './flexplota.events::update'
+  remoteDataChanged: './flexplota.events::onRemoteDataChanged'
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -21,12 +24,14 @@ children:
           - type: VariablesListBox
             name: preds
             isTarget: true
+            events:
+                change: './flexplota.events::onChange_preds'            
       - type: TargetLayoutBox
         label: Paneled variable
         children:
           - type: VariablesListBox
             name: given
-            isTarget: true
+            isTarget: true        
   - type: CollapseBox
     label: Plot type
     collapsed: true

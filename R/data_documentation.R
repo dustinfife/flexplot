@@ -16,6 +16,19 @@
 #' }
 "alcuse"
 
+#' Job performance dataset
+#'
+#' These simulated data show relationships between various predictors of job performance with missing data
+#'
+#' @format A data frame with 187 rows and 4 variables:
+#' \describe{
+#'   \item{job.performance}{supervisor ratings of job performance}
+#'   \item{iq}{intelligence}
+#'   \item{conscientiousness}{score on a conscientious scale}
+#'   \item{interview}{Rating on an interview scale}
+#' }
+"job_data"
+
 #' Sales of books on Amazon
 #'
 #' A data-scraped dataset of book sales from about 200K authors
