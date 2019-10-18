@@ -91,7 +91,7 @@ flexplot(weight.loss~rewards, data=k, related=T, jitter=c(.05,0))
 # ### CHI SQUARE PLOT (categorical on categorical)
 flexplot(gender~rewards, data=d, jitter=c(.05,0))
 
-options(warn=-1)
+#options(warn=-1)
 # ### INTERACTION PLOT			
 flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)
 flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)

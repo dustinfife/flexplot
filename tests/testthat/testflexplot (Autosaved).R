@@ -11,7 +11,7 @@ histcont = flexplot(income~1, data=d)
 histcat = flexplot(gender~1, data=d)
 vdiffr::expect_doppelganger("histogram", histcont)
 vdiffr::expect_doppelganger("barchart", histcat)
-
+?expect_doppelganger
 
 # ### scatter plots
 require(MASS)
