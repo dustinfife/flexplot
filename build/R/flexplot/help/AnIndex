@@ -22,6 +22,7 @@ geom_jitterd	geom_jitterd
 glinmod	glinmod
 glmbasic	glmbasic
 graduate_income	graduate_income
+job_data	job_data
 make.formula	make.formula
 math	math
 mixed.mod.visual	mixed.mod.visual
@@ -30,7 +31,6 @@ modelcomp	modelcomp
 nsduh	nsduh
 plant_growth	plant_growth
 position_jitterd	position_jitterd
-position_jitterddodge	position_jitterddodge
 print.estimates	print.estimates
 relationship_satisfaction	relationship_satisfaction
 secret_agent	secret_agent

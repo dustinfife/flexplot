@@ -5,7 +5,7 @@
 \title{Compare the fits of two models}
 \usage{
 compare.fits(formula, data, model1, model2 = NULL, return.preds = F,
-  silent = F, report.se = F, re = F, ...)
+  silent = F, report.se = F, re = F, pred.type = "response", ...)
 }
 \arguments{
 \item{formula}{A formula that can be used in flexplot. The variables inside must not include variables outside the fitted models.}
@@ -24,6 +24,8 @@ compare.fits(formula, data, model1, model2 = NULL, return.preds = F,
 
 \item{re}{Should random effects be predicted? Only applies to mixed models. Defaults to F.}
 
+\item{pred.type}{What type of predictions should be outputted? This is mostly for \code{glm} models. Defaults to "response."}
+
 \item{...}{Other parameters passed to flexplot}
 }
 \value{
@@ -34,9 +36,6 @@ Compare the fits of two models
 }
 \details{
 Compare the fits of two models
-}
-\examples{
-#not yet
 }
 \author{
 Dustin Fife

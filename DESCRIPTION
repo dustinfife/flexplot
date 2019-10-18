@@ -9,6 +9,17 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Depends: stats
-Imports: jmvcore (>= 0.8.5), R6, cowplot, ggplot2, MASS, tibble, withr, dplyr, magrittr, forcats, purrr, knitr, lme4
+Imports: jmvcore (>= 0.8.5), 
+  R6, 
+  cowplot, 
+  ggplot2, 
+  MASS, 
+  tibble, 
+  withr, 
+  dplyr, 
+  magrittr, 
+  forcats, 
+  purrr, 
+  knitr, 
+  lme4
 RoxygenNote: 6.1.1
-VignetteBuilder: knitr

@@ -27,6 +27,7 @@ geom_jitterd            Jittered density points
 glinmod                 Perform a general linear model
 glmbasic                General Linear Model
 graduate_income         Graduate income
+job_data                Job performance dataset
 make.formula            Convert strings to a formula
 math                    Math Achievement Dataset
 mixed.mod.visual        Display a graphic of a mixed model
@@ -36,7 +37,6 @@ nsduh                   NSDUH Dataset
 plant_growth            Plant Growth
 position_jitterd        Jitter points based on density to avoid
                         overplotting
-position_jitterddodge   Simultaneously dodge and jitter
 print.estimates         Print estimates Summary
 relationship_satisfaction
                         Relationship satisfaction dataset

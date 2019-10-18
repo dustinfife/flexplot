@@ -75,7 +75,10 @@ view.layout = ui.extend({
 							type: DefaultControls.VariablesListBox,
 							typeName: 'VariablesListBox',
 							name: "given",
-							isTarget: true
+							isTarget: true,
+							events: [
+								{ execute: require('./flexplota.events').onChange_given }
+							]
 						}
 					]
 				}
