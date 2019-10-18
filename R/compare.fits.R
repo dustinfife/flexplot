@@ -17,7 +17,7 @@
 ##' @export
 ##' @examples
 ##' #not yet
-compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F,...){
+compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F, pred.type="response", ...){
 
 	#### if mod2 is null..
 	if (is.null(model2)){
@@ -140,10 +140,9 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval=int), model=model1.type)
 	} else {	
 		int = ifelse(report.se, "confidence", "none")
-		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", interval=int), model= model1.type)		
-
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type=pred.type, interval=int), model= model1.type)		
 	}
-	
+
 	#### generate separate predictions for random effects
 	if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")	
@@ -156,7 +155,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		int = ifelse(report.se, "confidence", "none")
 		pred.mod2 = data.frame(prediction = predict(model2, pred.values, interval="confidence")[,1], model=model2.type)
 	} else {
-		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= model2.type)		
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type= pred.type), model= model2.type)		
 	}
 	
 	#### convert polyr back to numeric (if applicable)
