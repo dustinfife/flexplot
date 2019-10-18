@@ -1,4 +1,3 @@
-rm(list=ls())
 
 ### detach all packages
 #invisible(lapply(paste0('package:', names(sessionInfo()$otherPkgs)), detach, character.only=TRUE, unload=TRUE))
@@ -9,6 +8,13 @@ rm(list=ls())
 #devtools::check("research/RPackages/flexplot")
 require(flexplot)
 
+
+	#### univariate plots
+data(exercise_data); d= exercise_data
+a = flexplot(income~1, data=d)
+b = flexplot(gender~1, data=d)
+require(ggplot2)
+ggsave(plot=cowplot::plot_grid(a), filename="research/RPackages/flexplot/plots/univariate_flexplot_test.jpg")
 
 	#### previous bugs
 data(birthweight)
@@ -34,8 +40,7 @@ d = exercise_data
 
 		# # #### histograms and barcharts
 
-flexplot(formula=income~1, data=d)
-flexplot(gender~1, data=d)
+
 
 # ### scatter plot
 require(MASS)

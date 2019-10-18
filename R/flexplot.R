@@ -230,7 +230,11 @@ flexplot = function(formula, data=NULL, related=F,
 			}
 			
 			if (!is.null(labels)){
-				bins = length(labels[[i]])
+				if (length(labels)>=i){
+					bins = length(labels[[i]])
+				} else {
+					bins = 3
+				}
 			}			
 			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)
 		}
