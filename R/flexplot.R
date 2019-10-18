@@ -228,7 +228,10 @@ flexplot = function(formula, data=NULL, related=F,
 					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")
 				}
 			}
-						
+			
+			if (!is.null(labels)){
+				bins = length(labels[[i]])
+			}			
 			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)
 		}
 	} 
@@ -389,7 +392,7 @@ flexplot = function(formula, data=NULL, related=F,
 			binned.name = paste0(given[i], "_binned")
 
 			if (is.numeric(data[,given[i]])){
-				data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])
+				data[,binned.name] = bin.me(variable=given[i], data, bins, labels=labels[i], breaks=breaks[[given[i]]])
 				
 				### if they specified prediction, bin those too
 				if (!is.null(prediction)){
