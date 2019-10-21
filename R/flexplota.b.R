@@ -65,8 +65,8 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 				### ADDED VARIABLE PLOT
 				### if they choose to residualize it
-			if (length(self$options$given)>0 & self$options$resid==TRUE) {
-            	plot = added.plot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins, suppress_smooth=self$options$suppr, related=related)	
+			if ((length(self$options$given) + length(self$options$preds))>0 & self$options$resid==TRUE) {
+            	p = added.plot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins, suppress_smooth=self$options$suppr, related=related)	
 
 
 	    		### THIRD EYE
@@ -83,8 +83,6 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {        	
 
 	            	p = flexplot(formula, data=data, se=self$options$se, spread=se.type, method=line,  alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty),suppress_smooth=self$options$suppr, bins=self$options$bins, related=related) #+ 
-	            	
-	            	            save(self, data, p, se.type, file="/Users/fife/Dropbox/checkme.Rdat")		
 	            	#	theme_bw(base_size = 16) +
 	            	#	theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
 	        }		
