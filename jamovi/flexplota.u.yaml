@@ -25,15 +25,14 @@ children:
             name: preds
             isTarget: true
             events:
-                change: './flexplota.events::onChange_preds'            
+              change: './flexplota.events::onChange_preds'            
       - type: TargetLayoutBox
         label: Paneled variable
         children:
           - type: VariablesListBox
             name: given
-            isTarget: true     
             events:
-                change: './flexplota.events::onChange_given'                  
+              change: './flexplota.events::onChange_given'                 
   - type: CollapseBox
     label: Plot type
     collapsed: true
