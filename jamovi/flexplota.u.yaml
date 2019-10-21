@@ -31,6 +31,7 @@ children:
         children:
           - type: VariablesListBox
             name: given
+            isTarget: true
             events:
               change: './flexplota.events::onChange_given'                 
   - type: CollapseBox
