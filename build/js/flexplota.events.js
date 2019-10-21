@@ -28,6 +28,7 @@ const updateUI = function(ui, context) {
           ui.view.model.options.beginEdit();
           ui.ghost.setPropertyValue('enable', false);
           ui.bins.setPropertyValue('enable', false);
+          ui.resid.setPropertyValue('enable', false);
           ui.view.model.options.endEdit();
     }
     else {
