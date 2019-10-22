@@ -4,7 +4,7 @@ require(vdiffr)
 context("Univariate plots")
 
 require(flexplot)
-data(exercise_data)
+data(exercise_data); data("relationship_satisfaction")
 d = exercise_data
 
 #### univariate plots
@@ -67,4 +67,5 @@ g = flexplot(weight.loss~motivation + therapy.type | income + health, data=d, se
 expect_doppelganger("ghost with using both second slots", g)   
 h = flexplot(gender~motivation | income + health, data=d, se=FALSE, method="logistic", ghost.line="gray")		
 expect_doppelganger("ghost with logistic regression", h)
-
+i = flexplot(conscientiousness ~ honesty + separated | gender, data=relationship_satisfaction, ghost.line="green")
+expect_doppelganger("ghost with previous bug", i)

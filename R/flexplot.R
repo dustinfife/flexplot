@@ -588,7 +588,7 @@ flexplot = function(formula, data=NULL, related=F,
 			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line, show.legend=F)'			
 		} else if (length(axis)>1){	
 			#### used to be factoring d_smooth$group, but that gave different groups for each color AND line, so just making it line now
-		  d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(k[,axis[2]])))
+		  d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(factor(k[,axis[2]]))))
 		      ### it seems ggplot is choosing the order based on sorting
 	  
 			### if the ghost line specifies a specific line to plot...
