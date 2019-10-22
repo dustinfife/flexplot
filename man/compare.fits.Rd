@@ -5,7 +5,7 @@
 \title{Compare the fits of two models}
 \usage{
 compare.fits(formula, data, model1, model2 = NULL, return.preds = F,
-  silent = F, report.se = F, re = F, ...)
+  silent = F, report.se = F, re = F, pred.type = "response", ...)
 }
 \arguments{
 \item{formula}{A formula that can be used in flexplot. The variables inside must not include variables outside the fitted models.}

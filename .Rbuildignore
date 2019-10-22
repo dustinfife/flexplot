@@ -5,3 +5,5 @@ jamovi
 ^icon\.png$ 
 ^icon\.svg$ 
 ^flexplot.jmo$
+^.*\.Rproj$
+^\.Rproj\.user$
