@@ -43,8 +43,6 @@ children:
       - type: CheckBox
         name: resid
       - type: CheckBox
-        name: thirdeye
-      - type: CheckBox
         name: diff
   - type: CollapseBox
     label: Fit options

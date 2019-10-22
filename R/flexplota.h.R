@@ -12,7 +12,6 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             se = TRUE,
             line = "Loess",
             ghost = TRUE,
-            thirdeye = FALSE,
             diff = FALSE,
             plmethod = "Jittered-density plot",
             resid = FALSE,
@@ -57,10 +56,6 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "ghost",
                 ghost,
                 default=TRUE)
-            private$..thirdeye <- jmvcore::OptionBool$new(
-                "thirdeye",
-                thirdeye,
-                default=FALSE)
             private$..diff <- jmvcore::OptionBool$new(
                 "diff",
                 diff,
@@ -126,7 +121,6 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..se)
             self$.addOption(private$..line)
             self$.addOption(private$..ghost)
-            self$.addOption(private$..thirdeye)
             self$.addOption(private$..diff)
             self$.addOption(private$..plmethod)
             self$.addOption(private$..resid)
@@ -145,7 +139,6 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         se = function() private$..se$value,
         line = function() private$..line$value,
         ghost = function() private$..ghost$value,
-        thirdeye = function() private$..thirdeye$value,
         diff = function() private$..diff$value,
         plmethod = function() private$..plmethod$value,
         resid = function() private$..resid$value,
@@ -163,7 +156,6 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..se = NA,
         ..line = NA,
         ..ghost = NA,
-        ..thirdeye = NA,
         ..diff = NA,
         ..plmethod = NA,
         ..resid = NA,
@@ -224,7 +216,6 @@ flexplotaBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param se .
 #' @param line .
 #' @param ghost .
-#' @param thirdeye .
 #' @param diff .
 #' @param plmethod .
 #' @param resid .
@@ -249,7 +240,6 @@ flexplota <- function(
     se = TRUE,
     line = "Loess",
     ghost = TRUE,
-    thirdeye = FALSE,
     diff = FALSE,
     plmethod = "Jittered-density plot",
     resid = FALSE,
@@ -282,7 +272,6 @@ flexplota <- function(
         se = se,
         line = line,
         ghost = ghost,
-        thirdeye = thirdeye,
         diff = diff,
         plmethod = plmethod,
         resid = resid,

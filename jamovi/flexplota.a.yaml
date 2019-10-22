@@ -41,11 +41,6 @@ options:
       title: Ghost line
       type: Bool
       default: true
-
-    - name: thirdeye
-      title: The "third eye"
-      type: Bool
-      default: false  
       
     - name: diff
       title: Difference plot (related t)

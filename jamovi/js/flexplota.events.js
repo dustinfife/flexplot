@@ -35,6 +35,7 @@ const updateUI = function(ui, context) {
         ui.view.model.options.beginEdit();
         ui.ghost.setPropertyValue('enable', true);
         ui.bins.setPropertyValue('enable', true);
+        ui.resid.setPropertyValue('enable', true);
         ui.view.model.options.endEdit();
     }
 
@@ -50,9 +51,9 @@ const updateUI = function(ui, context) {
 
                 //disable checkbox call 'suppr' and 'line' when the dataType is not an integer
                 ui.view.model.options.beginEdit();
-                ui.suppr.setPropertyValue('enable', rData.dataType === 'integer' );
-                ui.line.setPropertyValue('enable', rData.dataType === 'integer' );
-                ui.se.setPropertyValue('enable', rData.dataType === 'integer' );
+                ui.suppr.setPropertyValue('enable', rData.dataType === 'decimal' || rData.dataType === 'integer');
+                ui.line.setPropertyValue('enable', rData.dataType === 'decimal' || rData.dataType === 'integer');
+                ui.se.setPropertyValue('enable', rData.dataType === 'decimal' || rData.dataType === 'integer' );
                 ui.center.setPropertyValue('enable', rData.dataType === 'text' );
                 ui.plmethod.setPropertyValue('enable', rData.dataType === 'text' );
                 ui.view.model.options.endEdit();

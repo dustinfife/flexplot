@@ -66,17 +66,21 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				### ADDED VARIABLE PLOT
 				### if they choose to residualize it
 			if ((length(self$options$given) + length(self$options$preds))>0 & self$options$resid==TRUE) {
-            	p = added.plot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins, suppress_smooth=self$options$suppr, related=related)	
+			  
+			  ## modify formula to use FIRST, rather than last variable
+			  f <- paste0(self$options$out, "~",paste0(self$options$given, collapse="+"), "+", paste0(rev(self$options$preds), collapse="+"))		            	
+			  f <- as.formula(f)
+        p = added.plot(f, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins, suppress_smooth=self$options$suppr, related=related)	
 
 
 	    		### THIRD EYE
-			} else if ((length(self$options$preds) + length(self$options$given))>1 & self$options$thirdeye==T){
-				perms = ifelse((length(self$options$preds) + length(self$options$given)>2), 1:4, c(1,3))
-				p = third.eye(formula, data=data, fixed.positions=NULL, which.perms=1:perms, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="gray", sample = samp, jitter=c(self$options$jittx, self$options$jitty),suppress_smooth=self$options$suppr, bins=self$options$bins) 
+			# } else if ((length(self$options$preds) + length(self$options$given))>1 & self$options$thirdeye==T){
+			# 	perms = ifelse((length(self$options$preds) + length(self$options$given)>2), 1:4, c(1,3))
+			# 	p = third.eye(formula, data=data, fixed.positions=NULL, which.perms=1:perms, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="black", sample = samp, jitter=c(self$options$jittx, self$options$jitty),suppress_smooth=self$options$suppr, bins=self$options$bins) 
 
 				#### GHOST LINES
             } else if (length(self$options$given)>0 & self$options$ghost==TRUE){
-	            p = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="gray", sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins,suppress_smooth=self$options$suppr, related=related) 
+	            p = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="black", sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins,suppress_smooth=self$options$suppr, related=related) 
     formula = weight.loss~gender
 
 
@@ -91,7 +95,7 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #save(self, data, p, se.type, file="/Users/fife/Dropbox/checkme.Rdat")		
             #plot = flexplot(weight.loss~therapy.type, data=exercise_data, related=T)
             geoms = sapply(p$layers, function(x) class(x$geom)[1])
-            if (self$options$plmethod != "Jittered-density plot" & "GeomErrorbar" %in% geoms & self$options$thirdeye==F){
+            if (self$options$plmethod != "Jittered-density plot" & "GeomErrorbar" %in% geoms){
 
    				#### delete old summary
 				p$layers[[2]] = NULL
