@@ -1,0 +1,269 @@
+\name{modular}
+\title{Modular Functions for Mixed Model Fits}
+\alias{glFormula}
+\alias{lFormula}
+\alias{mkGlmerDevfun}
+\alias{mkLmerDevfun}
+\alias{modular}
+\alias{optimizeGlmer}
+\alias{optimizeLmer}
+\alias{updateGlmerDevfun}
+\usage{
+lFormula(formula, data = NULL, REML = TRUE, subset,
+    weights, na.action, offset, contrasts = NULL,
+    control = lmerControl(), ...)
+
+mkLmerDevfun(fr, X, reTrms, REML = TRUE, start = NULL,
+    verbose = 0, control = lmerControl(), ...)
+
+optimizeLmer(devfun,
+             optimizer    = formals(lmerControl)$optimizer,
+             restart_edge = formals(lmerControl)$restart_edge,
+             boundary.tol = formals(lmerControl)$boundary.tol,
+             start = NULL, verbose = 0L,
+             control = list(), ...)
+
+glFormula(formula, data = NULL, family = gaussian,
+    subset, weights, na.action, offset, contrasts = NULL,
+    start, mustart, etastart, control = glmerControl(), ...)
+
+mkGlmerDevfun(fr, X, reTrms, family, nAGQ = 1L,
+              verbose = 0L, maxit = 100L, control = glmerControl(), ...)
+
+optimizeGlmer(devfun, 
+    optimizer = if (stage == 1) "bobyqa" else "Nelder_Mead", 
+    restart_edge = FALSE,
+    boundary.tol = formals(glmerControl)$boundary.tol,
+    verbose = 0L, control = list(),
+    nAGQ = 1L, stage = 1, start = NULL, ...)
+
+updateGlmerDevfun(devfun, reTrms, nAGQ = 1L)
+}
+\arguments{
+  \item{formula}{a two-sided linear formula object
+    describing both the fixed-effects and random-effects parts
+    of the model, with the response on the left of a \code{~}
+    operator and the terms, separated by \code{+} operators,
+    on the right.  Random-effects terms are distinguished by
+    vertical bars (\code{"|"}) separating expressions for
+    design matrices from grouping factors.}
+
+  \item{data}{an optional data frame containing the
+    variables named in \code{formula}.  By default the
+    variables are taken from the environment from which
+    \code{lmer} is called. While \code{data} is optional, the
+    package authors \emph{strongly} recommend its use,
+    especially when later applying methods such as
+    \code{update} and \code{drop1} to the fitted model
+    (\emph{such methods are not guaranteed to work properly
+      if \code{data} is omitted}). If \code{data} is omitted,
+    variables will be taken from the environment of
+    \code{formula} (if specified as a formula) or from the
+    parent frame (if specified as a character vector).}
+
+  \item{REML}{(logical) indicating to fit \bold{re}stricted maximum
+    likelihood model.}
+
+  \item{subset}{an optional expression indicating the
+    subset of the rows of \code{data} that should be used in
+    the fit. This can be a logical vector, or a numeric
+    vector indicating which observation numbers are to be
+    included, or a character vector of the row names to be
+    included.  All observations are included by default.}
+
+  \item{weights}{an optional vector of \sQuote{prior weights} to be used
+    in the fitting process.  Should be \code{NULL} or a numeric vector.}
+
+  \item{na.action}{a function that indicates what should
+    happen when the data contain \code{NA}s.  The default
+    action (\code{na.omit}, inherited from the 'factory
+    fresh' value of \code{getOption("na.action")}) strips any
+    observations with any missing values in any variables.}
+
+  \item{offset}{this can be used to specify an \emph{a priori} known
+    component to be included in the linear predictor during
+    fitting.  This should be \code{NULL} or a numeric vector of length
+    equal to the number of cases.  One or more \code{\link{offset}}
+    terms can be included in the formula instead or as well, and if
+    more than one is specified their sum is used.  See
+    \code{\link{model.offset}}.}
+
+  \item{contrasts}{an optional \code{\link{list}}.  See the
+    \code{contrasts.arg} of \code{\link{model.matrix.default}}.}
+
+  \item{control}{a list giving
+    \describe{
+      \item{for \code{[g]lFormula}:}{all
+	options for running the model, see \code{\link{lmerControl}};}
+      \item{for \code{mkLmerDevfun,mkGlmerDevfun}:}{options
+	for the inner optimization step;}
+      \item{for \code{optimizeLmer} and \code{optimizeGlmer}:}{control
+	parameters for nonlinear optimizer (typically inherited from the
+	\dots argument to \code{\link{lmerControl}}).}
+	% FIXME: reference optCtrl
+    }
+  }
+  \item{fr}{A model frame containing the variables needed to create an
+    \code{\link{lmerResp}} or \code{\link{glmResp}} instance.}
+  \item{X}{fixed-effects design matrix}
+  \item{reTrms}{information on random effects structure (see
+    \code{\link{mkReTrms}}).}
+  \item{start}{starting values (see \code{\link{lmer}};
+    for \code{glFormula}, should be just a numeric vector of
+    fixed-effect coefficients)}
+  \item{verbose}{print output?}
+  \item{maxit}{maximal number of Pwrss update iterations.}
+  \item{devfun}{a deviance function, as generated by \code{\link{mkLmerDevfun}}}
+  \item{nAGQ}{number of Gauss-Hermite quadrature points}
+  \item{stage}{optimization stage (1: nAGQ=0, optimize over theta only;
+    2: nAGQ possibly >0, optimize over theta and beta)}
+  \item{optimizer}{character - name of optimizing
+    function(s).  A character vector or list of functions:
+    length 1 for \code{lmer} or \code{glmer}, possibly length
+    2 for \code{glmer}.  The built-in optimizers are
+    \code{"\link{Nelder_Mead}"} and \code{"\link[minqa]{bobyqa}"}
+    (from the \pkg{minqa} package).  Any minimizing function
+    that allows box constraints can be used provided that it
+    \enumerate{
+      \item{takes input parameters \code{fn} (function to be
+	optimized), \code{par} (starting parameter values),
+	\code{lower} (lower bounds) and \code{control} (control
+	parameters, passed through from the \code{control}
+	argument) and}
+      \item{returns a list with (at least) elements
+	\code{par} (best-fit parameters), \code{fval} (best-fit
+	function value), \code{conv} (convergence code) and
+	(optionally) \code{message} (informational message, or
+	explanation of convergence failure)}.
+    }
+    Special provisions are made for \code{\link{bobyqa}},
+    \code{\link{Nelder_Mead}}, and optimizers wrapped in the
+    \pkg{optimx} package; to use \pkg{optimx} optimizers
+    (including \code{L-BFGS-B} from base \code{\link{optim}}
+    and \code{\link{nlminb}}), pass the \code{method}
+    argument to \code{optim} in the \code{control} argument.
+
+    For \code{glmer}, if \code{length(optimizer)==2}, the
+    first element will be used for the preliminary (random
+    effects parameters only) optimization, while the second
+    will be used for the final (random effects plus fixed
+    effect parameters) phase. See \code{\link{modular}} for
+    more information on these two phases.
+  }
+  \item{restart_edge}{see \code{\link{lmerControl}}}
+  \item{boundary.tol}{see \code{\link{lmerControl}}}
+  \item{family}{a GLM family; see \code{\link[stats]{glm}}
+    and \code{\link[stats]{family}}.}
+  \item{mustart}{optional starting values on the scale of
+    the conditional mean; see \code{\link[stats]{glm}} for details.}
+  \item{etastart}{optional starting values on the scale of
+    the unbounded predictor; see \code{\link[stats]{glm}} for details.}
+  \item{\dots}{other potential arguments; for \code{optimizeLmer} and
+    \code{optimizeGlmer}, these are passed to internal function
+    \code{optwrap}, which has relevant parameters \code{calc.derivs}
+    and \code{use.last.params} (see \code{\link{lmerControl}}).}
+}
+\value{
+  \code{lFormula} and \code{glFormula} return a list containing
+  components:
+
+  \describe{
+    \item{fr}{model frame}
+     \item{X}{fixed-effect design matrix}
+     \item{reTrms}{list containing information on random effects structure:
+     result of \code{\link{mkReTrms}}}
+     \item{REML}{(lFormula only): logical indicating if restricted maximum
+     likelihood was used (Copy of argument.)}
+  }
+
+  \code{mkLmerDevfun} and \code{mkGlmerDevfun} return a function to
+      calculate deviance (or restricted deviance) as a function of the
+      theta (random-effect) parameters.  \code{updateGlmerDevfun}
+      returns a function to calculate the deviance as a function of a
+      concatenation of theta and beta (fixed-effect) parameters. These
+      deviance functions have an environment containing objects required
+      for their evaluation. CAUTION: The \code{\link{environment}} of
+      functions returned by \code{mk(Gl|L)merDevfun} contains reference
+      class objects (see \code{\link{ReferenceClasses}},
+      \code{\link{merPredD-class}}, \code{\link{lmResp-class}}), which
+      behave in ways that may surprise many users. For example, if the
+      output of \code{mk(Gl|L)merDevfun} is naively copied, then
+      modifications to the original will also appear in the copy (and
+      vice versa). To avoid this behavior one must make a deep copy (see
+      \code{\link{ReferenceClasses}} for details).
+
+  \code{optimizeLmer} and \code{optimizeGlmer} return the results of an
+  optimization.
+}
+\description{
+  Modular functions for mixed model fits
+}
+\details{
+  These functions make up the internal components of an [gn]lmer fit.
+  \itemize{
+    \item \code{[g]lFormula} takes the arguments that would normally be
+    passed to \code{[g]lmer}, checking for errors and processing the
+    formula and data input to create a list of objects required to fit a
+    mixed model.
+    \item \code{mk(Gl|L)merDevfun} takes the output of the previous
+    step (minus the \code{formula} component) and creates a
+    deviance function
+    \item \code{optimize(Gl|L)mer} takes a
+    deviance function and optimizes over \code{theta} (or
+    over \code{theta} and \code{beta}, if \code{stage} is set
+    to 2 for \code{optimizeGlmer}
+    \item \code{updateGlmerDevfun} takes the first stage of a GLMM
+    optimization (with \code{nAGQ=0}, optimizing over \code{theta} only)
+    and produces a second-stage deviance function
+    \item \code{\link{mkMerMod}} takes the \emph{environment} of a
+    deviance function, the results of an optimization, a list of
+    random-effect terms, a model frame, and a model all and produces a
+    \code{[g]lmerMod} object.
+  }
+}
+\examples{
+### Fitting a linear mixed model in 4 modularized steps
+
+## 1.  Parse the data and formula:
+lmod <- lFormula(Reaction ~ Days + (Days|Subject), sleepstudy)
+names(lmod)
+## 2.  Create the deviance function to be optimized:
+(devfun <- do.call(mkLmerDevfun, lmod))
+ls(environment(devfun)) # the environment of 'devfun' contains objects
+                        # required for its evaluation
+## 3.  Optimize the deviance function:
+opt <- optimizeLmer(devfun)
+opt[1:3]
+## 4.  Package up the results:
+mkMerMod(environment(devfun), opt, lmod$reTrms, fr = lmod$fr)
+
+
+### Same model in one line
+lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+
+
+### Fitting a generalized linear mixed model in six modularized steps
+
+## 1.  Parse the data and formula:
+glmod <- glFormula(cbind(incidence, size - incidence) ~ period + (1 | herd),
+data = cbpp, family = binomial)
+names(glmod)
+## 2.  Create the deviance function for optimizing over theta:
+(devfun <- do.call(mkGlmerDevfun, glmod))
+ls(environment(devfun)) # the environment of devfun contains lots of info
+## 3.  Optimize over theta using a rough approximation (i.e. nAGQ = 0):
+(opt <- optimizeGlmer(devfun))
+## 4.  Update the deviance function for optimizing over theta and beta:
+(devfun <- updateGlmerDevfun(devfun, glmod$reTrms))
+## 5.  Optimize over theta and beta:
+opt <- optimizeGlmer(devfun, stage=2)
+opt[1:3]
+## 6.  Package up the results:
+mkMerMod(environment(devfun), opt, glmod$reTrms, fr = glmod$fr)
+
+### Same model in one line
+glmer(cbind(incidence, size - incidence) ~ period + (1 | herd),
+      data = cbpp, family = binomial)
+}
+\keyword{models}
+

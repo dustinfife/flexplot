@@ -14,7 +14,6 @@ estimates	estimates
 estimates.default	estimates.default
 estimates.glm	estimates.glm
 estimates.lm	estimates.lm
-estimates.regression	estimates.regression
 estimates.zeroinfl	estimates.zeroinfl
 exercise_data	exercise_data
 flexplot	flexplot
@@ -23,6 +22,7 @@ geom_jitterd	geom_jitterd
 glinmod	glinmod
 glmbasic	glmbasic
 graduate_income	graduate_income
+job_data	job_data
 make.formula	make.formula
 math	math
 mixed.mod.visual	mixed.mod.visual
@@ -38,7 +38,9 @@ sensitivity.table	sensitivity.table
 standardized.beta	standardized.beta
 subsetString	subsetString
 tablesaw.injury	tablesaw.injury
+third.eye	third.eye
 uni.plot	uni.plot
 visualize	visualize
 visualize.default	visualize.default
 visualize.lm	visualize.lm
+visualize.lmerMod	visualize.lmerMod

@@ -1,0 +1,434 @@
+2012-01-07  Douglas Bates <bates@stat.wisc.edu>
+
+	* man/GHrule.Rd, man/NelderMead-class.Rd, man/NelderMead.Rd,
+	  man/golden-class.Rd, man/golden.Rd, man/lmer.Rd, man/mkdevfun.Rd:
+	  Documentation updates.
+	* R/lmer.R, R/profile.R, tests/lmer-1.R: Nlmer now working (for nAGQ=1).
+	  Updated tests and got profile working again.
+	* R/AllClass.R, R/lmer.R, src/external.cpp, src/optimizer.h: Allowed
+	  setting options in the NelderMead optimizer. Switched so that this is
+	  the default in glmer.
+	* R/AllClass.R, R/lmer.R, src/external.cpp, src/predModule.cpp: More
+	  work on nlmer.
+
+2011-12-31  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/predModule.cpp: Add an explicit copy of the mapped sparse matrix
+	  to a sparse matrix in updateL
+
+2011-12-28  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/lmer.R: Change maximum iterations error to a warning.
+	* DESCRIPTION: New version number.
+	* R/lmer.R: Allowed choice of optimizer in glmer at least.
+	* R/AllClass.R: Extended and exported the NelderMead class
+	* src/external.cpp, src/optimizer.cpp, src/optimizer.h: Removed
+	  debugging code, added methods to NelderMead to set convergence
+	  characteristics and exported same.
+
+2011-12-22  Douglas Bates <bates@stat.wisc.edu>
+
+	* NAMESPACE, R/AllClass.R, src/external.cpp, src/optimizer.cpp,
+	  src/optimizer.h: Tuned the Nelder-Mead optimizer a bit and got rid of
+	  some of the noise.
+	* R/lmer.R, man/lmer.Rd, src/external.cpp: Incorporated aGQ code in the
+	  glmer function itself. Eliminated the doFit argument which is
+	  redundant when devFunOnly is also used.
+
+2011-12-21  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/external.cpp: Added the glmerAGQ function and did some cleanup.
+	* src/predModule.cpp: Delete some debugging code.
+	* R/lmer.R: Updates in glmer, aGQ not yet added but soon will be.
+	* R/GHrule.R: Rename the knots on the z scale as 'z', not 'k'
+	* NAMESPACE: Export the golden class and class generator object
+
+2011-12-16  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/respModule.cpp, src/respModule.h: Clean up declarations by
+	  declaring a typedef for Eigen::Map<Eigen::VectorXd>
+
+2011-12-15  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/lmer.R: Adopt new version of the merPredD$new function that uses S.
+	* R/GHrule.R: Added an R function, based on SparseGrid:::GQN to evaluate
+	  a matrix of nodes, weights and log-density for Gauss-Hermite
+	  quadrature against a Gaussian density.
+	* R/AllClass.R, src/optimizer.h: Added a reverse-communication golden
+	  search algorithm class
+
+2011-12-12  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/external.cpp: Fat-finger error. I meant to commit this file and
+	  not glmFamily.h
+	* src/glmFamily.h, src/optimizer.cpp, src/optimizer.h: Added simple
+	  optimizers (Golden search for bounded 1-dimensional and Nelder-Mead
+	  for multidimensional).
+
+2011-12-07  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/AllClass.R, R/lmer.R, src/external.cpp, src/predModule.cpp,
+	  src/predModule.h: Allow regeneration of pointers in merPredD objects.
+
+2011-12-06  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/AllClass.R, R/lmer.R, src/external.cpp, src/predModule.cpp,
+	  src/predModule.h: Add many more fields to the merPredD class and allow
+	  for serialize/unserialize. Lower the default tolPwrss as per testing
+	  by Ben.
+
+2011-12-05  Douglas Bates <bates@stat.wisc.edu>
+
+	* DESCRIPTION, R/AllClass.R, R/lmer.R, man/lmer.Rd, man/mkdevfun.Rd,
+	  man/refitML.Rd, src/external.cpp, src/predModule.cpp,
+	  src/predModule.h, src/respModule.cpp, src/respModule.h: Use mapped
+	  objects in C++ structures so that serialize/unserialize will work.
+
+2011-11-29  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/profile.R: More fixing of labels. Fix up strip names to
+	  reflect sigma, not log(sigma).
+
+2011-11-29  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/profile.R: Profiling now works for lmer models with variance
+	  components only, including the case of a single fixed-effects
+	  parameter. Labeling of some plots needs to be corrected.
+	* src/predModule.cpp, src/predModule.h: Modifications for the 0-column X
+	  matrix case used in profiling.
+	* src/Gauss_Hermite.cpp, src/Gauss_Hermite.h, src/external.cpp: Move
+	  Gaussian quadrature knot/weight calculations to the Gqr package.
+
+2011-11-28  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/profile.R: Got profile working for cases where the number of
+	  fixed-effects is greater than 1. Need a "do nothing gracefully" clause
+	  for p == 1.
+	* R/lmer.R: Use the value of emptyenv(), not the funtion itself. Add ...
+	  to refitML generic and method
+	* R/lmer.R: Use separate mkdevfun in glmer. Switch devFunOnly to an
+	  integer value where 1 and 2 refer to different stages.
+
+2011-11-17  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/AllClass.R: Correct and extend the allInfo method for the glmResp
+	  class.
+	* ToDo: Need to come up with a crafty way of creating a copy of the
+	  reference class object with the external pointer. It may work to just
+	  copy it then set the PTR to be a NULL pointer.
+
+2011-11-16  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/Gauss_Hermite.cpp, src/Gauss_Hermite.h, src/external.cpp: Add
+	  another method of creating Gaussian quadrature rules. Export the GHQ
+	  class.
+	* tests/lmer-1.R: Comment out enough tests to make R CMD check succeed.
+	* R/lmer.R: Clean up some functions and methods that were causing
+	  problems with the tests.
+	* man/glmFamily-class.Rd, man/glmFamily.Rd, man/lmResp-class.Rd,
+	  man/lmResp.Rd: Document the class generator object and the reference
+	  class (for now).
+	* NAMESPACE: Remove redundant S3 method vcov.summary.mer
+
+2011-11-04  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/external.cpp: Correct the argument counts for externally visible
+	  glmFamily accessors
+	* man/sleepstudy.Rd: disable a test - need to check what rcond(fm@re)
+	  did in lme4a
+	* man/reTrms.Rd: No longer used
+	* man/profile-methods.Rd: Don't run examples until the code has been
+	  fixed
+	* man/merPredD-class.Rd, man/merPredD.Rd: Try to document reference
+	  class generator object this way
+	* inst/unitTests/runit.compDev.R, inst/unitTests/runit.link.R,
+	  inst/unitTests/runit.lmerResp.R: update tests (compDev is inert at
+	  present but could be activated for glmer tests)
+
+2011-11-02  Douglas Bates <bates@stat.wisc.edu>
+
+	* DESCRIPTION: Bump the version number.
+	* NAMESPACE, man/glmFamily-class.Rd: Export and document the glmFamily
+	  reference class and generator object
+	* src/Makevars, src/Makevars.win: Add a Makevars.win file. Make the
+	  factory-fresh setting of CPPFLAGS suppress warnings.
+	* man/lmerMod-class.Rd, man/merMod-class.Rd, man/merPredD-class.Rd:
+	  incorporate documentation for [gn]lmerMod-class in the merMod-class
+	  docs; document merPredD-class
+	* inst/doc/PLSvGLS.Rnw, inst/doc/PLSvGLS.pdf, inst/doc/Theory.Rnw,
+	  inst/doc/Theory.pdf, inst/doc/lme4.bib, vignettes,
+	  vignettes/PLSvGLS.Rnw, vignettes/PLSvGLS.pdf, vignettes/Theory.Rnw,
+	  vignettes/Theory.pdf, vignettes/lme4.bib: Move vignette sources to a
+	  vignettes directory per recommendations for R-2.14.0
+
+2011-10-18  Douglas Bates <bates@stat.wisc.edu>
+
+	* man/mkdevfun.Rd: Cleanup.
+	* NAMESPACE: Export S3 method for devcomp.
+	* man/lmResp-class.Rd: Document response reference classes and
+	  constructor objects
+	* man/chmSp.Rd, man/deFeMod.Rd, man/feModule-class.Rd, man/glmFamily.Rd,
+	  man/glmerResp.Rd, man/lmerResp-class.Rd, man/lmerResp.Rd,
+	  man/reModule-class.Rd, man/reModule.Rd: Remove documentation of
+	  no-longer-used classes from Rcpp modules
+	* man/cbpp.Rd: From R-2.14.0 on getCall is imported from the stats
+	  package.
+	* R/lmer.R: Getter and setter for REML field in lmerResp should be reml,
+	  not REML.
+
+2011-10-17  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/respModule.cpp, src/respModule.h: Change working weights to be a
+	  matrix.
+	* src/predModule.cpp: Thinko regarding 0-based indices.
+
+2011-10-14  Douglas Bates <bates@stat.wisc.edu>
+
+	* DESCRIPTION, NAMESPACE, R/AllClass.R, R/lmer.R, src/external.cpp,
+	  src/predModule.cpp, src/predModule.h, src/respModule.cpp,
+	  src/respModule.h: nlmer added. Increment calculation for PWRSS works
+	  but not yet incorporated in R code.
+
+2011-10-03  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/lmer.R: Small but important change in checking for object weights in
+	  environment rho in mkRespMod2
+
+2011-09-30  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/AllClass.R, R/lmer.R: Use inheritance on reference classes, being
+	  careful about package installation. Create a cleaner version of
+	  mkRespMod2.
+	* NAMESPACE: export more classes
+	* DESCRIPTION: new version and date
+
+2011-09-29  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/lmer.R: Modify mkRespMod for nlmer response.
+	* src/external.cpp: Add isNullExtPtr .Call'able function for Ptr/ptr
+	  formulation.
+	* NAMESPACE, R/AllClass.R: new organization of response classes. Use
+	  Ptr/ptr formulation to generate external pointers.
+
+2011-09-27  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/lmer.R: More components/slots/etc. available in getME()
+	* R/AllClass.R, R/lmer.R: Reinstitute the Gp slot in merMod objects
+
+2011-09-23  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmer.R, man/ranef.Rd: *must* use lme4Eigen::: inside devFun()
+	  [evaluated from C++]
+	* man/refitML.Rd: add doc. + example
+	* man/Pastes.Rd, man/Penicillin.Rd: reactivate the image(L) plots
+
+2011-09-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* NAMESPACE, R/AllClass.R, R/lmer.R: tolPwrss - for now
+
+2011-09-22  Douglas Bates <bates@stat.wisc.edu>
+
+	* data/VerbAgg.rda: Correct labels on Gender, use camelCase consistently
+	  on item labels.
+	* data/sleepstudy.rda: switch to bzip2 compression for smaller file
+	  size.
+
+2011-09-21  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/external.cpp: Added a function to check on the SIMD instruction
+	  sets in use by Eigen.
+
+2011-09-20  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/lmer.R: Do the same number of pwrssUpdate calls with compDev=TRUE or
+	  FALSE
+	* src/external.cpp, src/predModule.cpp, src/predModule.h: Remove
+	  debugging code. solve and solveU methods for merPredD class now return
+	  the numerator of the convergence criterion.
+	* R/lmer.R: Need to pass the pointer, not the reference class object.
+	  Modifications to glmer, pwrssUpdate, etc. to get glmer working.
+
+2011-09-20  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/lmer.R, man/lmer.Rd, src/external.cpp: non-hardcorded PWRSS
+	  tolerance
+
+2011-09-19  Douglas Bates <bates@stat.wisc.edu>
+
+	* NAMESPACE, R/AllClass.R, R/lmer.R, src/external.cpp, src/glmFamily.h,
+	  src/respModule.cpp: created a glmFamily reference class and allowed
+	  for compiled version of glmer update using working residuals and
+	  weights (not currently working properly, use compDev=FALSE argument to
+	  glmer)
+	* DESCRIPTION: new version and date
+	* src/external.cpp, src/predModule.cpp, src/predModule.h,
+	  src/respModule.cpp, src/respModule.h: Moved all externally .Call'able
+	  function definitions to external.cpp. external.h and init.cpp are no
+	  longer needed.
+
+2011-09-19  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/lmer.R: Clean up printMer and summary.merMod
+	* src/external.cpp, src/external.h, src/lmer.cpp, src/lmer.h: rename
+	  lmer.[h,cpp] to external.[h,cpp]
+	* R/lmer.R: Initial iterations in glmer (the nAGQ=0L part) now working.
+	  Later iterations still need work.
+
+2011-09-16  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/lmer.R: Use fac argument in call to sqrL() method. glmer now
+	  iterates but does not yet converge.
+	* src/predModule.cpp: Add the - u_i on the rhs of the equation in the
+	  solve method.
+	* R/AllClass.R, src/init.cpp, src/predModule.cpp, src/predModule.h: New
+	  'allInfo' method for glmerResp reference class. Added .Call'able
+	  extractors for Utr and Vtr to merPredD class.
+
+2011-09-14  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/lmer.R: Modified glmer to return a meaningful object when
+	  doFit=FALSE.
+	* R/AllClass.R, src/init.cpp, src/respModule.cpp, src/respModule.h:
+	  Added methods and new classes for response modules. Modified names of
+	  .Call'able functions to make them easier to understand.
+	* src/predModule.cpp: Use d_LamtUt instead of recomputing d_Lambdat *
+	  d_Ut
+	* inst/unitTests/runit.link.R: Modified link/muEta/variance unit tests
+	  to use a glmerResp object.
+
+2011-09-13  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/Makevars: Add more explanation about the -DNDEBUG compiler flag
+	  and when to use it.
+	* R/AllClass.R, R/lmer.R, src/init.cpp, src/predModule.cpp,
+	  src/predModule.h, src/respModule.cpp, src/respModule.h: Many more
+	  methods added to the reference class definitions, as well as
+	  documentation. glmer is now working in the sense that it doesn't
+	  segfault, however it is not yet performing the calculations correctly.
+	* DESCRIPTION: Remove RcppModule specification.
+2011-09-12  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/respModule.h: Clean up calculation of working residuals.
+	* R/lmer.R: Still working on glmer, not there yet.
+	* R/AllClass.R, src/init.cpp, src/predModule.cpp, src/predModule.h,
+	  src/respModule.cpp, src/respModule.h: Added many more R-callable entry
+	  points in respModule and predModule, incorporating them as methods in
+	  the reference class definitions.
+	* src/Makevars: Allow for suppression of assert statements with -DNDEBUG
+	  (R CMD check complains)
+
+2011-09-12  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION, NAMESPACE, R/AllClass.R, R/lmer.R,
+	  inst/unitTests/runTests.R, tests/doRunit.R, tests/drop.R,
+	  tests/extras.R, tests/lmer-1.Rout.save, tests/lmer.R,
+	  tests/lmer2_ex.R, tests/nlmer-conv.R, tests/nlmer.R, tests/throw.R:
+	  more updates
+	* man/Dyestuff.Rd, man/VarCorr.Rd, man/cbpp.Rd, man/getME.Rd,
+	  man/lmer.Rd, man/lmerMod-class.Rd, man/merMod-class.Rd,
+	  man/mkdevfun.Rd, man/ranef.Rd, man/reModule-class.Rd: considerably
+	  more documentation
+
+2011-09-11  Douglas Bates <bates@stat.wisc.edu>
+
+	* NAMESPACE, R/AllClass.R, R/lmer.R, src/init.cpp, src/respModule.cpp,
+	  src/respModule.h: Added glmerResp class and began glmer function.
+	  Still needs work.
+
+2011-09-11  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/predModule.[h,cpp]: Wrote native C++ L() method. Somehow calling
+	  ::M_chm_factor_as_SEXP was messing up memory.
+	* tests/vcov-etc.R, tests/lmer-conv.R: Test using this package not lme4a
+	* R/AllClass.R, src/init.cpp, src/predModule.cpp, src/predModule.h: Add
+	  capability of extracting L from a merPredD object
+
+2011-09-10  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION, NAMESPACE, R/lmer.R, man/Pastes.Rd, man/Penicillin.Rd,
+	  man/bootMer.Rd, man/getL.Rd, man/getME.Rd, man/merMod-class.Rd:
+	  getME() for all three(!) versions of lme4 -- deprecate getL() where it
+	  exists
+
+2011-09-02  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/init.cpp, src/predModule.cpp, src/predModule.h: Drop the check for
+	  diagonal Lambda. Cache the value of LamtUt and update it in place with
+	  new method updateLamtUt.
+
+2011-08-31  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/init.cpp, src/predModule.cpp, src/predModule.h: Finally got a
+	  work-around for the "pruning of sparse product" problem. Also added a
+	  diagonalLambda method.
+	* R/AllClass.R: Add a "fitted" method to the lmerResp reference class.
+	  Re-arrange code.
+
+2011-08-30  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/predModule.cpp, src/predModule.h: Drop some debugging code.
+	  Isolate the calculation of LamtUt to try to find out what goes wrong
+	  in there.
+	* R/lmer.R: Update the ranef method for merPredD storing Lambdat, not
+	  Lambda
+
+2011-08-29  Douglas Bates <bates@stat.wisc.edu>
+
+	* R/AllGeneric.R, R/utilities.R, src/init.cpp, src/predModule.cpp,
+	  src/respModule.cpp, src/respModule.h: Code cleanup - remove exception
+	  declarations, use specific 'using' statements within blocks instead of
+	  'using namespace' statements.
+
+2011-08-28  Douglas Bates <bates@stat.wisc.edu>
+
+	* NAMESPACE, src/eigen.h, src/glmFamily.cpp, src/glmFamily.h,
+	  src/lmer.cpp, src/predModule.cpp, src/predModule.h,
+	  src/respModule.cpp, src/respModule.h: Initialize d_delb and d_delu in
+	  predModule to zero (not doing so was causing hard-to-debug errors).
+	  Remove exception declarations as suggested for Rcpp. Make declaration
+	  of short names for Eigen classes and constants namespace-specific.
+
+2011-08-11  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/predModule.cpp: Using solveInPlace to try to avoid memory
+	  problems.
+
+2011-07-31  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/lmer.cpp, src/predModule.cpp, src/predModule.h: Trying to track
+	  dowm memory problem in the evaluation of delu. It looks like it is in
+	  the CholmodSupport.h file in Eigen but my intended fix apparently
+	  didn't succeed.
+	* R/AllClass.R: Modified according to John Chambers' suggestions.
+
+2011-07-29  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/respModule.cpp, src/respModule.h: Flailing around trying to find
+	  the source of the memory problems. valgrind claims there is an
+	  uninitialized value being used in a log call within the Laplace method
+	  but I can't find it.
+	* src/predModule.h: Remove unneeded template keywords (caught by an old
+	  compiler).
+	* R/AllClass.R: Realized that the initialize method should return an
+	  object.
+	* R/AllClass.R, R/lmer.R, src/init.cpp, src/predModule.cpp,
+	  src/predModule.h: Switch to Lambdat and Zt and the CHOLMOD
+	  factorization. Special code for diagonal Lambda.
+	* src/predModule.cpp: One more attempt. Still failing on the boundary
+	  when the number of nonzeros changes.
+
+2011-07-28  Douglas Bates <bates@stat.wisc.edu>
+
+	* src/init.cpp, src/predModule.cpp, src/predModule.h: First shot at a
+	  version with the Eigen/Matrix/CHOLMOD links. Compiles and loads but
+	  not yet tested. Checking in so I can access it from home.
+	* src/init.cpp, src/lmer.cpp, src/predModule.cpp, src/predModule.h: More
+	  getter methods defined in C++ code and reference class. Remove some
+	  debugging code.
+	* R/AllClass.R, R/AllGeneric.R, R/lmList.R, R/lmer.R: More changes to
+	  use S3 methods when dispatching on the first argument only.
+	* DESCRIPTION, NAMESPACE: Change dependencies and imports.
+
+2011-07-26  Douglas Bates <bates@stat.wisc.edu>
+
+	* * initialize this archive.

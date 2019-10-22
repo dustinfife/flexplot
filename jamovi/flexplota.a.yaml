@@ -40,15 +40,39 @@ options:
     - name: ghost
       title: Ghost line
       type: Bool
-      default: true  
+      default: true
 
-    - name: resid
-      title: Residualize predictor variable
+    - name: thirdeye
+      title: The "third eye"
       type: Bool
-      default: false    
+      default: false  
+      
+    - name: diff
+      title: Difference plot (related t)
+      type: Bool
+      default: false 
+       
+    - name: plmethod
+      title: Plot method (categorical predictors)
+      type: List
+      options:
+        - "Jittered-density plot"
+        - "Boxplot"
+        - "Violin plot"
+      default: "Jittered-density plot"      
+      
+    - name: resid
+      title: Added variable plot
+      type: Bool
+      default: false   
+
+    - name: suppr
+      title: Suppress fitted line
+      type: Bool
+      default: false                      
            
     - name: center
-      title: Center/spread (for dot plots)
+      title: Center/spread (categorical predictors)
       type: List
       options:
         - "Median + quartiles"
@@ -63,7 +87,36 @@ options:
       max: 100
       default: 50
       
+    - name: sample
+      title: Percent of dots to display
+      type: Number
+      min: 0
+      max: 100
+      default: 100   
+         
+    - name: jittx
+      title: Amount of jittering in X
+      type: Number
+      min: 0
+      max: .5
+      default: .2
+      
+    - name: jitty
+      title: Amount of jittering in Y
+      type: Number
+      min: 0
+      max: .5
+      default: 0      
+      
+    - name: bins
+      title: Number of bins (for numeric variables)
+      type: Number
+      min: 2
+      max: 6
+      default: 3            
   
+    - name: text
+      type: String
                         
       
       

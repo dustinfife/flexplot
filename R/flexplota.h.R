@@ -12,9 +12,18 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             se = TRUE,
             line = "Loess",
             ghost = TRUE,
+            thirdeye = FALSE,
+            diff = FALSE,
+            plmethod = "Jittered-density plot",
             resid = FALSE,
+            suppr = FALSE,
             center = "Median + quartiles",
-            alpha = 50, ...) {
+            alpha = 50,
+            sample = 100,
+            jittx = 0.2,
+            jitty = 0,
+            bins = 3,
+            text = NULL, ...) {
 
             super$initialize(
                 package='flexplot',
@@ -49,9 +58,29 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "ghost",
                 ghost,
                 default=TRUE)
+            private$..thirdeye <- jmvcore::OptionBool$new(
+                "thirdeye",
+                thirdeye,
+                default=FALSE)
+            private$..diff <- jmvcore::OptionBool$new(
+                "diff",
+                diff,
+                default=FALSE)
+            private$..plmethod <- jmvcore::OptionList$new(
+                "plmethod",
+                plmethod,
+                options=list(
+                    "Jittered-density plot",
+                    "Boxplot",
+                    "Violin plot"),
+                default="Jittered-density plot")
             private$..resid <- jmvcore::OptionBool$new(
                 "resid",
                 resid,
+                default=FALSE)
+            private$..suppr <- jmvcore::OptionBool$new(
+                "suppr",
+                suppr,
                 default=FALSE)
             private$..center <- jmvcore::OptionList$new(
                 "center",
@@ -67,6 +96,33 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 min=0,
                 max=100,
                 default=50)
+            private$..sample <- jmvcore::OptionNumber$new(
+                "sample",
+                sample,
+                min=0,
+                max=100,
+                default=100)
+            private$..jittx <- jmvcore::OptionNumber$new(
+                "jittx",
+                jittx,
+                min=0,
+                max=0.5,
+                default=0.2)
+            private$..jitty <- jmvcore::OptionNumber$new(
+                "jitty",
+                jitty,
+                min=0,
+                max=0.5,
+                default=0)
+            private$..bins <- jmvcore::OptionNumber$new(
+                "bins",
+                bins,
+                min=2,
+                max=6,
+                default=3)
+            private$..text <- jmvcore::OptionString$new(
+                "text",
+                text)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -74,9 +130,18 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..se)
             self$.addOption(private$..line)
             self$.addOption(private$..ghost)
+            self$.addOption(private$..thirdeye)
+            self$.addOption(private$..diff)
+            self$.addOption(private$..plmethod)
             self$.addOption(private$..resid)
+            self$.addOption(private$..suppr)
             self$.addOption(private$..center)
             self$.addOption(private$..alpha)
+            self$.addOption(private$..sample)
+            self$.addOption(private$..jittx)
+            self$.addOption(private$..jitty)
+            self$.addOption(private$..bins)
+            self$.addOption(private$..text)
         }),
     active = list(
         out = function() private$..out$value,
@@ -85,9 +150,18 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         se = function() private$..se$value,
         line = function() private$..line$value,
         ghost = function() private$..ghost$value,
+        thirdeye = function() private$..thirdeye$value,
+        diff = function() private$..diff$value,
+        plmethod = function() private$..plmethod$value,
         resid = function() private$..resid$value,
+        suppr = function() private$..suppr$value,
         center = function() private$..center$value,
-        alpha = function() private$..alpha$value),
+        alpha = function() private$..alpha$value,
+        sample = function() private$..sample$value,
+        jittx = function() private$..jittx$value,
+        jitty = function() private$..jitty$value,
+        bins = function() private$..bins$value,
+        text = function() private$..text$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -95,9 +169,18 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..se = NA,
         ..line = NA,
         ..ghost = NA,
+        ..thirdeye = NA,
+        ..diff = NA,
+        ..plmethod = NA,
         ..resid = NA,
+        ..suppr = NA,
         ..center = NA,
-        ..alpha = NA)
+        ..alpha = NA,
+        ..sample = NA,
+        ..jittx = NA,
+        ..jitty = NA,
+        ..bins = NA,
+        ..text = NA)
 )
 
 flexplotaResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -148,9 +231,18 @@ flexplotaBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param se .
 #' @param line .
 #' @param ghost .
+#' @param thirdeye .
+#' @param diff .
+#' @param plmethod .
 #' @param resid .
+#' @param suppr .
 #' @param center .
 #' @param alpha .
+#' @param sample .
+#' @param jittx .
+#' @param jitty .
+#' @param bins .
+#' @param text .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -165,9 +257,18 @@ flexplota <- function(
     se = TRUE,
     line = "Loess",
     ghost = TRUE,
+    thirdeye = FALSE,
+    diff = FALSE,
+    plmethod = "Jittered-density plot",
     resid = FALSE,
+    suppr = FALSE,
     center = "Median + quartiles",
-    alpha = 50) {
+    alpha = 50,
+    sample = 100,
+    jittx = 0.2,
+    jitty = 0,
+    bins = 3,
+    text) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('flexplota requires jmvcore to be installed (restart may be required)')
@@ -190,9 +291,18 @@ flexplota <- function(
         se = se,
         line = line,
         ghost = ghost,
+        thirdeye = thirdeye,
+        diff = diff,
+        plmethod = plmethod,
         resid = resid,
+        suppr = suppr,
         center = center,
-        alpha = alpha)
+        alpha = alpha,
+        sample = sample,
+        jittx = jittx,
+        jitty = jitty,
+        bins = bins,
+        text = text)
 
     analysis <- flexplotaClass$new(
         options = options,

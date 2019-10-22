@@ -11,12 +11,11 @@
 ##' @param silent Should R tell you how it's handling the variables in the model that are not in the formula? Defaults to F. 
 ##' @param report.se Should standard errors be reported alongside the estimates? Defaults to F. 
 ##' @param re Should random effects be predicted? Only applies to mixed models. Defaults to F. 
+##' @param pred.type What type of predictions should be outputted? This is mostly for \code{glm} models. Defaults to "response." 
 ##' @param ... Other parameters passed to flexplot
 ##' @author Dustin Fife
 ##' @return Either a graphic or the predictions for the specified model(s)
 ##' @export
-##' @examples
-##' #not yet
 compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F, pred.type="response", ...){
 
 	#### if mod2 is null..

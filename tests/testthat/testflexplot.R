@@ -1,3 +1,4 @@
+
 require(testthat)
 require(vdiffr)
 context("Univariate plots")
@@ -9,6 +10,7 @@ d = exercise_data
 #### univariate plots
 histcont = flexplot(income~1, data=d)
 histcat = flexplot(gender~1, data=d)
+
 vdiffr::expect_doppelganger("histogram", histcont)
 vdiffr::expect_doppelganger("barchart", histcat)
 
@@ -66,3 +68,4 @@ g = flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE
 expect_doppelganger("ghost with using both second slots", g)   
 h = flexplot(gender~motivation | income + health, data=d, se=FALSE, method="logistic", ghost.line="gray")		
 expect_doppelganger("ghost with logistic regression", h)
+

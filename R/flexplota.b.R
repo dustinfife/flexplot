@@ -1,13 +1,10 @@
-
-# This file is a generated template, your changes will not be overwritten
-
 flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "flexplotaClass",
     inherit = flexplotaBase,
     private = list(
         .run = function() {
-        	
-						
+
+
 			
 			#### if they have both predictor and outcome
 			if (length(self$options$out)>0 & length(self$options$preds)>0){
@@ -23,6 +20,7 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					output = list(formula=formula, data=self$data)
 					image <- self$results$plot
 					image$setState(output)
+		
 			#### run if they do univariate stuff		
 			} else if (length(self$options$out)>0 & length(self$options$preds)==0 & length(self$options$given)==0){
 		        	#### write formula for flexplot
@@ -32,9 +30,9 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					output = list(formula=formula, data=self$data)
 					image <- self$results$plot
 					image$setState(output)
-			} else if (length(self$options$out)>0 & length(self$options$preds)>1 & length(self$options$given)>0 & self$options$ghost==TRUE){
-					jmvcore::reject("Sorry! You can't do ghost lines when you have two variables in the 'Predictor variables' box. Try putting one in the 'Paneled variables' box.")
-			}
+			} #else if (length(self$options$out)>0 & length(self$options$preds)>1 & length(self$options$given)>0 & self$options$ghost==TRUE){
+				#	jmvcore::reject("Sorry! You can't do ghost lines when you have two variables in the 'Predictor variables' box. Try putting one in the 'Paneled variables' box.")
+			#}
 			return(formula)
 		}
 		, 
@@ -46,62 +44,86 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			if (self$options$line=="Regression"){line ="lm"}
 			if (self$options$line=="Logistic"){line ="logistic"}
 			if (self$options$line=="Polynomial"){line ="polynomial"}
-			if (self$options$line=="Cubic"){line ="cubic"}						
-						
+			if (self$options$line=="Cubic"){line ="cubic"}	
+			if (self$options$line=="Robust"){line ="rlm"}				
+			if (self$options$sample==100){samp = Inf} else { samp = self$options$sample*.01*nrow(image$state$data)}					
+			#### record related = T if the conditions are met
+			related = FALSE
+			if (self$options$diff==TRUE & length(self$options$preds)==1){
+				if (length(unique(image$state$data[,self$options$preds]))==2 & 
+						table(image$state$data[,self$options$preds])[1]==table(image$state$data[,self$options$preds])[2]){
+							related = TRUE
+				}	
+			}
+								
             if (is.null(image$state))
                 return(FALSE)
             se.type = unlist(strsplit(self$options$center," + ", fixed=T))[2]			
 			formula = image$state$formula
 			data = image$state$data
-			
+			#save(se.type, file="/Users/fife/Dropbox/checkme.Rdat")		
+
+				### ADDED VARIABLE PLOT
 				### if they choose to residualize it
-			if (length(self$options$given)>0 & self$options$resid==TRUE) {
-            	plot = added.plot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01)	
-            	### if they choose to do a ghost line	
+			if ((length(self$options$given) + length(self$options$preds))>0 & self$options$resid==TRUE) {
+            	p = added.plot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins, suppress_smooth=self$options$suppr, related=related)	
+
+
+	    		### THIRD EYE
+			} else if ((length(self$options$preds) + length(self$options$given))>1 & self$options$thirdeye==T){
+				perms = ifelse((length(self$options$preds) + length(self$options$given)>2), 1:4, c(1,3))
+				p = third.eye(formula, data=data, fixed.positions=NULL, which.perms=1:perms, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="gray", sample = samp, jitter=c(self$options$jittx, self$options$jitty),suppress_smooth=self$options$suppr, bins=self$options$bins) 
+
+				#### GHOST LINES
             } else if (length(self$options$given)>0 & self$options$ghost==TRUE){
-            		
-            	#### first create initial plot
-            	plot = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="gray") 
-            	# plot = p$plot
+	            p = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="gray", sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins,suppress_smooth=self$options$suppr, related=related) 
+    formula = weight.loss~gender
 
-            	
-# #             	#### now add the ghost line (have to do it separately because of environment conflicts)
-            	# #### first get ghost.reference
-            	# k = p$data
-            	# ghost.reference = list()
-            	# for (i in 1:length(self$options$given)){
-            		# condition = k[1,self$options$given[i]]
-            		# k = k[k[,self$options$given[i]]==condition,]
-            	# }
+
+            } else {        	
+
+	            	p = flexplot(formula, data=data, se=self$options$se, spread=se.type, method=line,  alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty),suppress_smooth=self$options$suppr, bins=self$options$bins, related=related) #+ 
+	            	#	theme_bw(base_size = 16) +
+	            	#	theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
+	        }		
+            #plot = added.plot(conscientiousness~communication + gender, data=relationship_satisfaction)
+            #### find out where (if) geom_summary is
+            #save(self, data, p, se.type, file="/Users/fife/Dropbox/checkme.Rdat")		
+            #plot = flexplot(weight.loss~therapy.type, data=exercise_data, related=T)
+            geoms = sapply(p$layers, function(x) class(x$geom)[1])
+            if (self$options$plmethod != "Jittered-density plot" & "GeomErrorbar" %in% geoms & self$options$thirdeye==F){
+
+   				#### delete old summary
+				p$layers[[2]] = NULL
+				p$layers[[2]] = NULL
+				p$layers[[2]] = NULL
 				
-			
-				# ### identify which variables are in the given category
-				# ghost.given = self$options$given
+				##### figure out the correct geom
+				if (self$options$plmethod == "Boxplot"){
+					g = geom_boxplot()
+				} else if (self$options$plmethod=="Violin plot"){
+					g = geom_violin()
+				}
 				
-				# if (is.numeric(data[,self$options$preds[1]])){
-					# g0 = ggplot(data=k, aes_string(x=self$options$preds[1], y=self$options$out))+geom_smooth(method=line, se=self$options$se)
-				# } else {
-					# g0 = ggplot(data=k, aes_string(x=self$options$preds[1], y=self$options$out))+p$summary1 + p$summary2 + p$sum.line
-				# }
-				# d_smooth = ggplot_build(g0)$data[[1]]; 
-					
-				# ### rename columns
-				# names(d_smooth)[names(d_smooth)=="x"] = as.character(self$options$preds[1]); names(d_smooth)[names(d_smooth)=="y"] = self$options$out; 
-	
-            	# save(p,k, ghost.given, d_smooth, file="/Users/fife/Dropbox/jamovi.Rda")
-	
-				# ## add line to existing plot   
-	            # plot = plot + theme_bw(base_size = 16) +
-	            		# theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA)) +
-						# geom_line(data=d_smooth, aes_string(x=self$options$preds[1], y= self$options$out), color="gray")
-
-            } else {	
-            	plot = flexplot(formula, data=data, se=self$options$se, spread=se.type,method=line,  alpha = self$options$alpha*.01) + 
-	            		theme_bw(base_size = 16) +
-	            		theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
-
+				#### add new layer
+				p$layers = c(g, p$layers)
+				
             }
-			print(plot)
+            ### choose plot type
+            #if (!is.numeric(data[,self$options$preds[1]]) & )
+			print(p)
 			TRUE
-		}		
+		}
+		
+				
 ))
+
+#fifer2::clear()
+#load("/Users/fife/Dropbox/checkme.Rdat")
+#ls()
+#se.type
+#head(data)
+#self$options$center
+#formula = weight.loss~therapy.type
+
+#p$layers

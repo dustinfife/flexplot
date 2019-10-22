@@ -14,7 +14,6 @@ data(exercise_data); d= exercise_data
 flexplot(income~1, data=d)
 flexplot(gender~1, data=d)
 
-
 	#### previous bugs
 data(birthweight)
 d = birthweight
@@ -91,7 +90,10 @@ flexplot(weight.loss~rewards, data=k, related=T, jitter=c(.05,0))
 # ### CHI SQUARE PLOT (categorical on categorical)
 flexplot(gender~rewards, data=d, jitter=c(.05,0))
 
+
 #options(warn=-1)
+
+
 # ### INTERACTION PLOT			
 flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)
 flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)
