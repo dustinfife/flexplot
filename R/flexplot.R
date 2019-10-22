@@ -562,7 +562,13 @@ flexplot = function(formula, data=NULL, related=F,
 							
 		}
 		g0 = gsub("+xxxx", "", g0, fixed=T)
-		g0 = eval(parse(text=g0))
+		
+		#### if they have a logistic, modify the p to reflect the data
+		if (method=="logistic" & !is.numeric(k[,outcome])){
+		  g0 = gsub("data=[[:alnum:]]+,", "data=factor.to.logistic(k,outcome),", g0)
+		}
+		
+		g0 = eval(parse(text=g0))		
 		d_smooth = suppressMessages(ggplot_build(g0)$data[[1]])
 
 
@@ -665,7 +671,6 @@ flexplot = function(formula, data=NULL, related=F,
 		points = gsub("data\\)", "factor.to.logistic(data,outcome))", points)		
 		
 		#### change the y axis labels
-		
 		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	
 	}
 

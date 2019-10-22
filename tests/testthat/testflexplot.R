@@ -63,5 +63,6 @@ expect_doppelganger("ghost with choosing ONE panel", e)
 f = flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000, gender="female"))	
 expect_doppelganger("ghost with choosing second slot", f)          	
 g = flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000))		
-expect_doppelganger("ghost with using both second slots", g)          	
-?expect_doppelganger
+expect_doppelganger("ghost with using both second slots", g)   
+h = flexplot(gender~motivation | income + health, data=d, se=FALSE, method="logistic", ghost.line="gray")		
+expect_doppelganger("ghost with logistic regression", h)
