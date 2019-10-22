@@ -4,7 +4,11 @@ require(vdiffr)
 context("Univariate plots")
 
 require(flexplot)
+<<<<<<< HEAD
 data(exercise_data); data("relationship_satisfaction")
+=======
+data(exercise_data)
+>>>>>>> origin/jamovi_ui
 d = exercise_data
 
 #### univariate plots
@@ -49,6 +53,7 @@ vdiffr::expect_doppelganger("interaction plot", flexplot(weight.loss~therapy.typ
 vdiffr::expect_doppelganger("interaction plot panel", flexplot(weight.loss~therapy.type | gender, data=d, sample=50))
 vdiffr::expect_doppelganger("panelled logistic with sampling", flexplot(gender~weight.loss | therapy.type, data=d, sample=50, method="logistic"))	
 
+
 ### ghost lines
 a=flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red")	   
 expect_doppelganger("just ghost line", a)         
@@ -60,6 +65,7 @@ c = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method=
 expect_doppelganger("ghost with choosing panel", c)          	
 e = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31))
 expect_doppelganger("ghost with choosing ONE panel", e)          	
+
 f = flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", 
              ghost.reference=list("health"=31, "income"=90000, gender="female"))	
 expect_doppelganger("ghost with choosing second slot", f)          	
