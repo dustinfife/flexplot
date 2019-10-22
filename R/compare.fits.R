@@ -1,8 +1,9 @@
 ##' Compare the fits of two models
 ##'
-##' Compare the fits of two models
+##' This function takes two fitted models as input and plots them to visually compare how the two differ in terms of fit.
+##' It can take a \code{glm}, \code{rlm}, \code{lm}, and \code{randomForest} model (and maybe others as well). The function takes
+##' a \link{\code{flexplot}}-like formula as input.  
 ##'	
-##' Compare the fits of two models
 ##' @param formula A formula that can be used in flexplot. The variables inside must not include variables outside the fitted models. 
 ##' @param data The dataset containing the variables in formula
 ##' @param model1 The fitted model object (e.g., lm) containing the variables specified in the formula
@@ -16,6 +17,11 @@
 ##' @author Dustin Fife
 ##' @return Either a graphic or the predictions for the specified model(s)
 ##' @export
+##' @examples 
+##' data(exercise_data)
+##' mod1 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
+##' mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
+##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
 compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F, pred.type="response", ...){
 
 	#### if mod2 is null..
@@ -178,8 +184,6 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		prediction.model = pred.mod1
 		prediction.model = cbind(pred.values, prediction.model)
 	}
-	
-
 
 
 	#### eliminate those predictions that are higher than the range of the data
@@ -192,9 +196,6 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		#### if they supply a factor, convert it to a number!!!!!
 		prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
 	}
-
-
-
 
 	#### create flexplot
 	if (return.preds){

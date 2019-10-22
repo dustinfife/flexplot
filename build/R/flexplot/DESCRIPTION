@@ -12,4 +12,4 @@ Depends: stats
 Imports: jmvcore (>= 0.8.5), R6, cowplot, ggplot2, MASS, tibble, withr,
         dplyr, magrittr, forcats, purrr, knitr, lme4
 RoxygenNote: 6.1.1
-Built: R 3.3.0; ; 2019-10-22 19:43:20 UTC; unix
+Built: R 3.3.0; ; 2019-10-22 21:26:14 UTC; unix
