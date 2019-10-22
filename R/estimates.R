@@ -284,9 +284,9 @@ estimates.glm = function(object){
 	}
 	
 	
-	options(warn=0)
+	#options(warn=0)
 	coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
-
+  coef.matrix[,1:5] = round(coef.matrix[,1:5], digits=3)
 	
 	
 	#### for those that are factors, put the first prediction in the -1 SD column
