@@ -1,4 +1,5 @@
 .Rproj.user
 .Rhistory
 .RData
+^build$
 .Ruserdata

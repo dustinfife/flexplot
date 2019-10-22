@@ -32,10 +32,15 @@ compare.fits(formula, data, model1, model2 = NULL, return.preds = F,
 Either a graphic or the predictions for the specified model(s)
 }
 \description{
-Compare the fits of two models
+This function takes two fitted models as input and plots them to visually compare how the two differ in terms of fit.
+It can take a \code{glm}, \code{rlm}, \code{lm}, and \code{randomForest} model (and maybe others as well). The function takes
+a \link{\code{flexplot}}-like formula as input.
 }
-\details{
-Compare the fits of two models
+\examples{
+data(exercise_data)
+mod1 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
+mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
+compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
 }
 \author{
 Dustin Fife

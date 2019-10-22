@@ -3,7 +3,7 @@
 
 'use strict';
 
-const options = [{"name":"data","type":"Data"},{"name":"out","title":"Dependent variable","type":"Variable"},{"name":"preds","title":"Predictor variable","type":"Variables"},{"name":"given","title":"Paneled variable","type":"Variables"},{"name":"se","title":"Confidence bands (for scatterplots)","type":"Bool","default":true},{"name":"line","title":"Fitted line (for scatterplots)","type":"List","options":["Loess","Regression","Logistic","Polynomial","Cubic"],"default":"Loess"},{"name":"ghost","title":"Ghost line","type":"Bool","default":true},{"name":"thirdeye","title":"The \"third eye\"","type":"Bool","default":false},{"name":"diff","title":"Difference plot (related t)","type":"Bool","default":false},{"name":"plmethod","title":"Plot method (categorical predictors)","type":"List","options":["Jittered-density plot","Boxplot","Violin plot"],"default":"Jittered-density plot"},{"name":"resid","title":"Added variable plot","type":"Bool","default":false},{"name":"suppr","title":"Suppress fitted line","type":"Bool","default":false},{"name":"center","title":"Center/spread (categorical predictors)","type":"List","options":["Median + quartiles","Mean + sterr","Mean + stdev"],"default":"Median + quartiles"},{"name":"alpha","title":"Transparency of dots (%)","type":"Number","min":0,"max":100,"default":50},{"name":"sample","title":"Percent of dots to display","type":"Number","min":0,"max":100,"default":100},{"name":"jittx","title":"Amount of jittering in X","type":"Number","min":0,"max":0.5,"default":0.2},{"name":"jitty","title":"Amount of jittering in Y","type":"Number","min":0,"max":0.5,"default":0},{"name":"bins","title":"Number of bins (for numeric variables)","type":"Number","min":2,"max":6,"default":3},{"name":"text","type":"String"}];
+const options = [{"name":"data","type":"Data"},{"name":"out","title":"Dependent variable","type":"Variable"},{"name":"preds","title":"Predictor variable","type":"Variables"},{"name":"given","title":"Paneled variable","type":"Variables"},{"name":"se","title":"Confidence bands (for scatterplots)","type":"Bool","default":true},{"name":"line","title":"Fitted line (for scatterplots)","type":"List","options":["Loess","Regression","Logistic","Polynomial","Cubic"],"default":"Loess"},{"name":"ghost","title":"Ghost line","type":"Bool","default":true},{"name":"diff","title":"Difference plot (related t)","type":"Bool","default":false},{"name":"plmethod","title":"Plot method (categorical predictors)","type":"List","options":["Jittered-density plot","Boxplot","Violin plot"],"default":"Jittered-density plot"},{"name":"resid","title":"Added variable plot","type":"Bool","default":false},{"name":"suppr","title":"Suppress fitted line","type":"Bool","default":false},{"name":"center","title":"Center/spread (categorical predictors)","type":"List","options":["Median + quartiles","Mean + sterr","Mean + stdev"],"default":"Median + quartiles"},{"name":"alpha","title":"Transparency of dots (%)","type":"Number","min":0,"max":100,"default":50},{"name":"sample","title":"Percent of dots to display","type":"Number","min":0,"max":100,"default":100},{"name":"jittx","title":"Amount of jittering in X","type":"Number","min":0,"max":0.5,"default":0.2},{"name":"jitty","title":"Amount of jittering in Y","type":"Number","min":0,"max":0.5,"default":0},{"name":"bins","title":"Number of bins (for numeric variables)","type":"Number","min":2,"max":6,"default":3}];
 
 const view = function() {
     
@@ -100,11 +100,6 @@ view.layout = ui.extend({
 				{
 					type: DefaultControls.CheckBox,
 					typeName: 'CheckBox',
-					name: "thirdeye"
-				},
-				{
-					type: DefaultControls.CheckBox,
-					typeName: 'CheckBox',
 					name: "diff"
 				}
 			]
@@ -197,19 +192,6 @@ view.layout = ui.extend({
 					typeName: 'TextBox',
 					name: "bins",
 					format: FormatDef.number
-				}
-			]
-		},
-		{
-			type: DefaultControls.LayoutBox,
-			typeName: 'LayoutBox',
-			margin: "large",
-			controls: [
-				{
-					type: DefaultControls.TextBox,
-					typeName: 'TextBox',
-					name: "text",
-					format: FormatDef.string
 				}
 			]
 		}

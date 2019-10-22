@@ -8,7 +8,7 @@ flexplota(data, out, preds, given, se = TRUE, line = "Loess",
   ghost = TRUE, thirdeye = FALSE, diff = FALSE,
   plmethod = "Jittered-density plot", resid = FALSE, suppr = FALSE,
   center = "Median + quartiles", alpha = 50, sample = 100,
-  jittx = 0.2, jitty = 0, bins = 3, text)
+  jittx = 0.2, jitty = 0, bins = 3)
 }
 \arguments{
 \item{data}{.}
@@ -46,8 +46,6 @@ flexplota(data, out, preds, given, se = TRUE, line = "Loess",
 \item{jitty}{.}
 
 \item{bins}{.}
-
-\item{text}{.}
 }
 \value{
 A results object containing:
