@@ -1,5 +1,13 @@
+
+require(testthat)
+require(vdiffr)
 context("Univariate plots")
 
+require(flexplot)
+data(exercise_data)
+d = exercise_data
+
+#### univariate plots
 histcont = flexplot(income~1, data=d)
 histcat = flexplot(gender~1, data=d)
 
@@ -29,3 +37,35 @@ vdiffr::expect_doppelganger("mean one jitter", flexplot(weight.loss~therapy.type
 vdiffr::expect_doppelganger("mean both jitter", flexplot(weight.loss~therapy.type, data=d, jitter=c(.3, .5))	)
 #vdiffr::expect_doppelganger("flexplot(gender~therapy.type, data=d, jitter=c(.3, .5), method="logistic")		)
 	### intentional error
+
+
+## unconventional plots
+k = d
+deleteme = which(k$rewards=="no rewards")
+k = k[-(deleteme[1:2]),]
+vdiffr::expect_doppelganger("related T", flexplot(weight.loss~rewards, data=k, related=T))
+vdiffr::expect_doppelganger("association plot", flexplot(gender~rewards, data=d, jitter=c(.05,0)))
+vdiffr::expect_doppelganger("interaction plot", flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4))
+vdiffr::expect_doppelganger("interaction plot panel", flexplot(weight.loss~therapy.type | gender, data=d, sample=50))
+vdiffr::expect_doppelganger("panelled logistic with sampling", flexplot(gender~weight.loss | therapy.type, data=d, sample=50, method="logistic"))	
+
+	
+
+### ghost lines
+a=flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red")	   
+expect_doppelganger("just ghost line", a)         
+b = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",
+	breaks = list(income = c(95000, 100000, 105000)),
+ 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	
+expect_doppelganger("ghost with breaks/labels", b)          	
+c = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	
+expect_doppelganger("ghost with choosing panel", c)          	
+e = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31))
+expect_doppelganger("ghost with choosing ONE panel", e)          	
+f = flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000, gender="female"))	
+expect_doppelganger("ghost with choosing second slot", f)          	
+g = flexplot(weight.loss~motivation + therapy.type | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000))		
+expect_doppelganger("ghost with using both second slots", g)   
+h = flexplot(gender~motivation | income + health, data=d, se=FALSE, method="logistic", ghost.line="gray")		
+expect_doppelganger("ghost with logistic regression", h)
+

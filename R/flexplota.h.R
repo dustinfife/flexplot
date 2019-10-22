@@ -22,8 +22,7 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             sample = 100,
             jittx = 0.2,
             jitty = 0,
-            bins = 3,
-            text = NULL, ...) {
+            bins = 3, ...) {
 
             super$initialize(
                 package='flexplot',
@@ -120,9 +119,6 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 min=2,
                 max=6,
                 default=3)
-            private$..text <- jmvcore::OptionString$new(
-                "text",
-                text)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -141,7 +137,6 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..jittx)
             self$.addOption(private$..jitty)
             self$.addOption(private$..bins)
-            self$.addOption(private$..text)
         }),
     active = list(
         out = function() private$..out$value,
@@ -160,8 +155,7 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         sample = function() private$..sample$value,
         jittx = function() private$..jittx$value,
         jitty = function() private$..jitty$value,
-        bins = function() private$..bins$value,
-        text = function() private$..text$value),
+        bins = function() private$..bins$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -179,8 +173,7 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..sample = NA,
         ..jittx = NA,
         ..jitty = NA,
-        ..bins = NA,
-        ..text = NA)
+        ..bins = NA)
 )
 
 flexplotaResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -242,7 +235,6 @@ flexplotaBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param jittx .
 #' @param jitty .
 #' @param bins .
-#' @param text .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -267,8 +259,7 @@ flexplota <- function(
     sample = 100,
     jittx = 0.2,
     jitty = 0,
-    bins = 3,
-    text) {
+    bins = 3) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('flexplota requires jmvcore to be installed (restart may be required)')
@@ -301,8 +292,7 @@ flexplota <- function(
         sample = sample,
         jittx = jittx,
         jitty = jitty,
-        bins = bins,
-        text = text)
+        bins = bins)
 
     analysis <- flexplotaClass$new(
         options = options,

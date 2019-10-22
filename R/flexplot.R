@@ -137,7 +137,7 @@ flexplot = function(formula, data=NULL, related=F,
 		not.there = variables[which(!(variables %in% names(data)))]
 		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))
 	}
-	
+
 	
 	#### make sure all names are in the dataset
 	if (!all(variables %in% names(data))){
@@ -230,7 +230,11 @@ flexplot = function(formula, data=NULL, related=F,
 			}
 			
 			if (!is.null(labels)){
-				bins = length(labels[[i]])
+				if (length(labels)>=i){
+					bins = length(labels[[i]])
+				} else {
+					bins = 3
+				}
 			}			
 			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)
 		}
@@ -380,6 +384,7 @@ flexplot = function(formula, data=NULL, related=F,
 		### remove the default color if they have something in the second axis
 		if (!is.numeric(data[,axis[2]])){
 			fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)
+			fitted = gsub(', color = "#bf0303"', "", fitted, fixed=T)
 		}	
 	}
 
@@ -435,7 +440,7 @@ flexplot = function(formula, data=NULL, related=F,
 
 	
 
-	if (!is.null(ghost.line)){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
+	if (!is.null(ghost.line) & !is.na(given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
 
 		### quit if they try to do two axes
 		# if (!is.na(axis[2])){
@@ -481,23 +486,33 @@ flexplot = function(formula, data=NULL, related=F,
 		
 			
 		} else {
-						
+				
+		  #### if they have an axis 2 variable
+		  if (length(axis)>1){
+		    if (!is.na(given)){
+		      to.bin = c(axis[2], given)
+		    } else {
+		      to.bin = axis[2]
+		    } 
+		  } else {
+		    to.bin = given
+		  }
+		  		
 			#### if they don't specify any reference group, choose the middle one
-
-			ghost.reference=list()
-			for (b in 1:length(given)){
-				given.bin = paste0(given[b], "_binned")
+    	ghost.reference=list()
+			for (b in 1:length(to.bin)){
+				given.bin = paste0(gsub("_binned", "", to.bin[b]), "_binned")
 				### format given as a binned variable
-				l = data[,given.bin]
+				l = factor(data[,given.bin])
 
 				middle = levels(l); middle = middle[round((length(middle))/2)]
-				ghost.reference[[given[b]]]=middle
+				ghost.reference[[to.bin[b]]]=middle
 			}
 
 			#### if they have an axis[2], add that to the ghost reference
-			if (length(axis)>1){
-				ghost.reference[[axis[2]]] = data[,axis[2]]
-			}
+			# if (length(axis)>1){
+			# 	ghost.reference[[axis[2]]] = data[,axis[2]]
+			# }
 			
 			if (!silent){message(paste0("Note: You didn't specify a reference for the ghost line, which means I get to chose it. That shows a lot of trust. I appreciate that. I won't let you down."))}
 
@@ -558,9 +573,14 @@ flexplot = function(formula, data=NULL, related=F,
 							
 		}
 		g0 = gsub("+xxxx", "", g0, fixed=T)
-		g0 = eval(parse(text=g0))
+		
+		#### if they have a logistic, modify the p to reflect the data
+		if (method=="logistic" & !is.numeric(k[,outcome])){
+		  g0 = gsub("data=[[:alnum:]]+,", "data=factor.to.logistic(k,outcome),", g0)
+		}
+		
+		g0 = eval(parse(text=g0))		
 		d_smooth = suppressMessages(ggplot_build(g0)$data[[1]])
-
 
 
 		### rename columns
@@ -571,8 +591,9 @@ flexplot = function(formula, data=NULL, related=F,
 			d_smooth$model = factor(d_smooth$group, labels=levels(prediction$model))
 			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line, show.legend=F)'			
 		} else if (length(axis)>1){	
-			d_smooth[,axis[2]] = factor(d_smooth$group, labels=levels(data[,axis[2]]))
-			
+			#### used to be factoring d_smooth$group, but that gave different groups for each color AND line, so just making it line now
+		  d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=levels(data[,axis[2]]))
+
 			### if the ghost line specifies a specific line to plot...
 			axis2_notbinned = gsub("_binned", "",axis[2])
 			if (axis2_notbinned %in% names(ghost.reference)){
@@ -661,7 +682,6 @@ flexplot = function(formula, data=NULL, related=F,
 		points = gsub("data\\)", "factor.to.logistic(data,outcome))", points)		
 		
 		#### change the y axis labels
-		
 		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	
 	}
 
@@ -670,6 +690,7 @@ flexplot = function(formula, data=NULL, related=F,
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
 	final = suppressMessages(eval(parse(text=total.call)))
+
 		### suppress messages only works for print messages, but print messages actually show the plot (even when i want to store it for laster use). Thus, I need both. Weird. 
 	#return(final)
 	#class(final) <- c("flexplot", class(final))

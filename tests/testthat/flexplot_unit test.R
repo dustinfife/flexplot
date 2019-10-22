@@ -11,10 +11,8 @@ require(flexplot)
 
 	#### univariate plots
 data(exercise_data); d= exercise_data
-a = flexplot(income~1, data=d)
-b = flexplot(gender~1, data=d)
-require(ggplot2)
-ggsave(plot=cowplot::plot_grid(a), filename="research/RPackages/flexplot/plots/univariate_flexplot_test.jpg")
+flexplot(income~1, data=d)
+flexplot(gender~1, data=d)
 
 	#### previous bugs
 data(birthweight)
@@ -91,6 +89,9 @@ flexplot(weight.loss~rewards, data=k, related=T, jitter=c(.05,0))
 
 # ### CHI SQUARE PLOT (categorical on categorical)
 flexplot(gender~rewards, data=d, jitter=c(.05,0))
+
+
+#options(warn=-1)
 
 
 # ### INTERACTION PLOT			

@@ -61,7 +61,7 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             se.type = unlist(strsplit(self$options$center," + ", fixed=T))[2]			
 			formula = image$state$formula
 			data = image$state$data
-			#save(se.type, file="/Users/fife/Dropbox/checkme.Rdat")		
+			save(self, data, formula, file="/Users/fife/Dropbox/checkme.Rdat")		
 
 				### ADDED VARIABLE PLOT
 				### if they choose to residualize it

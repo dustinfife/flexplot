@@ -114,10 +114,6 @@ options:
       min: 2
       max: 6
       default: 3            
-  
-    - name: text
-      type: String
-                        
       
       
 ...
