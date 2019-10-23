@@ -15,11 +15,4 @@ LaTeX: pdfLaTeX
 BuildType: Package
 PackageUseDevtools: Yes
 PackageInstallArgs: --no-multiarch --with-keep.source
-<<<<<<< HEAD
-<<<<<<< Updated upstream
 PackageRoxygenize: rd,collate,namespace
-=======
->>>>>>> Stashed changes
-=======
-PackageRoxygenize: rd,collate,namespace
->>>>>>> origin/jamovi_ui

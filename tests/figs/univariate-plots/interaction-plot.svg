@@ -252,13 +252,8 @@
 <polyline points='501.01,169.77 520.00,169.77 ' style='stroke-width: 2.67; stroke: #F8766D; stroke-linecap: butt;' clip-path='url(#cpMzUuNzB8NjQzLjQ1fDU0NS4xM3wyMi43Nw==)' />
 <polyline points='510.51,169.77 510.51,310.16 ' style='stroke-width: 2.67; stroke: #F8766D; stroke-linecap: butt;' clip-path='url(#cpMzUuNzB8NjQzLjQ1fDU0NS4xM3wyMi43Nw==)' />
 <polyline points='501.01,310.16 520.00,310.16 ' style='stroke-width: 2.67; stroke: #F8766D; stroke-linecap: butt;' clip-path='url(#cpMzUuNzB8NjQzLjQ1fDU0NS4xM3wyMi43Nw==)' />
-<<<<<<< HEAD
 <polyline points='130.66,292.61 320.58,257.51 510.51,239.96 ' style='stroke-width: 1.07; stroke: #F8766D; stroke-linecap: butt;' clip-path='url(#cpMzUuNzB8NjQzLjQ1fDU0NS4xM3wyMi43Nw==)' />
 <polyline points='168.64,275.06 358.57,222.41 548.49,222.41 ' style='stroke-width: 1.07; stroke: #00BFC4; stroke-dasharray: 2.85,2.85; stroke-linecap: butt;' clip-path='url(#cpMzUuNzB8NjQzLjQ1fDU0NS4xM3wyMi43Nw==)' />
-=======
-<polyline points='130.66,292.61 320.58,257.51 510.51,239.96 ' style='stroke-width: 1.07; stroke: #BF0303; stroke-linecap: butt;' clip-path='url(#cpMzUuNzB8NjQzLjQ1fDU0NS4xM3wyMi43Nw==)' />
-<polyline points='168.64,275.06 358.57,222.41 548.49,222.41 ' style='stroke-width: 1.07; stroke: #BF0303; stroke-dasharray: 2.85,2.85; stroke-linecap: butt;' clip-path='url(#cpMzUuNzB8NjQzLjQ1fDU0NS4xM3wyMi43Nw==)' />
->>>>>>> origin/jamovi_ui
 <rect x='35.70' y='22.77' width='607.76' height='522.36' style='stroke-width: 1.07; stroke: #333333;' clip-path='url(#cpMzUuNzB8NjQzLjQ1fDU0NS4xM3wyMi43Nw==)' />
 <defs>
   <clipPath id='cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA='>
@@ -285,20 +280,12 @@
 <circle cx='668.53' cy='282.97' r='1.95pt' style='stroke-width: 0.71; stroke: none; fill: #F8766D; fill-opacity: 0.40;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
 <circle cx='668.53' cy='282.97' r='3.56pt' style='stroke-width: 0.71; stroke: none; fill: #F8766D;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
 <line x1='661.62' y1='282.97' x2='675.44' y2='282.97' style='stroke-width: 2.67; stroke: #F8766D; stroke-linecap: butt;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
-<<<<<<< HEAD
 <line x1='661.62' y1='282.97' x2='675.44' y2='282.97' style='stroke-width: 1.07; stroke: #F8766D; stroke-linecap: butt;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
-=======
-<line x1='661.62' y1='282.97' x2='675.44' y2='282.97' style='stroke-width: 1.07; stroke: #BF0303; stroke-linecap: butt;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
->>>>>>> origin/jamovi_ui
 <rect x='659.89' y='291.61' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
 <polygon points='668.53,297.21 671.16,301.77 665.90,301.77 ' style='stroke-width: 0.71; stroke: none; fill: #00BFC4; fill-opacity: 0.40;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
 <polygon points='668.53,294.72 673.32,303.02 663.74,303.02 ' style='stroke-width: 0.71; stroke: none; fill: #00BFC4;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
 <line x1='661.62' y1='300.25' x2='675.44' y2='300.25' style='stroke-width: 2.67; stroke: #00BFC4; stroke-dasharray: 7.11,7.11; stroke-linecap: butt;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
-<<<<<<< HEAD
 <line x1='661.62' y1='300.25' x2='675.44' y2='300.25' style='stroke-width: 1.07; stroke: #00BFC4; stroke-dasharray: 2.85,2.85; stroke-linecap: butt;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
-=======
-<line x1='661.62' y1='300.25' x2='675.44' y2='300.25' style='stroke-width: 1.07; stroke: #BF0303; stroke-dasharray: 2.85,2.85; stroke-linecap: butt;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
->>>>>>> origin/jamovi_ui
 <g clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)'><text x='682.65' y='286.00' style='font-size: 8.80px; font-family: Liberation Sans;' textLength='19.06px' lengthAdjust='spacingAndGlyphs'>male</text></g>
 <g clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)'><text x='682.65' y='303.28' style='font-size: 8.80px; font-family: Liberation Sans;' textLength='26.39px' lengthAdjust='spacingAndGlyphs'>female</text></g>
 <g clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)'><text x='35.70' y='14.56' style='font-size: 13.20px; font-family: Liberation Sans;' textLength='85.72px' lengthAdjust='spacingAndGlyphs'>interaction plot</text></g>

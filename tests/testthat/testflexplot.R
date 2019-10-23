@@ -4,11 +4,7 @@ require(vdiffr)
 context("Univariate plots")
 
 require(flexplot)
-<<<<<<< HEAD
 data(exercise_data); data("relationship_satisfaction")
-=======
-data(exercise_data)
->>>>>>> origin/jamovi_ui
 d = exercise_data
 
 #### univariate plots
@@ -30,6 +26,7 @@ vdiffr::expect_doppelganger("scatter cubic", flexplot(weight.loss~motivation, da
 vdiffr::expect_doppelganger("scatter logistic jittery", flexplot(gender~health, data=d, se=FALSE, method="logistic", jitter=c(0, .1)))	
 
 # ### mean plots
+options(warn=-1)
 vdiffr::expect_doppelganger("mean plot", flexplot(weight.loss~therapy.type, data=d))
 vdiffr::expect_doppelganger("mean stdev", flexplot(weight.loss~therapy.type, data=d, spread="stdev"))
 vdiffr::expect_doppelganger("mean sterr", flexplot(weight.loss~therapy.type, data=d, spread="sterr"))
@@ -75,3 +72,4 @@ h = flexplot(gender~motivation | income + health, data=d, se=FALSE, method="logi
 expect_doppelganger("ghost with logistic regression", h)
 i = flexplot(conscientiousness ~ honesty + separated | gender, data=relationship_satisfaction, ghost.line="green")
 expect_doppelganger("ghost with previous bug", i)
+options(warn=0)
