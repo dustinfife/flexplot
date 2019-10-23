@@ -23,7 +23,7 @@
 ##' mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
 ##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
 compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F, pred.type="response", ...){
-
+  
 	#### if mod2 is null..
 	if (is.null(model2)){
 		model2 = model1
@@ -47,6 +47,11 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	variables = all.vars(formula)
     outcome = variables[1]
     predictors = variables[-1]
+    
+    #### for the rare occasion where deleting missing data changes the levels...
+    if (length(predict(model1))<nrow(data) | length(predict(model2))<nrow(data)){
+      data = na.omit(data[,variables])
+    }    
     
     ##### make sure they're putting the same variables from formula in terms
 	if (!(all(predictors %in% testme))){

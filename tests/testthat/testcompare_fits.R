@@ -25,6 +25,9 @@ test_that("compare.fits linear models", {
                               compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2))
   vdiffr::expect_doppelganger("compare.fits with many vars and polynomial v2",
                               compare.fits(weight.loss ~muscle.gain +therapy.type | motivation + health, data=d, model1=mod1))
+  data("relationship_satisfaction")
+  vdiffr::expect_doppelganger("compare.fits where listwise deletion causes change in levels",
+                              compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod))
 })
 
 test_that("compare.fits for other models", {
