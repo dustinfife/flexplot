@@ -19,5 +19,6 @@ Imports: cowplot,
 	forcats, 
 	purrr
 Suggests: jmvcore (>= 0.8.5), 
-	R6
+	R6,
+	vdiffr
 RoxygenNote: 6.1.1
