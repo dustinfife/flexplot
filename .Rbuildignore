@@ -1,9 +1,13 @@
-^README\.Rmd$       # An Rmarkdown file used to generate README.md
+^README.Rmd$
+^README2.Rmd$
+^README2.html$
+^README.html$
 ^\.git$     
 jamovi
+.travis.yml
 ^build$
-^icon\.png$ 
-^icon\.svg$ 
+^icon.svg$
 ^flexplot.jmo$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+tests/figs/

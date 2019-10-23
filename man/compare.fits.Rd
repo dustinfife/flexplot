@@ -34,7 +34,7 @@ Either a graphic or the predictions for the specified model(s)
 \description{
 This function takes two fitted models as input and plots them to visually compare how the two differ in terms of fit.
 It can take a \code{glm}, \code{rlm}, \code{lm}, and \code{randomForest} model (and maybe others as well). The function takes
-a \link{\code{flexplot}}-like formula as input.
+a \code{\link{flexplot}}-like formula as input.
 }
 \examples{
 data(exercise_data)
