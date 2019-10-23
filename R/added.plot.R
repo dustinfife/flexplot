@@ -55,5 +55,7 @@ added.plot = function(formula, data, ...){
 	
 	##### now plot that succa
 	new.form = make.formula("residuals", res.variable)
-	flexplot(new.form, data=data, ...) + labs(y=paste0(outcome, " | ", paste0(remaining.vars, collapse=", ")))
+	plot = flexplot(new.form, data=data, ...) + labs(y=paste0(outcome, " | ", paste0(remaining.vars, collapse=", ")))
+	class(plot) <- c("flexplot", class(plot))
+	return(plot)
 }

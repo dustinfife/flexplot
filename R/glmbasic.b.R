@@ -139,7 +139,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			data = image$state$data
             mod = lm(formula, data=data)
             theme_set(theme_bw(base_size = 16))
-            plot = visualize(mod, plot="bivariate", se=self$options$se, method=line, spread=se.type) + 
+            plot = visualize(mod, plot="model", se=self$options$se, method=line, spread=se.type) + 
             	theme(panel.background = element_rect(fill = "transparent",colour = NA), 
             		line = element_blank(), 
             		text = element_blank(), 

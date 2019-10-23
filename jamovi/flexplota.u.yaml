@@ -3,6 +3,9 @@ name: flexplota
 jus: '2.0'
 stage: 0
 compilerMode: tame
+events:
+  update: './flexplota.events::update'
+  remoteDataChanged: './flexplota.events::onRemoteDataChanged'
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -21,35 +24,69 @@ children:
           - type: VariablesListBox
             name: preds
             isTarget: true
+            events:
+              change: './flexplota.events::onChange_preds'
       - type: TargetLayoutBox
         label: Paneled variable
         children:
           - type: VariablesListBox
             name: given
             isTarget: true
-  - type: LayoutBox
+            events:
+              change: './flexplota.events::onChange_given'
+  - type: CollapseBox
+    label: Plot type
+    collapsed: true
     margin: large
+    stretchFactor: 1
     children:
-      - type: LayoutBox
-        margin: large
-        stretchFactor: 1
-        cell:
-          column: 0
-          row: 0
-        children:
-          - type: Label
-            label: Graphic Options
-            children:
-              - type: CheckBox
-                name: se
-              - type: CheckBox
-                name: ghost
-              - type: CheckBox
-                name: resid
-              - type: ComboBox
-                name: line
-              - type: ComboBox
-                name: center
-              - type: TextBox
-                name: alpha
-                format: number
+      - type: CheckBox
+        name: resid
+      - type: CheckBox
+        name: diff
+  - type: CollapseBox
+    label: Fit options
+    collapsed: true
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: CheckBox
+        name: se
+      - type: ComboBox
+        name: line
+      - type: CheckBox
+        name: suppr
+      - type: ComboBox
+        name: center
+      - type: ComboBox
+        name: plmethod
+  - type: CollapseBox
+    label: Point options
+    collapsed: true
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: TextBox
+        name: alpha
+        format: number
+      - type: TextBox
+        name: sample
+        format: number
+      - type: TextBox
+        name: jittx
+        format: number
+      - type: TextBox
+        name: jitty
+        format: number
+  - type: CollapseBox
+    label: Paneling options
+    collapsed: true
+    name: panel_box
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: CheckBox
+        name: ghost
+      - type: TextBox
+        name: bins
+        format: number

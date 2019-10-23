@@ -1,0 +1,21 @@
+language: r
+cache: packages
+warnings_are_errors: false
+
+r:
+  - oldrel
+  - release
+  - devel
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+    
+    # for codecov
+r_packages:
+  - covr
+
+# only report coverage after build is successful
+after_success:
+  - Rscript -e 'covr::codecov()'

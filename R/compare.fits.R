@@ -1,8 +1,9 @@
 ##' Compare the fits of two models
 ##'
-##' Compare the fits of two models
+##' This function takes two fitted models as input and plots them to visually compare how the two differ in terms of fit.
+##' It can take a \code{glm}, \code{rlm}, \code{lm}, and \code{randomForest} model (and maybe others as well). The function takes
+##' a \code{\link{flexplot}}-like formula as input.  
 ##'	
-##' Compare the fits of two models
 ##' @param formula A formula that can be used in flexplot. The variables inside must not include variables outside the fitted models. 
 ##' @param data The dataset containing the variables in formula
 ##' @param model1 The fitted model object (e.g., lm) containing the variables specified in the formula
@@ -11,14 +12,18 @@
 ##' @param silent Should R tell you how it's handling the variables in the model that are not in the formula? Defaults to F. 
 ##' @param report.se Should standard errors be reported alongside the estimates? Defaults to F. 
 ##' @param re Should random effects be predicted? Only applies to mixed models. Defaults to F. 
+##' @param pred.type What type of predictions should be outputted? This is mostly for \code{glm} models. Defaults to "response." 
 ##' @param ... Other parameters passed to flexplot
 ##' @author Dustin Fife
 ##' @return Either a graphic or the predictions for the specified model(s)
 ##' @export
-##' @examples
-##' #not yet
+##' @examples 
+##' data(exercise_data)
+##' mod1 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
+##' mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
+##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
 compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F, pred.type="response", ...){
-
+  
 	#### if mod2 is null..
 	if (is.null(model2)){
 		model2 = model1
@@ -42,6 +47,11 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	variables = all.vars(formula)
     outcome = variables[1]
     predictors = variables[-1]
+    
+    #### for the rare occasion where deleting missing data changes the levels...
+    if (length(predict(model1))<nrow(data) | length(predict(model2))<nrow(data)){
+      data = na.omit(data[,variables])
+    }    
     
     ##### make sure they're putting the same variables from formula in terms
 	if (!(all(predictors %in% testme))){
@@ -179,8 +189,6 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		prediction.model = pred.mod1
 		prediction.model = cbind(pred.values, prediction.model)
 	}
-	
-
 
 
 	#### eliminate those predictions that are higher than the range of the data
@@ -193,9 +201,6 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		#### if they supply a factor, convert it to a number!!!!!
 		prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
 	}
-
-
-
 
 	#### create flexplot
 	if (return.preds){
