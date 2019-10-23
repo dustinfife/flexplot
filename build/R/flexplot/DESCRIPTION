@@ -1,7 +1,7 @@
 Package: flexplot
 Type: Package
 Title: Graphically Based Data Analysis Using Flexplot
-Version: 0.6.2
+Version: 0.6.3
 Author: Dustin Fife
 Maintainer: Dustin Fife <fife.dustin@gmail.com>
 Description: The ‘flexplot’ suite is a graphically-based set of tools for doing data analysis. flexplot() allows users to specify a formula and the software automatically chooses what sort of graphic to present. Analysis can be paired with visuals using the visualize() function, such that the software will choose an appropriate graphic to match an R model object.
@@ -9,7 +9,8 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Depends: stats
-Imports: jmvcore (>= 0.8.5), R6, cowplot, ggplot2, MASS, tibble, withr,
-        dplyr, magrittr, forcats, purrr, knitr, lme4
+Imports: cowplot, ggplot2, MASS, tibble, withr, dplyr, magrittr,
+        forcats, purrr
+Suggests: jmvcore (>= 0.8.5), R6
 RoxygenNote: 6.1.1
-Built: R 3.3.0; ; 2019-10-22 23:49:03 UTC; unix
+Built: R 3.3.0; ; 2019-10-23 00:22:08 UTC; unix
