@@ -23,6 +23,7 @@ Suggests: jmvcore (>= 0.8.5),
 	vdiffr,
 	knitr,
 	lme4,
-	testthat
+	testthat,
+	randomForest
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
