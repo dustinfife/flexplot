@@ -11,3 +11,6 @@ jamovi
 ^.*\.Rproj$
 ^\.Rproj\.user$
 tests/figs/
+README_files/
+^doc$
+^Meta$

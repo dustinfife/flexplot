@@ -1,6 +1,7 @@
 #' Alcohol use among youth
 #'
 #' A dataset containing alcohol use from 82 youth over the course of three years
+#' @importFrom utils packageVersion
 #'
 #' @format A data frame with 246 rows and 9 variables:
 #' \describe{

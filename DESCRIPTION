@@ -20,5 +20,9 @@ Imports: cowplot,
 	purrr,
 	R6
 Suggests: jmvcore (>= 0.8.5), 
-	vdiffr
+	vdiffr,
+	knitr,
+	lme4,
+	testthat
 RoxygenNote: 6.1.1
+VignetteBuilder: knitr

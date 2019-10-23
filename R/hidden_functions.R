@@ -407,7 +407,15 @@ fit.function = function(outcome, predictors, data, suppress_smooth, method, spre
 
 		}
 		
-		fit.string = paste0(summary1, "+",summary2, "+", sum.line)			
+		fit.string = paste0(summary1, "+",summary2, "+", sum.line)		
+		### check package version of ggplot2
+		if (packageVersion("ggplot2")>"3.2.1.0"){
+		  fit.string = gsub("fun.ymin", "fun.min", fit.string, fixed=T)
+		  fit.string = gsub("fun.ymax", "fun.max", fit.string, fixed=T)
+		  fit.string = gsub("fun.y", "fun", fit.string, fixed=T)
+		} else {
+		  
+		}
 		
 	}
 	

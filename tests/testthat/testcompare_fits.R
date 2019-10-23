@@ -7,8 +7,8 @@ set.seed(1212)
 test_that("compare.fits linear models", {
   model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
   model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
-  vdiffr::expect_doppelganger("compare interaction vs. me",compare.fits(weight.loss ~ motivation | therapy.type, 
-               data = exercise_data, model.me, model.int, ghost.line = "black"))            
+  suppressWarnings(vdiffr::expect_doppelganger("compare interaction vs. me",compare.fits(weight.loss ~ motivation | therapy.type, 
+               data = exercise_data, model.me, model.int, ghost.line = "black")))
 
   ### compare interaction and non-interaction models
   mod = lm(wl ~motivation+rewards, data=d)
@@ -26,6 +26,8 @@ test_that("compare.fits linear models", {
   vdiffr::expect_doppelganger("compare.fits with many vars and polynomial v2",
                               compare.fits(weight.loss ~muscle.gain +therapy.type | motivation + health, data=d, model1=mod1))
   data("relationship_satisfaction")
+  full.mod = lm(satisfaction~communication * separated , data=relationship_satisfaction)
+  reduced.mod = lm(satisfaction~communication + separated , data=relationship_satisfaction)
   vdiffr::expect_doppelganger("compare.fits where listwise deletion causes change in levels",
                               compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod))
 })
