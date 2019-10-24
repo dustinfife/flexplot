@@ -72,29 +72,4 @@
 # #compare.fits(satisfaction~interests + separated, data=d, model1=mod)		
 # 
 # 
-# 		##### model.comparisons
-# a = lm(weight.loss~motivation, data=d)
-# b = lm(weight.loss~motivation + therapy.type, data=d)		
-# model.comparison(a,b)
-# 
-# a = lm(weight.loss~motivation + gender, data=d)
-# b = lm(weight.loss~motivation + therapy.type, data=d)		
-# model.comparison(a,b)
-# model1 = a; model2=b
-# a = lm(weight.loss~motivation + gender, data=d)
-# b = lm(weight.loss~therapy.type, data=d)		
-# model.comparison(a,b)
-# 
-# 
-# a = lm(weight.loss~motivation , data=d)
-# b = lm(weight.loss~therapy.type, data=d)		
-# model.comparison(a,b)
-# 
-# 
-# a = lm(weight.loss~motivation *therapy.type, data=d)
-# b = lm(weight.loss~motivation+therapy.type, data=d)
-# model.comparison(a,b)
-# 
-# 
-# 
-# ##
+]
