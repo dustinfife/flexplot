@@ -19,7 +19,7 @@ model.comparison = function(model1, model2){
 	class.mod2 = class(model2)	
 	
 	#### check for nested models
-	if (all(length(mod1)>length(mod2) & (mod2 %in% mod1)) & class.mod1 == class.mod2){
+	if (all(length(mod1)>length(mod2) & (mod2 %in% mod1)) & class.mod1[1] == class.mod2[1]){
 		nested = T
 	} else if (all(length(mod2)>length(mod1) & mod1 %in% mod2)) {
 		nested = T
