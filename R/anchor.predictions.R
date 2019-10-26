@@ -39,7 +39,7 @@ anchor.predictions = function(model, reference, shutup=F){
 	if (length(terms)>1){	
 		factors = names(which(unlist(lapply(d[,terms], is.factor)))); factors.included = factors[factors%in%included]
 	} else {
-		factors = ifelse(is.factor(d[,terms]), terms, NULL); factors.included = factors[factors%in%included]
+		factors = ifelse(is.factor(d[,terms]), terms, NA); factors.included = factors[factors%in%included]
 	}
 	numeric = terms[!(terms %in% factors)]; numeric.included = numeric[numeric%in%included]
 

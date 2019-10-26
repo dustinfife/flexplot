@@ -23,7 +23,6 @@
 ##' mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
 ##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
 compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F, pred.type="response", ...){
-  
 	#### if mod2 is null..
 	if (is.null(model2)){
 		model2 = model1
@@ -176,11 +175,14 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	}
 
 		#### if they have the same name, just call them model1 and model2
-	if (pred.mod1$model[1]==pred.mod2$model[1]){
-		pred.mod1$model = paste0(model1.type, " - Model 1", collapse="")
-		pred.mod2$model = paste0(model1.type, " - Model 2", collapse="")		
+	if (!re){
+		pred.mod1$model = paste0(deparse(substitute(model1)), " (", model1.type, ")", collapse="")
+    if (pred.mod1$model[1] == pred.mod2$model[1]){
+      pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, " 2)", collapse="")
+    } else {
+      pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, ")", collapse="")
+    }
 	}
-	
 	#### report one or two coefficients, depending on if they supplied it
 	if (old.mod==0){
 		prediction.model = rbind(pred.mod1, pred.mod2)

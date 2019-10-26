@@ -10,6 +10,8 @@ k = k[-(deleteme[1:2]), ]
 test_that("unconventional plots", {
   vdiffr::expect_doppelganger("related T",
                               flexplot(weight.loss ~ rewards, data = k, related = T))
+  formula = weight.loss ~ rewards; data = k; related = T
+  options(warn=2)
   vdiffr::expect_doppelganger("association plot",
                               flexplot(gender ~ rewards, data = d, jitter = c(.05, 0)))
   vdiffr::expect_doppelganger("interaction plot",
