@@ -47,8 +47,10 @@ test_that("scatterplots and options work", {
   
 test_that("jittered density plots and options work", {
   options(warn = -1)
+  set.seed(1212)
   vdiffr::expect_doppelganger("mean plot", flexplot(weight.loss ~ therapy.type, data =
                                                       d))
+  formula = weight.loss ~ therapy.type; data =  d
   vdiffr::expect_doppelganger("mean stdev",
                               flexplot(weight.loss ~ therapy.type, data = d, spread = "stdev"))
   vdiffr::expect_doppelganger("mean sterr",

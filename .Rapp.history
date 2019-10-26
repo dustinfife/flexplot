@@ -1,3233 +1,516 @@
-results_tidy = results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Estimator"))
-results_tidy
-results_tidy = results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Estimator")) %>%#
-	spread(Estimates, value)
-results_tidy = results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Estimator")) %>%#
-	spread(Estimates, values)
-results_tidy
-results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Estimator"))
-results_tidy = results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Estimator")) %>%#
-	spread(Estimates, values)#
-#
-#### make a dataset for just accuracy	#
-results_accuracy = results_tidy %>% filter(!is.na(acc))
-results_accuracy
-results_accuracy = results_tidy %>% filter(!is.na(acc))	%>% select(-(b))
-results_accuracy
-results_tidy = results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Sample")) %>%#
-	spread(Estimates, values)#
-#
-#### make a dataset for just accuracy	#
-results_accuracy = results_tidy %>% filter(!is.na(acc))	%>% select(-(b))#
-	results_accuracy
-results_values = results_tidy %>% filter(!is.na(b))	%>% select(-(acc))
-toc()
-### questions to ask:#
-  ### how much will I decrease turnover in the new system (administer to incumbents and predict new score)#
-fifer::clear()#
-#
-	### set population parameters#
-	### first set the matrix based one#
-rho = matrix(#
-  c(1, .3, .2, .1,#
-    .3, 1, .4, .2,#
-    .2, .4, 1, .05,#
-    .1, .2, .05, 1), nrow=4)#
-weights = c(2.4, 1.7, .6, 0)		## iq, biodata, conscientiousness, interview#
-#optimal.weights = c(.6, .5, .2, 0)		## iq, biodata, conscientiousness, interview#
-N = c(30, 100, 200)#
-selection = .5#
-quit = .5#
-weights2 = c("same", "bad", "close")		#
-rsquared = c(.25, .5, .75)#
-it = 1:10#
-conditions = crossing(n=N, actual.weights=weights2, quit.ratio=quit, selection.ratio=selection, rsq=rsquared, iterations=it)#
-#
-		### load packages#
-require(dplyr)#
-require(tidyverse)#
-require(flexplot)#
-source("research/Missing Data/maximizeDV/R/functions/composite_functions.R")#
-require(furrr)#
-require(tictoc)#
-plan(multiprocess)#
-		#### run the actual simulation#
-tic()#
-results = conditions %>% #
-		group_by(n,actual.weights, quit.ratio, selection.ratio, rsq, iterations) %>%#
-		mutate(#
-			datasets = pmap(list(n=n, actual.weights=actual.weights, quit.ratio=quit.ratio, selection.ratio=selection.ratio, rsq=rsq, iterations=iterations), simulate_data_turnover, predictor.matrix=rho, optimal.weights=weights))#
-results$values = future_map(results$datasets, possibly(simulate_estimation_turnover, NA))#
-toc()
-results_tidy = results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Sample")) %>%#
-	spread(Estimates, values)#
-#
-#### make a dataset for just accuracy	#
-results_accuracy = results_tidy %>% filter(!is.na(acc))	%>% select(-(b))#
-results_values = results_tidy %>% filter(!is.na(b))	%>% select(-(acc))
-results_accuracy
-### questions to ask:#
-  ### how much will I decrease turnover in the new system (administer to incumbents and predict new score)#
-fifer::clear()#
-#
-	### set population parameters#
-	### first set the matrix based one#
-rho = matrix(#
-  c(1, .3, .2, .1,#
-    .3, 1, .4, .2,#
-    .2, .4, 1, .05,#
-    .1, .2, .05, 1), nrow=4)#
-weights = c(2.4, 1.7, .6, 0)		## iq, biodata, conscientiousness, interview#
-#optimal.weights = c(.6, .5, .2, 0)		## iq, biodata, conscientiousness, interview#
-N = c(30, 100, 200)#
-selection = .5#
-quit = .5#
-weights2 = c("same", "bad", "close")		#
-rsquared = c(.25, .5, .75)#
-it = 1:10#
-conditions = crossing(n=N, actual.weights=weights2, quit.ratio=quit, selection.ratio=selection, rsq=rsquared, iterations=it)
-conditions
-### load packages#
-require(dplyr)#
-require(tidyverse)#
-require(flexplot)#
-source("research/Missing Data/maximizeDV/R/functions/composite_functions.R")#
-require(furrr)#
-require(tictoc)#
-plan(multiprocess)#
-		#### run the actual simulation#
-tic()#
-results = conditions %>% #
-		group_by(n,actual.weights, quit.ratio, selection.ratio, rsq, iterations) %>%#
-		mutate(#
-			datasets = pmap(list(n=n, actual.weights=actual.weights, quit.ratio=quit.ratio, selection.ratio=selection.ratio, rsq=rsq, iterations=iterations), simulate_data_turnover, predictor.matrix=rho, optimal.weights=weights))#
-results$values = future_map(results$datasets, possibly(simulate_estimation_turnover, NA))#
-toc()
-results_tidy
-results$values = future_map(results$datasets, simulate_estimation_turnover)
-warnings()
-results
-results$datasets[[1]]
-### questions to ask:#
-  ### how much will I decrease turnover in the new system (administer to incumbents and predict new score)#
-fifer::clear()#
-#
-	### set population parameters#
-	### first set the matrix based one#
-rho = matrix(#
-  c(1, .3, .2, .1,#
-    .3, 1, .4, .2,#
-    .2, .4, 1, .05,#
-    .1, .2, .05, 1), nrow=4)#
-weights = c(2.4, 1.7, .6, 0)		## iq, biodata, conscientiousness, interview#
-#optimal.weights = c(.6, .5, .2, 0)		## iq, biodata, conscientiousness, interview#
-N = c(50, 100, 200)#
-selection = .5#
-quit = .5#
-weights2 = c("same", "bad", "close")		#
-rsquared = c(.25, .5, .75)#
-it = 1:10#
-conditions = crossing(n=N, actual.weights=weights2, quit.ratio=quit, selection.ratio=selection, rsq=rsquared, iterations=it)#
-#
-		### load packages#
-require(dplyr)#
-require(tidyverse)#
-require(flexplot)#
-source("research/Missing Data/maximizeDV/R/functions/composite_functions.R")#
-require(furrr)#
-require(tictoc)#
-plan(multiprocess)#
-		#### run the actual simulation#
-tic()#
-results = conditions %>% #
-		group_by(n,actual.weights, quit.ratio, selection.ratio, rsq, iterations) %>%#
-		mutate(#
-			datasets = pmap(list(n=n, actual.weights=actual.weights, quit.ratio=quit.ratio, selection.ratio=selection.ratio, rsq=rsq, iterations=iterations), simulate_data_turnover, predictor.matrix=rho, optimal.weights=weights))#
-results$values = future_map(results$datasets, simulate_estimation_turnover)#
-toc()
-results$values
-results_tidy = results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Sample")) %>%#
-	spread(Estimates, values)
-results_accuracy = results_tidy %>% filter(!is.na(acc))	%>% select(-(b))#
-results_values = results_tidy %>% filter(!is.na(b))	%>% select(-(acc))
-results_accuracy
-flexplot(acc~Sample + n | actual.weights + rsq, data=results_accuracy)
-flexplot(acc~Sample  | actual.weights + rsq, data=results_accuracy, ghost.line="black")
-flexplot(acc~Sample  | actual.weights + rsq, data=results_accuracy)
-flexplot(acc~Sample  | actual.weights + rsq, data=results_accuracy, ghost.line="red")
-20*10
-### questions to ask:#
-  ### how much will I decrease turnover in the new system (administer to incumbents and predict new score)#
-fifer::clear()#
-#
-	### set population parameters#
-	### first set the matrix based one#
-rho = matrix(#
-  c(1, .3, .2, .1,#
-    .3, 1, .4, .2,#
-    .2, .4, 1, .05,#
-    .1, .2, .05, 1), nrow=4)#
-weights = c(2.4, 1.7, .6, 0)		## iq, biodata, conscientiousness, interview#
-#optimal.weights = c(.6, .5, .2, 0)		## iq, biodata, conscientiousness, interview#
-N = c(50, 100, 200)#
-selection = .5#
-quit = .5#
-weights2 = c("same", "bad", "close")		#
-rsquared = c(.25, .5, .75)#
-it = 1:100#
-conditions = crossing(n=N, actual.weights=weights2, quit.ratio=quit, selection.ratio=selection, rsq=rsquared, iterations=it)#
-#
-		### load packages#
-require(dplyr)#
-require(tidyverse)#
-require(flexplot)#
-source("research/Missing Data/maximizeDV/R/functions/composite_functions.R")#
-require(furrr)#
-require(tictoc)#
-plan(multiprocess)#
-		#### run the actual simulation#
-tic()#
-results = conditions %>% #
-		group_by(n,actual.weights, quit.ratio, selection.ratio, rsq, iterations) %>%#
-		mutate(#
-			datasets = pmap(list(n=n, actual.weights=actual.weights, quit.ratio=quit.ratio, selection.ratio=selection.ratio, rsq=rsq, iterations=iterations), simulate_data_turnover, predictor.matrix=rho, optimal.weights=weights))#
-results$values = future_map(results$datasets, simulate_estimation_turnover)#
-toc()#
-		### aggregate results#
-results_tidy = results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Sample")) %>%#
-	spread(Estimates, values)#
-#
-#### make a dataset for just accuracy	#
-results_accuracy = results_tidy %>% filter(!is.na(acc))	%>% select(-(b))#
-results_values = results_tidy %>% filter(!is.na(b))	%>% select(-(acc))#
-#
-save(results_accuracy, results_values, file="research/Missing Data/maximizeDV/data/simulation_results.rda")
-flexplot(acc~Sample  | actual.weights + rsq, data=results_accuracy, ghost.line="red")
-flexplot(acc~Sample  | actual.weights + rsq, data=results_accuracy)
-rfThresh(acc~., data=results_accuracy)
-fifer::rfThresh(acc~., data=results_accuracy)
-### questions to ask:#
-  ### how much will I decrease turnover in the new system (administer to incumbents and predict new score)#
-fifer::clear()#
-#
-	### set population parameters#
-	### first set the matrix based one#
-rho = matrix(#
-  c(1, .3, .2, .1,#
-    .3, 1, .4, .2,#
-    .2, .4, 1, .05,#
-    .1, .2, .05, 1), nrow=4)#
-weights = c(2.4, 1.7, .6, 0)		## iq, biodata, conscientiousness, interview#
-#optimal.weights = c(.6, .5, .2, 0)		## iq, biodata, conscientiousness, interview#
-N = c(50, 100, 200)#
-selection = .5#
-quit = .5#
-weights2 = c("same", "bad", "close")		#
-rsquared = c(.25, .5, .75)#
-it = 1:1000#
-conditions = crossing(n=N, actual.weights=weights2, quit.ratio=quit, selection.ratio=selection, rsq=rsquared, iterations=it)#
-#
-		### load packages#
-require(dplyr)#
-require(tidyverse)#
-require(flexplot)#
-source("research/Missing Data/maximizeDV/R/functions/composite_functions.R")#
-require(furrr)#
-require(tictoc)#
-plan(multiprocess)#
-		#### run the actual simulation#
-tic()#
-results = conditions %>% #
-		group_by(n,actual.weights, quit.ratio, selection.ratio, rsq, iterations) %>%#
-		mutate(#
-			datasets = pmap(list(n=n, actual.weights=actual.weights, quit.ratio=quit.ratio, selection.ratio=selection.ratio, rsq=rsq, iterations=iterations), simulate_data_turnover, predictor.matrix=rho, optimal.weights=weights))#
-results$values = future_map(results$datasets, simulate_estimation_turnover)#
-toc()#
-		### aggregate results#
-results_tidy = results %>%#
-	dplyr::select(-(datasets)) %>%#
-	unnest() %>%#
-	mutate(Estimates = c("acc_selected", "acc_optimal", "acc_estimated", paste0("b_pop", 1:5), paste0("b_samp", 1:5), paste0("b_hired", 1:5))) %>%#
-	separate(Estimates, c("Estimates", "Sample")) %>%#
-	spread(Estimates, values)#
-#
-#### make a dataset for just accuracy	#
-results_accuracy = results_tidy %>% filter(!is.na(acc))	%>% select(-(b))#
-results_values = results_tidy %>% filter(!is.na(b))	%>% select(-(acc))#
-a = fifer::rfThresh(acc~., data=results_accuracy)#
-b = fifer::rfInterp(a)#
-save(results_accuracy, results_values, a,b,file="research/Missing Data/maximizeDV/data/simulation_results.rda")
-require(tidyverse)#
-full.file = "research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/introduction.txt"#
-block = paste0(readChar(full.file, file.info(full.file)$size), "\n\n")#
-	create.graphics=T	#
-		#### create function that reorders heuristics, then assigns v/f in order	#
-f = function(replication, x, size=8){#
-	numb.samp = sample(x)#
-	vf.samp = sample(c("v", "f"), size=size, replace=T)#
-	vf.notsamp = rep("v", size); vf.notsamp[vf.samp=="v"] = "f"#
-	together = data.frame(heuristic=c(numb.samp, numb.samp), followed=c(vf.samp, vf.notsamp))#
-	together$replication = replication#
-	return(together)#
-}		#
-#
-set.seed(12214434)#
-		#### create twenty different conditions#
-conditions = 1:12 %>% map(f, x=1:8)#
-#
-	#### for when we want to fix the order#
-# all <- expand.grid(p1 = 1:8, p2 = c("v", "f")) #
-# all = all[order(all$p1),]#
-# samples = 10#
-# i=7;j=nrow(all)#
-	#### loop for each of the orderings#
-m = 1	#
-i=1#
-# for (m in 1:length(conditions)){	#
-#
-	# all = conditions[[m]]	#
-	# ### create a block#
-	# #
-			#### loop through all conditions#
-for (i in 1:length(conditions)){#
-		block.name = paste0("[[Block:iteration", i+4, "]]\n\n",collapse="")	#
-		block = paste0(block, block.name)	#
-		#### source everything to start (that way we stick with certain qualifications)#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h1_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h2_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h3_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h4_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h5_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h6_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h7_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h8_generation.R")														#
-		### randomly sort the conditions#
-		#all.rand = all[order(runif(nrow(all))),]#
-		all.rand = conditions[[i]]#
-		### loop through all conditions#
-		for (j in 1:nrow(all.rand)){#
-			### extract name of file scenario#
-			file.name = paste0("h", all.rand[j,1], all.rand[j,2], "_scenario.txt", collapse="")#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-			heuristic_scenario = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")#
-			### extract name of question#
-			file.name = paste0("h", all.rand[j,1], "_question.txt", collapse="")#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-			if (file.exists(file.name)){#
-				heuristic_question = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")			#
-			} else {#
-				file.name = paste0("h", all.rand[j,1], all.rand[j,2], "_question.txt", collapse="")#
-				file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-				heuristic_question = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")			#
-			}#
-			#### replace 'grepfindme' with question ID#
-			heuristic_question = gsub("grepfindme", paste0("h", all.rand[j,1], all.rand[j,2], collapse=""),heuristic_question)#
-			### read in confidence answers#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/confidence_answers.txt")#
-			confidence = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")#
-			confidence = gsub("grepfindme", paste0("h", all.rand[j,1], all.rand[j,2], collapse=""), confidence)#
-			### combine into one file#
-			block = paste0(block, heuristic_scenario, heuristic_question, confidence,"\n[[PageBreak]]\n")#
-		}#
-}#
-		#### output the file#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/qualtrics_flexplot_final.txt")#
-writeLines(block, fileConn)#
-close(fileConn)
-tracebac()
-traceback()
-require(knitr)#
-require(cowplot)#
-require(flexplot)#
-require(fifer2)#
-require(MASS)#
-set.seed(121212)#
-#
-	#### decide what scenario to play out#
-scenarios = matrix(c("stress", "time management (TM)", "sense of purpose (SOP)",#
-						"depression", "social engagement (SE)", "leisure time"),#
-					ncol=3, byrow=T)#
-#
-d = data.frame(matrix(rnorm(1000*3, 0, 1), ncol=3)); names(d) = c("y", "A", "B")#
-d$y = d$y + model.matrix(y~A+B, data=d)%*%t(t(c(0, -.12, .35)))#
-nrow(d)#
-		### create all plots#
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F) + labs(x="TM", y="Stress") + geom_point(size=.8, pch=16) + theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-violated1#
-followed1 = flexplot(y~B | A, data=d, method="lm", se=F, labels=list(c("TM:low", "TM:mid-low", "TM:mid-high", "TM:high")), raw.data=F) + labs(x="SOP", y="Stress")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-violated2 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(c("Leisure:low", "Leisure:mid-low", "Leisure:mid-high", "Leisure:high")), raw.data=F) + labs(x="SE", y="Depression")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-followed2 = flexplot(y~B | A, data=d, method="lm", se=F, labels=list(c("SE:low", "SE:mid-low", "SE:mid-high", "SE:high")),raw.data=F) +  labs(x="Leisure", y="Depression")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-#
-fol1 = plot_grid(violated2, followed2, nrow=2)#
-fol2 = plot_grid(violated1, followed1, nrow=2)#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8f_1_2.jpg", plot=fol2, width=4, height=4)#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8v_1_2.jpg", plot=violated1, width=4, height=4)#
-#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8f_2_2.jpg", plot= fol1, width=4, height=4)#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8v_2_2.jpg", plot= violated2, width=4, height=4)#
-#
-		#### randomly select which scenario#
-k = sample(c(1,2), 1)#
-nk = c(1:2)[which(!(c(1:2)%in%k))]#
-h8v_scenario = paste0("#
-[[Question:Text]]#
-The figure below plots the relationship between ", scenarios[nk,1], ", ", scenarios[nk,2], ", and ", scenarios[nk,3], ". Use that figure to answer the following question.#
-<br><br>#
-<img src='http://www.quantpsych.net/images/flexplot/h8v_", nk, "_2.jpg'>#
-<br><br>#
-")#
-h8f_scenario = paste0("#
-[[Question:Text]]#
-The figure below plots the relationship between ", scenarios[k,1], ", ", scenarios[k,2], ", and ", scenarios[k,3], ". The top rows place ", scenarios[k,2], " on the X axis, while the bottom figure place ", scenarios[k,3], " on the X axis. Use that figure to answer the following question.#
-<br><br>#
-<img src='http://www.quantpsych.net/images/flexplot/h8f_", k, "_2.jpg'>#
-<br><br>#
-")#
-h8f_question = paste0("#
-[[Question:MC]]#
-[[ID:grepfindme_1]]#
-Which of the following statements is true about the relationship between ", scenarios[k,3], " and ", scenarios[k,1], "?#
-[[AdvancedChoices]]#
-[[Choice]]#
-As ", scenarios[k,3], " increases, ", scenarios[k,1], " also increases#
-[[Choice]]#
-As ", scenarios[k,3], " increases, ", scenarios[k,1], " decreases#
-[[Choice]]#
-As ", scenarios[k,3], " increases, ", scenarios[k,1], " remains the same#
-[[Choice]]#
-As ", scenarios[k,2], " increases, ", scenarios[k,1], " also increases#
-")#
-#
-h8v_question = paste0("#
-[[Question:MC]]#
-[[ID:grepfindme_1]]#
-Which of the following statements is true about the relationship between ", scenarios[nk,3], " and ", scenarios[nk,1], "?#
-[[AdvancedChoices]]#
-[[Choice]]#
-As ", scenarios[nk,3], " increases, ", scenarios[nk,1], " also increases#
-[[Choice]]#
-As ", scenarios[nk,3], " increases, ", scenarios[nk,1], " decreases#
-[[Choice]]#
-As ", scenarios[nk,3], " increases, ", scenarios[nk,1], " remains the same#
-[[Choice]]#
-As ", scenarios[nk,2], " increases, ", scenarios[nk,1], " also increases#
-")
-require(tidyverse)#
-full.file = "research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/introduction.txt"#
-block = paste0(readChar(full.file, file.info(full.file)$size), "\n\n")#
-	create.graphics=T	#
-		#### create function that reorders heuristics, then assigns v/f in order	#
-f = function(replication, x, size=8){#
-	numb.samp = sample(x)#
-	vf.samp = sample(c("v", "f"), size=size, replace=T)#
-	vf.notsamp = rep("v", size); vf.notsamp[vf.samp=="v"] = "f"#
-	together = data.frame(heuristic=c(numb.samp, numb.samp), followed=c(vf.samp, vf.notsamp))#
-	together$replication = replication#
-	return(together)#
-}		#
-#
-set.seed(12214434)#
-		#### create twenty different conditions#
-conditions = 1:12 %>% map(f, x=1:8)#
-#
-	#### for when we want to fix the order#
-# all <- expand.grid(p1 = 1:8, p2 = c("v", "f")) #
-# all = all[order(all$p1),]#
-# samples = 10#
-# i=7;j=nrow(all)#
-	#### loop for each of the orderings#
-m = 1	#
-i=1#
-# for (m in 1:length(conditions)){	#
-#
-	# all = conditions[[m]]	#
-	# ### create a block#
-	# #
-			#### loop through all conditions#
-for (i in 1:length(conditions)){#
-		block.name = paste0("[[Block:iteration", i+4, "]]\n\n",collapse="")	#
-		block = paste0(block, block.name)	#
-		#### source everything to start (that way we stick with certain qualifications)#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h1_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h2_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h3_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h4_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h5_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h6_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h7_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h8_generation.R")														#
-		### randomly sort the conditions#
-		#all.rand = all[order(runif(nrow(all))),]#
-		all.rand = conditions[[i]]#
-		### loop through all conditions#
-		for (j in 1:nrow(all.rand)){#
-			### extract name of file scenario#
-			file.name = paste0("h", all.rand[j,1], all.rand[j,2], "_scenario.txt", collapse="")#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-			heuristic_scenario = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")#
-			### extract name of question#
-			file.name = paste0("h", all.rand[j,1], "_question.txt", collapse="")#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-			if (file.exists(file.name)){#
-				heuristic_question = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")			#
-			} else {#
-				file.name = paste0("h", all.rand[j,1], all.rand[j,2], "_question.txt", collapse="")#
-				file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-				heuristic_question = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")			#
-			}#
-			#### replace 'grepfindme' with question ID#
-			heuristic_question = gsub("grepfindme", paste0("h", all.rand[j,1], all.rand[j,2], collapse=""),heuristic_question)#
-			### read in confidence answers#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/confidence_answers.txt")#
-			confidence = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")#
-			confidence = gsub("grepfindme", paste0("h", all.rand[j,1], all.rand[j,2], collapse=""), confidence)#
-			### combine into one file#
-			block = paste0(block, heuristic_scenario, heuristic_question, confidence,"\n[[PageBreak]]\n")#
-		}#
-}
-traceback()
-require(knitr)#
-require(cowplot)#
-require(flexplot)#
-require(fifer2)#
-require(MASS)#
-set.seed(121212)#
-#
-	#### decide what scenario to play out#
-scenarios = matrix(c("stress", "time management (TM)", "sense of purpose (SOP)",#
-						"depression", "social engagement (SE)", "leisure time"),#
-					ncol=3, byrow=T)#
-#
-d = data.frame(matrix(rnorm(1000*3, 0, 1), ncol=3)); names(d) = c("y", "A", "B")#
-d$y = d$y + model.matrix(y~A+B, data=d)%*%t(t(c(0, -.12, .35)))#
-nrow(d)
-### create all plots#
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F) + labs(x="TM", y="Stress") + geom_point(size=.8, pch=16) + theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-violated1#
-followed1 = flexplot(y~B | A, data=d, method="lm", se=F, labels=list(c("TM:low", "TM:mid-low", "TM:mid-high", "TM:high")), raw.data=F) + labs(x="SOP", y="Stress")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-violated2 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(c("Leisure:low", "Leisure:mid-low", "Leisure:mid-high", "Leisure:high")), raw.data=F) + labs(x="SE", y="Depression")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-followed2 = flexplot(y~B | A, data=d, method="lm", se=F, labels=list(c("SE:low", "SE:mid-low", "SE:mid-high", "SE:high")),raw.data=F) +  labs(x="Leisure", y="Depression")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-#
-fol1 = plot_grid(violated2, followed2, nrow=2)#
-fol2 = plot_grid(violated1, followed1, nrow=2)
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F) + labs(x="TM", y="Stress") + geom_point(size=.8, pch=16) + theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())
-formula = y~A | B#
-data=d; method="lm"; se=F; labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")); raw.data=F)
-data=d; method="lm"; se=F; labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")); raw.data=F
-bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
-formula = y~A | B#
-data=d; method="lm"; se=F; labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")); raw.data=F
-if (is.null(data)){#
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")#
-	}#
-#
-	##### make models into a factor if they supply predictions#
-	if (!is.null(prediction)){#
-		prediction$model = factor(prediction$model)#
-	}#
-#
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error#
-	#df = data.frame()#
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))#
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)#
-	if (tibble::is_tibble(data)){#
-		data = as.data.frame(data)#
-	}#
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))#
-	}#
-	#### make sure all names are in the dataset#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))#
-	}#
-		# #### extract outcome, predictors, and given variables#
-	# if (!is.null(third.eye) & length(predictors)>2){#
-		# formula = rotate.view(formula = formula, third.eye= third.eye)#
-		# variables = all.vars(formula)#
-		# outcome = variables[1]#
-		# predictors = variables[-1]		#
-	# }#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	given = gsub(" ", "", given)		#
-	given = unlist(strsplit(given, "+", fixed=T))	#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = gsub(" ", "", axis)			#
-	axis = unlist(strsplit(axis, "+", fixed=T))	#
-	#### give an error if they try to visualize logistic with a categorical x axis#
-	if (method=="logistic" & length(predictors)>0){#
-		if (!is.numeric(data[,axis[1]])){#
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n#
-				Best of luck on your statistical journeys."))#
-		}	#
-	}#
-#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-#
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)#
-	#### also, lapply fails when there's just one additional predictor, hence the if statement#
-	if (length(predictors)>2){#
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	} else {#
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	}#
-	#### did they provide a named break?#
-	if (!is.null(breaks)) {#
-		named.breaks = names(breaks)#
-	} else {#
-		named.breaks = NA#
-	}	#
-#
-		#### create a list of breaks#
-	if (length(break.me)>0 ){#
-		#### bark at them if they forgot to name their breaks#
-		if (is.null(named.breaks)){	#
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-		#### make sure they spelled breaks right and such#
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){#
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")#
-		}#
-		#### make an empty list if they don't provide breaks#
-		if (is.null(breaks)){#
-			breaks = rep(list(NULL),length(break.me))#
-			#names(breaks) = break.me#
-		}#
-			#### now make the breaks and convert the data#
-		for (i in 1:length(break.me)){#
-#
-			if ((i-1)<length(breaks)){#
-				#### if they don't name the breaks, bark at them#
-				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){#
-					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-				}#
-			}#
-			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)#
-		}#
-	} #
-	#### if they only have a few levels on the x axis, jitter convert it to categorical#
-	if (length(predictors)>0){#
-		if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){#
-			data[,axis[1]] = factor(data[,axis[1]], ordered=T)#
-		}#
-		### do the same for the second axis#
-		if (length(axis)>1){#
-			if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){#
-				data[,axis[2]] = factor(data[,axis[2]], ordered=T)#
-			}		#
-		}#
-	}#
-	### BEGIN THE MEGA PLOTTING IFS!#
-	### PLOT UNIVARIATE PLOTS#
-	if (length(outcome)==1 & length(predictors)==0){#
-#
-		##### reorder according to columns lengths (if it's not an ordered factor)#
-		if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){#
-			counts = sort(table(data[,outcome]), decreasing=T)#
-			names(counts)#
-			data[,outcome] = factor(data[,outcome], levels=names(counts))#
-		}#
-		### figure out how many levels for the variable#
-		levels = length(unique(data[,outcome]))	#
-		#### if numeric, do a histogram#
-		if (is.numeric(data[,outcome])){#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		#
-		} #
-		points = "xxxx"#
-		fitted = "xxxx"		#
-#
-	### BIVARIATE PLOTS#
-	} else if (length(outcome)==1 & length(axis)==1 & !related){#
-		#### if both are categorical, do chi square#
-		if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){#
-			m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)#
-			chi = chisq.test(data[,axis], data[,outcome])#
-			obs.exp = (chi$observed - chi$expected)/chi$expected#
-			m$Freq = as.vector(obs.exp)#
-			names(m)[names(m)=="Freq"] = "Proportion"#
-			p = "ggplot(data=m, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"#
-			points = "xxxx"#
-			fitted = "xxxx"#
-		} else {#
-#
-			### reorder axis and alter default alpha if categorical#
-			if (!is.numeric(data[,axis])){#
-#
-				#### reorder if it's not already ordered#
-				if (!is.ordered(data[, axis[1]])){#
-					if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}#
-					ord = aggregate(data[,outcome]~data[, axis], FUN=fn, na.rm=T)#
-					ord = ord[order(ord[,2], decreasing=T),]#
-					data[,axis] = factor(data[, axis], levels=ord[,1])#
-				}#
-				#### set default alpha#
-				if(alpha==.99977){#
-					alpha = .2#
-				}		#
-			}#
-#
-			p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'#
-			points = points.func(axis.var=axis, data=data, jitter=jitter)#
-			fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		#
-#
-		}	#
-	### RELATED T-TEST#
-	} else if (related){		#
-		#### extract levels of the predictors#
-		levs = levels(data[,axis[1]])#
-#
-		#### create difference scores#
-		g1 = data[data[, axis[1]]==levs[1], outcome]#
-		g2 = data[data[, axis[1]]==levs[2], outcome]				#
-		### error checking#
-		if (length(predictors)!=1){#
-			stop("Currently, the 'related' option is only available when there's a single predictor.")#
-		} #
-		if (length(levs)!=2){#
-			stop("Sorry, I can only accept two levels of the grouping variable when related=T.")#
-		}#
-		if (length(g1) != length(g2)){#
-			stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")#
-		}#
-		lab = paste0("Difference (",levs[2], "-", levs[1], ')')#
-		d2 = data.frame(Difference=g2-g1)#
-		p = "ggplot(d2, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x=lab) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())"#
-		#### modify default jitter#
-		if (is.null(jitter)){#
-			jitter = c(.05, 0)#
-		} #
-		points = points.func(axis.var="Difference", data=d2, jitter=jitter)#
-		fitted = paste0(fit.function(outcome, "Difference", data=d2, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")#
-#
-	##### if they have two axis variables#
-	} else if (length(axis)>1){#
-#
-		#### if the second variable is numeric, bin it#
-		if (is.numeric(data[,axis[2]])){#
-			binned.name = paste0(axis[2], "_binned")#
-			data[[binned.name]] = bin.me(axis[2], data, bins, unlist(labels), breaks[[axis[2]]])#
-			axis[2] = binned.name#
-		}#
-		### if they supply predictions, do not vary color#
-		if (!is.null(prediction)){#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'#
-			### remove the default color if they have categorical variables		#
-		}#
-		points = points.func(axis.var=axis[1], data=data, jitter=jitter)#
-		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)#
-		### remove the default color if they have something in the second axis#
-		if (!is.numeric(data[,axis[2]])){#
-			fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)#
-		}	#
-	}#
-#
-	#### all the above should take care of ALL possible plots, but now we add paneling#
-	#### add panels (if they were specified)#
-	if (!is.na(given[1])){#
-		for (i in 1:length(given)){#
-#
-			binned.name = paste0(given[i], "_binned")#
-#
-			if (is.numeric(data[,given[i]])){#
-				data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])#
-				### if they specified prediction, bin those too#
-				if (!is.null(prediction)){#
-					prediction[,binned.name] = bin.me(given[i], prediction, bins, labels[i], breaks[[given[i]]])#
-				}				#
-				### reorder levels of bin 2#
-				if (i==2){#
-					data[,binned.name] = forcats::fct_rev(data[,binned.name])#
-				}#
-			} else {#
-				### duplicate categorical variables and give a new name for binned ones#
-				data[,binned.name] = data[,given[i]]#
-				### if they specified prediction, bin those too (because later when doing ghost lines, I randomly choose a prediction value from a data value, and they need to be binned before that)#
-				if (!is.null(prediction)){#
-					prediction[,binned.name] = prediction[,given[i]]#
-				}					#
-			}#
-		}#
-#
-		#### prep the given variables to be stringed together#
-		given2 = given#
-		if (length(break.me)>0){#
-			given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")#
-		}	#
-		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))#
-		#### make a custom labeller that removes "_binned"#
-		custom.labeler = function(x){#
-			lapply(names(x),function(y){#
-			paste0(gsub("_binned", "", y),": ", x[[y]])#
-			})#
-		}#
-		facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			#
-	} else {#
-		facets = "xxxx"#
-	}
-fifer::unhide()
-if (is.null(data)){#
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")#
-	}#
-#
-	##### make models into a factor if they supply predictions#
-	if (!is.null(prediction)){#
-		prediction$model = factor(prediction$model)#
-	}#
-#
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error#
-	#df = data.frame()#
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))#
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)#
-	if (tibble::is_tibble(data)){#
-		data = as.data.frame(data)#
-	}#
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))#
-	}#
-	#### make sure all names are in the dataset#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))#
-	}#
-		# #### extract outcome, predictors, and given variables#
-	# if (!is.null(third.eye) & length(predictors)>2){#
-		# formula = rotate.view(formula = formula, third.eye= third.eye)#
-		# variables = all.vars(formula)#
-		# outcome = variables[1]#
-		# predictors = variables[-1]		#
-	# }#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	given = gsub(" ", "", given)		#
-	given = unlist(strsplit(given, "+", fixed=T))	#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = gsub(" ", "", axis)			#
-	axis = unlist(strsplit(axis, "+", fixed=T))	#
-	#### give an error if they try to visualize logistic with a categorical x axis#
-	if (method=="logistic" & length(predictors)>0){#
-		if (!is.numeric(data[,axis[1]])){#
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n#
-				Best of luck on your statistical journeys."))#
-		}	#
-	}#
-#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-#
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)#
-	#### also, lapply fails when there's just one additional predictor, hence the if statement#
-	if (length(predictors)>2){#
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	} else {#
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	}#
-	#### did they provide a named break?#
-	if (!is.null(breaks)) {#
-		named.breaks = names(breaks)#
-	} else {#
-		named.breaks = NA#
-	}	#
-#
-		#### create a list of breaks#
-	if (length(break.me)>0 ){#
-		#### bark at them if they forgot to name their breaks#
-		if (is.null(named.breaks)){	#
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-		#### make sure they spelled breaks right and such#
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){#
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")#
-		}#
-		#### make an empty list if they don't provide breaks#
-		if (is.null(breaks)){#
-			breaks = rep(list(NULL),length(break.me))#
-			#names(breaks) = break.me#
-		}#
-			#### now make the breaks and convert the data#
-		for (i in 1:length(break.me)){#
-#
-			if ((i-1)<length(breaks)){#
-				#### if they don't name the breaks, bark at them#
-				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){#
-					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-				}#
-			}#
-			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)#
-		}#
-	} #
-	#### if they only have a few levels on the x axis, jitter convert it to categorical#
-	if (length(predictors)>0){#
-		if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){#
-			data[,axis[1]] = factor(data[,axis[1]], ordered=T)#
-		}#
-		### do the same for the second axis#
-		if (length(axis)>1){#
-			if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){#
-				data[,axis[2]] = factor(data[,axis[2]], ordered=T)#
-			}		#
-		}#
-	}#
-	### BEGIN THE MEGA PLOTTING IFS!#
-	### PLOT UNIVARIATE PLOTS#
-	if (length(outcome)==1 & length(predictors)==0){#
-#
-		##### reorder according to columns lengths (if it's not an ordered factor)#
-		if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){#
-			counts = sort(table(data[,outcome]), decreasing=T)#
-			names(counts)#
-			data[,outcome] = factor(data[,outcome], levels=names(counts))#
-		}#
-		### figure out how many levels for the variable#
-		levels = length(unique(data[,outcome]))	#
-		#### if numeric, do a histogram#
-		if (is.numeric(data[,outcome])){#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		#
-		} #
-		points = "xxxx"#
-		fitted = "xxxx"		#
-#
-	### BIVARIATE PLOTS#
-	} else if (length(outcome)==1 & length(axis)==1 & !related){#
-		#### if both are categorical, do chi square#
-		if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){#
-			m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)#
-			chi = chisq.test(data[,axis], data[,outcome])#
-			obs.exp = (chi$observed - chi$expected)/chi$expected#
-			m$Freq = as.vector(obs.exp)#
-			names(m)[names(m)=="Freq"] = "Proportion"#
-			p = "ggplot(data=m, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"#
-			points = "xxxx"#
-			fitted = "xxxx"#
-		} else {#
-#
-			### reorder axis and alter default alpha if categorical#
-			if (!is.numeric(data[,axis])){#
-#
-				#### reorder if it's not already ordered#
-				if (!is.ordered(data[, axis[1]])){#
-					if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}#
-					ord = aggregate(data[,outcome]~data[, axis], FUN=fn, na.rm=T)#
-					ord = ord[order(ord[,2], decreasing=T),]#
-					data[,axis] = factor(data[, axis], levels=ord[,1])#
-				}#
-				#### set default alpha#
-				if(alpha==.99977){#
-					alpha = .2#
-				}		#
-			}#
-#
-			p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'#
-			points = points.func(axis.var=axis, data=data, jitter=jitter)#
-			fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		#
-#
-		}	#
-	### RELATED T-TEST#
-	} else if (related){		#
-		#### extract levels of the predictors#
-		levs = levels(data[,axis[1]])#
-#
-		#### create difference scores#
-		g1 = data[data[, axis[1]]==levs[1], outcome]#
-		g2 = data[data[, axis[1]]==levs[2], outcome]				#
-		### error checking#
-		if (length(predictors)!=1){#
-			stop("Currently, the 'related' option is only available when there's a single predictor.")#
-		} #
-		if (length(levs)!=2){#
-			stop("Sorry, I can only accept two levels of the grouping variable when related=T.")#
-		}#
-		if (length(g1) != length(g2)){#
-			stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")#
-		}#
-		lab = paste0("Difference (",levs[2], "-", levs[1], ')')#
-		d2 = data.frame(Difference=g2-g1)#
-		p = "ggplot(d2, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x=lab) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())"#
-		#### modify default jitter#
-		if (is.null(jitter)){#
-			jitter = c(.05, 0)#
-		} #
-		points = points.func(axis.var="Difference", data=d2, jitter=jitter)#
-		fitted = paste0(fit.function(outcome, "Difference", data=d2, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")#
-#
-	##### if they have two axis variables#
-	} else if (length(axis)>1){#
-#
-		#### if the second variable is numeric, bin it#
-		if (is.numeric(data[,axis[2]])){#
-			binned.name = paste0(axis[2], "_binned")#
-			data[[binned.name]] = bin.me(axis[2], data, bins, unlist(labels), breaks[[axis[2]]])#
-			axis[2] = binned.name#
-		}#
-		### if they supply predictions, do not vary color#
-		if (!is.null(prediction)){#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'#
-			### remove the default color if they have categorical variables		#
-		}#
-		points = points.func(axis.var=axis[1], data=data, jitter=jitter)#
-		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)#
-		### remove the default color if they have something in the second axis#
-		if (!is.numeric(data[,axis[2]])){#
-			fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)#
-		}	#
-	}#
-#
-	#### all the above should take care of ALL possible plots, but now we add paneling#
-	#### add panels (if they were specified)#
-	if (!is.na(given[1])){#
-		for (i in 1:length(given)){#
-#
-			binned.name = paste0(given[i], "_binned")#
-#
-			if (is.numeric(data[,given[i]])){#
-				data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])#
-				### if they specified prediction, bin those too#
-				if (!is.null(prediction)){#
-					prediction[,binned.name] = bin.me(given[i], prediction, bins, labels[i], breaks[[given[i]]])#
-				}				#
-				### reorder levels of bin 2#
-				if (i==2){#
-					data[,binned.name] = forcats::fct_rev(data[,binned.name])#
-				}#
-			} else {#
-				### duplicate categorical variables and give a new name for binned ones#
-				data[,binned.name] = data[,given[i]]#
-				### if they specified prediction, bin those too (because later when doing ghost lines, I randomly choose a prediction value from a data value, and they need to be binned before that)#
-				if (!is.null(prediction)){#
-					prediction[,binned.name] = prediction[,given[i]]#
-				}					#
-			}#
-		}#
-#
-		#### prep the given variables to be stringed together#
-		given2 = given#
-		if (length(break.me)>0){#
-			given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")#
-		}	#
-		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))#
-		#### make a custom labeller that removes "_binned"#
-		custom.labeler = function(x){#
-			lapply(names(x),function(y){#
-			paste0(gsub("_binned", "", y),": ", x[[y]])#
-			})#
-		}#
-		facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			#
-	} else {#
-		facets = "xxxx"#
-	}
-fifer2::unhide()
-if (is.null(data)){#
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")#
-	}#
-#
-	##### make models into a factor if they supply predictions#
-	if (!is.null(prediction)){#
-		prediction$model = factor(prediction$model)#
-	}#
-#
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error#
-	#df = data.frame()#
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))#
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)#
-	if (tibble::is_tibble(data)){#
-		data = as.data.frame(data)#
-	}#
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))#
-	}#
-	#### make sure all names are in the dataset#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))#
-	}#
-		# #### extract outcome, predictors, and given variables#
-	# if (!is.null(third.eye) & length(predictors)>2){#
-		# formula = rotate.view(formula = formula, third.eye= third.eye)#
-		# variables = all.vars(formula)#
-		# outcome = variables[1]#
-		# predictors = variables[-1]		#
-	# }#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	given = gsub(" ", "", given)		#
-	given = unlist(strsplit(given, "+", fixed=T))	#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = gsub(" ", "", axis)			#
-	axis = unlist(strsplit(axis, "+", fixed=T))	#
-	#### give an error if they try to visualize logistic with a categorical x axis#
-	if (method=="logistic" & length(predictors)>0){#
-		if (!is.numeric(data[,axis[1]])){#
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n#
-				Best of luck on your statistical journeys."))#
-		}	#
-	}#
-#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-#
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)#
-	#### also, lapply fails when there's just one additional predictor, hence the if statement#
-	if (length(predictors)>2){#
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	} else {#
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	}#
-	#### did they provide a named break?#
-	if (!is.null(breaks)) {#
-		named.breaks = names(breaks)#
-	} else {#
-		named.breaks = NA#
-	}	#
-#
-		#### create a list of breaks#
-	if (length(break.me)>0 ){#
-		#### bark at them if they forgot to name their breaks#
-		if (is.null(named.breaks)){	#
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-		#### make sure they spelled breaks right and such#
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){#
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")#
-		}#
-		#### make an empty list if they don't provide breaks#
-		if (is.null(breaks)){#
-			breaks = rep(list(NULL),length(break.me))#
-			#names(breaks) = break.me#
-		}#
-			#### now make the breaks and convert the data#
-		for (i in 1:length(break.me)){#
-#
-			if ((i-1)<length(breaks)){#
-				#### if they don't name the breaks, bark at them#
-				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){#
-					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-				}#
-			}#
-			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)#
-		}#
-	} #
-	#### if they only have a few levels on the x axis, jitter convert it to categorical#
-	if (length(predictors)>0){#
-		if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){#
-			data[,axis[1]] = factor(data[,axis[1]], ordered=T)#
-		}#
-		### do the same for the second axis#
-		if (length(axis)>1){#
-			if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){#
-				data[,axis[2]] = factor(data[,axis[2]], ordered=T)#
-			}		#
-		}#
-	}#
-	### BEGIN THE MEGA PLOTTING IFS!#
-	### PLOT UNIVARIATE PLOTS#
-	if (length(outcome)==1 & length(predictors)==0){#
-#
-		##### reorder according to columns lengths (if it's not an ordered factor)#
-		if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){#
-			counts = sort(table(data[,outcome]), decreasing=T)#
-			names(counts)#
-			data[,outcome] = factor(data[,outcome], levels=names(counts))#
-		}#
-		### figure out how many levels for the variable#
-		levels = length(unique(data[,outcome]))	#
-		#### if numeric, do a histogram#
-		if (is.numeric(data[,outcome])){#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		#
-		} #
-		points = "xxxx"#
-		fitted = "xxxx"		#
-#
-	### BIVARIATE PLOTS#
-	} else if (length(outcome)==1 & length(axis)==1 & !related){#
-		#### if both are categorical, do chi square#
-		if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){#
-			m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)#
-			chi = chisq.test(data[,axis], data[,outcome])#
-			obs.exp = (chi$observed - chi$expected)/chi$expected#
-			m$Freq = as.vector(obs.exp)#
-			names(m)[names(m)=="Freq"] = "Proportion"#
-			p = "ggplot(data=m, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"#
-			points = "xxxx"#
-			fitted = "xxxx"#
-		} else {#
-#
-			### reorder axis and alter default alpha if categorical#
-			if (!is.numeric(data[,axis])){#
-#
-				#### reorder if it's not already ordered#
-				if (!is.ordered(data[, axis[1]])){#
-					if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}#
-					ord = aggregate(data[,outcome]~data[, axis], FUN=fn, na.rm=T)#
-					ord = ord[order(ord[,2], decreasing=T),]#
-					data[,axis] = factor(data[, axis], levels=ord[,1])#
-				}#
-				#### set default alpha#
-				if(alpha==.99977){#
-					alpha = .2#
-				}		#
-			}#
-#
-			p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'#
-			points = points.func(axis.var=axis, data=data, jitter=jitter)#
-			fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		#
-#
-		}	#
-	### RELATED T-TEST#
-	} else if (related){		#
-		#### extract levels of the predictors#
-		levs = levels(data[,axis[1]])#
-#
-		#### create difference scores#
-		g1 = data[data[, axis[1]]==levs[1], outcome]#
-		g2 = data[data[, axis[1]]==levs[2], outcome]				#
-		### error checking#
-		if (length(predictors)!=1){#
-			stop("Currently, the 'related' option is only available when there's a single predictor.")#
-		} #
-		if (length(levs)!=2){#
-			stop("Sorry, I can only accept two levels of the grouping variable when related=T.")#
-		}#
-		if (length(g1) != length(g2)){#
-			stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")#
-		}#
-		lab = paste0("Difference (",levs[2], "-", levs[1], ')')#
-		d2 = data.frame(Difference=g2-g1)#
-		p = "ggplot(d2, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x=lab) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())"#
-		#### modify default jitter#
-		if (is.null(jitter)){#
-			jitter = c(.05, 0)#
-		} #
-		points = points.func(axis.var="Difference", data=d2, jitter=jitter)#
-		fitted = paste0(fit.function(outcome, "Difference", data=d2, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")#
-#
-	##### if they have two axis variables#
-	} else if (length(axis)>1){#
-#
-		#### if the second variable is numeric, bin it#
-		if (is.numeric(data[,axis[2]])){#
-			binned.name = paste0(axis[2], "_binned")#
-			data[[binned.name]] = bin.me(axis[2], data, bins, unlist(labels), breaks[[axis[2]]])#
-			axis[2] = binned.name#
-		}#
-		### if they supply predictions, do not vary color#
-		if (!is.null(prediction)){#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'#
-			### remove the default color if they have categorical variables		#
-		}#
-		points = points.func(axis.var=axis[1], data=data, jitter=jitter)#
-		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)#
-		### remove the default color if they have something in the second axis#
-		if (!is.numeric(data[,axis[2]])){#
-			fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)#
-		}	#
-	}#
-#
-	#### all the above should take care of ALL possible plots, but now we add paneling#
-	#### add panels (if they were specified)#
-	if (!is.na(given[1])){#
-		for (i in 1:length(given)){#
-#
-			binned.name = paste0(given[i], "_binned")#
-#
-			if (is.numeric(data[,given[i]])){#
-				data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])#
-				### if they specified prediction, bin those too#
-				if (!is.null(prediction)){#
-					prediction[,binned.name] = bin.me(given[i], prediction, bins, labels[i], breaks[[given[i]]])#
-				}				#
-				### reorder levels of bin 2#
-				if (i==2){#
-					data[,binned.name] = forcats::fct_rev(data[,binned.name])#
-				}#
-			} else {#
-				### duplicate categorical variables and give a new name for binned ones#
-				data[,binned.name] = data[,given[i]]#
-				### if they specified prediction, bin those too (because later when doing ghost lines, I randomly choose a prediction value from a data value, and they need to be binned before that)#
-				if (!is.null(prediction)){#
-					prediction[,binned.name] = prediction[,given[i]]#
-				}					#
-			}#
-		}#
-#
-		#### prep the given variables to be stringed together#
-		given2 = given#
-		if (length(break.me)>0){#
-			given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")#
-		}	#
-		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))#
-		#### make a custom labeller that removes "_binned"#
-		custom.labeler = function(x){#
-			lapply(names(x),function(y){#
-			paste0(gsub("_binned", "", y),": ", x[[y]])#
-			})#
-		}#
-		facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			#
-	} else {#
-		facets = "xxxx"#
-	}
-!is.null(ghost.line)
-if (!is.null(ghost.line)){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068#
-#
-		### quit if they try to do two axes#
-		# if (!is.na(axis[2])){#
-			# stop("Sorry. I can't plot ghost lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z)")#
-		# }#
-#
-				### bin the ghost reference if it's not null#
-		if (!is.null(ghost.reference)){#
-#
-			### what needs a reference? all given and MAYBE axis[2]#
-#
-			if (axis[2] %in% names(ghost.reference)) {#
-				to.ghost = c(given, axis[2])#
-			} else {#
-				to.ghost = c(given)#
-			}					#
-#
-			#breaks.keep = names(which(!unlist(lapply(to.ghost,is.null))))#
-			for (i in 1:length(to.ghost)){#
-#
-				binned.name = paste0(to.ghost[i], "_binned")#
-#
-				### if the ghost reference is null, fill with middle value#
-				if (is.null(ghost.reference[[to.ghost[i]]])){#
-					l = data[,binned.name]#
-					middle = levels(l); middle = middle[round((length(middle))/2)]#
-					ghost.reference[[to.ghost[i]]] = middle#
-					if (!silent){message(paste0("Hey-yo: You didn't choose ghost.reference values for ", to.ghost[i], ", which means I get to chose it. That shows a lot of trust. I appreciate that. I won't let you down.\n"))}#
-				#### when they supply ghost reference information#
-				} else {#
-					if (is.numeric(ghost.reference[[to.ghost[i]]])){#
-						ghost.reference[[to.ghost[i]]] = bin.me(variable= to.ghost[i], data=ghost.reference, bins=bins, labels=labels[i], breaks=breaks[[to.ghost[i]]], check.breaks=F)#
-					} else {#
-						ghost.reference[[to.ghost[i]]] = unlist(ghost.reference[[to.ghost[i]]])#
-					}#
-#
-				}#
-			}#
-		} else {#
-			#### if they don't specify any reference group, choose the middle one#
-#
-			ghost.reference=list()#
-			for (b in 1:length(given)){#
-				given.bin = paste0(given[b], "_binned")#
-				### format given as a binned variable#
-				l = data[,given.bin]#
-#
-				middle = levels(l); middle = middle[round((length(middle))/2)]#
-				ghost.reference[[given[b]]]=middle#
-			}#
-#
-			#### if they have an axis[2], add that to the ghost reference#
-			if (length(axis)>1){#
-				ghost.reference[[axis[2]]] = data[,axis[2]]#
-			}#
-			if (!silent){message(paste0("Note: You didn't specify a reference for the ghost line, which means I get to chose it. That shows a lot of trust. I appreciate that. I won't let you down."))}#
-#
-		#### if they specify a reference group for some of them, but not all#
-		}#
-		#### if they specified a prediction, extract data from prediction model#
-		if (!is.null(prediction)){#
-			k = prediction#
-		} else {#
-			k = data#
-		}#
-		s=1#
-#
-		#### norrow down based on GIVEN, not the axis (because we're trying to find the right panel, then plot only the one group line)#
-		for (s in 1:length(given)){#
-			binned.name = paste0(given[s], "_binned")#
-#
-			### specify k based on whether they supply a prediction#
-			if (is.null(prediction)){#
-				k = k[(k[,binned.name])==unlist(ghost.reference[[given[s]]]),]				#
-			} else {#
-				#### find the closest value to the one specified in ghost.reference#
-				#closest.val = which.min(abs(k[,given[s]]-ghost.reference[[given[s]]]))[1]#
-				rows = which(k[,binned.name]==unlist(ghost.reference[[given[s]]]))#
-				k = k[rows,]#
-#
-				names(k)[names(k)=="prediction"] = outcome#
-#
-			}#
-#
-		}
-#### is k gone???#
-		if (nrow(k)==0){#
-			stop("there was an error in generating the ghost line. Please email the developer: fife.dustin@gmail.com")#
-		}#
-		### create ggplot object to extract the fit for the ghost line#
-		if (!is.null(prediction)){#
-			#### ghost line needs a FITTED LINE, otherwise it generates weird zigzags. When you do a prediction line with no fitted line, that's a problem.#
-			#### each given variable still has multiple entries, so average across those entires#
-			#### average within the binned values#
-			grouped.vars = c("model", predictors[(!(predictors %in% given))])#
-			k = k %>% group_by_at(vars(one_of(grouped.vars))) %>% summarize_at(.vars = outcome, .funs=mean)#
-			g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome, linetype="model", group="model"))+', fitted)							#
-		} else {#
-			g0 = paste0(gsub("data=[[:alnum:]]+,", "data=k,", p), "+",fitted)#
-			#g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome))+', fitted)#
-		}#
-		g0 = gsub("+xxxx", "", g0, fixed=T)#
-		g0 = eval(parse(text=g0))#
-		d_smooth = suppressMessages(ggplot_build(g0)$data[[1]])#
-		### rename columns#
-		names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; #
-#
-		## add line to existing plot #
-		if (!is.null(prediction) & length(levels(prediction$model)>1)){  #
-			d_smooth$model = factor(d_smooth$group, labels=levels(prediction$model))#
-			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line, show.legend=F)'			#
-		} else if (length(axis)>1){	#
-			d_smooth[,axis[2]] = factor(d_smooth$group, labels=levels(data[,axis[2]]))#
-			### if the ghost line specifies a specific line to plot...#
-			axis2_notbinned = gsub("_binned", "",axis[2])#
-			if (axis2_notbinned %in% names(ghost.reference)){#
-				d_smooth = d_smooth[d_smooth[,axis[2]]==(ghost.reference[[axis2_notbinned]]),]#
-				ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group=axis[2], linetype=axis[2]), color=ghost.line, show.legend=F)'								#
-			} else {#
-				ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group=axis[2], linetype=axis[2]), color=ghost.line, show.legend=F)'				#
-			}#
-		} else {	#
-			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line, show.legend=F)'#
-		}#
-#
-	} else {#
-		ghost = "xxxx"#
-	}
-!is.null(prediction)
-if (!is.null(prediction)){#
-		### see how many models are being compared#
-		num.models = levels(prediction$model)#
-		if (!is.na(axis[2]) & length(num.models)>1){#
-			stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z), or choose to display only one model")#
-		}#
-		#### bin the predictions, where needed#
-		if (length(break.me)>0){#
-			for (i in 1:length(break.me)){#
-				### find that variable in the model and bin it#
-				prediction[[break.me[i]]] = bin.me(break.me[i], prediction, bins, labels[i], breaks[[break.me[i]]])#
-#
-			}#
-							### now average fit within bin#
-				groups = c("model", paste0(break.me, "_binned"), predictors[-which(predictors%in%break.me)])#
-				prediction = prediction %>% group_by_at(groups) %>% summarize(prediction = mean(prediction)) %>% as.data.frame#
-#
-		}#
-#
-		#### check if first variable is a continuous predictor#
-		if (is.numeric(data[[predictors[1]]])){#
-			##### if they specify an axis[2], modify the "fitted" string#
-			if (!is.na(axis[2])){#
-				pred.line = 'geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)' 				#
-				fitted = "xxxx"#
-			} else {#
-				#### if they supply more than two models to compare...#
-				if (length(levels(prediction$model))>2){#
-					pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)' 									#
-				} else {#
-					pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				#
-				}#
-			}#
-		} else {#
-#
-			pred.line = 'geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))'#
-#
-		}#
-		#### remove linetype from the plot#
-	} else {#
-		pred.line = "xxxx"#
-	}#
-#
-	##### do third eye if they choose to#
-	#if (third.eye)#
-#
-	theme = "theme_bw()"
-is.finite(sample) & is.numeric(data[,outcome])
-if (is.finite(sample) & is.numeric(data[,outcome])){#
-		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")#
-	}#
-	#### if they have a logistic, modify the p to reflect the data#
-	if (method=="logistic" & !is.numeric(data[,outcome])){#
-		p = gsub("data=[[:alnum:]]+,", "data=factor.to.logistic(data,outcome),", p)#
-		points = gsub("data\\)", "factor.to.logistic(data,outcome))", points)		#
-		#### change the y axis labels#
-		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	#
-	}
-#### evaluate the plot#
-	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)#
-	### remove +xxxx (happens when I've made an element blank)#
-	total.call = gsub("+xxxx","",total.call, fixed=T)#
-	final = suppressMessages(eval(parse(text=total.call)))
-final
-devtools::load("research/RPackages/flexplot")
-devtools::load_all("research/RPackages/flexplot")
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F) + labs(x="TM", y="Stress") + geom_point(size=.8, pch=16) + theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())
-traceback()
-set.seed(121212)#
-#
-	#### decide what scenario to play out#
-scenarios = matrix(c("stress", "time management (TM)", "sense of purpose (SOP)",#
-						"depression", "social engagement (SE)", "leisure time"),#
-					ncol=3, byrow=T)#
-#
-d = data.frame(matrix(rnorm(1000*3, 0, 1), ncol=3)); names(d) = c("y", "A", "B")#
-d$y = d$y + model.matrix(y~A+B, data=d)%*%t(t(c(0, -.12, .35)))#
-nrow(d)
-devtools::load_all("research/RPackages/flexplot")
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F) + labs(x="TM", y="Stress") + geom_point(size=.8, pch=16) + theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F)
-formula = y~A | B#
-data=d; method="lm"; se=F; labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")); raw.data=F
-bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
-if (is.null(data)){#
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")#
-	}#
-#
-	##### make models into a factor if they supply predictions#
-	if (!is.null(prediction)){#
-		prediction$model = factor(prediction$model)#
-	}#
-#
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error#
-	#df = data.frame()#
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))#
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)#
-	if (tibble::is_tibble(data)){#
-		data = as.data.frame(data)#
-	}#
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))#
-	}#
-	#### make sure all names are in the dataset#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))#
-	}#
-		# #### extract outcome, predictors, and given variables#
-	# if (!is.null(third.eye) & length(predictors)>2){#
-		# formula = rotate.view(formula = formula, third.eye= third.eye)#
-		# variables = all.vars(formula)#
-		# outcome = variables[1]#
-		# predictors = variables[-1]		#
-	# }#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	given = gsub(" ", "", given)		#
-	given = unlist(strsplit(given, "+", fixed=T))	#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = gsub(" ", "", axis)			#
-	axis = unlist(strsplit(axis, "+", fixed=T))	#
-	#### give an error if they try to visualize logistic with a categorical x axis#
-	if (method=="logistic" & length(predictors)>0){#
-		if (!is.numeric(data[,axis[1]])){#
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n#
-				Best of luck on your statistical journeys."))#
-		}	#
-	}#
-#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-#
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)#
-	#### also, lapply fails when there's just one additional predictor, hence the if statement#
-	if (length(predictors)>2){#
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	} else {#
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	}#
-	#### did they provide a named break?#
-	if (!is.null(breaks)) {#
-		named.breaks = names(breaks)#
-	} else {#
-		named.breaks = NA#
-	}
-#### create a list of breaks#
-	if (length(break.me)>0 ){#
-		#### bark at them if they forgot to name their breaks#
-		if (is.null(named.breaks)){	#
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-		#### make sure they spelled breaks right and such#
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){#
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")#
-		}#
-		#### make an empty list if they don't provide breaks#
-		if (is.null(breaks)){#
-			breaks = rep(list(NULL),length(break.me))#
-			#names(breaks) = break.me#
-		}#
-			#### now make the breaks and convert the data#
-		for (i in 1:length(break.me)){#
-#
-			if ((i-1)<length(breaks)){#
-				#### if they don't name the breaks, bark at them#
-				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){#
-					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-				}#
-			}#
-			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)#
-		}#
-	}
-#### if they only have a few levels on the x axis, jitter convert it to categorical#
-	if (length(predictors)>0){#
-		if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){#
-			data[,axis[1]] = factor(data[,axis[1]], ordered=T)#
-		}#
-		### do the same for the second axis#
-		if (length(axis)>1){#
-			if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){#
-				data[,axis[2]] = factor(data[,axis[2]], ordered=T)#
-			}		#
-		}#
-	}
-if (length(outcome)==1 & length(predictors)==0){#
-#
-		##### reorder according to columns lengths (if it's not an ordered factor)#
-		if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){#
-			counts = sort(table(data[,outcome]), decreasing=T)#
-			names(counts)#
-			data[,outcome] = factor(data[,outcome], levels=names(counts))#
-		}#
-		### figure out how many levels for the variable#
-		levels = length(unique(data[,outcome]))	#
-		#### if numeric, do a histogram#
-		if (is.numeric(data[,outcome])){#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		#
-		} #
-		points = "xxxx"#
-		fitted = "xxxx"		#
-#
-	### BIVARIATE PLOTS#
-	} else if (length(outcome)==1 & length(axis)==1 & !related){#
-		#### if both are categorical, do chi square#
-		if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){#
-			m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)#
-			chi = chisq.test(data[,axis], data[,outcome])#
-			obs.exp = (chi$observed - chi$expected)/chi$expected#
-			m$Freq = as.vector(obs.exp)#
-			names(m)[names(m)=="Freq"] = "Proportion"#
-			p = "ggplot(data=m, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"#
-			points = "xxxx"#
-			fitted = "xxxx"#
-		} else {#
-#
-			### reorder axis and alter default alpha if categorical#
-			if (!is.numeric(data[,axis])){#
-#
-				#### reorder if it's not already ordered#
-				if (!is.ordered(data[, axis[1]])){#
-					if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}#
-					ord = aggregate(data[,outcome]~data[, axis], FUN=fn, na.rm=T)#
-					ord = ord[order(ord[,2], decreasing=T),]#
-					data[,axis] = factor(data[, axis], levels=ord[,1])#
-				}#
-				#### set default alpha#
-				if(alpha==.99977){#
-					alpha = .2#
-				}		#
-			}#
-#
-			p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'#
-			points = points.func(axis.var=axis, data=data, jitter=jitter)#
-			fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		#
-#
-		}	#
-	### RELATED T-TEST#
-	} else if (related){		#
-		#### extract levels of the predictors#
-		levs = levels(data[,axis[1]])#
-#
-		#### create difference scores#
-		g1 = data[data[, axis[1]]==levs[1], outcome]#
-		g2 = data[data[, axis[1]]==levs[2], outcome]				#
-		### error checking#
-		if (length(predictors)!=1){#
-			stop("Currently, the 'related' option is only available when there's a single predictor.")#
-		} #
-		if (length(levs)!=2){#
-			stop("Sorry, I can only accept two levels of the grouping variable when related=T.")#
-		}#
-		if (length(g1) != length(g2)){#
-			stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")#
-		}#
-		lab = paste0("Difference (",levs[2], "-", levs[1], ')')#
-		d2 = data.frame(Difference=g2-g1)#
-		p = "ggplot(d2, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x=lab) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())"#
-		#### modify default jitter#
-		if (is.null(jitter)){#
-			jitter = c(.05, 0)#
-		} #
-		points = points.func(axis.var="Difference", data=d2, jitter=jitter)#
-		fitted = paste0(fit.function(outcome, "Difference", data=d2, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")#
-#
-	##### if they have two axis variables#
-	} else if (length(axis)>1){#
-#
-		#### if the second variable is numeric, bin it#
-		if (is.numeric(data[,axis[2]])){#
-			binned.name = paste0(axis[2], "_binned")#
-			data[[binned.name]] = bin.me(axis[2], data, bins, unlist(labels), breaks[[axis[2]]])#
-			axis[2] = binned.name#
-		}#
-		### if they supply predictions, do not vary color#
-		if (!is.null(prediction)){#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'#
-			### remove the default color if they have categorical variables		#
-		}#
-		points = points.func(axis.var=axis[1], data=data, jitter=jitter)#
-		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)#
-		### remove the default color if they have something in the second axis#
-		if (!is.numeric(data[,axis[2]])){#
-			fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)#
-		}	#
-	}
-points
-fitted
-!is.na(given[1])
-for (i in 1:length(given)){#
-#
-			binned.name = paste0(given[i], "_binned")#
-#
-			if (is.numeric(data[,given[i]])){#
-				data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])#
-				### if they specified prediction, bin those too#
-				if (!is.null(prediction)){#
-					prediction[,binned.name] = bin.me(given[i], prediction, bins, labels[i], breaks[[given[i]]])#
-				}				#
-				### reorder levels of bin 2#
-				if (i==2){#
-					data[,binned.name] = forcats::fct_rev(data[,binned.name])#
-				}#
-			} else {#
-				### duplicate categorical variables and give a new name for binned ones#
-				data[,binned.name] = data[,given[i]]#
-				### if they specified prediction, bin those too (because later when doing ghost lines, I randomly choose a prediction value from a data value, and they need to be binned before that)#
-				if (!is.null(prediction)){#
-					prediction[,binned.name] = prediction[,given[i]]#
-				}					#
-			}#
-		}
-given2 = given#
-		if (length(break.me)>0){#
-			given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")#
-		}	#
-		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))#
-		#### make a custom labeller that removes "_binned"#
-		custom.labeler = function(x){#
-			lapply(names(x),function(y){#
-			paste0(gsub("_binned", "", y),": ", x[[y]])#
-			})#
-		}#
-		facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')
-total.call = paste0(p, "+",points, "+",fitted, "+", facets
+ls()
+head(data)
+formula
+self$options
+self$options$se
+self$options$suppr
+self$options$bins
+flexplot(formula, data, se=self$options$se, spread=se.type, ghost.line="gray", bins=self$options$bins, suppress_smooth = self$options$suppr)
+flexplot::flexplot(formula, data, se=self$options$se, spread=se.type, ghost.line="gray", bins=self$options$bins, suppress_smooth = self$options$suppr)
+flexplot::flexplot(formula, data, se=self$options$se, ghost.line="gray", bins=self$options$bins, suppress_smooth = self$options$suppr)
+formula
+devtools::install_github("dustinfife/flexplot")
+data(blood_pressure)
+require(flexplot)
+data(blood_pressure)
+head(blood_pressure)
+data(diet)
+head(diet)
+data(exercise_data)
+require(flexplot)
+data(exercise_data
 )
-total.call = gsub("+xxxx","",total.call, fixed=T)
-final = suppressMessages(eval(parse(text=total.call)))
-require(ggplot2)
-final = suppressMessages(eval(parse(text=total.call)))
-final
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F, breaks=4)
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F, bins=4)
-violated1
-formula = y~A | B#
-data=d; method="lm"; se=F; labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")); raw.data=F
-bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
-formula = y~A | B#
-data=d; method="lm"; se=F; labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")); raw.data=F
-if (is.null(data)){#
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")#
-	}#
-#
-	##### make models into a factor if they supply predictions#
-	if (!is.null(prediction)){#
-		prediction$model = factor(prediction$model)#
-	}#
-#
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error#
-	#df = data.frame()#
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))#
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)#
-	if (tibble::is_tibble(data)){#
-		data = as.data.frame(data)#
-	}#
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))#
-	}#
-	#### make sure all names are in the dataset#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))#
-	}#
-		# #### extract outcome, predictors, and given variables#
-	# if (!is.null(third.eye) & length(predictors)>2){#
-		# formula = rotate.view(formula = formula, third.eye= third.eye)#
-		# variables = all.vars(formula)#
-		# outcome = variables[1]#
-		# predictors = variables[-1]		#
-	# }#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	given = gsub(" ", "", given)		#
-	given = unlist(strsplit(given, "+", fixed=T))	#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = gsub(" ", "", axis)			#
-	axis = unlist(strsplit(axis, "+", fixed=T))	#
-	#### give an error if they try to visualize logistic with a categorical x axis#
-	if (method=="logistic" & length(predictors)>0){#
-		if (!is.numeric(data[,axis[1]])){#
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n#
-				Best of luck on your statistical journeys."))#
-		}	#
-	}#
-#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-#
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)#
-	#### also, lapply fails when there's just one additional predictor, hence the if statement#
-	if (length(predictors)>2){#
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	} else {#
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	}#
-	#### did they provide a named break?#
-	if (!is.null(breaks)) {#
-		named.breaks = names(breaks)#
-	} else {#
-		named.breaks = NA#
-	}	#
-#
-		#### create a list of breaks#
-	if (length(break.me)>0 ){#
-		#### bark at them if they forgot to name their breaks#
-		if (is.null(named.breaks)){	#
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-		#### make sure they spelled breaks right and such#
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){#
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")#
-		}#
-		#### make an empty list if they don't provide breaks#
-		if (is.null(breaks)){#
-			breaks = rep(list(NULL),length(break.me))#
-			#names(breaks) = break.me#
-		}#
-			#### now make the breaks and convert the data#
-		for (i in 1:length(break.me)){#
-#
-			if ((i-1)<length(breaks)){#
-				#### if they don't name the breaks, bark at them#
-				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){#
-					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-				}#
-			}#
-			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)#
-		}#
-	} #
-	#### if they only have a few levels on the x axis, jitter convert it to categorical#
-	if (length(predictors)>0){#
-		if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){#
-			data[,axis[1]] = factor(data[,axis[1]], ordered=T)#
-		}#
-		### do the same for the second axis#
-		if (length(axis)>1){#
-			if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){#
-				data[,axis[2]] = factor(data[,axis[2]], ordered=T)#
-			}		#
-		}#
-	}
-### BEGIN THE MEGA PLOTTING IFS!#
-	### PLOT UNIVARIATE PLOTS#
-	if (length(outcome)==1 & length(predictors)==0){#
-#
-		##### reorder according to columns lengths (if it's not an ordered factor)#
-		if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){#
-			counts = sort(table(data[,outcome]), decreasing=T)#
-			names(counts)#
-			data[,outcome] = factor(data[,outcome], levels=names(counts))#
-		}#
-		### figure out how many levels for the variable#
-		levels = length(unique(data[,outcome]))	#
-		#### if numeric, do a histogram#
-		if (is.numeric(data[,outcome])){#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		#
-		} #
-		points = "xxxx"#
-		fitted = "xxxx"		#
-#
-	### BIVARIATE PLOTS#
-	} else if (length(outcome)==1 & length(axis)==1 & !related){#
-		#### if both are categorical, do chi square#
-		if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){#
-			m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)#
-			chi = chisq.test(data[,axis], data[,outcome])#
-			obs.exp = (chi$observed - chi$expected)/chi$expected#
-			m$Freq = as.vector(obs.exp)#
-			names(m)[names(m)=="Freq"] = "Proportion"#
-			p = "ggplot(data=m, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"#
-			points = "xxxx"#
-			fitted = "xxxx"#
-		} else {#
-#
-			### reorder axis and alter default alpha if categorical#
-			if (!is.numeric(data[,axis])){#
-#
-				#### reorder if it's not already ordered#
-				if (!is.ordered(data[, axis[1]])){#
-					if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}#
-					ord = aggregate(data[,outcome]~data[, axis], FUN=fn, na.rm=T)#
-					ord = ord[order(ord[,2], decreasing=T),]#
-					data[,axis] = factor(data[, axis], levels=ord[,1])#
-				}#
-				#### set default alpha#
-				if(alpha==.99977){#
-					alpha = .2#
-				}		#
-			}#
-#
-			p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'#
-			points = points.func(axis.var=axis, data=data, jitter=jitter)#
-			fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		#
-#
-		}	#
-	### RELATED T-TEST#
-	} else if (related){		#
-		#### extract levels of the predictors#
-		levs = levels(data[,axis[1]])#
-#
-		#### create difference scores#
-		g1 = data[data[, axis[1]]==levs[1], outcome]#
-		g2 = data[data[, axis[1]]==levs[2], outcome]				#
-		### error checking#
-		if (length(predictors)!=1){#
-			stop("Currently, the 'related' option is only available when there's a single predictor.")#
-		} #
-		if (length(levs)!=2){#
-			stop("Sorry, I can only accept two levels of the grouping variable when related=T.")#
-		}#
-		if (length(g1) != length(g2)){#
-			stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")#
-		}#
-		lab = paste0("Difference (",levs[2], "-", levs[1], ')')#
-		d2 = data.frame(Difference=g2-g1)#
-		p = "ggplot(d2, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x=lab) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())"#
-		#### modify default jitter#
-		if (is.null(jitter)){#
-			jitter = c(.05, 0)#
-		} #
-		points = points.func(axis.var="Difference", data=d2, jitter=jitter)#
-		fitted = paste0(fit.function(outcome, "Difference", data=d2, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")#
-#
-	##### if they have two axis variables#
-	} else if (length(axis)>1){#
-#
-		#### if the second variable is numeric, bin it#
-		if (is.numeric(data[,axis[2]])){#
-			binned.name = paste0(axis[2], "_binned")#
-			data[[binned.name]] = bin.me(axis[2], data, bins, unlist(labels), breaks[[axis[2]]])#
-			axis[2] = binned.name#
-		}#
-		### if they supply predictions, do not vary color#
-		if (!is.null(prediction)){#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'#
-		} else {#
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'#
-			### remove the default color if they have categorical variables		#
-		}#
-		points = points.func(axis.var=axis[1], data=data, jitter=jitter)#
-		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)#
-		### remove the default color if they have something in the second axis#
-		if (!is.numeric(data[,axis[2]])){#
-			fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)#
-		}	#
-	}
-given
-i=1
-binned.name = paste0(given[i], "_binned")
-is.numeric(data[,given[i]])
-data[,binned.name] = bin.me(given[i], data, bins, labels[i], breaks[[given[i]]])
-bins
-labels[i]
-given[i]
-breaks[[given[i]]]
-### taken from gtools::permutations
-variable=given[i]
-labels=labels[i]
-breaks=breaks[[given[i]]]
-### if they come as a list, unlist them#
-	if (is.list(breaks)){#
-		breaks = unlist(breaks)#
-	}#
-	if (is.list(labels)){#
-		labels = unlist(labels)#
-	}
-labels
-!is.null(labels)
-if (!is.null(labels)){#
-		bins = length(labels)#
-	} else if (!is.null(breaks)){#
-		bins = length(breaks)+1#
-	#### otherwise, set bins to 3#
-	} else {#
-		bins = 3#
-	}
-bins
-if (!is.null(breaks) & check.breaks){#
-		breaks = prep.breaks(variable, data, breaks)#
-	} #
-	### if they don't provide labels, make them easier to read (than R's native bin labels)\#
-	if (is.null(labels)){#
-		labels = 1:(length(breaks)-1)		#
-		for (i in 1:(length(breaks)-1)){#
-			labels[i] = paste0(round(breaks[i], digits=1), "-", round(breaks[i+1], digits=1))#
-		}#
-	}
-!is.null(breaks)
-is.null(labels)
-is.null(breaks)
-cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
-breaks
-labels
-bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
-formula = y~A | B#
-data=d; method="lm"; se=F; labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")); raw.data=F
-if (is.null(data)){#
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")#
-	}#
-#
-	##### make models into a factor if they supply predictions#
-	if (!is.null(prediction)){#
-		prediction$model = factor(prediction$model)#
-	}#
-#
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error#
-	#df = data.frame()#
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))#
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)#
-	if (tibble::is_tibble(data)){#
-		data = as.data.frame(data)#
-	}#
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))#
-	}#
-	#### make sure all names are in the dataset#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))#
-	}#
-		# #### extract outcome, predictors, and given variables#
-	# if (!is.null(third.eye) & length(predictors)>2){#
-		# formula = rotate.view(formula = formula, third.eye= third.eye)#
-		# variables = all.vars(formula)#
-		# outcome = variables[1]#
-		# predictors = variables[-1]		#
-	# }#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	given = gsub(" ", "", given)		#
-	given = unlist(strsplit(given, "+", fixed=T))	#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = gsub(" ", "", axis)			#
-	axis = unlist(strsplit(axis, "+", fixed=T))	#
-	#### give an error if they try to visualize logistic with a categorical x axis#
-	if (method=="logistic" & length(predictors)>0){#
-		if (!is.numeric(data[,axis[1]])){#
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n#
-				Best of luck on your statistical journeys."))#
-		}	#
-	}#
-#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-#
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)#
-	#### also, lapply fails when there's just one additional predictor, hence the if statement#
-	if (length(predictors)>2){#
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	} else {#
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	}#
-	#### did they provide a named break?#
-	if (!is.null(breaks)) {#
-		named.breaks = names(breaks)#
-	} else {#
-		named.breaks = NA#
-	}
-length(break.me)
-is.null(named.breaks)
-!is.na(named.breaks) & !(named.breaks %in% break.me)
-is.null(breaks)
-breaks = rep(list(NULL),length(break.me))
-breaks
-i=1
-(i-1)<length(breaks)
-is.null(names(breaks)[[i]]) & is.null(named.breaks)
-labels
-devtools::load_all("research/RPackages/flexplot")
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F, bins=4)
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F)
-formula = y~A | B#
-data=d; method="lm"; se=F; labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")); raw.data=F
-bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
-formula = y~A | B#
-data=d; method="lm"; se=F; labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")); raw.data=F
-if (is.null(data)){#
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")#
-	}#
-#
-	##### make models into a factor if they supply predictions#
-	if (!is.null(prediction)){#
-		prediction$model = factor(prediction$model)#
-	}#
-#
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error#
-	#df = data.frame()#
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))#
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)#
-	if (tibble::is_tibble(data)){#
-		data = as.data.frame(data)#
-	}#
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))#
-	}#
-	#### make sure all names are in the dataset#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))#
-	}#
-		# #### extract outcome, predictors, and given variables#
-	# if (!is.null(third.eye) & length(predictors)>2){#
-		# formula = rotate.view(formula = formula, third.eye= third.eye)#
-		# variables = all.vars(formula)#
-		# outcome = variables[1]#
-		# predictors = variables[-1]		#
-	# }#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	given = gsub(" ", "", given)		#
-	given = unlist(strsplit(given, "+", fixed=T))	#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = gsub(" ", "", axis)			#
-	axis = unlist(strsplit(axis, "+", fixed=T))	#
-	#### give an error if they try to visualize logistic with a categorical x axis#
-	if (method=="logistic" & length(predictors)>0){#
-		if (!is.numeric(data[,axis[1]])){#
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n#
-				Best of luck on your statistical journeys."))#
-		}	#
-	}#
-#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-#
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)#
-	#### also, lapply fails when there's just one additional predictor, hence the if statement#
-	if (length(predictors)>2){#
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	} else {#
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	}#
-	#### did they provide a named break?#
-	if (!is.null(breaks)) {#
-		named.breaks = names(breaks)#
-	} else {#
-		named.breaks = NA#
-	}
-#### bark at them if they forgot to name their breaks#
-		if (is.null(named.breaks)){	#
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-		#### make sure they spelled breaks right and such#
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){#
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")#
-		}#
-		#### make an empty list if they don't provide breaks#
-		if (is.null(breaks)){#
-			breaks = rep(list(NULL),length(break.me))#
-			#names(breaks) = break.me#
-		}
-i = 1
-(i-1)<length(breaks)
-length(breaks)
-is.null(names(breaks)[[i]]) & is.null(named.breaks)
-!is.null(labels)
-length(labels)
-bins = length(labels[[i]])
-bins
-breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)
-devtools::load_all("research/RPackages/flexplot")
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F)
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F) + labs(x="TM", y="Stress") + geom_point(size=.8, pch=16) + theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())
-followed1 = flexplot(y~B | A, data=d, method="lm", se=F, labels=list(c("TM:low", "TM:mid-low", "TM:mid-high", "TM:high")), raw.data=F) + labs(x="SOP", y="Stress")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-violated2 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(c("Leisure:low", "Leisure:mid-low", "Leisure:mid-high", "Leisure:high")), raw.data=F) + labs(x="SE", y="Depression")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-followed2 = flexplot(y~B | A, data=d, method="lm", se=F, labels=list(c("SE:low", "SE:mid-low", "SE:mid-high", "SE:high")),raw.data=F) +  labs(x="Leisure", y="Depression")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-#
-fol1 = plot_grid(violated2, followed2, nrow=2)#
-fol2 = plot_grid(violated1, followed1, nrow=2)#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8f_1_2.jpg", plot=fol2, width=4, height=4)#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8v_1_2.jpg", plot=violated1, width=4, height=4)#
-#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8f_2_2.jpg", plot= fol1, width=4, height=4)#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8v_2_2.jpg", plot= violated2, width=4, height=4)#
-#
-		#### randomly select which scenario#
-k = sample(c(1,2), 1)#
-nk = c(1:2)[which(!(c(1:2)%in%k))]#
-h8v_scenario = paste0("#
-[[Question:Text]]#
-The figure below plots the relationship between ", scenarios[nk,1], ", ", scenarios[nk,2], ", and ", scenarios[nk,3], ". Use that figure to answer the following question.#
-<br><br>#
-<img src='http://www.quantpsych.net/images/flexplot/h8v_", nk, "_2.jpg'>#
-<br><br>#
-")#
-h8f_scenario = paste0("#
-[[Question:Text]]#
-The figure below plots the relationship between ", scenarios[k,1], ", ", scenarios[k,2], ", and ", scenarios[k,3], ". The top rows place ", scenarios[k,2], " on the X axis, while the bottom figure place ", scenarios[k,3], " on the X axis. Use that figure to answer the following question.#
-<br><br>#
-<img src='http://www.quantpsych.net/images/flexplot/h8f_", k, "_2.jpg'>#
-<br><br>#
-")#
-h8f_question = paste0("#
-[[Question:MC]]#
-[[ID:grepfindme_1]]#
-Which of the following statements is true about the relationship between ", scenarios[k,3], " and ", scenarios[k,1], "?#
-[[AdvancedChoices]]#
-[[Choice]]#
-As ", scenarios[k,3], " increases, ", scenarios[k,1], " also increases#
-[[Choice]]#
-As ", scenarios[k,3], " increases, ", scenarios[k,1], " decreases#
-[[Choice]]#
-As ", scenarios[k,3], " increases, ", scenarios[k,1], " remains the same#
-[[Choice]]#
-As ", scenarios[k,2], " increases, ", scenarios[k,1], " also increases#
-")#
-#
-h8v_question = paste0("#
-[[Question:MC]]#
-[[ID:grepfindme_1]]#
-Which of the following statements is true about the relationship between ", scenarios[nk,3], " and ", scenarios[nk,1], "?#
-[[AdvancedChoices]]#
-[[Choice]]#
-As ", scenarios[nk,3], " increases, ", scenarios[nk,1], " also increases#
-[[Choice]]#
-As ", scenarios[nk,3], " increases, ", scenarios[nk,1], " decreases#
-[[Choice]]#
-As ", scenarios[nk,3], " increases, ", scenarios[nk,1], " remains the same#
-[[Choice]]#
-As ", scenarios[nk,2], " increases, ", scenarios[nk,1], " also increases#
-")#
-	# ### export text#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/h8v_scenario.txt")#
-writeLines(h8v_scenario, fileConn)#
-close(fileConn)#
-#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/h8f_scenario.txt")#
-writeLines(h8f_scenario, fileConn)#
-close(fileConn)#
-#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/h8f_question.txt")#
-writeLines(h8f_question, fileConn)#
-close(fileConn)#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/h8v_question.txt")#
-writeLines(h8v_question, fileConn)#
-close(fileConn)
-require(knitr)#
-require(cowplot)#
-require(flexplot)#
-require(fifer2)#
-require(MASS)#
-set.seed(121212)#
-#
-	#### decide what scenario to play out#
-scenarios = matrix(c("stress", "time management (TM)", "sense of purpose (SOP)",#
-						"depression", "social engagement (SE)", "leisure time"),#
-					ncol=3, byrow=T)#
-#
-d = data.frame(matrix(rnorm(1000*3, 0, 1), ncol=3)); names(d) = c("y", "A", "B")#
-d$y = d$y + model.matrix(y~A+B, data=d)%*%t(t(c(0, -.12, .35)))#
-nrow(d)#
-devtools::load_all("research/RPackages/flexplot")#
-		### create all plots#
-violated1 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(SOP=c("SOP:low", "SOP:mid-low", "SOP:mid-high", "SOP:high")), raw.data=F) + labs(x="TM", y="Stress") + geom_point(size=.8, pch=16) + theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-followed1 = flexplot(y~B | A, data=d, method="lm", se=F, labels=list(c("TM:low", "TM:mid-low", "TM:mid-high", "TM:high")), raw.data=F) + labs(x="SOP", y="Stress")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-violated2 = flexplot(y~A | B, data=d, method="lm", se=F, labels=list(c("Leisure:low", "Leisure:mid-low", "Leisure:mid-high", "Leisure:high")), raw.data=F) + labs(x="SE", y="Depression")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())#
-followed2 = flexplot(y~B | A, data=d, method="lm", se=F, labels=list(c("SE:low", "SE:mid-low", "SE:mid-high", "SE:high")),raw.data=F) +  labs(x="Leisure", y="Depression")+ geom_point(size=.8, pch=16)+ theme(strip.text.x = element_text(size=7), axis.text.y=element_blank())
-fol1 = plot_grid(violated2, followed2, nrow=2)#
-fol2 = plot_grid(violated1, followed1, nrow=2)#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8f_1_2.jpg", plot=fol2, width=4, height=4)#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8v_1_2.jpg", plot=violated1, width=4, height=4)#
-#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8f_2_2.jpg", plot= fol1, width=4, height=4)#
-ggsave("research/Statistical Framework/flexplot - experimental/qualtrics setup/graphics/h8v_2_2.jpg", plot= violated2, width=4, height=4)#
-#
-		#### randomly select which scenario#
-k = sample(c(1,2), 1)#
-nk = c(1:2)[which(!(c(1:2)%in%k))]
-h8v_scenario = paste0("#
-[[Question:Text]]#
-The figure below plots the relationship between ", scenarios[nk,1], ", ", scenarios[nk,2], ", and ", scenarios[nk,3], ". Use that figure to answer the following question.#
-<br><br>#
-<img src='http://www.quantpsych.net/images/flexplot/h8v_", nk, "_2.jpg'>#
-<br><br>#
-")#
-h8f_scenario = paste0("#
-[[Question:Text]]#
-The figure below plots the relationship between ", scenarios[k,1], ", ", scenarios[k,2], ", and ", scenarios[k,3], ". The top rows place ", scenarios[k,2], " on the X axis, while the bottom figure place ", scenarios[k,3], " on the X axis. Use that figure to answer the following question.#
-<br><br>#
-<img src='http://www.quantpsych.net/images/flexplot/h8f_", k, "_2.jpg'>#
-<br><br>#
-")#
-h8f_question = paste0("#
-[[Question:MC]]#
-[[ID:grepfindme_1]]#
-Which of the following statements is true about the relationship between ", scenarios[k,3], " and ", scenarios[k,1], "?#
-[[AdvancedChoices]]#
-[[Choice]]#
-As ", scenarios[k,3], " increases, ", scenarios[k,1], " also increases#
-[[Choice]]#
-As ", scenarios[k,3], " increases, ", scenarios[k,1], " decreases#
-[[Choice]]#
-As ", scenarios[k,3], " increases, ", scenarios[k,1], " remains the same#
-[[Choice]]#
-As ", scenarios[k,2], " increases, ", scenarios[k,1], " also increases#
-")#
-#
-h8v_question = paste0("#
-[[Question:MC]]#
-[[ID:grepfindme_1]]#
-Which of the following statements is true about the relationship between ", scenarios[nk,3], " and ", scenarios[nk,1], "?#
-[[AdvancedChoices]]#
-[[Choice]]#
-As ", scenarios[nk,3], " increases, ", scenarios[nk,1], " also increases#
-[[Choice]]#
-As ", scenarios[nk,3], " increases, ", scenarios[nk,1], " decreases#
-[[Choice]]#
-As ", scenarios[nk,3], " increases, ", scenarios[nk,1], " remains the same#
-[[Choice]]#
-As ", scenarios[nk,2], " increases, ", scenarios[nk,1], " also increases#
-")#
-	# ### export text#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/h8v_scenario.txt")#
-writeLines(h8v_scenario, fileConn)#
-close(fileConn)#
-#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/h8f_scenario.txt")#
-writeLines(h8f_scenario, fileConn)#
-close(fileConn)#
-#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/h8f_question.txt")#
-writeLines(h8f_question, fileConn)#
-close(fileConn)#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/h8v_question.txt")#
-writeLines(h8v_question, fileConn)#
-close(fileConn)
-require(tidyverse)#
-full.file = "research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/introduction.txt"#
-block = paste0(readChar(full.file, file.info(full.file)$size), "\n\n")#
-	create.graphics=T	#
-		#### create function that reorders heuristics, then assigns v/f in order	#
-f = function(replication, x, size=8){#
-	numb.samp = sample(x)#
-	vf.samp = sample(c("v", "f"), size=size, replace=T)#
-	vf.notsamp = rep("v", size); vf.notsamp[vf.samp=="v"] = "f"#
-	together = data.frame(heuristic=c(numb.samp, numb.samp), followed=c(vf.samp, vf.notsamp))#
-	together$replication = replication#
-	return(together)#
-}		#
-#
-set.seed(12214434)#
-		#### create twenty different conditions#
-conditions = 1:12 %>% map(f, x=1:8)#
-#
-	#### for when we want to fix the order#
-# all <- expand.grid(p1 = 1:8, p2 = c("v", "f")) #
-# all = all[order(all$p1),]#
-# samples = 10#
-# i=7;j=nrow(all)#
-	#### loop for each of the orderings#
-m = 1	#
-i=1#
-# for (m in 1:length(conditions)){	#
-#
-	# all = conditions[[m]]	#
-	# ### create a block#
-	# #
-			#### loop through all conditions#
-for (i in 1:length(conditions)){#
-		block.name = paste0("[[Block:iteration", i+4, "]]\n\n",collapse="")	#
-		block = paste0(block, block.name)	#
-		#### source everything to start (that way we stick with certain qualifications)#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h1_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h2_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h3_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h4_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h5_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h6_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h7_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h8_generation.R")														#
-		### randomly sort the conditions#
-		#all.rand = all[order(runif(nrow(all))),]#
-		all.rand = conditions[[i]]#
-		### loop through all conditions#
-		for (j in 1:nrow(all.rand)){#
-			### extract name of file scenario#
-			file.name = paste0("h", all.rand[j,1], all.rand[j,2], "_scenario.txt", collapse="")#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-			heuristic_scenario = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")#
-			### extract name of question#
-			file.name = paste0("h", all.rand[j,1], "_question.txt", collapse="")#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-			if (file.exists(file.name)){#
-				heuristic_question = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")			#
-			} else {#
-				file.name = paste0("h", all.rand[j,1], all.rand[j,2], "_question.txt", collapse="")#
-				file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-				heuristic_question = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")			#
-			}#
-			#### replace 'grepfindme' with question ID#
-			heuristic_question = gsub("grepfindme", paste0("h", all.rand[j,1], all.rand[j,2], collapse=""),heuristic_question)#
-			### read in confidence answers#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/confidence_answers.txt")#
-			confidence = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")#
-			confidence = gsub("grepfindme", paste0("h", all.rand[j,1], all.rand[j,2], collapse=""), confidence)#
-			### combine into one file#
-			block = paste0(block, heuristic_scenario, heuristic_question, confidence,"\n[[PageBreak]]\n")#
-		}#
-}#
-traceback()#
-#
-		#### output the file#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/qualtrics_flexplot_final.txt")#
-writeLines(block, fileConn)#
-close(fileConn)
-devtools::install("research/RPackages/flexplot")
-devtools::document("research/RPackages/flexplot")
-devtools::install("research/RPackages/flexplot")
-require(tidyverse)#
-full.file = "research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/introduction.txt"#
-block = paste0(readChar(full.file, file.info(full.file)$size), "\n\n")#
-	create.graphics=T	#
-		#### create function that reorders heuristics, then assigns v/f in order	#
-f = function(replication, x, size=8){#
-	numb.samp = sample(x)#
-	vf.samp = sample(c("v", "f"), size=size, replace=T)#
-	vf.notsamp = rep("v", size); vf.notsamp[vf.samp=="v"] = "f"#
-	together = data.frame(heuristic=c(numb.samp, numb.samp), followed=c(vf.samp, vf.notsamp))#
-	together$replication = replication#
-	return(together)#
-}		#
-#
-set.seed(12214434)#
-		#### create twenty different conditions#
-conditions = 1:12 %>% map(f, x=1:8)#
-#
-	#### for when we want to fix the order#
-# all <- expand.grid(p1 = 1:8, p2 = c("v", "f")) #
-# all = all[order(all$p1),]#
-# samples = 10#
-# i=7;j=nrow(all)#
-	#### loop for each of the orderings#
-m = 1	#
-i=1#
-# for (m in 1:length(conditions)){	#
-#
-	# all = conditions[[m]]	#
-	# ### create a block#
-	# #
-			#### loop through all conditions#
-for (i in 1:length(conditions)){#
-		block.name = paste0("[[Block:iteration", i+4, "]]\n\n",collapse="")	#
-		block = paste0(block, block.name)	#
-		#### source everything to start (that way we stick with certain qualifications)#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h1_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h2_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h3_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h4_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h5_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h6_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h7_generation.R")#
-		source("research/Statistical Framework/flexplot - experimental/qualtrics setup/R_heuristics/h8_generation.R")														#
-		### randomly sort the conditions#
-		#all.rand = all[order(runif(nrow(all))),]#
-		all.rand = conditions[[i]]#
-		### loop through all conditions#
-		for (j in 1:nrow(all.rand)){#
-			### extract name of file scenario#
-			file.name = paste0("h", all.rand[j,1], all.rand[j,2], "_scenario.txt", collapse="")#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-			heuristic_scenario = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")#
-			### extract name of question#
-			file.name = paste0("h", all.rand[j,1], "_question.txt", collapse="")#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-			if (file.exists(file.name)){#
-				heuristic_question = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")			#
-			} else {#
-				file.name = paste0("h", all.rand[j,1], all.rand[j,2], "_question.txt", collapse="")#
-				file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/blocks/H1/",file.name)#
-				heuristic_question = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")			#
-			}#
-			#### replace 'grepfindme' with question ID#
-			heuristic_question = gsub("grepfindme", paste0("h", all.rand[j,1], all.rand[j,2], collapse=""),heuristic_question)#
-			### read in confidence answers#
-			file.name = paste0("research/Statistical Framework/flexplot - experimental/qualtrics setup/confidence_answers.txt")#
-			confidence = paste0(readChar(file.name, file.info(file.name)$size), "\n\n")#
-			confidence = gsub("grepfindme", paste0("h", all.rand[j,1], all.rand[j,2], collapse=""), confidence)#
-			### combine into one file#
-			block = paste0(block, heuristic_scenario, heuristic_question, confidence,"\n[[PageBreak]]\n")#
-		}#
-}#
-traceback()#
-#
-		#### output the file#
-fileConn<-file("research/Statistical Framework/flexplot - experimental/qualtrics setup/qualtrics_flexplot_final.txt")#
-writeLines(block, fileConn)#
-close(fileConn)
-context("Univariate plots")#
-#
 require(flexplot)#
 data(exercise_data)#
-d = exercise_data
-require(testthat)#
-require(vdiffr)
-context("Univariate plots")
-devtools::test("research/RPackages/flexplot")
-?expect_doppelganger
-devtools::compare("research/RPackages/flexplot")
-testthat::compare("research/RPackages/flexplot")
-manage_cases("research/RPackages/flexplot")
-d = exercise_data
-a=flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red")
-b = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",#
-	breaks = list(income = c(95000, 100000, 105000)),#
- 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))
-formula = weight.loss~motivation | income + health, data=d; se=FALSE; method="lm"; ghost.line="red";#
-	breaks = list(income = c(95000, 100000, 105000));#
- 	labels=list(income = c("<95K", "<100K", "<105K", ">105K"))
-formula = weight.loss~motivation | income + health; data=d; se=FALSE; method="lm"; ghost.line="red";#
-	breaks = list(income = c(95000, 100000, 105000));#
- 	labels=list(income = c("<95K", "<100K", "<105K", ">105K"))
-bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
-formula = weight.loss~motivation | income + health; data=d; se=FALSE; method="lm"; ghost.line="red";#
-	breaks = list(income = c(95000, 100000, 105000));#
- 	labels=list(income = c("<95K", "<100K", "<105K", ">105K"))
-if (is.null(data)){#
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")#
+mod1 = lm(weight.loss~motivation + therapy.type, data=exercise_data)#
+mod2 = rlm(weight.loss~motivation + therapy.type, data=exercise_data)#
+model.comparison(mod1, mod2)
+mod2 = MASS::rlm(weight.loss~motivation + therapy.type, data=exercise_data)
+model.comparison(mod1, mod2)
+data(exercise_data)
+require(flexplot)
+data(exercise_data)
+mod1 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
+mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
+formula =weight.loss~therapy.type | motivation; data=exercise_data; model1= mod1; model2= mod2
+return.preds=F
+silent=F
+report.se=F
+re=F
+pred.type="response"
+#### if mod2 is null..#
+	if (is.null(model2)){#
+		model2 = model1#
+		old.mod = 1#
+	} else {#
+		old.mod = 0#
 	}#
 #
-	##### make models into a factor if they supply predictions#
-	if (!is.null(prediction)){#
-		prediction$model = factor(prediction$model)#
-	}#
-#
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error#
-	#df = data.frame()#
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))#
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)#
-	if (tibble::is_tibble(data)){#
-		data = as.data.frame(data)#
-	}#
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
+	#### get type of model#
+	model1.type = class(model1)[1]#
+	model2.type = class(model2)[1]	#
+	#### extract the terms from each MODEL#
+	testme1 = formula(model1); terms.mod1=all.vars(testme1)[-1]#
+	testme2 = formula(model2); terms.mod2=all.vars(testme2)[-1]#
+	testme = unique(all.vars(testme1)[-1], all.vars(testme2)[-1])#
+	##### extract variable names#
 	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))#
+    outcome = variables[1]#
+    predictors = variables[-1]#
+    #### for the rare occasion where deleting missing data changes the levels...#
+    if (length(predict(model1))<nrow(data) | length(predict(model2))<nrow(data)){#
+      data = na.omit(data[,variables])#
+    }    #
+    ##### make sure they're putting the same variables from formula in terms#
+	if (!(all(predictors %in% testme))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%terms.mod1)], collapse=",")))#
 	}#
-	#### make sure all names are in the dataset#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))#
-	}#
-		# #### extract outcome, predictors, and given variables#
-	# if (!is.null(third.eye) & length(predictors)>2){#
-		# formula = rotate.view(formula = formula, third.eye= third.eye)#
-		# variables = all.vars(formula)#
-		# outcome = variables[1]#
-		# predictors = variables[-1]		#
-	# }#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	given = gsub(" ", "", given)		#
-	given = unlist(strsplit(given, "+", fixed=T))	#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = gsub(" ", "", axis)			#
-	axis = unlist(strsplit(axis, "+", fixed=T))	#
-	#### give an error if they try to visualize logistic with a categorical x axis#
-	if (method=="logistic" & length(predictors)>0){#
-		if (!is.numeric(data[,axis[1]])){#
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n#
-				Best of luck on your statistical journeys."))#
-		}	#
-	}#
-#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
-		}#
-	}#
-#
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)#
-	#### also, lapply fails when there's just one additional predictor, hence the if statement#
-	if (length(predictors)>2){#
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	} else {#
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
-	}#
-	#### did they provide a named break?#
-	if (!is.null(breaks)) {#
-		named.breaks = names(breaks)#
-	} else {#
-		named.breaks = NA#
+	##### make sure they're using the right dataset#
+	if (!(all(predictors %in% names(data)))){#
+		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))#
 	}	#
+	#### create random column just to make the applies work (yeah, it's hacky, but it works)#
+    data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)#
+    predictors = c(predictors, "reject", "reject2")#
 #
-		#### create a list of breaks#
-	if (length(break.me)>0 ){#
-		#### bark at them if they forgot to name their breaks#
-		if (is.null(named.breaks)){	#
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-		#### make sure they spelled breaks right and such#
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){#
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")#
-		}#
-		#### make an empty list if they don't provide breaks#
-		if (is.null(breaks)){#
-			breaks = rep(list(NULL),length(break.me))#
-			#names(breaks) = break.me#
-		}#
-			#### now make the breaks and convert the data#
-		for (i in 1:length(break.me)){#
+    #### get variable types#
+    numb = names(which(unlist(lapply(data[,predictors], is.numeric))))#
+    cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
 #
-			if ((i-1)<length(breaks)){#
-				#### if they don't name the breaks, bark at them#
-				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){#
-					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-				}#
+    ##### make "quadriture" points for quant variables#
+    var.mins = apply(data[, numb], 2, min, na.rm=T)#
+    var.max = apply(data[, numb], 2, max, na.rm=T)    #
+    min.max = data.frame(var.mins, var.max); min.max$size = c(50, rep(10, nrow(min.max)-1))#
+	f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}#
+	min.max = as.list(apply(min.max, 1, f))#
+#
+    #### get unique values for categorical vars#
+    if (length(cat)==1){#
+    	un.vars = lapply(data[cat], unique)    	#
+    } else {#
+		un.vars =lapply(data[,cat], unique); names(un.vars) = cat#
+	}#
+    #### combine into one dataset#
+    all.vars = c(min.max, un.vars)    #
+    #### get rid of extra variables#
+    tot.vars = length(predictors)#
+    rejects = grep("reject", names(all.vars))#
+	all.vars = all.vars[-rejects]#
+	all.vars = lapply(all.vars, function(x) x[!is.na(x)])#
+	pred.values = expand.grid(all.vars)#
+	##### look for interactions and remove them#
+	if (length(grep(":", terms.mod1))>0){#
+		terms.mod1 = terms.mod1[-grep(":", terms.mod1)]#
+		model1.type = ifelse(model1.type=="lm", "interaction", model1.type)#
+	}#
+	if (length(grep(":", terms.mod2))>0){#
+		terms.mod2 = terms.mod2[-grep(":", terms.mod1)]#
+		model2.type = ifelse(model2.type=="lm", "interaction", model2.type)#
+	}	#
+	##### look for polynomials and remove them#
+	if (length(grep("^2", terms.mod1, fixed=T, value=T))>0 ){#
+		terms.mod1 = terms.mod1[-grep("^2", terms.mod1, fixed=T)]#
+		model1.type = ifelse(model1.type=="lm", "polynomial", model1.type)#
+	}#
+	if (length(grep("^2", terms.mod2, fixed=T, value=T))>0 & model1.type=="lm"){#
+		terms.mod2 = terms.mod2[-grep("^2", terms.mod1, fixed=T)]#
+		model2.type = ifelse(model2.type=="lm", "polynomial", model2.type)#
+	}	#
+	#### if the outcome is an ordered factor...#
+	#### if it's not in model 1:#
+	#### input the mean (if numeric) or a value (if categorical)#
+	if (length(which(!(terms.mod1 %in% predictors)))>0){#
+		not.in.there = terms.mod1[which(!(terms.mod1 %in% predictors))]#
+		for (i in 1:length(not.in.there)){#
+			if (is.numeric(data[,not.in.there[i]])){#
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))}#
+				pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)#
+			} else {#
+				val = unique(data[,not.in.there[i]])[1]#
+				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))}#
+				pred.values[,not.in.there[i]] = val#
 			}#
-			if (!is.null(labels)){#
-				bins = length(labels[[i]])#
-			}			#
-			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)#
-		}#
-	} #
-	#### if they only have a few levels on the x axis, jitter convert it to categorical#
-	if (length(predictors)>0){#
-		if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){#
-			data[,axis[1]] = factor(data[,axis[1]], ordered=T)#
-		}#
-		### do the same for the second axis#
-		if (length(axis)>1){#
-			if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){#
-				data[,axis[2]] = factor(data[,axis[2]], ordered=T)#
-			}		#
-		}#
-	}
-if (is.null(data)){#
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")#
-	}#
-#
-	##### make models into a factor if they supply predictions#
-	if (!is.null(prediction)){#
-		prediction$model = factor(prediction$model)#
-	}#
-#
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error#
-	#df = data.frame()#
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))#
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)#
-	if (tibble::is_tibble(data)){#
-		data = as.data.frame(data)#
-	}#
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))#
-	variables = all.vars(formula)#
-	outcome = variables[1]#
-	predictors = variables[-1]#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))#
-	}#
-	#### make sure all names are in the dataset#
-	if (!all(variables %in% names(data))){#
-		not.there = variables[which(!(variables %in% names(data)))]#
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))#
-	}#
-		# #### extract outcome, predictors, and given variables#
-	# if (!is.null(third.eye) & length(predictors)>2){#
-		# formula = rotate.view(formula = formula, third.eye= third.eye)#
-		# variables = all.vars(formula)#
-		# outcome = variables[1]#
-		# predictors = variables[-1]		#
-	# }#
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))#
-	given = gsub(" ", "", given)		#
-	given = unlist(strsplit(given, "+", fixed=T))	#
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))#
-	axis = gsub(" ", "", axis)			#
-	axis = unlist(strsplit(axis, "+", fixed=T))	#
-	#### give an error if they try to visualize logistic with a categorical x axis#
-	if (method=="logistic" & length(predictors)>0){#
-		if (!is.numeric(data[,axis[1]])){#
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n#
-				Best of luck on your statistical journeys."))#
-		}	#
-	}#
-#
-	#### identify which variables are numeric and which are factors#
-	if (length(predictors)>0){#
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))#
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))#
-	}#
-#
-		### remove missing values#
-	if (length(predictors)>0){#
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){#
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))#
-			data = data[-delete.me,]#
 		}#
 	}#
+	#### generate predictions#
+	if (model1.type == "lmerMod" | model1.type == "glmerMod"){#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		#
+	} else if (model1.type == "polr"){#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="class", re.form=NA), model= model1.type)		#
+	} else if (model1.type == "lm" | model1.type == "polynomial" | model1.type=="interaction"){#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval=int), model=model1.type)#
+	} else {	#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type=pred.type, interval=int), model= model1.type)		#
+	}#
 #
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)#
-	#### also, lapply fails when there's just one additional predictor, hence the if statement#
-	if (length(predictors)>2){#
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
+	#### generate separate predictions for random effects#
+	if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")	#
+		old.mod=0	#
+	} else if ((model2.type == "lmerMod" | model2.type == "glmerMod") & !re){#
+		pred.mod2 = pred.mod1#
+	} else if (model2.type == "polr"){#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="class", re.form=NA), model= model2.type)		#
+	} else if (model2.type == "lm" | model2.type == "polynomial" | model2.type=="interaction"){#
+		int = ifelse(report.se, "confidence", "none")#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, interval="confidence")[,1], model=model2.type)#
 	} else {#
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	#
+		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type= pred.type), model= model2.type)		#
 	}#
-	#### did they provide a named break?#
-	if (!is.null(breaks)) {#
-		named.breaks = names(breaks)#
+	#### convert polyr back to numeric (if applicable)#
+	if (model1.type == "polr" | model2.type == "polr"){#
+		data[,outcome] = as.numeric(as.character(data[,outcome]))		#
+		pred.mod1$prediction = as.numeric(as.character(pred.mod1$prediction))#
+		pred.mod2$prediction = as.numeric(as.character(pred.mod2$prediction))		#
+	}
+deparse(substitute(model1))
+pred.mod1$model = paste0(deparse(substitute(model1)), " (", model1.type, ")", collapse="")#
+		pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, ")", collapse="")#
+	#}#
+	#### report one or two coefficients, depending on if they supplied it#
+	if (old.mod==0){#
+		prediction.model = rbind(pred.mod1, pred.mod2)#
+		prediction.model = cbind(pred.values, prediction.model)#
 	} else {#
-		named.breaks = NA#
+		prediction.model = pred.mod1#
+		prediction.model = cbind(pred.values, prediction.model)#
+	}#
+	#### eliminate those predictions that are higher than the range of the data#
+	if (!is.factor(data[,outcome])){#
+	min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)#
+		if (length(which(prediction.model$prediction>max.dat)>0 | length(which(prediction.model$prediction<min.dat)))){#
+			prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]#
+		}#
+	} else {#
+		#### if they supply a factor, convert it to a number!!!!!#
+		prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)#
 	}
-#### bark at them if they forgot to name their breaks#
-		if (is.null(named.breaks)){	#
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-		#### make sure they spelled breaks right and such#
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){#
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")#
-		}#
-		#### make an empty list if they don't provide breaks#
-		if (is.null(breaks)){#
-			breaks = rep(list(NULL),length(break.me))#
-			#names(breaks) = break.me#
-		}
-i=1
-for (i in 1:length(break.me)){#
-#
-			if ((i-1)<length(breaks)){#
-				#### if they don't name the breaks, bark at them#
-				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){#
-					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-				}#
-			}#
-			if (!is.null(labels)){#
-				bins = length(labels[[i]])#
-			}			#
-			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)#
-		}
-i
-(i-1)<length(breaks)
-!is.null(labels)
-labels[[i]]
-labels
-length(labels)
-length(labels)<=i
-length(labels)
-i
-length(labels)>=i
-if (length(break.me)>0 ){#
-		#### bark at them if they forgot to name their breaks#
-		if (is.null(named.breaks)){	#
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-		#### make sure they spelled breaks right and such#
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){#
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")#
-		}#
-		#### make an empty list if they don't provide breaks#
-		if (is.null(breaks)){#
-			breaks = rep(list(NULL),length(break.me))#
-			#names(breaks) = break.me#
-		}#
-			#### now make the breaks and convert the data#
-		for (i in 1:length(break.me)){#
-#
-			if ((i-1)<length(breaks)){#
-				#### if they don't name the breaks, bark at them#
-				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){#
-					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")#
-				}#
-			}#
-			if (!is.null(labels)){#
-				if (length(labels)>=i){#
-					bins = length(labels[[i]])#
-				} else {#
-					bins = 3#
-				}#
-			}			#
-			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)#
-		}#
-	}
-devtools::load_all("research/RPackages/flexplot")
-b = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",#
-	breaks = list(income = c(95000, 100000, 105000)),#
- 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))
-b
-c = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))
-e = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31))
-f = flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000, gender="female"))
-g = flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000))
-manage_cases("research/RPackages/flexplot")
-devtools::install("research/RPackages/flexplot")
-require(flexplot)#
-	#### univariate plots#
-data(exercise_data); d= exercise_data#
-a = flexplot(income~1, data=d)#
-b = flexplot(gender~1, data=d)#
-require(ggplot2)#
-ggsave(plot=cowplot::plot_grid(a), filename="research/RPackages/flexplot/plots/univariate_flexplot_test.jpg")
-data(exercise_data); d= exercise_data#
-flexplot(income~1, data=d)#
-flexplot(gender~1, data=d)#
-	#### previous bugs#
-data(birthweight)#
-d = birthweight#
-mod = lm(Birthweight~motherage + fheight + mheight + smoker, data=d)#
-flexplot(Birthweight~mheight+smoker|motherage, data=d)#
-#
-d = read.csv("research/Statistical Framework/grants/CSM Seed Grant/data/classroom_method.csv")#
-d$instruction.method = relevel(d$instruction.method, ref="lecture")#
-flexplot(test.score~funding|instruction.method, data=d, se=F, alpha=.05, ghost.reference=list(instruction.method="lecture"), ghost.line="gray")#
-flexplot(test.score~instruction.method, data=d, sample=50)
-require(flexplot)#
-data(exercise_data)	#
-d = exercise_data#
-glinmod(weight.loss~gender + motivation, data=exercise_data, se=F, method="lm")#
-model = lm(weight.loss~motivation+therapy.type, #
-           data=exercise_data)#
-visualize(model)#
-object = model#
-#
-d = exercise_data#
-#
-		# # #### histograms and barcharts#
-# ### scatter plot#
-require(MASS)#
-flexplot(weight.loss~motivation, data=d)	#
-flexplot(weight.loss~motivation, data=d, method="lm", se=FALSE)	#
-flexplot(weight.loss~motivation, data=d, method="rlm", se=FALSE)	#
-flexplot(weight.loss~motivation, data=d, method="rlm", se=FALSE, raw.data=F)	#
-flexplot(weight.loss~health, data=d, method="polynomial", se=FALSE)	#
-flexplot(weight.loss~health, data=d, method="cubic", se=FALSE)	#
-flexplot(gender~health, data=d, method="logistic", se=FALSE, jitter=c(0, .1))	#
-flexplot(weight.loss~therapy.type + gender, #
-    data=exercise_data, se=F, alpha=.3)#
-data("tablesaw.injury") ### also simulated data available in flexplot package#
-                        ### always remember to be safe and attentive when woodworking#
-flexplot(injury~attention, data=tablesaw.injury, #
-             method="logistic", jitter=c(0, .05))#
-# ### mean plots#
-flexplot(weight.loss~therapy.type, data=d)#
-data(relationship_satisfaction)#
-flexplot(satisfaction~separated, data=relationship_satisfaction)#
-flexplot(weight.loss~therapy.type, data=d, spread="stdev")#
-flexplot(weight.loss~therapy.type, data=d, spread="sterr")#
-flexplot(weight.loss~therapy.type, data=d, raw.data=FALSE)	#
-flexplot(weight.loss~therapy.type, data=d, jitter=F)		#
-flexplot(weight.loss~therapy.type, data=d, jitter=T)		#
-flexplot(weight.loss~therapy.type, data=d, jitter=c(.3,0))		#
-flexplot(weight.loss~therapy.type, data=d, jitter=c(.3))#
-flexplot(weight.loss~therapy.type, data=d, jitter=c(.3, .5))	#
-flexplot(gender~therapy.type, data=d, jitter=c(.3, .5), method="logistic")		#
-	### intentional error#
-## related T#
-k = d#
-deleteme = which(k$rewards=="no rewards")#
-k = k[-(deleteme[1:2]),]#
-table(k$rewards)#
-flexplot(weight.loss~rewards, data=k, related=T)#
-flexplot(weight.loss~rewards, data=k, related=T, jitter=F)#
-flexplot(weight.loss~rewards, data=k, related=T, jitter=T)#
-flexplot(weight.loss~rewards, data=k, related=T, jitter=c(.05,0))#
- 	## without raw data#
-#
-# ### CHI SQUARE PLOT (categorical on categorical)#
-flexplot(gender~rewards, data=d, jitter=c(.05,0))
-options(suppressWarnings=T)
-# ### INTERACTION PLOT			#
-flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)#
-flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=F)#
-flexplot(weight.loss~therapy.type + gender, data=d, alpha=.4, jitter=c(.4,0))#
-flexplot(weight.loss~therapy.type + gender, data=d, sample=50)	#
-flexplot(weight.loss~therapy.type | gender, data=d, sample=50)	#
-flexplot(gender~weight.loss | therapy.type, data=d, sample=50, method="logistic")	#
-flexplot(gender~weight.loss + therapy.type, data=d, sample=50, method="logistic")	#
-#
-# #### ANCOVA PLOT#
-flexplot(weight.loss~motivation + gender, data=d, se=FALSE)	### remove se#
-added.plot(weight.loss~motivation + gender, data=d, se=FALSE)	### remove se#
-# #### 2N PLOT (2 NUMERIC VARIABLE PLOTS)#
-flexplot(formula = weight.loss~motivation + income, data=d, se=FALSE, method="lm", breaks=NULL, bins=3, labels=NULL)#
-#source("research/RPackages/flexplot/R/flexplot.R")#
-#source("research/RPackages/flexplot/R/hidden_functions.R")#
-flexplot(formula = weight.loss~motivation + income, data=d, se=FALSE, method="lm", #
- 	breaks = list(income=c(95000, 100000, 105000)),#
- 	labels=list(income=c("<95K", "<100K", "<105K", ">105K")))		#
-flexplot(formula = gender~motivation + income, data=d, se=FALSE, method="logistic", #
- 	breaks = list(income=c(95000, 100000, 105000)),#
- 	labels=list(income=c("<95K", "<100K", "<105K", ">105K")))#
-#
-# #### 3N plot#
-flexplot(weight.loss~motivation + income + health, data=d, se=FALSE, method="lm")	#
- 		## different lines for income#
-flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", third.eye=c(T))	#
-flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="polynomial", third.eye=c(T))	#
- 		## different panels for income#
-flexplot(formula = weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", #
- 	breaks = list(income = c(95000, 100000, 105000)),#
- 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	#
-#### ghost lines#
-flexplot(weight.loss~motivation + gender | satisfaction + health, #
-         data=exercise_data, #
-         method="lm", se=F, bins=2, ghost.line="black", alpha=.1,#
-         ghost.reference = list(c("satisfaction"=0, "health"=10)))#
-flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",#
-	breaks = list(income = c(95000, 100000, 105000)),#
- 	labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	#
-flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	#
-flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31))#
-flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	#
-flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000, gender="female"))	#
-flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000))	#
-		#### VISUALIZE FUNCTIONS -- Linear Models#
-## t-test#
-mod = lm(weight.loss~rewards, data=d)#
-visualize(mod)#
-object = mod#
-### regression#
-mod = lm(weight.loss~motivation, data=d)#
-visualize(mod)#
-visualize(mod, plot="residuals")#
-visualize(mod, plot="model")#
-#
-### ancova#
-mod = lm(weight.loss~motivation + rewards, data=d)#
-visualize(mod)#
-visualize(mod, plot="residuals")#
-visualize(mod, plot="model")#
-#
-model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)#
-model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)#
-compare.fits(weight.loss ~ motivation | therapy.type, #
-             data = exercise_data, model.me, model.int, ghost.line = "black", return.preds=F)
-options(warn=-1)
-#### VISUALIZE FUNCTIONS -- Linear Models#
-## t-test#
-mod = lm(weight.loss~rewards, data=d)#
-visualize(mod)#
-object = mod#
-### regression#
-mod = lm(weight.loss~motivation, data=d)#
-visualize(mod)#
-visualize(mod, plot="residuals")#
-visualize(mod, plot="model")#
-#
-### ancova#
-mod = lm(weight.loss~motivation + rewards, data=d)#
-visualize(mod)#
-visualize(mod, plot="residuals")#
-visualize(mod, plot="model")#
-#
-model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)#
-model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)#
-compare.fits(weight.loss ~ motivation | therapy.type, #
-             data = exercise_data, model.me, model.int, ghost.line = "black", return.preds=F)             #
-### factorial anova#
-mod = lm(weight.loss~gender + rewards, data=d)#
-visualize(mod)#
-visualize(mod, plot="residuals")#
-visualize(mod, plot="model")#
-#
-### multiple regression#
-mod = lm(weight.loss~gender + rewards + motivation, data=d)#
-visualize(mod)#
-visualize(mod, plot="residuals")#
-visualize(mod, plot="model")#
-#
-data(birthweight)#
-k= birthweight#
-added.plot(Birthweight~mheight + fheight + motherage + smoker, data=k, method="lm")#
-mod = lm(Birthweight~mheight + fheight + motherage, data=k)#
-mod2 = lm(Birthweight~mheight + fheight + motherage, data=k)#
-visualize(mod, plot="residuals")#
-#
-	#### mixed models#
-require(flexplot)#
-require(lme4)#
-data(math)#
-model = lmer(MathAch~ SES + Sex + (SES|School), data=math)#
-flexplot::visualize(model, formula = MathAch~ SES | Sex + School, plot="model")#
-visualize(model, formula = MathAch~ SES + School| Sex, sample=100)#
-object = model#
-visualize(model, formula = MathAch~ Sex | SES+ School, sample=3)#
-visualize(model, formula = MathAch~ Sex + School| SES, sample=30)#
-#
-d = exercise_data#
-	#### COMPARE.FITS FUNCTIONS -- linear models#
-mod = lm(weight.loss~rewards, data=d)#
-require(MASS)#
-mod2 = rlm(weight.loss~rewards, data=d)#
-compare.fits(weight.loss~rewards, data=d, model1=mod)#
-formula = weight.loss~rewards; data=d; model1=mod; model2=NULL#
-compare.fits(formula=weight.loss~rewards, data=d, model1=mod, model2=mod2)#
-#
-mod = lm(weight.loss~motivation, data=d)#
-compare.fits(weight.loss~motivation, data=d, model1=mod)#
-#
-	### compare interaction and non-interaction models#
-d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)#
-mod = lm(wl ~motivation+rewards, data=d)#
-mod2 = lm(wl ~motivation*rewards, data=d)#
-compare.fits(wl~motivation|rewards, data=d, model1=mod, model2=mod2)#
-#
-	### compare interaction and non-interaction models#
-d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)#
-mod = lm(wl ~gender+rewards, data=d)#
-mod2 = lm(wl ~gender*rewards, data=d)#
-compare.fits(wl~gender|rewards, data=d, model1=mod, model2=mod2)#
-#
-		##### compare predictions with random forest#
-require(randomForest)#
-model1 = randomForest(wl~motivation + gender + rewards, data=d)#
-model2 = lm(wl~motivation * gender * rewards, data=d)		### use the same predictors in both models#
-compare.fits(wl~motivation | gender + rewards, data=d, model1, model2)#
-#
-		##### predictions with generalize lidnear model#
-d$weight.loss = d$weight.loss + 1 + abs(min(d$weight.loss, na.rm=T))#
-mod1 = glm(weight.loss~motivation + health + gender, data=d, family="Gamma")#
-mod2 = lm(weight.loss~motivation + health + gender, data=d)#
-compare.fits(weight.loss~motivation | health + gender, data=d, mod1, mod2)#
-compare.fits(weight.loss ~ motivation | health, data=d, model1=mod1, ghost.line="blue")#
-compare.fits(weight.loss ~ motivation | health, data=d, model1=mod1, model2=mod2, ghost.line="red")#
-mod1 = lm(weight.loss~therapy.type * motivation * health * muscle.gain * I(motivation^2), data=d)#
-mod2 = lm(weight.loss~therapy.type + motivation + health + muscle.gain + I(motivation^2), data=d)#
-compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2)#
-compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2)#
-compare.fits(weight.loss ~muscle.gain +therapy.type | motivation + health, data=d, model1=mod1)#
-flexplot::third.eye(weight.loss~muscle.gain|motivation + health, data=d, which.perms=1:2, se=F, ghost.line="gray", method="lm")#
-#
-require(fifer)#
-data(authors); d= authors[1:1000,]#
-mod1 = lm(Daily.Units.Sold~Sale.Price*Publisher, data=d)#
-mod2 = glm(Daily.Units.Sold~Sale.Price*Publisher, data=d, family=quasipoisson(link="log"))#
-compare.fits(Daily.Units.Sold~Sale.Price|Publisher, data=d, mod1, mod2)
-flexplot(gender~weight.loss + therapy.type, data=d, sample=50, method="logistic")
-d = exercise_data
-flexplot(gender~weight.loss + therapy.type, data=d, sample=50, method="logistic")
-flexplot(gender~weight.loss | therapy.type, data=d, sample=50, method="logistic")
-compare.cases("research/RPackages/flexplot")
-require(vdiffr)
-compare.cases("research/RPackages/flexplot")
-require(testthat)
-compare.cases("research/RPackages/flexplot")
-compare_cases("research/RPackages/flexplot")
-?expect_doppelganger
-manage_cases("research/RPackages/flexplot")
-jmvtools::install("research/RPackages/flexplot")
-devtools::document("research/RPackages/flexplot")
-jmvtools::install("research/RPackages/flexplot")
-devtools::document("research/RPackages/flexplot")
-jmvtools::install("research/RPackages/flexplot")
-devtools::document("research/RPackages/flexplot")
-jmvtools::install("research/RPackages/flexplot")
-devtools::document("research/RPackages/flexplot")
-jmvtools::install("research/RPackages/flexplot")
-devtools::install("research/RPackages/fifer")
-require(knitr)#
-require(cowplot)#
-require(flexplot)#
-require(fifer2)#
-require(MASS)#
-#
-set.seed(11111)#
-height = rnorm(200, 0,1)#
-weight = 30 + -.45*height^2 + rnorm(200,0,.8)#
-d = data.frame(X=height, Y=weight)	#
-d = d[-which(d$Y<27),]	#
-#d$weight = d$weight #
-d$Y = rescale(d$Y, 30, 10)
-a = flexplot(Y~X, data=d, raw.data=T, method="lm", se=F) #
-b = flexplot(Y~X, data=d, raw.data=T, method="loess", se=F)#
-c = flexplot(Y~X, data=d, raw.data=T, method="", se=F)
-b
+flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=
+)
 setwd("research/RPackages/flexplot")
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
-jmvtools::install()
+devtools::load_all()
+devtools::test()
+d = exercise_data#
+d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)
+model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
+model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
+compare.fits(weight.loss ~ motivation | therapy.type, #
+               data = exercise_data, model.me, model.int, ghost.line = "black"))
+compare.fits(weight.loss ~ motivation | therapy.type, #
+               data = exercise_data, model.me, model.int, ghost.line = "black")
+mod = lm(wl ~motivation+rewards, data=d)
+mod2 = lm(wl ~motivation*rewards, data=d)
+compare.fits(wl~motivation|rewards, data=d, model1=mod, model2=mod2)
+mod = lm(weight.loss~motivation, data=d)
+compare.fits(weight.loss~motivation, data=d, model1=mod)
+mod1 = lm(weight.loss~therapy.type * motivation * health * muscle.gain * I(motivation^2), data=d)
+mod1 = lm(weight.loss~therapy.type * motivation * health * muscle.gain * I(motivation^2), data=d)
+mod2 = lm(weight.loss~therapy.type + motivation + health + muscle.gain + I(motivation^2), data=d)
+compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2)
+compare.fits(weight.loss ~muscle.gain +therapy.type | motivation + health, data=d, model1=mod1)
+data("relationship_satisfaction")
+full.mod = lm(satisfaction~communication * separated , data=relationship_satisfaction)
+reduced.mod = lm(satisfaction~communication + separated , data=relationship_satisfaction)
+compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod)
+mod = lm(weight.loss~rewards, data=d)#
+  require(MASS)#
+  mod2 = rlm(weight.loss~rewards, data=d)
+compare.fits(formula=weight.loss~rewards, data=d, model1=mod, model2=mod2)
+require(randomForest)#
+  model1 = randomForest::randomForest(wl~motivation + gender + rewards, data=d)#
+  model2 = lm(wl~motivation * gender * rewards, data=d)		### use the same predictors in both models
+compare.fits(wl~motivation | gender + rewards, data=d, model1, model2)
+mod1 = glm(weight.loss~motivation + health + gender, data=d, family="Gamma")
+mod2 = lm(weight.loss~motivation + health + gender, data=d)
+compare.fits(weight.loss~motivation | health + gender, data=d, mod1, mod2)
+d$weight.loss = d$weight.loss + 1 + abs(min(d$weight.loss, na.rm=T))
+mod1 = glm(weight.loss~motivation + health + gender, data=d, family="Gamma")
+mod2 = lm(weight.loss~motivation + health + gender, data=d)
+compare.fits(weight.loss~motivation | health + gender, data=d, mod1, mod2)
+require(fifer)#
+  data(authors); d= authors[1:1000,]#
+  mod1 = lm(Daily.Units.Sold~Sale.Price*Publisher, data=d)#
+  mod2 = glm(Daily.Units.Sold~Sale.Price*Publisher, data=d, family=quasipoisson(link="log"))
+compare.fits(Daily.Units.Sold~Sale.Price|Publisher, data=d, mod1, mod2)
+cat1 = lm(weight.loss~therapy.type, data=d)
+data(exercise_data)
+d = exercise_data
+cat1 = lm(weight.loss~therapy.type, data=d)
+estimates(cat1)
+names(estimates(cat1))
+estimates(cat1)$difference.matrix$cohens.1
+estimates(cat1)$difference.matrix
+estimates(cat1)$difference.matrix$cohens.d
+mod = lm(weight.loss~therapy.type + gender, data=d)
+estimates(mod)$difference.matrix$cohens.d[1]
+estimates(mod)$difference.matrix$cohens.d
+estimates(mod)
+mod = lm(weight.loss~therapy.type * gender, data=d)
+estimates(mod)
+estimates(mod)$semi.p
+cat1 = lm(weight.loss~motivation, data=d)	#
+  estimates(cat1)
+estimates(cat1)$numbers
+estimates(cat1)$numbers.summary
+estimates(cat1)$numbers.summary$estimate[2]
+mod = lm(weight.loss~motivation + income, data=d)	#
+  estimates(mod)
+estimates(mod)$numbers.summary$std.upper[3]
+mod = lm(weight.loss~motivation + therapy.type + gender, data=d)	#
+  estimates(mod)
+estimates(mod)$difference.matrix
+mod = lm(weight.loss~motivation + income + gender, data=d)
+estimates(mod)
+names( estimates(mod))
+estimates(mod)$semi.p
+mod = lm(weight.loss~motivation + I(motivation^2), data=d)	#
+  estimates(mod)
+require(testthat)
+cat1 = lm(weight.loss~therapy.type, data=d)
+expect_equal(estimates(cat1)$difference.matrix$cohens.d[1], .63)
+expect_equal(estimates(cat1)$difference.matrix$cohens.d[1], .631)
+estimates(cat1)$difference.matrix$cohens.d[1]
+expect_equal(estimates(cat1)$difference.matrix$cohens.d[1], .6305667)
+estimates(cat1)$difference.matrix$cohens.d[1]
+?expect_equal
+expect_equal(estimates(cat1)$difference.matrix$cohens.d[1], .6305667, tolerance = 0.002)
+cat1 = lm(weight.loss~therapy.type, data=d)
+expect_equal(estimates(cat1)$difference.matrix$cohens.d[1], .6305667, tolerance = 0.002)#
+  ##### two categoricals#
+  mod = lm(weight.loss~therapy.type + gender, data=d)	#
+  expect_equal(estimates(mod)$difference.matrix$cohens.d[4], -.1, tolerance = 0.002)#
+  ##### interaction#
+  mod = lm(weight.loss~therapy.type * gender, data=d)	#
+  expect_equal(estimates(mod)$semi.p, .009, tolerance = 0.002)
+estimates(mod)$difference.matrix$cohens.d[4]
+estimates(mod)
+mod = lm(weight.loss~therapy.type + gender, data=d)
+estimates(mod)$difference.matrix
+expect_equal(estimates(mod)$difference.matrix$cohens.d[4], -.1024, tolerance = 0.002)
+mod = lm(weight.loss~therapy.type * gender, data=d)
+estimates(mod)$semi.p
+expect_equal(estimates(mod)$semi.p, .009, tolerance = 0.002)
+expect_equal(estimates(mod)$semi.p, .009, tolerance = 0.002, tolerance = 0.002)
+expect_equal(estimates(mod)$semi.p, .00934, tolerance = 0.002)
+estimates(mod)
+expect_true(estimates(mod)$semi.p<0.01 & estimates(mod)$semi.p>0.009)
+expect_equal(estimates(cat1)$numbers.summary$estimate[2], .1856, tolerance = 0.002)
+cat1 = lm(weight.loss~motivation, data=d)
+expect_equal(estimates(cat1)$numbers.summary$estimate[2], .1856, tolerance = 0.002)
+mod = lm(weight.loss~motivation + income, data=d)
+expect_equal(estimates(mod)$numbers.summary$std.upper[3], -.1898, tolerance = 0.002)
+mod = lm(weight.loss~motivation + therapy.type + gender, data=d)
+expect_equal(estimates(mod)$difference.matrix$difference[4] = -.93229, tolerance = 0.002)
+expect_equal(estimates(mod)$difference.matrix$difference[4], -.93229, tolerance = 0.002)
+mod = lm(weight.loss~motivation + income + gender, data=d)
+expect_equal(estimates(mod)$semi.p[3] = .007958, tolerance = 0.002)
+mod = lm(weight.loss~motivation + income + gender, data=d)
+expect_equal(estimates(mod)$semi.p[3] = .007958, tolerance = 0.002)
+expect_equal(estimates(mod)$semi.p[3], .007958, tolerance = 0.002)
+estimates(mod)$semi.p[3]
+expect_equal(estimates(mod)$semi.p[3], .007958, tolerance = 0.002)
+estimates(mod)$semi.p[3]
+expect_equal(estimates(mod)$semi.p[3], .007958, tolerance = 0.002)
+traceback()
+estimates(mod)
+estimates(mod)$semi.p
+estimates(mod)$semi.p[3]
+expect_true(estimates(mod)$semi.p[3]<0.01 & estimates(mod)$semi.p[3]>0.007)
+mod = lm(weight.loss~motivation + I(motivation^2), data=d)
+expect_equal(estimates(mod)$numbers.summary$std.upper[3], -.53, tolerance = 0.002)
+data(tablesaw)
+head(tablesaw)
+data(tablesaw)
+head(tablesaw)
+ls()
+fifer::clear()
+data(tablesaw)
+ls()
+data(tablesaw_injury)
+tablesaw_injury
+data(tablesaw.injury)
+tablesaw.injury
+d = tablesaw.injury
+head(d)
+data(criminal_data)
+d = criminal_data
+head(d)
+d$rape
+apply(d, 2, table)
+head(d)
+mod = glm(rape~ses + empathy + depression, data=d, family="binomial")
+estimates(mod)
+mod = glm(convictions~ses + empathy + depression, data=d, family=poisson)
+estimates(mod)
+mod
+object = mod
+terms = attr(terms(object), "term.labels")#
+	#### get dataset#
+	d = object$model#
+	#### identify factors#
+	if (length(terms)>1){#
+		factors = names(which(unlist(lapply(d[,terms], is.factor))));#
+		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));#
+	} else {#
+		factors = terms[which(is.factor(d[,terms]))]#
+		numbers = terms[which(is.numeric(d[,terms]))]#
+	}
+#### output predictions#
+	n.func = function(term){anchor.predictions(object, term, shutup=T)$prediction}#
+	preds = lapply(terms, n.func); names(preds) = terms
+if (family(object)$link=="logit"){#
+		coef.matrix = data.frame(raw.coefficients = coef(object), OR = exp(coef(object)), inverse.OR = 1/exp(coef(object)), standardized.OR = exp(standardized.beta(object, sd.y=F)), inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))
+} else if (family(object)$link=="log"){#
+		coef.matrix = data.frame(raw.coefficients = coef(object), #
+				multiplicative.coef = exp(coef(object)), #
+				std.mult.coef = exp(standardized.beta(object, sd.y=F)))#
+	} else if (family(object)$link=="inverse"){#
+		coef.matrix = data.frame(raw.coefficients = coef(object), #
+				inverse.coef = 1/((object)), #
+				std.mult.coef = 1/(standardized.beta(object, sd.y=F)))#
+	}
+inverse.coef
+family(object)$link
+multiplicative.coef
+family(object)$link=="log"
+coef.matrix = data.frame(raw.coefficients = coef(object),
+multiplicative.coef = exp(coef(object)),
+std.mult.coef = exp(standardized.beta(object, sd.y=F)))
+coef.matrix
+coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
+coef.matrix[,1:5] = round(coef.matrix[,1:5], digits=3)
+coef.matrix
+coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
+coef.matrix
+data.frame(lapply(coef.matrix, function(y) if(is.numeric(y)) round(y, 2) else y))
+nms = row.names(coef.matrix)
+coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
+nms = row.names(coef.matrix)
+coef.matrix
+coef.matrix = data.frame(lapply(coef.matrix, function(y) if(is.numeric(y)) round(y, 2) else y)); names(coef.matrix) = nms
+coef.matrix
+#### for those that are factors, put the first prediction in the -1 SD column#
+	string.round = function(x, digits){#
+		return.val = ifelse(round(x, digits)==0, paste0("<0.", rep(0, times=digits-1), "1"), round(x, digits=digits))#
+		return.val#
+	}#
+	if (length(factors)>0){#
+	for (i in 1:length(factors)){#
+		current.pre = preds[factors[i]]#
+		levs = levels(d[,factors[i]]); levs = paste0(factors[i], levs)#
+		coef.matrix[levs[-1],"Prediction Difference (+/- 1 SD)"] = paste0(string.round(unlist(current.pre)[-1] - unlist(current.pre)[1], digits=2), " (relative to ", levs[1], ")")#
+		if (length(factors)==1){#
+			coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(string.round(unlist(current.pre)[1], digits=2), " (", levs[1], " prediction)")#
+			row.names(coef.matrix)[1] = levs[1]#
+		}#
+	}}#
+	coef.matrix
+devtools::load_all()
+mod = glm(rape~ses + empathy + depression, data=d, family="binomial")#
+estimates(mod)
+data(criminal_data)
+mod = glm(rape~ses + empathy + depression, data=d, family="binomial")
+d = criminal_data
+mod = glm(rape~ses + empathy + depression, data=d, family="binomial")
+estimates(mod)
+devtools::load_all()
+data(criminal_data)#
+d = criminal_data#
+mod = glm(rape~ses + empathy + depression, data=d, family="binomial")#
+estimates(mod)
+devtools::load_all()
+data(criminal_data)#
+d = criminal_data#
+mod = glm(rape~ses + empathy + depression, data=d, family="binomial")#
+estimates(mod)
+mod = glm(convictions~ses + empathy + depression, data=d, family=poisson)#
+object = mod
+estimates(mod)
+head(d)
+mod = glm(aggression~ses + empathy + depression, data=d, family=gamma)
+?family
+mod = glm(aggression~ses + empathy + depression, data=d, family=Gamma)
+estimates(mod)
+object = mod
+terms = attr(terms(object), "term.labels")#
+	#### get dataset#
+	d = object$model#
+	#### identify factors#
+	if (length(terms)>1){#
+		factors = names(which(unlist(lapply(d[,terms], is.factor))));#
+		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));#
+	} else {#
+		factors = terms[which(is.factor(d[,terms]))]#
+		numbers = terms[which(is.numeric(d[,terms]))]#
+	}#
+#
+	#### output predictions#
+	n.func = function(term){anchor.predictions(object, term, shutup=T)$prediction}#
+	preds = lapply(terms, n.func); names(preds) = terms#
+	#### output coefficients#
+	options(warn=-1)#
+	if (family(object)$link=="logit"){#
+		coef.matrix = data.frame(raw.coefficients = coef(object), OR = exp(coef(object)), inverse.OR = 1/exp(coef(object)), standardized.OR = exp(standardized.beta(object, sd.y=F)), inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))#
+	} else if (family(object)$link=="log"){#
+		coef.matrix = data.frame(raw.coefficients = coef(object), #
+				multiplicative.coef = exp(coef(object)), #
+				std.mult.coef = exp(standardized.beta(object, sd.y=F)))#
+	}
+family(object)$link=="inverse"
+coef(object)
+1/((object))
+inverse.coef = 1/(coef(object)),
+inverse.coef = 1/(coef(object))
+std.mult.coef = 1/(standardized.beta(object, sd.y=F))
+if (family(object)$link=="logit"){#
+		coef.matrix = data.frame(raw.coefficients = coef(object), OR = exp(coef(object)), inverse.OR = 1/exp(coef(object)), standardized.OR = exp(standardized.beta(object, sd.y=F)), inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))#
+	} else if (family(object)$link=="log"){#
+		coef.matrix = data.frame(raw.coefficients = coef(object), #
+				multiplicative.coef = exp(coef(object)), #
+				std.mult.coef = exp(standardized.beta(object, sd.y=F)))#
+	} else if (family(object)$link=="inverse"){#
+		coef.matrix = data.frame(raw.coefficients = coef(object), #
+				inverse.coef = 1/(coef(object)), #
+				std.mult.coef = 1/(standardized.beta(object, sd.y=F)))#
+	}
+coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})#
+	nms = row.names(coef.matrix); nms2 = names(coef.matrix)#
+  	coef.matrix = data.frame(lapply(coef.matrix, function(y) if(is.numeric(y)) round(y, 3) else y), row.names=nms); names(coef.matrix) = nms2
+coef.matrix
+#### for those that are factors, put the first prediction in the -1 SD column#
+	string.round = function(x, digits){#
+		return.val = ifelse(round(x, digits)==0, paste0("<0.", rep(0, times=digits-1), "1"), round(x, digits=digits))#
+		return.val#
+	}#
+	if (length(factors)>0){#
+	for (i in 1:length(factors)){#
+		current.pre = preds[factors[i]]#
+		levs = levels(d[,factors[i]]); levs = paste0(factors[i], levs)#
+		coef.matrix[levs[-1],"Prediction Difference (+/- 1 SD)"] = paste0(string.round(unlist(current.pre)[-1] - unlist(current.pre)[1], digits=2), " (relative to ", levs[1], ")")#
+		if (length(factors)==1){#
+			coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(string.round(unlist(current.pre)[1], digits=2), " (", levs[1], " prediction)")#
+			row.names(coef.matrix)[1] = levs[1]#
+		}#
+	}}#
+	coef.matrix
+mod = glm(aggression~ses + empathy + depression, data=d, family=Gamma)
+estimates(mod)
+devtools::load_all()
+estimates(mod)
+mod = glm(convictions~ses + empathy + depression, data=d, family=poisson)#
+estimates(mod)$raw.coefficients[1]
+mod = glm(convictions~ses + empathy + depression, data=d, family=poisson)
+d = criminal_data#
+head(d)
+mod = glm(rape~ses + empathy + depression, data=d, family="binomial")
+estimates(mod)
+expect_equal(estimates(mod)$raw.coefficients[1], -98.915)
+mod = glm(convictions~ses + empathy + depression, data=d, family=poisson)
+mod
+?family
+estimates(mod)$raw.coefficients[1]
+expect_equal(estimates(mod)$raw.coefficients[1], -.798)
+mod = glm(aggression~ses + empathy + depression, data=d, family=Gamma)
+expect_equal(estimates(mod)$raw.coefficients[1], .164)

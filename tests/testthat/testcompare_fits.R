@@ -53,7 +53,7 @@ test_that("compare.fits for other models", {
   mod2 = lm(weight.loss~motivation + health + gender, data=d)
   vdiffr::expect_doppelganger("compare.fits with glm",
                               compare.fits(weight.loss~motivation | health + gender, data=d, mod1, mod2))
-  require(fifer)
+  
   data(authors); d= authors[1:1000,]
   mod1 = lm(Daily.Units.Sold~Sale.Price*Publisher, data=d)
   mod2 = glm(Daily.Units.Sold~Sale.Price*Publisher, data=d, family=quasipoisson(link="log"))

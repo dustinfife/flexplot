@@ -279,14 +279,15 @@ estimates.glm = function(object){
 				std.mult.coef = exp(standardized.beta(object, sd.y=F)))
 	} else if (family(object)$link=="inverse"){
 		coef.matrix = data.frame(raw.coefficients = coef(object), 
-				inverse.coef = 1/((object)), 
+				inverse.coef = 1/(coef(object)), 
 				std.mult.coef = 1/(standardized.beta(object, sd.y=F)))
 	}
 	
 	
 	#options(warn=0)
 	coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
-  coef.matrix[,1:5] = round(coef.matrix[,1:5], digits=3)
+	nms = row.names(coef.matrix); nms2 = names(coef.matrix)
+  	coef.matrix = data.frame(lapply(coef.matrix, function(y) if(is.numeric(y)) round(y, 3) else y), row.names=nms); names(coef.matrix) = nms2
 	
 	
 	#### for those that are factors, put the first prediction in the -1 SD column
