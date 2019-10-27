@@ -2,7 +2,7 @@ context("visualize function on linear models")
 set.seed(1212)
 data(exercise_data)
 d = exercise_data
-
+data(birthweight)
 
  
 test_that("visualize function plots", {
@@ -33,7 +33,6 @@ test_that("visualize function plots", {
   mod = lm(weight.loss~gender + rewards + motivation, data=d)
   suppressWarnings(vdiffr::expect_doppelganger("multiple regression",visualize(mod)))
   
-  data(birthweight)
   mod = lm(Birthweight~mheight + fheight + motherage, data=birthweight)
   suppressWarnings(vdiffr::expect_doppelganger("four variables",visualize(mod)))
 
@@ -41,4 +40,10 @@ test_that("visualize function plots", {
 
 test_that("added.plot function", {
   suppressWarnings(vdiffr::expect_doppelganger("avp",added.plot(Birthweight~mheight + fheight + motherage + smoker, data=birthweight, method="lm")))
+  expect_error(added.plot(Birthweight~mhight + smoker, data=birthweight, method="lm"))
+  tib = tibble::as_tibble(birthweight)
+  tibble.test = added.plot(Birthweight~mheight + smoker, data=tib, method="lm")
+  suppressWarnings(vdiffr::expect_doppelganger("testing tibbles",tibble.test))
+  suppressWarnings(vdiffr::expect_doppelganger("testing missing values on added.plot",
+                                               added.plot(weight.loss~therapy.type + muscle.gain.missing, data=exercise_data)))
 })
