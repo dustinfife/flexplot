@@ -10,8 +10,6 @@ k = k[-(deleteme[1:2]), ]
 test_that("unconventional plots", {
   vdiffr::expect_doppelganger("related T",
                               flexplot(weight.loss ~ rewards, data = k, related = T))
-  formula = weight.loss ~ rewards; data = k; related = T
-  options(warn=2)
   vdiffr::expect_doppelganger("association plot",
                               flexplot(gender ~ rewards, data = d, jitter = c(.05, 0)))
   vdiffr::expect_doppelganger("interaction plot",
@@ -38,4 +36,11 @@ test_that("unconventional plots", {
       method = "logistic"
     )
   )
+})
+
+test_that("given with few categories isn't collapsed",{
+  require(dplyr)
+  d = exercise_data %>% mutate(gender=as.numeric(gender))
+  a = flexplot(weight.loss~health | gender, data=d)
+  vdiffr::expect_doppelganger("categories not collapsed", a)
 })

@@ -120,15 +120,9 @@ flexplot = function(formula, data=NULL, related=F,
 	if (tibble::is_tibble(data)){
 		data = as.data.frame(data)
 	}
-	
-
-	
-	
 
 	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
-
-
-		
+	
 	variables = all.vars(formula)
 	outcome = variables[1]
 	predictors = variables[-1]
@@ -145,22 +139,12 @@ flexplot = function(formula, data=NULL, related=F,
 		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))
 	}
 	
-		# #### extract outcome, predictors, and given variables
-	# if (!is.null(third.eye) & length(predictors)>2){
-		# formula = rotate.view(formula = formula, third.eye= third.eye)
-		# variables = all.vars(formula)
-		# outcome = variables[1]
-		# predictors = variables[-1]		
-	# }
-		
 	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
 	given = gsub(" ", "", given)		
 	given = unlist(strsplit(given, "+", fixed=T))	
 	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
 	axis = gsub(" ", "", axis)			
 	axis = unlist(strsplit(axis, "+", fixed=T))	
-	
-	
 	
 	#### give an error if they try to visualize logistic with a categorical x axis
 	if (method=="logistic" & length(predictors)>0){
@@ -397,7 +381,14 @@ flexplot = function(formula, data=NULL, related=F,
 			binned.name = paste0(given[i], "_binned")
 
 			if (is.numeric(data[,given[i]])){
-				data[,binned.name] = bin.me(variable=given[i], data, bins, labels=labels[i], breaks=breaks[[given[i]]])
+			  b = bin.me(variable=given[i], data, bins, labels=labels[i], breaks=breaks[[given[i]]])
+				#### if there's only one category, fix that succa!
+			  if (length(levels(b))==1 & length(unique(data[[given[i]]]))>1){
+				  data[,binned.name] = factor(data[,given[i]])
+			  } else {
+			    data[,binned.name] = b  
+				}
+			  
 				
 				### if they specified prediction, bin those too
 				if (!is.null(prediction)){
