@@ -132,7 +132,6 @@ flexplot = function(formula, data=NULL, related=F,
 		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))
 	}
 
-	
 	#### make sure all names are in the dataset
 	if (!all(variables %in% names(data))){
 		not.there = variables[which(!(variables %in% names(data)))]

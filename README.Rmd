@@ -16,7 +16,7 @@ options(tibble.print_min = 5, tibble.print_max = 5)
 <!-- badges: start -->
 <!-- [![CRAN status](https://www.r-pkg.org/badges/version/dplyr)](https://cran.r-project.org/package=dplyr) -->
 [![Travis build status](https://travis-ci.org/dustinfife/flexplot.svg?branch=master)](https://travis-ci.org/dustinfife/flexplot)
-[![Codecov test coverage](https://codecov.io/gh/dustinfife/flexplot.svg/branch/master/graph/badge.svg)](https://codecov.io/gh/dustinfife/flexplot?branch=master)
+[![codecov](https://codecov.io/gh/dustinfife/flexplot/branch/master/graph/badge.svg)](https://codecov.io/gh/dustinfife/flexplot)
 <!-- badges: end -->
   
 ## Overview

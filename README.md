@@ -6,9 +6,8 @@
 <!-- [![CRAN status](https://www.r-pkg.org/badges/version/dplyr)](https://cran.r-project.org/package=dplyr) -->
 
 [![Travis build
-status](https://travis-ci.org/dustinfife/flexplot.svg?branch=development)](https://travis-ci.org/dustinfife/flexplot)
-[![Codecov test
-coverage](https://codecov.io/gh/dustinfife/flexplot.svg/branch/master/graph/badge.svg)](https://codecov.io/gh/dustinfife/flexplot?branch=master)
+status](https://travis-ci.org/dustinfife/flexplot.svg?branch=master)](https://travis-ci.org/dustinfife/flexplot)
+[![codecov](https://codecov.io/gh/dustinfife/flexplot/branch/master/graph/badge.svg)](https://codecov.io/gh/dustinfife/flexplot)
 <!-- badges: end -->
 
 ## Overview
@@ -136,9 +135,6 @@ compare.fits(satisfaction~communication|separated, data=relationship_satisfactio
 <img src="README_files/figure-gfm/unnamed-chunk-3-9.png" width="100%" />
 
 ``` r
-
-formula = satisfaction~communication|separated; data=relationship_satisfaction; model1= full.mod; model2= reduced.mod
-
 model.comparison(full.mod, reduced.mod)
 #> $statistics
 #>                  aic      bic bayes.factor p.value r.squared
