@@ -61,7 +61,7 @@ flexplot_jasp2<- function(jaspResults, dataset, options) {
 
 .flexPlotRes <- function(jaspResults, formula, dataset, options, ready) {
 	
-	require(ggplot2)
+	#require(ggplot2)
 	
 	#### set up parameters
 	flex_Plot <- createJaspPlot(title = "Flexplot",  width = 900, height = 900)
