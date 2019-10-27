@@ -9,6 +9,12 @@ test_that("standardized.beta returns the correct value", {
   expect_equal(results[2], 0.3708347) 
 })
 
+test_that("bic inverts", {
+  model1 = lm(weight.loss~motivation + therapy.type, data=exercise_data)
+  model2 = lm(weight.loss~motivation * therapy.type, data=exercise_data)
+  expect_equal(bf.bic(model1, model2), 95.29443) 
+})
+
 test_that("subsetString returns correct values", {
   stringthing = ("I - am - a - string")
   subsetString(stringthing, sep = "*", position = 2, flexible=T)
