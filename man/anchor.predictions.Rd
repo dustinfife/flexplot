@@ -22,7 +22,8 @@ A data frame containing the predicted values (along with the values of the predi
 Generate Predictions for a Model
 }
 \details{
-This function is simply an easy-to-use wrapper for the predict function. With some models (e.g., logistic regression), the metrics are not very intuitive. 
+This function is simply an easy-to-use wrapper for the predict function. 
+With some models (e.g., logistic regression), the metrics are not very intuitive. 
 The anchor.predictions model generates the actual predicted values, depending on what the user specifies.
 }
 \examples{

@@ -2,7 +2,8 @@
 ##'
 ##' Generate Predictions for a Model
 ##'	
-##' This function is simply an easy-to-use wrapper for the predict function. With some models (e.g., logistic regression), the metrics are not very intuitive. 
+##' This function is simply an easy-to-use wrapper for the predict function. 
+##' With some models (e.g., logistic regression), the metrics are not very intuitive. 
 ##' The anchor.predictions model generates the actual predicted values, depending on what the user specifies. 
 ##' @param model The fitted model object to generate predictions
 ##' @param reference A vector (or single value) containing the name of the variable(s) the user wishes to generate predictions for. For
