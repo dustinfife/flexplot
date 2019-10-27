@@ -183,6 +183,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
       pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, ")", collapse="")
     }
 	}
+	
 	#### report one or two coefficients, depending on if they supplied it
 	if (old.mod==0){
 		prediction.model = rbind(pred.mod1, pred.mod2)

@@ -1,4 +1,5 @@
 ^README.Rmd$
+^README.md$
 ^README2.Rmd$
 ^README2.html$
 ^README.html$
@@ -15,3 +16,4 @@ README_files/
 ^doc$
 ^Meta$
 R/flexplot_jasp2.R
+vignettes/regex_syntax.txt
