@@ -1,3 +1,12 @@
+## function to generate predicted differences, standardized
+standardized_differences = function(model1, model2, sigma=TRUE){
+  pred1 = predict(model1, type="response")
+  pred2 = predict(model2, type="response")
+  differences = round(
+    (quantile(abs(predict(model1, type="response") - 
+                    predict(model2, type="response")))), digits=3)
+  differences
+}
 
 	### taken from gtools::permutations
 permute.vector = function (n, r, v = 1:n, set = TRUE, repeats.allowed = FALSE) 
