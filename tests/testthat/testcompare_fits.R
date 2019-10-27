@@ -7,8 +7,23 @@ set.seed(1212)
 test_that("compare.fits linear models", {
   model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
   model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
+  model.int2 = lm(weight.loss ~ motivation + therapy.type + motivation:therapy.type, data = exercise_data)
+  model.poly = lm(weight.loss ~ motivation + therapy.type + I(motivation^2), data = exercise_data)
   suppressWarnings(vdiffr::expect_doppelganger("compare interaction vs. me",compare.fits(weight.loss ~ motivation | therapy.type, 
                data = exercise_data, model.me, model.int, ghost.line = "black")))
+  expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=exercise_data, model.me, model.int))
+  expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
+               data = exercise_data, model.me, model.int2, return.preds = T)[1,1], 21)
+  expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
+                            data = exercise_data, model.int2, model.me, return.preds = T)[1,1], 21) 
+  expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
+                            data = exercise_data, model.me, model.int2, return.preds = T)[1,1], 21)
+  expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
+                            data = exercise_data, model.int2, model.poly, return.preds = T)[1,3], -1.933519)   
+  expect_equal(round(compare.fits(weight.loss ~ motivation | therapy.type, 
+                            data = exercise_data, model.poly, model.int2, return.preds = T)[1,3], digits=3), -2.293)
+  expect_message(compare.fits(weight.loss ~ motivation, 
+                              data = exercise_data, model.int2, model.poly, return.preds = T))
 
   ### compare interaction and non-interaction models
   mod = lm(wl ~motivation+rewards, data=d)
@@ -61,5 +76,3 @@ test_that("compare.fits for other models", {
                               compare.fits(Daily.Units.Sold~Sale.Price|Publisher, data=d, mod1, mod2))
 
 })
-  
-
