@@ -126,7 +126,7 @@ estimates.lm = function(object){
 
 				#### populate the estimates/lower/upper
 				f = as.formula(paste0(outcome, "~", factors[i]))
-				est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, silent=T, report.se=T)
+				est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T)
 
 				
 				coef.matrix$levels[current.rows] = as.character(est[,1])
