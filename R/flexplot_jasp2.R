@@ -1,4 +1,9 @@
-flexplot_jasp2<- function(jaspResults, dataset, options) {
+#' @param jaspResults jasp results
+#' @param dataset dataset
+#' @param options options
+#'
+#' @export
+flexplot_jasp2 <- function(jaspResults, dataset, options) {
 
         #jaspResults$title <- "Flexplot"
 
