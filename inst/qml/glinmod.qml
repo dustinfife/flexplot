@@ -11,41 +11,54 @@ Form
     AvailableVariablesList { 
       name: "allVariables" 
     }
-
     AssignedVariablesList { 
 			name: "dependent";	
 			title: qsTr("Dependent Variable");
 			singleVariable: true 
 		}
-        
 		AssignedVariablesList { 
 			name: "variables";	
 			title: qsTr("Independent Variable(s)");
 			singleVariable: false 
 		}
-
   }
+  
+  
 		
   ExpanderButton{
     title: qsTr("Plot Options")
 
     Group{
-		  
 		  CheckBox{
 			  name:"modelPlot"; 
 			  label: qsTr("Model plot")
 			  }
-      
       CheckBox{
 			  name:"univariates"; 
 			  label: qsTr("Univariates")
 			  }			  
-      
       CheckBox{
 			  name:"residualPlot"; 
 			  label: qsTr("Diagnostics")
 			  }			  
-			  
 		  }
-		}		
+		}
+		
+		
+	ExpanderButton{
+    title: qsTr("Estimation Options")
+
+    Group{
+      CheckBox{
+			  name:"ci"; 
+			  label: qsTr("Show Intervals")
+			}	
+		  DropDown{
+			  name: "estimationmethod"
+			  values: ["Bootstrapped Intervals", "Credible Interval", "Confidence Interval"]
+			  label: qsTr("Interval Estimation")
+		  }
+		}
+  }
+  
 }

@@ -15,5 +15,4 @@ tests/figs/
 README_files/
 ^doc$
 ^Meta$
-R/flexplot_jasp2.R
 vignettes/regex_syntax.txt

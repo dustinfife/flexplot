@@ -1,3 +1,14 @@
+#' Flexplot in JASP
+#'
+#' This function was developed for use in JASP. It takes a dataset as input with user 
+#' options and returns a flexplot graphic
+#' 
+#' @param jaspResults A JASP object
+#' @param dataset dataset supplied by JASP
+#' @param options a list of options to pass to JASP
+#'
+#' @return a flexplot graphic. 
+#' @export
 flexplot_jasp2 <- function(jaspResults, dataset, options) {
 
 	### check if they've entered anything	  
