@@ -22,7 +22,7 @@
       {
         "title":   	"general linear model",
         "qml":    	"glinmod.qml",
-        "function":  	"flexplot_jasp2"
+        "function":  	"glinmod_jasp"
       }
   ]
 }

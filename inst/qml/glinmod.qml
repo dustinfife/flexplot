@@ -25,27 +25,9 @@ Form
 		}
 
   }
-
-  ExpanderButton{
-    title: qsTr("Plot Options")
-
-    Group{
-		  
-		  CheckBox{
-			  name:"modelPlot"; 
-			  label: qsTr("Plot the model")
-			  }
-      
-      CheckBox{
-			  name:"residualPlot"; 
-			  label: qsTr("Plot diagnostics")
-			  }			  
-			  
-		  }
-		}
 		
   ExpanderButton{
-    title: qsTr("Estimation Options")
+    title: qsTr("Plot Options")
 
     Group{
 		  
