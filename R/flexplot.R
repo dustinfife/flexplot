@@ -656,7 +656,7 @@ flexplot = function(formula, data=NULL, related=F,
 	##### do third eye if they choose to
 	#if (third.eye)
 
-	theme = "theme_bw()"
+	theme = "theme_bw() + theme(text=element_text(size=18))"
 
 	if (is.finite(sample) & is.numeric(data[,outcome])){
 		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
@@ -671,7 +671,6 @@ flexplot = function(formula, data=NULL, related=F,
 		#### change the y axis labels
 		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	
 	}
-
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)

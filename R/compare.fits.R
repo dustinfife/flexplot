@@ -9,7 +9,6 @@
 ##' @param model1 The fitted model object (e.g., lm) containing the variables specified in the formula
 ##' @param model2 The second fitted model object (e.g., lm) containing the variables specified in the formula
 ##' @param return.preds Should the function return the predictions instead of a graphic? Defaults to F
-##' @param silent Should R tell you how it's handling the variables in the model that are not in the formula? Defaults to F. 
 ##' @param report.se Should standard errors be reported alongside the estimates? Defaults to F. 
 ##' @param re Should random effects be predicted? Only applies to mixed models. Defaults to F. 
 ##' @param pred.type What type of predictions should be outputted? This is mostly for \code{glm} models. Defaults to "response." 
@@ -22,7 +21,7 @@
 ##' mod1 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
 ##' mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
 ##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
-compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, silent=F, report.se=F, re=F, pred.type="response", ...){
+compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, report.se=F, re=F, pred.type="response", ...){
 	#### if mod2 is null..
 	if (is.null(model2)){
 		model2 = model1
@@ -39,7 +38,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 	#### extract the terms from each MODEL
 	testme1 = formula(model1); terms.mod1=all.vars(testme1)[-1]
 	testme2 = formula(model2); terms.mod2=all.vars(testme2)[-1]
-	testme = unique(all.vars(testme1)[-1], all.vars(testme2)[-1])
+	testme = unique(c(all.vars(testme1)[-1], all.vars(testme2)[-1]))
 	
 	
 	##### extract variable names
@@ -128,11 +127,11 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, sile
 		not.in.there = terms.mod1[which(!(terms.mod1 %in% predictors))]
 		for (i in 1:length(not.in.there)){
 			if (is.numeric(data[,not.in.there[i]])){
-				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))}
+				message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))
 				pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)
 			} else {
 				val = unique(data[,not.in.there[i]])[1]
-				if (!silent){message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))}
+				message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))
 				pred.values[,not.in.there[i]] = val
 			}
 		}

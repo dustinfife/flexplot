@@ -22,8 +22,6 @@ test_that("compare.fits linear models", {
                             data = exercise_data, model.int2, model.poly, return.preds = T)[1,3], -1.933519)   
   expect_equal(round(compare.fits(weight.loss ~ motivation | therapy.type, 
                             data = exercise_data, model.poly, model.int2, return.preds = T)[1,3], digits=3), -2.293)
-  expect_message(compare.fits(weight.loss ~ motivation, 
-                              data = exercise_data, model.int2, model.poly, return.preds = T))
 
   ### compare interaction and non-interaction models
   mod = lm(wl ~motivation+rewards, data=d)
@@ -54,7 +52,13 @@ test_that("compare.fits for other models", {
   require(MASS)
   mod2 = rlm(weight.loss~rewards, data=d)
   vdiffr::expect_doppelganger("compare.fits with rlm",compare.fits(formula=weight.loss~rewards, data=d, model1=mod, model2=mod2))
-
+  
+  k = d; k$weight.loss = factor(k$weight.loss, ordered=T)
+  polyn = MASS::polr(weight.loss~rewards, data=k)
+  polyn2 = MASS::polr(weight.loss~rewards+therapy.type, data=k)
+  vdiffr::expect_doppelganger("compare.fits with polr",
+                              compare.fits(weight.loss~rewards|therapy.type, data=k, polyn, polyn2))
+  
   
   ##### compare predictions with random forest
   require(randomForest)
