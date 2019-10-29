@@ -8,17 +8,17 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
         #jaspResults$title <- "Flexplot"
 
 	### check if they've entered anything	  
-	ready <- (length(options$dependent) > 0) #&& length(options$variables)>0)
+	ready <- (options$dependent != "") #&& length(options$variables)>0)
 
 		#### check for errors
 	customChecksFlexPlot <- list(
 		function(){
-			if ((length(options$dependent)==0 & length(options$paneledVars)>0) | (length(options$dependent)==0 & length(options$variables)>0)) {
+			if ((options$dependent == "" & ( length(options$paneledVars)>0) | length(options$variables)>0)) {
 					return(paste0("You must specify a dependent variable to view a graphic"))
 				}
 			},
 			function(){
-				if(length(options$dependent)!=0 & length(options$paneledVars)>0){
+				if(options$dependent != "" & length(options$paneledVars)>0){
 					return(paste0("You must have at least one independent variable to do paneling"))
 				}
 			})
@@ -58,8 +58,8 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 .flexCheckErrors <- function(dataset, options){
 	
 	# check length of variables
-	if ((length(options$dependent)==0 & length(options$paneledVars)>0) | (length(options$dependent)==0 & length(options$variables)>0)) .quitAnalysis("You must specify a dependent variable to view a graphic")
-	if (length(options$dependent)!=0 & length(options$paneledVars)>0) .quitAnalysis("You must have at least one independent variable to do paneling")
+	if ((options$dependent == "" & length(options$paneledVars)>0) | (options$dependent == "" & length(options$variables)>0)) .quitAnalysis("You must specify a dependent variable to view a graphic")
+	if (options$dependent != "" & length(options$paneledVars)>0) .quitAnalysis("You must have at least one independent variable to do paneling")
 
 }
 

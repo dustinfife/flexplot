@@ -2,24 +2,37 @@ import QtQuick 2.8
 import JASP.Controls 1.0
 import JASP.Widgets 1.0
 import JASP.Theme 1.0
-Form {
+Form 
+{
     usesJaspResults: true
 
-    VariablesForm{
+    VariablesForm
+	{
         AvailableVariablesList { name: "allVariables" }
-        AssignedVariablesList { 
-		name: "dependent";	
-		title: qsTr("Dependent Variable");
-		singleVariable: true }
-        AssignedVariablesList { 
-		name: "variables";	
-		title: qsTr("Independent Variable(s)");
-		singleVariable: false }
-        AssignedVariablesList { 
-		name: "paneledVars";	
-		title: qsTr("Panelled Variable(s)");
-		singleVariable: false }
-	VariablesList {
+
+        AssignedVariablesList 
+		{ 
+			name: "dependent";	
+			title: qsTr("Dependent Variable");
+			singleVariable: true 
+		}
+        
+		AssignedVariablesList 
+		{ 
+			name: "variables";	
+			title: qsTr("Independent Variable(s)");
+			singleVariable: false 
+		}
+        
+		AssignedVariablesList 
+		{
+			name: "paneledVars";	
+			title: qsTr("Panelled Variable(s)");
+			singleVariable: false 
+		}
+	
+	VariablesList 
+	{
 			title: qsTr("Ghost Lines")
 			source: "paneledVars"
 			name: "ghostLines"
