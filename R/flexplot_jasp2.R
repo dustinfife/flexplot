@@ -1,24 +1,17 @@
-#' @param jaspResults jasp results
-#' @param dataset dataset
-#' @param options options
-#'
-#' @export
 flexplot_jasp2 <- function(jaspResults, dataset, options) {
 
-        #jaspResults$title <- "Flexplot"
-
 	### check if they've entered anything	  
-	ready <- (options$dependent != "") #&& length(options$variables)>0)
+	ready <- (length(options$dependent) > 0) #&& length(options$variables)>0)
 
 		#### check for errors
 	customChecksFlexPlot <- list(
 		function(){
-			if ((options$dependent == "" & ( length(options$paneledVars)>0) | length(options$variables)>0)) {
+			if ((length(options$dependent)==0 & length(options$paneledVars)>0) | (length(options$dependent)==0 & length(options$variables)>0)) {
 					return(paste0("You must specify a dependent variable to view a graphic"))
 				}
 			},
 			function(){
-				if(options$dependent != "" & length(options$paneledVars)>0){
+				if(length(options$dependent)!=0 & length(options$paneledVars)>0){
 					return(paste0("You must have at least one independent variable to do paneling"))
 				}
 			})
@@ -32,12 +25,8 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
     		dataset = (.readDataSetToEnd(columns=c(options$dependent, options$variables, options$paneledVars)))
 		} else {
 			return(dataset) 
-	    }
-
-
-		### create a table output
-		#.printedResults(jaspResults, dataset, options, ready)
-
+		}
+	  
 		### change name of smoothed line
 		if (options$type=="regression"){options$type=="lm"}
 
@@ -58,8 +47,8 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 .flexCheckErrors <- function(dataset, options){
 	
 	# check length of variables
-	if ((options$dependent == "" & length(options$paneledVars)>0) | (options$dependent == "" & length(options$variables)>0)) .quitAnalysis("You must specify a dependent variable to view a graphic")
-	if (options$dependent != "" & length(options$paneledVars)>0) .quitAnalysis("You must have at least one independent variable to do paneling")
+	if ((length(options$dependent)==0 & length(options$paneledVars)>0) | (length(options$dependent)==0 & length(options$variables)>0)) .quitAnalysis("You must specify a dependent variable to view a graphic")
+	if (length(options$dependent)!=0 & length(options$paneledVars)>0) .quitAnalysis("You must have at least one independent variable to do paneling")
 
 }
 
@@ -118,34 +107,18 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 			}
 			ghost.lines = lapply(ghost.vars, FUN=f)
 			names(ghost.lines) = ghost.vars
-			#ghost.lines = split(ghost.lines, ghost.vars)
 			plot = flexplot(formula, data=k, method=options$type, se=options$confidence, ghost.line="gray", ghost.reference=ghost.lines) + xlab(names(ghost.lines))		
-			#plot = flexplot(formula, data=k, method=options$type, se=options$confidence, ghost.line="gray", ghost.reference=ghost.lines) + xlab(paste0(ghost.lines)) + ylab(as.character(formula))
-			# #plot = flexplot(formula, data=k, method=options$type, se=options$confidence) + xlab(paste0(ghost.lines, collapse=","))
 		} else {
 			plot = flexplot(formula, data=k, method=options$type, se=options$confidence) + xlab(paste0(unlist(options$ghostLines)))
 		}
 
-		#plot = ggplot(data=tst, aes(x,y)) + ggtitle(options$dependent) +
- 		 #xlab(paste0(length(unlist(options$ghostLines)))) + ylab("Teeth length")
-
 		# #### create flexplot object   
-		# require(ggplot2)
-		#plot = flexplot(formula, data=k, method=options$type, se=options$confidence) 
-		#flex_Plot$plotObject <- JASPgraphs::themeJasp(plot) + ggplot2::theme(strip.text = ggplot2::element_text(size = 14), panel.margin=unit(.15, "lines"), strip.background = element_rect(color = "gray", fill="white", size = 1))
 		flex_Plot$plotObject <- plot
 		return()   
 }   
 
   
 .flexplotFill <- function(flex_Plot, formula, dataset, options){
-  #f <- as.formula(paste0(options$dependent, "~", paste0(options$variables, collapse="+")))
-  # k <- data.frame(A=1:10, B=1:10)
-  #plot <- ggplot2::ggplot(data=dataset, ggplot2::aes(x=A, y=B)) + geom_point()
-  
-  #plot = ggplot2::ggplot(data=dataset, ggplot2::aes_string(y=options$dependent, x=options$dependent)) + geom_point()
- 
-  
  
   return()
 }

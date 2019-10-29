@@ -57,7 +57,7 @@ Form
             CheckBox{name:"confidence"; label: qsTr("Plot Confidence Bands")}
 		DropDown{
 			name: "type"
-			values: ["loess", "lm"]
+			values: ["loess", "regression", "polynomial", "cubic"]
 			label: qsTr("Fitted Line")
 		}
 
