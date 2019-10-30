@@ -213,10 +213,26 @@ estimates.lm = function(object){
 	}
 	
 	### do nested model comparisons
-	mod.comps = nested_model_comparisons(object)
-	mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
+	if (length(terms)>1){
+	  #save(object, terms, file="/Users/fife/Dropbox/jaspResults.Rdat")
+	  removed.one.at.a.time = function(i, terms, object){
+	    new.f = as.formula(paste0(". ~ . -", terms[i]))
+	    new.object = update(object, new.f)
+	    list(
+	      rsq = summary(object)$r.squared - summary(new.object)$r.squared,
+	      bayes.factor = bf.bic(object, new.object, invert=FALSE)
+	    )
+	  }
+	  ### this requires superassignment to work with JASP
+	  dataset<<-object$model
+	  mc = t(sapply(1:length(terms), removed.one.at.a.time, terms=terms, object=object))
+	  mc = data.frame(cbind(terms,mc), stringsAsFactors = FALSE)
+	  mod.comps = mc
+  	mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
+	} else {
+	  mod.comps = NULL
+	}
   
-  model.comparison(object, object2)
 	# #### print summary
 	# message(paste("Model R squared:\n", round(r.squared[1], digits=3), " (", round(r.squared[2], digits=2),", ", round(r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
 	# print(semi.p)

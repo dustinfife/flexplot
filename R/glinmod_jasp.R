@@ -20,21 +20,25 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     #.check_glinmod_error()  #### HOW DO YOU HAVE IT THROW AN ERROR IF THE VARIABLE IS NOT NUMBERIC?
   
     ### check for categorical/numeric variables
-    numeric = apply(dataset[,options$variables, drop=F], 2, is.numeric)
-    character = !numeric  
-  
+    check.non.number = function(x){
+      return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
+      return.bool
+    }
+    character = sapply(dataset[,options$variables, drop=F], check.non.number)
+    numeric = !character
+    
     #### compute results
     if (is.null(jaspResults[["glinmod_results"]]))
       .glinmod_compute(jaspResults, dataset, options, ready)
     
     ### show output, depending on results
-    if (length(numeric)>0){
+    if (sum(numeric)>0){
       if (is.null(jaspResults[["glinmod_table_slopes"]])){
-        .create_glinmod_table_slopes(jaspResults, dataset, options, ready)
+        .create_glinmod_table_slopes(jaspResults, options, ready)
       }
     }
     
-    if (length(character)>0){
+    if (sum(character)>0){
       
       ### check if there's a jasp table already. if not, create it
       if (is.null(jaspResults[["glinmod_table_means"]])){
@@ -74,7 +78,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     
     ### model it
     model = lm(f, dataset)
-    save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
+    #save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
     ### store all the information
     est = estimates(model)
     est$model = model
@@ -177,7 +181,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   return()
 }
 
-.create_glinmod_table_slopes <- function(jaspResults, dataset, options, ready) {
+.create_glinmod_table_slopes <- function(jaspResults, options, ready) {
   glinmod_table_slopes <- createJaspTable(title = "Regression Slopes and Intercept")
   
   ### which options are required
@@ -209,7 +213,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
                     "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
   )
   
-  message = paste0("message \n Note: all estimates are conditional estimates.")
+  message = paste0(message, "\n All estimates are conditional estimates.")
   glinmod_table_slopes$addFootnote(message)  
   glinmod_table_slopes$showSpecifiedColumnsOnly <- TRUE
   ### store the table structure
@@ -229,43 +233,26 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   return()
 }
 
-.create_glinmod_table_slopes <- function(jaspResults, dataset, options, ready) {
-  glinmod_table_slopes <- createJaspTable(title = "Regression Slopes and Intercept")
+.create_glinmod_table_modcomp <- function(jaspResults, options, ready) {
+  glinmod_table_modcomp <- createJaspTable(title = "Model Comparisons (Estimating the Effect of Removing Terms)")
   
   ### which options are required
-  glinmod_table_slopes$dependOn(c("dependent", "variables", "ci"))
+  glinmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions"))
   
   ### add citation
-  glinmod_table_slopes$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
+  glinmod_table_modcomp$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
   
   ### build the table structure
-  glinmod_table_slopes$addColumnInfo(name = "var",      title = "Variables",   type = "string", combine = TRUE)
-  glinmod_table_slopes$addColumnInfo(name = "val",    title = "Value",       type = "number", format = "dp:2", combine = TRUE)	
+  glinmod_table_modcomp$addColumnInfo(name = "terms",      title = "Term",   type = "string", combine = TRUE)
+  glinmod_table_modcomp$addColumnInfo(name = "rsq",    title = "Semi-partial R Squared",       type = "number", format = "dp:2", combine = TRUE)	
+  glinmod_table_modcomp$addColumnInfo(name = "bayes",      title = "Semi-partial Bayes Factor",       type = "number", format = "dp:2", combine = TRUE)
   
-  if (options$ci){
-    glinmod_table_slopes$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    glinmod_table_slopes$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-  }
   
-  glinmod_table_slopes$addColumnInfo(name = "std",    title = "Standardized Slope (β)",       type = "number", format = "dp:2", combine = TRUE)	
-  
-  if (options$ci){
-    glinmod_table_slopes$addColumnInfo(name = "slwr",      title = "Lower β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    glinmod_table_slopes$addColumnInfo(name = "supr",      title = "Upper β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-  }
-  
-  ### add message about what type of interval was used
-  message <- switch(options$estimationmethod,
-                    "Bootstrapped Intervals"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
-  )
-  
-  message = paste0("message \n Note: all estimates are conditional estimates.")
-  glinmod_table_slopes$addFootnote(message)  
-  glinmod_table_slopes$showSpecifiedColumnsOnly <- TRUE
+  message = paste0("message \n Note: Semi-partials indicate the effect of removing that particular term from the model. Higher Bayes Factors indicate important terms. Lower Bayes Factors suggest they can be removed from the model")
+  glinmod_table_modcomp$addFootnote(message)  
+  glinmod_table_modcomp$showSpecifiedColumnsOnly <- TRUE
   ### store the table structure
-  jaspResults[["glinmod_table_slopes"]] <- glinmod_table_slopes
+  jaspResults[["glinmod_table_modcomp"]] <- glinmod_table_modcomp
   
   ### return the table
   if (!ready) {
@@ -276,7 +263,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_results <- jaspResults[["glinmod_results"]]$object
   
   ### fill the table with those results
-  .fill_glinmod_table_slopes(glinmod_table_slopes, glinmod_results)
+  .fill_glinmod_table_modcomp(glinmod_table_modcomp, glinmod_results)
   
   return()
 }
@@ -342,8 +329,22 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   return()
 }
 
-
-
+.fill_glinmod_table_modcomp = function(glinmod_table_modcomp, glinmod_results){
+  
+  mc = glinmod_results$model.comparison
+  
+  ### output results
+  tabdat = list(
+    terms = as.character(mc$variables),
+    rsq = mc$estimate,
+    bayes = mc$lower
+  )
+  
+  glinmod_table_modcomp$setData(tabdat)
+  
+  
+  return()
+}
 
 .check_glinmod_error = function(dataset, options){
   
