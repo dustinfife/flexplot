@@ -93,7 +93,7 @@ if(!is.null(seed) &&is.na(seed)) {
 }
 
 
-PositionJitterd<- ggplot2::ggproto("PositionJitterd",Position,
+PositionJitterd<- ggplot2::ggproto("PositionJitterd",ggplot2::Position,
 required_aes= c("x","y"),
 
 setup_params=function(self,data) {
