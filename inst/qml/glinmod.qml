@@ -51,7 +51,8 @@ Form
     Group{
 		  CheckBox{
 			  name:"model"; 
-			  label: qsTr("Model plot")
+			  label: qsTr("Model plot");
+			  checked: true
 			  }
       CheckBox{
 			  name:"univariates"; 
@@ -71,13 +72,38 @@ Form
     Group{
       CheckBox{
 			  name:"ci"; 
-			  label: qsTr("Show Intervals")
-			}	
+			  label: qsTr("Show Intervals");
+			  checked: true
+			}	 
 		  DropDown{
 			  name: "estimationmethod"
 			  values: ["Bootstrapped Intervals", "Credible Interval", "Confidence Interval"]
 			  label: qsTr("Interval Estimation")
-		  }
+		  }			
+    }
+
+    Group{
+    title: qsTr("Display Options")
+      CheckBox{
+			  name:"modinf"; 
+			  label: qsTr("Show Model Comparisons")
+			}	
+      CheckBox{
+			  name:"means"; 
+			  label: qsTr("Report Means");
+			  checked: true
+			}	
+      CheckBox{
+			  name:"diff"; 
+			  label: qsTr("Show Mean Differences")
+			  checked: true
+			}	
+      CheckBox{
+			  name:"sl"; 
+			  label: qsTr("Show Slopes/Intercepts");
+			  checked: true
+			}				
+
 		}
   }
   

@@ -230,7 +230,7 @@ estimates.lm = function(object){
 	  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
 	  mod.comps = mc
   	mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
-  	mod.comps$rsq = as.numeric(mod.comps$rsq)
+  	mod.comps$rsq = as.numeric(mod.comps$rsq); mod.comps$bayes.factor = as.numeric(unlist(mod.comps$bayes.factor))
 	} else {
 	  mod.comps = NULL
 	}

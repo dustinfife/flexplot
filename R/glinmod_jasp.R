@@ -50,32 +50,41 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     if (sum(numeric)>0){
     
       if (length(options$variables)>1){
-        if (is.null(jaspResults[["glinmod_table_modcomp"]])){
-          .create_glinmod_table_modcomp(jaspResults, options, ready)
+        if (options$modinf){
+          if (is.null(jaspResults[["glinmod_table_modcomp"]])){
+            .create_glinmod_table_modcomp(jaspResults, options, ready)
+          }
         }
       }
       
-      if (is.null(jaspResults[["glinmod_table_slopes"]])){
-        .create_glinmod_table_slopes(jaspResults, options, ready)
+      if (options$sl){
+        if (is.null(jaspResults[["glinmod_table_slopes"]])){
+          .create_glinmod_table_slopes(jaspResults, options, ready)
+        }
       }
-
     }
     
     if (sum(character)>0){
       
       if (length(options$variables)>1){
-        if (is.null(jaspResults[["glinmod_table_modcomp"]])){
-          .create_glinmod_table_modcomp(jaspResults, options, ready)
+        if (options$modinf) {
+          if (is.null(jaspResults[["glinmod_table_modcomp"]])){
+            .create_glinmod_table_modcomp(jaspResults, options, ready)
+          }
         }
-      }
-      
-      ### check if there's a jasp table already. if not, create it
-      if (is.null(jaspResults[["glinmod_table_means"]])){
-        .create_glinmod_table_means(jaspResults, options, ready)
       }  
       
-      if (is.null(jaspResults[["glinmod_table_differences"]])){
-        .create_glinmod_table_differences(jaspResults, options, ready)
+      ### check if there's a jasp table already. if not, create it
+      if (options$means){
+        if (is.null(jaspResults[["glinmod_table_means"]])){
+        .create_glinmod_table_means(jaspResults, options, ready)
+        }  
+      }  
+      
+      if (options$diff) {
+        if (is.null(jaspResults[["glinmod_table_differences"]])){
+          .create_glinmod_table_differences(jaspResults, options, ready)
+        }
       }  
       
     }
