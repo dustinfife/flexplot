@@ -88,7 +88,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
 .glinmod_model_plot <- function(jaspResults, options, ready) {
   
   ### create plot options
-  modelplot <- createJaspPlot(title = "Plot of the Statistical Model",  width = 800, height = 500)
+  modelplot <- createJaspPlot(title = "Plot of the Statistical Model",  width = 900, height = 500)
   
   ### what options should change the flexplot?
   modelplot$dependOn(c("variables", "residuals", "model", "dependent"))
