@@ -24,6 +24,26 @@ Form
   }
   
   
+  ExpanderButton{
+    title: qsTr("Interaction Terms")  
+    VariablesForm
+    {
+      height: 150
+      AvailableVariablesList { 
+        name: "components"; 
+        title: qsTr("Components"); 
+        source: ["variables"] 
+      }
+  
+      AssignedVariablesList 
+      { 
+        name: "interactions"; 
+        title: qsTr("Model Terms"); 
+        listViewType:"Interaction" 
+      }
+    }
+  }  
+  
 		
   ExpanderButton{
     title: qsTr("Plot Options")

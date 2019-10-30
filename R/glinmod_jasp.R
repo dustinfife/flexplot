@@ -76,13 +76,19 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   #save(glinmod_table, dataset, options,)
   ### make a formula from input
-  f = paste0((options$dependent), " ~ ", paste0((unlist(options$variables)), collapse = "+"))
+  predictors = paste0(
+      unlist(
+          lapply(options$interactions, FUN=function(x) paste0(unlist(x$components), collapse="*"))
+            ), 
+      collapse=" + ")
+  f = paste0(options$dependent, " ~ ", predictors, collapse = "")
   f = as.formula(f)
   names(dataset) = JASP:::.unv(names(dataset))
-  save(f, dataset, file="/Users/fife/Dropbox/jaspresults.Rdat")
+  save(options, dataset, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
   #save(dataset, options, file="/Users/fife/Dropbox/jaspresults.Rdat")
   ### store results
   model = lm(f, dataset)
+  
   
   est = estimates(model)
   factors = est$factor.summary
@@ -98,7 +104,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     upr = factors$upper
   )
   glinmod_table$setData(tabdat)
-  save(tabdat, file="/Users/fife/Dropbox/jaspresults.Rdat")
+  
   
   return()
 }
