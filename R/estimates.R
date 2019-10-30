@@ -225,10 +225,12 @@ estimates.lm = function(object){
 	  }
 	  ### this requires superassignment to work with JASP
 	  dataset<<-object$model
-	  mc = t(sapply(1:length(terms), removed.one.at.a.time, terms=terms, object=object))
-	  mc = data.frame(cbind(terms,mc), stringsAsFactors = FALSE)
+	  all.terms = attr(terms(object), "term.labels")
+	  mc = t(sapply(1:length(all.terms), removed.one.at.a.time, terms=all.terms, object=object))
+	  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
 	  mod.comps = mc
   	mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
+  	mod.comps$rsq = as.numeric(mod.comps$rsq)
 	} else {
 	  mod.comps = NULL
 	}

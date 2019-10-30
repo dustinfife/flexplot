@@ -33,12 +33,26 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     
     ### show output, depending on results
     if (sum(numeric)>0){
+    
+      if (length(options$variables)>1){
+        if (is.null(jaspResults[["glinmod_table_modcomp"]])){
+          .create_glinmod_table_modcomp(jaspResults, options, ready)
+        }
+      }
+      
       if (is.null(jaspResults[["glinmod_table_slopes"]])){
         .create_glinmod_table_slopes(jaspResults, options, ready)
       }
+
     }
     
     if (sum(character)>0){
+      
+      if (length(options$variables)>1){
+        if (is.null(jaspResults[["glinmod_table_modcomp"]])){
+          .create_glinmod_table_modcomp(jaspResults, options, ready)
+        }
+      }
       
       ### check if there's a jasp table already. if not, create it
       if (is.null(jaspResults[["glinmod_table_means"]])){
@@ -48,6 +62,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
       if (is.null(jaspResults[["glinmod_table_differences"]])){
         .create_glinmod_table_differences(jaspResults, options, ready)
       }  
+      
     }
     
     # 
@@ -93,7 +108,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_table_means <- createJaspTable(title = "Means of Categorical Variables")
   
   ### which options are required
-  glinmod_table_means$dependOn(c("dependent", "variables", "ci"))
+  glinmod_table_means$dependOn(c("dependent", "variables", "ci", "interactions"))
   
   ### add citation
   glinmod_table_means$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -139,7 +154,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_table_differences <- createJaspTable(title = "Mean Differences Between Groups")
   
   ### which options are required
-  glinmod_table_differences$dependOn(c("dependent", "variables", "ci"))
+  glinmod_table_differences$dependOn(c("dependent", "variables", "ci", "interactions"))
   
   ### add citation
   glinmod_table_differences$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -185,7 +200,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_table_slopes <- createJaspTable(title = "Regression Slopes and Intercept")
   
   ### which options are required
-  glinmod_table_slopes$dependOn(c("dependent", "variables", "ci"))
+  glinmod_table_slopes$dependOn(c("dependent", "variables", "ci", "interactions"))
   
   ### add citation
   glinmod_table_slopes$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -268,6 +283,8 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   return()
 }
 
+
+
 .fill_glinmod_table_means = function(glinmod_table_means, glinmod_results){
   
 
@@ -333,11 +350,15 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   mc = glinmod_results$model.comparison
   
+  
+  ### reformat : to be a times
+  term.labels = as.character(mc$all.terms)
+  term.labels = gsub(":", "×", term.labels)
   ### output results
   tabdat = list(
-    terms = as.character(mc$variables),
-    rsq = mc$estimate,
-    bayes = mc$lower
+    terms = term.labels,
+    rsq = mc$rsq,
+    bayes = mc$bayes.factor
   )
   
   glinmod_table_modcomp$setData(tabdat)
