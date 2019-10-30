@@ -12,28 +12,15 @@
 flexplot_jasp2 <- function(jaspResults, dataset, options) {
 
 	### check if they've entered anything	  
-	ready <- (length(options$dependent) > 0) #&& length(options$variables)>0)
-
-		#### check for errors
-	customChecksFlexPlot <- list(
-		function(){
-			if ((length(options$dependent)==0 & length(options$paneledVars)>0) | (length(options$dependent)==0 & length(options$variables)>0)) {
-					return(paste0("You must specify a dependent variable to view a graphic"))
-				}
-			},
-			function(){
-				if(length(options$dependent)!=0 & length(options$paneledVars)>0){
-					return(paste0("You must have at least one independent variable to do paneling"))
-				}
-			})
-
-		error <- .hasErrors(dataset=dataset, perform=perform, type=c("infinity", "variance"), custom= customChecksFlexPlot, exitAnalysisIfErrors=TRUE)
+  #save(dataset, options, file="~/Documents/JaspResults.Rdat")
+	ready <- (options$dependent != "") 
 	  
 	### read in the dataset 
 	if (ready) {
 		### read in the dataset
 		if (is.null(dataset)){ 
     		dataset = (.readDataSetToEnd(columns=c(options$dependent, options$variables, options$paneledVars)))
+    		#save(dataset, ready, options, file="~/Users/Documents/jaspdata.rdat")
 		} else {
 			return(dataset) 
 		}
@@ -42,7 +29,6 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 		if (options$type=="regression"){options$type=="lm"}
 
 		### create plots
-		#if (is.null(jaspResults[["flex_Plot"]])){
 		.flexPlotRes(jaspResults, formula, dataset, options, ready)
 		
 		return()	  
@@ -55,21 +41,13 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 
 			
 			
-.flexCheckErrors <- function(dataset, options){
-	
-	# check length of variables
-	if ((length(options$dependent)==0 & length(options$paneledVars)>0) | (length(options$dependent)==0 & length(options$variables)>0)) .quitAnalysis("You must specify a dependent variable to view a graphic")
-	if (length(options$dependent)!=0 & length(options$paneledVars)>0) .quitAnalysis("You must have at least one independent variable to do paneling")
 
-}
 
 
 .flexPlotRes <- function(jaspResults, formula, dataset, options, ready) {
 	
-	#require(ggplot2)
-	
 	#### set up parameters
-	flex_Plot <- createJaspPlot(title = "Flexplot",  width = 900, height = 900)
+	flex_Plot <- createJaspPlot(title = "Flexplot",  width = 600, height = 600)
 	flex_Plot$dependOn(c("confidence", "dependent", "variables", "paneledVars", "ghostLines"))
 	flex_Plot$addCitation("Fife, Dustin A. (2019). Flexplot (Version 0.9.2) [Computer software].")
 	
@@ -118,9 +96,9 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 			}
 			ghost.lines = lapply(ghost.vars, FUN=f)
 			names(ghost.lines) = ghost.vars
-			plot = flexplot(formula, data=k, method=options$type, se=options$confidence, ghost.line="gray", ghost.reference=ghost.lines) + xlab(names(ghost.lines))		
+			plot = flexplot(formula, data=k, method=options$type, se=options$confidence, ghost.line="gray")
 		} else {
-			plot = flexplot(formula, data=k, method=options$type, se=options$confidence) + xlab(paste0(unlist(options$ghostLines)))
+			plot = flexplot(formula, data=k, method=options$type, se=options$confidence)
 		}
 
 		# #### create flexplot object   
@@ -264,5 +242,11 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 	# plot = flexplot(formula, data=k, method=options$type, se=options$confidence) 
 	# flex_Plot$plotObject <- plot
 
-
+# .flexCheckErrors <- function(dataset, options){
+#   
+#   # check length of variables
+#   if ((length(options$dependent)==0 & length(options$paneledVars)>0) | (length(options$dependent)==0 & length(options$variables)>0)) .quitAnalysis("You must specify a dependent variable to view a graphic")
+#   if (length(options$dependent)!=0 & length(options$paneledVars)>0) .quitAnalysis("You must have at least one independent variable to do paneling")
+#   
+# }
 

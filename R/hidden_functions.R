@@ -29,6 +29,43 @@ nested_model_comparisons = function(object){
   mc
 }
 
+check.non.number = function(x){
+  return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
+  return.bool
+}
+
+
+variable_types = function(variables, data){
+  characters = sapply(data[,variables, drop=F], check.non.number) 
+  numbers = !characters
+  list(characters=characters, numbers=numbers)
+}
+
+#### if both numeric and factor, put numeric on x axis and factor as color/line
+# predictors = c("therapy.type", "gender", "income", "motivation")
+# data = exercise_data
+# outcome = "weight.loss"
+make_flexplot_formula = function(predictors, outcome, data){
+  
+  # algorithm that puts numeric in first slot, categorical in second slot
+  favored.slots = c(1,3,4,2)
+  vtypes = variable_types(predictors, data)
+  numb = vtypes$numbers
+  cat = vtypes$characters
+  levs = sapply(data[,predictors], function(x) length(levels(x)))
+  custom.sort = numb*1000 + cat*levs
+  custom.sort = sort(custom.sort, decreasing=T)
+  slots = names(custom.sort)[favored.slots]
+  
+  
+  #### now create formula
+  x = c(outcome, "~",slots[1], slots[2], "|", slots[3], slots[4])
+  x = x[-which(is.na(x))]
+  x = paste0(x, collapse="+")
+  x = gsub("+|+", "|", x, fixed=T);x = gsub("+~+", "~", x, fixed=T)
+  x = gsub("+|", "", x, fixed=T)
+  f = as.formula(x)	
+}
 
 	### taken from gtools::permutations
 permute.vector = function (n, r, v = 1:n, set = TRUE, repeats.allowed = FALSE) 
