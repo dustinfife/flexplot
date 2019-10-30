@@ -88,18 +88,26 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 		} else {
 		  ghost = NULL
 		}
-			
+		
+		whiskers = list("quartiles" = "quartiles",
+		                "standard errors" = "sterr",
+		                "standard deviations", "stdev")
+
 		linetype = options$type
 		if (linetype == "regression") linetype = "lm"
-		plot = flexplot(formula, data=k, method=linetype, se=options$confidence, alpha=options$alpha, ghost.line=ghost)
+		plot = flexplot(formula, data=k, method=linetype, se=options$confidence, alpha=options$alpha, ghost.line=ghost,
+		                spread=whiskers[[options$intervals]])
 		
+		if (options$theme == "JASP"){
+		  plot = themeJasp(plot)
+		} else {
+  		theme = list("black and white"="theme_bw()+ theme(text=element_text(size=18))",
+  		                  "minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
+  		                 "classic" = "theme_classic()+ theme(text=element_text(size=18))",
+  		                 "dark" = "theme_dark() + theme(text=element_text(size=18))")
+  		plot = plot + eval(parse(text=theme[[options$theme]]))
+		}
 		
-		theme = list("black and white"="theme_bw()+ theme(text=element_text(size=18))",
-		                  "minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
-		                 "classic" = "theme_classic()+ theme(text=element_text(size=18))",
-		                 "dark" = "theme_dark() + theme(text=element_text(size=18))")
-		plot = plot + eval(parse(text=theme[[options$theme]]))
-
 		# #### create flexplot object   
 		flex_Plot$plotObject <- plot
 		return()   
@@ -258,3 +266,50 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 # }
 # ghost.lines = lapply(ghost.vars, FUN=f)
 # names(ghost.lines) = ghost.vars
+
+themeJasp = function(graph,
+                     xAxis = TRUE,
+                     yAxis = TRUE,
+                     sides = "bl",
+                     axis.title.cex = getGraphOption("axis.title.cex"),
+                     bty = getGraphOption("bty"),
+                     fontsize = getGraphOption("fontsize"),
+                     family = getGraphOption("family"),
+                     horizontal = FALSE,
+                     legend.position = getGraphOption("legend.position"),
+                     legend.justification = "top",
+                     axisTickLength = getGraphOption("axisTickLength"),
+                     axisTickWidth = getGraphOption("axisTickWidth")) {
+  
+  if (!xAxis || !yAxis) {
+    warning("Arguments xAxis and yAxis of themeJasp will be deprecated. Please use the argument \"sides\" instead.")
+    
+    if (horizontal) {
+      if (!xAxis)
+        sides <- stringr::str_remove(sides, "l")
+      if (!yAxis)
+        sides <- stringr::str_remove(sides, "b")
+    } else {
+      if (!xAxis)
+        sides <- stringr::str_remove(sides, "b")
+      if (!yAxis)
+        sides <- stringr::str_remove(sides, "l")
+    }
+    if (sides == "")
+      bty <- NULL
+  }
+  
+  if (is.list(bty) && bty[["type"]] == "n")
+    graph <- graph + geom_rangeframe(sides = sides)
+  
+  if (horizontal)
+    graph <- graph + coord_flip()
+  
+  graph <- graph + themeJaspRaw(legend.position = legend.position,
+                                axis.title.cex = axis.title.cex, family = family,
+                                fontsize = fontsize, legend.justification = legend.justification,
+                                axisTickLength = axisTickLength, axisTickWidth = axisTickWidth)
+  
+  return(graph)
+  
+}

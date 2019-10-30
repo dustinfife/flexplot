@@ -36,32 +36,47 @@ Form
   ExpanderButton
   {
       title: qsTr("Options")
-        Group
-        {
-            CheckBox{
-              name:"confidence"; 
-              label: qsTr("Plot confidence bands")
-            }
-            CheckBox{
+      
+        Group{
+        title: qsTr("Visual Aids")
+             CheckBox{
               name:"ghost"; 
-              label: qsTr("Plot ghost lines")
+              label: qsTr("Ghost lines");
+              checked: true
             }
-		        DropDown{
-			        name: "type"
-			        values: ["loess", "regression", "polynomial", "cubic"]
-			        label: qsTr("Fitted line")
-		        }
-            DropDown{
-			        name: "theme"
-			        values: ["black and white", "minimal", "classic", "dark"]
-			        label: qsTr("GGplot Theme")
-		        }
 		        Slider{
               name: "alpha"
               label: qsTr("Point Transparency")
               value: 0.4
+              vertical: false
             }
-		        
+        }
+        
+        Group{
+        title: qsTr("Aesthetics")
+            DropDown{
+			        name: "theme"
+			        values: ["JASP", "black and white", "minimal", "classic", "dark"]
+			        label: qsTr("GGplot Theme")
+		        }
+        }
+        
+        Group{
+        title: qsTr("Visual Statistics")
+            CheckBox{
+              name:"confidence"; 
+              label: qsTr("Plot confidence bands")
+            }
+		        DropDown{
+			        name: "type"
+			        values: ["loess", "regression", "polynomial", "cubic"]
+			        label: qsTr("Fitted line (scatterplots)")
+		        }
+		        DropDown{
+			        name: "intervals"
+			        values: ["quartiles", "standard errors", "standard deviations"]
+			        label: qsTr("Intervals")
+		        }		        
         }
   }
 
