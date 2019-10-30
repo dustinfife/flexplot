@@ -165,15 +165,6 @@ estimates.lm = function(object){
 				
 			}
 			
-			
-			# std.rows = 	coef.matrix$levels %in% names(coef.std$beta)
-			# coef.matrix$std.estimate[std.rows] = coef.std$beta[-1]
-			# lower.limits = coef.std$beta[-1] - 1.96*coef.std$se[-1]
-			# upper.limits = coef.std$beta[-1] + 1.96*coef.std$se[-1]
-			# coef.matrix$std.lower[std.rows] = lower.limits
-			# coef.matrix$std.upper[std.rows] = upper.limits
-
-			
 	} else {
 		coef.matrix = NA
 		difference.matrix=NA
@@ -220,7 +211,12 @@ estimates.lm = function(object){
 	} else {
 		correlation = NA
 	}
-
+	
+	### do nested model comparisons
+	mod.comps = nested_model_comparisons(object)
+	mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
+  
+  model.comparison(object, object2)
 	# #### print summary
 	# message(paste("Model R squared:\n", round(r.squared[1], digits=3), " (", round(r.squared[2], digits=2),", ", round(r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
 	# print(semi.p)
@@ -234,7 +230,10 @@ estimates.lm = function(object){
 	# }
 	# message(paste("\nsigma = ", round(summary(object)$sigma, digits=4), "\n\n"))
 	
-	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, sigma=summary(object)$sigma)
+	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, 
+	           difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, 
+	           sigma=summary(object)$sigma,
+	           model.comparison = mod.comps)
 	attr(ret, "class") = "estimates"
 	return(ret)
 }

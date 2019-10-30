@@ -22,8 +22,6 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     ### check for categorical/numeric variables
     numeric = apply(dataset[,options$variables, drop=F], 2, is.numeric)
     character = !numeric  
-    
-    save(dataset, options, numeric, character, file="/Users/fife/Dropbox/jaspresults.Rdat")
   
     #### compute results
     if (is.null(jaspResults[["glinmod_results"]]))
@@ -59,7 +57,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     ## createJaspState allows these results to be recycled
     glinmod_results <- createJaspState()
     jaspResults[["glinmod_results"]] <- glinmod_results
-    glinmod_results$dependOn(c("dependent", "variables"))
+    glinmod_results$dependOn(c("dependent", "variables", "interactions"))
     
     ## interactions are stored in a deeply nested list. de-listify them
     predictors = paste0(
@@ -71,12 +69,12 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     f = as.formula(f)
     
     ## save results (for debugging purposes)
-    #save(options, dataset, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
+    
     #save(dataset, options, file="/Users/fife/Dropbox/jaspresults.Rdat")
     
     ### model it
     model = lm(f, dataset)
-    
+    save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
     ### store all the information
     est = estimates(model)
     est$model = model
@@ -175,6 +173,58 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   ### fill the table with those results
   .fill_glinmod_table_differences(glinmod_table_differences, glinmod_results)
+  
+  return()
+}
+
+.create_glinmod_table_slopes <- function(jaspResults, dataset, options, ready) {
+  glinmod_table_slopes <- createJaspTable(title = "Regression Slopes and Intercept")
+  
+  ### which options are required
+  glinmod_table_slopes$dependOn(c("dependent", "variables", "ci"))
+  
+  ### add citation
+  glinmod_table_slopes$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
+  
+  ### build the table structure
+  glinmod_table_slopes$addColumnInfo(name = "var",      title = "Variables",   type = "string", combine = TRUE)
+  glinmod_table_slopes$addColumnInfo(name = "val",    title = "Value",       type = "number", format = "dp:2", combine = TRUE)	
+  
+  if (options$ci){
+    glinmod_table_slopes$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    glinmod_table_slopes$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+  }
+  
+  glinmod_table_slopes$addColumnInfo(name = "std",    title = "Standardized Slope (β)",       type = "number", format = "dp:2", combine = TRUE)	
+  
+  if (options$ci){
+    glinmod_table_slopes$addColumnInfo(name = "slwr",      title = "Lower β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    glinmod_table_slopes$addColumnInfo(name = "supr",      title = "Upper β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+  }
+  
+  ### add message about what type of interval was used
+  message <- switch(options$estimationmethod,
+                    "Bootstrapped Intervals"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
+                    "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
+                    "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
+  )
+  
+  message = paste0("message \n Note: all estimates are conditional estimates.")
+  glinmod_table_slopes$addFootnote(message)  
+  glinmod_table_slopes$showSpecifiedColumnsOnly <- TRUE
+  ### store the table structure
+  jaspResults[["glinmod_table_slopes"]] <- glinmod_table_slopes
+  
+  ### return the table
+  if (!ready) {
+    return()
+  } 
+  
+  ### retrieve the already-computed results
+  glinmod_results <- jaspResults[["glinmod_results"]]$object
+  
+  ### fill the table with those results
+  .fill_glinmod_table_slopes(glinmod_table_slopes, glinmod_results)
   
   return()
 }

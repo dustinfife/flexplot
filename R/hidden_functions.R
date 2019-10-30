@@ -8,6 +8,28 @@ standardized_differences = function(model1, model2, sigma=TRUE){
   differences
 }
 
+## function that does nested model comparisons on a single fitted model
+nested_model_comparisons = function(object){
+  
+  ### extract necessary terms
+  terms = attr(terms(object), "term.labels")
+  
+  ### temporary function that updates model
+  removed.one.at.a.time = function(i, terms, object){
+    new.f = as.formula(paste0(". ~ . -", terms[i]))
+    new.object = update(object, new.f)
+    list(
+      rsq = summary(object)$r.squared - summary(new.object)$r.squared,
+      bayes.factor = bf.bic(object, new.object, invert=FALSE)
+    )
+  }
+  
+  mc = t(sapply(1:length(terms), removed.one.at.a.time, terms=terms, object=object))
+  mc = data.frame(cbind(terms,mc), stringsAsFactors = FALSE)
+  mc
+}
+
+
 	### taken from gtools::permutations
 permute.vector = function (n, r, v = 1:n, set = TRUE, repeats.allowed = FALSE) 
 {
