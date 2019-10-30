@@ -20,7 +20,7 @@
       },
 
       {
-        "title":   	"general linear model",
+        "title":   	"General Linear Model",
         "qml":    	"glinmod.qml",
         "function":  	"glinmod_jasp"
       }

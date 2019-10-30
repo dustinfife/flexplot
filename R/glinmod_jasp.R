@@ -22,14 +22,18 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     #.check_glinmod_error()  #### HOW DO YOU HAVE IT THROW AN ERROR IF THE VARIABLE IS NOT NUMBERIC?
   }
   
+  ### compute the results
+  if (is.null(jaspResults[["glinmod_results"]]))
+    .glinmod_compute(jaspResults, dataset, options)
+  
   ### check if there's a jasp table already. if not, create it
   if (is.null(jaspResults[["glinmod_table_means"]])){
-    .create_glinmod_table_means(jaspResults, dataset, options, ready)
+    .create_glinmod_table_means(jaspResults, options, ready)
   }  
   
-  # if (is.null(jaspResults[["glinmod_table_differences"]])){
-  #   .create_glinmod_table_differences(jaspResults, dataset, options, ready)
-  # }  
+  if (is.null(jaspResults[["glinmod_table_differences"]])){
+    .create_glinmod_table_differences(jaspResults, dataset, options, ready)
+  }
   # 
   # if (is.null(jaspResults[["glinmod_table_slopes"]])){
   #   .create_glinmod_table_slopes(jaspResults, dataset, options, ready)
@@ -75,11 +79,11 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
 }
 
 
-.create_glinmod_table_means <- function(jaspResults, dataset, options, ready) {
+.create_glinmod_table_means <- function(jaspResults, options, ready) {
   glinmod_table_means <- createJaspTable(title = "Means of Categorical Variables")
   
   ### which options are required
-  glinmod_table_means$dependOn(c("dependent", "variables"))
+  glinmod_table_means$dependOn(c("dependent", "variables", "ci"))
   
   ### add citation
   glinmod_table_means$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -110,10 +114,6 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   if (!ready) {
     return()
   } 
-  
-  ### collect the stored info about the results
-  if (is.null(jaspResults[["glinmod_results"]]))
-    .glinmod_compute(jaspResults, dataset, options)
   
   ### retrieve the already-computed results
   glinmod_results <- jaspResults[["glinmod_results"]]$object
@@ -153,7 +153,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_table_differences <- createJaspTable(title = "Mean Differences Between Groups")
   
   ### which options are required
-  glinmod_table_differences$dependOn(c("dependent", "variables"))
+  glinmod_table_differences$dependOn(c("dependent", "variables", "ci"))
   
   ### add citation
   glinmod_table_differences$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -184,30 +184,38 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   ### return the table
   if (!ready) {
     return()
-  } else {
-    .fill_glinmod_table_differences(glinmod_table_differences, dataset, options)
-    return()
-  }
+  } 
+  
+  ### retrieve the already-computed results
+  glinmod_results <- jaspResults[["glinmod_results"]]$object
+  
+  ### fill the table with those results
+  .fill_glinmod_table_differences(glinmod_table_differences, glinmod_results)
+
+  return()
 }
 
-.fill_glinmod_table_means = function(glinmod_table_means, glinmod_results){
+.fill_glinmod_table_differences = function(glinmod_table_differences, glinmod_results){
   
   
-  factors = glinmod_results$factor.summary
+  diff = glinmod_results$difference.matrix
   
   ### output results
   tabdat = list(
-    var = as.character(factors$variables),
-    levels = factors$levels,
-    est = factors$estimate,
-    lwr = factors$lower,
-    upr = factors$upper
+    var = as.character(diff$variables),
+    comparison = diff$comparison,
+    diff = diff$difference,
+    lwr = diff$lower,
+    upr = diff$upper,
+    cohensd = diff$cohens.d
   )
-  glinmod_table_means$setData(tabdat)
+  
+  glinmod_table_differences$setData(tabdat)
   
   
   return()
 }
+
 
 
 
