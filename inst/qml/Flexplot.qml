@@ -30,39 +30,39 @@ Form
 			title: qsTr("Panelled Variable(s)");
 			singleVariable: false 
 		}
-	
-	VariablesList 
-	{
-			title: qsTr("Ghost Lines")
-			source: "paneledVars"
-			name: "ghostLines"
-			listViewType: "AssignedVariables"
-			height: 60
-			draggable: false
 
-			ExtraControlColumn {
-				type: "TextField"
-				name: "ghostlinepoint"
-			}
-		}
+  }
 
-    }
-
-    ExpanderButton
-    {
-        title: qsTr("Options")
-
+  ExpanderButton
+  {
+      title: qsTr("Options")
         Group
         {
-            CheckBox{name:"confidence"; label: qsTr("Plot Confidence Bands")}
-		DropDown{
-			name: "type"
-			values: ["loess", "regression", "polynomial", "cubic"]
-			label: qsTr("Fitted Line")
-		}
-
-		
+            CheckBox{
+              name:"confidence"; 
+              label: qsTr("Plot confidence bands")
+            }
+            CheckBox{
+              name:"ghost"; 
+              label: qsTr("Plot ghost lines")
+            }
+		        DropDown{
+			        name: "type"
+			        values: ["loess", "regression", "polynomial", "cubic"]
+			        label: qsTr("Fitted line")
+		        }
+            DropDown{
+			        name: "theme"
+			        values: ["black and white", "minimal", "classic", "dark"]
+			        label: qsTr("GGplot Theme")
+		        }
+		        Slider{
+              name: "alpha"
+              label: qsTr("Point Transparency")
+              value: 0.4
+            }
+		        
         }
-    }
+  }
 
 }

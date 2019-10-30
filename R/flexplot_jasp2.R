@@ -25,9 +25,6 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 			return(dataset) 
 		}
 	  
-		### change name of smoothed line
-		if (options$type=="regression"){options$type=="lm"}
-
 		### create plots
 		.flexPlotRes(jaspResults, formula, dataset, options, ready)
 		
@@ -47,7 +44,7 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 .flexPlotRes <- function(jaspResults, formula, dataset, options, ready) {
 	
 	#### set up parameters
-	flex_Plot <- createJaspPlot(title = "Flexplot",  width = 600, height = 600)
+	flex_Plot <- createJaspPlot(title = "Flexplot",  width = 600, height = 450)
 	flex_Plot$dependOn(c("confidence", "dependent", "variables", "paneledVars", "ghostLines"))
 	flex_Plot$addCitation("Fife, Dustin A. (2019). Flexplot (Version 0.9.2) [Computer software].")
 	
@@ -86,20 +83,22 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 		require(ggplot2)
 		
 		#### do a ghost line
-		if	(length(options$ghostLines)[1]>0){
-			ghost.length = length(unlist(options$ghostLines))
-			num.vars = seq(from=2, to=ghost.length, by=2)
-			ghost.vars = unlist(options$ghostLines)[num.vars]
-			f = function(name){
-				mean.var = round(mean(dataset[[.v(name)]], na.rm=T))
-				return(mean.var)
-			}
-			ghost.lines = lapply(ghost.vars, FUN=f)
-			names(ghost.lines) = ghost.vars
-			plot = flexplot(formula, data=k, method=options$type, se=options$confidence, ghost.line="gray")
+		if	(options$ghost){
+		  ghost="black" 
 		} else {
-			plot = flexplot(formula, data=k, method=options$type, se=options$confidence)
+		  ghost = NULL
 		}
+			
+		linetype = options$type
+		if (linetype == "regression") linetype = "lm"
+		plot = flexplot(formula, data=k, method=linetype, se=options$confidence, alpha=options$alpha, ghost.line=ghost)
+		
+		
+		theme = list("black and white"="theme_bw()+ theme(text=element_text(size=18))",
+		                  "minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
+		                 "classic" = "theme_classic()+ theme(text=element_text(size=18))",
+		                 "dark" = "theme_dark() + theme(text=element_text(size=18))")
+		plot = plot + eval(parse(text=theme[[options$theme]]))
 
 		# #### create flexplot object   
 		flex_Plot$plotObject <- plot
@@ -249,4 +248,13 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 #   if (length(options$dependent)!=0 & length(options$paneledVars)>0) .quitAnalysis("You must have at least one independent variable to do paneling")
 #   
 # }
-
+# 
+# ghost.length = length(unlist(options$ghostLines))
+# num.vars = seq(from=2, to=ghost.length, by=2)
+# ghost.vars = unlist(options$ghostLines)[num.vars]
+# f = function(name){
+#   mean.var = round(mean(dataset[[.v(name)]], na.rm=T))
+#   return(mean.var)
+# }
+# ghost.lines = lapply(ghost.vars, FUN=f)
+# names(ghost.lines) = ghost.vars
