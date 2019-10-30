@@ -50,7 +50,7 @@ Form
 
     Group{
 		  CheckBox{
-			  name:"modelPlot"; 
+			  name:"model"; 
 			  label: qsTr("Model plot")
 			  }
       CheckBox{
@@ -58,7 +58,7 @@ Form
 			  label: qsTr("Univariates")
 			  }			  
       CheckBox{
-			  name:"residualPlot"; 
+			  name:"residuals"; 
 			  label: qsTr("Diagnostics")
 			  }			  
 		  }

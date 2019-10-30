@@ -31,6 +31,21 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     if (is.null(jaspResults[["glinmod_results"]]))
       .glinmod_compute(jaspResults, dataset, options, ready)
     
+    
+    #### show plots (if user specifies them)
+    if (options$model) {
+      if (is.null(jaspResults[["glinmod_model_plot"]])){
+        .glinmod_model_plot(jaspResults, options, ready)
+      }
+    }
+
+    if (options$residuals) {
+      if (is.null(jaspResults[["glinmod_residual_plot"]])){
+        .glinmod_residual_plot(jaspResults, options, ready)
+      }
+    }
+    
+    
     ### show output, depending on results
     if (sum(numeric)>0){
     
@@ -69,6 +84,62 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
 
   }  
 }
+
+.glinmod_model_plot <- function(jaspResults, options, ready) {
+  
+  ### create plot options
+  modelplot <- createJaspPlot(title = "Plot of the Statistical Model",  width = 800, height = 500)
+  
+  ### what options should change the flexplot?
+  modelplot$dependOn(c("variables", "residuals", "model", "dependent"))
+  
+  ### fill the plot object
+  jaspResults[["modelplot"]] <- modelplot
+  
+  if (!ready)
+    return()
+  
+  ### create the flexplot
+  model.type = "model"
+  .create_flexplot(jaspResults, modelplot, options, model.type)
+  
+  return()
+}
+
+.glinmod_residual_plot <- function(jaspResults, options, ready) {
+  
+  ### create plot options
+  residualplot <- createJaspPlot(title = "Diagnostic Plots",  width = 800, height = 500)
+  
+  ### what options should change the flexplot?
+  residualplot$dependOn(c("variables", "residuals", "model", "dependent"))
+  
+  ### fill the plot object
+  jaspResults[["residualplot"]] <- residualplot
+  
+  if (!ready)
+    return()
+  
+  ### create the flexplot
+  model.type = "residuals"
+  .create_flexplot(jaspResults, residualplot, options, model.type)
+  
+  return()
+}
+
+.create_flexplot <- function(jaspResults, flexplot, options, model.type) {
+  
+  glinmod_results <- jaspResults[["glinmod_results"]]$object
+  
+  if (model.type=="model"){
+    flexplot$plotObject <- visualize(glinmod_results$model, plot="model")
+  } else if (model.type=="residuals") {
+    flexplot$plotObject <- visualize(glinmod_results$model, plot="residuals")
+  }
+
+  return()
+}
+
 
 .glinmod_compute = function(jaspResults, dataset, options, ready) {
   
@@ -366,6 +437,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   return()
 }
+
 
 .check_glinmod_error = function(dataset, options){
   
