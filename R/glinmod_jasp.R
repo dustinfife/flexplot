@@ -145,8 +145,10 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   } else if (model.type=="residuals"){
     type = "model"
   }
+  generated.formula = make_flexplot_formula(options$variables, options$dependent, glinmod_results$model$model)
   
-  plot = visualize(glinmod_results$model, plot=model.type)
+  plot = compare.fits(generated.formula, data = glinmod_results$model$model, model1 = glinmod_results$model)
+  #plot = visualize(glinmod_results$model, glinmod_results, plot=model.type)
   plot = themeJasp(plot)
   flexplot$plotObject <- plot
   
@@ -345,7 +347,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   ### build the table structure
   glinmod_table_modcomp$addColumnInfo(name = "terms",      title = "Term",   type = "string", combine = TRUE)
   glinmod_table_modcomp$addColumnInfo(name = "rsq",    title = "Semi-partial R Squared",       type = "number", format = "dp:2", combine = TRUE)	
-  glinmod_table_modcomp$addColumnInfo(name = "bayes",      title = "Semi-partial Bayes Factor",       type = "number", format = "dp:2", combine = TRUE)
+  glinmod_table_modcomp$addColumnInfo(name = "bayes",      title = "Semi-partial Bayes Factor", type = "number", combine = TRUE)
   
   
   message = paste0("message \n Note: Semi-partials indicate the effect of removing that particular term from the model. Higher Bayes Factors indicate important terms. Lower Bayes Factors suggest they can be removed from the model")
@@ -444,7 +446,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     rsq = mc$rsq,
     bayes = mc$bayes.factor
   )
-  
+  save(mc, file="/Users/fife/Documents/jaspresults.rdat")
   glinmod_table_modcomp$setData(tabdat)
   
   

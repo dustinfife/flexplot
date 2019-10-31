@@ -53,9 +53,10 @@ Form
   
 		
   ExpanderButton{
-    title: qsTr("Plot Options")
+    title: qsTr("Display Options")
 
     Group{
+    title: qsTr("Plots")
 		  CheckBox{
 			  name:"model"; 
 			  label: qsTr("Model plot");
@@ -70,27 +71,9 @@ Form
 			  label: qsTr("Diagnostics")
 			  }			  
 		  }
-		}
-		
-		
-	ExpanderButton{
-    title: qsTr("Estimation Options")
-
-    Group{
-      CheckBox{
-			  name:"ci"; 
-			  label: qsTr("Show Intervals");
-			  checked: true
-			}	 
-		  DropDown{
-			  name: "estimationmethod"
-			  values: ["Credible Interval", "Bootstrapped Intervals", "Confidence Interval"]
-			  label: qsTr("Interval Estimation")
-		  }			
-    }
-
-    Group{
-    title: qsTr("Display Options")
+		  
+		Group{
+    title: qsTr("Estimation")
       CheckBox{
 			  name:"modinf"; 
 			  label: qsTr("Show Model Comparisons")
@@ -112,6 +95,24 @@ Form
 			}				
 
 		}
+		}
+		
+		
+	ExpanderButton{
+    title: qsTr("Estimation Options")
+
+    Group{
+      CheckBox{
+			  name:"ci"; 
+			  label: qsTr("Show Intervals");
+			  checked: true
+			}	 
+		  DropDown{
+			  name: "estimationmethod"
+			  values: ["Credible Interval", "Bootstrapped Intervals", "Confidence Interval"]
+			  label: qsTr("Interval Estimation")
+		  }			
+    }
   }
   
   ExpanderButton{
