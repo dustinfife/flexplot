@@ -193,7 +193,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_table_means <- createJaspTable(title = "Means of Categorical Variables")
   
   ### which options are required
-  glinmod_table_means$dependOn(c("dependent", "variables", "ci", "interactions"))
+  glinmod_table_means$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
   
   ### add citation
   glinmod_table_means$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -239,7 +239,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_table_differences <- createJaspTable(title = "Mean Differences Between Groups")
   
   ### which options are required
-  glinmod_table_differences$dependOn(c("dependent", "variables", "ci", "interactions"))
+  glinmod_table_differences$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
   
   ### add citation
   glinmod_table_differences$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -285,7 +285,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_table_slopes <- createJaspTable(title = "Regression Slopes and Intercept")
   
   ### which options are required
-  glinmod_table_slopes$dependOn(c("dependent", "variables", "ci", "interactions"))
+  glinmod_table_slopes$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
   
   ### add citation
   glinmod_table_slopes$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -337,7 +337,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_table_modcomp <- createJaspTable(title = "Model Comparisons (Estimating the Effect of Removing Terms)")
   
   ### which options are required
-  glinmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions"))
+  glinmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
   
   ### add citation
   glinmod_table_modcomp$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
