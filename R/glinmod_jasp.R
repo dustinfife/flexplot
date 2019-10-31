@@ -141,13 +141,18 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_results <- jaspResults[["glinmod_results"]]$object
   
   if (model.type=="model"){
-    flexplot$plotObject <- visualize(glinmod_results$model, plot="model")
-  } else if (model.type=="residuals") {
-    flexplot$plotObject <- visualize(glinmod_results$model, plot="residuals")
+    type = "model"
+  } else if (model.type=="residuals"){
+    type = "model"
   }
-
+  
+  plot = visualize(glinmod_results$model, plot=model.type)
+  plot = themeJasp(plot)
+  flexplot$plotObject <- plot
+  
   return()
 }
+
 
 
 .glinmod_compute = function(jaspResults, dataset, options, ready) {
@@ -362,7 +367,6 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   return()
 }
-
 
 
 .fill_glinmod_table_means = function(glinmod_table_means, glinmod_results){

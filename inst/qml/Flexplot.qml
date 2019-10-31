@@ -19,6 +19,7 @@ Form
         
 		AssignedVariablesList 
 		{ 
+		  id: varlist
 			name: "variables";	
 			title: qsTr("Independent Variable(s)");
 			singleVariable: false 
@@ -26,6 +27,7 @@ Form
         
 		AssignedVariablesList 
 		{
+  		id: paneledVars
 			name: "paneledVars";	
 			title: qsTr("Panelled Variable(s)");
 			singleVariable: false 
@@ -43,12 +45,14 @@ Form
               name:"ghost"; 
               label: qsTr("Ghost lines");
               checked: true
+              enabled: paneledVars.count > 0
             }
 		        Slider{
               name: "alpha"
               label: qsTr("Point Transparency")
               value: 0.4
               vertical: false
+              enabled: varlist.count > 0
             }
         }
         
@@ -66,16 +70,19 @@ Form
             CheckBox{
               name:"confidence"; 
               label: qsTr("Plot confidence bands")
+               enabled: varlist.count > 0
             }
 		        DropDown{
 			        name: "type"
 			        values: ["loess", "regression", "polynomial", "cubic"]
 			        label: qsTr("Fitted line (scatterplots)")
+			         enabled: varlist.count > 0
 		        }
 		        DropDown{
 			        name: "intervals"
 			        values: ["quartiles", "standard errors", "standard deviations"]
 			        label: qsTr("Intervals")
+			         enabled: varlist.count > 0
 		        }		        
         }
   }

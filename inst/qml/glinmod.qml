@@ -17,6 +17,7 @@ Form
 			singleVariable: true 
 		}
 		AssignedVariablesList { 
+		  id: vars
 			name: "variables";	
 			title: qsTr("Independent Variable(s)");
 			singleVariable: false 
@@ -39,7 +40,8 @@ Form
       { 
         name: "interactions"; 
         title: qsTr("Model Terms"); 
-        listViewType:"Interaction" 
+        listViewType:"Interaction"
+        enabled: vars.count > 1
       }
     }
   }  
