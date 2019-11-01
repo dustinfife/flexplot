@@ -113,7 +113,7 @@ Form
               name:"ghost"; 
               label: qsTr("Ghost lines");
               checked: true
-              enabled: paneledVars.count > 0
+              enabled: vars.count > 0 & vars.count< 4
             }
 		        Slider{
               name: "alpha"

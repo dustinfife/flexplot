@@ -42,9 +42,9 @@ variable_types = function(variables, data){
 }
 
 #### if both numeric and factor, put numeric on x axis and factor as color/line
-# predictors = c("therapy.type", "gender", "income", "motivation")
-# data = exercise_data
-# outcome = "weight.loss"
+# predictors = c("Grad.School", "Years", "GPA", "Profession")
+# data = graduate_income
+# outcome = "Income"
 make_flexplot_formula = function(predictors, outcome, data){
   
   # if there's only one variable, make it
@@ -399,7 +399,7 @@ points.func = function(axis.var, data, jitter){
 
 
 	#### this function converts a binary variable to a 1/0 for logistic regression
-factor.to.logistic = function(data, outcome, labels=F){
+factor.to.logistic = function(outcome, data, labels=F){
 	
 	#### check if they have 2 unique values
 	if (length(unique(data[,outcome]))!=2){
@@ -416,6 +416,19 @@ factor.to.logistic = function(data, outcome, labels=F){
 		return(data)
 	}
 	
+}
+
+factor_to_logistic_x = function(x){
+  
+  #### check if they have 2 unique values
+  if (length(unique(x))!=2){
+    stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
+  }	
+  
+  ### now do the converstion
+    
+  x = as.numeric(as.character(factor(x, levels=levels(x), labels=c(0,1))))
+  x
 }
 
 

@@ -147,6 +147,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   }
 
   generated.formula = make_flexplot_formula(options$variables, options$dependent, glinmod_results$model$model)
+  
   if	(options$ghost){
     ghost="black"
   } else {
@@ -157,6 +158,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
                   "standard errors" = "sterr",
                   "standard deviations", "stdev")
   if (model.type=="model"){
+    save(generated.formula, glinmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
   plot = compare.fits(generated.formula, data = glinmod_results$model$model, model1 = glinmod_results$model,
                       alpha=options$alpha, ghost.line=ghost)
   } else {
@@ -198,8 +200,16 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     
     ## save results (for debugging purposes)
     
-    #save(dataset, options, file="/Users/fife/Dropbox/jaspresults.Rdat")
-    
+    ## set up generalIZED models
+    # family = list(
+    #   "Normal" = "gaussian",
+    #   "Logistic" = "binomial",
+    #   "Poisson" = "poisson",
+    #   "Negative Binomial" = "quassipoisson",
+    #   "Gamma" = "Gamma"
+    # )
+    #require(tidyverse)
+    #model = glm(f, dataset %>% mutate(!!options$dependent := factor_to_logistic_x(dataset[,options$dependent])), family=family[[options$family]])
     ### model it
     model = lm(f, dataset)
     #save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
