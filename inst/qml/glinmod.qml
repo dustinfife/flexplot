@@ -31,7 +31,7 @@ Form
   
   
   ExpanderButton{
-    title: qsTr("Interaction Terms")  
+    title: qsTr("Interaction terms")  
     VariablesForm
     {
       height: 150
@@ -44,7 +44,7 @@ Form
       AssignedVariablesList 
       { 
         name: "interactions"; 
-        title: qsTr("Model Terms"); 
+        title: qsTr("Model terms"); 
         listViewType:"Interaction"
         enabled: vars.count > 1
       }
@@ -77,21 +77,21 @@ Form
     title: qsTr("Estimation")
       CheckBox{
 			  name:"modinf"; 
-			  label: qsTr("Show Model Comparisons")
+			  label: qsTr("Show model comparisons")
 			}	
       CheckBox{
 			  name:"means"; 
-			  label: qsTr("Report Means");
+			  label: qsTr("Report means");
 			  checked: true
 			}	
       CheckBox{
 			  name:"diff"; 
-			  label: qsTr("Show Mean Differences")
+			  label: qsTr("Show mean differences")
 			  checked: true
 			}	
       CheckBox{
 			  name:"sl"; 
-			  label: qsTr("Show Slopes/Intercepts");
+			  label: qsTr("Show slopes/intercepts");
 			  checked: true
 			}		
 		}
@@ -117,7 +117,7 @@ Form
             }
 		        Slider{
               name: "alpha"
-              label: qsTr("Point Transparency")
+              label: qsTr("Point transparency")
               value: 0.4
               vertical: true
               enabled: varlist.count > 0
@@ -127,8 +127,8 @@ Form
         title: qsTr("Aesthetics")
             DropDown{
 			        name: "theme"
-			        values: ["JASP", "black and white", "minimal", "classic", "dark"]
-			        label: qsTr("GGplot Theme")
+			        values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
+			        label: qsTr("GGplot theme")
 		        }
         }        
   }

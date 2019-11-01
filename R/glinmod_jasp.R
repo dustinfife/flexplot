@@ -372,7 +372,8 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_table_modcomp$addColumnInfo(name = "bayes",      title = "Semi-partial Bayes Factor", type = "number", combine = TRUE)
   
   
-  message = paste0("message \n Note: Semi-partials indicate the effect of removing that particular term from the model. Higher Bayes Factors indicate important terms. Lower Bayes Factors suggest they can be removed from the model")
+  message = paste0("message \n Note: Semi-partials indicate the effect of removing that particular term from the model. ",
+    "Bayes factors are computed using the BIC. Higher Bayes factors indicate important terms. Lower Bayes factors suggest they can be removed from the model")
   glinmod_table_modcomp$addFootnote(message)  
   glinmod_table_modcomp$showSpecifiedColumnsOnly <- TRUE
   ### store the table structure

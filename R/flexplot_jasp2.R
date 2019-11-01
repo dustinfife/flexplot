@@ -89,11 +89,11 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
 		  ghost = NULL
 		}
 		
-		whiskers = list("quartiles" = "quartiles",
-		                "standard errors" = "sterr",
-		                "standard deviations", "stdev")
+		whiskers = list("Quartiles" = "quartiles",
+		                "Standard errors" = "sterr",
+		                "Standard deviations", "stdev")
 
-		linetype = options$type
+		linetype = tolower(options$type)
 		if (linetype == "regression") linetype = "lm"
 		plot = flexplot(formula, data=k, method=linetype, se=options$confidence, alpha=options$alpha, ghost.line=ghost,
 		                spread=whiskers[[options$intervals]])
@@ -105,7 +105,7 @@ flexplot_jasp2 <- function(jaspResults, dataset, options) {
   		                  "minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
   		                 "classic" = "theme_classic()+ theme(text=element_text(size=18))",
   		                 "dark" = "theme_dark() + theme(text=element_text(size=18))")
-  		plot = plot + eval(parse(text=theme[[options$theme]]))
+  		plot = plot + eval(parse(text=theme[[tolower(options$theme)]]))
 		}
 		
 		# #### create flexplot object   
@@ -281,23 +281,23 @@ themeJasp = function(graph,
                      axisTickLength = getGraphOption("axisTickLength"),
                      axisTickWidth = getGraphOption("axisTickWidth")) {
   
-  if (!xAxis || !yAxis) {
-     warning("Arguments xAxis and yAxis of themeJasp will be deprecated. Please use the argument \"sides\" instead.")
-     
-     if (horizontal) {
-       if (!xAxis)
-         sides <- stringr::str_remove(sides, "l")
-       if (!yAxis)
-         sides <- stringr::str_remove(sides, "b")
-     } else {
-       if (!xAxis)
-         sides <- stringr::str_remove(sides, "b")
-       if (!yAxis)
-         sides <- stringr::str_remove(sides, "l")
-     }
-     if (sides == "")
-       bty <- NULL
-   }
+  # if (!xAxis || !yAxis) {
+  #   warning("Arguments xAxis and yAxis of themeJasp will be deprecated. Please use the argument \"sides\" instead.")
+  #   
+  #   if (horizontal) {
+  #     if (!xAxis)
+  #       #sides <- stringr::str_remove(sides, "l")
+  #     if (!yAxis)
+  #       #sides <- stringr::str_remove(sides, "b")
+  #   } else {
+  #     if (!xAxis)
+  #       #sides <- stringr::str_remove(sides, "b")
+  #     if (!yAxis)
+  #       #sides <- stringr::str_remove(sides, "l")
+  #   }
+  #   if (sides == "")
+  #     bty <- NULL
+  # }
   
   
   if (is.list(bty) && bty[["type"]] == "n")
@@ -306,10 +306,12 @@ themeJasp = function(graph,
   if (horizontal)
     graph <- graph + coord_flip()
   
-  graph <- graph + themeJaspRaw(legend.position = legend.position,
+  graph <- graph + theme(plot.margin=unit(c(1,1,1.5,1.2),"mm")) + 
+                  themeJaspRaw(legend.position = legend.position,
                                 axis.title.cex = axis.title.cex, family = family,
                                 fontsize = fontsize, legend.justification = legend.justification,
-                                axisTickLength = axisTickLength, axisTickWidth = axisTickWidth)
+                                axisTickLength = axisTickLength, axisTickWidth = axisTickWidth) 
+                                
   
   return(graph)
   

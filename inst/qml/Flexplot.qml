@@ -49,7 +49,7 @@ Form
             }
 		        Slider{
               name: "alpha"
-              label: qsTr("Point Transparency")
+              label: qsTr("Point transparency")
               value: 0.4
               vertical: false
               enabled: varlist.count > 0
@@ -60,8 +60,8 @@ Form
         title: qsTr("Aesthetics")
             DropDown{
 			        name: "theme"
-			        values: ["JASP", "black and white", "minimal", "classic", "dark"]
-			        label: qsTr("GGplot Theme")
+			        values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
+			        label: qsTr("GGplot theme")
 		        }
         }
         
@@ -74,13 +74,13 @@ Form
             }
 		        DropDown{
 			        name: "type"
-			        values: ["loess", "regression", "polynomial", "cubic"]
+			        values: ["Loess", "Regression", "Quadratic", "Cubic"]
 			        label: qsTr("Fitted line (scatterplots)")
 			         enabled: varlist.count > 0
 		        }
 		        DropDown{
 			        name: "intervals"
-			        values: ["quartiles", "standard errors", "standard deviations"]
+			        values: ["Quartiles", "Standard errors", "Standard deviations"]
 			        label: qsTr("Intervals")
 			         enabled: varlist.count > 0
 		        }		        

@@ -441,7 +441,7 @@ fit.function = function(outcome, predictors, data, suppress_smooth, method, spre
 		}else if (method=="poisson" | method=="Gamma") {
 			#### specify the curve
 			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se)'
-		} else if (method=="polynomial"){
+		} else if (method=="polynomial" | method == "quadratic"){
 			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 2, raw=TRUE))'
 		} else if (method=="cubic"){
 			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 3, raw=TRUE))'
