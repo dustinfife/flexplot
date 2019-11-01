@@ -339,60 +339,64 @@ raw.alph.func = function(raw.data,alpha=1){
 	} else {
 		alpha.raw = 0
 	}	
+  alpha.raw
 }
 
+
+match_jitter_categorical = function(x){
+  if (is.null(x)){
+    return(c(.2, 0))
+  }else if (length(x)==2 & is.numeric(x))
+    return(x)
+  else if (is.null(x) | x)
+    return(c(.2, 0))
+  else if (is.numeric(x) & length(x)==1)
+    return(c(.2, 0))
+  else if (!x)
+    return(c(0,0))
+  else
+    stop("something's wrong with how you specified jittering.")
+}
+
+#match_jitter_categorical(.2)
+#match_jitter_categorical(T)
+#match_jitter_categorical(c(.2, .1))
+#match_jitter_categorical(F)
+#match_jitter_categorical(c(F,T))
+#jitter = c(.2, .4); data=exercise_data; axis.var=c("therapy.type", "gender")
 	#### points = the datapoints
 points.func = function(axis.var, data, jitter){
 	
-	### jitter if it's numeric BUT only a few levels
-
-	
-	### if they specified something for jitter
-	if (!is.null(jitter)){
-	
-
-		#### if they don't specify both vectors for jitter, warn them
-		if (is.numeric(jitter[1]) & length(jitter)<2){
-			message("You're supposed to supply TWO values for jitter (one for x axis, one for y axis). You only supplied one. I'm going to assume the value you gave is for the x axis, then I'll set the y axis to 0.\n")
-			jitter[2] = 0
-		}
-
-		#### if they supply only one value
-		if (length(jitter) == 1){
-
-			#### if they said jitter=T
-			if (jitter[1]==T){
-			
-				#### I'm putting the command as a string to avoid environment problems
-				jit = paste0("geom_jitterd(data=sample.subset(sample,", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=0)")
-				
-			#### if they said jitter=F	
-			} else if (jitter[1] == F){
-				jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha))")
-			}
-			
-		} else {
-			jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=", jitter[1], ", height=", jitter[2], ")")				
-		}
-		
-
-	#### if they left jitter at the default	
-	} else {
-	
-		### if x axis is categorical, jitter it by .2
-		if (!is.numeric(data[[axis.var[1]]])){
-			jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2)")				
-			
-		### if x axis is numeric, don't jitter it	
-		} else {
-			jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha))")
-		}
-	}
-
-	
+  if (is.null(jitter) & !check.non.number(data[,axis.var[1]])){
+    jitter = c(0,0)
+  } else {
+    jitter = match_jitter_categorical(jitter)
+  }
+  
+  ### if they have two axis variables that are categorical
+  if (length(axis.var)>1 & all(sapply(data[,axis.var, drop=F], check.non.number))){
+    jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), 
+                 "), alpha=raw.alph.func(raw.data, alpha=alpha), position=position_jitterdodged(jitter.width=", jitter[1], ", jitter.height=", jitter[2], ", dodge.width=.5))")				
+  
+  ### if they have one categorical axis
+  } else if (length(axis.var)==1 & check.non.number(data[,axis.var])){
+    jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=", jitter[1], ", height=", jitter[2], ")")				
+  } else {  
+    jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=", jitter[1], ", height=", jitter[2], ")")				
+  }
+  
 	#### return the jittered string
 	return(jit)		
 }
+
+# points.func(axis.var="therapy.type", data=exercise_data, jitter=NULL)
+# points.func("therapy.type", exercise_data, T)
+# points.func("therapy.type", exercise_data, F)
+# points.func("motivation", exercise_data, NULL)
+# points.func(axis.var=c("motivation", "therapy.type"), data=exercise_data, jitter=NULL)
+# points.func(c("gender", "therapy.type"), exercise_data, NULL)
+# points.func(c("gender", "therapy.type"), exercise_data, c(.2, .1))
+
 
 	#### this function converts a binary variable to a 1/0 for logistic regression
 factor.to.logistic = function(data, outcome, labels=F){

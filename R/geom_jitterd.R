@@ -172,6 +172,7 @@ jitterd=function(x,y,quad.points,amount=NULL, reverse=F){
 #'   geom_point(pch = 21, position = position_jitterdodged())
 position_jitterdodged <- function(jitter.width = .2, jitter.height = 0,
                                  dodge.width = 0.75, seed = NA) {
+  
   if (!is.null(seed) && is.na(seed)) {
     seed <- sample.int(.Machine$integer.max, 1L)
   }
@@ -182,6 +183,7 @@ position_jitterdodged <- function(jitter.width = .2, jitter.height = 0,
     dodge.width = dodge.width,
     seed = seed
   )
+  
 }
 
 #' @importFrom purrr "%||%"

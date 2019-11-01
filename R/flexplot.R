@@ -368,7 +368,7 @@ flexplot = function(formula, data=NULL, related=F,
 			### remove the default color if they have categorical variables		
 		}
 		
-		points = points.func(axis.var=axis[1], data=data, jitter=jitter)
+		points = points.func(axis.var=axis, data=data, jitter=jitter)
 		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)
 		
 		
