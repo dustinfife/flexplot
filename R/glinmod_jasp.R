@@ -148,7 +148,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
 
   generated.formula = make_flexplot_formula(options$variables, options$dependent, glinmod_results$model$model)
   if	(options$ghost){
-    ghost="black" 
+    ghost="black"
   } else {
     ghost = NULL
   }
