@@ -276,28 +276,29 @@ themeJasp = function(graph,
                      fontsize = getGraphOption("fontsize"),
                      family = getGraphOption("family"),
                      horizontal = FALSE,
-                     legend.position = getGraphOption("legend.position"),
+                     legend.position = "right",
                      legend.justification = "top",
                      axisTickLength = getGraphOption("axisTickLength"),
                      axisTickWidth = getGraphOption("axisTickWidth")) {
   
   if (!xAxis || !yAxis) {
-    warning("Arguments xAxis and yAxis of themeJasp will be deprecated. Please use the argument \"sides\" instead.")
-    
-    if (horizontal) {
-      if (!xAxis)
-        sides <- stringr::str_remove(sides, "l")
-      if (!yAxis)
-        sides <- stringr::str_remove(sides, "b")
-    } else {
-      if (!xAxis)
-        sides <- stringr::str_remove(sides, "b")
-      if (!yAxis)
-        sides <- stringr::str_remove(sides, "l")
-    }
-    if (sides == "")
-      bty <- NULL
-  }
+     warning("Arguments xAxis and yAxis of themeJasp will be deprecated. Please use the argument \"sides\" instead.")
+     
+     if (horizontal) {
+       if (!xAxis)
+         sides <- stringr::str_remove(sides, "l")
+       if (!yAxis)
+         sides <- stringr::str_remove(sides, "b")
+     } else {
+       if (!xAxis)
+         sides <- stringr::str_remove(sides, "b")
+       if (!yAxis)
+         sides <- stringr::str_remove(sides, "l")
+     }
+     if (sides == "")
+       bty <- NULL
+   }
+  
   
   if (is.list(bty) && bty[["type"]] == "n")
     graph <- graph + geom_rangeframe(sides = sides)
