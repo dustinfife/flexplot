@@ -53,7 +53,7 @@ Form
   
 		
   ExpanderButton{
-    title: qsTr("Display Options")
+    title: qsTr("Results Displays")
 
     Group{
     title: qsTr("Plots")
@@ -71,6 +71,7 @@ Form
 			  label: qsTr("Diagnostics")
 			  }			  
 		  }
+		  
 		  
 		Group{
     title: qsTr("Estimation")
@@ -92,21 +93,51 @@ Form
 			  name:"sl"; 
 			  label: qsTr("Show Slopes/Intercepts");
 			  checked: true
-			}				
-
-		}
+			}		
 		}
 		
+    CheckBox{
+			  name:"ci"; 
+			  label: qsTr("Show 95% intervals");
+			  checked: true
+			}	 
+		}
+		
+		  ExpanderButton
+  {
+      title: qsTr("Plot Controls")
+      
+        Group{
+        title: qsTr("Visual Aids")
+             CheckBox{
+              name:"ghost"; 
+              label: qsTr("Ghost lines");
+              checked: true
+              enabled: paneledVars.count > 0
+            }
+		        Slider{
+              name: "alpha"
+              label: qsTr("Point Transparency")
+              value: 0.4
+              vertical: true
+              enabled: varlist.count > 0
+            }
+        }
+        Group{
+        title: qsTr("Aesthetics")
+            DropDown{
+			        name: "theme"
+			        values: ["JASP", "black and white", "minimal", "classic", "dark"]
+			        label: qsTr("GGplot Theme")
+		        }
+        }        
+  }
+
 		
 	ExpanderButton{
     title: qsTr("Estimation Options")
 
     Group{
-      CheckBox{
-			  name:"ci"; 
-			  label: qsTr("Show Intervals");
-			  checked: true
-			}	 
 		  DropDown{
 			  name: "estimationmethod"
 			  values: ["Credible Interval", "Bootstrapped Intervals", "Confidence Interval"]

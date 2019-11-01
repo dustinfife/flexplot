@@ -145,11 +145,33 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   } else if (model.type=="residuals"){
     type = "model"
   }
+
   generated.formula = make_flexplot_formula(options$variables, options$dependent, glinmod_results$model$model)
+  if	(options$ghost){
+    ghost="black" 
+  } else {
+    ghost = NULL
+  }
   
-  plot = compare.fits(generated.formula, data = glinmod_results$model$model, model1 = glinmod_results$model)
-  #plot = visualize(glinmod_results$model, glinmod_results, plot=model.type)
-  plot = themeJasp(plot)
+  whiskers = list("quartiles" = "quartiles",
+                  "standard errors" = "sterr",
+                  "standard deviations", "stdev")
+  if (model.type=="model"){
+  plot = compare.fits(generated.formula, data = glinmod_results$model$model, model1 = glinmod_results$model,
+                      alpha=options$alpha, ghost.line=ghost)
+  } else {
+    plot = visualize(glinmod_results$model, glinmod_results, plot=model.type, alpha=options$alpha)
+  }
+  
+  if (options$theme == "JASP"){
+    plot = themeJasp(plot)
+  } else {
+    theme = list("black and white"="theme_bw()+ theme(text=element_text(size=18))",
+                 "minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
+                 "classic" = "theme_classic()+ theme(text=element_text(size=18))",
+                 "dark" = "theme_dark() + theme(text=element_text(size=18))")
+    plot = plot + eval(parse(text=theme[[options$theme]]))
+  }
   flexplot$plotObject <- plot
   
   return()
@@ -446,7 +468,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     rsq = mc$rsq,
     bayes = mc$bayes.factor
   )
-  save(mc, file="/Users/fife/Documents/jaspresults.rdat")
+  #save(mc, file="/Users/fife/Documents/jaspresults.rdat")
   glinmod_table_modcomp$setData(tabdat)
   
   
