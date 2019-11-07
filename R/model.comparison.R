@@ -28,16 +28,22 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   } else if (family(model1)$link=="logit" & family(model2)$link=="logit"){
     mod1.predictions = sensitivity.table(model1)
     mod2.predictions = sensitivity.table(model2)	
+    vars1 = all.vars(model1); vars2 = all.vars(model2)
     predictions = data.frame(rbind(unlist(mod1.predictions), unlist(mod2.predictions))); row.names(predictions) = c(m1.name, m2.name)
-    if (length(mod1)>length(mod2)){
+    if (length(vars1)>length(vars2)){
       difference = unlist(predictions[1,]) - unlist(predictions[2,])
     } else {
       difference = predictions[2,] - predictions[1,]
     }
     
+    aic = c(AIC(model1), AIC(model2))
+    bic = c(BIC(model1), BIC(model2))
+    bayes.factor = bf.bic(model1, model2)
+    
+    model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor))
     
     predictions = data.frame(rbind(predictions, difference)); row.names(predictions)[3] = "Difference"
-    to.return = list(statistics=model.table, predictions=predictions, pred.difference = differences)
+    to.return = list(statistics=model.table, predictions=predictions)
     
   ### for linear models and other things  
   } else {

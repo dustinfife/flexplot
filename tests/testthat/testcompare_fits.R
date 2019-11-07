@@ -78,5 +78,5 @@ test_that("compare.fits for other models", {
   mod2 = glm(Daily.Units.Sold~Sale.Price*Publisher, data=d, family=quasipoisson(link="log"))
   vdiffr::expect_doppelganger("compare.fits with loglink",
                               compare.fits(Daily.Units.Sold~Sale.Price|Publisher, data=d, mod1, mod2))
-
+  
 })
