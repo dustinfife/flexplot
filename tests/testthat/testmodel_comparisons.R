@@ -30,6 +30,14 @@ test_that("glm vs lm works", {
   expect_equal(results$statistics$aic[1], 1382.206)
 })
 
+test_that("glm and glm works", {
+  data("tablesaw.injury")
+  head(tablesaw.injury)
+  model1 = glm(injury~safety, data=tablesaw.injury, family=binomial)  
+  model2 = glm(injury~safety + attention, data=tablesaw.injury, family=binomial)  
+  res = model.comparison(model1, model2)
+  expect_output(print(res), "1765.236 1775.706 6.145538e-03")
+})
 
 test_that("interaction vs lm works", {
   a = lm(weight.loss~motivation *therapy.type, data=exercise_data)
