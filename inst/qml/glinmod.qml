@@ -29,6 +29,27 @@ Form
 		}		
   }
   
+  ExpanderButton{
+    title: qsTr("Visual Fitting")  
+        DropDown{
+	        name: "linetype"
+	        values: ["Loess (Non-parametric)", "Regression", "Quadratic", "Cubic"]
+	        label: qsTr("Fitted line (scatterplots)")
+	         enabled: varlist.count > 0
+        }
+        DropDown{
+	        name: "spreadtype"
+	        values: ["Quartiles (Non-parametric)", "Standard errors"]
+	        label: qsTr("Intervals")
+	         enabled: varlist.count > 0
+        }
+      CheckBox{
+			  name:"refit"; 
+			  label: qsTr("Refit models based on visual displays")
+			}	
+        
+  }
+
   
   ExpanderButton{
     title: qsTr("Interaction terms")  
@@ -69,6 +90,10 @@ Form
       CheckBox{
 			  name:"residuals"; 
 			  label: qsTr("Diagnostics")
+			  }
+      CheckBox{
+			  name:"avp"; 
+			  label: qsTr("Added variable plot")
 			  }			  
 		  }
 		  
