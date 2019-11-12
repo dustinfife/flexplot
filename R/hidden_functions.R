@@ -399,24 +399,25 @@ points.func = function(axis.var, data, jitter){
 
 
 	#### this function converts a binary variable to a 1/0 for logistic regression
-factor.to.logistic = function(outcome, data, labels=F){
-	
-	#### check if they have 2 unique values
-	if (length(unique(data[,outcome]))!=2){
-		stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
-	}	
-	
-	### now do the converstion
-	if (labels){
-		levels(data[,outcome])
-	} else {
-		
-		data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=levels(data[,outcome]), labels=c(0,1))))
-		#data %>% dplyr::mutate(!!outcome := as.numeric(as.character(factor(!!as.name(outcome), levels=levels(!!as.name(outcome)), labels=c(0,1))))) 
-		return(data)
-	}
-	
+factor.to.logistic = function(data, outcome, labels=F){
+  
+  #### check if they have 2 unique values
+  if (length(unique(data[,outcome]))!=2){
+    stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
+  }	
+  
+  ### now do the converstion
+  if (labels){
+    levels(data[,outcome])
+  } else {
+    
+    data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=levels(data[,outcome]), labels=c(0,1))))
+    #data %>% dplyr::mutate(!!outcome := as.numeric(as.character(factor(!!as.name(outcome), levels=levels(!!as.name(outcome)), labels=c(0,1))))) 
+    return(data)
+  }
+  
 }
+
 
 factor_to_logistic_x = function(x){
   
