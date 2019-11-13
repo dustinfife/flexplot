@@ -4,12 +4,14 @@
 \alias{added.plot}
 \title{Create an added variable plot}
 \usage{
-added.plot(formula, data, ...)
+added.plot(formula, data, method = "loess", ...)
 }
 \arguments{
 \item{formula}{A formula with exactly two predictors and an outcome variable}
 
 \item{data}{The dataset used}
+
+\item{method}{The smoothing method. Defaults to "loess"}
 
 \item{...}{Other parameters passed to flexplot}
 }
