@@ -5,7 +5,7 @@
 \title{Create a "flexible plot" or flexplot}
 \usage{
 flexplot(formula, data = NULL, related = F, bins = 3,
-  labels = NULL, breaks = NULL, method = "loess", se = T,
+  labels = NULL, breaks = NULL, method = "loess", se = NULL,
   ghost.line = NULL, ghost.reference = NULL, spread = c("quartiles",
   "stdev", "sterr"), jitter = NULL, raw.data = T, sample = Inf,
   prediction = NULL, suppress_smooth = F, alpha = 0.99977,

@@ -1,11 +1,11 @@
 {
   "moduleDescription" :
   {
-    "title" :     "Flexplot Module",
+    "title" :     "Visual Modeling",
     "description":    "Graphically-Based Data Analysis",
     "version":     "0.0.1",
     "author":    "Dustin Fife",
-    "icon":      "analysis-descriptives.svg",
+    "icon":      "icon.svg",
     "maintainer":    "Dustin Fife <fife.dustin@gmail.com>",
     "website":    "github.com/dustinfife/flexplot",
     "license":    "GPL (>= 2)"
@@ -14,9 +14,15 @@
   "menu":
   [
       {
-        "title":   	"flexplot",
+        "title":   	"Flexplot (Graphics)",
         "qml":    	"Flexplot.qml",
         "function":  	"flexplot_jasp2"
+      },
+
+      {
+        "title":   	"Modeling (General Linear Model)",
+        "qml":    	"glinmod.qml",
+        "function":  	"glinmod_jasp"
       }
   ]
 }

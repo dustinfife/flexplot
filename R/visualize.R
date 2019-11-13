@@ -43,43 +43,19 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 	d = object$model
 	res.plots = residual.plots(d, object)
 
+	data = object$model
+	variables = all.vars(formula(object))
+	outcome = variables[1]
+	predictors = variables[-1]
+	
 	#### use flexplot to visualize a model
 	if ((plot=="all" | plot == "model" ) & is.null(formula)){
 		
 		#### generate formula as best we can
 		#### get dataset
-		data = object$model
-		
-		#### extract the terms from each model
-		terms = attr(terms(object), "term.labels")
-	
-			
-		##### extract variable names
-		variables = all.vars(formula(object))
-	    outcome = variables[1]
-	    predictors = variables[-1]
-	    
-	    ##### look for interactions and remove them
-		if (length(grep(":", terms))>0){
-			terms = terms[-grep(":", terms)]
-		}
-		
-		##### look for polynomials and remove them
-		if (length(grep("^2", terms, fixed=T, value=T))>0){
-			terms = terms[-grep("^2", terms, fixed=T)]
-		}
-	
-		#### figure out variable types
-		if (length(terms)>1){
-			numb = names(which(unlist(lapply(data[,terms], is.numeric))))
-			cat = names(which(!(unlist(lapply(data[,terms], is.numeric)))))
-		} else {
-			numb = ifelse(is.numeric(data[,terms]), terms, NA)
-			cat = ifelse(is.factor(data[,terms]), terms, NA)		
-		}
 	    
 		#### now decide where things go
-		if (length(terms)>4){
+		if (length(predictors)>4){
 			message("Note: to visualize more than four variables, I'm going to do an 'added variable plot.'")
 			
 			f = object$call[[2]]
@@ -87,26 +63,11 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 			class(step3) <- c("flexplot", class(step3))
 			return(step3)
 		} else {
-		
-			#### if both numeric and factor, put numeric on x axis and factor as color/line
-			if ((!is.na(cat[1]) | length(cat[1])!=0) & (!is.na(cat[1]) | length(cat[1])!=0)){
-				### remove terms with first numb and first cat
-				t2 = terms[-which(terms==numb[1] | terms==cat[1])]
-				t2 = c(numb[1],cat[1], t2)
-			#### otherwise, if length is greater than 
-			} else {
-				t2 = terms[1:min(length(terms), 4)]
-			}
-		
-			#### now create formula
-			x = c(outcome, "~",t2[1], t2[2], "|", t2[3], t2[4])
-			x = x[-which(is.na(x))]
-			x = paste0(x, collapse="+")
-			x = gsub("+|+", "|", x, fixed=T);x = gsub("+~+", "~", x, fixed=T)
-			x = gsub("+|", "", x, fixed=T)
-			f = as.formula(x)		
-	
+		  #browse()
+		  
+		  f = make_flexplot_formula(predictors, outcome, data)
 			step3 = flexplot(f, data=data, ...)+ labs(title="Analysis Plot")
+			
 			#class(step3) <- c("flexplot", class(step3))
 			#return(step3)			
 			### if they have more than two variables, also include a added variable plot
@@ -140,7 +101,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 }
 
 
-utils::globalVariables(c("model", "Value", "y"))
+utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation"))
 
 
 #' Visualize a fitted lmerMod model 

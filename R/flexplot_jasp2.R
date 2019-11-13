@@ -1,43 +1,31 @@
-flexplot_jasp2<- function(jaspResults, dataset, options) {
-
-        #jaspResults$title <- "Flexplot"
+#' Flexplot in JASP
+#'
+#' This function was developed for use in JASP. It takes a dataset as input with user 
+#' options and returns a flexplot graphic
+#' 
+#' @param jaspResults A JASP object
+#' @param dataset dataset supplied by JASP
+#' @param options a list of options to pass to JASP
+#'
+#' @return a flexplot graphic. 
+#' @export
+flexplot_jasp2 <- function(jaspResults, dataset, options) {
 
 	### check if they've entered anything	  
-	ready <- (options$dependent != "") #&& length(options$variables)>0)
-
-		#### check for errors
-	customChecksFlexPlot <- list(
-		function(){
-			if ((options$dependent == "" & ( length(options$paneledVars)>0) | length(options$variables)>0)) {
-					return(paste0("You must specify a dependent variable to view a graphic"))
-				}
-			},
-			function(){
-				if(options$dependent != "" & length(options$paneledVars)>0){
-					return(paste0("You must have at least one independent variable to do paneling"))
-				}
-			})
-
-		error <- .hasErrors(dataset=dataset, perform=perform, type=c("infinity", "variance"), custom= customChecksFlexPlot, exitAnalysisIfErrors=TRUE)
+  #save(dataset, options, file="~/Documents/JaspResults.Rdat")
+	ready <- (options$dependent != "") 
 	  
 	### read in the dataset 
 	if (ready) {
 		### read in the dataset
 		if (is.null(dataset)){ 
     		dataset = (.readDataSetToEnd(columns=c(options$dependent, options$variables, options$paneledVars)))
+    		#save(dataset, ready, options, file="~/Users/Documents/jaspdata.rdat")
 		} else {
 			return(dataset) 
-	    }
-
-
-		### create a table output
-		#.printedResults(jaspResults, dataset, options, ready)
-
-		### change name of smoothed line
-		if (options$type=="regression"){options$type=="lm"}
-
+		}
+	  
 		### create plots
-		#if (is.null(jaspResults[["flex_Plot"]])){
 		.flexPlotRes(jaspResults, formula, dataset, options, ready)
 		
 		return()	  
@@ -50,21 +38,13 @@ flexplot_jasp2<- function(jaspResults, dataset, options) {
 
 			
 			
-.flexCheckErrors <- function(dataset, options){
-	
-	# check length of variables
-	if ((options$dependent == "" & length(options$paneledVars)>0) | (options$dependent == "" & length(options$variables)>0)) .quitAnalysis("You must specify a dependent variable to view a graphic")
-	if (options$dependent != "" & length(options$paneledVars)>0) .quitAnalysis("You must have at least one independent variable to do paneling")
 
-}
 
 
 .flexPlotRes <- function(jaspResults, formula, dataset, options, ready) {
 	
-	#require(ggplot2)
-	
 	#### set up parameters
-	flex_Plot <- createJaspPlot(title = "Flexplot",  width = 900, height = 900)
+	flex_Plot <- createJaspPlot(title = "Flexplot",  width = 600, height = 450)
 	flex_Plot$dependOn(c("confidence", "dependent", "variables", "paneledVars", "ghostLines"))
 	flex_Plot$addCitation("Fife, Dustin A. (2019). Flexplot (Version 0.9.2) [Computer software].")
 	
@@ -103,44 +83,38 @@ flexplot_jasp2<- function(jaspResults, dataset, options) {
 		require(ggplot2)
 		
 		#### do a ghost line
-		if	(length(options$ghostLines)[1]>0){
-			ghost.length = length(unlist(options$ghostLines))
-			num.vars = seq(from=2, to=ghost.length, by=2)
-			ghost.vars = unlist(options$ghostLines)[num.vars]
-			f = function(name){
-				mean.var = round(mean(dataset[[.v(name)]], na.rm=T))
-				return(mean.var)
-			}
-			ghost.lines = lapply(ghost.vars, FUN=f)
-			names(ghost.lines) = ghost.vars
-			#ghost.lines = split(ghost.lines, ghost.vars)
-			plot = flexplot(formula, data=k, method=options$type, se=options$confidence, ghost.line="gray", ghost.reference=ghost.lines) + xlab(names(ghost.lines))		
-			#plot = flexplot(formula, data=k, method=options$type, se=options$confidence, ghost.line="gray", ghost.reference=ghost.lines) + xlab(paste0(ghost.lines)) + ylab(as.character(formula))
-			# #plot = flexplot(formula, data=k, method=options$type, se=options$confidence) + xlab(paste0(ghost.lines, collapse=","))
+		if	(options$ghost){
+		  ghost="black" 
 		} else {
-			plot = flexplot(formula, data=k, method=options$type, se=options$confidence) + xlab(paste0(unlist(options$ghostLines)))
+		  ghost = NULL
 		}
+		
+		whiskers = list("Quartiles" = "quartiles",
+		                "Standard errors" = "sterr",
+		                "Standard deviations", "stdev")
 
-		#plot = ggplot(data=tst, aes(x,y)) + ggtitle(options$dependent) +
- 		 #xlab(paste0(length(unlist(options$ghostLines)))) + ylab("Teeth length")
-
+		linetype = tolower(options$type)
+		if (linetype == "regression") linetype = "lm"
+		plot = flexplot(formula, data=k, method=linetype, se=options$confidence, alpha=options$alpha, ghost.line=ghost,
+		                spread=whiskers[[options$intervals]])
+		
+		if (options$theme == "JASP"){
+		  plot = themeJasp(plot)
+		} else {
+  		theme = list("black and white"="theme_bw()+ theme(text=element_text(size=18))",
+  		                  "minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
+  		                 "classic" = "theme_classic()+ theme(text=element_text(size=18))",
+  		                 "dark" = "theme_dark() + theme(text=element_text(size=18))")
+  		plot = plot + eval(parse(text=theme[[tolower(options$theme)]]))
+		}
+		
 		# #### create flexplot object   
-		# require(ggplot2)
-		#plot = flexplot(formula, data=k, method=options$type, se=options$confidence) 
-		#flex_Plot$plotObject <- JASPgraphs::themeJasp(plot) + ggplot2::theme(strip.text = ggplot2::element_text(size = 14), panel.margin=unit(.15, "lines"), strip.background = element_rect(color = "gray", fill="white", size = 1))
 		flex_Plot$plotObject <- plot
 		return()   
 }   
 
   
 .flexplotFill <- function(flex_Plot, formula, dataset, options){
-  #f <- as.formula(paste0(options$dependent, "~", paste0(options$variables, collapse="+")))
-  # k <- data.frame(A=1:10, B=1:10)
-  #plot <- ggplot2::ggplot(data=dataset, ggplot2::aes(x=A, y=B)) + geom_point()
-  
-  #plot = ggplot2::ggplot(data=dataset, ggplot2::aes_string(y=options$dependent, x=options$dependent)) + geom_point()
- 
-  
  
   return()
 }
@@ -275,5 +249,70 @@ flexplot_jasp2<- function(jaspResults, dataset, options) {
 	# plot = flexplot(formula, data=k, method=options$type, se=options$confidence) 
 	# flex_Plot$plotObject <- plot
 
+# .flexCheckErrors <- function(dataset, options){
+#   
+#   # check length of variables
+#   if ((length(options$dependent)==0 & length(options$paneledVars)>0) | (length(options$dependent)==0 & length(options$variables)>0)) .quitAnalysis("You must specify a dependent variable to view a graphic")
+#   if (length(options$dependent)!=0 & length(options$paneledVars)>0) .quitAnalysis("You must have at least one independent variable to do paneling")
+#   
+# }
+# 
+# ghost.length = length(unlist(options$ghostLines))
+# num.vars = seq(from=2, to=ghost.length, by=2)
+# ghost.vars = unlist(options$ghostLines)[num.vars]
+# f = function(name){
+#   mean.var = round(mean(dataset[[.v(name)]], na.rm=T))
+#   return(mean.var)
+# }
+# ghost.lines = lapply(ghost.vars, FUN=f)
+# names(ghost.lines) = ghost.vars
 
-
+themeJasp = function(graph,
+                     xAxis = TRUE,
+                     yAxis = TRUE,
+                     sides = "bl",
+                     axis.title.cex = getGraphOption("axis.title.cex"),
+                     bty = getGraphOption("bty"),
+                     fontsize = getGraphOption("fontsize"),
+                     family = getGraphOption("family"),
+                     horizontal = FALSE,
+                     legend.position = "right",
+                     legend.justification = "top",
+                     axisTickLength = getGraphOption("axisTickLength"),
+                     axisTickWidth = getGraphOption("axisTickWidth")) {
+  
+  # if (!xAxis || !yAxis) {
+  #   warning("Arguments xAxis and yAxis of themeJasp will be deprecated. Please use the argument \"sides\" instead.")
+  #   
+  #   if (horizontal) {
+  #     if (!xAxis)
+  #       #sides <- stringr::str_remove(sides, "l")
+  #     if (!yAxis)
+  #       #sides <- stringr::str_remove(sides, "b")
+  #   } else {
+  #     if (!xAxis)
+  #       #sides <- stringr::str_remove(sides, "b")
+  #     if (!yAxis)
+  #       #sides <- stringr::str_remove(sides, "l")
+  #   }
+  #   if (sides == "")
+  #     bty <- NULL
+  # }
+  
+  
+  if (is.list(bty) && bty[["type"]] == "n")
+    graph <- graph + geom_rangeframe(sides = sides)
+  
+  if (horizontal)
+    graph <- graph + coord_flip()
+  
+  graph <- graph + theme(plot.margin=unit(c(1,1,1.5,1.2),"mm")) + 
+                  themeJaspRaw(legend.position = legend.position,
+                                axis.title.cex = axis.title.cex, family = family,
+                                fontsize = fontsize, legend.justification = legend.justification,
+                                axisTickLength = axisTickLength, axisTickWidth = axisTickWidth) 
+                                
+  
+  return(graph)
+  
+}

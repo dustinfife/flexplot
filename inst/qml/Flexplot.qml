@@ -19,6 +19,7 @@ Form
         
 		AssignedVariablesList 
 		{ 
+		  id: varlist
 			name: "variables";	
 			title: qsTr("Independent Variable(s)");
 			singleVariable: false 
@@ -26,43 +27,64 @@ Form
         
 		AssignedVariablesList 
 		{
+  		id: paneledVars
 			name: "paneledVars";	
 			title: qsTr("Panelled Variable(s)");
 			singleVariable: false 
 		}
-	
-	VariablesList 
-	{
-			title: qsTr("Ghost Lines")
-			source: "paneledVars"
-			name: "ghostLines"
-			listViewType: "AssignedVariables"
-			height: 60
-			draggable: false
 
-			ExtraControlColumn {
-				type: "TextField"
-				name: "ghostlinepoint"
-			}
-		}
+  }
 
-    }
-
-    ExpanderButton
-    {
-        title: qsTr("Options")
-
-        Group
-        {
-            CheckBox{name:"confidence"; label: qsTr("Plot Confidence Bands")}
-		DropDown{
-			name: "type"
-			values: ["loess", "lm"]
-			label: qsTr("Fitted Line")
-		}
-
-		
+  ExpanderButton
+  {
+      title: qsTr("Options")
+      
+        Group{
+        title: qsTr("Visual Aids")
+             CheckBox{
+              name:"ghost"; 
+              label: qsTr("Ghost lines");
+              checked: true
+              enabled: paneledVars.count > 0 
+            }
+		        Slider{
+              name: "alpha"
+              label: qsTr("Point transparency")
+              value: 0.4
+              vertical: false
+              enabled: varlist.count > 0
+            }
         }
-    }
+        
+        Group{
+        title: qsTr("Aesthetics")
+            DropDown{
+			        name: "theme"
+			        values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
+			        label: qsTr("GGplot theme")
+		        }
+        }
+        
+        Group{
+        title: qsTr("Visual Statistics")
+            CheckBox{
+              name:"confidence"; 
+              label: qsTr("Plot confidence bands")
+               enabled: varlist.count > 0
+            }
+		        DropDown{
+			        name: "type"
+			        values: ["Loess", "Regression", "Quadratic", "Cubic"]
+			        label: qsTr("Fitted line (scatterplots)")
+			         enabled: varlist.count > 0
+		        }
+		        DropDown{
+			        name: "intervals"
+			        values: ["Quartiles", "Standard errors", "Standard deviations"]
+			        label: qsTr("Intervals")
+			         enabled: varlist.count > 0
+		        }		        
+        }
+  }
 
 }

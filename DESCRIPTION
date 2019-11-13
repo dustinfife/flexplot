@@ -18,6 +18,7 @@ Imports: cowplot,
 	magrittr, 
 	forcats, 
 	purrr,
+	plyr,
 	R6
 Suggests: jmvcore (>= 0.8.5), 
 	vdiffr,

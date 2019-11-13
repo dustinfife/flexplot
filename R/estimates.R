@@ -43,7 +43,7 @@ estimates.lm = function(object){
 	}
 	#### get dataset
 	d = object$model
-
+  dataset=NULL
 	#### identify factors
 	if (length(terms)>1){
 		### convert characters to factors
@@ -165,15 +165,6 @@ estimates.lm = function(object){
 				
 			}
 			
-			
-			# std.rows = 	coef.matrix$levels %in% names(coef.std$beta)
-			# coef.matrix$std.estimate[std.rows] = coef.std$beta[-1]
-			# lower.limits = coef.std$beta[-1] - 1.96*coef.std$se[-1]
-			# upper.limits = coef.std$beta[-1] + 1.96*coef.std$se[-1]
-			# coef.matrix$std.lower[std.rows] = lower.limits
-			# coef.matrix$std.upper[std.rows] = upper.limits
-
-			
 	} else {
 		coef.matrix = NA
 		difference.matrix=NA
@@ -220,7 +211,30 @@ estimates.lm = function(object){
 	} else {
 		correlation = NA
 	}
-
+	
+	### do nested model comparisons
+	if (length(terms)>1){
+	  #save(object, terms, file="/Users/fife/Dropbox/jaspResults.Rdat")
+	  removed.one.at.a.time = function(i, terms, object){
+	    new.f = as.formula(paste0(". ~ . -", terms[i]))
+	    new.object = update(object, new.f)
+	    list(
+	      rsq = summary(object)$r.squared - summary(new.object)$r.squared,
+	      bayes.factor = bf.bic(object, new.object, invert=FALSE)
+	    )
+	  }
+	  ### this requires superassignment to work with JASP
+	  dataset<<-object$model
+	  all.terms = attr(terms(object), "term.labels")
+	  mc = t(sapply(1:length(all.terms), removed.one.at.a.time, terms=all.terms, object=object))
+	  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
+	  mod.comps = mc
+  	mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
+  	mod.comps$rsq = as.numeric(mod.comps$rsq); mod.comps$bayes.factor = as.numeric(unlist(mod.comps$bayes.factor))
+	} else {
+	  mod.comps = NULL
+	}
+  
 	# #### print summary
 	# message(paste("Model R squared:\n", round(r.squared[1], digits=3), " (", round(r.squared[2], digits=2),", ", round(r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
 	# print(semi.p)
@@ -234,7 +248,10 @@ estimates.lm = function(object){
 	# }
 	# message(paste("\nsigma = ", round(summary(object)$sigma, digits=4), "\n\n"))
 	
-	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, sigma=summary(object)$sigma)
+	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, 
+	           difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, 
+	           sigma=summary(object)$sigma,
+	           model.comparison = mod.comps)
 	attr(ret, "class") = "estimates"
 	return(ret)
 }

@@ -8,6 +8,72 @@ standardized_differences = function(model1, model2, sigma=TRUE){
   differences
 }
 
+## function that does nested model comparisons on a single fitted model
+nested_model_comparisons = function(object){
+  
+  ### extract necessary terms
+  terms = attr(terms(object), "term.labels")
+  
+  ### temporary function that updates model
+  removed.one.at.a.time = function(i, terms, object){
+    new.f = as.formula(paste0(". ~ . -", terms[i]))
+    new.object = update(object, new.f)
+    list(
+      rsq = summary(object)$r.squared - summary(new.object)$r.squared,
+      bayes.factor = bf.bic(object, new.object, invert=FALSE)
+    )
+  }
+  
+  mc = t(sapply(1:length(terms), removed.one.at.a.time, terms=terms, object=object))
+  mc = data.frame(cbind(terms,mc), stringsAsFactors = FALSE)
+  mc
+}
+
+check.non.number = function(x){
+  return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
+  return.bool
+}
+
+
+variable_types = function(variables, data){
+  characters = sapply(data[,variables, drop=F], check.non.number) 
+  numbers = !characters
+  list(characters=characters, numbers=numbers)
+}
+
+#### if both numeric and factor, put numeric on x axis and factor as color/line
+# predictors = c("Grad.School", "Years", "GPA", "Profession")
+# data = graduate_income
+# outcome = "Income"
+make_flexplot_formula = function(predictors, outcome, data){
+  
+  # if there's only one variable, make it
+  if (length(predictors)==1){
+    f = make.formula(outcome, predictors)
+  } else {
+  
+    # algorithm that puts numeric in first slot, categorical in second slot
+    favored.slots = c(1,4,3,2)
+    vtypes = variable_types(predictors, data)
+    numb = vtypes$numbers
+    cat = vtypes$characters
+    levs = sapply(data[,predictors], function(x) length(levels(x)))
+    custom.sort = numb*1000 + cat*levs
+    custom.sort = sort(custom.sort, decreasing=T)
+    slots = names(custom.sort)[favored.slots]
+    
+    
+    #### now create formula
+    x = c(outcome, "~",slots[1], slots[2], "|", slots[3], slots[4])
+    if (any(is.na(x)))  x = x[-which(is.na(x))]
+    x = paste0(x, collapse="+")
+    x = gsub("+|+", "|", x, fixed=T);x = gsub("+~+", "~", x, fixed=T)
+    x = gsub("+|", "", x, fixed=T)
+    f = as.formula(x)	
+  }
+  return(f)
+}
+
 	### taken from gtools::permutations
 permute.vector = function (n, r, v = 1:n, set = TRUE, repeats.allowed = FALSE) 
 {
@@ -273,79 +339,97 @@ raw.alph.func = function(raw.data,alpha=1){
 	} else {
 		alpha.raw = 0
 	}	
+  alpha.raw
 }
 
+
+match_jitter_categorical = function(x){
+  if (is.null(x)){
+    return(c(.2, 0))
+  }else if (length(x)==2 & is.numeric(x))
+    return(x)
+  else if (is.null(x) | x)
+    return(c(.2, 0))
+  else if (is.numeric(x) & length(x)==1)
+    return(c(.2, 0))
+  else if (!x)
+    return(c(0,0))
+  else
+    stop("something's wrong with how you specified jittering.")
+}
+
+#match_jitter_categorical(.2)
+#match_jitter_categorical(T)
+#match_jitter_categorical(c(.2, .1))
+#match_jitter_categorical(F)
+#match_jitter_categorical(c(F,T))
+#jitter = c(.2, .4); data=exercise_data; axis.var=c("therapy.type", "gender")
 	#### points = the datapoints
 points.func = function(axis.var, data, jitter){
 	
-	### jitter if it's numeric BUT only a few levels
-
-	
-	### if they specified something for jitter
-	if (!is.null(jitter)){
-	
-
-		#### if they don't specify both vectors for jitter, warn them
-		if (is.numeric(jitter[1]) & length(jitter)<2){
-			message("You're supposed to supply TWO values for jitter (one for x axis, one for y axis). You only supplied one. I'm going to assume the value you gave is for the x axis, then I'll set the y axis to 0.\n")
-			jitter[2] = 0
-		}
-
-		#### if they supply only one value
-		if (length(jitter) == 1){
-
-			#### if they said jitter=T
-			if (jitter[1]==T){
-			
-				#### I'm putting the command as a string to avoid environment problems
-				jit = paste0("geom_jitterd(data=sample.subset(sample,", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2, height=0)")
-				
-			#### if they said jitter=F	
-			} else if (jitter[1] == F){
-				jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha))")
-			}
-			
-		} else {
-			jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=", jitter[1], ", height=", jitter[2], ")")				
-		}
-		
-
-	#### if they left jitter at the default	
-	} else {
-	
-		### if x axis is categorical, jitter it by .2
-		if (!is.numeric(data[[axis.var[1]]])){
-			jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=.2)")				
-			
-		### if x axis is numeric, don't jitter it	
-		} else {
-			jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha))")
-		}
-	}
-
-	
+  if (is.null(jitter) & !check.non.number(data[,axis.var[1]])){
+    jitter = c(0,0)
+  } else {
+    jitter = match_jitter_categorical(jitter)
+  }
+  
+  ### if they have two axis variables that are categorical
+  if (length(axis.var)>1 & all(sapply(data[,axis.var, drop=F], check.non.number))){
+    jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), 
+                 "), alpha=raw.alph.func(raw.data, alpha=alpha), position=position_jitterdodged(jitter.width=", jitter[1], ", jitter.height=", jitter[2], ", dodge.width=.5))")				
+  
+  ### if they have one categorical axis
+  } else if (length(axis.var)==1 & check.non.number(data[,axis.var])){
+    jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=", jitter[1], ", height=", jitter[2], ")")				
+  } else {  
+    jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=", jitter[1], ", height=", jitter[2], ")")				
+  }
+  
 	#### return the jittered string
 	return(jit)		
 }
 
+# points.func(axis.var="therapy.type", data=exercise_data, jitter=NULL)
+# points.func("therapy.type", exercise_data, T)
+# points.func("therapy.type", exercise_data, F)
+# points.func("motivation", exercise_data, NULL)
+# points.func(axis.var=c("motivation", "therapy.type"), data=exercise_data, jitter=NULL)
+# points.func(c("gender", "therapy.type"), exercise_data, NULL)
+# points.func(c("gender", "therapy.type"), exercise_data, c(.2, .1))
+
+
 	#### this function converts a binary variable to a 1/0 for logistic regression
 factor.to.logistic = function(data, outcome, labels=F){
-	
-	#### check if they have 2 unique values
-	if (length(unique(data[,outcome]))!=2){
-		stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
-	}	
-	
-	### now do the converstion
-	if (labels){
-		levels(data[,outcome])
-	} else {
-		
-		data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=levels(data[,outcome]), labels=c(0,1))))
-		#data %>% dplyr::mutate(!!outcome := as.numeric(as.character(factor(!!as.name(outcome), levels=levels(!!as.name(outcome)), labels=c(0,1))))) 
-		return(data)
-	}
-	
+  
+  #### check if they have 2 unique values
+  if (length(unique(data[,outcome]))!=2){
+    stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
+  }	
+  
+  ### now do the converstion
+  if (labels){
+    unique(data[,outcome])
+  } else {
+    
+    data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=unique(data[,outcome]), labels=c(0,1))))
+    #data %>% dplyr::mutate(!!outcome := as.numeric(as.character(factor(!!as.name(outcome), levels=levels(!!as.name(outcome)), labels=c(0,1))))) 
+    return(data)
+  }
+  
+}
+
+
+factor_to_logistic_x = function(x){
+  
+  #### check if they have 2 unique values
+  if (length(unique(x))!=2){
+    stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
+  }	
+  
+  ### now do the converstion
+    
+  x = as.numeric(as.character(factor(x, levels=levels(x), labels=c(0,1))))
+  x
 }
 
 
@@ -371,7 +455,7 @@ fit.function = function(outcome, predictors, data, suppress_smooth, method, spre
 		}else if (method=="poisson" | method=="Gamma") {
 			#### specify the curve
 			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se)'
-		} else if (method=="polynomial"){
+		} else if (method=="polynomial" | method == "quadratic"){
 			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 2, raw=TRUE))'
 		} else if (method=="cubic"){
 			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 3, raw=TRUE))'

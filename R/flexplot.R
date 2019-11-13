@@ -86,7 +86,7 @@
 ##' 	ghost.line="red", ghost.reference=list("health"=31, "income"=90000, "motivation"=10))}	
 flexplot = function(formula, data=NULL, related=F,
 		bins = 3, labels=NULL, breaks=NULL,
-		method="loess", se=T, 
+		method="loess", se=NULL, 
 		ghost.line=NULL, ghost.reference=NULL,
 		spread=c('quartiles', 'stdev', 'sterr'), jitter=NULL, raw.data=T,
 		sample=Inf, 
@@ -145,6 +145,14 @@ flexplot = function(formula, data=NULL, related=F,
 	axis = gsub(" ", "", axis)			
 	axis = unlist(strsplit(axis, "+", fixed=T))	
 	
+	### change se based on how many variables they have
+	if (is.null(se)){
+	  if (length(predictors)==1){
+	    se=T
+	  } else {
+	    se = F
+	  }
+	}
 	#### give an error if they try to visualize logistic with a categorical x axis
 	if (method=="logistic" & length(predictors)>0){
 		if (!is.numeric(data[,axis[1]])){
@@ -360,7 +368,7 @@ flexplot = function(formula, data=NULL, related=F,
 			### remove the default color if they have categorical variables		
 		}
 		
-		points = points.func(axis.var=axis[1], data=data, jitter=jitter)
+		points = points.func(axis.var=axis, data=data, jitter=jitter)
 		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)
 		
 		
