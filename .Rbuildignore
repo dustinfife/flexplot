@@ -15,6 +15,7 @@ tests/figs/
 README_files/
 ^doc$
 ^Meta$
+EJ notes.rtf
 R/flexplota.b.R
 R/flexplota.h.R
 R/glmbasic.b.R
@@ -22,3 +23,5 @@ R/glmbasic.h.R
 R/modelcomp.b.R
 R/modelcomp.h.R
 vignettes/regex_syntax.txt
+R/flexplot_jasp2.R
+R/glinmod_jasp.R

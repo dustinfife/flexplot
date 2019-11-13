@@ -101,7 +101,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 }
 
 
-utils::globalVariables(c("model", "Value", "y"))
+utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation"))
 
 
 #' Visualize a fitted lmerMod model 

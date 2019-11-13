@@ -92,25 +92,65 @@ if(!is.null(seed) &&is.na(seed)) {
  )
 }
 
+#' @importFrom purrr "%||%"
+#' @import ggplot2
+PositionJitterdodged <- ggproto("PositionJitterdodged", ggplot2::Position,
+                                jitter.width = .2,
+                                jitter.height = NULL,
+                                dodge.width = NULL,
+                                
+    required_aes = c("x", "y"),
+    
+    setup_params = function(self, data) {
+      flipped_aes <- has_flipped_aes(data)
+      data <- flip_data(data, flipped_aes)
+      width <- self$jitter.width %||% (resolution(data$x, zero = FALSE) * 0.4)
+      #Adjust the x transformation based on the number of 'dodge' variables
+      dodgecols <- intersect(c("fill", "colour", "linetype", "shape", "size", "alpha"), colnames(data))
+      if (length(dodgecols) == 0) {
+        stop("`position_jitterdodged()` requires at least one aesthetic to dodge by", call. = FALSE)
+      }
+      ndodge    <- lapply(data[dodgecols], levels)  #returns NULL for numeric, i.e. non-dodge layers
+      ndodge    <- length(unique(unlist(ndodge)))
+      
+      list(
+        dodge.width = self$dodge.width,
+        jitter.height = self$jitter.height,
+        jitter.width = width / (ndodge + 2),
+        seed = self$seed,
+        flipped_aes = flipped_aes
+      )
+    },
+    
+    compute_panel = function(data, params, scales) {
+      data <- flip_data(data, params$flipped_aes)
+      data <- collide(data, params$dodge.width, "position_jitterdodged", ggplot2:::pos_dodge,
+                      check.width = FALSE)
+      trans_x <- if (params$jitter.width > 0) function(x) jitterd(x,data$y,quad.points=params$quad.points,amount=params$jitter.width)
+      trans_y <- if (params$jitter.height > 0) function(x) jitterd(data$y, data$x,quad.points=params$quad.points,amount=params$jitter.height)
+      data <- with_seed_null(params$seed, transform_position(data, trans_x, trans_y))
+      flip_data(data, params$flipped_aes)
+    }
+)
 
 PositionJitterd<- ggplot2::ggproto("PositionJitterd",ggplot2::Position,
-required_aes= c("x","y"),
-
-setup_params=function(self,data) {
-  list(
-  width=self$width%||% (resolution(data$x,zero=FALSE) *0.4),
-  height=self$height%||% (resolution(data$y,zero=FALSE) *0.4),
-  seed=self$seed,
-  quad.points=self$quad.points
-  )
- },
-
-compute_layer=function(self,data,params,layout) {
- trans_x<-if(params$width>0)function(x,y) jitterd(x,data$y,quad.points=params$quad.points,amount=params$width)
- trans_y<-if(params$height>0)function(x,y) jitterd(data$y, data$x,quad.points=params$quad.points,amount=params$height)
-
-  with_seed_null(params$seed,ggplot2::transform_position(data,trans_x,trans_y))
- }
+    required_aes= c("x","y"),
+  
+    setup_params=function(self,data) {
+        list(
+        width=self$width%||% (resolution(data$x,zero=FALSE) *0.4),
+        height=self$height%||% (resolution(data$y,zero=FALSE) *0.4),
+        seed=self$seed,
+        quad.points=self$quad.points
+        )
+       },
+      
+      compute_layer=function(self,data,params,layout) {
+       trans_x<-if(params$width>0)function(x,y) jitterd(x,data$y,quad.points=params$quad.points,amount=params$width)
+       trans_y<-if(params$height>0)function(x,y) jitterd(data$y, data$x,quad.points=params$quad.points,amount=params$height)
+      
+        with_seed_null(params$seed,ggplot2::transform_position(data,trans_x,trans_y))
+       }
 )
 
 #' @import withr
@@ -164,12 +204,10 @@ jitterd=function(x,y,quad.points,amount=NULL, reverse=F){
 #' @param jitter.width degree of jitter in x direction. Defaults to 40\% of the
 #'   resolution of the data.
 #' @param jitter.height degree of jitter in y direction. Defaults to 0.
+#' @param dodge.width The degree of dodging
+#' @param seed Random seed. 
+#' 
 #' @export
-#' @examples
-#' dsub <- diamonds[ sample(nrow(diamonds), 1000), ]
-#' ggplot(dsub, aes(x = cut, y = carat, fill = clarity)) +
-#'   geom_boxplot(outlier.size = 0) +
-#'   geom_point(pch = 21, position = position_jitterdodged())
 position_jitterdodged <- function(jitter.width = .2, jitter.height = 0,
                                  dodge.width = 0.75, seed = NA) {
   
@@ -186,47 +224,7 @@ position_jitterdodged <- function(jitter.width = .2, jitter.height = 0,
   
 }
 
-#' @importFrom purrr "%||%"
-#' @import ggplot2
-#' @export
-PositionJitterdodged <- ggproto("PositionJitterdodged", Position,
-  jitter.width = .2,
-  jitter.height = NULL,
-  dodge.width = NULL,
 
-  required_aes = c("x", "y"),
-
-  setup_params = function(self, data) {
-    flipped_aes <- has_flipped_aes(data)
-    data <- flip_data(data, flipped_aes)
-    width <- self$jitter.width %||% (resolution(data$x, zero = FALSE) * 0.4)
-    #Adjust the x transformation based on the number of 'dodge' variables
-    dodgecols <- intersect(c("fill", "colour", "linetype", "shape", "size", "alpha"), colnames(data))
-    if (length(dodgecols) == 0) {
-      stop("`position_jitterdodged()` requires at least one aesthetic to dodge by", call. = FALSE)
-    }
-    ndodge    <- lapply(data[dodgecols], levels)  #returns NULL for numeric, i.e. non-dodge layers
-    ndodge    <- length(unique(unlist(ndodge)))
-
-    list(
-      dodge.width = self$dodge.width,
-      jitter.height = self$jitter.height,
-      jitter.width = width / (ndodge + 2),
-      seed = self$seed,
-      flipped_aes = flipped_aes
-    )
-  },
-
-  compute_panel = function(data, params, scales) {
-    data <- flip_data(data, params$flipped_aes)
-    data <- collide(data, params$dodge.width, "position_jitterdodged", ggplot2:::pos_dodge,
-      check.width = FALSE)
-    trans_x <- if (params$jitter.width > 0) function(x) jitterd(x,data$y,quad.points=params$quad.points,amount=params$jitter.width)
-    trans_y <- if (params$jitter.height > 0) function(x) jitterd(data$y, data$x,quad.points=params$quad.points,amount=params$jitter.height)
-    data <- with_seed_null(params$seed, transform_position(data, trans_x, trans_y))
-    flip_data(data, params$flipped_aes)
-  }
-)
 
 
 #' Utilities for working with bidirecitonal layers

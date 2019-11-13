@@ -79,4 +79,9 @@ test_that("compare.fits for other models", {
   vdiffr::expect_doppelganger("compare.fits with loglink",
                               compare.fits(Daily.Units.Sold~Sale.Price|Publisher, data=d, mod1, mod2))
   
+  #### compare.fits with two glms
+  data("tablesaw.injury")
+  mod1 = glm(injury~safety + attention, data=tablesaw.injury, family=binomial)  
+  mod2 = glm(injury~safety * attention, data=tablesaw.injury, family=binomial)  
+  compare.fits(injury~safety | attention, data=tablesaw.injury, mod2, mod1)
 })

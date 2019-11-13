@@ -12,17 +12,15 @@ position_jitterdodged(jitter.width = 0.2, jitter.height = 0,
 resolution of the data.}
 
 \item{jitter.height}{degree of jitter in y direction. Defaults to 0.}
+
+\item{dodge.width}{The degree of dodging}
+
+\item{seed}{Random seed.}
 }
 \description{
 This is primarily used for aligning points generated through
 `geom_point()` with dodged boxplots (e.g., a `geom_boxplot()` with
 a fill aesthetic supplied).
-}
-\examples{
-dsub <- diamonds[ sample(nrow(diamonds), 1000), ]
-ggplot(dsub, aes(x = cut, y = carat, fill = clarity)) +
-  geom_boxplot(outlier.size = 0) +
-  geom_point(pch = 21, position = position_jitterdodged())
 }
 \seealso{
 Other position adjustments: \code{\link{position_jitterd}}
