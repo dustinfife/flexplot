@@ -7,6 +7,7 @@
 ##' then the function plots the residuals against the second variable. 
 ##' @param formula A formula with exactly two predictors and an outcome variable
 ##' @param data The dataset used
+##' @param method The smoothing method. Defaults to "loess"
 ##' @param ... Other parameters passed to flexplot
 ##' @seealso \code{\link{flexplot}}
 ##' @author Dustin Fife
@@ -15,9 +16,7 @@
 ##' @examples
 ##' data(exercise_data)
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
-added.plot = function(formula, data, ...){
-
-
+added.plot = function(formula, data, method="loess", ...){
 
 	#### identify variable types
 	variables = all.vars(formula)
@@ -47,15 +46,29 @@ added.plot = function(formula, data, ...){
 		warning("Note: I'm removing missing values so the function will work.")
 		data = na.omit(data)
 	}
+	
+	#### find model type
+	
 
 
 	#### model the first chosen variable
 	new.form = make.formula(outcome, remaining.vars)
-	data$residuals = residuals(lm(new.form, data=data)) + mean(data[,outcome])
+	
+  #### if they ask for logistic
+	if (method == "logistic"){
+	    fitted = fitted(glm(new.form, data=data, family=binomial))
+	    data$residuals = factor.to.logistic(data=data, outcome=outcome)[,outcome] - fitted
+	    method = "loess"
+	 } else {
+	    data$residuals = residuals(lm(new.form, data=data)) + mean(data[,outcome])    
+	 }
+	
 	
 	##### now plot that succa
 	new.form = make.formula("residuals", res.variable)
-	plot = flexplot(new.form, data=data, ...) + labs(y=paste0(outcome, " | ", paste0(remaining.vars, collapse=", ")))
+
+	#### if they ask for
+	plot = flexplot(new.form, data=data, method=method, ...) + labs(y=paste0(outcome, " | ", paste0(remaining.vars, collapse=", ")))
 	class(plot) <- c("flexplot", class(plot))
 	return(plot)
 }

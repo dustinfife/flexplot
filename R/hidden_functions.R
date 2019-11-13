@@ -408,10 +408,10 @@ factor.to.logistic = function(data, outcome, labels=F){
   
   ### now do the converstion
   if (labels){
-    levels(data[,outcome])
+    unique(data[,outcome])
   } else {
     
-    data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=levels(data[,outcome]), labels=c(0,1))))
+    data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=unique(data[,outcome]), labels=c(0,1))))
     #data %>% dplyr::mutate(!!outcome := as.numeric(as.character(factor(!!as.name(outcome), levels=levels(!!as.name(outcome)), labels=c(0,1))))) 
     return(data)
   }
