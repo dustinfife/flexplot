@@ -1,14 +1,14 @@
 {
   "moduleDescription" :
   {
-    "title" :     "Visual Modeling",
+    "title" :         "Visual Modeling",
     "description":    "Graphically-Based Data Analysis",
-    "version":     "0.0.1",
-    "author":    "Dustin Fife",
-    "icon":      "icon.svg",
-    "maintainer":    "Dustin Fife <fife.dustin@gmail.com>",
-    "website":    "github.com/dustinfife/flexplot",
-    "license":    "GPL (>= 2)"
+    "version":        "0.0.1",
+    "author":         "Dustin Fife",
+    "icon":           "icon.svg",
+    "maintainer":     "Dustin Fife <fife.dustin@gmail.com>",
+    "website":        "github.com/dustinfife/flexplot",
+    "license":        "GPL (>= 2)"
   },
 
   "menu":

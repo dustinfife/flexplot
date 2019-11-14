@@ -171,47 +171,5 @@ Form
     }
   }
   
-  ExpanderButton{
-    title: qsTr("Generalized Linear Models")  
-		  DropDown{
-		    id: family
-			  name: "family"
-			  values: ["Normal", "Logistic", "Poisson", "Negative Binomial", "Gamma", "Zero-Inflated"]
-			  label: qsTr("Distribution family")
-		  }
-		  
-  
-		  DropDown{
-			  name: "link"
-			  values: ["identity", "logit", "log", "inverse", "custom..."]
-			  /*{
-			    if (["Normal", "Logistic"].includes(family.currentText)) return ["identity", "logit", "log", "inverse", "custom..."]
-			    else if (["Poisson", "Gamma"].includes(family.currentText)) return ["inverse", "custom..."]
-			    else return ["identity", "test"]
-			   } */
-			  label: qsTr("Link function")
-		  }	
-  }
-  
-  ExpanderButton{
-    title: qsTr("Mixed Models")  
-    VariablesForm
-    {
-      height: 150
-      AvailableVariablesList { 
-        name: "fixedlist"; 
-        title: qsTr("Variables"); 
-        source: ["variables"] 
-      }
-  
-      AssignedVariablesList 
-      { 
-        name: "randeff"; 
-        title: qsTr("Random Effects"); 
-        listViewType:"Interaction"
-        enabled: vars.count > 1
-      }
-    }
-  }  
   
 }
