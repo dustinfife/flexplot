@@ -9,7 +9,7 @@
 #'
 #' @return a flexplot graphic. 
 #' @export
-flexplot_jasp2 <- function(jaspResults, dataset, options) {
+flexplot_jasp2 = function(jaspResults, dataset, options) {
 
 	### check if they've entered anything	  
   #save(dataset, options, file="~/Documents/JaspResults.Rdat")

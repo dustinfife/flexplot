@@ -9,15 +9,15 @@
 #'
 #' @return a table, plot, etc. 
 #' @export
-mixedmod_jasp<- function(jaspResults, dataset, options) {
+linmod_jasp<- function(jaspResults, dataset, options) {
 
   ### check if they have an IV and a DV
   ready <- (options$dependent != "" & length(options$variables)>0)
   
   ### read in the dataset if it's ready
   if (ready){
-    dataset = .read_mixedmod_data(dataset, options)
-    #.check_mixedmod_error()  #### HOW DO YOU HAVE IT THROW AN ERROR IF THE VARIABLE IS NOT NUMBERIC?
+    dataset = .read_linmod_data(dataset, options)
+    #.check_linmod_error()  #### HOW DO YOU HAVE IT THROW AN ERROR IF THE VARIABLE IS NOT NUMBERIC?
   
     ### check for categorical/numeric variables
     check.non.number = function(x){
@@ -28,20 +28,20 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     numeric = !character
     
     #### compute results
-    if (is.null(jaspResults[["mixedmod_results"]]))
-      .mixedmod_compute(jaspResults, dataset, options, ready)
+    if (is.null(jaspResults[["linmod_results"]]))
+      .linmod_compute(jaspResults, dataset, options, ready)
     
     
     #### show plots (if user specifies them)
     if (options$model) {
-      if (is.null(jaspResults[["mixedmod_model_plot"]])){
-        .mixedmod_model_plot(jaspResults, options, ready)
+      if (is.null(jaspResults[["linmod_model_plot"]])){
+        .linmod_model_plot(jaspResults, options, ready)
       }
     }
 
     if (options$residuals) {
-      if (is.null(jaspResults[["mixedmod_residual_plot"]])){
-        .mixedmod_residual_plot(jaspResults, options, ready)
+      if (is.null(jaspResults[["linmod_residual_plot"]])){
+        .linmod_residual_plot(jaspResults, options, ready)
       }
     }
     
@@ -51,15 +51,15 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     
       if (length(options$variables)>1){
         if (options$modinf){
-          if (is.null(jaspResults[["mixedmod_table_modcomp"]])){
-            .create_mixedmod_table_modcomp(jaspResults, options, ready)
+          if (is.null(jaspResults[["linmod_table_modcomp"]])){
+            .create_linmod_table_modcomp(jaspResults, options, ready)
           }
         }
       }
       
       if (options$sl){
-        if (is.null(jaspResults[["mixedmod_table_slopes"]])){
-          .create_mixedmod_table_slopes(jaspResults, options, ready)
+        if (is.null(jaspResults[["linmod_table_slopes"]])){
+          .create_linmod_table_slopes(jaspResults, options, ready)
         }
       }
     }
@@ -68,22 +68,22 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
       
       if (length(options$variables)>1){
         if (options$modinf) {
-          if (is.null(jaspResults[["mixedmod_table_modcomp"]])){
-            .create_mixedmod_table_modcomp(jaspResults, options, ready)
+          if (is.null(jaspResults[["linmod_table_modcomp"]])){
+            .create_linmod_table_modcomp(jaspResults, options, ready)
           }
         }
       }  
       
       ### check if there's a jasp table already. if not, create it
       if (options$means){
-        if (is.null(jaspResults[["mixedmod_table_means"]])){
-        .create_mixedmod_table_means(jaspResults, options, ready)
+        if (is.null(jaspResults[["linmod_table_means"]])){
+        .create_linmod_table_means(jaspResults, options, ready)
         }  
       }  
       
       if (options$diff) {
-        if (is.null(jaspResults[["mixedmod_table_differences"]])){
-          .create_mixedmod_table_differences(jaspResults, options, ready)
+        if (is.null(jaspResults[["linmod_table_differences"]])){
+          .create_linmod_table_differences(jaspResults, options, ready)
         }
       }  
       
@@ -94,7 +94,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   }  
 }
 
-.mixedmod_model_plot <- function(jaspResults, options, ready) {
+.linmod_model_plot <- function(jaspResults, options, ready) {
   
   ### create plot options
   modelplot <- createJaspPlot(title = "Plot of the Statistical Model",  width = 900, height = 500)
@@ -115,7 +115,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   return()
 }
 
-.mixedmod_residual_plot <- function(jaspResults, options, ready) {
+.linmod_residual_plot <- function(jaspResults, options, ready) {
   
   ### create plot options
   residualplot <- createJaspPlot(title = "Diagnostic Plots",  width = 800, height = 500)
@@ -138,7 +138,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
 
 .create_flexplot <- function(jaspResults, flexplot, options, model.type) {
   
-  mixedmod_results <- jaspResults[["mixedmod_results"]]$object
+  linmod_results <- jaspResults[["linmod_results"]]$object
   
   if (model.type=="model"){
     type = "model"
@@ -146,7 +146,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     type = "model"
   }
 
-  generated.formula = make_flexplot_formula(options$variables, options$dependent, mixedmod_results$model$model)
+  generated.formula = make_flexplot_formula(options$variables, options$dependent, linmod_results$model$model)
   
   if	(options$ghost){
     ghost="black"
@@ -158,11 +158,11 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
                   "standard errors" = "sterr",
                   "standard deviations", "stdev")
   if (model.type=="model"){
-    save(generated.formula, mixedmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
-  plot = compare.fits(generated.formula, data = mixedmod_results$model$model, model1 = mixedmod_results$model,
+    save(generated.formula, linmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
+  plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                       alpha=options$alpha, ghost.line=ghost)
   } else {
-    plot = visualize(mixedmod_results$model, mixedmod_results, plot=model.type, alpha=options$alpha)
+    plot = visualize(linmod_results$model, linmod_results, plot=model.type, alpha=options$alpha)
   }
   
   if (options$theme == "JASP"){
@@ -181,13 +181,13 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
 
 
 
-.mixedmod_compute = function(jaspResults, dataset, options, ready) {
+.linmod_compute = function(jaspResults, dataset, options, ready) {
   
   if (ready){
     ## createJaspState allows these results to be recycled
-    mixedmod_results <- createJaspState()
-    jaspResults[["mixedmod_results"]] <- mixedmod_results
-    mixedmod_results$dependOn(c("dependent", "variables", "interactions"))
+    linmod_results <- createJaspState()
+    jaspResults[["linmod_results"]] <- linmod_results
+    linmod_results$dependOn(c("dependent", "variables", "interactions"))
     
     ## interactions are stored in a deeply nested list. de-listify them
     predictors = paste0(
@@ -217,29 +217,29 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     est = estimates(model)
     est$model = model
     
-    mixedmod_results$object = est
+    linmod_results$object = est
     
     return()
   }
 }
 
-.create_mixedmod_table_means <- function(jaspResults, options, ready) {
-  mixedmod_table_means <- createJaspTable(title = "Means of Categorical Variables")
+.create_linmod_table_means <- function(jaspResults, options, ready) {
+  linmod_table_means <- createJaspTable(title = "Means of Categorical Variables")
   
   ### which options are required
-  mixedmod_table_means$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
+  linmod_table_means$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
   
   ### add citation
-  mixedmod_table_means$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
+  linmod_table_means$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
   
   ### build the table structure
-  mixedmod_table_means$addColumnInfo(name = "var",      title = "Variable",   type = "string", combine = TRUE)
-  mixedmod_table_means$addColumnInfo(name = "levels",    title = "Level",       type = "string", combine = TRUE)	
-  mixedmod_table_means$addColumnInfo(name = "est",      title = "Estimate",    type = "number", format = "dp:2", combine = TRUE)	
+  linmod_table_means$addColumnInfo(name = "var",      title = "Variable",   type = "string", combine = TRUE)
+  linmod_table_means$addColumnInfo(name = "levels",    title = "Level",       type = "string", combine = TRUE)	
+  linmod_table_means$addColumnInfo(name = "est",      title = "Estimate",    type = "number", format = "dp:2", combine = TRUE)	
   
   if (options$ci){
-    mixedmod_table_means$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    mixedmod_table_means$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_means$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_means$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
   }
   
   ### add message about what type of interval was used
@@ -248,11 +248,11 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
                     "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
                     "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
   )
-  mixedmod_table_means$addFootnote(message)  
-  mixedmod_table_means$showSpecifiedColumnsOnly <- TRUE
+  linmod_table_means$addFootnote(message)  
+  linmod_table_means$showSpecifiedColumnsOnly <- TRUE
   
   ### store the table structure
-  jaspResults[["mixedmod_table_means"]] <- mixedmod_table_means
+  jaspResults[["linmod_table_means"]] <- linmod_table_means
   
   ### return the table
   if (!ready) {
@@ -260,35 +260,35 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   } 
   
   ### retrieve the already-computed results
-  mixedmod_results <- jaspResults[["mixedmod_results"]]$object
+  linmod_results <- jaspResults[["linmod_results"]]$object
   
   ### fill the table with those results
-  .fill_mixedmod_table_means(mixedmod_table_means, mixedmod_results)
+  .fill_linmod_table_means(linmod_table_means, linmod_results)
   
   return()
   
 }
 
-.create_mixedmod_table_differences <- function(jaspResults, options, ready) {
-  mixedmod_table_differences <- createJaspTable(title = "Mean Differences Between Groups")
+.create_linmod_table_differences <- function(jaspResults, options, ready) {
+  linmod_table_differences <- createJaspTable(title = "Mean Differences Between Groups")
   
   ### which options are required
-  mixedmod_table_differences$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
+  linmod_table_differences$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
   
   ### add citation
-  mixedmod_table_differences$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
+  linmod_table_differences$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
   
   ### build the table structure
-  mixedmod_table_differences$addColumnInfo(name = "var",      title = "Variable",   type = "string", combine = TRUE)
-  mixedmod_table_differences$addColumnInfo(name = "comparison",    title = "Comparison",       type = "string", combine = TRUE)	
-  mixedmod_table_differences$addColumnInfo(name = "diff",      title = "Difference",    type = "number", format = "dp:2", combine = TRUE)	
+  linmod_table_differences$addColumnInfo(name = "var",      title = "Variable",   type = "string", combine = TRUE)
+  linmod_table_differences$addColumnInfo(name = "comparison",    title = "Comparison",       type = "string", combine = TRUE)	
+  linmod_table_differences$addColumnInfo(name = "diff",      title = "Difference",    type = "number", format = "dp:2", combine = TRUE)	
   
   if (options$ci){
-    mixedmod_table_differences$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    mixedmod_table_differences$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_differences$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_differences$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
   }
   
-  mixedmod_table_differences$addColumnInfo(name = "cohensd",      title = "Cohen's d",    type = "number", format = "dp:2", combine = TRUE)	
+  linmod_table_differences$addColumnInfo(name = "cohensd",      title = "Cohen's d",    type = "number", format = "dp:2", combine = TRUE)	
   
   ### add message about what type of interval was used
   message <- switch(options$estimationmethod,
@@ -296,10 +296,10 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
                     "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
                     "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
   )
-  mixedmod_table_differences$addFootnote(message)  
-  mixedmod_table_differences$showSpecifiedColumnsOnly <- TRUE
+  linmod_table_differences$addFootnote(message)  
+  linmod_table_differences$showSpecifiedColumnsOnly <- TRUE
   ### store the table structure
-  jaspResults[["mixedmod_table_differences"]] <- mixedmod_table_differences
+  jaspResults[["linmod_table_differences"]] <- linmod_table_differences
   
   ### return the table
   if (!ready) {
@@ -307,37 +307,37 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   } 
   
   ### retrieve the already-computed results
-  mixedmod_results <- jaspResults[["mixedmod_results"]]$object
+  linmod_results <- jaspResults[["linmod_results"]]$object
   
   ### fill the table with those results
-  .fill_mixedmod_table_differences(mixedmod_table_differences, mixedmod_results)
+  .fill_linmod_table_differences(linmod_table_differences, linmod_results)
   
   return()
 }
 
-.create_mixedmod_table_slopes <- function(jaspResults, options, ready) {
-  mixedmod_table_slopes <- createJaspTable(title = "Regression Slopes and Intercept")
+.create_linmod_table_slopes <- function(jaspResults, options, ready) {
+  linmod_table_slopes <- createJaspTable(title = "Regression Slopes and Intercept")
   
   ### which options are required
-  mixedmod_table_slopes$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
+  linmod_table_slopes$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
   
   ### add citation
-  mixedmod_table_slopes$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
+  linmod_table_slopes$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
   
   ### build the table structure
-  mixedmod_table_slopes$addColumnInfo(name = "var",      title = "Variables",   type = "string", combine = TRUE)
-  mixedmod_table_slopes$addColumnInfo(name = "val",    title = "Value",       type = "number", format = "dp:2", combine = TRUE)	
+  linmod_table_slopes$addColumnInfo(name = "var",      title = "Variables",   type = "string", combine = TRUE)
+  linmod_table_slopes$addColumnInfo(name = "val",    title = "Value",       type = "number", format = "dp:2", combine = TRUE)	
   
   if (options$ci){
-    mixedmod_table_slopes$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    mixedmod_table_slopes$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_slopes$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_slopes$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
   }
   
-  mixedmod_table_slopes$addColumnInfo(name = "std",    title = "Standardized Slope (β)",       type = "number", format = "dp:2", combine = TRUE)	
+  linmod_table_slopes$addColumnInfo(name = "std",    title = "Standardized Slope (β)",       type = "number", format = "dp:2", combine = TRUE)	
   
   if (options$ci){
-    mixedmod_table_slopes$addColumnInfo(name = "slwr",      title = "Lower β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    mixedmod_table_slopes$addColumnInfo(name = "supr",      title = "Upper β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_slopes$addColumnInfo(name = "slwr",      title = "Lower β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_slopes$addColumnInfo(name = "supr",      title = "Upper β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
   }
   
   ### add message about what type of interval was used
@@ -348,10 +348,10 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   )
   
   message = paste0(message, "\n All estimates are conditional estimates.")
-  mixedmod_table_slopes$addFootnote(message)  
-  mixedmod_table_slopes$showSpecifiedColumnsOnly <- TRUE
+  linmod_table_slopes$addFootnote(message)  
+  linmod_table_slopes$showSpecifiedColumnsOnly <- TRUE
   ### store the table structure
-  jaspResults[["mixedmod_table_slopes"]] <- mixedmod_table_slopes
+  jaspResults[["linmod_table_slopes"]] <- linmod_table_slopes
   
   ### return the table
   if (!ready) {
@@ -359,35 +359,35 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   } 
   
   ### retrieve the already-computed results
-  mixedmod_results <- jaspResults[["mixedmod_results"]]$object
+  linmod_results <- jaspResults[["linmod_results"]]$object
   
   ### fill the table with those results
-  .fill_mixedmod_table_slopes(mixedmod_table_slopes, mixedmod_results)
+  .fill_linmod_table_slopes(linmod_table_slopes, linmod_results)
   
   return()
 }
 
-.create_mixedmod_table_modcomp <- function(jaspResults, options, ready) {
-  mixedmod_table_modcomp <- createJaspTable(title = "Model Comparisons (Estimating the Effect of Removing Terms)")
+.create_linmod_table_modcomp <- function(jaspResults, options, ready) {
+  linmod_table_modcomp <- createJaspTable(title = "Model Comparisons (Estimating the Effect of Removing Terms)")
   
   ### which options are required
-  mixedmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
+  linmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
   
   ### add citation
-  mixedmod_table_modcomp$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
+  linmod_table_modcomp$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
   
   ### build the table structure
-  mixedmod_table_modcomp$addColumnInfo(name = "terms",      title = "Term",   type = "string", combine = TRUE)
-  mixedmod_table_modcomp$addColumnInfo(name = "rsq",    title = "Semi-partial R Squared",       type = "number", format = "dp:2", combine = TRUE)	
-  mixedmod_table_modcomp$addColumnInfo(name = "bayes",      title = "Semi-partial Bayes Factor", type = "number", combine = TRUE)
+  linmod_table_modcomp$addColumnInfo(name = "terms",      title = "Term",   type = "string", combine = TRUE)
+  linmod_table_modcomp$addColumnInfo(name = "rsq",    title = "Semi-partial R Squared",       type = "number", format = "dp:2", combine = TRUE)	
+  linmod_table_modcomp$addColumnInfo(name = "bayes",      title = "Semi-partial Bayes Factor", type = "number", combine = TRUE)
   
   
   message = paste0("message \n Note: Semi-partials indicate the effect of removing that particular term from the model. ",
     "Bayes factors are computed using the BIC. Higher Bayes factors indicate important terms. Lower Bayes factors suggest they can be removed from the model")
-  mixedmod_table_modcomp$addFootnote(message)  
-  mixedmod_table_modcomp$showSpecifiedColumnsOnly <- TRUE
+  linmod_table_modcomp$addFootnote(message)  
+  linmod_table_modcomp$showSpecifiedColumnsOnly <- TRUE
   ### store the table structure
-  jaspResults[["mixedmod_table_modcomp"]] <- mixedmod_table_modcomp
+  jaspResults[["linmod_table_modcomp"]] <- linmod_table_modcomp
   
   ### return the table
   if (!ready) {
@@ -395,19 +395,19 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   } 
   
   ### retrieve the already-computed results
-  mixedmod_results <- jaspResults[["mixedmod_results"]]$object
+  linmod_results <- jaspResults[["linmod_results"]]$object
   
   ### fill the table with those results
-  .fill_mixedmod_table_modcomp(mixedmod_table_modcomp, mixedmod_results)
+  .fill_linmod_table_modcomp(linmod_table_modcomp, linmod_results)
   
   return()
 }
 
 
-.fill_mixedmod_table_means = function(mixedmod_table_means, mixedmod_results){
+.fill_linmod_table_means = function(linmod_table_means, linmod_results){
   
 
-  factors = mixedmod_results$factor.summary
+  factors = linmod_results$factor.summary
   
   ### output results
   tabdat = list(
@@ -417,16 +417,16 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     lwr = factors$lower,
     upr = factors$upper
   )
-  mixedmod_table_means$setData(tabdat)
+  linmod_table_means$setData(tabdat)
   
   
   return()
 }
 
-.fill_mixedmod_table_differences = function(mixedmod_table_differences, mixedmod_results){
+.fill_linmod_table_differences = function(linmod_table_differences, linmod_results){
   
   
-  diff = mixedmod_results$difference.matrix
+  diff = linmod_results$difference.matrix
   
   ### output results
   tabdat = list(
@@ -438,15 +438,15 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     cohensd = diff$cohens.d
   )
   
-  mixedmod_table_differences$setData(tabdat)
+  linmod_table_differences$setData(tabdat)
   
   
   return()
 }
 
-.fill_mixedmod_table_slopes = function(mixedmod_table_slopes, mixedmod_results){
+.fill_linmod_table_slopes = function(linmod_table_slopes, linmod_results){
   
-  slopes = mixedmod_results$numbers.summary
+  slopes = linmod_results$numbers.summary
   
   ### output results
   tabdat = list(
@@ -459,15 +459,15 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     supr = slopes$std.upper
   )
   
-  mixedmod_table_slopes$setData(tabdat)
+  linmod_table_slopes$setData(tabdat)
   
   
   return()
 }
 
-.fill_mixedmod_table_modcomp = function(mixedmod_table_modcomp, mixedmod_results){
+.fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
-  mc = mixedmod_results$model.comparison
+  mc = linmod_results$model.comparison
   
   
   ### reformat : to be a times
@@ -480,14 +480,14 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     bayes = mc$bayes.factor
   )
   #save(mc, file="/Users/fife/Documents/jaspresults.rdat")
-  mixedmod_table_modcomp$setData(tabdat)
+  linmod_table_modcomp$setData(tabdat)
   
   
   return()
 }
 
 
-.check_mixedmod_error = function(dataset, options){
+.check_linmod_error = function(dataset, options){
   
   # check length of variables
   if ((options$dependent == "" & length(options$paneledVars)>0) | (options$dependent == "" & length(options$variables)>0)) .quitAnalysis("You must specify a dependent variable to view a graphic")
@@ -495,7 +495,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   
 }
 
-.read_mixedmod_data = function(dataset, options) {
+.read_linmod_data = function(dataset, options) {
   if (!is.null(dataset))
     return(dataset)
   else
