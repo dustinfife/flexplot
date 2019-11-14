@@ -240,11 +240,11 @@ prep.breaks = function(variable, data, breaks=NULL, bins=3){
 			breaks = quants[!duplicated(quants)]
 		} else {			
 			#### give min as breaks, if the user doesn't
-			if (min(breaks)>min(data[[variable]])){
-				breaks = c(min(data[[variable]]), breaks)
+			if (min(breaks)>min(data[[variable]], na.rm=T)){
+				breaks = c(min(data[[variable]], na.rm=T), breaks)
 			}
-			if (max(breaks,na.rm=T)<max(data[[variable]])){
-				breaks = c(breaks, max(data[[variable]]))
+			if (max(breaks,na.rm=T)<max(data[[variable]], na.rm=T)){
+				breaks = c(breaks, max(data[[variable]], na.rm=T))
 			}	
 		}
 		
@@ -264,12 +264,6 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
 		labels = unlist(labels)
 	}
 	
-	
-	### error if their labels are not the same length as the breaks + 1
-	# if (!is.null(labels) & !is.null(breaks) & length(labels) != (length(breaks))){
-		# stop(paste0("The label vectors (", paste0(unlist(labels), collapse=", "), ") needs to be equal to the number of breaks (", paste0(breaks, collapse="-"), ") + 1. Either change the breaks or the number of labels"))
-	# }
-	
 	#### if they provide labels or breaks, choose the number of bins
 	if (!is.null(labels)){
 		bins = length(labels)
@@ -280,21 +274,17 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
 		bins = 3
 	}
 
-	
-	
-
-	### check length of binned variables. If <= breaks, treat as categorical
-	# if (length(unique(data[[variable]]))<=bins){
-		# data[[variable]] = factor(data[[variable]], ordered=T)
-	# }
-	
-
 
 	#### if they supply breaks, make sure there's a good min/max value	
 	if (!is.null(breaks) & check.breaks){
 		breaks = prep.breaks(variable, data, breaks)
 	} 
-	
+
+  ### if we don't have breaks at this point, make some
+  if (is.null(breaks)){
+    breaks = quantile(as.numeric(data[[variable]]), seq(from=0, to=1, length.out=bins+1), na.rm=T)
+  }
+  
 	### if they don't provide labels, make them easier to read (than R's native bin labels)\
 	if (is.null(labels)){
 		labels = 1:(length(breaks)-1)		
@@ -303,13 +293,10 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
 		}
 	}
 	
-	### if we don't have breaks at this point, make some
-	if (is.null(breaks)){
-		breaks = quantile(as.numeric(data[[variable]]), seq(from=0, to=1, length.out=bins+1))
-	}
+
 
 	if (return.breaks){
-		breaks
+		return(breaks)
 	} else {
 		binned.variable = cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
 		binned.variable

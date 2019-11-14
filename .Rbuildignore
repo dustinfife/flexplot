@@ -13,6 +13,7 @@ jamovi
 ^\.Rproj\.user$
 tests/figs/
 README_files/
+tests/
 ^doc$
 ^Meta$
 EJ notes.rtf

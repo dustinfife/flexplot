@@ -3,8 +3,9 @@ context("use compare.fits to visualize linear models")
 data(exercise_data)
 d = exercise_data
 d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)
-set.seed(1212)
+
 test_that("compare.fits linear models", {
+  set.seed(1212)
   model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
   model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
   model.int2 = lm(weight.loss ~ motivation + therapy.type + motivation:therapy.type, data = exercise_data)
@@ -46,7 +47,7 @@ test_that("compare.fits linear models", {
 })
 
 test_that("compare.fits for other models", {
-
+  set.seed(1212)
   #### COMPARE.FITS FUNCTIONS -- linear models
   mod = lm(weight.loss~rewards, data=d)
   require(MASS)

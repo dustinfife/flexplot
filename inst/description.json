@@ -20,9 +20,21 @@
       },
 
       {
-        "title":   	"Modeling (General Linear Model)",
+        "title":   	"Linear Modeling",
+        "qml":    	"linmod.qml",
+        "function":  	"linmod_jasp"
+      },
+      
+      {
+        "title":   	"Mixed Modeling",
+        "qml":    	"mixedmod.qml",
+        "function":  	"mixedmod_jasp"
+      },
+      
+      {
+        "title":   	"Generalized Linear Modeling",
         "qml":    	"glinmod.qml",
         "function":  	"glinmod_jasp"
-      }
+      }         
   ]
 }
