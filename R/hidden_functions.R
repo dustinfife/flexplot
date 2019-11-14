@@ -42,6 +42,9 @@ variable_types = function(variables, data){
 }
 
 #### if both numeric and factor, put numeric on x axis and factor as color/line
+# predictors = c("Grad.School", "Years", "GPA", "Profession")
+# data = graduate_income
+# outcome = "Income"
 make_flexplot_formula = function(predictors, outcome, data){
   
   # if there's only one variable, make it
