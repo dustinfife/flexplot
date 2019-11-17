@@ -406,27 +406,25 @@ factor.to.logistic = function(data, outcome, labels=F){
 }
 
 
-factor_to_logistic_x = function(x){
-  
-  #### check if they have 2 unique values
-  if (length(unique(x))!=2){
-    stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
-  }	
-  
-  ### now do the converstion
-    
-  x = as.numeric(as.character(factor(x, levels=levels(x), labels=c(0,1))))
-  x
-}
+# factor_to_logistic_x = function(x){
+#   
+#   #### check if they have 2 unique values
+#   if (length(unique(x))!=2){
+#     stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
+#   }	
+#   
+#   ### now do the converstion
+#     
+#   x = as.numeric(as.character(factor(x, levels=levels(x), labels=c(0,1))))
+#   x
+# }
 
 
 ##' @importFrom MASS rlm	
 #### identify the correct "fit"
-fit.function = function(outcome, predictors, data, suppress_smooth, method, spread, mean.line=F, categorical=FALSE){
+fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method="loess", spread="sterr", mean.line=F, categorical=FALSE){
 	
 	if (is.numeric(data[,predictors]) & !categorical){
-		
-		
 		if (suppress_smooth){
 			fit.string = "xxxx"
 		} else if (method=="logistic") {

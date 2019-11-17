@@ -72,3 +72,77 @@ test_that("bin.me works", {
   res = bin.me(variable="satisfaction", data=relationship_satisfaction, breaks = list(c(20, 60, 80)), return.breaks=TRUE)
   expect_output(print(res), "-7  20  60  80 117")  
 })
+
+test_that("sample.subset returns a dataset the right rows", {
+  set.seed(232)
+  d = exercise_data
+  expect_equal(nrow(sample.subset(10, d)), 10)
+  expect_equal(nrow(sample.subset(Inf, d)), nrow(d))
+})
+
+test_that("points.func works",{
+  expect_output(print(points.func(axis.var="therapy.type", data=exercise_data, jitter=NULL)), 
+                '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0\\.2, height=0\\)"')
+  expect_output(print(points.func("therapy.type", exercise_data, T)),
+                '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0\\.2, height=0\\)"')
+  expect_output(print(points.func("therapy.type", exercise_data, F)),
+                '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0, height=0\\)"')
+  expect_output(print(points.func("motivation", exercise_data, NULL)),
+                '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0, height=0\\)"')
+  expect_output(print(points.func(c("motivation", "therapy.type"), exercise_data, NULL)),
+                '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0, height=0\\)"')  
+  expect_output(print(points.func(c("gender", "therapy.type"), exercise_data, NULL)),
+                '\\[1\\] "geom_point\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), position=position_jitterdodged\\(jitter\\.width=0\\.2, jitter\\.height=0, dodge\\.width=\\.5\\)\\)"')  
+  expect_output(print(points.func(c("gender", "therapy.type"), exercise_data, c(.2, .1))),
+                '\\[1\\] "geom_point\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), position=position_jitterdodged\\(jitter\\.width=0\\.2, jitter\\.height=0\\.1, dodge\\.width=\\.5\\)\\)"')    
+})
+
+test_that("factor.to.logistic works", {
+  expect_error(factor.to.logistic(exercise_data, "therapy.type"))
+  expect_equal(length(levels(factor.to.logistic(exercise_data, "gender", T))), 2)
+  expect_equal(levels(factor.to.logistic(exercise_data, "gender")$gender), NULL)  
+})
+
+test_that("fit.function works for numeric predictors", {
+  expect_identical(fit.function("motivation", "weight.loss", data=exercise_data, suppress_smooth=T), "xxxx")
+  expect_error(fit.function("motivation", "weight.loss", method="logistic", data=exercise_data))
+  expect_identical(fit.function("gender", "weight.loss", method="logistic", data=exercise_data),
+    "geom_smooth(method = \"glm\", method.args = list(family = \"binomial\"), se = se)")
+  expect_identical(fit.function("motivation", "weight.loss", method="rlm", data=exercise_data),
+                   "geom_smooth(method = \"rlm\", se = se)")
+  expect_identical(fit.function("motivation", "weight.loss", method="lm", data=exercise_data),
+                   "stat_smooth(method=\"lm\", se=se)")  
+  expect_identical(fit.function("motivation", "weight.loss", method="cubic", data=exercise_data),
+                   "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 3, raw=TRUE))") 
+  expect_identical(fit.function("motivation", "weight.loss", method="quadratic", data=exercise_data),
+                   "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 2, raw=TRUE))")   
+  expect_identical(fit.function("motivation", "weight.loss", method="loess", data=exercise_data),
+                   "geom_smooth(method=\"loess\", se=se)")     
+  
+})
+
+
+test_that("fit.function works for categorical predictors", {
+  expect_identical(fit.function("weight.loss", "gender", data=exercise_data, suppress_smooth=T), "xxxx+xxxx+xxxx")
+  expect_output(print(fit.function("weight.loss", "gender", data=exercise_data, method="stdev")), "\\+xxxx")
+  
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
