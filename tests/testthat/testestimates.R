@@ -51,3 +51,8 @@ test_that("estimates from generalized linear models", {
   expect_equal(estimates(mod)$raw.coefficients[1], .164)
 })  
   
+test_that("bic works", {
+  model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
+  model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
+  expect_equal(bf.bic(model.me, model.int, invert=T), .01049, tolerance=.001)
+})  

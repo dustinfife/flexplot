@@ -96,25 +96,25 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
 
 
 
-	##### look for interactions and remove them
-	if (length(grep(":", terms.mod1))>0){
-		terms.mod1 = terms.mod1[-grep(":", terms.mod1)]
-		model1.type = ifelse(model1.type=="lm", "interaction", model1.type)
-	}
-	if (length(grep(":", terms.mod2))>0){
-		terms.mod2 = terms.mod2[-grep(":", terms.mod1)]
-		model2.type = ifelse(model2.type=="lm", "interaction", model2.type)
-	}	
-	
-	##### look for polynomials and remove them
-	if (length(grep("^2", terms.mod1, fixed=T, value=T))>0 ){
-		terms.mod1 = terms.mod1[-grep("^2", terms.mod1, fixed=T)]
-		model1.type = ifelse(model1.type=="lm", "polynomial", model1.type)
-	}
-	if (length(grep("^2", terms.mod2, fixed=T, value=T))>0 & model1.type=="lm"){
-		terms.mod2 = terms.mod2[-grep("^2", terms.mod1, fixed=T)]
-		model2.type = ifelse(model2.type=="lm", "polynomial", model2.type)
-	}	
+	# ##### look for interactions and remove them
+	# if (length(grep(":", terms.mod1))>0){
+	# 	terms.mod1 = terms.mod1[-grep(":", terms.mod1)]
+	# 	model1.type = ifelse(model1.type=="lm", "interaction", model1.type)
+	# }
+	# if (length(grep(":", terms.mod2))>0){
+	# 	terms.mod2 = terms.mod2[-grep(":", terms.mod1)]
+	# 	model2.type = ifelse(model2.type=="lm", "interaction", model2.type)
+	# }	
+	# 
+	# ##### look for polynomials and remove them
+	# if (length(grep("^2", terms.mod1, fixed=T, value=T))>0 ){
+	# 	terms.mod1 = terms.mod1[-grep("^2", terms.mod1, fixed=T)]
+	# 	model1.type = ifelse(model1.type=="lm", "polynomial", model1.type)
+	# }
+	# if (length(grep("^2", terms.mod2, fixed=T, value=T))>0 & model1.type=="lm"){
+	# 	terms.mod2 = terms.mod2[-grep("^2", terms.mod1, fixed=T)]
+	# 	model2.type = ifelse(model2.type=="lm", "polynomial", model2.type)
+	# }	
 	
 
 	

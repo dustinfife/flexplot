@@ -13,6 +13,7 @@ test_that("compare.fits linear models", {
   suppressWarnings(vdiffr::expect_doppelganger("compare interaction vs. me",compare.fits(weight.loss ~ motivation | therapy.type, 
                data = exercise_data, model.me, model.int, ghost.line = "black")))
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=exercise_data, model.me, model.int))
+  expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=relationship_satisfaction, model.me, model.int))
   expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
                data = exercise_data, model.me, model.int2, return.preds = T)[1,1], 21)
   expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
