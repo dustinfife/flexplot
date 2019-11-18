@@ -12,7 +12,7 @@ test_that("avp plots work for linear models", {
 })
 
 test_that("avp plots work for glms", {
-
+  set.seed(1212)
   #### COMPARE.FITS FUNCTIONS -- linear models
   data("tablesaw.injury")
   model.glm = glm(injury~safety + gender, data=tablesaw.injury, family=binomial)

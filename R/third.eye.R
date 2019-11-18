@@ -28,28 +28,28 @@
 third.eye = function(formula, data, fixed.positions=NULL, which.perms=NULL, plot=NULL, ...){
 	
 	### make sure the permutations are possible
-	if (!is.null(which.perms)){
-		all.possible = rotate.view(formula, fixed.positions, return.perms=T)		
-		if (!all(which.perms %in% 1:nrow(all.possible))){
-			msg = paste0("\n Well snizzzy-izap! There's a problem. It looks like at least one of your values in permutations is larger than the number of possible permutations (", nrow(all.possible), "). Make sure all values you specify are smaller than that number.\nOr maybe you should take a nap? You look tired. ")
-			stop(msg)
-		}
-	}
-
-
-	### if permutations is null, choose to plot four images
-	num.plots = ifelse(is.null(which.perms), 4, length(which.perms))
-
-	### loop through and flexplot that shiz a number of times
-	for (i in 1:num.plots){
-		plot = flexplot(rotate.view(formula, fixed.positions, which.perms=which.perms[i]), data=data)
-		assign(paste0("f", i, collapse=""), value = plot)
-	}
-
-	#### return the plot(s)
-	if (!is.null(plot)){
-		suppressMessages(cowplot::plot_grid(plotlist=mget(paste0("f", 1:num.plots))))	
-	} else {
-		suppressMessages(cowplot::plot_grid(plotlist=c(plot, (mget(paste0("f", 1:num.plots))))))	
-	}
+	# if (!is.null(which.perms)){
+	# 	all.possible = rotate.view(formula, fixed.positions, return.perms=T)		
+	# 	if (!all(which.perms %in% 1:nrow(all.possible))){
+	# 		msg = paste0("\n Well snizzzy-izap! There's a problem. It looks like at least one of your values in permutations is larger than the number of possible permutations (", nrow(all.possible), "). Make sure all values you specify are smaller than that number.\nOr maybe you should take a nap? You look tired. ")
+	# 		stop(msg)
+	# 	}
+	# }
+	# 
+	# 
+	# ### if permutations is null, choose to plot four images
+	# num.plots = ifelse(is.null(which.perms), 4, length(which.perms))
+	# 
+	# ### loop through and flexplot that shiz a number of times
+	# for (i in 1:num.plots){
+	# 	plot = flexplot(rotate.view(formula, fixed.positions, which.perms=which.perms[i]), data=data)
+	# 	assign(paste0("f", i, collapse=""), value = plot)
+	# }
+	# 
+	# #### return the plot(s)
+	# if (!is.null(plot)){
+	# 	suppressMessages(cowplot::plot_grid(plotlist=mget(paste0("f", 1:num.plots))))	
+	# } else {
+	# 	suppressMessages(cowplot::plot_grid(plotlist=c(plot, (mget(paste0("f", 1:num.plots))))))	
+	# }
 }

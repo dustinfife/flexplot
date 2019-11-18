@@ -3,8 +3,9 @@ context("use compare.fits to visualize linear models")
 data(exercise_data)
 d = exercise_data
 d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)
-set.seed(1212)
+
 test_that("compare.fits linear models", {
+  set.seed(1212)
   model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
   model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
   model.int2 = lm(weight.loss ~ motivation + therapy.type + motivation:therapy.type, data = exercise_data)
@@ -12,6 +13,7 @@ test_that("compare.fits linear models", {
   suppressWarnings(vdiffr::expect_doppelganger("compare interaction vs. me",compare.fits(weight.loss ~ motivation | therapy.type, 
                data = exercise_data, model.me, model.int, ghost.line = "black")))
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=exercise_data, model.me, model.int))
+  expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=relationship_satisfaction, model.me, model.int))
   expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
                data = exercise_data, model.me, model.int2, return.preds = T)[1,1], 21)
   expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
@@ -46,7 +48,7 @@ test_that("compare.fits linear models", {
 })
 
 test_that("compare.fits for other models", {
-
+  set.seed(1212)
   #### COMPARE.FITS FUNCTIONS -- linear models
   mod = lm(weight.loss~rewards, data=d)
   require(MASS)
