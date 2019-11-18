@@ -692,7 +692,8 @@ flexplot = function(formula, data=NULL, related=F,
 	total.call = gsub("+xxxx","",total.call, fixed=T)
 	final = suppressMessages(eval(parse(text=total.call)))
 
-		### suppress messages only works for print messages, but print messages actually show the plot (even when i want to store it for laster use). Thus, I need both. Weird. 
+		
+  ### suppress messages only works for print messages, but print messages actually show the plot (even when i want to store it for laster use). Thus, I need both. Weird. 
 	#return(final)
 	#class(final) <- c("flexplot", class(final))
 

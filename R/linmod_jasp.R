@@ -154,7 +154,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   generated.formula = make_flexplot_formula(options$variables, options$dependent, linmod_results$model$model)
   save(generated.formula, linmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
   
-  if	(options$ghost){
+  if	(options$ghost & length(options$variables)<4){
     ghost="black"
   } else {
     ghost = NULL
