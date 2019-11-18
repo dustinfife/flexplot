@@ -146,32 +146,47 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 		slots = c(1,3,4)
 		form.slots = rep(NA, times=4)
 		for (i in 1:min(4,length(preds))){
-			form.slots[slots[i]] = preds[i]
+		  if (preds[i]!=term.re){
+			  form.slots[slots[i]] = preds[i]
+		  }
 		}
 		
-		#form.slots[2] = term.re
+		### for random effects models, just put school in first slot
+		if (length(preds)>1) {
+		  form.slots[2] = term.re
+		} else {
+		  form.slots[1] = term.re
+		}
 		symbol.slots = c("~","+", "|", "+")
 		formula = paste0(symbol.slots, form.slots, collapse="")
 		formula = gsub("\\|NA", "", formula);formula = gsub("\\+NA", "", formula);
 		formula = paste0(outcome, formula, collapse="")
 		
 		formula = formula(formula)
-		modify=F
-	} else {
-		### figure out where random component is
-		f.char = as.character(formula)[3]
-		criteria = paste0("\\+.*", term.re, ".*\\|")
+	} 
+	
+	### figure out where random component is
+	f.char = as.character(formula)[3]
+	criteria = paste0("\\+.*", term.re)
 
-		### if random component is in slot 2, modify the formula
-		if (length(grep(criteria, f.char))>0){
-			modify=T
-			termses = gsub(criteria, "|", f.char)
-			formula.new = make.formula(outcome, termses)			
+	### if random component is in slot 2, modify the formula
+	if (length(grep(criteria, f.char))>0){
+		modify=T
+		
+		### if there's a | in the formula, put it back
+		crit2 = paste0("\\+.*", term.re,".*\\|")
+		if (length(grep(crit2, f.char))>0){
+		  termses = gsub(crit2, "|", f.char)  
 		} else {
-			modify = F
+		  termses = gsub(criteria, "", f.char)
 		}
 		
+		formula.new = make.formula(outcome, termses)			
+	} else {
+		modify = F
 	}
+		
+	
 	terms = all.vars(formula)[-1]
 	terms.fixed = terms[-which(terms %in% term.re)]
 

@@ -22,11 +22,6 @@ Form
 			title: qsTr("Independent Variable(s)");
 			singleVariable: false 
 		}
-		AssignedVariablesList { 
-			name: "rvariables";	
-			title: qsTr("Random");
-			singleVariable: true 
-		}		
   }
   
   ExpanderButton{

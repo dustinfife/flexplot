@@ -27,13 +27,17 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     character = sapply(dataset[,options$variables, drop=F], check.non.number)
     numeric = !character
     
-    #### compute results
+    
+    #save(dataset, character, options, file="/Users/fife/Documents/jaspbroke.rdat")
+    
+    ### compute results
     if (is.null(jaspResults[["linmod_results"]]))
       .linmod_compute(jaspResults, dataset, options, ready)
-    
-    
-    #### show plots (if user specifies them)
+
+
+    ### show plots (if user specifies them)
     if (options$model) {
+
       if (is.null(jaspResults[["linmod_model_plot"]])){
         .linmod_model_plot(jaspResults, options, ready)
       }
@@ -44,11 +48,11 @@ linmod_jasp<- function(jaspResults, dataset, options) {
         .linmod_residual_plot(jaspResults, options, ready)
       }
     }
-    
-    
+
+
     ### show output, depending on results
     if (sum(numeric)>0){
-    
+
       if (length(options$variables)>1){
         if (options$modinf){
           if (is.null(jaspResults[["linmod_table_modcomp"]])){
@@ -56,37 +60,37 @@ linmod_jasp<- function(jaspResults, dataset, options) {
           }
         }
       }
-      
+
       if (options$sl){
         if (is.null(jaspResults[["linmod_table_slopes"]])){
           .create_linmod_table_slopes(jaspResults, options, ready)
         }
       }
     }
-    
+
     if (sum(character)>0){
-      
+
       if (length(options$variables)>1){
         if (options$modinf) {
           if (is.null(jaspResults[["linmod_table_modcomp"]])){
             .create_linmod_table_modcomp(jaspResults, options, ready)
           }
         }
-      }  
-      
+      }
+
       ### check if there's a jasp table already. if not, create it
       if (options$means){
         if (is.null(jaspResults[["linmod_table_means"]])){
         .create_linmod_table_means(jaspResults, options, ready)
-        }  
-      }  
-      
+        }
+      }
+
       if (options$diff) {
         if (is.null(jaspResults[["linmod_table_differences"]])){
           .create_linmod_table_differences(jaspResults, options, ready)
         }
-      }  
-      
+      }
+
     }
     
     # 
@@ -110,7 +114,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   ### create the flexplot
   model.type = "model"
-  .create_flexplot(jaspResults, modelplot, options, model.type)
+  
+  .create_flexplot_linmod(jaspResults, modelplot, options, model.type)
   
   return()
 }
@@ -131,12 +136,12 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   ### create the flexplot
   model.type = "residuals"
-  .create_flexplot(jaspResults, residualplot, options, model.type)
+  .create_flexplot_linmod(jaspResults, residualplot, options, model.type)
   
   return()
 }
 
-.create_flexplot <- function(jaspResults, flexplot, options, model.type) {
+.create_flexplot_linmod <- function(jaspResults, flexplot, options, model.type) {
   
   linmod_results <- jaspResults[["linmod_results"]]$object
   
@@ -147,6 +152,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   }
 
   generated.formula = make_flexplot_formula(options$variables, options$dependent, linmod_results$model$model)
+  save(generated.formula, linmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
   
   if	(options$ghost){
     ghost="black"
@@ -158,7 +164,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
                   "standard errors" = "sterr",
                   "standard deviations", "stdev")
   if (model.type=="model"){
-    save(generated.formula, linmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
+  
   plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                       alpha=options$alpha, ghost.line=ghost)
   } else {
@@ -179,8 +185,6 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   return()
 }
 
-
-
 .linmod_compute = function(jaspResults, dataset, options, ready) {
   
   if (ready){
@@ -198,25 +202,18 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     f = paste0(options$dependent, " ~ ", predictors, collapse = "")
     f = as.formula(f)
     
-    ## save results (for debugging purposes)
     
-    ## set up generalIZED models
-    # family = list(
-    #   "Normal" = "gaussian",
-    #   "Logistic" = "binomial",
-    #   "Poisson" = "poisson",
-    #   "Negative Binomial" = "quassipoisson",
-    #   "Gamma" = "Gamma"
-    # )
-    #require(tidyverse)
-    #model = glm(f, dataset %>% mutate(!!options$dependent := factor_to_logistic_x(dataset[,options$dependent])), family=family[[options$family]])
-    ### model it
-    model = lm(f, dataset)
+    
     #save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
+     
+    
     ### store all the information
+    model = lm(f, dataset)
     est = estimates(model)
+    #save(options, dataset, ready, model, file="/Users/fife/Documents/jaspresults.Rdat")
     est$model = model
     
+     
     linmod_results$object = est
     
     return()
