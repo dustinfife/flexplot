@@ -43,7 +43,7 @@ estimates.lm = function(object){
 	}
 	#### get dataset
 	d = object$model
-  #dataset=NULL
+  #}dataset=NULL
 	#### identify factors
 	if (length(terms)>1){
 		### convert characters to factors

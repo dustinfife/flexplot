@@ -164,8 +164,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
                   "standard errors" = "sterr",
                   "standard deviations", "stdev")
   if (model.type=="model"){
-  
-  plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
+    
+    plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                       alpha=options$alpha, ghost.line=ghost)
   } else {
     plot = visualize(linmod_results$model, linmod_results, plot=model.type, alpha=options$alpha)
@@ -174,11 +174,11 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   if (options$theme == "JASP"){
     plot = themeJasp(plot)
   } else {
-    theme = list("black and white"="theme_bw()+ theme(text=element_text(size=18))",
-                 "minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
-                 "classic" = "theme_classic()+ theme(text=element_text(size=18))",
-                 "dark" = "theme_dark() + theme(text=element_text(size=18))")
-    plot = plot + eval(parse(text=theme[[options$theme]]))
+    theme = list("Black and white"="theme_bw()+ theme(text=element_text(size=18))",
+                 "Minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
+                 "Classic" = "theme_classic()+ theme(text=element_text(size=18))",
+                 "Dark" = "theme_dark() + theme(text=element_text(size=18))")
+    plot = plot + eval(parse(text=theme[[options$theme]])) + theme(legend.position = "none")
   }
   flexplot$plotObject <- plot
   

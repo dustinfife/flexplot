@@ -581,12 +581,19 @@ flexplot = function(formula, data=NULL, related=F,
 		names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 
 
 		## add line to existing plot 
-		if (!is.null(prediction) & length(levels(prediction$model)>1)){  
+		if (!is.null(prediction) & length(levels(prediction$model))>1){  
 			d_smooth$model = factor(d_smooth$group, labels=levels(prediction$model))
 			ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line, show.legend=F)'			
 		} else if (length(axis)>1){	
 			#### used to be factoring d_smooth$group, but that gave different groups for each color AND line, so just making it line now
-		  d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(factor(k[,axis[2]]))))
+		  
+		  #### if they specify BOTH references, allow it. Otherwise, pick one
+		  if (length(unique(d_smooth$linetype))==1){
+		    d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=ghost.reference[[axis[2]]])
+		  } else {
+		    d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(factor(k[[axis[2]]]))))
+		  }
+		  
 		      ### it seems ggplot is choosing the order based on sorting
 	  
 			### if the ghost line specifies a specific line to plot...
