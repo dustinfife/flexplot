@@ -156,6 +156,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 		formula = paste0(outcome, formula, collapse="")
 		
 		formula = formula(formula)
+		modify=F
 	} else {
 		### figure out where random component is
 		f.char = as.character(formula)[3]

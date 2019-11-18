@@ -50,6 +50,7 @@ test_that("compare.fits for other models", {
   #### COMPARE.FITS FUNCTIONS -- linear models
   mod = lm(weight.loss~rewards, data=d)
   require(MASS)
+  set.seed(1212)
   mod2 = rlm(weight.loss~rewards, data=d)
   vdiffr::expect_doppelganger("compare.fits with rlm",compare.fits(formula=weight.loss~rewards, data=d, model1=mod, model2=mod2))
   

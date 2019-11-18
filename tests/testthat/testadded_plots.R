@@ -2,8 +2,9 @@ context("added.plots")
 
 data(exercise_data)
 d = exercise_data
-set.seed(1212)
+
 test_that("avp plots work for linear models", {
+  set.seed(1212)
   vdiffr::expect_doppelganger("avp for therapy.type",
                               added.plot(weight.loss ~ motivation+therapy.type, data=d))
   vdiffr::expect_doppelganger("avp for motivation",
