@@ -111,10 +111,6 @@ flexplot = function(formula, data=NULL, related=F,
 	if (!is.null(prediction)){
 		prediction$model = factor(prediction$model)
 	}
-
-	#### create an empty plot to avoid the 'Error in UseMethod("depth") : no applicable method for 'depth' applied to an object of class "NULL"' error
-	#df = data.frame()
-	#ggplot2::ggplot(df) + ggplot2::theme(panel.background = ggplot2::element_rect(fill = NA, colour = NA))
 	
 	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
 	if (tibble::is_tibble(data)){
@@ -127,23 +123,13 @@ flexplot = function(formula, data=NULL, related=F,
 	outcome = variables[1]
 	predictors = variables[-1]
 	
-	if (!all(variables %in% names(data))){
-		not.there = variables[which(!(variables %in% names(data)))]
-		stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))
-	}
-
-	#### make sure all names are in the dataset
-	if (!all(variables %in% names(data))){
-		not.there = variables[which(!(variables %in% names(data)))]
-		stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))
-	}
+  ### extract given and axis variables
+	given.axis = flexplot_axis_given(formula)
+	given = given.axis$given
+	axis = given.axis$axis
 	
-	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
-	given = gsub(" ", "", given)		
-	given = unlist(strsplit(given, "+", fixed=T))	
-	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
-	axis = gsub(" ", "", axis)			
-	axis = unlist(strsplit(axis, "+", fixed=T))	
+	### make sure all names are in the dataset
+	flexplot_errors(variables = variables, data = data, method=method, axis=axis)
 	
 	### change se based on how many variables they have
 	if (is.null(se)){
@@ -153,287 +139,41 @@ flexplot = function(formula, data=NULL, related=F,
 	    se = F
 	  }
 	}
-	#### give an error if they try to visualize logistic with a categorical x axis
-	if (method=="logistic" & length(predictors)>0){
-		if (!is.numeric(data[,axis[1]])){
-			stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n
-				Best of luck on your statistical journeys."))
-		}	
-	}
 
 	#### identify which variables are numeric and which are factors
-	if (length(predictors)>0){
-		numbers = names(which(unlist(lapply(data[,predictors], is.numeric))))
-		categories = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))
-	}
+	vtypes = variable_types(predictors, data, return.names=T)
+	numbers = vtypes$numbers
+	categories = vtypes$characters
+	levels = length(unique(data[,outcome]))	### necessary for univariate plots
 
 		### remove missing values
-	if (length(predictors)>0){
-		if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){
-			delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))
-			data = data[-delete.me,]
-		}
-	}
+	data = flexplot_delete_na(data, predictors, variables)
 
-	#### get the breaks for the needed variables (remove one because it's the axis and thus will never be binned)
-	#### also, lapply fails when there's just one additional predictor, hence the if statement
-	if (length(predictors)>2){
-		break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	
-	} else {
-		break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (axis[2] %in% predictors[-1]))]	
-	}
+	  ### create the lists that contain the breaks
+  break.me = flexplot_break_me(data, predictors, given)
+  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels)
 	
-	
-	#### did they provide a named break?
-	if (!is.null(breaks)) {
-		named.breaks = names(breaks)
-	} else {
-		named.breaks = NA
-	}	
-
-		#### create a list of breaks
-	if (length(break.me)>0 ){
-		
-		#### bark at them if they forgot to name their breaks
-		if (is.null(named.breaks)){	
-			stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")
-		
-		#### make sure they spelled breaks right and such
-		} else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){
-			stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")
-		}
-		
-		#### make an empty list if they don't provide breaks
-		if (is.null(breaks)){
-			breaks = rep(list(NULL),length(break.me))
-			#names(breaks) = break.me
-		}
-
-
-			#### now make the breaks and convert the data
-		for (i in 1:length(break.me)){
-
-			if ((i-1)<length(breaks)){
-				#### if they don't name the breaks, bark at them
-				if (is.null(names(breaks)[[i]]) & is.null(named.breaks)){
-					stop("It looks like you forgot to name your breaks. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")
-				}
-			}
-			
-			if (!is.null(labels)){
-				if (length(labels)>=i){
-					bins = length(labels[[i]])
-				} else {
-					bins = 3
-				}
-			}			
-			breaks[[break.me[i]]] = prep.breaks(variable=break.me[i], data, breaks=breaks[[break.me[i]]], bins)
-		}
-	} 
-
-	
-	#### if they only have a few levels on the x axis, jitter convert it to categorical
-	if (length(predictors)>0){
-		if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){
-			data[,axis[1]] = factor(data[,axis[1]], ordered=T)
-		}
-		### do the same for the second axis
-		if (length(axis)>1){
-			if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){
-				data[,axis[2]] = factor(data[,axis[2]], ordered=T)
-			}		
-		}
-	}
+    ### convert variables with < 5 categories to ordered factors
+  data = flexplot_convert_to_categorical(data, axis)
 	
 
-	### BEGIN THE MEGA PLOTTING IFS!
-	
-	
+
 	### PLOT UNIVARIATE PLOTS
-	if (length(outcome)==1 & length(predictors)==0){
-
-		##### reorder according to columns lengths (if it's not an ordered factor)
-		if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){
-			counts = sort(table(data[,outcome]), decreasing=T)
-			names(counts)
-			data[,outcome] = factor(data[,outcome], levels=names(counts))
-		}
-		
-		
-		### figure out how many levels for the variable
-		levels = length(unique(data[,outcome]))	
-		
-		#### if numeric, do a histogram
-		if (is.numeric(data[,outcome])){
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
-		} else {
-			p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
-		} 
-		points = "xxxx"
-		fitted = "xxxx"		
-
-	### BIVARIATE PLOTS
-	} else if (length(outcome)==1 & length(axis)==1 & !related){
-		
-		#### if both are categorical, do chi square
-		if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
-			
-			m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
-			chi = chisq.test(data[,axis], data[,outcome])
-			obs.exp = (chi$observed - chi$expected)/chi$expected
-			m$Freq = as.vector(obs.exp)
-			names(m)[names(m)=="Freq"] = "Proportion"
-			p = "ggplot(data=m, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
-			points = "xxxx"
-			fitted = "xxxx"
-		} else {
-
-			### reorder axis and alter default alpha if categorical
-			if (!is.numeric(data[,axis])){
-
-				#### reorder if it's not already ordered
-				if (!is.ordered(data[, axis[1]])){
-					if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
-					ord = aggregate(data[,outcome]~data[, axis], FUN=fn, na.rm=T)
-					ord = ord[order(ord[,2], decreasing=T),]
-					data[,axis] = factor(data[, axis], levels=ord[,1])
-				}
-		
-				#### set default alpha
-				if(alpha==.99977){
-					alpha = .2
-				}		
-			}
-
-			p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
-			points = points.func(axis.var=axis, data=data, jitter=jitter)
-			fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
-
-		}	
-	
-	### RELATED T-TEST
-	} else if (related){		
-		
-		
-		#### extract levels of the predictors
-		levs = levels(data[,axis[1]])
-
-		#### create difference scores
-		g1 = data[data[, axis[1]]==levs[1], outcome]
-		g2 = data[data[, axis[1]]==levs[2], outcome]				
-
-		
-		### error checking
-		if (length(predictors)!=1){
-			stop("Currently, the 'related' option is only available when there's a single predictor.")
-		} 
-		
-		if (length(levs)!=2){
-			stop("Sorry, I can only accept two levels of the grouping variable when related=T.")
-		}
-		
-		if (length(g1) != length(g2)){
-			stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")
-		}
-		
-		lab = paste0("Difference (",levs[2], "-", levs[1], ')')
-		d2 = data.frame(Difference=g2-g1)
-		
-		
-		p = "ggplot(d2, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x=lab) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())"
-	
-		#### modify default jitter
-		if (is.null(jitter)){
-			jitter = c(.05, 0)
-		} 
-		points = points.func(axis.var="Difference", data=d2, jitter=jitter)
-		fitted = paste0(fit.function(outcome, "Difference", data=d2, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
-
-	##### if they have two axis variables
-	} else if (length(axis)>1){
-
-		#### if the second variable is numeric, bin it
-		if (is.numeric(data[,axis[2]])){
-			binned.name = paste0(axis[2], "_binned")
-			data[[binned.name]] = bin.me(axis[2], data, bins, unlist(labels), breaks[[axis[2]]])
-			axis[2] = binned.name
-		}
-		
-		### if they supply predictions, do not vary color
-		if (!is.null(prediction)){
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'
-			
-		} else {
-			p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
-			### remove the default color if they have categorical variables		
-		}
-		
-		points = points.func(axis.var=axis, data=data, jitter=jitter)
-		fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)
-		
-		
-		### remove the default color if they have something in the second axis
-		if (!is.numeric(data[,axis[2]])){
-			fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)
-			fitted = gsub(', color = "#bf0303"', "", fitted, fixed=T)
-		}	
-	}
+  bivariate = flexplot_bivariate_plot(outcome=outcome, predictors=predictors, axis=axis, 
+                                      related=related, labels=labels, bins=bins, breaks=breaks, 
+                                      data=data, jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, alpha=alpha, prediction=prediction)
+    p = bivariate$p
+    points = bivariate$points
+    fitted = bivariate$fitted
+    data = bivariate$data
+    prediction = bivariate$prediction
+    alpha = bivariate$alpha
 
 	#### all the above should take care of ALL possible plots, but now we add paneling
-	
-	#### add panels (if they were specified)
-	if (!is.na(given[1])){
-		for (i in 1:length(given)){
-
-			binned.name = paste0(given[i], "_binned")
-
-			if (is.numeric(data[,given[i]])){
-			  b = bin.me(variable=given[i], data, bins, labels=labels[i], breaks=breaks[[given[i]]])
-				#### if there's only one category, fix that succa!
-			  if (length(levels(b))==1 & length(unique(data[[given[i]]]))>1){
-				  data[,binned.name] = factor(data[,given[i]])
-			  } else {
-			    data[,binned.name] = b  
-				}
-			  
-				
-				### if they specified prediction, bin those too
-				if (!is.null(prediction)){
-					prediction[,binned.name] = bin.me(given[i], prediction, bins, labels[i], breaks[[given[i]]])
-				}				
-				### reorder levels of bin 2
-				if (i==2){
-					data[,binned.name] = forcats::fct_rev(data[,binned.name])
-				}
-			} else {
-				### duplicate categorical variables and give a new name for binned ones
-				data[,binned.name] = data[,given[i]]
-				
-				
-				### if they specified prediction, bin those too (because later when doing ghost lines, I randomly choose a prediction value from a data value, and they need to be binned before that)
-				if (!is.null(prediction)){
-					prediction[,binned.name] = prediction[,given[i]]
-				}					
-			}
-		}
-
-		#### prep the given variables to be stringed together
-		given2 = given
-		if (length(break.me)>0){
-			given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")
-		}	
-		given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
-		
-		#### make a custom labeller that removes "_binned"
-		custom.labeler = function(x){
-			lapply(names(x),function(y){
-			paste0(gsub("_binned", "", y),": ", x[[y]])
-			})
-		}
-		facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			
-	} else {
-		facets = "xxxx"
-	}
+  panels = flexplot_panel_variables(outcome, predictors, axis, given, related, labels, bins, breaks, data, suppress_smooth=suppress_smooth, method=method, spread=spread, prediction=prediction, break.me=break.me)
+    facets = panels$facets
+    data = panels$data
+    prediction = panels$prediction
 
 
 	
@@ -692,7 +432,7 @@ flexplot = function(formula, data=NULL, related=F,
 	total.call = gsub("+xxxx","",total.call, fixed=T)
 	final = suppressMessages(eval(parse(text=total.call)))
 
-		
+	
   ### suppress messages only works for print messages, but print messages actually show the plot (even when i want to store it for laster use). Thus, I need both. Weird. 
 	#return(final)
 	#class(final) <- c("flexplot", class(final))

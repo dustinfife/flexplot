@@ -8,6 +8,13 @@ standardized_differences = function(model1, model2, sigma=TRUE){
   differences
 }
 
+#### make a custom labeller that removes "_binned"
+custom.labeler = function(x){
+  lapply(names(x),function(y){
+    paste0(gsub("_binned", "", y),": ", x[[y]])
+  })
+}
+
 ## function that does nested model comparisons on a single fitted model
 nested_model_comparisons = function(object){
   
@@ -35,10 +42,17 @@ check.non.number = function(x){
 }
 
 
-variable_types = function(variables, data){
-  characters = sapply(data[,variables, drop=F], check.non.number) 
-  numbers = !characters
-  list(characters=characters, numbers=numbers)
+variable_types = function(variables, data, return.names=F){
+  if (length(variables)>0){
+    characters = sapply(data[,variables, drop=F], check.non.number) 
+    numbers = !characters
+    if (return.names){
+      list(characters=names(characters)[which(characters)], numbers=names(characters)[which(numbers)])  
+    } else {
+      list(characters=(characters), numbers=(numbers))  
+    }
+    
+  }
 }
 
 #### if both numeric and factor, put numeric on x axis and factor as color/line

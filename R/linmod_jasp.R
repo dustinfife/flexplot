@@ -178,7 +178,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
                  "Minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
                  "Classic" = "theme_classic()+ theme(text=element_text(size=18))",
                  "Dark" = "theme_dark() + theme(text=element_text(size=18))")
-    plot = plot + eval(parse(text=theme[[options$theme]])) + theme(legend.position = "none")
+    plot = plot + eval(parse(text=theme[[options$theme]])) #+ theme(legend.position = "none")
   }
   flexplot$plotObject <- plot
   
