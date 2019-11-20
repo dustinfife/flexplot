@@ -1,4 +1,4 @@
-create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, ghost.reference){
+create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, ghost.reference, data){
   ### rename columns
   names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 
   
@@ -13,7 +13,7 @@ create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, gh
     if (length(unique(d_smooth$linetype))==1){
       d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=ghost.reference[[axis[2]]])
     } else {
-      d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(factor(k[[axis[2]]]))))
+      d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(factor(data[[axis[2]]]))))
     }
     
     ### it seems ggplot is choosing the order based on sorting
@@ -33,7 +33,7 @@ create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, gh
   list(ghost=ghost, d_smooth = d_smooth)
 }
 
-create_ghost_dataset = function(data, axis,prediction, given, ghost.reference, predictors, p, fitted, method, outcome, se){
+create_ghost_dataset = function(data, axis, prediction, given, ghost.reference, predictors, p, fitted, method, outcome, se){
   #### if they specified a prediction, extract data from prediction model
   if (!is.null(prediction)){
     k = prediction

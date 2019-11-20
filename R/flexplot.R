@@ -184,10 +184,10 @@ flexplot = function(formula, data=NULL, related=F,
     ghost.reference = create_ghost_reference(ghost.reference=ghost.reference, given=given, axis=axis, data=data, bins=bins, labels=labels, breaks=breaks)
 		
         ### extract the ggplot dataset that contains the fitted information
-    d_smooth = create_ghost_dataset(data=data, prediction=prediction, given=given, ghost.reference=ghost.reference, predictors=predictors, p=p, fitted=fitted, method=method, outcome=outcome, se=se)
+    d_smooth = create_ghost_dataset(data=data, axis=axis, prediction=prediction, given=given, ghost.reference=ghost.reference, predictors=predictors, p=p, fitted=fitted, method=method, outcome=outcome, se=se)
 
         ### create the text for the ghost line
-    ghosttext = create_ghost_text(d_smooth=d_smooth, axis=axis, outcome=outcome, prediction=prediction, ghost.line=ghost.line, ghost.reference=ghost.reference)
+    ghosttext = create_ghost_text(d_smooth=d_smooth, axis=axis, outcome=outcome, prediction=prediction, ghost.line=ghost.line, ghost.reference=ghost.reference, data=data)
     ghost = ghosttext$ghost
     d_smooth = ghosttext$d_smooth
 
