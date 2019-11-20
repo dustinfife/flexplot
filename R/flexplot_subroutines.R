@@ -348,5 +348,55 @@ flexplot_panel_variables = function(outcome, predictors, axis, given, related, l
   list(facets=facets, prediction=prediction, data=data)
 }
 
+flexplot_modify_prediction = function(prediction, axis, break.me, data, num.models, labels, bins, breaks, predictors){
+  
+  if (!is.na(axis[2]) & length(num.models)>1){
+    stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z), or choose to display only one model")
+  }
+  
+  
+  #### bin the predictions, where needed
+  if (length(break.me)>0){
+    for (i in 1:length(break.me)){
+      ### find that variable in the model and bin it
+      prediction[[break.me[i]]] = bin.me(break.me[i], prediction, bins, labels[i], breaks[[break.me[i]]])
+      
+    }
+    ### now average fit within bin
+    groups = c("model", paste0(break.me, "_binned"), predictors[-which(predictors%in%break.me)])
+    prediction = prediction %>% group_by_at(groups) %>% summarize(prediction = mean(prediction)) %>% as.data.frame
+  }
+  
+  return(prediction)
+}
+
+flexplot_generate_prediction_lines = function(prediction, axis, break.me, data,num.models, labels, bins, breaks){
+    
+    #### check if first variable is a continuous predictor
+    if (is.numeric(data[[axis[1]]])){
+      
+      ##### if they specify an axis[2], modify the "fitted" string
+      if (!is.na(axis[2])){
+        pred.line = 'geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)' 				
+        fitted = "xxxx"
+      } else {
+        
+        
+        #### if they supply more than two models to compare...
+        if (length(levels(prediction$model))>2){
+          pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)' 									
+        } else {
+          pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				
+        }
+      }
+      
+    } else {
+      
+      pred.line = 'geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))'
+      
+    }
+  
+  return(pred.line) 
+}
 
 #

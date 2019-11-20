@@ -188,8 +188,8 @@ flexplot = function(formula, data=NULL, related=F,
 
         ### create the text for the ghost line
     ghosttext = create_ghost_text(d_smooth=d_smooth, axis=axis, outcome=outcome, prediction=prediction, ghost.line=ghost.line, ghost.reference=ghost.reference, data=data)
-    ghost = ghosttext$ghost
-    d_smooth = ghosttext$d_smooth
+      ghost = ghosttext$ghost
+      d_smooth = ghosttext$d_smooth
 
 	} else {
 		ghost = "xxxx"
@@ -197,65 +197,20 @@ flexplot = function(formula, data=NULL, related=F,
 
 	### add prediction lines
 	if (!is.null(prediction)){
-	
 		### see how many models are being compared
 		num.models = levels(prediction$model)
 	
-		if (!is.na(axis[2]) & length(num.models)>1){
-			stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z), or choose to display only one model")
-		}
-
-
-		#### bin the predictions, where needed
-		if (length(break.me)>0){
-			for (i in 1:length(break.me)){
-				### find that variable in the model and bin it
-				prediction[[break.me[i]]] = bin.me(break.me[i], prediction, bins, labels[i], breaks[[break.me[i]]])
-
-			}
-							### now average fit within bin
-				groups = c("model", paste0(break.me, "_binned"), predictors[-which(predictors%in%break.me)])
-				prediction = prediction %>% group_by_at(groups) %>% summarize(prediction = mean(prediction)) %>% as.data.frame
-
-		}
-
-		#### check if first variable is a continuous predictor
-		if (is.numeric(data[[predictors[1]]])){
-					
-			##### if they specify an axis[2], modify the "fitted" string
-			if (!is.na(axis[2])){
-				pred.line = 'geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)' 				
-				fitted = "xxxx"
-			} else {
-				
-				
-				#### if they supply more than two models to compare...
-				if (length(levels(prediction$model))>2){
-					pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)' 									
-				} else {
-					pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				
-				}
-			}
-			                         
-		} else {
-
-			pred.line = 'geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))'
-
-		}
-		
-
-		#### remove linetype from the plot
-		
-		
+		prediction = flexplot_modify_prediction(prediction=prediction, axis=axis, break.me=break.me, data=data, 
+		                                        num.models=num.models, labels=labels, bins=bins, breaks=breaks, predictors=predictors)
+		pred.line = flexplot_generate_prediction_lines(prediction=prediction, axis=axis, break.me=break.me, 
+		                                               data=data, num.models=num.models, breaks=breaks,labels=labels, bins=bins) 
 	} else {
-		pred.line = "xxxx"
+	  pred.line = "xxxx"
 	}
-
-	##### do third eye if they choose to
-	#if (third.eye)
 
 	theme = "theme_bw() + theme(text=element_text(size=18))"
 
+	### without this, the scale of the y axis changes if the user samples
 	if (is.finite(sample) & is.numeric(data[,outcome])){
 		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
 	}
