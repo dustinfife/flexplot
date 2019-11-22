@@ -161,8 +161,9 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     }
     
     ### reorder levels of given 2
-    if (length(given)>1 & is.numeric(data[,given[2]])){ ### for categorical variables, they're not binned, so we have to include the option where they're not
-        data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
+    if (length(given)>1){ 
+        ### for categorical variables, they're not binned, so we have to include the option where they're not
+        if (is.numeric(data[,given[2]])) data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
     }
     return(data)
   }  
