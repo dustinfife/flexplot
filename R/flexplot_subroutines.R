@@ -60,7 +60,6 @@ flexplot_alpha_default = function(data, axis, alpha){
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
   
-
   if (is.null(data)) {
     return(data) 
   } else {
@@ -160,12 +159,14 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
       ord = ord[order(ord[,2], decreasing=T),]
       data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
     }
+    
     ### reorder levels of given 2
-    if (length(given)>1){
-      data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])
+    if (length(given)>1 & is.numeric(data[,given[2]])){ ### for categorical variables, they're not binned, so we have to include the option where they're not
+        data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
     }
     return(data)
   }  
+  
 }
 
 

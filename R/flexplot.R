@@ -105,6 +105,7 @@ flexplot = function(formula, data=NULL, related=F,
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   
   ### prepare the variables
+
   varprep = flexplot_prep_variables(formula, data, 
                                     breaks = breaks, labels=labels, bins=bins,
                                     related=related,  
@@ -112,7 +113,7 @@ flexplot = function(formula, data=NULL, related=F,
                                     alpha=alpha, prediction=prediction) 
 
   ### make modifications to the data
-  
+ 
 	data = with(varprep, 
 	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
