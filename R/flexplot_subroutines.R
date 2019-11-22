@@ -1,8 +1,135 @@
+# expect_true(length(names(flexplot_prep_variables(weight.loss~therapy.type, data=exercise_data)))==23)
+# expect_true(length(flexplot_prep_variables(weight.loss~therapy.type + motivation, data=exercise_data)$variables)==3)
+# this function takes all the arguments needed for the rest of the --------
+# function and stores them as a list --------------------------------------
+flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels=NULL, bins=3, 
+                                   jitter=NULL, suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
+                                   alpha=.99977, prediction=NULL){
+  variables = all.vars(formula)
+  outcome = variables[1]
+  predictors = variables[-1]
+  
+  ### extract given and axis variables
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  
+  #### identify which variables are numeric and which are factors
+  vtypes = variable_types(predictors, data, return.names=T)
+  numbers = vtypes$numbers
+  categories = vtypes$characters
+  if (outcome %in% categories){
+    levels = length(unique(data[,outcome]))	### necessary for univariate plots
+  }
+  
+  ### create the lists that contain the breaks
+  break.me = flexplot_break_me(data, predictors, given, axis)
+  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels)
+  
+  list(variables=variables, outcome=outcome, predictors=predictors, 
+       given=given, axis=axis, numbers=numbers, categories=categories, 
+       levels=levels, data=data, break.me=break.me, breaks=breaks, formula = formula, data = data,
+       related = related, labels=labels, bins=bins, breaks=breaks, jitter=jitter, suppress_smooth=suppress_smooth,
+       method = method, spread = spread, alpha = alpha, prediction = prediction)
+}
+
+# expect_error(flexplot_modify_data(data=exercise_data, variables = "weight.loss"))  ### missing all variables
+# expect_true(!is.tibble(flexplot_modify_data(formula = weight.loss~therapy.type, data=exercise_data %>% select(weight.loss, therapy.type))))### data as tibble
+# expect_equal(flexplot_modify_data(therapy.type~gender, data=exercise_data)$Proportion[1], .12745098)  ### association plot data
+# expect_error(flexplot_modify_data(weight.loss~gender + motivation, data=exercise_data, related=T))
+# expect_error(flexplot_modify_data(formula = weight.loss~gender, data=exercise_data, related=T))
+# expect_true(all(c("motivation_binned", "income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + motivation | income, data=exercise_data))))
+# expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
+flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, axis = NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL){
+  
+  if (is.null(formula)){
+    list.na = list(related, variables, outcome, axis, labels, bins, breaks, break.me)
+    isnull =  names(which(unlist(lapply(list.na, is.null))))
+    if (length(isnull)>0){
+      stop(paste0("You must either provide a formula OR all variables requested. It looks like you're missing the variable ", isnull))
+    }
+  }
+  
+  if (!is.null(formula)){
+    prep_vars = flexplot_prep_variables(formula, data=exercise_data)
+    variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; 
+    break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors
+  }
+  
+  ### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
+  if (tibble::is_tibble(data)){
+    data = as.data.frame(data)
+  }
+  
+  ### remove missing values
+  print(variables)
+  data = flexplot_delete_na(data, variables)
+  
+  
+  ### prep data for association plot
+  if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1){
+    m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
+    chi = chisq.test(data[,axis], data[,outcome])
+    obs.exp = (chi$observed - chi$expected)/chi$expected
+    m$Freq = as.vector(obs.exp)
+    names(m)[names(m)=="Freq"] = "Proportion"
+    data = m
+  }
+  
+  
+  ### prep data for related plot
+  if (related){
+    #### extract levels of the predictors
+    levs = levels(data[,axis[1]])
+    
+    #### create difference scores
+    g1 = data[data[, axis[1]]==levs[1], outcome]
+    g2 = data[data[, axis[1]]==levs[2], outcome]				
+    
+    
+    ### error checking
+    if (length(predictors)!=1){
+      stop("Currently, the 'related' option is only available when there's a single predictor.")
+    } 
+    
+    if (length(levs)!=2){
+      stop("Sorry, I can only accept two levels of the grouping variable when related=T.")
+    }
+    
+    if (length(g1) != length(g2)){
+      stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")
+    }
+    
+    lab = paste0("Difference (",levs[2], "-", levs[1], ')')
+    data = data.frame(Difference=g2-g1)
+    data[[outcome]] = NA
+    data[[predictors]] = NA
+  }
+  
+  if (length(break.me)>0){
+    #### bin the variables that need to be binned
+    tempfunc = function(i=1, break.me, bins, labels, breaks, data){
+      bin.me(break.me[i], data, bins[i], unlist(labels)[i], breaks[[i]])
+    }
+    
+    new_cols = lapply(1:length(break.me), tempfunc, break.me, bins, labels, breaks, data)
+    data[,paste0(break.me, "_binned")] = new_cols
+  }
+  
+  return(data)
+}
+
+
 # expect_error(flexplot_errors("hello", exercise_data, method="logistic", axis="hello"))
 # expect_error(flexplot_errors(c("weight.loss", "therapy.type"), exercise_data, method="logistic", axis="hello"))
 # expect_error(flexplot_errors(c("gender", "therapy.type"), exercise_data, method="logistic", axis="therapy.type"))
 # expect_error(flexplot_errors(c("weight.loss", "therapy.type"), NULL, method="logistic", axis="hello"))
 flexplot_errors = function(variables, data, method=method, axis){
+  
+  if (is.null(data)){
+    stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
+  }
+  
   if (!all(variables %in% names(data))){
     not.there = variables[which(!(variables %in% names(data)))]
     stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))
@@ -26,7 +153,7 @@ flexplot_errors = function(variables, data, method=method, axis){
 #expect_identical(flexplot_break_me(exercise_data, c("weight.loss", "income"), given="income"), "income")
 #expect_equal(length(flexplot_break_me(exercise_data, c("weight.loss", "income"), given=NULL)), 0)
 #expect_equal(length(flexplot_break_me(exercise_data, c("weight.loss", "income", "weight.loss", "motivation", "therapy.type"), given=c("weight.loss", "motivation"))), 2)
-flexplot_break_me = function(data, predictors, given){
+flexplot_break_me = function(data, predictors, given, axis){
 
   ### without this line of code, there's an error for those situations where there is no second axis
   if (length(axis)<2){
@@ -35,12 +162,13 @@ flexplot_break_me = function(data, predictors, given){
     second.axis = axis[2]
   }
 
+  non.axis.one = predictors[-1]
   #### get the breaks for the needed variables (remove axis 1 because it's the axis and thus will never be binned)
   #### also, lapply fails when there's just one additional predictor, hence the if statement
   if (length(predictors)>2){
-    break.me = predictors[-1][unlist(lapply(data[,predictors[-1]], FUN=is.numeric)) & ((predictors[-1] %in% given) | (second.axis %in% predictors[-1]))]	
+    break.me = non.axis.one[unlist(lapply(data[,non.axis.one], FUN=is.numeric)) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   } else {
-    break.me = predictors[-1][is.numeric(data[,predictors[-1]]) & ((predictors[-1] %in% given) | (second.axis %in% predictors[-1]))]	
+    break.me = non.axis.one[is.numeric(data[,non.axis.one]) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
   
   #if (length(break.me)==0) break.me = NA
@@ -158,42 +286,6 @@ flexplot_convert_to_categorical = function(data, axis){
   return(data)
 }
 
-# expect_true(length(names(flexplot_prep_variables(weight.loss~therapy.type, data=exercise_data)))==23)
-# expect_true(length(flexplot_prep_variables(weight.loss~therapy.type + motivation, data=exercise_data)$variables)==3)
-
-# this function takes all the arguments needed for the rest of the --------
-# function and stores them as a list --------------------------------------
-flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels=NULL, bins=3, 
-                                   jitter=NULL, suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
-                                   alpha=.99977, prediction=NULL){
-  variables = all.vars(formula)
-  outcome = variables[1]
-  predictors = variables[-1]
-  
-  ### extract given and axis variables
-  given.axis = flexplot_axis_given(formula)
-  given = given.axis$given
-  axis = given.axis$axis
-  
-  #### identify which variables are numeric and which are factors
-  vtypes = variable_types(predictors, data, return.names=T)
-  numbers = vtypes$numbers
-  categories = vtypes$characters
-  levels = length(unique(data[,outcome]))	### necessary for univariate plots
-  
-  ### remove missing values
-  data = flexplot_delete_na(data, variables)
-  
-  ### create the lists that contain the breaks
-  break.me = flexplot_break_me(data, predictors, given)
-  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels)
-  
-  list(variables=variables, outcome=outcome, predictors=predictors, 
-       given=given, axis=axis, numbers=numbers, categories=categories, 
-       levels=levels, data=data, break.me=break.me, breaks=breaks, formula = formula, data = data,
-       related = related, labels=labels, bins=bins, breaks=breaks, jitter=jitter, suppress_smooth=suppress_smooth,
-       method = method, spread = spread, alpha = alpha, prediction = prediction)
-}
 
 
 # uni = flexplot_bivariate_plot(flexplot_prep_variables(weight.loss~1, data=exercise_data))$p
@@ -212,18 +304,12 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
 # expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
 # bv = flexplot_bivariate_plot(flexplot_prep_variables(weight.loss~motivation, data=exercise_data))$p
 # expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
-flexplot_bivariate_plot = function(flexplot_vars, related=F, labels=NULL, bins=3, breaks=NULL, 
-                                   jitter=NULL, suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
-                                   alpha=.99977, prediction=NULL){
+flexplot_bivariate_plot = function(outcome, predictors, data, axis, # variable types and stuff
+                                    related, alpha, jitter, suppress_smooth, method, spread,  # arguments passed from flexplot
+                                   bins, breaks, labels ### binning information
+                                   ){
   
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
-  
-  ## prep data
-  vars = flexplot_vars
-    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
-    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
-    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
-    formula = vars$formula; data = vars$data
     
   if (length(outcome)==1 & length(predictors)==0){
     
@@ -381,6 +467,7 @@ flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=
       
       if (is.numeric(data[,given[i]])){
         b = bin.me(variable=given[i], data, bins, labels=labels[i], breaks=breaks[[given[i]]])
+        
         #### if there's only one category, fix that succa!
         if (length(levels(b))==1 & length(unique(data[[given[i]]]))>1){
           data[,binned.name] = factor(data[,given[i]])

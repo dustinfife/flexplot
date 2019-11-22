@@ -42,6 +42,7 @@ check.non.number = function(x){
 }
 
 
+
 variable_types = function(variables, data, return.names=F){
   if (length(variables)>0){
     characters = sapply(data[,variables, drop=F], check.non.number) 

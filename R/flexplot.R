@@ -93,36 +93,34 @@ flexplot = function(formula, data=NULL, related=F,
 		prediction = NULL, suppress_smooth=F, alpha=.99977, plot.string=F, silent=F,
 		third.eye=NULL){
 			
-	#d = exercise_data
+	#data = exercise_data
 	##### use the following to debug flexplot
-	#formula = formula(weight.loss~therapy.type + rewards); data=d; 
+	#formula = formula(weight.loss~therapy.type + rewards | motivation); data=exercise_data; 
 	#bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
 	#data(exercise_data)
 	#d = exercise_data
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
 	#ghost.reference = list(income=90000)
 
+  spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
+  
+  ### prepare the variables
+  varprep = flexplot_prep_variables(formula, data, 
+                                    breaks = breaks, labels=labels, bins=bins,
+                                    related=related,  
+                                    jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
+                                    alpha=alpha, prediction=prediction) 
 
-	if (is.null(data)){
-		stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
-	}
-
-	##### make models into a factor if they supply predictions
+	data = with(varprep, 
+	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, related=related, labels=labels, break.me=break.me, breaks=breaks, bins=bins))
+	                                                                      
+  ##### make models into a factor if they supply predictions
 	if (!is.null(prediction)){
 		prediction$model = factor(prediction$model)
 	}
 	
-	### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
-	if (tibble::is_tibble(data)){
-		data = as.data.frame(data)
-	}
-
-	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
-  
-	### do all the prep work for the flexplot arguments
-	varprep = flexplot_prep_variables(formula, data, breaks = breaks)
 	
-  ### make sure all names are in the dataset
+  ### report errors when necessary
   with(varprep, flexplot_errors(variables = variables, data = data, method=method, axis=axis))
 	
     ### convert variables with < 5 categories to ordered factors
@@ -140,9 +138,9 @@ flexplot = function(formula, data=NULL, related=F,
   
 
 	### PLOT UNIVARIATE PLOTS
-  bivariate = with(varprep, flexplot_bivariate_plot(related=related, labels=labels, bins=bins,
-                                      jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
-                                      alpha=alpha, prediction=prediction))
+  bivariate = with(varprep, flexplot_bivariate_plot(outcome, predictors, data, axis, # variable types and stuff
+                                                    related, alpha, jitter, suppress_smooth, method, spread,  # arguments passed from flexplot
+                                                    bins, breaks, labels))
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
