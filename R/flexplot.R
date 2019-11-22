@@ -118,14 +118,15 @@ flexplot = function(formula, data=NULL, related=F,
 	}
 
 	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
-	
-
   
+	### do all the prep work for the flexplot arguments
+	varprep = flexplot_prep_variables(formula, data, breaks = breaks)
+	
   ### make sure all names are in the dataset
-  flexplot_errors(variables = variables, data = data, method=method, axis=axis)  
+  with(varprep, flexplot_errors(variables = variables, data = data, method=method, axis=axis))
 	
     ### convert variables with < 5 categories to ordered factors
-  data = flexplot_convert_to_categorical(data, axis)
+  data = with(varprep, flexplot_convert_to_categorical(data, axis))
 	
   ### change se based on how many variables they have
   if (is.null(se)){
@@ -136,13 +137,12 @@ flexplot = function(formula, data=NULL, related=F,
     }
   }
   
-  varprep = flexplot_prep_variables(formula, data, breaks = breaks)
+  
 
 	### PLOT UNIVARIATE PLOTS
-  bivariate = flexplot_bivariate_plot(varprep, 
-                                      related=related, labels=labels, bins=bins,
+  bivariate = with(varprep, flexplot_bivariate_plot(related=related, labels=labels, bins=bins,
                                       jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
-                                      alpha=alpha, prediction=prediction)
+                                      alpha=alpha, prediction=prediction))
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
@@ -158,9 +158,6 @@ flexplot = function(formula, data=NULL, related=F,
     facets = panels$facets
     data = panels$data
     prediction = panels$prediction
-
-
-	
 
 	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
 	  

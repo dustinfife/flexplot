@@ -158,9 +158,14 @@ flexplot_convert_to_categorical = function(data, axis){
   return(data)
 }
 
-# expect_true(length(names(flexplot_prep_variables(weight.loss~therapy.type, data=exercise_data)))==11)
+# expect_true(length(names(flexplot_prep_variables(weight.loss~therapy.type, data=exercise_data)))==23)
 # expect_true(length(flexplot_prep_variables(weight.loss~therapy.type + motivation, data=exercise_data)$variables)==3)
-flexplot_prep_variables = function(formula, data, breaks=NULL){
+
+# this function takes all the arguments needed for the rest of the --------
+# function and stores them as a list --------------------------------------
+flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels=NULL, bins=3, 
+                                   jitter=NULL, suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
+                                   alpha=.99977, prediction=NULL){
   variables = all.vars(formula)
   outcome = variables[1]
   predictors = variables[-1]
@@ -185,7 +190,9 @@ flexplot_prep_variables = function(formula, data, breaks=NULL){
   
   list(variables=variables, outcome=outcome, predictors=predictors, 
        given=given, axis=axis, numbers=numbers, categories=categories, 
-       levels=levels, data=data, break.me=break.me, breaks=breaks, formula = formula, data = data)
+       levels=levels, data=data, break.me=break.me, breaks=breaks, formula = formula, data = data,
+       related = related, labels=labels, bins=bins, breaks=breaks, jitter=jitter, suppress_smooth=suppress_smooth,
+       method = method, spread = spread, alpha = alpha, prediction = prediction)
 }
 
 
