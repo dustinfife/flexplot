@@ -94,8 +94,18 @@ create_ghost_dataset = function(data, axis, prediction, given, ghost.reference, 
   return(d_smooth)
 }
 
-create_ghost_reference= function(ghost.reference, given, axis, data, bins, labels, breaks){
 
+# bv = create_ghost_reference(flexplot_prep_variables(weight.loss~motivation|therapy.type, data=exercise_data))
+# expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
+create_ghost_reference= function(flexplot_vars, ghost.reference=NULL, bins=3, labels=NULL, breaks=NULL){
+
+  vars = flexplot_vars
+    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
+    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
+    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
+    formula = vars$formula; data = vars$data; break.me = vars$break.me
+  
+  
     if (!is.null(ghost.reference)){
     
     ### what needs a reference? all given and MAYBE axis[2]

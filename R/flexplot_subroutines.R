@@ -1,13 +1,11 @@
+# expect_error(flexplot_errors("hello", exercise_data, method="logistic", axis="hello"))
+# expect_error(flexplot_errors(c("weight.loss", "therapy.type"), exercise_data, method="logistic", axis="hello"))
+# expect_error(flexplot_errors(c("gender", "therapy.type"), exercise_data, method="logistic", axis="therapy.type"))
+# expect_error(flexplot_errors(c("weight.loss", "therapy.type"), NULL, method="logistic", axis="hello"))
 flexplot_errors = function(variables, data, method=method, axis){
   if (!all(variables %in% names(data))){
     not.there = variables[which(!(variables %in% names(data)))]
     stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))
-  }
-  
-  #### make sure all names are in the dataset
-  if (!all(variables %in% names(data))){
-    not.there = variables[which(!(variables %in% names(data)))]
-    stop(paste0("So...we've got a lil' problem. You specified one or more variable in the formula that is not in your dataset (specifically ", paste0(not.there, collapse=", "), "). Let's get that fixed and try again.\n"))
   }
 
   #### give an error if they try to visualize logistic with a categorical x axis
@@ -109,7 +107,9 @@ flexplot_create_breaks = function(break.me, breaks, data, labels, bins=3){
 }
 
 
-#flexplot_axis_given(formula(y~1))
+# expect_true(is.na(flexplot_axis_given(formula(y~1))$given))
+# expect_true(length(flexplot_axis_given(formula(y~x+z))$axis) ==2)
+# expect_true(length(flexplot_axis_given(formula(y~x+z|z))$given) ==1)
 flexplot_axis_given = function(formula){
   given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
   given = gsub(" ", "", given)		
@@ -120,10 +120,13 @@ flexplot_axis_given = function(formula){
   list(given=given, axis=axis)
 }
 
-flexplot_delete_na = function(data, predictors, variables){
-  if (length(predictors)>0){
-    if (length(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))>0){
-      delete.me = as.numeric(unlist(apply(data[,variables], 2, function(x){(which(is.na(x)))})))
+#expect_true(nrow(flexplot_delete_na(exercise_data, "muscle.gain.missing"))==167)
+#expect_true(nrow(flexplot_delete_na(exercise_data, "muscle.gain"))==200)
+#expect_true(nrow(flexplot_delete_na(exercise_data, NULL))==200)
+flexplot_delete_na = function(data, variables){
+  if (length(variables)>=0){
+    if (length(unlist(apply(data[,variables, drop=FALSE], 2, function(x){(which(is.na(x)))})))>0){
+      delete.me = as.numeric(unlist(apply(data[,variables, drop=FALSE], 2, function(x){(which(is.na(x)))})))
       data = data[-delete.me,]
       return(data)
     } else {
@@ -155,8 +158,66 @@ flexplot_convert_to_categorical = function(data, axis){
   return(data)
 }
 
+# expect_true(length(names(flexplot_prep_variables(weight.loss~therapy.type, data=exercise_data)))==11)
+# expect_true(length(flexplot_prep_variables(weight.loss~therapy.type + motivation, data=exercise_data)$variables)==3)
+flexplot_prep_variables = function(formula, data, breaks=NULL){
+  variables = all.vars(formula)
+  outcome = variables[1]
+  predictors = variables[-1]
+  
+  ### extract given and axis variables
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  
+  #### identify which variables are numeric and which are factors
+  vtypes = variable_types(predictors, data, return.names=T)
+  numbers = vtypes$numbers
+  categories = vtypes$characters
+  levels = length(unique(data[,outcome]))	### necessary for univariate plots
+  
+  ### remove missing values
+  data = flexplot_delete_na(data, variables)
+  
+  ### create the lists that contain the breaks
+  break.me = flexplot_break_me(data, predictors, given)
+  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels)
+  
+  list(variables=variables, outcome=outcome, predictors=predictors, 
+       given=given, axis=axis, numbers=numbers, categories=categories, 
+       levels=levels, data=data, break.me=break.me, breaks=breaks, formula = formula, data = data)
+}
 
-flexplot_bivariate_plot = function(outcome, predictors, axis, related, labels, bins, breaks, data, jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, alpha=alpha, prediction=prediction){
+
+# uni = flexplot_bivariate_plot(flexplot_prep_variables(weight.loss~1, data=exercise_data))$p
+# expect_identical(uni, "ggplot(data=data, aes_string(outcome)) + geom_histogram(fill=\"lightgray\", col=\"black\", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)")
+# uni2 = flexplot_bivariate_plot(flexplot_prep_variables(therapy.type~1, data=exercise_data))$p
+# expect_identical(uni2, "ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)")
+# uni3 = flexplot_bivariate_plot(flexplot_prep_variables(therapy.type~1, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T))))$p
+# expect_identical(uni3, "ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)")
+# chi = flexplot_bivariate_plot(flexplot_prep_variables(therapy.type~gender, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T))))$p
+# tst = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+# expect_identical(chi, tst)
+# chi = flexplot_bivariate_plot(flexplot_prep_variables(therapy.type~gender, data=exercise_data))$p
+# tst = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+# expect_identical(chi, tst)
+# bv = flexplot_bivariate_plot(flexplot_prep_variables(weight.loss~gender, data=exercise_data))$p
+# expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
+# bv = flexplot_bivariate_plot(flexplot_prep_variables(weight.loss~motivation, data=exercise_data))$p
+# expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
+flexplot_bivariate_plot = function(flexplot_vars, related=F, labels=NULL, bins=3, breaks=NULL, 
+                                   jitter=NULL, suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
+                                   alpha=.99977, prediction=NULL){
+  
+  spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
+  
+  ## prep data
+  vars = flexplot_vars
+    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
+    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
+    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
+    formula = vars$formula; data = vars$data
+    
   if (length(outcome)==1 & length(predictors)==0){
     
     ##### reorder according to columns lengths (if it's not an ordered factor)
@@ -295,8 +356,17 @@ flexplot_bivariate_plot = function(outcome, predictors, axis, related, labels, b
 
 
 #### flexplot function for paneling
-flexplot_panel_variables = function(outcome, predictors, axis, given, related, labels, bins, breaks, data, suppress_smooth=suppress_smooth, method=method, spread=spread, prediction, break.me){
+flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=3, breaks=NULL, 
+                                    suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
+                                    prediction=NULL){
 
+  ## prep data
+  vars = flexplot_vars
+    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
+    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
+    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
+    formula = vars$formula; data = vars$data; break.me = vars$break.me
+  
   if (!is.na(given[1])){
     for (i in 1:length(given)){
       
@@ -348,8 +418,16 @@ flexplot_panel_variables = function(outcome, predictors, axis, given, related, l
   list(facets=facets, prediction=prediction, data=data)
 }
 
-flexplot_modify_prediction = function(prediction, axis, break.me, data, num.models, labels, bins, breaks, predictors){
+flexplot_modify_prediction = function(flexplot_vars, prediction=NULL, 
+                                      num.models, labels=NULL, bins=3, breaks=NULL){
   
+  ## prep data
+  vars = flexplot_vars
+    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
+    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
+    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
+    formula = vars$formula; data = vars$data; break.me = vars$break.me
+    
   if (!is.na(axis[2]) & length(num.models)>1){
     stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z), or choose to display only one model")
   }

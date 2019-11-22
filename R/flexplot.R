@@ -119,49 +119,30 @@ flexplot = function(formula, data=NULL, related=F,
 
 	spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
 	
-	variables = all.vars(formula)
-	outcome = variables[1]
-	predictors = variables[-1]
-	
-  ### extract given and axis variables
-	given.axis = flexplot_axis_given(formula)
-	given = given.axis$given
-	axis = given.axis$axis
-	
-	### make sure all names are in the dataset
-	flexplot_errors(variables = variables, data = data, method=method, axis=axis)
-	
-	### change se based on how many variables they have
-	if (is.null(se)){
-	  if (length(predictors)==1){
-	    se=T
-	  } else {
-	    se = F
-	  }
-	}
 
-	#### identify which variables are numeric and which are factors
-	vtypes = variable_types(predictors, data, return.names=T)
-	numbers = vtypes$numbers
-	categories = vtypes$characters
-	levels = length(unique(data[,outcome]))	### necessary for univariate plots
-
-		### remove missing values
-	data = flexplot_delete_na(data, predictors, variables)
-
-	  ### create the lists that contain the breaks
-  break.me = flexplot_break_me(data, predictors, given)
-  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels)
+  
+  ### make sure all names are in the dataset
+  flexplot_errors(variables = variables, data = data, method=method, axis=axis)  
 	
     ### convert variables with < 5 categories to ordered factors
   data = flexplot_convert_to_categorical(data, axis)
 	
-
+  ### change se based on how many variables they have
+  if (is.null(se)){
+    if (length(predictors)==1){
+      se=T
+    } else {
+      se = F
+    }
+  }
+  
+  varprep = flexplot_prep_variables(formula, data, breaks = breaks)
 
 	### PLOT UNIVARIATE PLOTS
-  bivariate = flexplot_bivariate_plot(outcome=outcome, predictors=predictors, axis=axis, 
-                                      related=related, labels=labels, bins=bins, breaks=breaks, 
-                                      data=data, jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, alpha=alpha, prediction=prediction)
+  bivariate = flexplot_bivariate_plot(varprep, 
+                                      related=related, labels=labels, bins=bins,
+                                      jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
+                                      alpha=alpha, prediction=prediction)
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
@@ -170,7 +151,10 @@ flexplot = function(formula, data=NULL, related=F,
     alpha = bivariate$alpha
 
 	#### all the above should take care of ALL possible plots, but now we add paneling
-  panels = flexplot_panel_variables(outcome, predictors, axis, given, related, labels, bins, breaks, data, suppress_smooth=suppress_smooth, method=method, spread=spread, prediction=prediction, break.me=break.me)
+  panels = flexplot_panel_variables(varprep, 
+                                    related=related, labels=labels, bins=bins, 
+                                    suppress_smooth=suppress_smooth, method=method, 
+                                    spread=spread, prediction=prediction)
     facets = panels$facets
     data = panels$data
     prediction = panels$prediction
@@ -178,11 +162,12 @@ flexplot = function(formula, data=NULL, related=F,
 
 	
 
-	if (!is.null(ghost.line) & !is.na(given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
+	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
 	  
 				### bin the ghost reference if it's not null
-    ghost.reference = create_ghost_reference(ghost.reference=ghost.reference, given=given, axis=axis, data=data, bins=bins, labels=labels, breaks=breaks)
-		
+    ghost.reference = create_ghost_reference(varprep, ghost.reference=ghost.reference, 
+                                             bins=bins, labels=labels, breaks=breaks)
+    
         ### extract the ggplot dataset that contains the fitted information
     d_smooth = create_ghost_dataset(data=data, axis=axis, prediction=prediction, given=given, ghost.reference=ghost.reference, predictors=predictors, p=p, fitted=fitted, method=method, outcome=outcome, se=se)
 
@@ -199,9 +184,10 @@ flexplot = function(formula, data=NULL, related=F,
 	if (!is.null(prediction)){
 		### see how many models are being compared
 		num.models = levels(prediction$model)
-	
-		prediction = flexplot_modify_prediction(prediction=prediction, axis=axis, break.me=break.me, data=data, 
-		                                        num.models=num.models, labels=labels, bins=bins, breaks=breaks, predictors=predictors)
+		
+		prediction = flexplot_modify_prediction(varprep, prediction=prediction, 
+		                                        num.models=num.models, labels=labels, bins=bins, 
+		                                        breaks=breaks)
 		pred.line = flexplot_generate_prediction_lines(prediction=prediction, axis=axis, break.me=break.me, 
 		                                               data=data, num.models=num.models, breaks=breaks,labels=labels, bins=bins) 
 	} else {
