@@ -1,7 +1,8 @@
 create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, ghost.reference, data){
-  ### rename columns
-  names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 
+
   
+    ### rename columns
+  names(d_smooth)[names(d_smooth)=="x"] = axis[1]; names(d_smooth)[names(d_smooth)=="y"] = outcome; 
   ## add line to existing plot 
   if (!is.null(prediction) & length(levels(prediction$model))>1){  
     d_smooth$model = factor(d_smooth$group, labels=levels(prediction$model))
@@ -29,12 +30,13 @@ create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, gh
   } else {	
     ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line, show.legend=F)'
   }
-  
+
   list(ghost=ghost, d_smooth = d_smooth)
 }
 
 create_ghost_dataset = function(data, axis, prediction, given, ghost.reference, predictors, p, fitted, method, outcome, se){
-  #### if they specified a prediction, extract data from prediction model
+
+    #### if they specified a prediction, extract data from prediction model
   if (!is.null(prediction)){
     k = prediction
   } else {
@@ -44,13 +46,17 @@ create_ghost_dataset = function(data, axis, prediction, given, ghost.reference, 
   
   #### norrow down based on GIVEN, not the axis (because we're trying to find the right panel, then plot only the one group line)
   for (s in 1:length(given)){
-    binned.name = paste0(given[s], "_binned")
+    
+    if (is.numeric(data[,given[s]])){
+      binned.name = paste0(given[s], "_binned")
+    } else {
+      binned.name = given[s]
+    }
     
     ### specify k based on whether they supply a prediction
     if (is.null(prediction)){
       k = k[(k[,binned.name])==unlist(ghost.reference[[given[s]]]),]				
     } else {
-      message(binned.name)
       rows = which(k[,binned.name]==unlist(ghost.reference[[given[s]]]))
       k = k[rows,]
       
@@ -87,25 +93,37 @@ create_ghost_dataset = function(data, axis, prediction, given, ghost.reference, 
   if (method=="logistic" & !is.numeric(k[,outcome])){
     g0 = gsub("data=[[:alnum:]]+,", "data=factor.to.logistic(k,outcome),", g0)
   }
-  message(g0)
   g0 = eval(parse(text=g0))		
   
   d_smooth = suppressMessages(ggplot_build(g0)$data[[1]])
   return(d_smooth)
+
 }
 
 
-# bv = create_ghost_reference(flexplot_prep_variables(weight.loss~motivation|therapy.type, data=exercise_data))
-# expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
-create_ghost_reference= function(flexplot_vars, ghost.reference=NULL, bins=3, labels=NULL, breaks=NULL){
 
-  vars = flexplot_vars
+# vars = flexplot_prep_variables(weight.loss~motivation|therapy.type, data=exercise_data)
+# expect_error(with(vars, create_ghost_reference(data = data, given=given, axis=axis, bins=bins, labels=labels, breaks=breaks)))  # no formula
+# bv = create_ghost_reference(weight.loss~motivation|therapy.type, data=exercise_data) # with formula, null ghost reference
+# expect_identical(bv[[1]], "cog")
+create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.reference=NULL, axis=NULL, bins=3, labels=NULL, breaks=NULL){
+
+  
+  if (is.null(formula)){
+    
+    list.na = list(given=given, axis=axis, bins=bins)
+    isnull =  names(which(unlist(lapply(list.na, is.null))))
+    if (length(isnull)>0){
+      stop(paste0("You must either provide a formula OR all variables requested. It looks like you're missing the variable ", paste0(isnull, collapse=", ")))
+    }
+  } else {
+    vars = flexplot_prep_variables(formula, data=exercise_data)
     variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
     given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
     levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
     formula = vars$formula; data = vars$data; break.me = vars$break.me
-  
-  
+  }
+
     if (!is.null(ghost.reference)){
     
     ### what needs a reference? all given and MAYBE axis[2]
@@ -141,7 +159,7 @@ create_ghost_reference= function(flexplot_vars, ghost.reference=NULL, bins=3, la
     }
     
   } else {
-    
+
     #### if they have an axis 2 variable
     if (length(axis)>1){
       to.bin = c(axis[2], given)
@@ -152,7 +170,6 @@ create_ghost_reference= function(flexplot_vars, ghost.reference=NULL, bins=3, la
     #### if they don't specify any reference group, choose the middle one
     ghost.reference=list()
     for (b in 1:length(to.bin)){
-      
       # use x_binned if it's numeric
       if (!is.numeric(data[,to.bin[b]])){
         given.bin = to.bin[b]
@@ -165,12 +182,7 @@ create_ghost_reference= function(flexplot_vars, ghost.reference=NULL, bins=3, la
       middle = levels(l); middle = middle[round((length(middle))/2)]
       ghost.reference[[to.bin[b]]]=middle
     }
-    
-    #### if they have an axis[2], add that to the ghost reference
-    # if (length(axis)>1){
-    # 	ghost.reference[[axis[2]]] = data[,axis[2]]
-    # }
-    
+
     message(paste0("Note: You didn't specify a reference for the ghost line, which means I get to chose it. That shows a lot of trust. I appreciate that. I won't let you down."))
     
     #### if they specify a reference group for some of them, but not all

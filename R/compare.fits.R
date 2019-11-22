@@ -46,11 +46,6 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
     outcome = variables[1]
     predictors = variables[-1]
     
-    #### for the rare occasion where deleting missing data changes the levels...
-    if (length(predict(model1))<nrow(data) | length(predict(model2))<nrow(data)){
-      data = na.omit(data[,variables])
-    }    
-    
     ##### make sure they're putting the same variables from formula in terms
 	if (!(all(predictors %in% testme))){
 		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%terms.mod1)], collapse=",")))
@@ -61,8 +56,12 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
 		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
 	}	
 	
-
-	#### create random column just to make the applies work (yeah, it's hacky, but it works)
+    #### for the rare occasion where deleting missing data changes the levels...
+    if (length(predict(model1))<nrow(data) | length(predict(model2))<nrow(data)){
+      data = na.omit(data[,variables])
+    }    
+    
+	  #### create random column just to make the applies work (yeah, it's hacky, but it works)
     data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)
     predictors = c(predictors, "reject", "reject2")
 

@@ -5,6 +5,8 @@
 flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels=NULL, bins=3, 
                                    jitter=NULL, suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
                                    alpha=.99977, prediction=NULL){
+  spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
+  
   variables = all.vars(formula)
   outcome = variables[1]
   predictors = variables[-1]
@@ -33,6 +35,21 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
        method = method, spread = spread, alpha = alpha, prediction = prediction)
 }
 
+flexplot_alpha_default = function(data, axis, alpha){
+  ### reorder axis and alter default alpha if categorical
+  if (!is.numeric(data[,axis[1]])){
+    #### set default alpha
+    if(alpha==.99977){
+      alpha = .2
+    }		
+  } else {
+    if(alpha==.99977){
+      alpha = .5
+    }	
+  }
+  
+  return(alpha)
+}
 # expect_error(flexplot_modify_data(data=exercise_data, variables = "weight.loss"))  ### missing all variables
 # expect_true(!is.tibble(flexplot_modify_data(formula = weight.loss~therapy.type, data=exercise_data %>% select(weight.loss, therapy.type))))### data as tibble
 # expect_equal(flexplot_modify_data(therapy.type~gender, data=exercise_data)$Proportion[1], .12745098)  ### association plot data
@@ -40,83 +57,115 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
 # expect_error(flexplot_modify_data(formula = weight.loss~gender, data=exercise_data, related=T))
 # expect_true(all(c("motivation_binned", "income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + motivation | income, data=exercise_data))))
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
-flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, axis = NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL){
+flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
+                                axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
   
-  if (is.null(formula)){
-    list.na = list(related, variables, outcome, axis, labels, bins, breaks, break.me)
-    isnull =  names(which(unlist(lapply(list.na, is.null))))
-    if (length(isnull)>0){
-      stop(paste0("You must either provide a formula OR all variables requested. It looks like you're missing the variable ", isnull))
-    }
-  }
-  
-  if (!is.null(formula)){
-    prep_vars = flexplot_prep_variables(formula, data=exercise_data)
-    variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; 
-    break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors
-  }
-  
-  ### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
-  if (tibble::is_tibble(data)){
-    data = as.data.frame(data)
-  }
-  
-  ### remove missing values
-  print(variables)
-  data = flexplot_delete_na(data, variables)
-  
-  
-  ### prep data for association plot
-  if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1){
-    m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
-    chi = chisq.test(data[,axis], data[,outcome])
-    obs.exp = (chi$observed - chi$expected)/chi$expected
-    m$Freq = as.vector(obs.exp)
-    names(m)[names(m)=="Freq"] = "Proportion"
-    data = m
-  }
-  
-  
-  ### prep data for related plot
-  if (related){
-    #### extract levels of the predictors
-    levs = levels(data[,axis[1]])
-    
-    #### create difference scores
-    g1 = data[data[, axis[1]]==levs[1], outcome]
-    g2 = data[data[, axis[1]]==levs[2], outcome]				
-    
-    
-    ### error checking
-    if (length(predictors)!=1){
-      stop("Currently, the 'related' option is only available when there's a single predictor.")
-    } 
-    
-    if (length(levs)!=2){
-      stop("Sorry, I can only accept two levels of the grouping variable when related=T.")
+
+  if (is.null(data)) {
+    return(data) 
+  } else {
+    if (is.null(formula)){
+      list.na = list(related, variables, outcome, axis, given, labels, bins, breaks, break.me, spread)
+      isnull =  names(which(unlist(lapply(list.na, is.null))))
+      if (length(isnull)>0){
+        stop(paste0("You must either provide a formula OR all variables requested. It looks like you're missing the variable ", isnull))
+      }
     }
     
-    if (length(g1) != length(g2)){
-      stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")
+    if (!is.null(formula)){
+      prep_vars = flexplot_prep_variables(formula, data=exercise_data)
+      variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; given = prep_vars$given
+      break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors; spread = prep_vars$spread
     }
     
-    lab = paste0("Difference (",levs[2], "-", levs[1], ')')
-    data = data.frame(Difference=g2-g1)
-    data[[outcome]] = NA
-    data[[predictors]] = NA
-  }
-  
-  if (length(break.me)>0){
-    #### bin the variables that need to be binned
-    tempfunc = function(i=1, break.me, bins, labels, breaks, data){
-      bin.me(break.me[i], data, bins[i], unlist(labels)[i], breaks[[i]])
+    ### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
+    if (tibble::is_tibble(data)){
+      data = as.data.frame(data)
     }
     
-    new_cols = lapply(1:length(break.me), tempfunc, break.me, bins, labels, breaks, data)
-    data[,paste0(break.me, "_binned")] = new_cols
-  }
-  
-  return(data)
+    if (pred.data) {
+      outcome = "prediction"
+      variables[1] = "prediction"
+      data[,"model"] = factor(data[,"model"])
+    }
+    
+    ### remove missing values
+    #browser()
+    data = flexplot_delete_na(data, variables)
+    #browser()
+    
+    ### prep data for association plot
+    if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1){
+      m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
+      chi = chisq.test(data[,axis], data[,outcome])
+      obs.exp = (chi$observed - chi$expected)/chi$expected
+      m$Freq = as.vector(obs.exp)
+      names(m)[names(m)=="Freq"] = "Proportion"
+      data = m
+    }
+    
+    
+    ### prep data for related plot
+    if (related){
+      #### extract levels of the predictors
+      levs = levels(data[,axis[1]])
+      
+      #### create difference scores
+      g1 = data[data[, axis[1]]==levs[1], outcome]
+      g2 = data[data[, axis[1]]==levs[2], outcome]				
+      
+      
+      ### error checking
+      if (length(predictors)!=1){
+        stop("Currently, the 'related' option is only available when there's a single predictor.")
+      } 
+      
+      if (length(levs)!=2){
+        stop("Sorry, I can only accept two levels of the grouping variable when related=T.")
+      }
+      
+      if (length(g1) != length(g2)){
+        stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")
+      }
+      
+      lab = paste0("Difference (",levs[2], "-", levs[1], ')')
+      data = data.frame(Difference=g2-g1)
+      data[[outcome]] = NA
+      data[[predictors]] = NA
+    }
+    
+    ## bin things
+    if (length(break.me)>0){
+      #### bin the variables that need to be binned
+      tempfunc = function(i=1, break.me, bins, labels, breaks, data){
+        b = bin.me(break.me[i], data, bins[i], unlist(labels)[i], breaks[[i]])
+        #### if there's only one category after we've binned things, fix that succa!
+        if (length(levels(b))==1 & length(unique(data[[break.me[i]]]))>1){
+          b = factor(data[,given[i]])
+        }
+        return(b)
+      }
+
+      new_cols = lapply(1:length(break.me), tempfunc, break.me, bins, labels, breaks, data)
+      data[,paste0(break.me, "_binned")] = new_cols
+    }
+    
+    ### convert variables with < 5 categories to ordered factors
+    data = flexplot_convert_to_categorical(data, axis)
+    
+    #### reorder axis 1 it's not already ordered
+    if (!is.numeric(data[,axis[1]]) & !is.ordered(data[, axis[1]])){
+      if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
+      ord = aggregate(data[,outcome]~data[, axis[1]], FUN=fn, na.rm=T)
+      ord = ord[order(ord[,2], decreasing=T),]
+      data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
+    }
+    ### reorder levels of given 2
+    if (length(given)>1){
+      data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])
+    }
+    return(data)
+  }  
 }
 
 
@@ -252,17 +301,16 @@ flexplot_axis_given = function(formula){
 #expect_true(nrow(flexplot_delete_na(exercise_data, "muscle.gain"))==200)
 #expect_true(nrow(flexplot_delete_na(exercise_data, NULL))==200)
 flexplot_delete_na = function(data, variables){
+  
+  #print(variables)
   if (length(variables)>=0){
-    if (length(unlist(apply(data[,variables, drop=FALSE], 2, function(x){(which(is.na(x)))})))>0){
-      delete.me = as.numeric(unlist(apply(data[,variables, drop=FALSE], 2, function(x){(which(is.na(x)))})))
-      data = data[-delete.me,]
+      keepers = complete.cases(data[,variables])
+      data = data[keepers,]
       return(data)
     } else {
       return(data)
     }
-  } else {
-    return(data)
-  }
+  
 }
 
 
@@ -288,38 +336,40 @@ flexplot_convert_to_categorical = function(data, axis){
 
 
 
-# uni = flexplot_bivariate_plot(flexplot_prep_variables(weight.loss~1, data=exercise_data))$p
+# uni = flexplot_bivariate_plot(weight.loss~1, data=exercise_data)$p
 # expect_identical(uni, "ggplot(data=data, aes_string(outcome)) + geom_histogram(fill=\"lightgray\", col=\"black\", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)")
-# uni2 = flexplot_bivariate_plot(flexplot_prep_variables(therapy.type~1, data=exercise_data))$p
+# uni2 = flexplot_bivariate_plot(therapy.type~1, data=exercise_data)$p
 # expect_identical(uni2, "ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)")
-# uni3 = flexplot_bivariate_plot(flexplot_prep_variables(therapy.type~1, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T))))$p
+# uni3 = flexplot_bivariate_plot(therapy.type~1, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T)))$p
 # expect_identical(uni3, "ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)")
-# chi = flexplot_bivariate_plot(flexplot_prep_variables(therapy.type~gender, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T))))$p
+# chi = flexplot_bivariate_plot(therapy.type~gender, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T)))$p
 # tst = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
 # expect_identical(chi, tst)
-# chi = flexplot_bivariate_plot(flexplot_prep_variables(therapy.type~gender, data=exercise_data))$p
+# chi = flexplot_bivariate_plot(therapy.type~gender, data=exercise_data)$p
 # tst = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
 # expect_identical(chi, tst)
-# bv = flexplot_bivariate_plot(flexplot_prep_variables(weight.loss~gender, data=exercise_data))$p
+# bv = flexplot_bivariate_plot(weight.loss~gender, data=exercise_data)$p
 # expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
-# bv = flexplot_bivariate_plot(flexplot_prep_variables(weight.loss~motivation, data=exercise_data))$p
+# bv = flexplot_bivariate_plot(weight.loss~motivation, data=exercise_data)$p
 # expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
-flexplot_bivariate_plot = function(outcome, predictors, data, axis, # variable types and stuff
-                                    related, alpha, jitter, suppress_smooth, method, spread,  # arguments passed from flexplot
-                                   bins, breaks, labels ### binning information
+flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
+                                    related, alpha, jitter, suppress_smooth, method, spread  # arguments passed from flexplot
                                    ){
-  
-  spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
-    
-  if (length(outcome)==1 & length(predictors)==0){
-    
-    ##### reorder according to columns lengths (if it's not an ordered factor)
-    if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){
-      counts = sort(table(data[,outcome]), decreasing=T)
-      names(counts)
-      data[,outcome] = factor(data[,outcome], levels=names(counts))
+  if (is.null(formula)){
+    list.na = list(outcome, predictors, axis, related, alpha, jitter, suppress_smooth, method, spread)
+    isnull =  names(which(unlist(lapply(list.na, is.null))))
+    if (length(isnull)>0){
+      stop(paste0("You must either provide a formula OR all variables requested. It looks like you're missing the variable ", isnull))
     }
-    
+  } else {
+    prep_vars = flexplot_prep_variables(formula, data=exercise_data)
+    predictors = prep_vars$predictors; outcome = prep_vars$outcome; axis = prep_vars$axis; 
+    related = prep_vars$related; alpha= prep_vars$alpha; jitter= prep_vars$jitter 
+    suppress_smooth= prep_vars$suppress_smooth; method= prep_vars$method; spread= prep_vars$spread
+  }
+  
+  #### histograms
+  if (length(outcome)==1 & length(predictors)==0){
     
     ### figure out how many levels for the variable
     levels = length(unique(data[,outcome]))	
@@ -333,39 +383,17 @@ flexplot_bivariate_plot = function(outcome, predictors, data, axis, # variable t
     points = "xxxx"
     fitted = "xxxx"		
     
-    ### BIVARIATE PLOTS
+  ### BIVARIATE PLOTS
   } else if (length(outcome)==1 & length(axis)==1 & !related){
     
     #### if both are categorical, do chi square
     if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
       
-      m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
-      chi = chisq.test(data[,axis], data[,outcome])
-      obs.exp = (chi$observed - chi$expected)/chi$expected
-      m$Freq = as.vector(obs.exp)
-      names(m)[names(m)=="Freq"] = "Proportion"
-      data = m
       p = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
       points = "xxxx"
       fitted = "xxxx"
-    } else {
       
-      ### reorder axis and alter default alpha if categorical
-      if (!is.numeric(data[,axis])){
-        
-        #### reorder if it's not already ordered
-        if (!is.ordered(data[, axis[1]])){
-          if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
-          ord = aggregate(data[,outcome]~data[, axis], FUN=fn, na.rm=T)
-          ord = ord[order(ord[,2], decreasing=T),]
-          data[,axis] = factor(data[, axis], levels=ord[,1])
-        }
-        
-        #### set default alpha
-        if(alpha==.99977){
-          alpha = .2
-        }		
-      }
+    } else {
       
       p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
       points = points.func(axis.var=axis, data=data, jitter=jitter)
@@ -375,54 +403,14 @@ flexplot_bivariate_plot = function(outcome, predictors, data, axis, # variable t
     
     ### RELATED T-TEST
   } else if (related){		
-    
-    
-    #### extract levels of the predictors
-    levs = levels(data[,axis[1]])
-    
-    #### create difference scores
-    g1 = data[data[, axis[1]]==levs[1], outcome]
-    g2 = data[data[, axis[1]]==levs[2], outcome]				
-    
-    
-    ### error checking
-    if (length(predictors)!=1){
-      stop("Currently, the 'related' option is only available when there's a single predictor.")
-    } 
-    
-    if (length(levs)!=2){
-      stop("Sorry, I can only accept two levels of the grouping variable when related=T.")
-    }
-    
-    if (length(g1) != length(g2)){
-      stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")
-    }
-    
-    lab = paste0("Difference (",levs[2], "-", levs[1], ')')
-    data = data.frame(Difference=g2-g1)
-    data[[outcome]] = NA
-    data[[predictors]] = NA
-    
-    
-    p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
+
+      p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
                levs[2], "-", levs[1], ")') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())")
-    
-    #### modify default jitter
-    if (is.null(jitter)){
-      jitter = c(.05, 0)
-    } 
-    points = points.func(axis.var="Difference", data=data, jitter=jitter)
-    fitted = paste0(fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
+      points = points.func(axis.var="Difference", data=data, jitter=jitter)
+      fitted = paste0(fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
     
     ##### if they have two axis variables
   } else if (length(axis)>1){
-    
-    #### if the second variable is numeric, bin it
-    if (is.numeric(data[,axis[2]])){
-      binned.name = paste0(axis[2], "_binned")
-      data[[binned.name]] = bin.me(axis[2], data, bins, unlist(labels), breaks[[axis[2]]])
-      axis[2] = binned.name
-    }
     
     ### if they supply predictions, do not vary color
     if (!is.null(prediction)){
@@ -432,7 +420,6 @@ flexplot_bivariate_plot = function(outcome, predictors, data, axis, # variable t
       p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
       ### remove the default color if they have categorical variables		
     }
-    
     points = points.func(axis.var=axis, data=data, jitter=jitter)
     fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)
     
@@ -444,7 +431,7 @@ flexplot_bivariate_plot = function(outcome, predictors, data, axis, # variable t
     }	
   }
   
-  list(p=p, points=points, fitted=fitted, prediction=prediction, data=data, alpha = alpha)
+  list(p=p, points=points, fitted=fitted)
 }
 
 
@@ -461,41 +448,6 @@ flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=
     formula = vars$formula; data = vars$data; break.me = vars$break.me
   
   if (!is.na(given[1])){
-    for (i in 1:length(given)){
-      
-      binned.name = paste0(given[i], "_binned")
-      
-      if (is.numeric(data[,given[i]])){
-        b = bin.me(variable=given[i], data, bins, labels=labels[i], breaks=breaks[[given[i]]])
-        
-        #### if there's only one category, fix that succa!
-        if (length(levels(b))==1 & length(unique(data[[given[i]]]))>1){
-          data[,binned.name] = factor(data[,given[i]])
-        } else {
-          data[,binned.name] = b  
-        }
-        
-        
-        ### if they specified prediction, bin those too
-        if (!is.null(prediction)){
-          prediction[,binned.name] = bin.me(given[i], prediction, bins, labels[i], breaks[[given[i]]])
-        }				
-        ### reorder levels of bin 2
-        if (i==2){
-          data[,binned.name] = forcats::fct_rev(data[,binned.name])
-        }
-      } else {
-        ### duplicate categorical variables and give a new name for binned ones
-        data[,binned.name] = data[,given[i]]
-        
-        
-        ### if they specified prediction, bin those too (because later when doing ghost lines, I randomly choose a prediction value from a data value, and they need to be binned before that)
-        if (!is.null(prediction)){
-          prediction[,binned.name] = prediction[,given[i]]
-        }					
-      }
-    }
-    
     #### prep the given variables to be stringed together
     given2 = given
     if (length(break.me)>0){
@@ -509,12 +461,12 @@ flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=
     facets = "xxxx"
   }
   
-  list(facets=facets, prediction=prediction, data=data)
+  return(facets)
 }
 
 flexplot_modify_prediction = function(flexplot_vars, prediction=NULL, 
                                       num.models, labels=NULL, bins=3, breaks=NULL){
-  
+
   ## prep data
   vars = flexplot_vars
     variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
@@ -538,12 +490,13 @@ flexplot_modify_prediction = function(flexplot_vars, prediction=NULL,
     groups = c("model", paste0(break.me, "_binned"), predictors[-which(predictors%in%break.me)])
     prediction = prediction %>% group_by_at(groups) %>% summarize(prediction = mean(prediction)) %>% as.data.frame
   }
+
   
   return(prediction)
 }
 
 flexplot_generate_prediction_lines = function(prediction, axis, break.me, data,num.models, labels, bins, breaks){
-    
+
     #### check if first variable is a continuous predictor
     if (is.numeric(data[[axis[1]]])){
       
@@ -567,7 +520,7 @@ flexplot_generate_prediction_lines = function(prediction, axis, break.me, data,n
       pred.line = 'geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))'
       
     }
-  
+
   return(pred.line) 
 }
 
