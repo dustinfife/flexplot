@@ -112,6 +112,7 @@ flexplot = function(formula, data=NULL, related=F,
                                     jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
                                     alpha=alpha, prediction=prediction) 
   ### make modifications to the data
+  
 	data = with(varprep, 
 	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
