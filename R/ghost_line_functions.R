@@ -15,10 +15,9 @@ create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, gh
       d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=ghost.reference[[axis[2]]])
     } else {
       ### the following code is for JASP to work
-      if (length(grep("_binned", axis[2]))==0){
+      if (length(grep("_binned", axis[2]))==0 & is.numeric(data[,axis[2]])){
         axis[2] = paste0(axis[2], "_binned")
       }
-      
       d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(factor(data[,axis[2]]))))
     }
     
