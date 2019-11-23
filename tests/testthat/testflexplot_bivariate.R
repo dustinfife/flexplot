@@ -34,6 +34,13 @@ test_that("scatterplots and options work", {
     "scatter logistic jittery",
     flexplot(gender ~ health, data = d, se = FALSE, method = "logistic", jitter = c(0, .1))
   )
+  
+  vdiffr::expect_doppelganger(
+    "numeric in second axis",
+    flexplot(weight.loss ~ motivation + satisfaction, 
+           data = exercise_data, 
+           bins = 2))
+  
 })
 
   

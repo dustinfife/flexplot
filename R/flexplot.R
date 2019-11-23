@@ -112,7 +112,6 @@ flexplot = function(formula, data=NULL, related=F,
                                     jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
                                     alpha=alpha, prediction=prediction) 
   ### make modifications to the data
-
 	data = with(varprep, 
 	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
@@ -221,6 +220,13 @@ flexplot = function(formula, data=NULL, related=F,
 	### put objects in this environment
 	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
 	
+	### if second axis is numeric, replace axis[2] with variable that is binned
+  if (length(axis)>1){
+    if (is.numeric(data[,axis[2]])){
+      axis[2] = paste0(axis[2], "_binned")
+    }
+  }
+
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)
