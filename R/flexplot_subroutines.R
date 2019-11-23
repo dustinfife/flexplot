@@ -36,16 +36,18 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
 }
 
 flexplot_alpha_default = function(data, axis, alpha){
-  ### reorder axis and alter default alpha if categorical
-  if (!is.numeric(data[,axis[1]])){
-    #### set default alpha
-    if(alpha==.99977){
-      alpha = .2
-    }		
-  } else {
-    if(alpha==.99977){
-      alpha = .5
-    }	
+  if (axis[1] != "1"){
+    ### reorder axis and alter default alpha if categorical
+    if (!is.numeric(data[,axis[1]])){
+      #### set default alpha
+      if(alpha==.99977){
+        alpha = .2
+      }		
+    } else {
+      if(alpha==.99977){
+        alpha = .5
+      }	
+    }
   }
   
   return(alpha)
@@ -59,7 +61,7 @@ flexplot_alpha_default = function(data, axis, alpha){
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
-  
+
   if (is.null(data)) {
     return(data) 
   } else {
@@ -94,7 +96,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     #browser()
     
     ### prep data for association plot
-    if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1){
+    if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1 & axis[1] != "1"){
       m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
       chi = chisq.test(data[,axis], data[,outcome])
       obs.exp = (chi$observed - chi$expected)/chi$expected
@@ -106,6 +108,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     
     ### prep data for related plot
     if (related){
+
       #### extract levels of the predictors
       levs = levels(data[,axis[1]])
       
@@ -115,7 +118,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
       
       
       ### error checking
-      if (length(predictors)!=1){
+      if (length(variables)!=2){
         stop("Currently, the 'related' option is only available when there's a single predictor.")
       } 
       
@@ -129,15 +132,23 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
       
       lab = paste0("Difference (",levs[2], "-", levs[1], ')')
       data = data.frame(Difference=g2-g1)
-      data[[outcome]] = NA
-      data[[predictors]] = NA
+      attr(data, "levels") = levs
+      data[,variables] = NA
     }
     
     ## bin things
     if (length(break.me)>0){
       #### bin the variables that need to be binned
       tempfunc = function(i=1, break.me, bins, labels, breaks, data){
-        b = bin.me(break.me[i], data, bins[i], unlist(labels)[i], breaks[[i]])
+        
+        # indexing fails if i > the number of slots in the list
+        if (length(labels)>= i){
+          labs = labels[[i]]
+        } else {
+          labs = NULL
+        }
+        
+        b = bin.me(break.me[i], data, bins[i], labs, breaks[[i]])
         #### if there's only one category after we've binned things, fix that succa!
         if (length(levels(b))==1 & length(unique(data[[break.me[i]]]))>1){
           b = factor(data[,given[i]])
@@ -152,12 +163,21 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     ### convert variables with < 5 categories to ordered factors
     data = flexplot_convert_to_categorical(data, axis)
     
+
     #### reorder axis 1 it's not already ordered
-    if (!is.numeric(data[,axis[1]]) & !is.ordered(data[, axis[1]])){
-      if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
-      ord = aggregate(data[,outcome]~data[, axis[1]], FUN=fn, na.rm=T)
-      ord = ord[order(ord[,2], decreasing=T),]
-      data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
+    if(axis[1] != "1"){
+      #### order by medians for numeric outcomes
+      if (!is.numeric(data[,axis[1]]) & is.numeric(data[,outcome]) & !is.ordered(data[, axis[1]]) & !related){
+        if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
+        ord = aggregate(data[,outcome]~data[, axis[1]], FUN=fn, na.rm=T)
+        ord = ord[order(ord[,2], decreasing=T),]
+        data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
+      }
+      #### order by frequency for categorical outcomes
+    } else if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){
+      sizes = table(data[,outcome])
+      ord = order(sizes, decreasing = T)
+      data[,outcome] = factor(data[, outcome], levels=names(sizes)[ord])
     }
     
     ### reorder levels of given 2
@@ -221,7 +241,7 @@ flexplot_break_me = function(data, predictors, given, axis){
   } else {
     break.me = non.axis.one[is.numeric(data[,non.axis.one]) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
-  
+
   #if (length(break.me)==0) break.me = NA
   return(break.me)
 }
@@ -357,6 +377,8 @@ flexplot_convert_to_categorical = function(data, axis){
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
                                     related, alpha, jitter, suppress_smooth, method, spread  # arguments passed from flexplot
                                    ){
+  
+  jitter = match_jitter_categorical(jitter)
   if (is.null(formula)){
     list.na = list(outcome, predictors, axis, related, alpha, jitter, suppress_smooth, method, spread)
     isnull =  names(which(unlist(lapply(list.na, is.null))))
@@ -405,10 +427,10 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     
     ### RELATED T-TEST
   } else if (related){		
-
+      levs = attr(data, "levels")
       p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
                levs[2], "-", levs[1], ")') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())")
-      points = points.func(axis.var="Difference", data=data, jitter=jitter)
+      points = points.func(axis.var="Difference", data=data, jitter=jitter*.5)
       fitted = paste0(fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
     
     ##### if they have two axis variables

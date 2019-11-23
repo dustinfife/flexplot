@@ -111,13 +111,13 @@ flexplot = function(formula, data=NULL, related=F,
                                     related=related,  
                                     jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
                                     alpha=alpha, prediction=prediction) 
-
   ### make modifications to the data
- 
+
 	data = with(varprep, 
 	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
-
+  varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
+                        ### (error came at ghost.reference when it couldn't find the binned version)
 	prediction = with(varprep, 
 	            flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE))
@@ -136,16 +136,16 @@ flexplot = function(formula, data=NULL, related=F,
   ### change alpha, depending on plot type
   alpha = with(varprep, flexplot_alpha_default(data=data, axis = axis, alpha = alpha))
   
-  
+
   ### change se based on how many variables they have
   if (is.null(se)){
-    if (length(varprep$given)==0){
-      se=T
+    if (length(varprep$axis)>1){
+      se=F
     } else {
-      se = F
+      se = T
     }
   }
-  
+
   
 
 	### PLOT UNIVARIATE PLOTS
@@ -218,12 +218,13 @@ flexplot = function(formula, data=NULL, related=F,
 		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	
 	}
 	
+	### put objects in this environment
+	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
+	
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
-
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
-	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors
 	final = suppressMessages(eval(parse(text=total.call)))
 	
 # axis = "muscle.gain"; outcome="weight.loss"

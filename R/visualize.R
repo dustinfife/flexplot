@@ -41,8 +41,6 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 
 
 	d = object$model
-	res.plots = residual.plots(d, object)
-
 	data = object$model
 	variables = all.vars(formula(object))
 	outcome = variables[1]
@@ -90,11 +88,13 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 	}
 	
 	if (plot=="residuals"){
+	  res.plots = residual.plots(d, object)
 		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)
 		return(p)
 	} else if (plot=="model"){
 		return(step3)
 	} else {
+	  res.plots = residual.plots(d, object)
 		p = arrange.plot(res.plots$histo, res.plots$res.dep, res.plots$sl, step3, plot, res.plots$terms, res.plots$numbers)
 		return(p)
 	}

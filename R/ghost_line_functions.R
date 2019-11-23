@@ -108,7 +108,6 @@ create_ghost_dataset = function(data, axis, prediction, given, ghost.reference, 
 # expect_identical(bv[[1]], "cog")
 create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.reference=NULL, axis=NULL, bins=3, labels=NULL, breaks=NULL){
 
-  
   if (is.null(formula)){
     
     list.na = list(given=given, axis=axis, bins=bins)
@@ -124,7 +123,7 @@ create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.referen
     formula = vars$formula; data = vars$data; break.me = vars$break.me
   }
 
-    if (!is.null(ghost.reference)){
+  if (!is.null(ghost.reference)){
     
     ### what needs a reference? all given and MAYBE axis[2]
     if (axis[2] %in% names(ghost.reference)) {
@@ -187,6 +186,6 @@ create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.referen
     
     #### if they specify a reference group for some of them, but not all
   }
-  
+
   return(ghost.reference)
 }
