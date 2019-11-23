@@ -433,13 +433,20 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     
     ##### if they have two axis variables
   } else if (length(axis)>1){
-    
+
     ### if they supply predictions, do not vary color
     if (!is.null(prediction)){
       p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'
       
     } else {
-      p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
+      if (is.numeric(data[,axis[2]])){
+        axis[2] = paste0(axis[2], "_binned"); axis2_binned = axis[2]
+        p = paste0('ggplot(data=data, aes(x=', predictors[1], ', ', y=outcome, 
+                   ', color=', axis2_binned, ', linetype = ', axis2_binned, 
+                   ', shape=', axis2_binned, ')) + labs(color= "', axis2_binned, '", linetype= "', axis2_binned, '", shape= "', axis2_binned, '")')
+      } else {
+        p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
+      }
       ### remove the default color if they have categorical variables		
     }
     points = points.func(axis.var=axis, data=data, jitter=jitter)

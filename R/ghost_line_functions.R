@@ -14,8 +14,15 @@ create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, gh
     if (length(unique(d_smooth$linetype))==1){
       d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=ghost.reference[[axis[2]]])
     } else {
-      d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(factor(data[[axis[2]]]))))
+      ### the following code is for JASP to work
+      if (length(grep("_binned", axis[2]))==0){
+        axis[2] = paste0(axis[2], "_binned")
+      }
+      
+      d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(factor(data[,axis[2]]))))
     }
+    
+
     
     ### it seems ggplot is choosing the order based on sorting
     
