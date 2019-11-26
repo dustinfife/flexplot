@@ -81,7 +81,7 @@ Form
 		        DropDown{
 			        name: "intervals"
 			        values: ["Quartiles", "Standard errors", "Standard deviations"]
-			        label: qsTr("Intervals")
+			        label: qsTr("Intervals (categorical predictors)")
 			         enabled: varlist.count > 0
 		        }		        
         }

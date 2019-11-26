@@ -91,7 +91,7 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
 		
 		whiskers = list("Quartiles" = "quartiles",
 		                "Standard errors" = "sterr",
-		                "Standard deviations", "stdev")
+		                "Standard deviations" = "stdev")
 
 		linetype = tolower(options$type)
 		
