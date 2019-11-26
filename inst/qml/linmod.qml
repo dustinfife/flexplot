@@ -101,14 +101,13 @@ Form
 			  label: qsTr("Show slopes/intercepts");
 			  checked: true
 			}		
-		}
-		
-    CheckBox{
+      CheckBox{
 			  name:"ci"; 
 			  label: qsTr("Show 95% intervals");
 			  checked: true
-			}	 
+			}	 			
 		}
+	}
 		
 		  ExpanderButton
   {
