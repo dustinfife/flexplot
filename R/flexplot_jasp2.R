@@ -308,11 +308,12 @@ themeJasp = function(graph,
   if (horizontal)
     graph <- graph + coord_flip()
   
-  graph <- graph + theme(plot.margin=unit(c(1,1,1.5,1.2),"mm")) + 
+  graph <- graph +
                   themeJaspRaw(legend.position = legend.position,
                                 axis.title.cex = axis.title.cex, family = family,
                                 fontsize = fontsize, legend.justification = legend.justification,
-                                axisTickLength = axisTickLength, axisTickWidth = axisTickWidth) 
+                                axisTickLength = axisTickLength, axisTickWidth = axisTickWidth) +
+            theme(panel.spacing = unit(.2, "cm"))
                                 
   
   return(graph)

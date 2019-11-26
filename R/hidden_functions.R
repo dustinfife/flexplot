@@ -11,7 +11,7 @@ standardized_differences = function(model1, model2, sigma=TRUE){
 #### make a custom labeller that removes "_binned"
 custom.labeler = function(x){
   lapply(names(x),function(y){
-    paste0(gsub("_binned", "", y),": ", x[[y]])
+    paste0(gsub("_binned", "", y),":\n", x[[y]])
   })
 }
 
