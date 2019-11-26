@@ -37,7 +37,13 @@ linmod_jasp<- function(jaspResults, dataset, options) {
         .linmod_model_plot(jaspResults, options, ready)
       }
     }
-
+    
+    if (options$avp) {
+      if (is.null(jaspResults[["linmod_avp_plot"]])){
+        .linmod_avp_plot(jaspResults, options, ready)
+      }
+    }
+    
     if (options$residuals) {
       if (is.null(jaspResults[["linmod_residual_plot"]])){
         .linmod_residual_plot(jaspResults, options, ready)
@@ -131,8 +137,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   ### create the flexplot
   model.type = "added"
-  
-  .create_flexplot_linmod(jaspResults, modelplot, options, model.type)
+  .create_flexplot_linmod(jaspResults, addedplot, options, model.type)
   
   return()
 }
@@ -162,15 +167,13 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   linmod_results <- jaspResults[["linmod_results"]]$object
   
-  if (model.type=="model"){
-    type = "model"
-  } else if (model.type=="residuals"){
-    type = "model"
-  } else if (model.type == "added"){
-    formla = make.formula(options$variables, options$dependent)
-    p = added.plot(formla, d)
-  }
-
+  # if (model.type=="model"){
+  #   type = "model"
+  # } else if (model.type=="residuals"){
+  #   type = "model"
+  # } else if (model.type == "added"){
+  # 
+  # }
   generated.formula = make_flexplot_formula(options$variables, options$dependent, linmod_results$model$model)
   
 
@@ -186,8 +189,16 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   if (model.type=="model"){
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                       alpha=options$alpha, ghost.line=ghost)
-  } else {
+  } else if (model.type == "residuals"){
     plot = visualize(linmod_results$model, linmod_results, plot=model.type, alpha=options$alpha)
+  } else if (model.type == "added"){
+    
+    methods = list("Regression"="lm", 
+                   "Quadratic"="quadratic", 
+                   "Cubic"="cubic")
+    formla = make.formula(options$dependent,options$variables)
+    save(formla, linmod_results, model.type, file="/Users/fife/Documents/jaspresults.Rdata")
+    plot = added.plot(formla, linmod_results$model$model, method=methods[options$linetype], alpha=options$alpha)
   }
   
   if (options$theme == "JASP"){
@@ -236,7 +247,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     #save(options, dataset, predictors, file="/Users/fife/Documents/jaspresults.Rdata")
     f = paste0(options$dependent, " ~ ", predictors, collapse = "")
     f = as.formula(f)
-    save(options, dataset, predictors, f, file="/Users/fife/Documents/jaspresults.Rdat")
+    #save(options, dataset, predictors, f, file="/Users/fife/Documents/jaspresults.Rdat")
     
     
     #save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
