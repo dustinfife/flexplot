@@ -95,7 +95,7 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
 
 		linetype = tolower(options$type)
 		
-		save(k, formula, file="/Users/fife/Documents/jaspbroke.rdata")
+		#save(k, formula, file="/Users/fife/Documents/jaspbroke.rdata")
 		if (linetype == "regression") linetype = "lm"
 		plot = flexplot(formula, data=k, method=linetype, se=options$confidence, alpha=options$alpha, ghost.line=ghost,
 		                spread=whiskers[[options$intervals]])

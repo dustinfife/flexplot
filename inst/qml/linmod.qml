@@ -14,7 +14,8 @@ Form
     AssignedVariablesList { 
 			name: "dependent";	
 			title: qsTr("Dependent Variable");
-			singleVariable: true 
+			singleVariable: true;
+			allowedColumns: ["scale"]
 		}
 		AssignedVariablesList { 
 		  id: vars
@@ -28,26 +29,16 @@ Form
     title: qsTr("Visual Fitting")  
         DropDown{
 	        name: "linetype"
-	        values: ["Loess (Non-parametric)", "Regression", "Quadratic", "Cubic"]
+	        values: ["Regression", "Quadratic", "Cubic"]
 	        label: qsTr("Fitted line (scatterplots)")
 	         enabled: varlist.count > 0
         }
-        DropDown{
-	        name: "spreadtype"
-	        values: ["Quartiles (Non-parametric)", "Standard errors"]
-	        label: qsTr("Intervals")
-	         enabled: varlist.count > 0
-        }
-      CheckBox{
-			  name:"refit"; 
-			  label: qsTr("Refit models based on visual displays")
-			}	
         
   }
 
   
   ExpanderButton{
-    title: qsTr("Interaction terms")  
+    title: qsTr("Model Terms")  
     VariablesForm
     {
       height: 150
@@ -78,10 +69,6 @@ Form
 			  label: qsTr("Model plot");
 			  checked: true
 			  }
-      CheckBox{
-			  name:"univariates"; 
-			  label: qsTr("Univariates")
-			  }			  
       CheckBox{
 			  name:"residuals"; 
 			  label: qsTr("Diagnostics")
@@ -153,18 +140,6 @@ Form
         }        
   }
 
-		
-	ExpanderButton{
-    title: qsTr("Estimation Options")
-
-    Group{
-		  DropDown{
-			  name: "estimationmethod"
-			  values: ["Credible Interval", "Bootstrapped Intervals", "Confidence Interval"]
-			  label: qsTr("Interval Estimation")
-		  }			
-    }
-  }
   
   
 }

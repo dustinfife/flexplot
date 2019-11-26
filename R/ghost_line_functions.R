@@ -103,7 +103,6 @@ create_ghost_dataset = function(data, axis, prediction, given, ghost.reference, 
   
   d_smooth = suppressMessages(ggplot_build(g0)$data[[1]])
   return(d_smooth)
-
 }
 
 

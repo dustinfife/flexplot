@@ -17,7 +17,6 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   ### read in the dataset if it's ready
   if (ready){
     dataset = .read_linmod_data(dataset, options)
-    #.check_linmod_error()  #### HOW DO YOU HAVE IT THROW AN ERROR IF THE VARIABLE IS NOT NUMBERIC?
   
     ### check for categorical/numeric variables
     check.non.number = function(x){
@@ -26,14 +25,10 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     }
     character = sapply(dataset[,options$variables, drop=F], check.non.number)
     numeric = !character
-    
-    
-    #save(dataset, character, options, file="/Users/fife/Documents/jaspbroke.rdat")
-    
+
     ### compute results
     if (is.null(jaspResults[["linmod_results"]]))
       .linmod_compute(jaspResults, dataset, options, ready)
-
 
     ### show plots (if user specifies them)
     if (options$model) {
@@ -120,6 +115,28 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   return()
 }
 
+.linmod_avp_plot <- function(jaspResults, options, ready) {
+  
+  ### create plot options
+  addedplot <- createJaspPlot(title = "Added Variable Plot",  width = 900, height = 500)
+  
+  ### what options should change the flexplot?
+  addedplot$dependOn(c("variables", "residuals", "model", "dependent", "avp"))
+  
+  ### fill the plot object
+  jaspResults[["avp"]] <- addedplot
+  
+  if (!ready)
+    return()
+  
+  ### create the flexplot
+  model.type = "added"
+  
+  .create_flexplot_linmod(jaspResults, modelplot, options, model.type)
+  
+  return()
+}
+
 .linmod_residual_plot <- function(jaspResults, options, ready) {
   
   ### create plot options
@@ -149,13 +166,16 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     type = "model"
   } else if (model.type=="residuals"){
     type = "model"
+  } else if (model.type == "added"){
+    formla = make.formula(options$variables, options$dependent)
+    p = added.plot(formla, d)
   }
 
   generated.formula = make_flexplot_formula(options$variables, options$dependent, linmod_results$model$model)
-  save(generated.formula, linmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
   
+
   if	(options$ghost & length(options$variables)<4){
-    ghost="black"
+    ghost=rgb(1,0,0,.4)
   } else {
     ghost = NULL
   }
@@ -164,7 +184,6 @@ linmod_jasp<- function(jaspResults, dataset, options) {
                   "standard errors" = "sterr",
                   "standard deviations", "stdev")
   if (model.type=="model"){
-    
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                       alpha=options$alpha, ghost.line=ghost)
   } else {
@@ -178,9 +197,17 @@ linmod_jasp<- function(jaspResults, dataset, options) {
                  "Minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
                  "Classic" = "theme_classic()+ theme(text=element_text(size=18))",
                  "Dark" = "theme_dark() + theme(text=element_text(size=18))")
-    plot = plot + eval(parse(text=theme[[options$theme]])) #+ theme(legend.position = "none")
+    plot = plot + eval(parse(text=theme[[options$theme]]))
+  }  
+  
+  if (length(options$variables)<4){
+    plot = plot + theme(legend.position = "none")      
   }
+    
+      #+ theme(legend.position = "none")
+  #flexplot$addFootnote("message")
   flexplot$plotObject <- plot
+
   
   return()
 }
@@ -191,7 +218,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     ## createJaspState allows these results to be recycled
     linmod_results <- createJaspState()
     jaspResults[["linmod_results"]] <- linmod_results
-    linmod_results$dependOn(c("dependent", "variables", "interactions"))
+    linmod_results$dependOn(c("dependent", "variables", "interactions", "linetype"))
     
     ## interactions are stored in a deeply nested list. de-listify them
     predictors = paste0(
@@ -199,9 +226,17 @@ linmod_jasp<- function(jaspResults, dataset, options) {
         lapply(options$interactions, FUN=function(x) paste0(unlist(x$components), collapse="*"))
       ), 
       collapse=" + ")
+    if (options$linetype=="Quadratic"){
+      vars = paste0(add_polynomials(options$variables, dataset, 2), collapse=" + ")
+      predictors = paste0(predictors, " + ", vars)
+    } else if (options$linetype == "Cubic"){
+      vars = paste0(add_polynomials(options$variables, dataset, 3), collapse=" + ")
+      predictors = paste0(predictors, " + ", vars)
+    }
+    #save(options, dataset, predictors, file="/Users/fife/Documents/jaspresults.Rdata")
     f = paste0(options$dependent, " ~ ", predictors, collapse = "")
     f = as.formula(f)
-    
+    save(options, dataset, predictors, f, file="/Users/fife/Documents/jaspresults.Rdat")
     
     
     #save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
@@ -240,11 +275,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   }
   
   ### add message about what type of interval was used
-  message <- switch(options$estimationmethod,
-                    "Bootstrapped Intervals"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
-  )
+  message <- paste0("Confidence intervals computed 95% Confidence Intervals")
   linmod_table_means$addFootnote(message)  
   linmod_table_means$showSpecifiedColumnsOnly <- TRUE
   
@@ -288,11 +319,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   linmod_table_differences$addColumnInfo(name = "cohensd",      title = "Cohen's d",    type = "number", format = "dp:2", combine = TRUE)	
   
   ### add message about what type of interval was used
-  message <- switch(options$estimationmethod,
-                    "Bootstrapped Intervals"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
-  )
+  message <- paste0("Confidence intervals computed 95% Confidence Intervals")
   linmod_table_differences$addFootnote(message)  
   linmod_table_differences$showSpecifiedColumnsOnly <- TRUE
   ### store the table structure
@@ -338,12 +365,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   }
   
   ### add message about what type of interval was used
-  message <- switch(options$estimationmethod,
-                    "Bootstrapped Intervals"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
-  )
-  
+  message <- paste0("Confidence intervals computed 95% Confidence Intervals.")
   message = paste0(message, "\n All estimates are conditional estimates.")
   linmod_table_slopes$addFootnote(message)  
   linmod_table_slopes$showSpecifiedColumnsOnly <- TRUE
