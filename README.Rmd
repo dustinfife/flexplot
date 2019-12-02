@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 options(tibble.print_min = 5, tibble.print_max = 5)
 ```
 
-# flexplot <img src='icon.svg' align="right" height="139" /></a>
+# flexplot <img src='flexplot.svg' align="right" height="139" /></a>
 
 <!-- badges: start -->
 <!-- [![CRAN status](https://www.r-pkg.org/badges/version/dplyr)](https://cran.r-project.org/package=dplyr) -->

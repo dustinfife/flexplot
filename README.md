@@ -1,5 +1,5 @@
 
-# flexplot <img src='icon.svg' align="right" height="139" /></a>
+# flexplot <img src='flexplot.svg' align="right" height="139" /></a>
 
 <!-- badges: start -->
 
@@ -143,7 +143,7 @@ model.comparison(full.mod, reduced.mod)
 #> 
 #> $pred.difference
 #>    0%   25%   50%   75%  100% 
-#> 0.003 0.040 0.084 0.158 0.585
+#> 0.033 0.460 0.962 1.814 6.736
 ```
 
 ## Getting help
