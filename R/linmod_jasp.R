@@ -167,13 +167,6 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   linmod_results <- jaspResults[["linmod_results"]]$object
   
-  # if (model.type=="model"){
-  #   type = "model"
-  # } else if (model.type=="residuals"){
-  #   type = "model"
-  # } else if (model.type == "added"){
-  # 
-  # }
   generated.formula = make_flexplot_formula(options$variables, options$dependent, linmod_results$model$model)
   
 
@@ -237,10 +230,11 @@ linmod_jasp<- function(jaspResults, dataset, options) {
         lapply(options$interactions, FUN=function(x) paste0(unlist(x$components), collapse="*"))
       ), 
       collapse=" + ")
-    if (options$linetype=="Quadratic"){
+    #save(dataset, options, ready, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+    if (options$linetype=="Quadratic" & is.numeric(dataset[,options$variables[1]])){
       vars = paste0(add_polynomials(options$variables, dataset, 2), collapse=" + ")
       predictors = paste0(predictors, " + ", vars)
-    } else if (options$linetype == "Cubic"){
+    } else if (options$linetype == "Cubic" &  is.numeric(dataset[,options$variables[1]])){
       vars = paste0(add_polynomials(options$variables, dataset, 3), collapse=" + ")
       predictors = paste0(predictors, " + ", vars)
     }
@@ -286,7 +280,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   }
   
   ### add message about what type of interval was used
-  message <- paste0("Confidence intervals computed 95% Confidence Intervals")
+  message <- paste0("")
   linmod_table_means$addFootnote(message)  
   linmod_table_means$showSpecifiedColumnsOnly <- TRUE
   
@@ -330,7 +324,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   linmod_table_differences$addColumnInfo(name = "cohensd",      title = "Cohen's d",    type = "number", format = "dp:2", combine = TRUE)	
   
   ### add message about what type of interval was used
-  message <- paste0("Confidence intervals computed 95% Confidence Intervals")
+  message <- paste0("")
   linmod_table_differences$addFootnote(message)  
   linmod_table_differences$showSpecifiedColumnsOnly <- TRUE
   ### store the table structure
@@ -410,12 +404,14 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   linmod_table_modcomp$addColumnInfo(name = "terms",      title = "Term",   type = "string", combine = TRUE)
   linmod_table_modcomp$addColumnInfo(name = "rsq",    title = "Semi-partial R Squared",       type = "number", format = "dp:2", combine = TRUE)	
   linmod_table_modcomp$addColumnInfo(name = "bayes",      title = "Semi-partial Bayes Factor", type = "number", combine = TRUE)
+  linmod_table_modcomp$addColumnInfo(name = "bayesinv",      title = "Inverted Bayes Factor", type = "number", combine = TRUE)
   
   
   message = paste0("message \n Note: Semi-partials indicate the effect of removing that particular term from the model. ",
-    "Bayes factors are computed using the BIC. Higher Bayes factors indicate important terms. Lower Bayes factors suggest they can be removed from the model")
+    "Bayes factors are computed using the BIC.")
   linmod_table_modcomp$addFootnote(message)  
   linmod_table_modcomp$showSpecifiedColumnsOnly <- TRUE
+  
   ### store the table structure
   jaspResults[["linmod_table_modcomp"]] <- linmod_table_modcomp
   
@@ -498,7 +494,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 .fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
   mc = linmod_results$model.comparison
-  
+  #save(linmod_table_modcomp, linmod_results, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
   
   ### reformat : to be a times
   term.labels = as.character(mc$all.terms)
@@ -507,7 +503,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   tabdat = list(
     terms = term.labels,
     rsq = mc$rsq,
-    bayes = mc$bayes.factor
+    bayes = mc$bayes.factor,
+    bayes2 = 1/mc$bayes.factor
   )
   #save(mc, file="/Users/fife/Documents/jaspresults.rdat")
   linmod_table_modcomp$setData(tabdat)

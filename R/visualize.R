@@ -116,7 +116,7 @@ utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation")
 #' @export
 visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formula=NULL, 
 	sample = 3, ...){
-
+  #browser()
 	#### figure out what is numeric
 	d = object@frame
 	plot = match.arg(plot, c("all", "residuals", "model"))
@@ -190,7 +190,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 	terms = all.vars(formula)[-1]
 	terms.fixed = terms[-which(terms %in% term.re)]
 
-	
+	#browser()
 	##### generate fixed effects predictions
 	#### if random is in NOT in the second slot
 	if (!modify){
@@ -200,7 +200,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 		prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	
 
 			### to prevent conflicts with base::filter
-		newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = "MathAch"
+		newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = outcome
 		#newd = prediction %>% dplyr::filter(model=="random effects") %>% dplyr::mutate(MathAch = prediction)			
 		step3 = flexplot(formula.new, data=k, suppress_smooth=T) 
 		#if axis 1 is numeric, do lines
@@ -210,7 +210,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 				geom_line(data=m, 
 					aes_string(terms[1], "prediction", color=NA), linetype=1, lwd=2, col="black") +
 				geom_line(data=newd, 
-					aes_string(terms[1], outcome, group="School", color="School"))
+					aes_string(terms[1], outcome, group=term.re, color=term.re))
 					 
 
 		#if axis 1 is categorical, plot means as dots

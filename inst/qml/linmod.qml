@@ -31,21 +31,22 @@ Form
 	        name: "linetype"
 	        values: ["Regression", "Quadratic", "Cubic"]
 	        label: qsTr("Fitted line (scatterplots)")
-	         enabled: varlist.count > 0
+	         enabled: vars.count > 0
         }
         
   }
 
   
   ExpanderButton{
-    title: qsTr("Model Terms")  
+    title: qsTr("Model Terms");  
+    enabled: vars.count > 1 
     VariablesForm
     {
       height: 150
       AvailableVariablesList { 
         name: "components"; 
         title: qsTr("Components"); 
-        source: ["variables"] 
+        source: ["variables"]
       }
   
       AssignedVariablesList 
@@ -53,7 +54,6 @@ Form
         name: "interactions"; 
         title: qsTr("Model terms"); 
         listViewType:"Interaction"
-        enabled: vars.count > 1
       }
     }
   }  
@@ -75,7 +75,8 @@ Form
 			  }
       CheckBox{
 			  name:"avp"; 
-			  label: qsTr("Added variable plot")
+			  label: qsTr("Added variable plot");
+			  enabled: vars.count > 1 
 			  }			  
 		  }
 		  
@@ -84,7 +85,8 @@ Form
     title: qsTr("Estimation")
       CheckBox{
 			  name:"modinf"; 
-			  label: qsTr("Show model comparisons")
+			  label: qsTr("Show model comparisons");
+			  enabled: vars.count > 1 			  
 			}	
       CheckBox{
 			  name:"means"; 

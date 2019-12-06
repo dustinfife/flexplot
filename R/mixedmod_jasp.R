@@ -12,12 +12,11 @@
 mixedmod_jasp<- function(jaspResults, dataset, options) {
 
   ### check if they have an IV and a DV
-  ready <- (options$dependent != "" & length(options$variables)>0)
+  ready <- (options$dependent != "" & length(options$variables)>0 & options$rvariables != "")
   
   ### read in the dataset if it's ready
   if (ready){
     dataset = .read_mixedmod_data(dataset, options)
-    #.check_mixedmod_error()  #### HOW DO YOU HAVE IT THROW AN ERROR IF THE VARIABLE IS NOT NUMBERIC?
   
     ### check for categorical/numeric variables
     check.non.number = function(x){
@@ -38,56 +37,56 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
         .mixedmod_model_plot(jaspResults, options, ready)
       }
     }
-
-    if (options$residuals) {
-      if (is.null(jaspResults[["mixedmod_residual_plot"]])){
-        .mixedmod_residual_plot(jaspResults, options, ready)
-      }
-    }
-    
-    
-    ### show output, depending on results
-    if (sum(numeric)>0){
-    
-      if (length(options$variables)>1){
-        if (options$modinf){
-          if (is.null(jaspResults[["mixedmod_table_modcomp"]])){
-            .create_mixedmod_table_modcomp(jaspResults, options, ready)
-          }
-        }
-      }
-      
-      if (options$sl){
-        if (is.null(jaspResults[["mixedmod_table_slopes"]])){
-          .create_mixedmod_table_slopes(jaspResults, options, ready)
-        }
-      }
-    }
-    
-    if (sum(character)>0){
-      
-      if (length(options$variables)>1){
-        if (options$modinf) {
-          if (is.null(jaspResults[["mixedmod_table_modcomp"]])){
-            .create_mixedmod_table_modcomp(jaspResults, options, ready)
-          }
-        }
-      }  
-      
-      ### check if there's a jasp table already. if not, create it
-      if (options$means){
-        if (is.null(jaspResults[["mixedmod_table_means"]])){
-        .create_mixedmod_table_means(jaspResults, options, ready)
-        }  
-      }  
-      
-      if (options$diff) {
-        if (is.null(jaspResults[["mixedmod_table_differences"]])){
-          .create_mixedmod_table_differences(jaspResults, options, ready)
-        }
-      }  
-      
-    }
+    # 
+    # if (options$residuals) {
+    #   if (is.null(jaspResults[["mixedmod_residual_plot"]])){
+    #     .mixedmod_residual_plot(jaspResults, options, ready)
+    #   }
+    # }
+    # 
+    # 
+    # ### show output, depending on results
+    # if (sum(numeric)>0){
+    # 
+    #   if (length(options$variables)>1){
+    #     if (options$modinf){
+    #       if (is.null(jaspResults[["mixedmod_table_modcomp"]])){
+    #         .create_mixedmod_table_modcomp(jaspResults, options, ready)
+    #       }
+    #     }
+    #   }
+    #   
+    #   if (options$sl){
+    #     if (is.null(jaspResults[["mixedmod_table_slopes"]])){
+    #       .create_mixedmod_table_slopes(jaspResults, options, ready)
+    #     }
+    #   }
+    # }
+    # 
+    # if (sum(character)>0){
+    #   
+    #   if (length(options$variables)>1){
+    #     if (options$modinf) {
+    #       if (is.null(jaspResults[["mixedmod_table_modcomp"]])){
+    #         .create_mixedmod_table_modcomp(jaspResults, options, ready)
+    #       }
+    #     }
+    #   }  
+    #   
+    #   ### check if there's a jasp table already. if not, create it
+    #   if (options$means){
+    #     if (is.null(jaspResults[["mixedmod_table_means"]])){
+    #     .create_mixedmod_table_means(jaspResults, options, ready)
+    #     }  
+    #   }  
+    #   
+    #   if (options$diff) {
+    #     if (is.null(jaspResults[["mixedmod_table_differences"]])){
+    #       .create_mixedmod_table_differences(jaspResults, options, ready)
+    #     }
+    #   }  
+    #   
+    # }
     
     # 
 
@@ -139,43 +138,28 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
 .create_flexplot <- function(jaspResults, flexplot, options, model.type) {
   
   mixedmod_results <- jaspResults[["mixedmod_results"]]$object
-  
-  if (model.type=="model"){
-    type = "model"
-  } else if (model.type=="residuals"){
-    type = "model"
-  }
+  plot = visualize(mixedmod_results, plot="model")
+  plot = theme_it(plot, options$theme)
+  save(mixedmod_results, options, file="/Users/fife/Documents/flexplot/jaspbroke.Rdata")
+  # if	(options$ghost){
+  #   ghost="black"
+  # } else {
+  #   ghost = NULL
+  # }
+  # 
+  # whiskers = list("quartiles" = "quartiles",
+  #                 "standard errors" = "sterr",
+  #                 "standard deviations", "stdev")
+  # if (model.type=="model"){
+  #   save(generated.formula, mixedmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
+  # plot = compare.fits(generated.formula, data = mixedmod_results$model$model, model1 = mixedmod_results$model,
+  #                     alpha=options$alpha, ghost.line=ghost)
+  # } else {
+  #   plot = visualize(mixedmod_results$model, mixedmod_results, plot=model.type, alpha=options$alpha)
+  # }
 
-  generated.formula = make_flexplot_formula(options$variables, options$dependent, mixedmod_results$model$model)
-  
-  if	(options$ghost){
-    ghost="black"
-  } else {
-    ghost = NULL
-  }
-  
-  whiskers = list("quartiles" = "quartiles",
-                  "standard errors" = "sterr",
-                  "standard deviations", "stdev")
-  if (model.type=="model"){
-    save(generated.formula, mixedmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
-  plot = compare.fits(generated.formula, data = mixedmod_results$model$model, model1 = mixedmod_results$model,
-                      alpha=options$alpha, ghost.line=ghost)
-  } else {
-    plot = visualize(mixedmod_results$model, mixedmod_results, plot=model.type, alpha=options$alpha)
-  }
-  
-  if (options$theme == "JASP"){
-    plot = themeJasp(plot)
-  } else {
-    theme = list("black and white"="theme_bw()+ theme(text=element_text(size=18))",
-                 "minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
-                 "classic" = "theme_classic()+ theme(text=element_text(size=18))",
-                 "dark" = "theme_dark() + theme(text=element_text(size=18))")
-    plot = plot + eval(parse(text=theme[[options$theme]]))
-  }
   flexplot$plotObject <- plot
-  
+
   return()
 }
 
@@ -187,38 +171,28 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     ## createJaspState allows these results to be recycled
     mixedmod_results <- createJaspState()
     jaspResults[["mixedmod_results"]] <- mixedmod_results
-    mixedmod_results$dependOn(c("dependent", "variables", "interactions"))
+    mixedmod_results$dependOn(c("dependent", "variables", "interactions", "randeff2"))
     
-    ## interactions are stored in a deeply nested list. de-listify them
-    predictors = paste0(
+
+    # create the mixed model formula ------------------------------------------
+    fixed.effects = paste0(
       unlist(
         lapply(options$interactions, FUN=function(x) paste0(unlist(x$components), collapse="*"))
       ), 
       collapse=" + ")
-    f = paste0(options$dependent, " ~ ", predictors, collapse = "")
+    random.effects = paste0(
+      unlist(
+        lapply(options$randeff2, FUN=function(x) paste0(unlist(x$components), collapse="+"))
+      ), 
+      collapse=" + ")
+    f = paste0(options$dependent, " ~ ", fixed.effects, " + (", random.effects, " | ", options$rvariables, ")", collapse = "")
     f = as.formula(f)
     
-    ## save results (for debugging purposes)
-    
-    ## set up generalIZED models
-    # family = list(
-    #   "Normal" = "gaussian",
-    #   "Logistic" = "binomial",
-    #   "Poisson" = "poisson",
-    #   "Negative Binomial" = "quassipoisson",
-    #   "Gamma" = "Gamma"
-    # )
-    #require(tidyverse)
-    #model = glm(f, dataset %>% mutate(!!options$dependent := factor_to_logistic_x(dataset[,options$dependent])), family=family[[options$family]])
-    ### model it
-    model = lm(f, dataset)
-    #save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
-    ### store all the information
-    est = estimates(model)
-    est$model = model
-    
-    mixedmod_results$object = est
-    
+
+    # fit the model -----------------------------------------------------------
+    mod = lme4::lmer(f, data=dataset)
+    #save(options, dataset, mod, f, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+    mixedmod_results$object = mod
     return()
   }
 }
@@ -499,7 +473,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   if (!is.null(dataset))
     return(dataset)
   else
-    dataset = .readDataSetToEnd(columns=(c(options$dependent, options$variables))) 
+    dataset = .readDataSetToEnd(columns=(c(options$dependent, options$variables, options$rvariables))) 
     ## variable names in the dataset are encoded. de-encodify them
     names(dataset) = JASP:::.unv(names(dataset))
     return(dataset)
