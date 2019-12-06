@@ -202,7 +202,8 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 			### to prevent conflicts with base::filter
 		newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = outcome
 		#newd = prediction %>% dplyr::filter(model=="random effects") %>% dplyr::mutate(MathAch = prediction)			
-		step3 = flexplot(formula.new, data=k, suppress_smooth=T) 
+		#formula_new = MathAch~SES + School | Sex
+		step3 = flexplot(formula, data=k, suppress_smooth=T) 
 		#if axis 1 is numeric, do lines
 		if (is.numeric(d[,terms[1]])){
 				m = prediction[prediction$model=="fixed effects",]
