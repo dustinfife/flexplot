@@ -99,7 +99,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   modelplot <- createJaspPlot(title = "Plot of the Statistical Model",  width = 900, height = 500)
   
   ### what options should change the flexplot?
-  modelplot$dependOn(c("variables", "residuals", "model", "dependent"))
+  modelplot$dependOn(c("variables", "residuals", "model", "dependent", "theme"))
   
   ### fill the plot object
   jaspResults[["modelplot"]] <- modelplot
@@ -140,7 +140,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   mixedmod_results <- jaspResults[["mixedmod_results"]]$object
   plot = visualize(mixedmod_results, plot="model")
   plot = theme_it(plot, options$theme)
-  save(mixedmod_results, options, file="/Users/fife/Documents/flexplot/jaspbroke.Rdata")
+  #save(mixedmod_results, options, file="/Users/fife/Documents/flexplot/jaspbroke.Rdata")
   # if	(options$ghost){
   #   ghost="black"
   # } else {
