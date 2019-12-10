@@ -91,11 +91,7 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
 		linetype = tolower(options$type)
 		
 		#save(k, formula, file="/Users/fife/Documents/jaspbroke.rdata")
-		if (options$jitx != 0 | options$jity != 0) {
-		  jitter = c(options$jitx,options$jity)
-		} else {
-		  jitter = NULL
-		}
+		jitter = c(options$jitx,options$jity)
 		if (linetype == "regression") linetype = "lm"
 		plot = flexplot(formula, data=k, method=linetype, se=options$confidence, alpha=options$alpha, 
 		                ghost.line=ghost,

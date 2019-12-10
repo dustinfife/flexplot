@@ -274,22 +274,23 @@ linmod_jasp<- function(jaspResults, dataset, options) {
         lapply(options$interactions, FUN=function(x) paste0(unlist(x$components), collapse="*"))
       ), 
       collapse=" + ")
-    #save(dataset, options, ready, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
-    if (options$linetype=="Quadratic" & is.numeric(dataset[,options$variables[1]])){
-      vars = paste0(add_polynomials(options$variables, dataset, 2), collapse=" + ")
+    
+    # add variables with polynomial terms -------------------------------------
+    vars = unlist(lapply(options$interactions, FUN=function(x) unlist(x$components)))
+    polys = unlist(lapply(options$interactions, FUN=function(x) unlist(x$polynoms)))
+    vars.with.poly = vars[polys]
+    # specify degree
+    if (options$linetype=="Quadratic" & length(vars.with.poly)>0){
+      vars = paste0(add_polynomials(vars.with.poly, dataset, 2), collapse=" + ")
       predictors = paste0(predictors, " + ", vars)
-    } else if (options$linetype == "Cubic" &  is.numeric(dataset[,options$variables[1]])){
-      vars = paste0(add_polynomials(options$variables, dataset, 3), collapse=" + ")
+    } else if (options$linetype == "Cubic" &  length(vars.with.poly)>0){
+      vars = paste0(add_polynomials(vars.with.poly, dataset, 3), collapse=" + ")
       predictors = paste0(predictors, " + ", vars)
     }
-    #save(options, dataset, predictors, file="/Users/fife/Documents/jaspresults.Rdata")
+    
+    # create formula
     f = paste0(options$dependent, " ~ ", predictors, collapse = "")
     f = as.formula(f)
-    #save(options, dataset, predictors, f, file="/Users/fife/Documents/jaspresults.Rdat")
-    
-    
-    #save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
-     
     
     ### store all the information
     model = lm(f, dataset)
@@ -392,7 +393,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   linmod_table_slopes <- createJaspTable(title = "Regression Slopes and Intercept")
   
   ### which options are required
-  linmod_table_slopes$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
+  linmod_table_slopes$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf", "linetype"))
   
   ### add citation
   linmod_table_slopes$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -439,7 +440,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   linmod_table_modcomp <- createJaspTable(title = "Model Comparisons (Estimating the Effect of Removing Terms)")
   
   ### which options are required
-  linmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
+  linmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf", "linetype"))
   
   ### add citation
   linmod_table_modcomp$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")

@@ -42,6 +42,11 @@ Form
         name: "interactions"; 
         title: qsTr("Model terms"); 
         listViewType:"Interaction"
+        ExtraControlColumn {
+          type: "CheckBox"
+          name: "polynoms"
+          title: "Add as a polynomial"
+        }
       }
     }
   }  
@@ -161,7 +166,7 @@ Form
               name:"ghost"; 
               label: qsTr("Ghost lines");
               checked: true
-              enabled: vars.count > 0 & vars.count< 4
+              enabled: vars.count > 1 & vars.count< 4
             }  
         }
 

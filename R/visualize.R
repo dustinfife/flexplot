@@ -119,7 +119,7 @@ utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation")
 #' @rawNamespace import(dplyr, except = c(filter, lag))
 #' @export
 visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formula=NULL, 
-	sample = 3, ...){
+	sample = 3, plots.as.list=FALSE,...){
   #browser()
 	#### figure out what is numeric
 	d = object@frame
@@ -271,7 +271,11 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 	#### now put them all together
 	if (plot=="residuals"){
 		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)
-		return(p)
+		if (plots.as.list){
+		  list(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl)
+		} else {
+		  return(p)
+		}
 	} else if (plot=="model"){
 		return(step3)
 	} else {

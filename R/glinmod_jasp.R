@@ -169,7 +169,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     "Normal" = "identity",
     "Logistic" = "logit",
     "Poisson" = "log",
-    "Negative Binomial" = "logit",
+    "Negative binomial" = "logit",
     "Gamma" = "inverse"
   )
   
@@ -238,12 +238,12 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
       "Normal" = "gaussian",
       "Logistic" = "binomial",
       "Poisson" = "poisson",
-      "Negative Binomial" = "quasipoisson",
+      "Negative binomial" = "quasipoisson",
       "Gamma" = "Gamma"
     )
     
     chosen.family = family[[options$family]]
-    
+    save(chosen.family, options, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
     model = glm(f, dataset, family=chosen.family)
     glinmod_results$object = model
     return()

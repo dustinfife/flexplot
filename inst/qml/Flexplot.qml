@@ -52,7 +52,7 @@ Form
 		        Slider{
               name: "jitx"
               label: qsTr("Jitter in X")
-              value: 0
+              value: .1
               min: 0
               max: .5
               vertical: true

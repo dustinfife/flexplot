@@ -25,7 +25,7 @@ Form
 		DropDown{
 		    id: family
 			  name: "family"
-			  values: ["Normal", "Logistic", "Poisson", "Negative Binomial", "Gamma"]
+			  values: ["Normal", "Logistic", "Poisson", "Negative binomial", "Gamma"]
 			  label: qsTr("Distribution family")
 		  }
   }
@@ -35,6 +35,7 @@ Form
   
   ExpanderButton{
     title: qsTr("Interaction terms")  
+    enabled: vars.count > 1    
     VariablesForm
     {
       height: 150
@@ -49,7 +50,6 @@ Form
         name: "interactions"; 
         title: qsTr("Model terms"); 
         listViewType:"Interaction"
-        enabled: vars.count > 1
       }
     }
   }  
@@ -143,7 +143,7 @@ Form
               name:"ghost"; 
               label: qsTr("Ghost lines");
               checked: true
-              enabled: vars.count > 0 & vars.count< 4
+              enabled: vars.count > 1 & vars.count< 4
             }  
         }
 

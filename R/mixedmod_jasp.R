@@ -44,6 +44,12 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
         .mixedmod_univariate_plot(jaspResults, options, ready, dataset)
       }
     }
+    
+    if (options$residuals) {
+      if (is.null(jaspResults[["mixedmod_residual_plot"]])){
+        .mixedmod_residual_plot(jaspResults, options, ready)
+      }
+    }
 
     ### report fixed effects
     if (options$fixeff){
@@ -224,10 +230,35 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   return()
 }
 
-.create_flexplot <- function(jaspResults, flexplot, options, model.type) {
+.mixedmod_residual_plot <- function(jaspResults, options, ready) {
+  
+  ### create plot options
+  residualplot <- createJaspPlot(title = "Diagnostic Plots",  width = 800, height = 500)
+  
+  ### what options should change the flexplot?
+  residualplot$dependOn(c("variables", "residuals", "model", "dependent", "interactions"))
+  
+  ### fill the plot object
+  jaspResults[["residualplot"]] <- residualplot
+  
+  if (!ready)
+    return()
   
   mixedmod_results <- jaspResults[["mixedmod_results"]]$object
   save(mixedmod_results, options, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+  plot = visualize(mixedmod_results, plot="residuals", plots.as.list=TRUE,
+                   alpha=options$alpha, jitter=c(options$jitx, options$jity))
+  plot = arrange_jasp_plots(plot, options$theme)
+  residualplot$plotObject <- plot
+  
+  return()
+}
+
+
+
+.create_flexplot <- function(jaspResults, flexplot, options, model.type) {
+  
+  mixedmod_results <- jaspResults[["mixedmod_results"]]$object
   plot = visualize(mixedmod_results, plot="model", alpha = options$alpha, sample = options$nsamp,
                    jitter=c(options$jitx, options$jity))
   plot = theme_it(plot, options$theme)

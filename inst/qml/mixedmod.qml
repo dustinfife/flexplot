@@ -71,7 +71,13 @@ Form
 			  name:"univariates"; 
 			  label: qsTr("Univariate plots");
 			  checked: true
-			  }			  
+			  }	
+
+      CheckBox{
+			  name:"residuals"; 
+			  label: qsTr("Diagnostics")
+			  }
+			  
 		  }
 		Group{
     title: qsTr("Estimation")
