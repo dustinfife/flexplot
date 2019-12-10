@@ -24,19 +24,7 @@ Form
 			singleVariable: false 
 		}
   }
-  
-  ExpanderButton{
-    title: qsTr("Visual Fitting")  
-        DropDown{
-	        name: "linetype"
-	        values: ["Regression", "Quadratic", "Cubic"]
-	        label: qsTr("Fitted line (scatterplots)")
-	         enabled: vars.count > 0
-        }
-        
-  }
 
-  
   ExpanderButton{
     title: qsTr("Model Terms");  
     enabled: vars.count > 1 
@@ -58,6 +46,20 @@ Form
     }
   }  
   
+  ExpanderButton{
+    title: qsTr("Visual Fitting")  
+        DropDown{
+	        name: "linetype"
+	        values: ["Regression", "Quadratic", "Cubic"]
+	        label: qsTr("Fitted line (scatterplots)")
+	         enabled: vars.count > 0
+        }
+        
+  }
+
+  
+
+  
 		
   ExpanderButton{
     title: qsTr("Results Displays")
@@ -68,6 +70,10 @@ Form
 			  name:"model"; 
 			  label: qsTr("Model plot");
 			  checked: true
+			  }
+      CheckBox{
+			  name:"univariate"; 
+			  label: qsTr("Univariate")
 			  }
       CheckBox{
 			  name:"residuals"; 
@@ -116,13 +122,8 @@ Form
       title: qsTr("Plot Controls")
       
         Group{
-        title: qsTr("Visual Aids")
-             CheckBox{
-              name:"ghost"; 
-              label: qsTr("Ghost lines");
-              checked: true
-              enabled: vars.count > 0 & vars.count< 4
-            }
+        title: qsTr("Point controls")
+        columns: 4
 		        Slider{
               name: "alpha"
               label: qsTr("Point transparency")
@@ -130,6 +131,24 @@ Form
               vertical: true
               enabled: varlist.count > 0
             }
+		        Slider{
+              name: "jitx"
+              label: qsTr("Jitter in X")
+              value: .1
+              min: 0
+              max: .5
+              vertical: true
+              enabled: varlist.count > 0
+            }  
+		        Slider{
+              name: "jity"
+              label: qsTr("Jitter in Y")
+              value: 0
+              min: 0
+              max: .5
+              vertical: true
+              enabled: varlist.count > 0
+            }   
         }
         Group{
         title: qsTr("Aesthetics")
@@ -138,9 +157,15 @@ Form
 			        values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
 			        label: qsTr("GGplot theme")
 		        }
-        }        
-  }
+		        CheckBox{
+              name:"ghost"; 
+              label: qsTr("Ghost lines");
+              checked: true
+              enabled: vars.count > 0 & vars.count< 4
+            }  
+        }
 
+  }
   
   
 }

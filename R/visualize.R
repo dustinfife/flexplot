@@ -34,7 +34,7 @@ visualize.default = function(object, plot=c("all", "residuals", "model"),formula
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
 #' @export
-visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL,...){
+visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL, plots.as.list=FALSE,...){
 
 
 	plot = match.arg(plot, c("all", "residuals", "model"))
@@ -90,7 +90,11 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 	if (plot=="residuals"){
 	  res.plots = residual.plots(d, object)
 		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)
-		return(p)
+		if (plots.as.list){
+		  list(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl)
+		} else {
+		  return(p)
+		}
 	} else if (plot=="model"){
 		return(step3)
 	} else {
@@ -194,7 +198,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 	##### generate fixed effects predictions
 	#### if random is in NOT in the second slot
 	if (!modify){
-		step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T)
+		step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T, ...)
 	} else {
 		#### otherwise...
 		prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	
@@ -203,7 +207,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 		newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = outcome
 		#newd = prediction %>% dplyr::filter(model=="random effects") %>% dplyr::mutate(MathAch = prediction)			
 		#formula_new = MathAch~SES + School | Sex
-		step3 = flexplot(formula, data=k, suppress_smooth=T) 
+		step3 = flexplot(formula, data=k, suppress_smooth=T, ...) 
 		#if axis 1 is numeric, do lines
 		if (is.numeric(d[,terms[1]])){
 				m = prediction[prediction$model=="fixed effects",]
@@ -234,18 +238,21 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 			#### aggregate the means across variables		
 			means = prediction %>% group_by_at(vars(one_of(c(terms, "model")))) %>% summarize(Value = mean(prediction))
 			fixed.means = means[means$model=="fixed effects",]
-			fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(terms.fixed))) %>% summarize(Value=mean(Value))
+			fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(c(terms.fixed)))) %>% 
+			  summarize(Value=mean(Value))
+			
 			means = means[means$model=="random effects",]
 			#means = means %>% dplyr::filter(model=="random effects") 
 			names(means)[ncol(means)] = names(fixed.means)[ncol(fixed.means)] = outcome
 			names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var
 			names(means)[names(means)==unbinned.var] = binned.var			
-			
+			fixed.means[,term.re] = unique(k[,term.re])
+			#head(fixed.means)
 			#### plot it
  			step3 = step3 + 
 				### fixed effects
-				geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3) +
-				geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=1), lwd=2) +
+				geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3, color="black", shape=16) +
+				geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=2, color="black", linetype=1) +
 
 				### random effects
 				geom_point(data=means, aes_string(x=terms[1], y=outcome), size=.5) +
@@ -373,7 +380,7 @@ residual.plots = function(data, object){
 		sl = flexplot(abs.res~fitted, data=data, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			
 		class(sl) = c("flexplot", class(sl))		
 	} else {
-		sl = flexplot(abs.res~fitted, data=data, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			
+		sl = flexplot(abs.res~fitted, data=data, method="lm")+ labs(x="fitted", y="Absolute Value\nof Residuals", title="S-L Plot")			
 		class(sl) = c("flexplot", class(sl))					
 	}
 	

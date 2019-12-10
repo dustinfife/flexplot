@@ -49,7 +49,12 @@ linmod_jasp<- function(jaspResults, dataset, options) {
         .linmod_residual_plot(jaspResults, options, ready)
       }
     }
-
+    #### show plots (if user specifies them)
+    if (options$univariate) {
+      if (is.null(jaspResults[["linmod_univariate_plot"]])){
+        .linmod_univariate_plot(jaspResults, options, ready, dataset)
+      }
+    }
 
     ### show output, depending on results
     if (sum(numeric)>0){
@@ -105,7 +110,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   modelplot <- createJaspPlot(title = "Plot of the Statistical Model",  width = 900, height = 500)
   
   ### what options should change the flexplot?
-  modelplot$dependOn(c("variables", "residuals", "model", "dependent"))
+  modelplot$dependOn(c("variables", "residuals", "model", "dependent", "interactions"))
   
   ### fill the plot object
   jaspResults[["modelplot"]] <- modelplot
@@ -121,13 +126,50 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   return()
 }
 
+.linmod_univariate_plot <- function(jaspResults, options, ready, dataset) {
+  
+  ### create plot options
+  uniplot <- createJaspPlot(title = "Univariate Plots",  width = 900, height = 500)
+  
+  ### what options should change the flexplot?
+  uniplot$dependOn(c("dependent", "variables", "theme", "univariate"))
+  
+  ### fill the plot object
+  jaspResults[["uniplot"]] <- uniplot
+  
+  if (!ready)
+    return()
+  
+  ### loop through and plot everything
+  all.variables = c(options$dependent, options$variables)
+  
+  a = theme_it(flexplot(make.formula(options$dependent, "1"), dataset), options$theme)
+  plot.list = list(rep(a, times=length(all.variables)))
+  plot.list[[1]] = a
+  for (i in 2:length(all.variables)){
+    p = theme_it(flexplot(make.formula(options$variables[i-1], "1"), dataset), options$theme)
+    plot.list[[i]] = p
+  }
+  #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+  if (length(options$variables)<3){
+    nc = length(options$variables) + 1
+  } else if ((length(options$variables)+1)/2 == round((length(options$variables)+1)/2)){
+    nc = 2
+  } else {
+    nc = 3
+  }
+  uniplot$plotObject <- cowplot::plot_grid(plotlist= plot.list, ncol=nc)
+  
+  return()
+}
+
 .linmod_avp_plot <- function(jaspResults, options, ready) {
   
   ### create plot options
   addedplot <- createJaspPlot(title = "Added Variable Plot",  width = 900, height = 500)
   
   ### what options should change the flexplot?
-  addedplot$dependOn(c("variables", "residuals", "model", "dependent", "avp"))
+  addedplot$dependOn(c("variables", "residuals", "model", "dependent", "avp", "interactions"))
   
   ### fill the plot object
   jaspResults[["avp"]] <- addedplot
@@ -148,7 +190,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   residualplot <- createJaspPlot(title = "Diagnostic Plots",  width = 800, height = 500)
   
   ### what options should change the flexplot?
-  residualplot$dependOn(c("variables", "residuals", "model", "dependent"))
+  residualplot$dependOn(c("variables", "residuals", "model", "dependent", "interactions"))
   
   ### fill the plot object
   jaspResults[["residualplot"]] <- residualplot
@@ -181,17 +223,19 @@ linmod_jasp<- function(jaspResults, dataset, options) {
                   "standard deviations", "stdev")
   if (model.type=="model"){
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
-                      alpha=options$alpha, ghost.line=ghost)
+                      alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
   } else if (model.type == "residuals"){
-    plot = visualize(linmod_results$model, linmod_results, plot=model.type, alpha=options$alpha)
+    plot = visualize(linmod_results$model, linmod_results, plot=model.type, plots.as.list=TRUE,
+                     alpha=options$alpha, jitter=c(options$jitx, options$jity))
+    plot = arrange_jasp_plots(plot, options$theme)
   } else if (model.type == "added"){
     
     methods = list("Regression"="lm", 
                    "Quadratic"="quadratic", 
                    "Cubic"="cubic")
     formla = make.formula(options$dependent,options$variables)
-    save(formla, linmod_results, model.type, file="/Users/fife/Documents/jaspresults.Rdata")
-    plot = added.plot(formla, linmod_results$model$model, method=methods[options$linetype], alpha=options$alpha)
+    plot = added.plot(formla, linmod_results$model$model, method=methods[options$linetype], alpha=options$alpha,
+                      jitter=c(options$jitx, options$jity))
   }
   
   if (options$theme == "JASP"){
@@ -407,8 +451,12 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   linmod_table_modcomp$addColumnInfo(name = "bayesinv",      title = "Inverted Bayes Factor", type = "number", combine = TRUE)
   
   
-  message = paste0("message \n Note: Semi-partials indicate the effect of removing that particular term from the model. ",
+  message = paste0("Note: Semi-partials indicate the effect of removing that particular term from the model. ",
     "Bayes factors are computed using the BIC.")
+  if (length(options$interactions)>0){
+    message = paste0(message, "\n 
+                     Main effect estimates of r squared and BF have been suppressed because there is an interaction in the model.")
+  }
   linmod_table_modcomp$addFootnote(message)  
   linmod_table_modcomp$showSpecifiedColumnsOnly <- TRUE
   
@@ -494,18 +542,30 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 .fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
   mc = linmod_results$model.comparison
-  #save(linmod_table_modcomp, linmod_results, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
+  save(linmod_table_modcomp, linmod_results, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
   
   ### reformat : to be a times
   term.labels = as.character(mc$all.terms)
+  main.effects = main_effects_2_remove(term.labels)
   term.labels = gsub(":", "×", term.labels)
+  
   ### output results
   tabdat = list(
     terms = term.labels,
     rsq = mc$rsq,
     bayes = mc$bayes.factor,
-    bayes2 = 1/mc$bayes.factor
+    bayesinv = 1/mc$bayes.factor
   )
+  
+  #### remove main effects where there's an interaction present
+  condition.me = term.labels %in% main.effects
+  tabdat$rsq[condition.me] = NA
+  tabdat$bayes[condition.me] = NA
+  tabdat$bayesinv[condition.me] = NA
+  
+  ### remove stats for main effects
+  
+  ### remove the main effects for models with interaction terms
   #save(mc, file="/Users/fife/Documents/jaspresults.rdat")
   linmod_table_modcomp$setData(tabdat)
   

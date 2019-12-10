@@ -17,6 +17,10 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   ### read in the dataset if it's ready
   if (ready){
     dataset = .read_glinmod_data(dataset, options)
+    save(dataset, options, file="/Users/fife/Documents/jaspdata.rdata")
+    #### modify dataset to convert to numeric (where applicable)
+
+    dataset = modify_dv(dataset, options$dependent, options$family)
     #.check_glinmod_error()  #### HOW DO YOU HAVE IT THROW AN ERROR IF THE VARIABLE IS NOT NUMBERIC?
   
     ### check for categorical/numeric variables
@@ -35,72 +39,77 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     #### show plots (if user specifies them)
     if (options$model) {
       if (is.null(jaspResults[["glinmod_model_plot"]])){
-        .glinmod_model_plot(jaspResults, options, ready)
+        .glinmod_model_plot(jaspResults, options, ready, dataset)
+      }
+    }
+    
+    #### show plots (if user specifies them)
+    if (options$univariates) {
+      if (is.null(jaspResults[["glinmod_univariate_plot"]])){
+        .glinmod_univariate_plot(jaspResults, options, ready, dataset)
+      }
+    }
+    
+    ### report parameter estimates
+    if (options$ests){
+      if (is.null(jaspResults[["glinmod_table_fixed"]])){
+        .create_glinmod_coefs(jaspResults, options, ready)
       }
     }
 
-    if (options$residuals) {
-      if (is.null(jaspResults[["glinmod_residual_plot"]])){
-        .glinmod_residual_plot(jaspResults, options, ready)
-      }
-    }
-    
-    
-    ### show output, depending on results
-    if (sum(numeric)>0){
-    
-      if (length(options$variables)>1){
-        if (options$modinf){
-          if (is.null(jaspResults[["glinmod_table_modcomp"]])){
-            .create_glinmod_table_modcomp(jaspResults, options, ready)
-          }
-        }
-      }
-      
-      if (options$sl){
-        if (is.null(jaspResults[["glinmod_table_slopes"]])){
-          .create_glinmod_table_slopes(jaspResults, options, ready)
-        }
-      }
-    }
-    
-    if (sum(character)>0){
-      
-      if (length(options$variables)>1){
-        if (options$modinf) {
-          if (is.null(jaspResults[["glinmod_table_modcomp"]])){
-            .create_glinmod_table_modcomp(jaspResults, options, ready)
-          }
-        }
-      }  
-      
-      ### check if there's a jasp table already. if not, create it
-      if (options$means){
-        if (is.null(jaspResults[["glinmod_table_means"]])){
-        .create_glinmod_table_means(jaspResults, options, ready)
-        }  
-      }  
-      
-      if (options$diff) {
-        if (is.null(jaspResults[["glinmod_table_differences"]])){
-          .create_glinmod_table_differences(jaspResults, options, ready)
-        }
-      }  
-      
-    }
-    
-    # 
 
   }  
 }
 
-.glinmod_model_plot <- function(jaspResults, options, ready) {
+
+
+
+# Plot the model ----------------------------------------------------------
+
+.glinmod_univariate_plot <- function(jaspResults, options, ready, dataset) {
+  
+  ### create plot options
+  uniplot <- createJaspPlot(title = "Univariate Plots",  width = 900, height = 500)
+  
+  ### what options should change the flexplot?
+  uniplot$dependOn(c("dependent", "variables", "theme", "univariates"))
+  
+  ### fill the plot object
+  jaspResults[["uniplot"]] <- uniplot
+  
+  if (!ready)
+    return()
+  
+  ### loop through and plot everything
+  all.variables = c(options$dependent, options$variables)
+  
+  a = theme_it(flexplot(make.formula(options$dependent, "1"), dataset), options$theme)
+  plot.list = list(rep(a, times=length(all.variables)))
+  plot.list[[1]] = a
+  for (i in 2:length(all.variables)){
+    p = theme_it(flexplot(make.formula(options$variables[i-1], "1"), dataset), options$theme)
+    plot.list[[i]] = p
+  }
+  #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+  if (length(options$variables)<3){
+    nc = length(options$variables) + 1
+  } else if ((length(options$variables)+1)/2 == round((length(options$variables)+1)/2)){
+    nc = 2
+  } else {
+    nc = 3
+  }
+  uniplot$plotObject <- cowplot::plot_grid(plotlist= plot.list, ncol=nc)
+  
+  return()
+}
+
+.glinmod_model_plot <- function(jaspResults, options, ready, dataset) {
   
   ### create plot options
   modelplot <- createJaspPlot(title = "Plot of the Statistical Model",  width = 900, height = 500)
   
   ### what options should change the flexplot?
-  modelplot$dependOn(c("variables", "residuals", "model", "dependent"))
+  modelplot$dependOn(c("dependent", "variables", "interactions", "family", "ghost", "theme"))
   
   ### fill the plot object
   jaspResults[["modelplot"]] <- modelplot
@@ -110,76 +119,102 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   ### create the flexplot
   model.type = "model"
-  .create_flexplot(jaspResults, modelplot, options, model.type)
+  .create_flexplot_glinmod(jaspResults, modelplot, options, dataset)
   
   return()
 }
 
-.glinmod_residual_plot <- function(jaspResults, options, ready) {
+.create_flexplot_glinmod <- function(jaspResults, modelplot, options, dataset) {
   
-  ### create plot options
-  residualplot <- createJaspPlot(title = "Diagnostic Plots",  width = 800, height = 500)
+  glinmod_results <- jaspResults[["glinmod_results"]]$object 
+  generated.formula = make_flexplot_formula(options$variables, options$dependent, dataset)
   
-  ### what options should change the flexplot?
-  residualplot$dependOn(c("variables", "residuals", "model", "dependent"))
-  
-  ### fill the plot object
-  jaspResults[["residualplot"]] <- residualplot
-  
-  if (!ready)
-    return()
-  
-  ### create the flexplot
-  model.type = "residuals"
-  .create_flexplot(jaspResults, residualplot, options, model.type)
-  
-  return()
-}
-
-.create_flexplot <- function(jaspResults, flexplot, options, model.type) {
-  
-  glinmod_results <- jaspResults[["glinmod_results"]]$object
-  
-  if (model.type=="model"){
-    type = "model"
-  } else if (model.type=="residuals"){
-    type = "model"
-  }
-
-  generated.formula = make_flexplot_formula(options$variables, options$dependent, glinmod_results$model$model)
-  
-  if	(options$ghost){
-    ghost="black"
+  if	(options$ghost & length(options$variables)<4){
+    ghost=rgb(1,0,0,.4)
   } else {
     ghost = NULL
   }
   
-  whiskers = list("quartiles" = "quartiles",
-                  "standard errors" = "sterr",
-                  "standard deviations", "stdev")
-  if (model.type=="model"){
-    save(generated.formula, glinmod_results, options, file="/Users/fife/Documents/jaspbroke.rdat")
-  plot = compare.fits(generated.formula, data = glinmod_results$model$model, model1 = glinmod_results$model,
-                      alpha=options$alpha, ghost.line=ghost)
-  } else {
-    plot = visualize(glinmod_results$model, glinmod_results, plot=model.type, alpha=options$alpha)
-  }
+  plot = compare.fits(generated.formula, data=dataset, glinmod_results, 
+                      alpha = options$alpha, jitter=c(options$jitx, options$jity),
+                      ghost.line=ghost) 
+  plot = theme_it(plot, options$theme) + theme(legend.position = "none")
   
-  if (options$theme == "JASP"){
-    plot = themeJasp(plot)
-  } else {
-    theme = list("black and white"="theme_bw()+ theme(text=element_text(size=18))",
-                 "minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
-                 "classic" = "theme_classic()+ theme(text=element_text(size=18))",
-                 "dark" = "theme_dark() + theme(text=element_text(size=18))")
-    plot = plot + eval(parse(text=theme[[options$theme]]))
-  }
-  flexplot$plotObject <- plot
+  modelplot$plotObject <- plot
   
   return()
 }
 
 
+# create tables -----------------------------------------------------------
+.create_glinmod_coefs <- function(jaspResults, options, ready) {
+  glinmod_table_fixed <- createJaspTable(title = "Parameter Estimates")
+  
+  ### which options are required
+  glinmod_table_fixed$dependOn(c("variables", "dependent", "rvariables", "ests", "interactions"))
+  
+  ### add citation
+  glinmod_table_fixed$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
+  
+  ### build the table structure
+  glinmod_table_fixed$addColumnInfo(name = "var",      title = "Variable",   type = "string", combine = TRUE)
+  glinmod_table_fixed$addColumnInfo(name = "est",    title = "Estimate",       type = "number", format = "dp:2", combine = TRUE)		
+  glinmod_table_fixed$addColumnInfo(name = "sterr",    title = "Standard Error",       type = "number", format = "dp:2", combine = TRUE)		
+  glinmod_table_fixed$addColumnInfo(name = "z",      title = "z-statistic",    type = "number", format = "dp:2", combine = TRUE)	
+  
+  ### store the table structure
+  jaspResults[["glinmod_table_fixed"]] <- glinmod_table_fixed
+  
+  family = list(
+    "Normal" = "identity",
+    "Logistic" = "logit",
+    "Poisson" = "log",
+    "Negative Binomial" = "logit",
+    "Gamma" = "inverse"
+  )
+  
+  message <- paste0("Note: the default link for ", tolower(options$family), " was used (the ", family[[options$family]], " function).")
+  glinmod_table_fixed$addFootnote(message)  
+  
+  ### return the table
+  if (!ready) {
+    return()
+  } 
+  
+  ### retrieve the already-computed results
+  glinmod_results <- jaspResults[["glinmod_results"]]$object
+  
+  ### fill the table with those results
+  .fill_glinmod_table_fixed(glinmod_table_fixed, glinmod_results)
+  
+  return()
+  
+}
+.fill_glinmod_table_fixed = function(glinmod_table_fixed, glinmod_results){
+  
+  factors = summary(glinmod_results)$coefficients
+  term.labels = gsub(":", "×", row.names(factors))
+  
+  ### output results
+  tabdat = list(
+    var = term.labels,
+    est = factors[,1],
+    sterr = factors[,2],
+    z = factors[, 3]
+  )
+  glinmod_table_fixed$setData(tabdat)
+  
+  
+  return()
+}
+
+
+
+
+
+
+
+# Other stuff -------------------------------------------------------------
 
 .glinmod_compute = function(jaspResults, dataset, options, ready) {
   
@@ -187,7 +222,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     ## createJaspState allows these results to be recycled
     glinmod_results <- createJaspState()
     jaspResults[["glinmod_results"]] <- glinmod_results
-    glinmod_results$dependOn(c("dependent", "variables", "interactions"))
+    glinmod_results$dependOn(c("dependent", "variables", "interactions", "family", "ghost", "theme"))
     
     ## interactions are stored in a deeply nested list. de-listify them
     predictors = paste0(
@@ -198,293 +233,23 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     f = paste0(options$dependent, " ~ ", predictors, collapse = "")
     f = as.formula(f)
     
-    ## save results (for debugging purposes)
-    
     ## set up generalIZED models
-    # family = list(
-    #   "Normal" = "gaussian",
-    #   "Logistic" = "binomial",
-    #   "Poisson" = "poisson",
-    #   "Negative Binomial" = "quassipoisson",
-    #   "Gamma" = "Gamma"
-    # )
-    #require(tidyverse)
-    #model = glm(f, dataset %>% mutate(!!options$dependent := factor_to_logistic_x(dataset[,options$dependent])), family=family[[options$family]])
-    ### model it
-    model = lm(f, dataset)
-    #save(options, dataset, model, f, file="/Users/fife/Dropbox/jaspresults.Rdat")
-    ### store all the information
-    est = estimates(model)
-    est$model = model
+    family = list(
+      "Normal" = "gaussian",
+      "Logistic" = "binomial",
+      "Poisson" = "poisson",
+      "Negative Binomial" = "quasipoisson",
+      "Gamma" = "Gamma"
+    )
     
-    glinmod_results$object = est
+    chosen.family = family[[options$family]]
     
+    model = glm(f, dataset, family=chosen.family)
+    glinmod_results$object = model
     return()
   }
 }
 
-.create_glinmod_table_means <- function(jaspResults, options, ready) {
-  glinmod_table_means <- createJaspTable(title = "Means of Categorical Variables")
-  
-  ### which options are required
-  glinmod_table_means$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
-  
-  ### add citation
-  glinmod_table_means$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
-  
-  ### build the table structure
-  glinmod_table_means$addColumnInfo(name = "var",      title = "Variable",   type = "string", combine = TRUE)
-  glinmod_table_means$addColumnInfo(name = "levels",    title = "Level",       type = "string", combine = TRUE)	
-  glinmod_table_means$addColumnInfo(name = "est",      title = "Estimate",    type = "number", format = "dp:2", combine = TRUE)	
-  
-  if (options$ci){
-    glinmod_table_means$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    glinmod_table_means$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-  }
-  
-  ### add message about what type of interval was used
-  message <- switch(options$estimationmethod,
-                    "Bootstrapped Intervals"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
-  )
-  glinmod_table_means$addFootnote(message)  
-  glinmod_table_means$showSpecifiedColumnsOnly <- TRUE
-  
-  ### store the table structure
-  jaspResults[["glinmod_table_means"]] <- glinmod_table_means
-  
-  ### return the table
-  if (!ready) {
-    return()
-  } 
-  
-  ### retrieve the already-computed results
-  glinmod_results <- jaspResults[["glinmod_results"]]$object
-  
-  ### fill the table with those results
-  .fill_glinmod_table_means(glinmod_table_means, glinmod_results)
-  
-  return()
-  
-}
-
-.create_glinmod_table_differences <- function(jaspResults, options, ready) {
-  glinmod_table_differences <- createJaspTable(title = "Mean Differences Between Groups")
-  
-  ### which options are required
-  glinmod_table_differences$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
-  
-  ### add citation
-  glinmod_table_differences$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
-  
-  ### build the table structure
-  glinmod_table_differences$addColumnInfo(name = "var",      title = "Variable",   type = "string", combine = TRUE)
-  glinmod_table_differences$addColumnInfo(name = "comparison",    title = "Comparison",       type = "string", combine = TRUE)	
-  glinmod_table_differences$addColumnInfo(name = "diff",      title = "Difference",    type = "number", format = "dp:2", combine = TRUE)	
-  
-  if (options$ci){
-    glinmod_table_differences$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    glinmod_table_differences$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-  }
-  
-  glinmod_table_differences$addColumnInfo(name = "cohensd",      title = "Cohen's d",    type = "number", format = "dp:2", combine = TRUE)	
-  
-  ### add message about what type of interval was used
-  message <- switch(options$estimationmethod,
-                    "Bootstrapped Intervals"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
-  )
-  glinmod_table_differences$addFootnote(message)  
-  glinmod_table_differences$showSpecifiedColumnsOnly <- TRUE
-  ### store the table structure
-  jaspResults[["glinmod_table_differences"]] <- glinmod_table_differences
-  
-  ### return the table
-  if (!ready) {
-    return()
-  } 
-  
-  ### retrieve the already-computed results
-  glinmod_results <- jaspResults[["glinmod_results"]]$object
-  
-  ### fill the table with those results
-  .fill_glinmod_table_differences(glinmod_table_differences, glinmod_results)
-  
-  return()
-}
-
-.create_glinmod_table_slopes <- function(jaspResults, options, ready) {
-  glinmod_table_slopes <- createJaspTable(title = "Regression Slopes and Intercept")
-  
-  ### which options are required
-  glinmod_table_slopes$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
-  
-  ### add citation
-  glinmod_table_slopes$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
-  
-  ### build the table structure
-  glinmod_table_slopes$addColumnInfo(name = "var",      title = "Variables",   type = "string", combine = TRUE)
-  glinmod_table_slopes$addColumnInfo(name = "val",    title = "Value",       type = "number", format = "dp:2", combine = TRUE)	
-  
-  if (options$ci){
-    glinmod_table_slopes$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    glinmod_table_slopes$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-  }
-  
-  glinmod_table_slopes$addColumnInfo(name = "std",    title = "Standardized Slope (β)",       type = "number", format = "dp:2", combine = TRUE)	
-  
-  if (options$ci){
-    glinmod_table_slopes$addColumnInfo(name = "slwr",      title = "Lower β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    glinmod_table_slopes$addColumnInfo(name = "supr",      title = "Upper β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-  }
-  
-  ### add message about what type of interval was used
-  message <- switch(options$estimationmethod,
-                    "Bootstrapped Intervals"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Credible Interval"  = paste0("Confidence intervals computed using 95% ", options$estimationmethod),
-                    "Confidence Interval"  = paste0("Confidence intervals computed 95% ", options$estimationmethod)
-  )
-  
-  message = paste0(message, "\n All estimates are conditional estimates.")
-  glinmod_table_slopes$addFootnote(message)  
-  glinmod_table_slopes$showSpecifiedColumnsOnly <- TRUE
-  ### store the table structure
-  jaspResults[["glinmod_table_slopes"]] <- glinmod_table_slopes
-  
-  ### return the table
-  if (!ready) {
-    return()
-  } 
-  
-  ### retrieve the already-computed results
-  glinmod_results <- jaspResults[["glinmod_results"]]$object
-  
-  ### fill the table with those results
-  .fill_glinmod_table_slopes(glinmod_table_slopes, glinmod_results)
-  
-  return()
-}
-
-.create_glinmod_table_modcomp <- function(jaspResults, options, ready) {
-  glinmod_table_modcomp <- createJaspTable(title = "Model Comparisons (Estimating the Effect of Removing Terms)")
-  
-  ### which options are required
-  glinmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf"))
-  
-  ### add citation
-  glinmod_table_modcomp$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
-  
-  ### build the table structure
-  glinmod_table_modcomp$addColumnInfo(name = "terms",      title = "Term",   type = "string", combine = TRUE)
-  glinmod_table_modcomp$addColumnInfo(name = "rsq",    title = "Semi-partial R Squared",       type = "number", format = "dp:2", combine = TRUE)	
-  glinmod_table_modcomp$addColumnInfo(name = "bayes",      title = "Semi-partial Bayes Factor", type = "number", combine = TRUE)
-  
-  
-  message = paste0("message \n Note: Semi-partials indicate the effect of removing that particular term from the model. ",
-    "Bayes factors are computed using the BIC. Higher Bayes factors indicate important terms. Lower Bayes factors suggest they can be removed from the model")
-  glinmod_table_modcomp$addFootnote(message)  
-  glinmod_table_modcomp$showSpecifiedColumnsOnly <- TRUE
-  ### store the table structure
-  jaspResults[["glinmod_table_modcomp"]] <- glinmod_table_modcomp
-  
-  ### return the table
-  if (!ready) {
-    return()
-  } 
-  
-  ### retrieve the already-computed results
-  glinmod_results <- jaspResults[["glinmod_results"]]$object
-  
-  ### fill the table with those results
-  .fill_glinmod_table_modcomp(glinmod_table_modcomp, glinmod_results)
-  
-  return()
-}
-
-
-.fill_glinmod_table_means = function(glinmod_table_means, glinmod_results){
-  
-
-  factors = glinmod_results$factor.summary
-  
-  ### output results
-  tabdat = list(
-    var = as.character(factors$variables),
-    levels = factors$levels,
-    est = factors$estimate,
-    lwr = factors$lower,
-    upr = factors$upper
-  )
-  glinmod_table_means$setData(tabdat)
-  
-  
-  return()
-}
-
-.fill_glinmod_table_differences = function(glinmod_table_differences, glinmod_results){
-  
-  
-  diff = glinmod_results$difference.matrix
-  
-  ### output results
-  tabdat = list(
-    var = as.character(diff$variables),
-    comparison = diff$comparison,
-    diff = diff$difference,
-    lwr = diff$lower,
-    upr = diff$upper,
-    cohensd = diff$cohens.d
-  )
-  
-  glinmod_table_differences$setData(tabdat)
-  
-  
-  return()
-}
-
-.fill_glinmod_table_slopes = function(glinmod_table_slopes, glinmod_results){
-  
-  slopes = glinmod_results$numbers.summary
-  
-  ### output results
-  tabdat = list(
-    var = as.character(slopes$variables),
-    val = slopes$estimate,
-    lwr = slopes$lower,
-    upr = slopes$upper,
-    std = slopes$std.estimate,
-    slwr = slopes$std.lower,
-    supr = slopes$std.upper
-  )
-  
-  glinmod_table_slopes$setData(tabdat)
-  
-  
-  return()
-}
-
-.fill_glinmod_table_modcomp = function(glinmod_table_modcomp, glinmod_results){
-  
-  mc = glinmod_results$model.comparison
-  
-  
-  ### reformat : to be a times
-  term.labels = as.character(mc$all.terms)
-  term.labels = gsub(":", "×", term.labels)
-  ### output results
-  tabdat = list(
-    terms = term.labels,
-    rsq = mc$rsq,
-    bayes = mc$bayes.factor
-  )
-  #save(mc, file="/Users/fife/Documents/jaspresults.rdat")
-  glinmod_table_modcomp$setData(tabdat)
-  
-  
-  return()
-}
 
 
 .check_glinmod_error = function(dataset, options){

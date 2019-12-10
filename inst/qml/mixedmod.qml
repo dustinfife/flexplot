@@ -43,26 +43,14 @@ Form
       AssignedVariablesList 
       { 
         name: "interactions"; 
-        title: qsTr("Model terms"); 
+        title: qsTr("Fixed terms"); 
         listViewType:"Interaction"
-        enabled: vars.count > 1
-      }
-    }
-      VariablesForm
-    {
-      height: 150
-      AvailableVariablesList { 
-        name: "fixedlist"; 
-        title: qsTr("Variables"); 
-        source: ["variables"] 
-      }
   
-      AssignedVariablesList 
-      { 
-        name: "randeff2"; 
-        title: qsTr("Random Effects"); 
-        listViewType:"Interaction"
-        enabled: vars.count > 1
+        ExtraControlColumn {
+          type: "CheckBox"
+          name: "randeff2"
+          title: "Add as a random effect"
+        }
       }
     }
   }
@@ -78,21 +66,15 @@ Form
 			  label: qsTr("Model plot");
 			  checked: true
 			  }
-      CheckBox{
+			  
+		  CheckBox{
 			  name:"univariates"; 
-			  label: qsTr("Univariates")
+			  label: qsTr("Univariate plots");
+			  checked: true
 			  }			  
-      CheckBox{
-			  name:"residuals"; 
-			  label: qsTr("Diagnostics")
-			  }
 		  }
 		Group{
     title: qsTr("Estimation")
-      CheckBox{
-			  name:"modinf"; 
-			  label: qsTr("Show model comparisons")
-			}	
       CheckBox{
 			  name:"fixeff"; 
 			  label: qsTr("Report fixed effects");
@@ -101,7 +83,7 @@ Form
       CheckBox{
 			  name:"randeff"; 
 			  label: qsTr("Report random effects")
-			  checked: true
+			  checked: false
 			}	
 		}
 
@@ -115,13 +97,8 @@ Form
       title: qsTr("Plot Controls")
       
         Group{
-        title: qsTr("Visual Aids")
-             CheckBox{
-              name:"ghost"; 
-              label: qsTr("Ghost lines");
-              checked: true
-              enabled: vars.count > 0 & vars.count< 4
-            }
+        title: qsTr("Point controls")
+        columns: 4
 		        Slider{
               name: "alpha"
               label: qsTr("Point transparency")
@@ -129,17 +106,44 @@ Form
               vertical: true
               enabled: varlist.count > 0
             }
+		        Slider{
+              name: "jitx"
+              label: qsTr("Jitter in X")
+              value: .1
+              min: 0
+              max: .5
+              vertical: true
+              enabled: varlist.count > 0
+            }  
+		        Slider{
+              name: "jity"
+              label: qsTr("Jitter in Y")
+              value: 0
+              min: 0
+              max: .5
+              vertical: true
+              enabled: varlist.count > 0
+            }   
         }
         Group{
-        title: qsTr("Aesthetics")
+        title: qsTr("Other parameters")
             DropDown{
 			        name: "theme"
 			        values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
 			        label: qsTr("GGplot theme")
 		        }
-        }        
-  }
+		      IntegerField{
+          name: "nsamp"
+          label: qsTr("Number of clusters")
+          defaultValue: 3
+          min: 1
+          max: 20
+          enabled: varlist.count > 0
+        }   
+        }
 
+  }
+  
 	
   
  

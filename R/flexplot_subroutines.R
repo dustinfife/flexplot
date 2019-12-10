@@ -103,6 +103,11 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
       data = m
     }
     
+    ### prevent univariates from binning numeric variables with few levels
+    if (axis[1] == "1" & is.numeric(data[,outcome]) & length(unique(data[,outcome]))<5){
+      data[,outcome] = factor(data[,outcome], ordered=TRUE)
+    }
+    
     
     ### prep data for related plot
     if (related){
