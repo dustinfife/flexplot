@@ -23,4 +23,6 @@ R/glmbasic.b.R
 R/glmbasic.h.R
 R/modelcomp.b.R
 R/modelcomp.h.R
+R/scratch/
+data/generate_data.R
 vignettes/regex_syntax.txt
