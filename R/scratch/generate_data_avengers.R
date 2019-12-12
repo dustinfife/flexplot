@@ -160,7 +160,7 @@ usethis::use_data(avengers, overwrite = TRUE)
 "avengers"
 
 
-
+#write.csv(avengers, "../avengers.csv", row.names=F)
 
 
 
