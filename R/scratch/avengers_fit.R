@@ -1,6 +1,7 @@
 data(avengers)
 head(avengers)
 require(flexplot)
+require(tidyverse)
 
   ### poisson
 mod1 = glm(injuries~superpower + damage.resistence, data=avengers, family=quasipoisson)

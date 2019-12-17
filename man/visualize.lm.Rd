@@ -5,7 +5,7 @@
 \title{Visualize a fitted model}
 \usage{
 \method{visualize}{lm}(object, plot = c("all", "residuals", "model"),
-  formula = NULL, ...)
+  formula = NULL, plots.as.list = FALSE, ...)
 }
 \arguments{
 \item{object}{a lm object}

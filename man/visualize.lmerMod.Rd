@@ -5,7 +5,7 @@
 \title{Visualize a fitted lmerMod model}
 \usage{
 \method{visualize}{lmerMod}(object, plot = c("all", "residuals",
-  "model"), formula = NULL, sample = 3, ...)
+  "model"), formula = NULL, sample = 3, plots.as.list = FALSE, ...)
 }
 \arguments{
 \item{object}{a lmer object}
