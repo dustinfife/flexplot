@@ -5,48 +5,34 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "glmbasicClass",
     inherit = glmbasicBase,
     private = list(
+      
         .run = function() {
-        	
         	if (length(self$options$out)>0 & length(self$options$preds)>0){
-        		
-        	# if (length(self$options$preds)==0){
-        		# formula = paste0(self$options$out, "~1")
-        	# } else {
-        	#### write formula for glinmod
-	            formula <- jmvcore::constructFormula(self$options$out, self$options$preds)
-            	formula <- as.formula(formula)
-#			}        
-        	#### output results
-            results <- estimates(lm(formula, self$data))
-            
-         	
-
-			#glinmod::estimates(lm(weight.loss~gender, data=exercise_data))
+        	  #### write formula for glinmod
+	            formula <- make.formula(self$options$out, self$options$preds)
+	            model = lm(formula, data=self$data)
+              results <- estimates.lm(model, mc=FALSE)
         	#### save formula/dataset to a file (to be used for plotting)
         	if (length(self$options$preds)>0){
-				output = list(formula=formula, data=self$data)
-				image <- self$results$plot
-				image$setState(output)
+			    	output = list(formula=formula, data=self$data)
+			    	image <- self$results$plot
+			    	image$setState(output)
 				
-				image2 <- self$results$assumpplot
-				image2$setState(output)			
-			}
+			    	image2 <- self$results$assumpplot
+			    	image2$setState(output)			
+		  	}
 
 			#### prepare r square output
 			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p, correlation=results$correlation)
 			private$.rsq(rsq_out, preds = self$options$preds)	
-			
-
 									
 
 			#### prepopulate table
-            table = self$results$glmcat			
+      table = self$results$glmcat			
             
             #### format factor summary to look nice
 			f = function(x){ x[is.na(x)] = "-"; x}
-			
-
-           
+    
 			#### if there are factors, report those results....           
 			if (!is.na(results$factor.summary)){        
 				
@@ -64,16 +50,14 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				))
 					
 
-    	    		#### make output for categorical predictors
+    		#### make output for categorical predictors
 
-	            results$factor.summary[,3:ncol(results$factor.summary)] = apply(results$factor.summary[,3:ncol(results$factor.summary)], 2, round, digits=2)
-	            results$factor.summary[,3:ncol(results$factor.summary)] = apply(results$factor.summary[,3:ncol(results$factor.summary)], 2, f)
+        results$factor.summary[,3:ncol(results$factor.summary)] = apply(results$factor.summary[,3:ncol(results$factor.summary)], 2, round, digits=2)
+        results$factor.summary[,3:ncol(results$factor.summary)] = apply(results$factor.summary[,3:ncol(results$factor.summary)], 2, f)
 	                        
 	                        ### loop through all rows in summary
-	            for (i in 3:(nrow(results$factor.summary)+2)){
-	            
-	            
-					table$addRow(rowKey = i, values=list(
+	       for (i in 3:(nrow(results$factor.summary)+2)){
+				  	table$addRow(rowKey = i, values=list(
 					    var=paste0("", as.character(results$factor.summary$variables[i-2])),
 					    levels=results$factor.summary$levels[i-2],
 						means = results$factor.summary$estimate[i-2],
@@ -139,11 +123,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			data = image$state$data
             mod = lm(formula, data=data)
             theme_set(theme_bw(base_size = 16))
-            plot = visualize(mod, plot="model", se=self$options$se, method=line, spread=se.type) + 
-            	theme(panel.background = element_rect(fill = "transparent",colour = NA), 
-            		line = element_blank(), 
-            		text = element_blank(), 
-            		panel.border = element_blank())
+            plot = visualize(mod, plot="model", se=self$options$se, method=line, spread=se.type) 
 			print(plot)
 			TRUE
 			},

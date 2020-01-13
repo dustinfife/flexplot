@@ -38,7 +38,6 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 		, 
 			
 		.plot = function(image, ...){
-		  #save(self$options, data, formula, se.type, formula, data, file="/Users/fife/Documents/flexplot/checkme.Rdat")	
        		#### change case so line type can be read in
 			if (self$options$line=="Loess"){line="loess"}
 			if (self$options$line=="Regression"){line ="lm"}
