@@ -154,7 +154,7 @@ flexplot = function(formula, data=NULL, related=F,
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
-  
+
 	#### all the above should take care of ALL possible plots, but now we add paneling
   facets = flexplot_panel_variables(varprep, 
                                     related=related, labels=labels, bins=bins, 

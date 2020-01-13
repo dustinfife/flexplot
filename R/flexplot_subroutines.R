@@ -5,6 +5,7 @@
 flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels=NULL, bins=3, 
                                    jitter=NULL, suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
                                    alpha=.99977, prediction=NULL){
+
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   
   variables = all.vars(formula)
@@ -26,7 +27,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   
   ### create the lists that contain the breaks
   break.me = flexplot_break_me(data, predictors, given, axis)
-  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels)
+  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
   list(variables=variables, outcome=outcome, predictors=predictors, 
        given=given, axis=axis, numbers=numbers, categories=categories, 
@@ -291,10 +292,10 @@ flexplot_create_breaks = function(break.me, breaks, data, labels, bins=3){
         if (length(labels[[i]])>=i){
           bins = length(labels[[i]])
         } else {
-          bins = 3
+          bins = bins
         }
       } else {
-        bins = 3
+        bins = bins
       }
       
 		

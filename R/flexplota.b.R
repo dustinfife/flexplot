@@ -70,7 +70,10 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			  ## modify formula to use FIRST, rather than last variable
 			  f <- paste0(self$options$out, "~",paste0(self$options$given, collapse="+"), "+", paste0(rev(self$options$preds), collapse="+"))		            	
 			  f <- as.formula(f)
-        p = added.plot(f, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins, suppress_smooth=self$options$suppr, related=related)	
+        p = added.plot(f, data=data, se=self$options$se,spread=se.type, 
+                       method=line, alpha = self$options$alpha*.01, 
+                       sample = samp, jitter=c(self$options$jittx, self$options$jitty), 
+                       bins=self$options$bins, suppress_smooth=self$options$suppr, related=related)	
 
 				#### GHOST LINES
       } else if (length(self$options$given)>0 & self$options$ghost==TRUE){
@@ -81,7 +84,10 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
         ### EVERYTHING ELSE            
       } else {        	
-        	p = flexplot(formula, data=data, se=self$options$se, spread=se.type, method=line,  alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty),suppress_smooth=self$options$suppr, bins=self$options$bins, related=related) #+ 
+        	p = flexplot(formula, data=data, se=self$options$se, spread=se.type, 
+        	             method=line,  alpha = self$options$alpha*.01, sample = samp, 
+        	             jitter=c(self$options$jittx, self$options$jitty),
+        	             suppress_smooth=self$options$suppr, bins=self$options$bins, related=related) #+ 
         	#	theme_bw(base_size = 16) +
         	#	theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
       }		
