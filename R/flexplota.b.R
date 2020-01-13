@@ -38,7 +38,7 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 		, 
 			
 		.plot = function(image, ...){
-       		
+		  save(self$options, data, formula, se.type, formula, data, file="/Users/fife/Documents/flexplot/checkme.Rdat")	
        		#### change case so line type can be read in
 			if (self$options$line=="Loess"){line="loess"}
 			if (self$options$line=="Regression"){line ="lm"}
@@ -47,7 +47,8 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			if (self$options$line=="Cubic"){line ="cubic"}	
 			if (self$options$line=="Robust"){line ="rlm"}				
 			if (self$options$sample==100){samp = Inf} else { samp = self$options$sample*.01*nrow(image$state$data)}					
-			#### record related = T if the conditions are met
+			
+		  #### record related = T if the conditions are met
 			related = FALSE
 			if (self$options$diff==TRUE & length(self$options$preds)==1){
 				if (length(unique(image$state$data[,self$options$preds]))==2 & 
@@ -56,12 +57,11 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				}	
 			}
 								
-            if (is.null(image$state))
-                return(FALSE)
-            se.type = unlist(strsplit(self$options$center," + ", fixed=T))[2]			
+      if (is.null(image$state)) return(FALSE)
+
+			se.type = unlist(strsplit(self$options$center," + ", fixed=T))[2]			
 			formula = image$state$formula
 			data = image$state$data
-			save(self, data, formula, file="/Users/fife/Dropbox/checkme.Rdat")		
 
 				### ADDED VARIABLE PLOT
 				### if they choose to residualize it
@@ -72,31 +72,26 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			  f <- as.formula(f)
         p = added.plot(f, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins, suppress_smooth=self$options$suppr, related=related)	
 
-
-	    		### THIRD EYE
-			# } else if ((length(self$options$preds) + length(self$options$given))>1 & self$options$thirdeye==T){
-			# 	perms = ifelse((length(self$options$preds) + length(self$options$given)>2), 1:4, c(1,3))
-			# 	p = third.eye(formula, data=data, fixed.positions=NULL, which.perms=1:perms, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="black", sample = samp, jitter=c(self$options$jittx, self$options$jitty),suppress_smooth=self$options$suppr, bins=self$options$bins) 
-
 				#### GHOST LINES
-            } else if (length(self$options$given)>0 & self$options$ghost==TRUE){
-	            p = flexplot(formula, data=data, se=self$options$se,spread=se.type, method=line, alpha = self$options$alpha*.01, ghost.line="black", sample = samp, jitter=c(self$options$jittx, self$options$jitty), bins=self$options$bins,suppress_smooth=self$options$suppr, related=related) 
-    formula = weight.loss~gender
+      } else if (length(self$options$given)>0 & self$options$ghost==TRUE){
+            p = flexplot(formula, data=data, se=self$options$se,spread=se.type, 
+                         method=line, alpha = self$options$alpha*.01, ghost.line="black", 
+                         sample = samp, jitter=c(self$options$jittx, self$options$jitty), 
+                         bins=self$options$bins,suppress_smooth=self$options$suppr, related=related)
+            
+        ### EVERYTHING ELSE            
+      } else {        	
+        	p = flexplot(formula, data=data, se=self$options$se, spread=se.type, method=line,  alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty),suppress_smooth=self$options$suppr, bins=self$options$bins, related=related) #+ 
+        	#	theme_bw(base_size = 16) +
+        	#	theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
+      }		
 
-
-            } else {        	
-
-	            	p = flexplot(formula, data=data, se=self$options$se, spread=se.type, method=line,  alpha = self$options$alpha*.01, sample = samp, jitter=c(self$options$jittx, self$options$jitty),suppress_smooth=self$options$suppr, bins=self$options$bins, related=related) #+ 
-	            	#	theme_bw(base_size = 16) +
-	            	#	theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
-	        }		
-            #plot = added.plot(conscientiousness~communication + gender, data=relationship_satisfaction)
-            #### find out where (if) geom_summary is
-            #save(self, data, p, se.type, file="/Users/fife/Dropbox/checkme.Rdat")		
-            #plot = flexplot(weight.loss~therapy.type, data=exercise_data, related=T)
-            geoms = sapply(p$layers, function(x) class(x$geom)[1])
-            if (self$options$plmethod != "Jittered-density plot" & "GeomErrorbar" %in% geoms){
-
+			save(self$options, data, formula, se.type, formula, data, file="/Users/fife/Documents/flexplot/checkme.Rdat")
+			
+			#### modify geoms (if they choose to)
+      geoms = sapply(p$layers, function(x) class(x$geom)[1])
+      if (self$options$plmethod != "Jittered-density plot" & "GeomErrorbar" %in% geoms){
+        		
    				#### delete old summary
 				p$layers[[2]] = NULL
 				p$layers[[2]] = NULL
@@ -117,7 +112,7 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             #if (!is.numeric(data[,self$options$preds[1]]) & )
 			print(p)
 			TRUE
-		}
+	}
 		
 				
 ))
