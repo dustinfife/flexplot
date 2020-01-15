@@ -14,6 +14,8 @@
 
 \item{formula}{A flexplot-style formula}
 
+\item{plots.as.list}{Should the plots be returned as a list? Defaults to FALSE.}
+
 \item{...}{Other arguments passed to flexplot}
 }
 \description{

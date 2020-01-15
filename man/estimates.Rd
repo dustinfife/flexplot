@@ -4,10 +4,12 @@
 \alias{estimates}
 \title{Report Estimates (effect sizes and parameters)}
 \usage{
-estimates(object)
+estimates(object, mc = TRUE)
 }
 \arguments{
 \item{object}{a object}
+
+\item{mc}{Should model comparisons be performed?}
 }
 \description{
 Report object Estimates

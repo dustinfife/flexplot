@@ -32,6 +32,7 @@ visualize.default = function(object, plot=c("all", "residuals", "model"),formula
 #' @param object a lm object
 #' @param plot what should be plotted? Residuals? Model plot? All of them?
 #' @param formula A flexplot-style formula
+#' @param plots.as.list Should the plots be returned as a list? Defaults to FALSE. 
 #' @param ... Other arguments passed to flexplot
 #' @export
 visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL, plots.as.list=FALSE,...){
@@ -116,11 +117,12 @@ utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation")
 #' @param ... Other arguments passed to flexplot
 #' @param formula A flexplot-style formula
 #' @param sample The number of individuals' datapoints to sample as raw data. Defaults to 3
+#' @param plots.as.list Should the plots be returned as a list? Defaults to FALSE. 
 #' @rawNamespace import(dplyr, except = c(filter, lag))
 #' @export
 visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formula=NULL, 
 	sample = 3, plots.as.list=FALSE,...){
-  #browser()
+
 	#### figure out what is numeric
 	d = object@frame
 	plot = match.arg(plot, c("all", "residuals", "model"))
@@ -208,6 +210,8 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 		#newd = prediction %>% dplyr::filter(model=="random effects") %>% dplyr::mutate(MathAch = prediction)			
 		#formula_new = MathAch~SES + School | Sex
 		step3 = flexplot(formula, data=k, suppress_smooth=T, ...) 
+		
+		#browser()
 		#if axis 1 is numeric, do lines
 		if (is.numeric(d[,terms[1]])){
 				m = prediction[prediction$model=="fixed effects",]
@@ -246,7 +250,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 			names(means)[ncol(means)] = names(fixed.means)[ncol(fixed.means)] = outcome
 			names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var
 			names(means)[names(means)==unbinned.var] = binned.var			
-			fixed.means[,term.re] = unique(k[,term.re])
+			fixed.means[,term.re] = unique(means[,term.re])
 			#head(fixed.means)
 			#### plot it
  			step3 = step3 + 

@@ -2,6 +2,7 @@
 #'
 #' Report object Estimates
 #' @param object a object
+#' @param mc Should model comparisons be performed?
 #' @export
 estimates = function(object, mc=TRUE){
 	UseMethod("estimates")
@@ -11,6 +12,7 @@ estimates = function(object, mc=TRUE){
 #'
 #' Output APA style statistical significance from an object
 #' @param object a object
+#' @param mc Should model comparisons be performed?
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.default = function(object, mc=TRUE){
@@ -262,9 +264,10 @@ estimates.lm = function(object, mc=TRUE){
 #'
 #' Report glm object Estimates
 #' @param object a glm object
+#' @param mc Should model comparisons be performed? Currently not used
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
-estimates.glm = function(object){
+estimates.glm = function(object, mc=FALSE){
 	#### generate list of coefficients
 	terms = attr(terms(object), "term.labels")
 	
@@ -332,8 +335,9 @@ estimates.glm = function(object){
 #'
 #' Report zeroinfl object Estimates
 #' @param object a zeroinfl object
+#' @param mc Should model comparisons be performed? Currently not used
 #' @export
-estimates.zeroinfl = function(object){
+estimates.zeroinfl = function(object, mc=FALSE){
 	
 	#### get dataset
 	d = object$model

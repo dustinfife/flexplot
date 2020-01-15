@@ -12,6 +12,7 @@
 #'   \item{damage.resistence}{Amount of skin deflection (in mm) when slapped with a frozen fish}
 #'   \item{flexibility}{Number of inches past their toes they can reach}
 #'   \item{willpower}{Length of time they wait at a DMV for a driver's license}
+#'   \item{superpower}{Does this person have a superpower?}   
 #'   \item{died}{Whether the person died at the final battle}
 #'   \item{kills}{Number of enemies killed in the final battle}
 #'   \item{injuries}{Number of injuries sustained. Anything more than 5 is marked as a 5}

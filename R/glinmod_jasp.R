@@ -17,7 +17,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   ### read in the dataset if it's ready
   if (ready){
     dataset = .read_glinmod_data(dataset, options)
-    save(dataset, options, file="/Users/fife/Documents/jaspdata.rdata")
+    #save(dataset, options, file="/Users/fife/Documents/jaspdata.rdata")
     #### modify dataset to convert to numeric (where applicable)
 
     dataset = modify_dv(dataset, options$dependent, options$family)
@@ -193,7 +193,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
 .fill_glinmod_table_fixed = function(glinmod_table_fixed, glinmod_results){
   
   factors = summary(glinmod_results)$coefficients
-  term.labels = gsub(":", "×", row.names(factors))
+  term.labels = gsub(":", "x", row.names(factors))
   
   ### output results
   tabdat = list(
@@ -243,7 +243,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     )
     
     chosen.family = family[[options$family]]
-    save(chosen.family, options, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
+    #save(chosen.family, options, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
     model = glm(f, dataset, family=chosen.family)
     glinmod_results$object = model
     return()

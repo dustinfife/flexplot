@@ -121,7 +121,7 @@ create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.referen
       stop(paste0("You must either provide a formula OR all variables requested. It looks like you're missing the variable ", paste0(isnull, collapse=", ")))
     }
   } else {
-    vars = flexplot_prep_variables(formula, data=exercise_data)
+    vars = flexplot_prep_variables(formula, data=data)
     variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
     given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
     levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;

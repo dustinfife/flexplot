@@ -74,7 +74,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     }
     
     if (!is.null(formula)){
-      prep_vars = flexplot_prep_variables(formula, data=exercise_data)
+      prep_vars = flexplot_prep_variables(formula, data=data)
       variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; given = prep_vars$given
       break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors; spread = prep_vars$spread
     }
@@ -390,7 +390,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
       stop(paste0("You must either provide a formula OR all variables requested. It looks like you're missing the variable ", isnull))
     }
   } else {
-    prep_vars = flexplot_prep_variables(formula, data=exercise_data)
+    prep_vars = flexplot_prep_variables(formula, data=data)
     predictors = prep_vars$predictors; outcome = prep_vars$outcome; axis = prep_vars$axis; 
     related = prep_vars$related; alpha= prep_vars$alpha; jitter= prep_vars$jitter 
     suppress_smooth= prep_vars$suppress_smooth; method= prep_vars$method; spread= prep_vars$spread

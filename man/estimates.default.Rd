@@ -4,10 +4,12 @@
 \alias{estimates.default}
 \title{Output APA style statistical significance from an object}
 \usage{
-\method{estimates}{default}(object)
+\method{estimates}{default}(object, mc = TRUE)
 }
 \arguments{
 \item{object}{a object}
+
+\item{mc}{Should model comparisons be performed?}
 }
 \value{
 One or more objects containing parameter estimates and effect sizes

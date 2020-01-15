@@ -14,4 +14,10 @@ test_that("visualize mixed models", {
   
   mod1 = lme4::lmer(MathAch~SES + (SES|School), data=math)
   vdiffr::expect_doppelganger("mixed no formula one covariate", visualize(mod1, plot="model"))
+  
+  vdiffr::expect_doppelganger("mixed old error", 
+                              visualize(model, plot = "model",
+                                        formula = MathAch ~  Sex + School| SES, 
+                                        sample = 30))
+            
 })
