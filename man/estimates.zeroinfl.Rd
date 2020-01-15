@@ -4,10 +4,12 @@
 \alias{estimates.zeroinfl}
 \title{Report zeroinfl object Estimates (effect sizes and parameters)}
 \usage{
-\method{estimates}{zeroinfl}(object)
+\method{estimates}{zeroinfl}(object, mc = FALSE)
 }
 \arguments{
 \item{object}{a zeroinfl object}
+
+\item{mc}{Should model comparisons be performed? Currently not used}
 }
 \description{
 Report zeroinfl object Estimates

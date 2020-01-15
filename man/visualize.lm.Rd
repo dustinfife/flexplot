@@ -5,7 +5,7 @@
 \title{Visualize a fitted model}
 \usage{
 \method{visualize}{lm}(object, plot = c("all", "residuals", "model"),
-  formula = NULL, ...)
+  formula = NULL, plots.as.list = FALSE, ...)
 }
 \arguments{
 \item{object}{a lm object}
@@ -13,6 +13,8 @@
 \item{plot}{what should be plotted? Residuals? Model plot? All of them?}
 
 \item{formula}{A flexplot-style formula}
+
+\item{plots.as.list}{Should the plots be returned as a list? Defaults to FALSE.}
 
 \item{...}{Other arguments passed to flexplot}
 }

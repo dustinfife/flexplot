@@ -4,10 +4,12 @@
 \alias{estimates.glm}
 \title{Report glm object Estimates (effect sizes and parameters)}
 \usage{
-\method{estimates}{glm}(object)
+\method{estimates}{glm}(object, mc = FALSE)
 }
 \arguments{
 \item{object}{a glm object}
+
+\item{mc}{Should model comparisons be performed? Currently not used}
 }
 \value{
 One or more objects containing parameter estimates and effect sizes

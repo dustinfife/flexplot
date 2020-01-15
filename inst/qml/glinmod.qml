@@ -22,37 +22,20 @@ Form
 			title: qsTr("Independent Variable(s)");
 			singleVariable: false 
 		}
-		AssignedVariablesList { 
-			name: "rvariables";	
-			title: qsTr("Random");
-			singleVariable: true 
-		}		
+		DropDown{
+		    id: family
+			  name: "family"
+			  values: ["Normal", "Logistic", "Poisson", "Negative binomial", "Gamma"]
+			  label: qsTr("Distribution family")
+		  }
   }
   
-  ExpanderButton{
-    title: qsTr("Visual Fitting")  
-        DropDown{
-	        name: "linetype"
-	        values: ["Loess (Non-parametric)", "Regression", "Quadratic", "Cubic"]
-	        label: qsTr("Fitted line (scatterplots)")
-	         enabled: varlist.count > 0
-        }
-        DropDown{
-	        name: "spreadtype"
-	        values: ["Quartiles (Non-parametric)", "Standard errors"]
-	        label: qsTr("Intervals")
-	         enabled: varlist.count > 0
-        }
-      CheckBox{
-			  name:"refit"; 
-			  label: qsTr("Refit models based on visual displays")
-			}	
-        
-  }
+
 
   
   ExpanderButton{
     title: qsTr("Interaction terms")  
+    enabled: vars.count > 1    
     VariablesForm
     {
       height: 150
@@ -67,11 +50,27 @@ Form
         name: "interactions"; 
         title: qsTr("Model terms"); 
         listViewType:"Interaction"
-        enabled: vars.count > 1
       }
     }
   }  
+
+ /* ExpanderButton{
+    title: qsTr("Family and Link Function")  
+
+		  
   
+		  DropDown{
+			  name: "link"
+			  values: ["identity", "logit", "log", "inverse", "custom..."]
+			  {
+			    if (["Normal", "Logistic"].includes(family.currentText)) return ["identity", "logit", "log", "inverse", "custom..."]
+			    else if (["Poisson", "Gamma"].includes(family.currentText)) return ["inverse", "custom..."]
+			    else return ["identity", "test"]
+			   } 
+			  label: qsTr("Link function")
+		  }	
+  }  */
+
 		
   ExpanderButton{
     title: qsTr("Results Displays")
@@ -87,45 +86,17 @@ Form
 			  name:"univariates"; 
 			  label: qsTr("Univariates")
 			  }			  
-      CheckBox{
-			  name:"residuals"; 
-			  label: qsTr("Diagnostics")
-			  }
-      CheckBox{
-			  name:"avp"; 
-			  label: qsTr("Added variable plot")
-			  }			  
 		  }
 		  
 		  
 		Group{
     title: qsTr("Estimation")
       CheckBox{
-			  name:"modinf"; 
-			  label: qsTr("Show model comparisons")
-			}	
-      CheckBox{
-			  name:"means"; 
-			  label: qsTr("Report means");
+			  name:"ests"; 
+			  label: qsTr("Show parameter Estimates")
 			  checked: true
 			}	
-      CheckBox{
-			  name:"diff"; 
-			  label: qsTr("Show mean differences")
-			  checked: true
-			}	
-      CheckBox{
-			  name:"sl"; 
-			  label: qsTr("Show slopes/intercepts");
-			  checked: true
-			}		
 		}
-		
-    CheckBox{
-			  name:"ci"; 
-			  label: qsTr("Show 95% intervals");
-			  checked: true
-			}	 
 		}
 		
 		  ExpanderButton
@@ -133,13 +104,8 @@ Form
       title: qsTr("Plot Controls")
       
         Group{
-        title: qsTr("Visual Aids")
-             CheckBox{
-              name:"ghost"; 
-              label: qsTr("Ghost lines");
-              checked: true
-              enabled: vars.count > 0 & vars.count< 4
-            }
+        title: qsTr("Point controls")
+        columns: 4
 		        Slider{
               name: "alpha"
               label: qsTr("Point transparency")
@@ -147,6 +113,24 @@ Form
               vertical: true
               enabled: varlist.count > 0
             }
+		        Slider{
+              name: "jitx"
+              label: qsTr("Jitter in X")
+              value: 0
+              min: 0
+              max: .5
+              vertical: true
+              enabled: varlist.count > 0
+            }  
+		        Slider{
+              name: "jity"
+              label: qsTr("Jitter in Y")
+              value: 0
+              min: 0
+              max: .5
+              vertical: true
+              enabled: varlist.count > 0
+            }   
         }
         Group{
         title: qsTr("Aesthetics")
@@ -155,63 +139,16 @@ Form
 			        values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
 			        label: qsTr("GGplot theme")
 		        }
-        }        
-  }
+		        CheckBox{
+              name:"ghost"; 
+              label: qsTr("Ghost lines");
+              checked: true
+              enabled: vars.count > 1 & vars.count< 4
+            }  
+        }
 
-		
-	ExpanderButton{
-    title: qsTr("Estimation Options")
+  }
+  
 
-    Group{
-		  DropDown{
-			  name: "estimationmethod"
-			  values: ["Credible Interval", "Bootstrapped Intervals", "Confidence Interval"]
-			  label: qsTr("Interval Estimation")
-		  }			
-    }
-  }
-  
-  ExpanderButton{
-    title: qsTr("Generalized Linear Models")  
-		  DropDown{
-		    id: family
-			  name: "family"
-			  values: ["Normal", "Logistic", "Poisson", "Negative Binomial", "Gamma", "Zero-Inflated"]
-			  label: qsTr("Distribution family")
-		  }
-		  
-  
-		  DropDown{
-			  name: "link"
-			  values: ["identity", "logit", "log", "inverse", "custom..."]
-			  /*{
-			    if (["Normal", "Logistic"].includes(family.currentText)) return ["identity", "logit", "log", "inverse", "custom..."]
-			    else if (["Poisson", "Gamma"].includes(family.currentText)) return ["inverse", "custom..."]
-			    else return ["identity", "test"]
-			   } */
-			  label: qsTr("Link function")
-		  }	
-  }
-  
-  ExpanderButton{
-    title: qsTr("Mixed Models")  
-    VariablesForm
-    {
-      height: 150
-      AvailableVariablesList { 
-        name: "fixedlist"; 
-        title: qsTr("Variables"); 
-        source: ["variables"] 
-      }
-  
-      AssignedVariablesList 
-      { 
-        name: "randeff"; 
-        title: qsTr("Random Effects"); 
-        listViewType:"Interaction"
-        enabled: vars.count > 1
-      }
-    }
-  }  
   
 }

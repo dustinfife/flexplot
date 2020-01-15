@@ -2,8 +2,9 @@
 #'
 #' Report object Estimates
 #' @param object a object
+#' @param mc Should model comparisons be performed?
 #' @export
-estimates = function(object){
+estimates = function(object, mc=TRUE){
 	UseMethod("estimates")
 }
 
@@ -11,9 +12,10 @@ estimates = function(object){
 #'
 #' Output APA style statistical significance from an object
 #' @param object a object
+#' @param mc Should model comparisons be performed?
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
-estimates.default = function(object){
+estimates.default = function(object, mc=TRUE){
 	out = summary(object)
 	class(out) = "estimates"
 	out
@@ -23,9 +25,10 @@ estimates.default = function(object){
 #'
 #' Report lm object Estimates
 #' @param object a lm object
+#' @param mc Should model comparisons be performed?
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
-estimates.lm = function(object){
+estimates.lm = function(object, mc=TRUE){
 
 	n = nrow(model.frame(object)) 
 	
@@ -43,7 +46,7 @@ estimates.lm = function(object){
 	}
 	#### get dataset
 	d = object$model
-  dataset=NULL
+  #}dataset=NULL
 	#### identify factors
 	if (length(terms)>1){
 		### convert characters to factors
@@ -213,8 +216,7 @@ estimates.lm = function(object){
 	}
 	
 	### do nested model comparisons
-	if (length(terms)>1){
-	  #save(object, terms, file="/Users/fife/Dropbox/jaspResults.Rdat")
+	if (length(terms)>1 & mc){
 	  removed.one.at.a.time = function(i, terms, object){
 	    new.f = as.formula(paste0(". ~ . -", terms[i]))
 	    new.object = update(object, new.f)
@@ -224,7 +226,7 @@ estimates.lm = function(object){
 	    )
 	  }
 	  ### this requires superassignment to work with JASP
-	  dataset<<-object$model
+	  #dataset<<-object$model
 	  all.terms = attr(terms(object), "term.labels")
 	  mc = t(sapply(1:length(all.terms), removed.one.at.a.time, terms=all.terms, object=object))
 	  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
@@ -262,9 +264,10 @@ estimates.lm = function(object){
 #'
 #' Report glm object Estimates
 #' @param object a glm object
+#' @param mc Should model comparisons be performed? Currently not used
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
-estimates.glm = function(object){
+estimates.glm = function(object, mc=FALSE){
 	#### generate list of coefficients
 	terms = attr(terms(object), "term.labels")
 	
@@ -332,8 +335,9 @@ estimates.glm = function(object){
 #'
 #' Report zeroinfl object Estimates
 #' @param object a zeroinfl object
+#' @param mc Should model comparisons be performed? Currently not used
 #' @export
-estimates.zeroinfl = function(object){
+estimates.zeroinfl = function(object, mc=FALSE){
 	
 	#### get dataset
 	d = object$model

@@ -5,7 +5,7 @@
 \title{Visualize a fitted lmerMod model}
 \usage{
 \method{visualize}{lmerMod}(object, plot = c("all", "residuals",
-  "model"), formula = NULL, sample = 3, ...)
+  "model"), formula = NULL, sample = 3, plots.as.list = FALSE, ...)
 }
 \arguments{
 \item{object}{a lmer object}
@@ -15,6 +15,8 @@
 \item{formula}{A flexplot-style formula}
 
 \item{sample}{The number of individuals' datapoints to sample as raw data. Defaults to 3}
+
+\item{plots.as.list}{Should the plots be returned as a list? Defaults to FALSE.}
 
 \item{...}{Other arguments passed to flexplot}
 }

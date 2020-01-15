@@ -40,31 +40,35 @@ Form
       title: qsTr("Options")
       
         Group{
-        title: qsTr("Visual Aids")
-             CheckBox{
-              name:"ghost"; 
-              label: qsTr("Ghost lines");
-              checked: true
-              enabled: paneledVars.count > 0 
-            }
+        title: qsTr("Point controls")
+        columns: 4
 		        Slider{
               name: "alpha"
               label: qsTr("Point transparency")
               value: 0.4
-              vertical: false
+              vertical: true
               enabled: varlist.count > 0
             }
+		        Slider{
+              name: "jitx"
+              label: qsTr("Jitter in X")
+              value: .1
+              min: 0
+              max: .5
+              vertical: true
+              enabled: varlist.count > 0
+            }  
+		        Slider{
+              name: "jity"
+              label: qsTr("Jitter in Y")
+              value: 0
+              min: 0
+              max: .5
+              vertical: true
+              enabled: varlist.count > 0
+            }   
         }
-        
         Group{
-        title: qsTr("Aesthetics")
-            DropDown{
-			        name: "theme"
-			        values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
-			        label: qsTr("GGplot theme")
-		        }
-        }
-        
         Group{
         title: qsTr("Visual Statistics")
             CheckBox{
@@ -81,10 +85,28 @@ Form
 		        DropDown{
 			        name: "intervals"
 			        values: ["Quartiles", "Standard errors", "Standard deviations"]
-			        label: qsTr("Intervals")
+			        label: qsTr("Intervals (categorical predictors)")
 			         enabled: varlist.count > 0
 		        }		        
+        }        
+        
+        Group{
+        title: qsTr("Other Plot Controls")
+            DropDown{
+			        name: "theme"
+			        values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
+			        label: qsTr("GGplot theme")
+		        }
+		        CheckBox{
+              name:"ghost"; 
+              label: qsTr("Ghost lines");
+              checked: true
+              enabled: paneledVars.count > 0 
+            }
         }
+        }
+        
+
   }
 
 }

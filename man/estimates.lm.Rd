@@ -4,10 +4,12 @@
 \alias{estimates.lm}
 \title{Report lm object Estimates (effect sizes and parameters)}
 \usage{
-\method{estimates}{lm}(object)
+\method{estimates}{lm}(object, mc = TRUE)
 }
 \arguments{
 \item{object}{a lm object}
+
+\item{mc}{Should model comparisons be performed?}
 }
 \value{
 One or more objects containing parameter estimates and effect sizes

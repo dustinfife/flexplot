@@ -32,17 +32,16 @@ visualize.default = function(object, plot=c("all", "residuals", "model"),formula
 #' @param object a lm object
 #' @param plot what should be plotted? Residuals? Model plot? All of them?
 #' @param formula A flexplot-style formula
+#' @param plots.as.list Should the plots be returned as a list? Defaults to FALSE. 
 #' @param ... Other arguments passed to flexplot
 #' @export
-visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL,...){
+visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL, plots.as.list=FALSE,...){
 
 
 	plot = match.arg(plot, c("all", "residuals", "model"))
 
 
 	d = object$model
-	res.plots = residual.plots(d, object)
-
 	data = object$model
 	variables = all.vars(formula(object))
 	outcome = variables[1]
@@ -90,11 +89,17 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 	}
 	
 	if (plot=="residuals"){
+	  res.plots = residual.plots(d, object)
 		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)
-		return(p)
+		if (plots.as.list){
+		  list(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl)
+		} else {
+		  return(p)
+		}
 	} else if (plot=="model"){
 		return(step3)
 	} else {
+	  res.plots = residual.plots(d, object)
 		p = arrange.plot(res.plots$histo, res.plots$res.dep, res.plots$sl, step3, plot, res.plots$terms, res.plots$numbers)
 		return(p)
 	}
@@ -112,10 +117,11 @@ utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation")
 #' @param ... Other arguments passed to flexplot
 #' @param formula A flexplot-style formula
 #' @param sample The number of individuals' datapoints to sample as raw data. Defaults to 3
+#' @param plots.as.list Should the plots be returned as a list? Defaults to FALSE. 
 #' @rawNamespace import(dplyr, except = c(filter, lag))
 #' @export
 visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formula=NULL, 
-	sample = 3, ...){
+	sample = 3, plots.as.list=FALSE,...){
 
 	#### figure out what is numeric
 	d = object@frame
@@ -146,48 +152,66 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 		slots = c(1,3,4)
 		form.slots = rep(NA, times=4)
 		for (i in 1:min(4,length(preds))){
-			form.slots[slots[i]] = preds[i]
+		  if (preds[i]!=term.re){
+			  form.slots[slots[i]] = preds[i]
+		  }
 		}
 		
-		#form.slots[2] = term.re
+		### for random effects models, just put school in first slot
+		if (length(preds)>1) {
+		  form.slots[2] = term.re
+		} else {
+		  form.slots[1] = term.re
+		}
 		symbol.slots = c("~","+", "|", "+")
 		formula = paste0(symbol.slots, form.slots, collapse="")
 		formula = gsub("\\|NA", "", formula);formula = gsub("\\+NA", "", formula);
 		formula = paste0(outcome, formula, collapse="")
 		
 		formula = formula(formula)
-		modify=F
-	} else {
-		### figure out where random component is
-		f.char = as.character(formula)[3]
-		criteria = paste0("\\+.*", term.re, ".*\\|")
+	} 
+	
+	### figure out where random component is
+	f.char = as.character(formula)[3]
+	criteria = paste0("\\+.*", term.re)
 
-		### if random component is in slot 2, modify the formula
-		if (length(grep(criteria, f.char))>0){
-			modify=T
-			termses = gsub(criteria, "|", f.char)
-			formula.new = make.formula(outcome, termses)			
+	### if random component is in slot 2, modify the formula
+	if (length(grep(criteria, f.char))>0){
+		modify=T
+		
+		### if there's a | in the formula, put it back
+		crit2 = paste0("\\+.*", term.re,".*\\|")
+		if (length(grep(crit2, f.char))>0){
+		  termses = gsub(crit2, "|", f.char)  
 		} else {
-			modify = F
+		  termses = gsub(criteria, "", f.char)
 		}
 		
+		formula.new = make.formula(outcome, termses)			
+	} else {
+		modify = F
 	}
+		
+	
 	terms = all.vars(formula)[-1]
 	terms.fixed = terms[-which(terms %in% term.re)]
 
-	
+	#browser()
 	##### generate fixed effects predictions
 	#### if random is in NOT in the second slot
 	if (!modify){
-		step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T)
+		step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T, ...)
 	} else {
 		#### otherwise...
 		prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	
 
 			### to prevent conflicts with base::filter
-		newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = "MathAch"
+		newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = outcome
 		#newd = prediction %>% dplyr::filter(model=="random effects") %>% dplyr::mutate(MathAch = prediction)			
-		step3 = flexplot(formula.new, data=k, suppress_smooth=T) 
+		#formula_new = MathAch~SES + School | Sex
+		step3 = flexplot(formula, data=k, suppress_smooth=T, ...) 
+		
+		#browser()
 		#if axis 1 is numeric, do lines
 		if (is.numeric(d[,terms[1]])){
 				m = prediction[prediction$model=="fixed effects",]
@@ -195,7 +219,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 				geom_line(data=m, 
 					aes_string(terms[1], "prediction", color=NA), linetype=1, lwd=2, col="black") +
 				geom_line(data=newd, 
-					aes_string(terms[1], outcome, group="School", color="School"))
+					aes_string(terms[1], outcome, group=term.re, color=term.re))
 					 
 
 		#if axis 1 is categorical, plot means as dots
@@ -218,18 +242,21 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 			#### aggregate the means across variables		
 			means = prediction %>% group_by_at(vars(one_of(c(terms, "model")))) %>% summarize(Value = mean(prediction))
 			fixed.means = means[means$model=="fixed effects",]
-			fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(terms.fixed))) %>% summarize(Value=mean(Value))
+			fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(c(terms.fixed)))) %>% 
+			  summarize(Value=mean(Value))
+			
 			means = means[means$model=="random effects",]
 			#means = means %>% dplyr::filter(model=="random effects") 
 			names(means)[ncol(means)] = names(fixed.means)[ncol(fixed.means)] = outcome
 			names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var
 			names(means)[names(means)==unbinned.var] = binned.var			
-			
+			fixed.means[,term.re] = unique(means[,term.re])
+			#head(fixed.means)
 			#### plot it
  			step3 = step3 + 
 				### fixed effects
-				geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3) +
-				geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=1), lwd=2) +
+				geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3, color="black", shape=16) +
+				geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=2, color="black", linetype=1) +
 
 				### random effects
 				geom_point(data=means, aes_string(x=terms[1], y=outcome), size=.5) +
@@ -248,7 +275,11 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 	#### now put them all together
 	if (plot=="residuals"){
 		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)
-		return(p)
+		if (plots.as.list){
+		  list(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl)
+		} else {
+		  return(p)
+		}
 	} else if (plot=="model"){
 		return(step3)
 	} else {
@@ -357,7 +388,7 @@ residual.plots = function(data, object){
 		sl = flexplot(abs.res~fitted, data=data, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			
 		class(sl) = c("flexplot", class(sl))		
 	} else {
-		sl = flexplot(abs.res~fitted, data=data, method="lm")+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			
+		sl = flexplot(abs.res~fitted, data=data, method="lm")+ labs(x="fitted", y="Absolute Value\nof Residuals", title="S-L Plot")			
 		class(sl) = c("flexplot", class(sl))					
 	}
 	

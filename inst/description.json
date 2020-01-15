@@ -5,7 +5,7 @@
     "description":    "Graphically-Based Data Analysis",
     "version":        "0.0.1",
     "author":         "Dustin Fife",
-    "icon":           "icon.svg",
+    "icon":           "FlexplotLogo.svg",
     "maintainer":     "Dustin Fife <fife.dustin@gmail.com>",
     "website":        "github.com/dustinfife/flexplot",
     "license":        "GPL (>= 2)"
