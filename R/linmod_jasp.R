@@ -294,7 +294,9 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     
     ### store all the information
     model = lm(f, dataset)
-    est = estimates(model)
+    
+    save(options, dataset, ready, model, file="/Users/fife/Documents/jaspresults.Rdat")
+    est = estimates(model, mc=TRUE)
     #save(options, dataset, ready, model, file="/Users/fife/Documents/jaspresults.Rdat")
     est$model = model
     

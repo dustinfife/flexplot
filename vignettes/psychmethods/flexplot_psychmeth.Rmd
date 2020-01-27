@@ -44,7 +44,7 @@ output            : papaja::apa6_pdf
 library("papaja")
 ```
 
-```{r analysis-preferences}
+```{r analysis-preferences, message=FALSE, warning=FALSE}
 # Seed for random number generation
 set.seed(42)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed, eval=TRUE)

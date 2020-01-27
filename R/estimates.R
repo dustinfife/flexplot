@@ -226,7 +226,7 @@ estimates.lm = function(object, mc=TRUE){
 	    )
 	  }
 	  ### this requires superassignment to work with JASP
-	  #dataset<<-object$model
+	  dataset<<-object$model
 	  all.terms = attr(terms(object), "term.labels")
 	  mc = t(sapply(1:length(all.terms), removed.one.at.a.time, terms=all.terms, object=object))
 	  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
