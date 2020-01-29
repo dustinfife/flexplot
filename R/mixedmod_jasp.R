@@ -12,7 +12,7 @@
 mixedmod_jasp<- function(jaspResults, dataset, options) {
 
   ### check if they have an IV and a DV
-  ready <- (options$dependent != "" & length(options$variables)>0 & options$rvariables != "")
+  ready <- options$dependent != "" && length(options$variables) > 0 && options$rvariables != ""
   
   ### read in the dataset if it's ready
   if (ready){
@@ -26,46 +26,46 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     character = sapply(dataset[,options$variables, drop=F], check.non.number)
     numeric = !character
     
-    #### compute results
-    if (is.null(jaspResults[["mixedmod_results"]]))
-      .mixedmod_compute(jaspResults, dataset, options, ready)
-    
-    
-    #### show plots (if user specifies them)
-    if (options$model) {
-      if (is.null(jaspResults[["mixedmod_model_plot"]])){
-        .mixedmod_model_plot(jaspResults, options, ready)
-      }
+  }
+  
+  #### compute results
+  if (is.null(jaspResults[["mixedmod_results"]]))
+    .mixedmod_compute(jaspResults, dataset, options, ready)
+  
+  #### show plots (if user specifies them)
+  if (options$model) {
+    if (is.null(jaspResults[["mixedmod_model_plot"]])){
+      .mixedmod_model_plot(jaspResults, options, ready)
     }
-    
-    #### show plots (if user specifies them)
-    if (options$univariates) {
-      if (is.null(jaspResults[["mixedmod_univariate_plot"]])){
-        .mixedmod_univariate_plot(jaspResults, options, ready, dataset)
-      }
+  }
+  
+  #### show plots (if user specifies them)
+  if (options$univariates) {
+    if (is.null(jaspResults[["mixedmod_univariate_plot"]])){
+      .mixedmod_univariate_plot(jaspResults, options, ready, dataset)
     }
-    
-    if (options$residuals) {
-      if (is.null(jaspResults[["mixedmod_residual_plot"]])){
-        .mixedmod_residual_plot(jaspResults, options, ready)
-      }
+  }
+  
+  if (options$residuals) {
+    if (is.null(jaspResults[["mixedmod_residual_plot"]])){
+      .mixedmod_residual_plot(jaspResults, options, ready)
     }
-
-    ### report fixed effects
-    if (options$fixeff){
-      if (is.null(jaspResults[["mixedmod_table_fixed"]])){
-        .create_mixedmod_fixed(jaspResults, options, ready)
-      }
+  }
+  
+  ### report fixed effects
+  if (options$fixeff){
+    if (is.null(jaspResults[["mixedmod_table_fixed"]])){
+      .create_mixedmod_fixed(jaspResults, options, ready)
     }
-    
-    ### report random effects
-    if (options$randeff){
-      if (is.null(jaspResults[["mixedmod_table_random"]])){
-        .create_mixedmod_random(jaspResults, options, ready)
-      }
+  }
+  
+  ### report random effects
+  if (options$randeff){
+    if (is.null(jaspResults[["mixedmod_table_random"]])){
+      .create_mixedmod_random(jaspResults, options, ready)
     }
-
-  }  
+  }
+  
 }
 
 # table functions ---------------------------------------------------------
@@ -79,9 +79,9 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   mixedmod_table_random$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
   
   ### build the table structure
-  mixedmod_table_random$addColumnInfo(name = "source",      title = "Source",   type = "string", combine = TRUE)
-  mixedmod_table_random$addColumnInfo(name = "param",    title = "Parameter",       type = "number", format = "dp:2", combine = TRUE)		
-  mixedmod_table_random$addColumnInfo(name = "std",    title = "Standard Deviation",       type = "number", format = "dp:2", combine = TRUE)		
+  mixedmod_table_random$addColumnInfo(name = "source",      title = "Source",   type = "string")
+  mixedmod_table_random$addColumnInfo(name = "param",    title = "Parameter",       type = "string")		
+  mixedmod_table_random$addColumnInfo(name = "std",    title = "Standard Deviation",       type = "number", format = "dp:2")		
   
   ### store the table structure
   jaspResults[["mixedmod_table_random"]] <- mixedmod_table_random
@@ -102,20 +102,24 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
 }
 
 .fill_mixedmod_table_random = function(mixedmod_table_random, mixedmod_results){
-  save(mixedmod_table_random, mixedmod_results, file="/Users/fife/Documents/flexplot/jaspdebug.Rdata")
-  
-  factors = summary(mixedmod_results)$varcor
+  factors = summary(mixedmod_results, correlation=FALSE)$varcor
   random.name = names(factors)
-  estimates = attr(factors[["School"]], "stddev")
-  random.name = c(random.name, rep("", times=length(estimates)-1), "Residual")
+  params = colnames(factors[[random.name]])
+  
+  source.filler = NULL
+  if (length(params) > 1)
+    source.filler = rep("", length(params) - 1)
+  
+  stddevs.random = attr(factors[[random.name]], "stddev")
+  stddev.resid = attr(factors, "sc")
+  
   ### output results
   tabdat = list(
-    source = random.name,
-    param = c(names(estimates), ""),
-    std = c(estimates, summary(mixedmod_results)$sigma)
+    source = c(random.name, source.filler, "Residual"),
+    param = c(params, ""),
+    std = c(stddevs.random, stddev.resid)
   )
   mixedmod_table_random$setData(tabdat)
-  
   
   return()
 }
@@ -154,9 +158,8 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
 }
 
 .fill_mixedmod_table_fixed = function(mixedmod_table_fixed, mixedmod_results){
+  factors = summary(mixedmod_results, correlation=FALSE)$coefficients
   
-  factors = summary(mixedmod_results)$coefficients
-
   ### output results
   tabdat = list(
     var = row.names(factors),
@@ -245,7 +248,6 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     return()
   
   mixedmod_results <- jaspResults[["mixedmod_results"]]$object
-  save(mixedmod_results, options, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
   plot = visualize(mixedmod_results, plot="residuals", plots.as.list=TRUE,
                    alpha=options$alpha, jitter=c(options$jitx, options$jity))
   plot = arrange_jasp_plots(plot, options$theme)
@@ -288,8 +290,8 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
       ), 
       collapse=" + ")
     random.effects = unlist(
-        lapply(options$interactions, FUN=function(x) unlist(x$randeff2))
-          )
+      lapply(options$interactions, FUN=function(x) unlist(x$randeff2))
+    )
     random.effects = fe[random.effects]
     if (length(random.effects)<1) random.effects = "1"
     random.effects = paste0(random.effects, collapse="+")
@@ -319,7 +321,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     return(dataset)
   else
     dataset = .readDataSetToEnd(columns=(c(options$dependent, options$variables, options$rvariables))) 
-    ## variable names in the dataset are encoded. de-encodify them
-    names(dataset) = JASP:::.unv(names(dataset))
-    return(dataset)
+  ## variable names in the dataset are encoded. de-encodify them
+  names(dataset) = JASP:::.unv(names(dataset))
+  return(dataset)
 }
