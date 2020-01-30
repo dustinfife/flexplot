@@ -25,83 +25,81 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     }
     character = sapply(dataset[,options$variables, drop=F], check.non.number)
     numeric = !character
-
-    ### compute results
-    if (is.null(jaspResults[["linmod_results"]]))
-      .linmod_compute(jaspResults, dataset, options, ready)
-
-    ### show plots (if user specifies them)
-    if (options$model) {
-
-      if (is.null(jaspResults[["linmod_model_plot"]])){
-        .linmod_model_plot(jaspResults, options, ready)
+  }
+  
+  ### compute results
+  if (is.null(jaspResults[["linmod_results"]]))
+    .linmod_compute(jaspResults, dataset, options, ready)
+  
+  ### show plots (if user specifies them)
+  if (options$model) {
+    
+    if (is.null(jaspResults[["linmod_model_plot"]])){
+      .linmod_model_plot(jaspResults, options, ready)
+    }
+  }
+  
+  if (options$avp) {
+    if (is.null(jaspResults[["linmod_avp_plot"]])){
+      .linmod_avp_plot(jaspResults, options, ready)
+    }
+  }
+  
+  if (options$residuals) {
+    if (is.null(jaspResults[["linmod_residual_plot"]])){
+      .linmod_residual_plot(jaspResults, options, ready)
+    }
+  }
+  #### show plots (if user specifies them)
+  if (options$univariate) {
+    if (is.null(jaspResults[["linmod_univariate_plot"]])){
+      .linmod_univariate_plot(jaspResults, options, ready, dataset)
+    }
+  }
+  
+  ### show output, depending on results
+  if (ready && sum(numeric)>0){
+    
+    if (length(options$variables)>1){
+      if (options$modinf){
+        if (is.null(jaspResults[["linmod_table_modcomp"]])){
+          .create_linmod_table_modcomp(jaspResults, options, ready)
+        }
       }
     }
     
-    if (options$avp) {
-      if (is.null(jaspResults[["linmod_avp_plot"]])){
-        .linmod_avp_plot(jaspResults, options, ready)
+    if (options$sl){
+      if (is.null(jaspResults[["linmod_table_slopes"]])){
+        .create_linmod_table_slopes(jaspResults, options, ready)
+      }
+    }
+  }
+  
+  if (ready && sum(character)>0){
+    
+    if (length(options$variables)>1){
+      if (options$modinf) {
+        if (is.null(jaspResults[["linmod_table_modcomp"]])){
+          .create_linmod_table_modcomp(jaspResults, options, ready)
+        }
       }
     }
     
-    if (options$residuals) {
-      if (is.null(jaspResults[["linmod_residual_plot"]])){
-        .linmod_residual_plot(jaspResults, options, ready)
-      }
-    }
-    #### show plots (if user specifies them)
-    if (options$univariate) {
-      if (is.null(jaspResults[["linmod_univariate_plot"]])){
-        .linmod_univariate_plot(jaspResults, options, ready, dataset)
-      }
-    }
-
-    ### show output, depending on results
-    if (sum(numeric)>0){
-
-      if (length(options$variables)>1){
-        if (options$modinf){
-          if (is.null(jaspResults[["linmod_table_modcomp"]])){
-            .create_linmod_table_modcomp(jaspResults, options, ready)
-          }
-        }
-      }
-
-      if (options$sl){
-        if (is.null(jaspResults[["linmod_table_slopes"]])){
-          .create_linmod_table_slopes(jaspResults, options, ready)
-        }
-      }
-    }
-
-    if (sum(character)>0){
-
-      if (length(options$variables)>1){
-        if (options$modinf) {
-          if (is.null(jaspResults[["linmod_table_modcomp"]])){
-            .create_linmod_table_modcomp(jaspResults, options, ready)
-          }
-        }
-      }
-
-      ### check if there's a jasp table already. if not, create it
-      if (options$means){
-        if (is.null(jaspResults[["linmod_table_means"]])){
+    ### check if there's a jasp table already. if not, create it
+    if (options$means){
+      if (is.null(jaspResults[["linmod_table_means"]])){
         .create_linmod_table_means(jaspResults, options, ready)
-        }
       }
-
-      if (options$diff) {
-        if (is.null(jaspResults[["linmod_table_differences"]])){
-          .create_linmod_table_differences(jaspResults, options, ready)
-        }
-      }
-
     }
     
-    # 
-
-  }  
+    if (options$diff) {
+      if (is.null(jaspResults[["linmod_table_differences"]])){
+        .create_linmod_table_differences(jaspResults, options, ready)
+      }
+    }
+    
+  }
+  
 }
 
 .linmod_model_plot <- function(jaspResults, options, ready) {
@@ -223,39 +221,32 @@ linmod_jasp<- function(jaspResults, dataset, options) {
                   "standard deviations", "stdev")
   if (model.type=="model"){
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
-                      alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
+                        alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
   } else if (model.type == "residuals"){
     plot = visualize(linmod_results$model, linmod_results, plot=model.type, plots.as.list=TRUE,
                      alpha=options$alpha, jitter=c(options$jitx, options$jity))
     plot = arrange_jasp_plots(plot, options$theme)
-  } else if (model.type == "added"){
+  } else if (model.type == "added" && length(options$variables) > 1){
     
     methods = list("Regression"="lm", 
                    "Quadratic"="quadratic", 
                    "Cubic"="cubic")
     formla = make.formula(options$dependent,options$variables)
+    
     plot = added.plot(formla, linmod_results$model$model, method=methods[options$linetype], alpha=options$alpha,
                       jitter=c(options$jitx, options$jity))
   }
   
-  if (options$theme == "JASP"){
-    plot = themeJasp(plot)
-  } else {
-    theme = list("Black and white"="theme_bw()+ theme(text=element_text(size=18))",
-                 "Minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
-                 "Classic" = "theme_classic()+ theme(text=element_text(size=18))",
-                 "Dark" = "theme_dark() + theme(text=element_text(size=18))")
-    plot = plot + eval(parse(text=theme[[options$theme]]))
-  }  
+  plot <- theme_it(plot, options$theme)
   
   if (length(options$variables)<4){
     plot = plot + theme(legend.position = "none")      
   }
-    
-      #+ theme(legend.position = "none")
+  
+  #+ theme(legend.position = "none")
   #flexplot$addFootnote("message")
   flexplot$plotObject <- plot
-
+  
   
   return()
 }
@@ -294,13 +285,10 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     
     ### store all the information
     model = lm(f, dataset)
-    
-    save(options, dataset, ready, model, file="/Users/fife/Documents/jaspresults.Rdat")
     est = estimates(model, mc=TRUE)
     #save(options, dataset, ready, model, file="/Users/fife/Documents/jaspresults.Rdat")
     est$model = model
     
-     
     linmod_results$object = est
     
     return()
@@ -455,7 +443,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   
   message = paste0("Note: Semi-partials indicate the effect of removing that particular term from the model. ",
-    "Bayes factors are computed using the BIC.")
+                   "Bayes factors are computed using the BIC.")
   if (length(options$interactions)>0){
     message = paste0(message, "\n 
                      Main effect estimates of r squared and BF have been suppressed because there is an interaction in the model.")
@@ -545,7 +533,6 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 .fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
   mc = linmod_results$model.comparison
-  save(linmod_table_modcomp, linmod_results, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
   
   ### reformat : to be a times
   term.labels = as.character(mc$all.terms)
@@ -590,7 +577,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     return(dataset)
   else
     dataset = .readDataSetToEnd(columns=(c(options$dependent, options$variables))) 
-    ## variable names in the dataset are encoded. de-encodify them
-    names(dataset) = JASP:::.unv(names(dataset))
-    return(dataset)
+  ## variable names in the dataset are encoded. de-encodify them
+  names(dataset) = JASP:::.unv(names(dataset))
+  return(dataset)
 }

@@ -12,7 +12,7 @@
 glinmod_jasp<- function(jaspResults, dataset, options) {
 
   ### check if they have an IV and a DV
-  ready <- (options$dependent != "" & length(options$variables)>0)
+  ready <- (options$dependent != "" && length(options$variables)>0)
   
   ### read in the dataset if it's ready
   if (ready){
@@ -30,35 +30,34 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     }
     character = sapply(dataset[,options$variables, drop=F], check.non.number)
     numeric = !character
-    
-    #### compute results
-    if (is.null(jaspResults[["glinmod_results"]]))
-      .glinmod_compute(jaspResults, dataset, options, ready)
-    
-    
-    #### show plots (if user specifies them)
-    if (options$model) {
-      if (is.null(jaspResults[["glinmod_model_plot"]])){
-        .glinmod_model_plot(jaspResults, options, ready, dataset)
-      }
+  }
+  
+  #### compute results
+  if (is.null(jaspResults[["glinmod_results"]]))
+    .glinmod_compute(jaspResults, dataset, options, ready)
+  
+  
+  #### show plots (if user specifies them)
+  if (options$model) {
+    if (is.null(jaspResults[["glinmod_model_plot"]])){
+      .glinmod_model_plot(jaspResults, options, ready, dataset)
     }
-    
-    #### show plots (if user specifies them)
-    if (options$univariates) {
-      if (is.null(jaspResults[["glinmod_univariate_plot"]])){
-        .glinmod_univariate_plot(jaspResults, options, ready, dataset)
-      }
+  }
+  
+  #### show plots (if user specifies them)
+  if (options$univariates) {
+    if (is.null(jaspResults[["glinmod_univariate_plot"]])){
+      .glinmod_univariate_plot(jaspResults, options, ready, dataset)
     }
-    
-    ### report parameter estimates
-    if (options$ests){
-      if (is.null(jaspResults[["glinmod_table_fixed"]])){
-        .create_glinmod_coefs(jaspResults, options, ready)
-      }
+  }
+  
+  ### report parameter estimates
+  if (options$ests){
+    if (is.null(jaspResults[["glinmod_table_fixed"]])){
+      .create_glinmod_coefs(jaspResults, options, ready)
     }
-
-
-  }  
+  }
+  
 }
 
 
@@ -193,7 +192,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
 .fill_glinmod_table_fixed = function(glinmod_table_fixed, glinmod_results){
   
   factors = summary(glinmod_results)$coefficients
-  term.labels = gsub(":", "x", row.names(factors))
+  term.labels = gsub(":", "\u2009\u273b\u2009", row.names(factors))
   
   ### output results
   tabdat = list(
@@ -265,7 +264,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     return(dataset)
   else
     dataset = .readDataSetToEnd(columns=(c(options$dependent, options$variables))) 
-    ## variable names in the dataset are encoded. de-encodify them
-    names(dataset) = JASP:::.unv(names(dataset))
-    return(dataset)
+  ## variable names in the dataset are encoded. de-encodify them
+  names(dataset) = JASP:::.unv(names(dataset))
+  return(dataset)
 }
