@@ -206,7 +206,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 .create_flexplot_linmod <- function(jaspResults, flexplot, options, model.type) {
   
   linmod_results <- jaspResults[["linmod_results"]]$object
-  
+  save(options, linmod_results, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
   generated.formula = make_flexplot_formula(options$variables, options$dependent, linmod_results$model$model)
   
 
@@ -260,6 +260,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     linmod_results$dependOn(c("dependent", "variables", "interactions", "linetype"))
     
     ## interactions are stored in a deeply nested list. de-listify them
+    
     predictors = paste0(
       unlist(
         lapply(options$interactions, FUN=function(x) paste0(unlist(x$components), collapse="*"))
@@ -280,11 +281,21 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     }
     
     # create formula
-    f = paste0(options$dependent, " ~ ", predictors, collapse = "")
+    if (predictors == ""){
+      f = paste0(options$dependent, " ~ ", options$variables)
+    } else {
+      f = paste0(options$dependent, " ~ ", predictors, collapse = "")
+    }
+    save(options, dataset, ready, f, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
     f = as.formula(f)
-    
+    #fsave(options, dataset, ready, f, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
     ### store all the information
     model = lm(f, dataset)
+<<<<<<< Updated upstream
+=======
+    
+   
+>>>>>>> Stashed changes
     est = estimates(model, mc=TRUE)
     #save(options, dataset, ready, model, file="/Users/fife/Documents/jaspresults.Rdat")
     est$model = model

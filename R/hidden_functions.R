@@ -61,7 +61,7 @@ variable_types = function(variables, data, return.names=F){
 # data = graduate_income
 # outcome = "Income"
 make_flexplot_formula = function(predictors, outcome, data){
-  
+
   # if there's only one variable, make it
   if (length(predictors)==1){
     f = make.formula(outcome, predictors)
