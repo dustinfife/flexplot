@@ -291,11 +291,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     #fsave(options, dataset, ready, f, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
     ### store all the information
     model = lm(f, dataset)
-<<<<<<< Updated upstream
-=======
-    
-   
->>>>>>> Stashed changes
+
     est = estimates(model, mc=TRUE)
     #save(options, dataset, ready, model, file="/Users/fife/Documents/jaspresults.Rdat")
     est$model = model

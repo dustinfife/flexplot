@@ -488,7 +488,7 @@ visualize(model, formula = weight.loss ~ motivation | therapy.type,
 
 Figure \@ref(fig:mixed) shows the `visualize()` function for a mixed model. With mixed models, `visualize()` randomly samples from the random effects (`Subject` in this case) and plots that as a variable in the graphic, and its location on the graph depends on whether the user specifies `formula`. If they do not, `visualize()` will default to placing it in the second slot (different lines/colors/shapes). This allows the user to visualize a subset of the subjects in a mixed model to ensure the model chosen is appropriate. 
 
-```{r, mixed, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Demonstration of the `visualize` function for a mixed model. In this graphic, each dashed line represents the fit of a particular school. \\label{fig:mixed}"}
+```{r, mixed, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Demonstration of the `visualize` function for a mixed model. In this graphic, each thin line represents the fit of a particular school. \\label{fig:mixed}"}
 require(lme4)
 data(math)
 model = lmer(MathAch ~ Sex + SES + (SES|School), data = math)
@@ -541,7 +541,7 @@ model.comparison(model.int, model.me)
 
 There's little doubt that psychology is undergoing a methodological revolution. Scholars are pushing with increased fervor for preregistration, larger sample sizes, open science practices, etc. This is a very good thing, but inevitably insufficient. Data can often be deceptive, especially when tortured into submission by standard analyses. Alongside emerging post-replication crisis practices, I advocate for greater use of visualizations. Visuals are the best, and sometimes the only way to allow data to speak for itself.
 
-Traditionally, producing visuals is a cumbersome and extraneous procedure, quite divorced from the actual analyses. In this paper, I have introduced `flexplot`. `flexplot` aims to automate much of the visualizations that accompany data analysis. These visuals, which are based on scientifically-derived principles of visual perception, promise to promote sound data analysis and enhance data decision-making. 
+Traditionally, producing visuals has been a cumbersome and extraneous procedure, quite divorced from the actual analyses. In this paper, I have introduced `flexplot`. `flexplot` aims to automate much of the visualizations that accompany data analysis. These visuals, which are based on scientifically-derived principles of visual perception, promise to promote sound data analysis and enhance data decision-making. 
 
 To use `flexplot`, users can download and install the R package through github, at www.github.com/dustinfife/flexplot. Alternatively, a point-and-click version of flexplot can be accessed via JASP (through the visual modeling module) or through Jamovi (through the flexplot module). For additional information on using flexplot, visit the following YouTube playlist: https://www.youtube.com/playlist?list=PL8F480DgtpW8cFY8diRWcNeq6bsleAoe_
 
