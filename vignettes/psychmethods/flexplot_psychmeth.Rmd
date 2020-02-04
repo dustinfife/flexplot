@@ -15,7 +15,7 @@ affiliation:
     institution   : "Rowan University"
 
 authornote: |
-
+  I wish to thank the dozens of students who very patiently discovered bugs in the flexplot software. Your efforts have resulted in a much more robust tool. 
 
 abstract: >
    The human visual processing system has enormous bandwidth, able to interpret vast amounts of data in fractions of a second [@Otten2015]. Despite this amazing ability, there is a troubling lack of graphics in scientific literature [@Healy2014a], and the graphics most traditionally used tend to bias perception in unintentional ways [@Weissgerber2015]. I suspect the reason for the underuse and misuse of graphics is because sound visuals are difficult to produce with existing software [@Wainer2010]. While `ggplot2` allows immense flexibility in creating graphics, its learning curve is quite steep, and even basic graphics require multiple lines of code. `flexplot` is an R package that aims to address these issues by providing a formula-based suite of tools that simplifies and automates much of the graphical decision-making. Additionally, `flexplot` pairs well with statistical modeling, making it easy for researchers to produce visuals that map onto statistical procedures. With one-line functions, users can visualize bivariate statistical models (e.g., scatterplots for regression, beeswarm plots for ANOVA/t-tests), multivariate statistical models (e.g., ANCOVA and multiple regression), and even more sophisicated models like multi-level models and logistic regressions. Further, this package utilizes old tools (e.g., added variable plots and coplots) as well as introduces new tools for complex visualizations, including ghost lines and point sampling. 
@@ -34,7 +34,7 @@ mask              : no
 draft             : no
 
 documentclass     : "apa6"
-classoption       : "man"
+classoption       : "doc"
 output            : papaja::apa6_pdf
 ---
 
@@ -73,7 +73,7 @@ Finally, and perhaps most importantly, graphics improve encoding [@Hansen]. Near
 
 Given these advantages, greater use of visualizations is critical to addressing the replication crisis. Even with open data, massive sample sizes, and preregistration, one can still be deceived by a well-fitting model. For example, a researcher might conclude that, once we control for socioeconomic status, a particular treatment for depression has a whopping effect. Perhaps, however, there's an underlying interaction that makes interpreting the main effects deceiving (see Figure \ref{fig:ses}). Increasing sample sizes won't ameliorate this problem, nor will preregistration. Open data might help, but even then one would have to explicitly model the interaction and/or visualize it as I have done. As noted by Wilkinson, "If you assess hypotheses without examining your data, you risk publishing nonsense" [@Wilkinson1999a, p. 597]. 
 
-```{r, ses, echo=FALSE, fig.cap = "Simulated relationship between Treatment, Depression, and SES. The visual makes it clear there's an interaction effect, which would be masked if one simply computed a main effects model.", message=FALSE, warning=FALSE}
+```{r, ses, echo=FALSE, fig.cap = "Simulated relationship between `Treatment`, `Depression`, and `SES`. The visual makes it clear there's an interaction effect, which would be masked if one simply computed a main effects model.", message=FALSE, warning=FALSE}
 require(ggplot2)
 require(flexplot)
 data(exercise_data)
@@ -97,7 +97,7 @@ In the following section, I begin by developing the guiding philosophy behind `f
 
 # Guiding Philosophy of Flexplot
 
-The traditional approach to data analysis requires a great deal of decision-making up-front, but requires little effort to interpret results. Initially, the analyst much choose between regression, ANOVA, t-tests, MANOVA, etc. If the analyst then chooses to visualize these results, they must *again* decide whether a boxplot, histogram, bar chart, scatterplot, etc. is most appropriate. By the time the analyst interprets the data, a great deal of effort has already been expended, though the traditional approach to data-analysis makes interpreting the results unambiguous. One simply needs to determine whether the p-value dips below the critical 0.05 threshold. 
+The traditional approach to data analysis requires a great deal of decision-making up-front, but requires little effort to interpret results. Initially, the analyst must choose between regression, ANOVA, t-tests, MANOVA, etc. If the analyst then chooses to visualize these results, they must *again* decide whether a boxplot, histogram, bar chart, scatterplot, etc. is most appropriate. By the time the analyst interprets the data, a great deal of effort has already been expended, though the traditional approach to data-analysis makes interpreting the results unambiguous. One simply needs to determine whether the p-value dips below the critical 0.05 threshold. 
 
 This approach has been routinely criticized [@cohen_earth_1994; @Gigerenzer2004; @Tyron1998], particularly in how results are interpreted (significant versus not). While the traditional approach requires great effort to choose the analysis and little effort to interpret it, `flexplot` takes the opposite approach: little effort is required to *choose* the analysis, leaving more resources to *interpret* the analysis. This is as it should be. 
 
@@ -106,11 +106,11 @@ To accomplish this goal, `flexplot` is based on the following principles:
 
 *1. Minimize obstacles to producing graphics.* The easier it is to produce graphics, the more likely they will be used, and the more resources the researcher will have available to interpret the results. Technology companies spend millions of dollars attempting to make the interaction between humans and technology as seamless as possible. One-click purchasing, voice-activated personal assistants like Siri, movies-on-demand, and audible app notifications are all innovations that are successful because they make it easy for humans to use their technology. Likewise, if producing a graphic is as simple (or simpler) than performing a statistical analysis, they too will become heavily utilized (and, dare I say, addictive?). Furthermore, the less effort required to produce them, the more resources available to invest in *interpreting* graphics. To make producing graphics as simple as possible, `flexplot` automates much of the decision-making in the background, such as choosing between types of graphics (e.g., histograms versus bar charts) and how those graphics are displayed.
 
-*2. Design graphics that leverage human strenths and mitigate human biases.* Successful technology capitalizes on human strengths. A mobile phone, for example, leverages our advanced finger tactile sensitivity and dexterity. Sending text messages with one's toes would be a very poor choice. Likewise, a computer that sends olefactory information might work well for a dog, but not a human. Visualization technology ought to be designed with the same principles in mind. Unfortunately, standard statistical analyses do not capitalize on human strengths. It takes a great deal of training to understand even basic statistics, and even then results are frequently misinterpreted [@Gigerenzer2004]. To put it in the words of Tyron @Tyron1998, traditional analyses have a "human factors" problem. To overcome misconceptions about statistical analyses, some of the tools within `flexplot` create visual representation of the statistical models. These representations highlight uncertainty, reveal whether chosen models are appropriate, and improve encoding of statistical information. 
+*2. Design graphics that leverage human strenths and mitigate human biases.* Successful technology capitalizes on human strengths. A mobile phone, for example, leverages our advanced finger tactile sensitivity and dexterity. Sending text messages with one's toes would be a very poor choice. Likewise, a computer that sends olefactory information might work well for a dog, but not a human. Visualization technology ought to be designed with the same principles in mind. Unfortunately, standard statistical analyses do not capitalize on human strengths. It takes a great deal of training to understand even basic statistics, and even then results are frequently misinterpreted [@Gigerenzer2004]. To put it in the words of @Tyron1998, traditional analyses have a "human factors" problem. To overcome misconceptions about statistical analyses, some of the tools within `flexplot` create visual representations of the statistical models. These representations highlight uncertainty, reveal whether chosen models are appropriate, and improve encoding of statistical information. 
 
 # `ggplot2` Versus `flexplot`
 
-Hadley Wickham, the author of `ggplot2`, developed a grammar of graphics [@Wickham2010], or a set of rules that guide the construction of visualizations. Furthermore, Wickham's grammar is "layered," which means that plotting elements can be stacked atop one another. For example, one could "layer" dots over an $X/Y$ axis, layer a regression line over the dots, layer a correlation coefficient over the regression line, etc. Wickham's grammar allows a great deal flexibility in the design of graphics. However, this flexibility comes at a cost. Very often the grammar necessary to produce a graphic requires a great deal of coding to produce. For example, consider the code to create jittered mean plots:
+Hadley Wickham, the author of `ggplot2`, developed a grammar of graphics [@Wickham2010], or a set of rules that guide the construction of visualizations. Furthermore, Wickham's grammar is "layered," which means that plotting elements can be stacked atop one another. For example, one could "layer" dots over an $X/Y$ axis, layer a regression line over the dots, layer a correlation coefficient over the regression line, etc. Wickham's grammar allows a great deal of flexibility in the design of graphics. However, this flexibility comes at a cost. Very often the grammar necessary to produce a graphic requires a great deal of coding to produce. For example, consider the code to create jittered mean plots:
 
 
 ```{r, message=FALSE, echo=TRUE, warning=FALSE, options(prompt=" ", continue=" ")}
@@ -129,7 +129,7 @@ plot = ggplot(data = exercise_data, aes(x=therapy.type, y=weight.loss)) +
 
 I have personally spoken to many veteren R users who have been extremely reluctant to adopt `ggplot2`, simply because the approach and sytax are elaborate, if not complicated. For those less experienced, the prospect of leveraging `ggplot2` is even more daunting, which means that few will likely abandon point-and-click software to produce graphics. 
 
-As noted earlier, the more difficult it is to produce a graphic, the more likely it is someone will simply not use it. A similar graphic can be produced with only one line of code using the `flexplot()` function:
+As noted earlier, the more difficult it is to produce a graphic, the more likely it is someone will simply not use it. A similar graphic can be produced with only one line of code using the `flexplot` function:
 
 ```{r, message=FALSE, echo=TRUE, warning=FALSE}
 plot = flexplot(weight.loss ~ therapy.type, data = exercise_data)
@@ -150,7 +150,7 @@ This simplifies the choice of graphics immensely; one only needs to specify the 
 
 Figure \ref{fig:flexplotgrammar} is an illustration that identifies which components of a `flexplot` equation produce each element of a `flexplot`-style graphic. The first variable in the equation ($X1$) specifies which variable is displayed on the $X$ axis. The second variable ($X2$) is displayed as different colors/symbols/lines. The third and fourth elements are shown as column and row panels, respectively. 
 
-By following the grammar of a GLM, there is consistency between statistical modeling and visualization, with a few notable exceptions. Most obviously, a GLM equation (e.g., `plot(y ~ x1 + x2 + x3, data = data)`) does not have any vertical pipes (`|`) as `flexplot()` does. This is necessary in `flexplot()` to allow more specificity in paneling. Additionally, with GLMs, one must explicitly specify interaction (e.g., `X1:X2`) and polynomial terms (e.g., `I(X2^2)`). This is not necessary with `flexplot()`; the raw data are displayed exactly as they are and if interactions are present, the visual will show it. 
+By following the grammar of a GLM, there is consistency between statistical modeling and visualization, with a few notable exceptions. Most obviously, a GLM equation (e.g., `plot(y ~ x1 + x2 + x3, data = data)`) does not have any vertical pipes (`|`) as `flexplot` does. This is necessary in `flexplot` to allow more specificity in paneling. Additionally, with GLMs, one must explicitly specify interaction (e.g., `X1:X2`) and polynomial terms (e.g., `I(X2^2)`). This is not necessary with `flexplot`; the raw data are displayed exactly as they are and if interactions are present, the visual will show it. 
 
 
 \begin{figure}
@@ -161,15 +161,15 @@ By following the grammar of a GLM, there is consistency between statistical mode
 \end{figure}
 
 
-The base `plot()` function in `R` follows similar conventions as `flexplot` (i.e., users can specify an equation, such as `plot(y  ~  x)`), though `flexplot()` is more intelligent in its choice of displays. Also, `plot()` only allows the user to visualize one variable at a time. Another function, `coplot()`, allows some multivariate visualizations, yet it is limited in the types of data allowed and, like `plot()` is not flexible in the types of visualization decisions it makes. The `flexplot` package, on the other hand, offers great flexibility and automates much of the decision-making. 
+The base `plot()` function in `R` follows similar conventions as `flexplot` (i.e., users can specify an equation, such as `plot(y  ~  x)`), though `flexplot` is more intelligent in its choice of displays. Also, `plot()` only allows the user to visualize one variable at a time. Another function, `coplot()`, allows some multivariate visualizations, yet it is limited in the types of data allowed and, like `plot()` is not flexible in the types of visualization decisions it makes. The `flexplot` package, on the other hand, offers great flexibility and automates much of the decision-making. 
 
 In the following section, I will demonstrate how decisions are made in `flexplot`. I begin by showing how to produce univariate graphics, then bivariate graphics, then multivariate graphics. I will then follow that up with various functions and techniques for combining visuals with models, then conclude with a brief summary. 
 
 # Univariate Graphics
 
-In `lm()`, one can fit an "intercept only" model, using the code `lm(y ~ 1)`. This is equivalent to estimating the mean of $y$. `flexplot` follows a similar convention with visualizing univariate distributions. Alternatively, one can also write this as `flexplot(y~y)`. The type of graphic displayed depends on the type of variable inputted into the function. `flexplot` visualizes numeric variables in histograms and categorical variables as barcharts. For example, in the code below, notice that `flexplot()` recognizes whether the variable is categorical or numeric, and plots accordingly. 
+In `lm()`, one can fit an "intercept only" model, using the code `lm(y ~ 1)`. This is equivalent to estimating the mean of $y$. `flexplot` follows a similar convention with visualizing univariate distributions. Alternatively, one can also write this as `flexplot(y~y)`. The type of graphic displayed depends on the type of variable inputted into the function. `flexplot` visualizes numeric variables in histograms and categorical variables as barcharts. For example, in the code below, notice that `flexplot` recognizes whether the variable is categorical or numeric, and plots accordingly. 
 
-```{r, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "A histogram (left) and barchart (right) produced within `flexplot` in R. ", fig.width = 6, fig.height = 3, out.width = "90%", fig.align = 'center'}
+```{r, bar, fig.cap = "A histogram (left) and barchart (right) produced within `flexplot` in R.", message=FALSE, echo=TRUE, warning=FALSE}
 require(flexplot)
 data(exercise_data) #### these are simulated data available 
                     #### in flexplot. Please don't base your 
@@ -196,7 +196,7 @@ b = flexplot(party~1, data=party) +
 cowplot::plot_grid(a,b)
 ```
 
-Sometimes, `flexplot()` will make a wrong guess, if, for example, a categorical variable is recorded as a number (e.g., 1 = Group 1, 2 =  Group 2, 3  =  Group 3). To force `flexplot()` to produce a barchart, simply convert the variable to a factor (e.g., `data$group = factor(data$group, levels = 1:3, labels = c("Group1", "Group2", "Group3"))`). 
+Sometimes, `flexplot` will make a wrong guess, if, for example, a categorical variable is recorded as a number (e.g., 1 = Group 1, 2 =  Group 2, 3  =  Group 3). To force `flexplot` to produce a barchart, simply convert the variable to a factor (e.g., `data$group = factor(data$group, levels = 1:3, labels = c("Group1", "Group2", "Group3"))`). 
 
 # Bivariate Graphics
 
@@ -210,14 +210,14 @@ Visualizing raw data can become tricky, particularly when categorical variables 
 
 There are many different ways to visualize a categorical predictor/numeric outcome relationship, including bar plots of means, box plots, violin plots, gradient plots, etc. Some are misleading (e.g., barplots of means and standard error plots). Others are mediocre (e.g., boxplots). Finally, some perform exceptionally well in human testing, including violin plots and gradient plots [@Correll2015]. As mentioned in the previous section, raw data are essential. To minimize overlap, a common strategy is to utilize "jittering," which means that categorical variables are first converted to values (e.g., control group = 1, treatment group = 2), then random noise is added to each participant's score (e.g., a 1 may become 1.012 or 0.097). This reduces overlap between datapoints. However, simply jittering values uniformly robs one of a valuable opportunity to convey additional information in a graphic. `flexplot` instead jitters data proportional to the density of the data. In other words, regions of little density will have very little jittering and regions of high density (e.g., at the mode) will have more jittering. These sorts of plots are essentially violin plots with raw data, where the maximum amount of jittering is the outline of the violin plot. Traditionally, these were called "textured dot strips," which were invented by @Tukey1990 [see also @Wilkinson1999]. Others [e.g., @eklund2012beeswarm] call them "bee swarm" plots. I am not too fond of the original name, so I'll refer to them as bee swarm plots throughout this text.
 
-While violin plots partially solve the problem mentioned earlier (i.e., that summary statistics can be generated from an diverse set of patterns of raw data), they too have their limitations. For one, it is impossible to tell the difference between a dataset with 15,000 versus 15 observations. For example, the two distributions in the left image in Figure \@ref(fig:raw) look essentially the same, while the same data, plotted as beeswarm plots, very clearly show the sample size. 
+While violin plots partially solve the problem mentioned earlier (i.e., that summary statistics can be generated from a diverse set of patterns of raw data), they too have their limitations. For one, it is impossible to tell the difference between a dataset with 15,000 versus 15 observations. For example, the two distributions in the left image in Figure \@ref(fig:raw) look essentially the same, while the same data, plotted as beeswarm plots, very clearly show the sample size. 
 
 ```{r, raw, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Violin plots with 15,000 versus 15 datapoints. The outlines look the same in the left image, but the right image overlays the raw data, which makes the differing sample sizes much more apparent. \\label{fig:raw}", fig.width = 6, fig.height = 3, out.width = "90%", fig.align = 'center'}
 group1 = c(0,1,2,2,3,3,3,3,3,3,4,4,5,6)
 group2 = rnorm(10000,3,1)
 d = data.frame(score = c(group1, group2), 
-               group = c(rep("group 1", times = length(group1)), 
-                       rep("group 2", times = length(group2))))
+               group = factor(c(rep("group 1", times = length(group1)), 
+                       rep("group 2", times = length(group2))), ordered=T))
 a = ggplot2::ggplot(data = d, aes(x = group, y = score)) +  
   geom_violin() + theme_bw()
 b = flexplot(score ~ group, data = d)
@@ -225,7 +225,7 @@ cowplot::plot_grid(a, b)
 
 ```
 
-In `flexplot()`, one can control the amount of jittering. The amount can be specified in multiple ways: as a boolean (`TRUE` means it will jitter, `FALSE` it will not), as a number (e.g., `0.2`), or as a vector (e.g., `c(.2, .4)`, which will indicate .2 jittering for X and .4 for Y). Just as it is in `geom_jitter()`, this number refers to the amount of jittering on either side. However, the value refers to the *maximum* amount the computer will jitter the data. So, 0.2 (the default) will jitter up to 0.1 points on the right, but only at the highest density and 0.1 on the left at the highest density. 
+In `flexplot`, one can control the amount of jittering. The amount can be specified in multiple ways: as a boolean (`TRUE` means it will jitter, `FALSE` it will not), as a number (e.g., `0.2`), or as a vector (e.g., `c(.2, .4)`, which will indicate .2 jittering for X and .4 for Y). Just as it is in `geom_jitter()`, this number refers to the amount of jittering on either side. However, the value refers to the *maximum* amount the computer will jitter the data. So, 0.2 (the default) will jitter up to 0.1 points on the right, but only at the highest density and 0.1 on the left at the highest density. 
 
 Users can also specify what the "whiskers" mean for the summary statistics. They default to the interquartile range (with the median as the center dot), but the user can also specify `sterr`, or `stdev,` to indicate the standard error or standard deviation:
 
@@ -249,7 +249,7 @@ cowplot::plot_grid(a, b, c, nrow = 1)
 
 ## Numeric Predictor, Numeric Outcome (Scatterplots)
 
-The indisputed king of numeric on numeric visualization is the scatterplot. Once again, `flexplot()` is smart enough to choose a scatterplot when it is passed a numeric predictor and numeric outcome. Except for severe departures, people tend to believe the fit of a line overlaid on raw data, even when the line is not appropriate [@Fife2019d]. For this reason, `flexplot` defaults to graphing a loess line as the summary statistic, so as to highlight deviations from linearity. However, the user can specify other sorts of fits, such as `"lm"` (for regression), `"quadratic"`, `"cubic"`, and `"rlm"` (robust linear model) in the `MASS` package [@ripley2013package]. The user can also choose to remove the confidence interval by specifying `se = F`, as well as jitter one or both variables, as shown below. 
+The indisputed king of numeric on numeric visualization is the scatterplot. Once again, `flexplot` is smart enough to choose a scatterplot when it is passed a numeric predictor and numeric outcome. Except for severe departures, people tend to believe the fit of a line overlaid on raw data, even when the line is not appropriate [@Fife2019d]. For this reason, `flexplot` defaults to graphing a loess line as the summary statistic, so as to highlight deviations from linearity. However, the user can specify other sorts of fits, such as `"lm"` (for regression), `"quadratic"`, `"cubic"`, and `"rlm"` (robust linear model) in the `MASS` package [@ripley2013package]. The user can also choose to remove the confidence interval by specifying `se = F`, as well as jitter one or both variables, as shown below. 
 
 ```{r, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Scatterplot with different options of fit: loess (default), lm (regression), and quadratic Also, the data in the far right plot has been jittered. ", fig.width = 6, fig.height = 2.5, out.width = "90%", fig.align = 'center'}
 a = flexplot(weight.loss ~ satisfaction, data = exercise_data) + 
@@ -266,9 +266,9 @@ Though `flexplot` defaults to a loess line, if the analyst models the data using
 
 ## Numeric Predictor, Categorical Outcome (Logistic Curves)
 
-`flexplot()` also has some ability to model categorical outcomes. One common situation might be when one is attempting to model a binary outcome, as they would in a logistic regression. In this situation, it is critical that the visual match the analysis [@Fife2019e]. This aligns with the principle of "cognitive fit," which suggests that the type of display matches the type of information conveyed [@umanath1994multiattribute; @vessey1991cognitive]. Because logistic regressions utilize ogive curves to model the data, the visuals ought to reflect that. 
+`flexplot` also has some ability to model categorical outcomes. One common situation might be when one is attempting to model a binary outcome, as they would in a logistic regression. In this situation, it is critical that the visual match the analysis [@Fife2019e]. This aligns with the principle of "cognitive fit," which suggests that the type of display matches the type of information conveyed [@umanath1994multiattribute; @vessey1991cognitive]. Because logistic regressions utilize ogive curves to model the data, the visuals ought to reflect that. 
 
-Any binary variable can be visualized as a logistic regression in `flexplot`, except when the axis variable (i.e., the variable occupying the first slot in the `flexplot()` equation) is also categorical. To model logistic curves, the user only needs to specify `logistic` as the method.
+Any binary variable can be visualized as a logistic regression in `flexplot`, except when the axis variable (i.e., the variable occupying the first slot in the `flexplot` equation) is also categorical. To model logistic curves, the user only needs to specify `logistic` as the method.
 
 ```{r, logistic, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Example of a logistic plot in the `flexplot` package.\\label{fig:logistic}", fig.width = 3, fig.height = 3}
 data("tablesaw.injury") ### also simulated data available 
@@ -279,9 +279,9 @@ flexplot(injury ~ attention, data = tablesaw.injury,
              method = "logistic", jitter = c(0, .05))
 ```
 
-## Categorical Outcome, Categorical Predictor (Association Pplots)
+## Categorical Outcome, Categorical Predictor (Association Plots)
 
-Sometimes the analyst may wish to visualize the relationship between two categorical variables. Once again, `flexplot()` is smart enough to determine that information from the formula, provided the user supplies two factors. In this situation, `flexplot()` will generate an "association" plot, which plots the deviation of each cell from its expected frequencies (divided by the expected values within that cell). The reason for an association plot (as opposed to a traditional barplot) is because it best maps into what sorts of questions viewers are interested in asking. When users model the association between categorical variables, they traditionally use a $\chi^2$ test, which compares observed versus expected frequencies. An association plot displays observed (height of bar) versus expected (y axis at zero) frequencies, thus following the principle of cognitive fit [@umanath1994multiattribute; @vessey1991cognitive; see also @Kosslyn2006e for a similar principle, the "principle of compatibility"]. 
+Sometimes the analyst may wish to visualize the relationship between two categorical variables. Once again, `flexplot` is smart enough to determine that information from the formula, provided the user supplies two factors. In this situation, `flexplot` will generate an "association" plot, which plots the deviation of each cell from its expected frequencies (divided by the expected values within that cell). The reason for an association plot (as opposed to a traditional barplot) is because it best maps into what sorts of questions viewers are interested in asking. When users model the association between categorical variables, they traditionally use a $\chi^2$ test, which compares observed versus expected frequencies. An association plot displays observed (height of bar) versus expected (y axis at zero) frequencies, thus following the principle of cognitive fit [@umanath1994multiattribute; @vessey1991cognitive; see also @Kosslyn2006e for a similar principle, the "principle of compatibility"]. 
 
 In the example below, I had to convert `injury` to a factor to get a barplot. The graphic (Figure \@ref(fig:association)) shows that females are less likely to be injured than males, relatively speaking. 
 
@@ -295,7 +295,7 @@ flexplot(injury ~ gender, data = tablesaw.injury)
 
 ## Repeated Measures Data (Related t-test)
 
-One of the guiding tenets of `flexplot` is that every statistical analysis ought to be accompanied by a graphic that closely matches the analysis. This not only improves encoding of statistical information, but it also highlights uncertainty and reveals the appropriateness of the model. With a related t-test, the existing graphics will not accurately represent this model because a related $t$ actually models the *difference* between scores (e.g., from Time 1 to Time 2). As such, `flexplot()` allows an additional option (`related = TRUE`) that tells `flexplot()` to plot the differences, rather than the groups. To do so, `flexplot()` requires "tidy" data, or data where time is indicated in one column and the score in the other. Also, there must be equal numbers of observations in each group. Once in this format, it simply plots the differences (Figure \@ref(fig:plant)). For example:
+One of the guiding tenets of `flexplot` is that every statistical analysis ought to be accompanied by a graphic that closely matches the analysis. This not only improves encoding of statistical information, but it also highlights uncertainty and reveals the appropriateness of the model. With a related t-test, the existing graphics will not accurately represent this model because a related $t$ actually models the *difference* between scores (e.g., from Time 1 to Time 2). As such, `flexplot` allows an additional option (`related = TRUE`) that tells `flexplot` to plot the differences, rather than the groups. To do so, `flexplot` requires "tidy" data, or data where time is indicated in one column and the score in the other. Also, there must be equal numbers of observations in each group. Once in this format, it simply plots the differences (Figure \@ref(fig:plant)). For example:
 
 ```{r, plant, message=FALSE, echo=TRUE, warning=FALSE,fig.width = 4, fig.height = 3, fig.cap = "A plot of repeated measures data.\\label{fig:plant}"}
 data("plant_growth")
@@ -309,11 +309,11 @@ Unfortunately, plotting difference scores only works with two timepoints. When t
 
 ## Avoiding Overlap
 
-If it wasn't yet apparent, let me be less subtle: I think all graphics should include raw data. Showing raw data allows readers to determine whether the chosen model is appropriate, and it communicates the degree of uncertainty about the model. However, when there are a large number of datapoints, it increases cognitive load and masks salient characteristics that require attention. [@Kosslyn2006e]. This makes it quite difficult to see any patterns; areas of high density look just as crowded as areas of lower density, relatively speaking (although having bee swarm plots makes it clear which areas are most dense; see the example in top-left image in Figure \@ref(fig:sample)). To address such overlap, `flexplot()` offers three options. The first is to suppress raw data (`raw.data = F`, right-top in Figure \@ref(fig:sample)). I don't recommend that, but it can be done.
+If it wasn't yet apparent, let me be less subtle: I think all graphics should include raw data. Showing raw data allows readers to determine whether the chosen model is appropriate, and it communicates the degree of uncertainty about the model. However, when there are a large number of datapoints, it increases cognitive load and masks salient characteristics [@Kosslyn2006e]. This makes it quite difficult to see any patterns; areas of high density look just as crowded as areas of lower density, relatively speaking (although having bee swarm plots makes it clear which areas are most dense; see the example in top-left image in Figure \@ref(fig:sample)). To address such overlap, `flexplot` offers three options. The first is to suppress raw data (`raw.data = F`, right-top in Figure \@ref(fig:sample)). I don't recommend that, but it can be done.
 
-A second option is to reduce the transparency (e.g., bottom-left in Figure \@ref(fig:sample)). This will draw more attention to the fit of the model than the raw data [e.g., users will attend to the regression line rather than the raw data; see @Kosslyn2006e], which may or may not be a good thing. Perhaps the best option is to *sample* (bottom-right in Figure \@ref(fig:sample)). Sampling allows the visual-processing system to not be overly influenced by the fit, but without overwhelming the visual processing system. However, it is important that the visual display of fit (e.g., median + IQR, loess line, regression line) not be estimated from the sampled data. Rather, the fit should correspond to the entire dataset. `flexplot()` performs this operation in the background. In Figure \@ref(fig:sample), notice how the medians/interquartile ranges do not change, despite having different numbers of datapoints. 
+A second option is to reduce the transparency (e.g., bottom-left in Figure \@ref(fig:sample)). This will draw more attention to the fit of the model than the raw data [e.g., users will attend to the regression line rather than the raw data; see @Kosslyn2006e], which may or may not be a good thing. Perhaps the best option is to *sample* (bottom-right in Figure \@ref(fig:sample)). Sampling allows the visual-processing system to not be overly influenced by the fit, but without overwhelming the visual processing system. However, it is important that the visual display of fit (e.g., median + IQR, loess line, regression line) not be estimated from the sampled data. Rather, the fit should correspond to the entire dataset. `flexplot` performs this operation in the background. In Figure \@ref(fig:sample), notice how the medians/interquartile ranges do not change, despite having different numbers of datapoints. 
 
-```{r, sample, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Four graphics showing different ways to handle overlapping datapoints. The top-left image does nothing. The top-right does omits raw data. The bottom-left reduces the opacity of the points. The bottom-right samples datapoints. \\label{fig:sample}"}
+```{r, sample, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Four graphics showing different ways to handle overlapping datapoints. The top-left image does nothing. The top-right omits raw data. The bottom-left reduces the opacity of the points. The bottom-right samples datapoints. \\label{fig:sample}"}
 data("nsduh")
 a = flexplot(distress ~ major.dep, data = nsduh)
 b = flexplot(distress ~ major.dep, data = nsduh, raw.data = F)
@@ -323,15 +323,15 @@ cowplot::plot_grid(a, b, c, d, nrow = 2)
 ```
 
 
-# Multivariate graphics
+# Multivariate Graphics
 
-Visualizing multivariate relationships can become quite tricky. It is very easy to induce cognitive overload, especially when attempting to visualize raw data (which is, again, a key characteristic of `flexplot`). Some might be inclined to create three-dimensional plots. However, these are difficult to interpret and they require the user to rotate the view. Even then, they can only show two predictors at a time. I find it much easier to use other strategies. `flexplot()` utilizes four different strategies to visualize multivariate relationships: (1) plotting a dimension as different colors/lines/shapes, (2) plotting a dimension in row or column panels, (3) visualizing conditional relationships with added variable plots, and (4) overlaying ghost lines. 
+Visualizing multivariate relationships can become quite tricky. It is very easy to induce cognitive overload, especially when attempting to visualize raw data (which is, again, a key characteristic of `flexplot`). Some might be inclined to create three-dimensional plots. However, these are difficult to interpret and they require the user to rotate the view. Even then, they can only show two predictors at a time. I find it much easier to use other strategies. `flexplot` utilizes four different strategies to visualize multivariate relationships: (1) plotting a dimension as different colors/lines/shapes, (2) plotting a dimension in row or column panels, (3) visualizing conditional relationships with added variable plots, and (4) overlaying ghost lines. 
 
-\subsection[Added variable plots (AVPs) with added.plot()]{Added variable plots (AVPs) with added.plot()} \label{sec:added.plot}
+## Added Variable Plots (AVPs) With `added.plot()`
 
-AVPs are underused, yet extremely useful. Essentially, an AVP shows the relationship between a predictor of interest and the *residuals* of an existing model. For example, if one wanted to understand the relationship between `therapy.type` and `weight.loss` after controlling for motivation, that person could build a model predicting weight.loss from motivation, residualize that relationship, then show a beeswarm plot of the residuals for each type of therapy. This is what AVPs do (see Figure \@ref(fig:avp)). These reduce cognitive load substantially, since users only need to interpret two dimensions. 
+AVPs are underused, yet extremely useful. Essentially, an AVP shows the relationship between a predictor of interest and the *residuals* of an existing model. For example, if one wanted to understand the relationship between `therapy.type` and `weight.loss` after controlling for `motivation`, that person could build a model predicting `weight.loss` from `motivation`, residualize that relationship, then show a beeswarm plot of the residuals for each type of therapy. This is what AVPs do (see Figure \@ref(fig:avp)). These reduce cognitive load substantially, since users only need to interpret two dimensions. 
 
-`flexplot's` version of AVPs have a slightly different flavor. In my experience, AVPs can be confusing to lay audiences because the scale of the outcome variable has changed to be centered on zero; if one is expecting the outcome variable to range from 0 to 30, yet the graph shows scores from -15 to +15, this will violate users' intuitions, which will create ostacles to proper interpretation of graphics [@Kosslyn2006e]. To counter this confusion, `flexplot` adds the mean back into the residuals so the $Y$-axis retains the original scale. The notation for `added.plot()` is similar to `flexplot()`, though the vertical pipes aren't necessary. What `flexplot()` will do is take the *last* variable entered (`therapy.type` in the following example) and plot that on the $X$ axis, while plotting the residuals of the model on the $Y$ axis (i.e., the residuals of the model `weight.loss ~ motivation`). Other arguments can be passed to `added.plots()` as well (such as `alpha`, `sample`, `method`, etc.)
+`flexplot's` version of AVPs have a slightly different flavor. In my experience, AVPs can be confusing to lay audiences because the scale of the outcome variable has changed to be centered on zero; if one is expecting the outcome variable to range from 0 to 30, yet the graph shows scores from -15 to +15, this will violate users' intuitions, which will create ostacles to proper interpretation of graphics [@Kosslyn2006e]. To counter this confusion, `flexplot` adds the mean back into the residuals so the $Y$-axis retains the original scale. The notation for `added.plot()` is similar to `flexplot`, though the vertical pipes aren't necessary. What `flexplot` will do is take the *last* variable entered (`therapy.type` in the following example) and plot that on the $X$ axis, while plotting the residuals of the model on the $Y$ axis (i.e., the residuals of the model `weight.loss ~ motivation`). Other arguments can be passed to `added.plots()` as well (such as `alpha`, `sample`, `method`, etc.)
 
 ```{r, avp, message=FALSE, echo=TRUE, warning=FALSE, fig.width = 5, fig.height = 3, fig.cap = "An Added Variable Plot (AVP) showing the relationship between `therapy.type` and `weight.loss`, after controlling for `motivation`. \\label{fig:avp}"}
 added.plot(weight.loss ~ motivation + therapy.type, data = exercise_data)
@@ -339,9 +339,9 @@ added.plot(weight.loss ~ motivation + therapy.type, data = exercise_data)
 
 ## Colors/Lines/Shapes
 
-As shown in Figure \@ref(fig:flexplotgrammar), the second slot in the `flexplot()` formula (`X2` in Figure \@ref(fig:flexplotgrammar)) controls which variable is displayed as different colors/symbols/lines. Figure \@ref(fig:symbols) shows two examples of this: one where a numeric predictor is on the $X$ axis, and one where a categorical predictor is on the X-axis. When categorical variables are shown on the X-axis, `flexplot()` draws lines connecting the medians (or means). 
+As shown in Figure \@ref(fig:flexplotgrammar), the second slot in the `flexplot` formula (`X2` in Figure \@ref(fig:flexplotgrammar)) controls which variable is displayed as different colors/symbols/lines. Figure \@ref(fig:symbols) shows two examples of this: one where a numeric predictor is on the $X$ axis, and one where a categorical predictor is on the X-axis. When categorical variables are shown on the X-axis, `flexplot` draws lines connecting the medians (or means). 
 
-```{r, symbols, message=FALSE, echo=TRUE, warning=FALSE, fig.width = 6, fig.height = 3, out.width = "100%", fig.align = 'center', fig.cap = "Two multivariate graphs illustrating how the second slot in a `flexplot` formula controls the visualization. The left image demonstrates what happens to the second slot variable ($X2$) when a numeric predictor is on the X-axis, while the right image demonstrates what happens to the second slot variable when a categorical predictor is on the X-axis.\\label{fig:symbols}"}
+```{r, symbols, message=FALSE, echo=TRUE, warning=FALSE, fig.width = 8, fig.height = 4, fig.cap = "Two multivariate graphs illustrating how the second slot in a `flexplot` formula controls the visualization. The left image demonstrates what happens to the second slot variable ($X2$) when a numeric predictor is on the X-axis, while the right image demonstrates what happens to the second slot variable when a categorical predictor is on the X-axis."}
 a = flexplot(weight.loss ~ motivation + gender, 
     data = exercise_data, se = F, alpha = .3)
 b = flexplot(weight.loss ~ therapy.type + gender, 
@@ -349,25 +349,29 @@ b = flexplot(weight.loss ~ therapy.type + gender,
     theme(axis.text.x = element_text(angle=90, hjust=1, vjust=.2))
 cowplot::plot_grid(a, b)
 ```
-One limitation of colors/shapes/symbols is the increase in cognitive load. When plotting different symbols/colors/lines on the same graph, there is often a great deal of overlap, which makes it more difficult to pick out patterns. While research suggests we can conceptualize up to four unique elements [@Kosslyn2006e], in my experience, having a variable with more than two levels in the second slot of a `flexplot()` equation becomes challenging to interpret, particularly when there are more than a handful of datapoints. 
+
+One limitation of colors/shapes/symbols is the increase in cognitive load. When plotting different symbols/colors/lines on the same graph, there is often a great deal of overlap, which makes it more difficult to pick out patterns. While research suggests we can conceptualize up to four unique elements [@Kosslyn2006e], in my experience, having a variable with more than two levels in the second slot of a `flexplot` equation becomes challenging to interpret, particularly when there are more than a handful of datapoints. 
 
 ## Paneling
 
 An alternative (or additional) strategy for plotting multivariate data is paneling. As shown in Figure \@ref(fig:flexplotgrammar), the third and fourth slots control paneling in columns and rows, respectively. The panels follow many conventions developed by William Cleveland [-@Cleveland1994], such as having values increase from left to right and bottom to top (just as they do on the $X$ and $Y$ axis, respectively). 
 
-Figure \@ref(fig:panels) shows the same relationships in Figure \@ref(fig:symbols), but with the second variable in panels instead. The bottom image also displays panels for three variables simultaneously. Paneled variables are easy to conceptualize with categorical variables, but what about numeric variables? These can still be visualized, but the values must be binned. Also notice that I have taken advantage of the fact that `flexplot()` returns a `ggplot2` object that can be edited. In this case, I am both layering (modifying the behavior of the labels to prevent cutting them off) and modifying the `ggplot2` object itself (reducing the size of the points in the final graphic).[^foot]
+Figure \@ref(fig:panels) shows the same relationships in Figure \@ref(fig:symbols), but with the second variable in panels instead. The bottom image also displays panels for three variables simultaneously. Paneled variables are easy to conceptualize with categorical variables, but what about numeric variables? These can still be visualized, but the values must be binned. Also notice that I have taken advantage of the fact that `flexplot` returns a `ggplot2` object that can be edited. In this case, I am both layering (modifying the behavior of the labels to prevent cutting them off) and modifying the `ggplot2` object itself (reducing the size of the points in the final graphic).[^foot]
 
-[^foot]: I also do not show the code where I actually plot the graphics. This required some advanced manipulation of the layout and I didn't want to detract from what `flexplot()` is doing. 
+[^foot]: I also do not show the code where I actually plot the graphics. This required some advanced manipulation of the layout and I didn't want to detract from what `flexplot` is doing. 
 
 ```{r, message=FALSE, echo=TRUE, warning=FALSE}
 a = flexplot(weight.loss ~ motivation | gender, 
-             data = exercise_data)
+             data = exercise_data) +
+              theme(axis.text.x = element_text(angle=90, hjust=1, vjust=.2))
 b = flexplot(weight.loss ~ therapy.type | gender, 
-             data = exercise_data)
+             data = exercise_data)+
+              theme(axis.text.x = element_text(angle=90, hjust=1, vjust=.2))
 c = flexplot(weight.loss ~ motivation |  gender + therapy.type, 
              data = exercise_data) +
       ggplot2::facet_grid(therapy.type ~ gender, 
-              labeller = ggplot2::labeller(therapy.type = label_value)) 
+              labeller = ggplot2::labeller(therapy.type = label_value)) +
+              theme(axis.text.x = element_text(angle=90, hjust=1, vjust=.2))
 #### edit point size
 c = ggplot2::ggplot_build(c)
 c$data[[1]]$size = .25
@@ -376,7 +380,7 @@ c = ggplot2::ggplot_gtable(c)
 ```
 
 
-```{r, panels, message=FALSE, echo=FALSE, warning=FALSE, fig.align = "center", out.width = "100%", fig.cap = "A multivariate plot where `therapy.type` and `gender` are now shown in panels. \\label{fig:panels}", fig.width = 8, fig.height = 8}
+```{r, panels, message=FALSE, echo=FALSE, warning=FALSE, fig.cap = "A multivariate plot where `therapy.type` and `gender` are now shown in panels. \\label{fig:panels}", fig.width = 8, fig.height = 8}
 		top.row = cowplot::plot_grid(a, b, ncol = 2)
 		bottom.row = cowplot::plot_grid(NULL, c, NULL, ncol = 3, rel_widths=c(.25, .5, .25))
 		cowplot::plot_grid(top.row, bottom.row, nrow = 2, rel_heights=c(.55, .45))
@@ -387,7 +391,7 @@ c = ggplot2::ggplot_gtable(c)
 
 ## Binning
 
-Within `flexplot()`, any numeric predictor, with the exception of the variable in the first slot, will be binned into discrete categories. These bins will then be represented in panels (if the variable is in the third or fourth slot) or as colors/symbols/lines (if the variable is in the second slot). The user has the option of specifying the number of bins (e.g., 2 or 3), or the user can specify breakpoints at which to bin. When the user specifies bins, `flexplot()` will attempt to have an equal number of datapoints in each bin. However, `flexplot()` may be unable to bin into the specified number of bins. For example, if a user specifies four bins, it is possible the scores at the 50th and 75th percentile are the same. In these cases, `flexplot()` will choose a smaller bin number, though it will report such to the user. `flexplot()` defaults to three bins. 
+Within `flexplot`, any numeric predictor, with the exception of the variable in the first slot, will be binned into discrete categories. These bins will then be represented in panels (if the variable is in the third or fourth slot) or as colors/symbols/lines (if the variable is in the second slot). The user has the option of specifying the number of bins (e.g., 2 or 3), or the user can specify breakpoints at which to bin. When the user specifies bins, `flexplot` will attempt to have an equal number of datapoints in each bin. However, `flexplot` may be unable to bin into the specified number of bins. For example, if a user specifies four bins, it is possible the scores at the 50th and 75th percentile are the same. In these cases, `flexplot` will choose a smaller bin number, though it will report such to the user. `flexplot` defaults to three bins. 
 
 When specifying breakpoints, the panels may have different sample sizes in each bin. A user may wish to do this if these breakpoints are meaningful (e.g., when particular scores are clinically meaningful, such as Beck Depression Inventory scores above 29 are considered severly depressed). 
 
@@ -421,7 +425,7 @@ c = flexplot(weight.loss ~ motivation + satisfaction,
 
 ## Ghost Lines
 
-There are advantages and disadvantages to plotting a variable as a color/symbol/line versus panels. Panels reduce clutter, but make it harder to make comparisons because the eye has to travel further to make such comparisons. On the other hand, plotting in the same panel with different colors/lines/symbols means less visual distances to travel, but then there is too much clutter. One obvious solution is to stick with colors/symbols/lines and reduce transparency (or sample). However, there is a more innovative way of resolving this difficulty, by using something I call ghost lines. Ghost lines repeat the relationship from one panel to the other panels to make it easier to compare. Figure \@ref(fig:ghost) demonstrates how to use ghost lines. By default, `flexplot()` chooses the middle panel for odd numbers of panels, otherwise it chooses a panel close to the middle. The second line of code below specifies the referent panel by picking a value in the range of the referent panel. In Figure \@ref(fig:ghost), the ghost lines makes it clear that the relationship between `motivation` and `weight.loss` is stronger both at low and high levels of `satisfaction`, but less so at medium levels. 
+There are advantages and disadvantages to plotting a variable as a color/symbol/line versus panels. Panels reduce clutter, but make it harder to make comparisons because the eye has to travel further to make such comparisons. On the other hand, plotting in the same panel with different colors/lines/symbols means less visual distances to travel, but then there is too much clutter. One obvious solution is to stick with colors/symbols/lines and reduce transparency (or sample). However, there is a more innovative way of resolving this difficulty, by using something I call ghost lines. Ghost lines repeat the relationship from one panel to the other panels to make it easier to compare. Figure \@ref(fig:ghost) demonstrates how to use ghost lines. By default, `flexplot` chooses the middle panel for odd numbers of panels, otherwise it chooses a panel close to the middle. The second line of code below specifies the referent panel by picking a value in the range of the referent panel. In Figure \@ref(fig:ghost), the ghost lines makes it clear that the relationship between `motivation` and `weight.loss` is stronger both at low and high levels of `satisfaction`, but less so at medium levels. 
 
 ```{r, ghost, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Ghost lines repeat the pattern from one panel to the others, making it easier to compare across panels. In this case, the line from the middle panel (Satisfaction = 4-6) is repeated in red across the other panels. \\label{fig:ghost}", out.width = "80%", fig.width = 7, fig.height = 4, fig.align = 'center'}
 flexplot(weight.loss ~ motivation | satisfaction, 
@@ -433,7 +437,7 @@ flexplot(weight.loss ~ motivation | satisfaction,
 ```
 
 ## General Strategy for Plotting Multivariate Relationships
-It is easy for multivariate visuals to become unnecessarily complicated. For example, the top image in Figure \@ref(fig:threeway) shows a graphic where all four `flexplot()` slots are occupied. This is very difficult to interpret what is going on. To simplify things, we could utilize several strategies. First, we can specify two bins instead of the default three. We can also remove confidence intervals, reduce the opacity of the data, and plot regression lines.[^foot2] Also, I generally try to have only two levels for the variable in the second slot (in this case, Male versus Female). Finally, we could add ghost lines. The bottom image in Figure \@ref(fig:threeway) utilizes all these strategies and simplifies the visual interpretation immensely.
+It is easy for multivariate visuals to become unnecessarily complicated. For example, the top image in Figure \@ref(fig:threeway) shows a graphic where all four `flexplot` slots are occupied. This is very difficult to interpret. To simplify things, we could utilize several strategies. First, we can specify two bins instead of the default three. We can also remove confidence intervals, reduce the opacity of the data, and plot regression lines.[^foot2] Also, I generally try to have only two levels for the variable in the second slot (in this case, Male versus Female). Finally, we could add ghost lines. The bottom image in Figure \@ref(fig:threeway) utilizes all these strategies and simplifies the visual interpretation immensely.
 
 [^foot2]: These are great strategies to use *after* one has determined that the model generally fits the data. If the data are curvilinear, for example, it would not make sense to plot straight lines or make the datapoints overly transparent. 
 
@@ -474,7 +478,7 @@ visualize(model)
 
 
 
-For multivariate data, `visualize` will create a plot that will use panels and/or colors/symbols/lines. It will also generate diagnostic plots (histogram of the residuals, residual dependence plots, and S-L plots). The user can specify *just* a plot of the model (`visualize(model1, "model")`), or *just* a plot of the diagnostics (`visualize(model1, "residuals")`). Additionally, visualize can take `flexplot()` arguments and even a `flexplot()` formula.
+For multivariate data, `visualize` will create a plot that will use panels and/or colors/symbols/lines. It will also generate diagnostic plots (histogram of the residuals, residual dependence plots, and S-L plots). The user can specify *just* a plot of the model (`visualize(model1, "model")`), or *just* a plot of the diagnostics (`visualize(model1, "residuals")`). Additionally, visualize can take `flexplot` arguments and even a `flexplot` formula.
 
 ```{r, ancova2, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Demonstration of the `visualize` function on a `lm` object, but with `flexplot` arguments controlling the output (as well as suppressing residuals).  \\label{fig:ancova2}"}
 model = lm(weight.loss ~ motivation + therapy.type, data = exercise_data)
@@ -498,7 +502,7 @@ visualize(model,
 
 Very often in statistical modeling, we are interested in comparing two models, such as one with and one without an interaction term. There are many statistics available that allow easy comparison between models, such as the AIC, BIC, Bayes Factor, $R^2$, p-values, etc. However, it is again important to *see* how the two models differ in terms of fit. On multiple occasions, I have found various statistics show preference for one model, yet the visuals show the two models differ in only trivial ways. 
 
-That is where `compare.fits()` comes in. It is simply a wrapper for the `predict()` function, combined with the graphing capabilities of `flexplot`. More specifically, `compare.fits()` will overlay the fit of both models onto the raw data. For example, Figure \@ref(fig:compare) shows the fit of two different models, one that includes an interaction and the other that does not. The arguments are very similar to `flexplot()`, but with the addition of the model objects. Likewise, `compare.fits()` takes many of the same arguments. In this example, I've overlaid a black ghost line. Notice that the two lines (from `lm` and `interaction`) generate very similar predictions across the range of data, suggesting that a main effects model may be sufficient. 
+That is where `compare.fits()` comes in. It is simply a wrapper for the `predict()` function, combined with the graphing capabilities of `flexplot`. More specifically, `compare.fits()` will overlay the fit of both models onto the raw data. For example, Figure \@ref(fig:compare) shows the fit of two different models, one that includes an interaction and the other that does not. The arguments are very similar to `flexplot`, but with the addition of the model objects. Likewise, `compare.fits()` takes many of the same arguments. In this example, I've overlaid a black ghost line. Notice that the two lines (from `lm` and `interaction`) generate very similar predictions across the range of data, suggesting that a main effects model may be sufficient. 
 
 ```{r, compare, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Demonstration of the `compare.fits()` function, comparing a main effects and an interaction model. Ghost lines have been added from the `cog` condition for easier comparison across panels. \\label{fig:compare}", fig.width = 8, fig.height = 4.5}
 model.me = lm(weight.loss ~ motivation + therapy.type, data = exercise_data)
@@ -517,7 +521,7 @@ The `flexplot` package specializes in visualization, providing easy-to-use tools
 
 ## The `estimates()` Function
 
-The `estimates()` function was designed to report paremeter estimates and effect sizes. Much like `flexplot()`, many of the decisions are made in the background. And like `visualize()`, `estimates()` takes a fitted object as input. `estimates()` will then determine which estimates are most appropriate. For grouping variables, `estimates()` will report means, mean differences, and cohen's $d$, as well as 95% confidence intervals. For numeric variables, `estimates()` will report the intercept, slopes, and standardized slopes, also with corresponding confidence intervals. Additionally, it will report the model $R^2$, as well as the semi-partial $R^2$ associated with each effect in the model, except when there are interactions in the model. (With interactions present, it does not make sense to interpret main effects, which is why `estimates()` only reports the semi-partial for the interaction effect).  
+The `estimates()` function was designed to report paremeter estimates and effect sizes. Much like `flexplot`, many of the decisions are made in the background. And like `visualize()`, `estimates()` takes a fitted object as input. `estimates()` will then determine which estimates are most appropriate. For grouping variables, `estimates()` will report means, mean differences, and cohen's $d$, as well as 95% confidence intervals. For numeric variables, `estimates()` will report the intercept, slopes, and standardized slopes, also with corresponding confidence intervals. Additionally, it will report the model $R^2$, as well as the semi-partial $R^2$ associated with each effect in the model, except when there are interactions in the model. (With interactions present, it does not make sense to interpret main effects, which is why `estimates()` only reports the semi-partial for the interaction effect).  
 
 ```{r, message=FALSE, echo=TRUE, warning=FALSE}
 estimates(model.int)
