@@ -34,7 +34,7 @@ mask              : no
 draft             : no
 
 documentclass     : "apa6"
-classoption       : "doc"
+classoption       : "man"
 output            : papaja::apa6_pdf
 ---
 
