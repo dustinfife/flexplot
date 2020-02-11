@@ -372,7 +372,8 @@ residual.plots = function(data, object){
 	data$fitted = fitted(object)
 
 	#### plot residuals
-	levels = length(unique(round(data[,"residuals"], digits=2)))		
+	levels = length(unique(round(data[,"residuals"], digits=2)))	
+	data$fitted = round(data$fitted, digits=2)	
 	
 	histo = ggplot2::ggplot(data=data, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black', bins=min(30, round(levels/2))) + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
 	class(histo) = c("flexplot", class(histo))
@@ -385,9 +386,13 @@ residual.plots = function(data, object){
 	} else {
 		res.dep = NULL
 	}
+
 	if (length(unique(data$fitted))<7){
-		sl = flexplot(abs.res~fitted, data=data, method="lm", jitter=c(.2, 0))+ labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")			
-		class(sl) = c("flexplot", class(sl))		
+		sl = flexplot(abs.res~fitted, data=data, method="lm", jitter=c(.2, 0)) + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
+		nd = aggregate(abs.res~fitted, data=data, FUN=median)
+		nd[,1] = 1:nrow(nd)
+		sl = sl + geom_line(data=nd, col="#bf0303", size=1.5)
+		#class(sl) = c("flexplot", class(sl))		
 	} else {
 		sl = flexplot(abs.res~fitted, data=data, method="lm")+ labs(x="fitted", y="Absolute Value\nof Residuals", title="S-L Plot")			
 		class(sl) = c("flexplot", class(sl))					
