@@ -89,7 +89,8 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     p = theme_it(flexplot(make.formula(options$variables[i-1], "1"), dataset), options$theme)
     plot.list[[i]] = p
   }
-  #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+
+  
   if (length(options$variables)<3){
     nc = length(options$variables) + 1
   } else if ((length(options$variables)+1)/2 == round((length(options$variables)+1)/2)){
@@ -126,7 +127,8 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
 .create_flexplot_glinmod <- function(jaspResults, modelplot, options, dataset) {
   
   glinmod_results <- jaspResults[["glinmod_results"]]$object 
-  generated.formula = make_flexplot_formula(options$variables, options$dependent, dataset)
+  terms = attr(terms(glinmod_results$model), "term.labels")
+  generated.formula = make_flexplot_formula(terms, options$dependent, dataset)
   
   if	(options$ghost & length(options$variables)<4){
     ghost=rgb(1,0,0,.4)
