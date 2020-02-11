@@ -95,7 +95,7 @@ test_that("jittered density plots and options work", {
                               flexplot(
                                 weight.loss ~ therapy.type,
                                 data = d,
-                                jitter = c(.3)
+                                jitter = c(.01)
                               ))
   vdiffr::expect_doppelganger("mean both jitter",
                               flexplot(

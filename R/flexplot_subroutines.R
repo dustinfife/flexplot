@@ -380,7 +380,7 @@ flexplot_convert_to_categorical = function(data, axis){
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
                                     related, alpha, jitter, suppress_smooth, method, spread  # arguments passed from flexplot
                                    ){
-  
+
   jitter = match_jitter_categorical(jitter)
   if (is.null(formula)){
     list.na = list(outcome, predictors, axis, related, alpha, jitter, suppress_smooth, method, spread)
