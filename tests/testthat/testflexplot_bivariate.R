@@ -3,6 +3,25 @@ set.seed(1212)
 data(exercise_data); data("relationship_satisfaction")
 d = exercise_data
 
+
+test_that("error messages are correct", {
+  data(avengers)
+  data("exercise_data")
+  
+  expect_error(flexplot(speed~superher, data=avengers),
+               "Ru oh! Somebody done made a mistake!"
+  )
+  
+  expect_error( 
+    flexplot(speed~superhero),
+    "Howdy! Looks like you forgot to include a dataset!")
+  
+  expect_error(
+    flexplot(gender~therapy.type, data=exercise_data, method="logistic"),
+    "Oh wise user of flexplot"
+  )
+})
+
 test_that("scatterplots and options work", {
   # ### scatter plots
   require(MASS)

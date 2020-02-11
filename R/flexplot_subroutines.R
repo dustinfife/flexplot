@@ -220,9 +220,6 @@ flexplot_errors = function(variables, data, method=method, axis){
     }	
   } 
   
-  if (is.null(data)){
-    stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
-  }
 }
 
   #### this function figures out which variables need to be binned
