@@ -102,6 +102,7 @@ flexplot = function(formula, data=NULL, related=F,
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
 	#ghost.reference = list(income=90000)
 
+
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   
   ### prepare the variables

@@ -17,6 +17,8 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   given = given.axis$given
   axis = given.axis$axis
   
+  flexplot_errors(variables = variables, data = data, method=method, axis=axis)
+  
   #### identify which variables are numeric and which are factors
   vtypes = variable_types(predictors, data, return.names=T)
   numbers = vtypes$numbers
