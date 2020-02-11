@@ -216,7 +216,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
 # Other stuff -------------------------------------------------------------
 
 .glinmod_compute = function(jaspResults, dataset, options, ready) {
-  
+  #save(dataset, options, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
   if (ready){
     ## createJaspState allows these results to be recycled
     glinmod_results <- createJaspState()

@@ -206,8 +206,10 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 .create_flexplot_linmod <- function(jaspResults, flexplot, options, model.type) {
   
   linmod_results <- jaspResults[["linmod_results"]]$object
-  save(options, linmod_results, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
-  generated.formula = make_flexplot_formula(options$variables, options$dependent, linmod_results$model$model)
+  ## extract variables from the model itself
+    ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
+  terms = attr(terms(linmod_results$model), "term.labels")
+  generated.formula = make_flexplot_formula(terms, options$dependent, linmod_results$model$model)
   
 
   if	(options$ghost & length(options$variables)<4){
@@ -226,7 +228,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     plot = visualize(linmod_results$model, linmod_results, plot=model.type, plots.as.list=TRUE,
                      alpha=options$alpha, jitter=c(options$jitx, options$jity))
     plot = arrange_jasp_plots(plot, options$theme)
-  } else if (model.type == "added" && length(options$variables) > 1){
+  } else if (model.type == "added" && length(options$interactions[[1]]$components) > 1){
     
     methods = list("Regression"="lm", 
                    "Quadratic"="quadratic", 
@@ -286,7 +288,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     } else {
       f = paste0(options$dependent, " ~ ", predictors, collapse = "")
     }
-    save(options, dataset, ready, f, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+    
     f = as.formula(f)
     #fsave(options, dataset, ready, f, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
     ### store all the information

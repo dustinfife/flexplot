@@ -1,3 +1,21 @@
+#' Simulated Dataset About Experiences with the Paranormal
+#'
+#' A dataset containing combat attributes of almost 812 fighters in the final
+#' Avengers battle. This dataset illustrates several types of problems one might
+#' encounter for univariate variables, including bimodality, zero-inflated data,
+#' outliers, mixed up labels, etc.
+#'
+#' @format A data frame with 1000 rows and 7 variables: \describe{
+#'   \item{conviction}{Degree of conviction they have about the existence of the
+#'   paranormal} \item{fear}{How much they fear being kidnapped by aliens}
+#'   \item{time}{How much time they spend a year researching the paranormal}
+#'   \item{kidnapped}{Whether they've been kidnapped by aliens}
+#'   \item{experiences.type}{What type of experiences they have had with the
+#'   paranormal? Can be "eerie feeling," "presence watching", "saw UFO", "saw ghost", or "heard voice"} 
+#'   \item{income}{How much money they make}
+#'   \item{age}{Age of respondent}}
+"paranormal"
+
 #' Simulated Statistics on the Final Avengers Battle
 #'
 #' A dataset containing combat attributes of almost 812 

@@ -39,13 +39,12 @@ Form
 			enabled: varlist.count > 0
 		}
 
-<<<<<<< Updated upstream
+
 	}
 
 	Section
 	{
 		title: qsTr("Results Displays")
-=======
   ExpanderButton{
     title: qsTr("Model Terms");  
     enabled: vars.count > 1 
@@ -81,7 +80,7 @@ Form
         }
         
   }
->>>>>>> Stashed changes
+
 
 		Group
 		{
@@ -89,7 +88,7 @@ Form
 			CheckBox { name:"model"			; label: qsTr("Model plot")	; checked: true							}
 			CheckBox { name:"univariate"	; label: qsTr("Univariate")											}
 			CheckBox { name:"residuals"		; label: qsTr("Diagnostics")										}
-			CheckBox { name:"avp"			; label: qsTr("Added variable plot")	; enabled: varlist.count > 1	}
+			CheckBox { name:"avp"			; label: qsTr("Added variable plot")	; enabled: interactions.components.count > 1	}
 		}
 
 
