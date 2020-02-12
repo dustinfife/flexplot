@@ -15,7 +15,7 @@ Form
 	Section
 	{
 		title: qsTr("Model Terms");
-		enabled: varlist.count > 1
+		enabled: varlist.count > 0
 
 		VariablesForm
 		{
@@ -47,7 +47,7 @@ Form
 		title: qsTr("Results Displays")
   ExpanderButton{
     title: qsTr("Model Terms");  
-    enabled: vars.count > 1 
+    enabled: vars.count > 0 
     VariablesForm
     {
       height: 150

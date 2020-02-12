@@ -12,7 +12,20 @@ require(tidyverse)
 require(cowplot)
 ```
 
-Years ago when I worked as a biostatistician, I was assigned to analyse the data for a local luminary in the field of Muscular Sclerosis. This analysis would lead to a conference submission, at least, and likely a publication. The man provided me a longitudinal dataset in "wide" format, where each measurement occasion was listed in a separate column. To analyze the data, I had to convert it to long format (where each measure was in a single column and a new column was created that indicated which on which occasion that measurement occured). 
+<style>
+p.caption {
+  font-style: italic;
+  margin: auto;
+  width: 80%;
+}
+
+img {
+    display: block;
+    margin: 0 auto;
+}
+</style>
+
+Years ago when I worked as a biostatistician, I was assigned to analyze the data for a local luminary in the field of Muscular Sclerosis. This analysis would lead to a conference submission, at least, and likely a publication. The man provided me a longitudinal dataset in "wide" format, where each measurement occasion was listed in a separate column. To analyze the data, I had to convert it to long format (where each measure was in a single column and a new column was created that indicated on which occasion that measurement occured). 
 
 Unfortunately, I messed up. Without going into details, let's just say I accidentally combined two different variables into a single variable. These variables had very different scales (e.g., one variable ranged from zero to 100, while another ranged from zero to one). When I analyzed the data, there happened to be more measures of the zero to 100 variable in the treatment group than in the control group, which meant that the mean of the treatment group was *much* higher than the control. When I computed p-values and effect sizes, they were *massive*, yet their values were completely meaningless. 
 
@@ -42,7 +55,7 @@ It's human nature. The more effort an activity requires, the less likely we will
 
 So it goes with plotting. Very few, I think, find plotting useless. Quite the opposite. Visuals allow rapid encoding of information and provide an aesthetic representation of our data. Plots are like the second venue: we *know* we want them, yet the effort required to produce sound, aesthetically appealing graphics in traditional software can be massive. 
 
-The Visual Modeling module, on the other hand, creates aesthetically-appealing visuals that follow empirically-supported graphics. Additionally, these visuals require *less* effort than performing a t-test. 
+The Visual Modeling module, on the other hand, creates aesthetically-appealing visuals that follow empirically-supported heuristics Additionally, these visuals require *less* effort than performing a t-test. 
 
 # The General Linear Model Approach
 
@@ -65,7 +78,7 @@ To display a histogram or barchart, the user simply needs to specify the variabl
 
 [GIF showing a numeric versus categorical variable]
 
-```{r, fig.cap="Note to JASP folks: these graphs are produced in R, which does not have the JASP theme. These will have to be replaced either by static graphs or the GIFs."}
+```{r}
 data("avengers")
 require(flexplot)
 require(cowplot)
@@ -84,7 +97,7 @@ a = flexplot(speed~1, data=avengers)
 b = a + theme_minimal()
 c = a + theme_classic()
 d = a + theme_dark()
-plot_grid(a,b,c,d, nrow=1)
+plot_grid(a,b,c,d, nrow=2)
 ```
 
 For categorical variables, Flexplot defaults to sorting the x-axis by sample size. This wouldn't make sense, however, if the variable is ordinal, as in the figure below. To preserve the order of ordinal variables, simply change the variable type to ordinal. 
@@ -93,18 +106,18 @@ For categorical variables, Flexplot defaults to sorting the x-axis by sample siz
 
 ```{r, fig.cap="Flexplot defaults to sorting X axes for categorical variables by sample size. For ordinal variables this is a problem. The left image shows Flexplot's default sorting. The right image shows that Flexplot preserves ordinality for ordinal variables."}
 data("paranormal")
-a = flexplot(income~1, data=paranormal)
-b = flexplot(income~1, data=paranormal %>% mutate(income = factor(income, levels=c("<50K", "50-75K", "75-100K", ">100K"), ordered=T)))
+a = flexplot(income~1, data=paranormal) + theme(text = element_text(size=14))
+b = flexplot(income~1, data=paranormal %>% mutate(income = factor(income, levels=c("<50K", "50-75K", "75-100K", ">100K"), ordered=T))) + theme(text = element_text(size=14))
 plot_grid(a,b, nrow=1)
 ```
 
 ## Bivariate Plots
 
-In the previous section, we saw that Flexplot is smart enough to display a barchart for categorical variables and a histogram for numeric variables. Likewise, Flexplot is smart enough to figure out what type of graphic to display, depending on whether the user chooses numeric or categorical predictors (and/or outcomes). 
+In the previous section, we saw that Flexplot is smart enough to display a barchart for categorical variables and a histogram for numeric variables. Likewise, Flexplot is smart enough to figure out what type of bivariate graphic to display, depending on whether the user chooses numeric or categorical predictors (and/or outcomes). 
 
 ### Numeric Predictor, Numeric Outcome
 
-If the user specifies a numeric predictor and outcome, Flexplot will display a scatterplot. It also defaults to showing a nonparametric loess line and displaying a 95% confidence band. These can be changed, of course, as in the gif below. The user can choose a regression, quadratic, or cubic line. The user can also make the datapoints more or less transparent, which will be more important later when we talk about multivariate plotting. 
+If the user specifies a numeric predictor and outcome, Flexplot will display a scatterplot. It also defaults to showing a nonparametric loess line and displaying a 95% confidence band. These can be changed, of course, as in the gif below. The user can choose a regression, quadratic, or cubic line. The user can also make the datapoints more or less transparent, which will be more important later with multivariate plotting. 
 
 [Gif showing changing to a regression line and no confidence band]
 
@@ -128,10 +141,10 @@ b = flexplot(agility~superpower, data=avengers, jitter=c(.5, 0), spread="stdev",
 plot_grid(a,b)
 ```
 
-As before, the user can reduce the opacity of datapoints and change the theme. There are also addition options. They can choose the amount of "jittering," or width of the datapoints in the beeswarm plot, in either the X direction, or the Y direction, though the Y jittering is rarely used. (I tend to jitter Y when the outcome variable has a discrete scale, like a likert scale from 1-7). 
+<br>
+As before, the user can reduce the opacity of datapoints and change the theme. There are also additional options. They can choose the amount of "jittering," or width of the datapoints in the beeswarm plot, in either the X direction, or the Y direction, though the Y jittering is rarely used. (I tend to jitter Y when the outcome variable has a discrete scale, like a likert scale from 1-7). 
 
 [GIF showing how to change jittering]
-
 
 Also, the user can specify what summary statistics are displayed. It defaults to medians (center red dots) and 25/75 percentiles (lower and upper whiskers, respectively). The user can instead specify standard errors or standard deviations (with means as the center). In both cases, the width of the whiskers is 1 $\times$ the standard deviation/standard error. (In other words, they are *not* 95% confidence intervals). 
 
@@ -157,10 +170,11 @@ When the user specifies multiple independent variables, Flexplot follows a few s
 data(avengers)
 a = flexplot(speed~agility + superpower, data=avengers)
 b = flexplot(speed~superpower + agility, data=avengers)
-plot_grid(a,b)
+plot_grid(a,b, nrow=2)
 ```
 
-The third box (labeled "Panelled Variables(s)") controls, not surprisingly, which variables are panelled (and how). The first variable entered will be binned (if numeric) and panelled in columns, while the second variable will be panelled in rows. As before, the user can specify the type of line draw, the opacity of datapoints, whether a confidence band is displayed, jittering, etc. 
+<br>
+The third box (labeled "Panelled Variables(s)") controls, not surprisingly, which variables are panelled (and how). The first variable entered will be binned (if numeric) and panelled in columns, while the second variable will be panelled in rows. As before, the user can specify the type of line drawn, the opacity of datapoints, whether a confidence band is displayed, jittering, etc. 
 
 ```{r, fig.cap="In Flexplot, the first variable entered (superpower in this case) is panelled in columns, while the second variable entered (willpower) is panelled in rows."}
 data(avengers)
@@ -202,20 +216,23 @@ Whether specifying a polynomial or an interaction term, both the visuals and the
 
 I am no fan of significance testing and I designed my software to make it impossible to compute a p-value :)
 
-Instead, my module focuses instead on graphical interpretation and the interpretation of effect sizes. As such, the options in here 
+Instead, my module focuses on graphical interpretation and the interpretation of effect sizes. As such, the options in here related to visuals and estimation. 
+
 There are two subsections within the Results Displays section. The first is plot, which has the following options:
 
-    - checking "Univariate" will produce histograms and/or barcharts for each variable in the model
-    - checking "Diagnostics" will produce a histogram of the residuals, a residual dependence plot, and a scale-location plot. These make it easier to assess the assumptions of normality, linearity, and homoscedasticity, respectively. 
-    - checking "Added variable plot" will plot the relationship between the last variable entered (in the GIF below, the "muscle.gain" variable), and the *residuals* of a model that includes all the other predictors. 
+ * checking "Univariate" will produce histograms and/or barcharts for each variable in the model.
+ * checking "Diagnostics" will produce a histogram of the residuals, a residual dependence plot, and a scale-location plot. These make it easier to assess the assumptions of normality, linearity, and homoscedasticity, respectively. 
+ * checking "Added variable plot" will plot the relationship between the last variable entered (in the GIF below, the "muscle.gain" variable), and the *residuals* of a model that includes all the other predictors. 
+
+[insert GIF here]
 
 Estimates controls which estimates are displayed:
 
-    - Show model comparisons: Checking this box will show nested model comparison metrics for each of the predictor variables. This will create a new table that shows semi-partial $R^2$, semi-partial Bayes Factors, and the inteverted Bayes Factors. Recall that the semi-partial $R^2$ shows how the $R^2$ increases when that particular variable is added to the model. The Bayes Factors compare the full model (i.e., the model with all the predictors) with a model that removes that one variable (or term). Values near one indicate removing that variable has little effect. Values far from one indicate that particular term should not be dropped from the model.
-    - Report means: Checking this box will display the means of the outcome variable for each level of the grouping variables.
-    - Show mean differences: Checking this box will display the mean differences between levels the grouping variables. Cohen's d will also be reported. 
-    - Show slopes/intercepts: Checking this box will report the slope for each numeric variable as well as the intercept. 
-    - Show 95% intervals: Checking this box will report the 95% confidence interval for each estimate. 
+ * Show model comparisons: Checking this box will show nested model comparison metrics for each of the predictor variables. This will create a new table that shows semi-partial $R^2$, semi-partial Bayes Factors, and the inteverted Bayes Factors. Recall that the semi-partial $R^2$ shows how the $R^2$ increases when that particular variable is added to the model. The Bayes Factors compare the full model (i.e., the model with all the predictors) with a model that removes that one variable (or term). Values near one indicate removing that variable has little effect. Values far from one indicate that particular term should not be dropped from the model.
+ * Report means: Checking this box will display the means of the outcome variable for each level of the grouping variables.
+ * Show mean differences: Checking this box will display the mean differences between levels the grouping variables. Cohen's d will also be reported. 
+ * Show slopes/intercepts: Checking this box will report the slope for each numeric variable as well as the intercept. 
+ * Show 95% intervals: Checking this box will report the 95% confidence interval for each estimate. 
       
 ## Plot Controls
 
@@ -229,15 +246,34 @@ The Model Builder section, however, is slightly different. Rather than having ch
 
 [GIF showing a model of SES as a predictor, Math as outcome, School as random, and specifying SES is a random effect]
 
-Similar to the Linear Modeling submodule, we can specify whether univariate distributions/diagnostics are displayed. Also, we can specify whether the results display fixed and/or random effects. Also, the user has some control in how the model graphic is displayed. 
+```{r, fig.cap = "A mixed model showing the relationship between SES and MatchAch for three randomly chosen clusters (Schools)."}
+data(math)
+require(lme4)
+mod = lmer(MathAch~SES + (SES | School), data=math)
+visualize(mod, plot="model", ghost.line="blue") + theme(text = element_text(size=14))
+```
+
+Similar to the Linear Modeling submodule, we can specify whether univariate distributions/diagnostics are displayed. Also, we can specify whether the results display fixed and/or random effects. Finally, the user has some control in how the model graphic is displayed. 
 
 # Generalized Linear Modeling Submodule
 
 Most statistical models make the assumption that the residuals are normally distributed. That assumption can be problematic in certain situations. For example, if we are modeling a dichotomous outcome and/or a count variable, the standard assumptions will almost surely be violated. In these situations, we can instead tell the computer that the residuals are not normally distributed, but instead that they follow a Poisson distribution, for example. 
 
-The "Distribution family" option allows the user to specify how the residuals are distributed. "Logistic" is to perform a logistic regression (for a binary outcome). "Poisson" and "Negative binomial" are for count data. "Gamma" is for continuous, positive skewed distributions, like reaction time. 
+The "Distribution family" option allows the user to specify how the residuals are distributed. "Logistic" is to perform a logistic regression (for a binary outcome). The link function used is a logit link. "Poisson" and "Negative binomial" are for count data and both utilize a log. (In future iterations of Visual Modeling, I hope to allow the user to choose different link functions). "Gamma" is for continuous, positive skewed distributions, like reaction time and has a inverse link function. 
 
-As with the other modules, we can specify interactions in the "Interaction Terms" section, we can control how plots are displayed in the "Plot Controls" section, and we can ask for univariate plots in the "Results Displays" section. We cannot display residuals, unfortunately, because interpreting residuals for generalized linear models is much less straightforward, though future implementations of the Visual Modeling module should include some basic residual analyses. 
+
+[GIF to create the following visual]
+
+```{r, fig.cap = "A Poisson generalized linear model, visualizing the relationship between strength/damage.resistence and injuries. Ghost lines have been overlaid for easier interpretation."}
+data(avengers)
+mod = glm(injuries~strength + damage.resistence, data=avengers, family=poisson)
+visualize(mod, plot="model", ghost.line="blue") + theme(text = element_text(size=14))
+```
+
+As with the other submodules, we can specify interactions in the "Interaction Terms" section, we can control how plots are displayed in the "Plot Controls" section, and we can ask for univariate plots in the "Results Displays" section. We cannot display residuals, unfortunately, because interpreting residuals for generalized linear models is much less straightforward, though future implementations of the Visual Modeling module should include some basic residual analyses. 
+
+
+
 
 # Conclusion
 

@@ -1,20 +1,20 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  7 FEB 2020 10:47
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  12 FEB 2020 11:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**/private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth.tex
+**/private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-1
+0579654de888.dir/flexplot_psychmeth.tex
 
-(/private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth.tex
+(/private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth.tex
 LaTeX2e <2016/03/31>
 Babel <3.9r> and hyphenation patterns for 83 language(s) loaded.
 (/usr/local/texlive/2016/texmf-dist/tex/latex/apa6/apa6.cls
 Document Class: apa6 2014/11/20 v2.14 APA formatting (6th edition)
 (/usr/local/texlive/2016/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
-(/usr/local/texlive/2016/texmf-dist/tex/latex/base/size12.clo
-File: size12.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/size11.clo
+File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@section=\count80
@@ -192,15 +192,6 @@ LaTeX Info: Redefining \bm on input line 208.
 \f@ncyO@erf=\skip62
 \f@ncyO@olf=\skip63
 \f@ncyO@orf=\skip64
-) (/usr/local/texlive/2016/texmf-dist/tex/latex/endfloat/endfloat.sty
-Package: endfloat 2011/12/25 v2.5d LaTeX2e package puts figures and tables at e
-nd (jdm)
-\c@posttable=\count99
-\efloat@postttt=\write3
-\@ef@tttopen=\count100
-\c@postfigure=\count101
-\efloat@postfff=\write4
-\@ef@fffopen=\count102
 )) (/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
 (/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/amsfonts.sty
@@ -227,13 +218,13 @@ LaTeX Info: Redefining \boldsymbol on input line 28.
 ) (/usr/local/texlive/2016/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 2016/03/08 v2.02 operator names
 )
-\inf@bad=\count103
+\inf@bad=\count99
 LaTeX Info: Redefining \frac on input line 199.
-\uproot@=\count104
-\leftroot@=\count105
+\uproot@=\count100
+\leftroot@=\count101
 LaTeX Info: Redefining \overline on input line 297.
-\classnum@=\count106
-\DOTSCASE@=\count107
+\classnum@=\count102
+\DOTSCASE@=\count103
 LaTeX Info: Redefining \ldots on input line 394.
 LaTeX Info: Redefining \dots on input line 397.
 LaTeX Info: Redefining \cdots on input line 518.
@@ -242,15 +233,15 @@ LaTeX Info: Redefining \cdots on input line 518.
 \big@size=\dimen135
 LaTeX Font Info:    Redeclaring font encoding OML on input line 634.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 635.
-\macc@depth=\count108
-\c@MaxMatrixCols=\count109
+\macc@depth=\count104
+\c@MaxMatrixCols=\count105
 \dotsspace@=\muskip10
-\c@parentequation=\count110
-\dspbrk@lvl=\count111
+\c@parentequation=\count106
+\dspbrk@lvl=\count107
 \tag@help=\toks18
-\row@=\count112
-\column@=\count113
-\maxfields@=\count114
+\row@=\count108
+\column@=\count109
+\maxfields@=\count110
 \andhelp@=\toks19
 \eqnshift@=\dimen136
 \alignsep@=\dimen137
@@ -740,11 +731,11 @@ tim
 ) (/usr/local/texlive/2016/texmf-dist/tex/latex/microtype/microtype.sty
 Package: microtype 2016/05/14 v2.6a Micro-typographical refinements (RS)
 \MT@toks=\toks24
-\MT@count=\count115
+\MT@count=\count111
 LaTeX Info: Redefining \textls on input line 774.
 \MT@outer@kern=\dimen142
 LaTeX Info: Redefining \textmicrotypecontext on input line 1310.
-\MT@listname@count=\count116
+\MT@listname@count=\count112
 (/usr/local/texlive/2016/texmf-dist/tex/latex/microtype/microtype-pdftex.def
 File: microtype-pdftex.def 2016/05/14 v2.6a Definitions specific to pdftex (RS)
 
@@ -825,14 +816,14 @@ Package: auxhook 2016/05/16 v1.4 Hooks for auxiliary files (HO)
 Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
 )
 \@linkdim=\dimen143
-\Hy@linkcounter=\count117
-\Hy@pagecounter=\count118
+\Hy@linkcounter=\count113
+\Hy@pagecounter=\count114
 (/usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2016/05/05 v6.83n Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
 ... no UTF-8 mapping file for font encoding PD1
 )
-\Hy@SavedSpaceFactor=\count119
+\Hy@SavedSpaceFactor=\count115
 (/usr/local/texlive/2016/texmf-dist/tex/latex/latexconfig/hyperref.cfg
 File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
 )
@@ -849,14 +840,14 @@ Package hyperref Info: Plain pages OFF on input line 4461.
 Package hyperref Info: Backreferencing OFF on input line 4466.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4691.
-\c@Hy@tempcnt=\count120
+\c@Hy@tempcnt=\count116
 (/usr/local/texlive/2016/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip11
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 5044.
 \XeTeXLinkMargin=\dimen144
-\Fld@menulength=\count121
+\Fld@menulength=\count117
 \Field@Width=\dimen145
 \Fld@charsize=\dimen146
 Package hyperref Info: Hyper figures OFF on input line 6298.
@@ -868,17 +859,17 @@ Package hyperref Info: Link coloring with OCG OFF on input line 6323.
 Package hyperref Info: PDF/A mode OFF on input line 6328.
 LaTeX Info: Redefining \ref on input line 6368.
 LaTeX Info: Redefining \pageref on input line 6372.
-\Hy@abspage=\count122
-\c@Item=\count123
-\c@Hfootnote=\count124
+\Hy@abspage=\count118
+\c@Item=\count119
+\c@Hfootnote=\count120
 )
 
 Package hyperref Message: Driver (autodetected): hpdftex.
 
 (/usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/hpdftex.def
 File: hpdftex.def 2016/05/05 v6.83n Hyperref driver for pdfTeX
-\Fld@listcount=\count125
-\c@bookmark@seq@number=\count126
+\Fld@listcount=\count121
+\c@bookmark@seq@number=\count122
 (/usr/local/texlive/2016/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
 Package: rerunfilecheck 2016/05/16 v1.8 Rerun checks for auxiliary files (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
@@ -887,18 +878,18 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 \Hy@SectionHShift=\skip69
 ) (/usr/local/texlive/2016/texmf-dist/tex/latex/oberdiek/bkm-pdftex.def
 File: bkm-pdftex.def 2016/05/16 v1.25 bookmark driver for pdfTeX (HO)
-\BKM@id=\count127
+\BKM@id=\count123
 )) (/usr/local/texlive/2016/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
 Package: fancyvrb 2008/02/07
 
 Style option: `fancyvrb' v2.7a, with DG/SPQR fixes, and firstline=lastline fix 
 <2008/02/07> (tvz)
-\FV@CodeLineNo=\count128
+\FV@CodeLineNo=\count124
 \FV@InFile=\read1
 \FV@TabBox=\box30
-\c@FancyVerbLine=\count129
-\FV@StepNumber=\count130
-\FV@OutFile=\write5
+\c@FancyVerbLine=\count125
+\FV@StepNumber=\count126
+\FV@OutFile=\write3
 ) (/usr/local/texlive/2016/texmf-dist/tex/latex/framed/framed.sty
 Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
 \OuterFrameSep=\skip70
@@ -924,16 +915,16 @@ Package: longtable 2014/10/28 v4.11 Multi-page Table package (DPC)
 \LTright=\skip72
 \LTpre=\skip73
 \LTpost=\skip74
-\LTchunksize=\count131
+\LTchunksize=\count127
 \LTcapwidth=\dimen151
 \LT@head=\box31
 \LT@firsthead=\box32
 \LT@foot=\box33
 \LT@lastfoot=\box34
-\LT@cols=\count132
-\LT@rows=\count133
-\c@LT@tables=\count134
-\c@LT@chunks=\count135
+\LT@cols=\count128
+\LT@rows=\count129
+\c@LT@tables=\count130
+\c@LT@chunks=\count131
 \LT@p@ftn=\toks25
 ) (/usr/local/texlive/2016/texmf-dist/tex/latex/graphics/lscape.sty
 Package: lscape 2000/10/22 v3.01 Landscape Pages (DPC)
@@ -954,7 +945,7 @@ Package: array 2014/10/28 v2.4c Tabular extension package (FMi)
 \TX@old@col=\dimen157
 \TX@target=\dimen158
 \TX@delta=\dimen159
-\TX@cols=\count136
+\TX@cols=\count132
 \TX@ftn=\toks27
 )
 (/usr/local/texlive/2016/texmf-dist/tex/latex/threeparttablex/threeparttablex.s
@@ -968,14 +959,15 @@ Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 \TPTL@width=\skip77
 )
 \longtablewidth=\skip78
+Failed to patch abstract.
 (/usr/local/texlive/2016/texmf-dist/tex/latex/csquotes/csquotes.sty
 Package: csquotes 2016/01/31 v5.1g context-sensitive quotations (JAW)
-\csq@reset=\count137
-\csq@gtype=\count138
-\csq@glevel=\count139
-\csq@qlevel=\count140
-\csq@maxlvl=\count141
-\csq@tshold=\count142
+\csq@reset=\count133
+\csq@gtype=\count134
+\csq@glevel=\count135
+\csq@qlevel=\count136
+\csq@maxlvl=\count137
+\csq@tshold=\count138
 \csq@ltx@everypar=\toks28
 (/usr/local/texlive/2016/texmf-dist/tex/latex/csquotes/csquotes.def
 File: csquotes.def 2016/01/31 v5.1g csquotes generic definitions (JAW)
@@ -990,7 +982,7 @@ Package: babel 2016/04/23 3.9r The Babel package
 Language: english 2012/08/20 v3.3p English support from the babel system
 (/usr/local/texlive/2016/texmf-dist/tex/generic/babel/babel.def
 File: babel.def 2016/04/23 3.9r Babel common definitions
-\babel@savecnt=\count143
+\babel@savecnt=\count139
 \U@D=\dimen160
 )
 \l@canadian = a dialect from \language\l@american 
@@ -1052,30 +1044,30 @@ LaTeX Warning: Label `fig:compare' multiply defined.
 )
 \openout1 = `flexplot_psychmeth.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 182.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 182.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 176.
+LaTeX Font Info:    ... okay on input line 176.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 176.
+LaTeX Font Info:    ... okay on input line 176.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 176.
+LaTeX Font Info:    ... okay on input line 176.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 176.
+LaTeX Font Info:    ... okay on input line 176.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 176.
+LaTeX Font Info:    ... okay on input line 176.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 176.
+LaTeX Font Info:    ... okay on input line 176.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 176.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 176.
 
 (/usr/local/texlive/2016/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 182.
-LaTeX Font Info:    ... okay on input line 182.
-LaTeX Font Info:    Try loading font information for T1+lmr on input line 182.
+LaTeX Font Info:    ... okay on input line 176.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 176.
+LaTeX Font Info:    ... okay on input line 176.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 176.
+LaTeX Font Info:    ... okay on input line 176.
+LaTeX Font Info:    Try loading font information for T1+lmr on input line 176.
 (/usr/local/texlive/2016/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
@@ -1091,19 +1083,19 @@ File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 * v-part:(T,H,B)=(72.26999pt, 650.43001pt, 72.26999pt)
 * \paperwidth=614.295pt
 * \paperheight=794.96999pt
-* \textwidth=469.75502pt
-* \textheight=650.43001pt
-* \oddsidemargin=0.0pt
-* \evensidemargin=0.0pt
-* \topmargin=-37.0pt
+* \textwidth=433.62pt
+* \textheight=614.295pt
+* \oddsidemargin=18.06749pt
+* \evensidemargin=18.06749pt
+* \topmargin=-18.06749pt
 * \headheight=15.2pt
 * \headsep=25.0pt
-* \topskip=12.0pt
+* \topskip=11.0pt
 * \footskip=30.0pt
-* \marginparwidth=95.0pt
+* \marginparwidth=113.0pt
 * \marginparsep=10.0pt
 * \columnsep=10.0pt
-* \skip\footins=10.8pt plus 4.0pt minus 2.0pt
+* \skip\footins=10.0pt plus 4.0pt minus 2.0pt
 * \hoffset=0.0pt
 * \voffset=0.0pt
 * \mag=1000
@@ -1115,16 +1107,16 @@ File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 
 (/usr/local/texlive/2016/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count144
+\scratchcounter=\count140
 \scratchdimen=\dimen161
 \scratchbox=\box35
-\nofMPsegments=\count145
-\nofMParguments=\count146
+\nofMPsegments=\count141
+\nofMParguments=\count142
 \everyMPshowfont=\toks29
-\MPscratchCnt=\count147
+\MPscratchCnt=\count143
 \MPscratchDim=\dimen162
-\MPnumerator=\count148
-\makeMPintoPDFobject=\count149
+\MPnumerator=\count144
+\makeMPintoPDFobject=\count145
 \everyMPtoPDFconversion=\toks30
 ) (/usr/local/texlive/2016/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
@@ -1148,7 +1140,7 @@ Package caption Info: longtable package is loaded.
 Package: ltcaption 2013/06/09 v1.4-94 longtable captions (AR)
 )
 Package caption Info: End \AtBeginDocument code.
-LaTeX Info: Redefining \microtypecontext on input line 182.
+LaTeX Info: Redefining \microtypecontext on input line 176.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
@@ -1163,486 +1155,454 @@ File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman
 (RS)
 )
 \AtBeginShipoutBox=\box36
-Package hyperref Info: Link coloring OFF on input line 182.
+Package hyperref Info: Link coloring OFF on input line 176.
 (/usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
 (/usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
-\c@section@level=\count150
+\c@section@level=\count146
 )
-LaTeX Info: Redefining \ref on input line 182.
-LaTeX Info: Redefining \pageref on input line 182.
-LaTeX Info: Redefining \nameref on input line 182.
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 184.
+LaTeX Info: Redefining \ref on input line 176.
+LaTeX Info: Redefining \pageref on input line 176.
+LaTeX Info: Redefining \nameref on input line 176.
+Using title for running head
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 178.
 
 (/usr/local/texlive/2016/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 184.
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 178.
 
 (/usr/local/texlive/2016/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 184
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 178
 .
 (/usr/local/texlive/2016/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 184
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 178
 .
 (/usr/local/texlive/2016/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 184.
+(Font)              <14.4> on input line 178.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 184.
+(Font)              <10> on input line 178.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 184.
-LaTeX Font Info:    Try loading font information for U+msa on input line 184.
+(Font)              <7> on input line 178.
+LaTeX Font Info:    Try loading font information for U+msa on input line 178.
 (/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/usr/local/texlive/2016/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 184.
+LaTeX Font Info:    Try loading font information for U+msb on input line 178.
 (/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/usr/local/texlive/2016/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 ) (/usr/local/texlive/2016/texmf-dist/tex/latex/microtype/mt-eur.cfg
 File: mt-eur.cfg 2006/07/31 v1.1 microtype config. file: AMS Euler Roman (RS)
-) [1{/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
-
-]
-LaTeX Font Info:    Try loading font information for T1+lmtt on input line 184.
+)
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10.95> on input line 178.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <8> on input line 178.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <6> on input line 178.
+LaTeX Font Info:    Try loading font information for T1+lmtt on input line 178.
 
 (/usr/local/texlive/2016/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [2] [3]
-\openout4 = `flexplot_psychmeth.fff'.
+)
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
-(flexplot_psychmeth.fff) [4] [5] [6]
-LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <12> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 233.
-LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 243
+[1
+
+{/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] <images
+/smiley.png, id=19, 939.51pt x 451.6875pt>
+File: images/smiley.png Graphic file (type png)
+<use images/smiley.png>
+Package pdftex.def Info: images/smiley.png used on input line 194.
+(pdftex.def)             Requested size: 433.61342pt x 208.46799pt.
+[2]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/ses-1.pdf, id=29, 459.717
+5pt x 311.1625pt>
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ses-1.pdf Graphic fi
+le (type pdf)
+
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ses-1.pdf>
+Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/s
+es-1.pdf used on input line 203.
+(pdftex.def)             Requested size: 433.64267pt x 293.5136pt.
+[3 <./images/smiley.png>] [4 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh1
+4mvzn/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-la
+tex/ses-1.pdf>]
+LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.95> not available
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 227.
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 237
 .
 (/usr/local/texlive/2016/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [7] [8]
-Underfull \vbox (badness 1742) has occurred while \output is active []
-
-[9] [10] [11] [12] [13]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[14] [15] [16] [17] [18] [19] [20]
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 570.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 570.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 570.
-[21] [22]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[23] [24] [25] [26] [27]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[28] [29] [30] [31] [32] [33] [34] [35] [36] AED endfloat: Processing end Figur
-es and Tables [37] (./flexplot_psychmeth.fff <images/smiley.png, id=359, 939.51
-pt x 451.6875pt>
-File: images/smiley.png Graphic file (type png)
-<use images/smiley.png>
-Package pdftex.def Info: images/smiley.png used on input line 5.
-(pdftex.def)             Requested size: 469.75385pt x 225.84319pt.
-[38
-
-
- <./images/smiley.png>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ses-1.pdf, id=366, 459.71
-75pt x 311.1625pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ses-1.pdf Graphic fi
-le (type pdf)
-
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ses-1.pdf>
-Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/s
-es-1.pdf used on input line 15.
-(pdftex.def)             Requested size: 459.72337pt x 311.16649pt.
-[39
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ses-1.pdf>] <images/flex
-plot_diagram.jpg, id=383, 1228.59pt x 1325.95375pt>
+) [5] [6] <images/flexplot_diagram.jpg, id=71, 1228.59pt x 1325.95375pt>
 File: images/flexplot_diagram.jpg Graphic file (type jpg)
 <use images/flexplot_diagram.jpg>
-Package pdftex.def Info: images/flexplot_diagram.jpg used on input line 24.
-(pdftex.def)             Requested size: 469.75606pt x 506.98346pt.
-[40
+Package pdftex.def Info: images/flexplot_diagram.jpg used on input line 279.
+(pdftex.def)             Requested size: 433.61232pt x 467.97539pt.
 
- <./images/flexplot_diagram.jpg>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf, id=388, 458.71
-375pt x 315.1775pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf Graphic fi
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf, id=73, 458.713
+75pt x 315.1775pt>
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf Graphic fi
 le (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/b
-ar-1.pdf used on input line 34.
-(pdftex.def)             Requested size: 458.73363pt x 315.19115pt.
-[41
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf, id=401, 45
-8.71375pt x 294.09875pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf Graphi
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/b
+ar-1.pdf used on input line 307.
+(pdftex.def)             Requested size: 433.64078pt x 297.9501pt.
+[7] [8 <./images/flexplot_diagram.jpg>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf, id=90, 458
+.71375pt x 294.09875pt>
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf Graphi
 c file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/c
-hunkit-1.pdf used on input line 43.
-(pdftex.def)             Requested size: 458.71263pt x 294.09802pt.
-[42
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/raw-1.png, id=413, 1754.5
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/c
+hunkit-1.pdf used on input line 315.
+(pdftex.def)             Requested size: 433.64078pt x 278.0235pt.
+[9 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview
+-10579654de888.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf>] [10 </priv
+ate/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10579654
+de888.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/raw-1.png, id=117, 1754.5
 55pt x 859.21pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/raw-1.png Graphic fi
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/raw-1.png Graphic fi
 le (type png)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/raw-1.png>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/raw-1.png>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/r
-aw-1.png used on input line 52.
-(pdftex.def)             Requested size: 422.76169pt x 207.02747pt.
-[43
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/raw-1.png>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/jitterit-1.png, id=420, 1
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/r
+aw-1.png used on input line 353.
+(pdftex.def)             Requested size: 390.23332pt x 191.09824pt.
+[11]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/jitterit-1.png, id=126, 1
 762.585pt x 624.3325pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/jitterit-1.png Graph
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/jitterit-1.png Graph
 ic file (type png)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/jitterit-1.png>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/jitterit-1.png>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/j
-itterit-1.png used on input line 64.
-(pdftex.def)             Requested size: 422.7601pt x 149.74759pt.
-[44
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/jitterit-1.png>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/scatter-1.png, id=426, 17
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/j
+itterit-1.png used on input line 384.
+(pdftex.def)             Requested size: 390.24423pt x 138.23001pt.
+[12 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/raw-1.png>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/scatter-1.png, id=136, 17
 62.585pt x 699.61375pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/scatter-1.png Graphi
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/scatter-1.png Graphi
 c file (type png)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/scatter-1.png>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/scatter-1.png>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/s
-catter-1.png used on input line 76.
-(pdftex.def)             Requested size: 469.74539pt x 186.4536pt.
-[45
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/scatter-1.png>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf, id=432, 2
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/s
+catter-1.png used on input line 410.
+(pdftex.def)             Requested size: 433.59872pt x 172.1061pt.
+[13 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/jitterit-1.png> </pri
+vate/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-1057965
+4de888.dir/flexplot_psychmeth_files/figure-latex/scatter-1.png>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf, id=146, 2
 11.79124pt x 202.7575pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf Graph
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf Graph
 ic file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/l
-ogistic-1.pdf used on input line 88.
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/l
+ogistic-1.pdf used on input line 439.
 (pdftex.def)             Requested size: 211.79718pt x 202.76318pt.
-[46
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf, id=449
+[14 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf, id=170
 , 236.885pt x 173.64874pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf Gr
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf Gr
 aphic file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/a
-ssociation-1.pdf used on input line 97.
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/a
+ssociation-1.pdf used on input line 460.
 (pdftex.def)             Requested size: 236.89163pt x 173.65361pt.
-[47
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf, id=461, 279.
+[15 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf, id=188, 279.
 0425pt x 208.78pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf Graphic 
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf Graphic 
 file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/p
-lant-1.pdf used on input line 106.
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/p
+lant-1.pdf used on input line 479.
 (pdftex.def)             Requested size: 279.05032pt x 208.78583pt.
-[48
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf, id=478, 459
+[16 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf, id=213, 459
 .7175pt x 319.1925pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf Graphic
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf Graphic
  file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/s
-ample-1.pdf used on input line 115.
-(pdftex.def)             Requested size: 459.71637pt x 319.19171pt.
-[49
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/s
+ample-1.pdf used on input line 507.
+(pdftex.def)             Requested size: 433.64267pt x 301.08813pt.
 
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf, id=497, 351.31
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[17 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf, id=233, 351.31
 25pt x 211.79124pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf Graphic fi
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf Graphic fi
 le (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/a
-vp-1.pdf used on input line 124.
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/a
+vp-1.pdf used on input line 531.
 (pdftex.def)             Requested size: 351.32234pt x 211.79718pt.
-[50
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf, id=513, 56
+[18]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf, id=248, 56
 2.1pt x 279.0425pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf Graphi
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf Graphi
 c file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/s
-ymbols-1.pdf used on input line 133.
-(pdftex.def)             Requested size: 469.75067pt x 233.19763pt.
-[51
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf, id=529, 568
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/s
+ymbols-1.pdf used on input line 553.
+(pdftex.def)             Requested size: 433.616pt x 215.25935pt.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <9> on input line 564.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 564.
+[19 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf, id=272, 568
 .1225pt x 564.1075pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf Graphic
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf Graphic
  file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/p
-anels-1.pdf used on input line 142.
-(pdftex.def)             Requested size: 469.7731pt x 466.45316pt.
-[52
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/p
+anels-1.pdf used on input line 588.
+(pdftex.def)             Requested size: 433.6327pt x 430.56816pt.
 
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/panels2-1.png, id=548, 23
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[20 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf>] [21 <
+/private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-105
+79654de888.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/panels2-1.png, id=311, 23
 37.73375pt x 1746.525pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/panels2-1.png Graphi
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/panels2-1.png Graphi
 c file (type png)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/panels2-1.png>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/panels2-1.png>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/p
-anels2-1.png used on input line 151.
-(pdftex.def)             Requested size: 469.75006pt x 350.9511pt.
-[53
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/panels2-1.png>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ghost-1.png, id=554, 2064
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/p
+anels2-1.png used on input line 623.
+(pdftex.def)             Requested size: 433.61545pt x 323.95486pt.
+[22]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/ghost-1.png, id=322, 2064
 .71375pt x 1144.275pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ghost-1.png Graphic 
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ghost-1.png Graphic 
 file (type png)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ghost-1.png>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ghost-1.png>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/g
-host-1.png used on input line 163.
-(pdftex.def)             Requested size: 375.79109pt x 208.26535pt.
-[54
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/g
+host-1.png used on input line 648.
+(pdftex.def)             Requested size: 346.86955pt x 192.23688pt.
 
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ghost-1.png>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf, id=560, 5
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[23 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/panels2-1.png>] [24 <
+/private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-105
+79654de888.dir/flexplot_psychmeth_files/figure-latex/ghost-1.png>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf, id=343, 5
 62.1pt x 564.1075pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf Graph
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf Graph
 ic file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/t
-hreeway-1.pdf used on input line 175.
-(pdftex.def)             Requested size: 469.75067pt x 471.42833pt.
-[55
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/t
+hreeway-1.pdf used on input line 682.
+(pdftex.def)             Requested size: 433.616pt x 435.16461pt.
 
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf, id=577, 568
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf, id=345, 568
 .1225pt x 566.115pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf Graphic
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf Graphic
  file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/a
-ncova-1.pdf used on input line 184.
-(pdftex.def)             Requested size: 469.7731pt x 468.11314pt.
-[56
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf, id=594, 46
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/a
+ncova-1.pdf used on input line 706.
+(pdftex.def)             Requested size: 433.6327pt x 432.10045pt.
+[25] [26 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/p
+review-10579654de888.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf>]
+[27 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf, id=387, 46
 0.72125pt x 311.1625pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf Graphi
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf Graphi
 c file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/a
-ncova2-1.pdf used on input line 193.
-(pdftex.def)             Requested size: 460.72012pt x 311.16174pt.
-[57
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/a
+ncova2-1.pdf used on input line 722.
+(pdftex.def)             Requested size: 433.61934pt x 292.85838pt.
 
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf, id=610, 453.
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf, id=389, 453.
 695pt x 311.1625pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf Graphic 
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf Graphic 
 file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/m
-ixed-1.pdf used on input line 202.
-(pdftex.def)             Requested size: 453.6939pt x 311.16174pt.
-[58
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/m
+ixed-1.pdf used on input line 742.
+(pdftex.def)             Requested size: 433.62463pt x 297.39743pt.
 
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf>]
-</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-11
-41d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf, id=625, 56
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[28 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf>] [29 <
+/private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-105
+79654de888.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf>]
+</private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/preview-10
+579654de888.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf, id=426, 56
 1.09625pt x 311.1625pt>
-File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previ
-ew-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf Graphi
+File: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previ
+ew-10579654de888.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf Graphi
 c file (type pdf)
 
-<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/previe
-w-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf>
+<use /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf>
 Package pdftex.def Info: /private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn
-/T/Rtmps2dImT/preview-1141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/c
-ompare-1.pdf used on input line 211.
-(pdftex.def)             Requested size: 469.75085pt x 260.50584pt.
-[59
-
- </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/Rtmps2dImT/preview-1
-141d40f68e4f.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf>])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 988.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 988.
+/T/RtmpPGOwRI/preview-10579654de888.dir/flexplot_psychmeth_files/figure-latex/c
+ompare-1.pdf used on input line 766.
+(pdftex.def)             Requested size: 433.62079pt x 240.46948pt.
+[30 </private/var/folders/09/56zxd07s5g736wqzhj1jlsrh14mvzn/T/RtmpPGOwRI/previe
+w-10579654de888.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf>] [31] 
+[32] [33] [34]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 982.
+[35]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 982.
 (./flexplot_psychmeth.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 988.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 988.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 982.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 982.
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 17324 strings out of 493014
- 264800 string characters out of 6133351
- 380247 words of memory out of 5000000
- 20260 multiletter control sequences out of 15000+600000
- 83070 words of font info for 136 fonts, out of 8000000 for 9000
+ 17238 strings out of 493014
+ 263733 string characters out of 6133351
+ 378933 words of memory out of 5000000
+ 20151 multiletter control sequences out of 15000+600000
+ 110018 words of font info for 182 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 43i,12n,47p,2351b,527s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 43i,12n,47p,3295b,436s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
 texlive/2016/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2016/t
 exmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2016/texmf-dist/fon
 ts/enc/dvips/lm/lm-mathit.enc}</usr/local/texlive/2016/texmf-dist/fonts/type1/p
-ublic/lm/lmbx12.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/l
-mmi12.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/lmr10.pfb><
+ublic/lm/lmbx10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/l
+mmi10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/lmr10.pfb><
 /usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/lmr12.pfb></usr/local/
-texlive/2016/texmf-dist/fonts/type1/public/lm/lmr7.pfb></usr/local/texlive/2016
-/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/local/texlive/2016/texmf-dist/
-fonts/type1/public/lm/lmri10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type
-1/public/lm/lmri12.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/l
-m/lmtk10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/lmtt10.p
-fb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/lmtt12.pfb></usr/l
-ocal/texlive/2016/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on flexplot_psychmeth.pdf (59 pages, 3029059 bytes).
+texlive/2016/texmf-dist/fonts/type1/public/lm/lmr17.pfb></usr/local/texlive/201
+6/texmf-dist/fonts/type1/public/lm/lmr6.pfb></usr/local/texlive/2016/texmf-dist
+/fonts/type1/public/lm/lmr8.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1
+/public/lm/lmr9.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/l
+mri10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/lmri9.pfb><
+/usr/local/texlive/2016/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/local
+/texlive/2016/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2
+016/texmf-dist/fonts/type1/public/lm/lmtt9.pfb></usr/local/texlive/2016/texmf-d
+ist/fonts/type1/public/lm/lmtti10.pfb>
+Output written on flexplot_psychmeth.pdf (35 pages, 3080774 bytes).
 PDF statistics:
- 816 PDF objects out of 1000 (max. 8388607)
- 678 compressed objects within 7 object streams
- 182 named destinations out of 1000 (max. 500000)
- 12623 words of extra memory for PDF output out of 14400 (max. 10000000)
+ 721 PDF objects out of 1000 (max. 8388607)
+ 605 compressed objects within 7 object streams
+ 157 named destinations out of 1000 (max. 500000)
+ 16711 words of extra memory for PDF output out of 17280 (max. 10000000)
 
