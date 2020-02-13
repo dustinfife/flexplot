@@ -343,6 +343,8 @@ flexplot_delete_na = function(data, variables){
 #expect_true(is.ordered(flexplot_convert_to_categorical(data %>% mutate(gender = as.numeric(gender)), c("therapy.type", "gender"))$gender))
 #expect_false(is.ordered(flexplot_convert_to_categorical(data, axis=NULL)$gender))
 flexplot_convert_to_categorical = function(data, axis){
+  
+
   #### if they only have a few levels on the x axis, convert it to categorical
   if (length(axis)>0 & axis[1] != "1"){
     if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){

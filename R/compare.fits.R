@@ -207,7 +207,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
 	if (return.preds){
 		prediction.model
 	} else {
-		
+        
 		flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...)
 	}	
 

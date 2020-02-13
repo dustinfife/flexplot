@@ -104,7 +104,7 @@ flexplot = function(formula, data=NULL, related=F,
 
 
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
-  
+
   ### prepare the variables
 
   varprep = flexplot_prep_variables(formula, data, 
@@ -125,6 +125,12 @@ flexplot = function(formula, data=NULL, related=F,
   ##### make models into a factor if they supply predictions
 	if (!is.null(prediction)){
 		prediction$model = factor(prediction$model)
+		
+		### make the levels consistent between prediction/data for axis 1
+		if (!is.numeric(data[[varprep$axis[1]]])){
+		  prediction[[varprep$axis[1]]] = factor(prediction[[varprep$axis[1]]], levels=levels(data[[varprep$axis[1]]]))
+		}
+		
 		varprep$prediction = prediction
 	}
 	
@@ -163,7 +169,7 @@ flexplot = function(formula, data=NULL, related=F,
                                     spread=spread, prediction=prediction)
   
 	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
-	  
+	 
 				### bin the ghost reference if it's not null
     ghost.reference = with(varprep, create_ghost_reference(ghost.reference=ghost.reference, data=data,
                                              bins=bins, breaks=breaks, given=given, axis=axis, labels=labels))

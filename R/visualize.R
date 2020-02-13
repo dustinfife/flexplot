@@ -62,7 +62,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 			class(step3) <- c("flexplot", class(step3))
 			return(step3)
 		} else {
-		  #browse()
+		  
 		  
 		  f = make_flexplot_formula(predictors, outcome, data)
 			#step3 = flexplot(f, data=data, ...)+ labs(title="Analysis Plot")

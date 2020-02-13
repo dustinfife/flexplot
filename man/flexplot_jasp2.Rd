@@ -4,7 +4,7 @@
 \alias{flexplot_jasp2}
 \title{Flexplot in JASP}
 \usage{
-flexplot_jasp2(jaspResults, dataset, options, ...)
+flexplot_jasp2(jaspResults, dataset, options)
 }
 \arguments{
 \item{jaspResults}{A JASP  object}
@@ -12,8 +12,6 @@ flexplot_jasp2(jaspResults, dataset, options, ...)
 \item{dataset}{dataset supplied by JASP}
 
 \item{options}{a list of options to pass to JASP}
-
-\item{...}{not used}
 }
 \value{
 a flexplot graphic.
