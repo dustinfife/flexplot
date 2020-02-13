@@ -37,7 +37,6 @@ visualize.default = function(object, plot=c("all", "residuals", "model"),formula
 #' @export
 visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL, plots.as.list=FALSE,...){
 
-
 	plot = match.arg(plot, c("all", "residuals", "model"))
 
 

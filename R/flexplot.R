@@ -191,7 +191,7 @@ flexplot = function(formula, data=NULL, related=F,
 	} else {
 		ghost = "xxxx"
 	}	
-                                                             
+                                                        
 	### add prediction lines
 	if (!is.null(prediction)){
 		### see how many models are being compared

@@ -26,6 +26,21 @@ test_that("unconventional plots", {
       sample = 50
     )
   )
+  
+  data("tablesaw.injury")
+  mod = glm(injury~attention, data=tablesaw.injury, family=binomial)
+  vdiffr::expect_doppelganger(
+    "logistic with numeric outcome",
+    compare.fits(injury~attention, data=tablesaw.injury, mod, jitter=c(0, .1))
+  )
+  
+  mod = glm(gender~attention, data=tablesaw.injury, family=binomial)
+  vdiffr::expect_doppelganger(
+    "logistic with categorical outcome",
+    compare.fits(gender~attention, data=tablesaw.injury, mod, jitter=c(0, .1))
+  )
+  
+  compare.fits(gender~attention, data=tablesaw.injury, mod, jitter=c(0, .1))
   vdiffr::expect_doppelganger(
     "panelled logistic with sampling",
     flexplot(
