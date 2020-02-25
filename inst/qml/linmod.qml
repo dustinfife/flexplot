@@ -44,42 +44,7 @@ Form
 
 	Section
 	{
-		title: qsTr("Results Displays")
-  ExpanderButton{
-    title: qsTr("Model Terms");  
-    enabled: vars.count > 0 
-    VariablesForm
-    {
-      height: 150
-      AvailableVariablesList { 
-        name: "components"; 
-        title: qsTr("Components"); 
-        source: ["variables"]
-      }
-  
-      AssignedVariablesList 
-      { 
-        name: "interactions"; 
-        title: qsTr("Model terms"); 
-        listViewType: JASP.Interaction
-        rowComponents:
-          [
-            Component { CheckBox { name: "polynoms" } }
-          ]
-      }
-    }
-  }  
-  
-  ExpanderButton{
-    title: qsTr("Visual Fitting")  
-        DropDown{
-	        name: "linetype"
-	        values: ["Regression", "Quadratic", "Cubic"]
-	        label: qsTr("Fitted line (scatterplots)")
-	         enabled: vars.count > 0
-        }
-        
-  }
+		title: qsTr("Results Displays");
 
 
 		Group
