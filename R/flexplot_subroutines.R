@@ -400,7 +400,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
   }
   
   #### histograms
-  if (length(outcome)==1 & length(predictors)==0 | axis == "1"){
+  if (length(outcome)==1 & length(predictors)==0 | axis[1] == "1"){
     
     ### figure out how many levels for the variable
     levels = length(unique(data[,outcome]))	
