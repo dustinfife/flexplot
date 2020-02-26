@@ -163,6 +163,7 @@ flexplot = function(formula, data=NULL, related=F,
     fitted = bivariate$fitted
     
 	#### all the above should take care of ALL possible plots, but now we add paneling
+   # browser()
   facets = flexplot_panel_variables(varprep, 
                                     related=related, labels=labels, bins=bins, 
                                     suppress_smooth=suppress_smooth, method=method, 
@@ -223,7 +224,7 @@ flexplot = function(formula, data=NULL, related=F,
 		#### change the y axis labels
 		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	
 	}
-	
+
 	### put objects in this environment
 	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
 	

@@ -491,8 +491,12 @@ flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=
     if (length(break.me)>0){
       given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")
     }	
-    given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
-    
+
+    if (given[1]=="") {
+      given.as.string = paste0(given2[2], "~.")
+    } else {
+      given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
+    }
 
     facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			
   } else {

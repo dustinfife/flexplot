@@ -12,4 +12,7 @@ test_that("histograms vs bar charts", {
   
   hist_paneled = flexplot(income~1 | gender, data=d)
   vdiffr::expect_doppelganger("paneled histogram", hist_paneled)
+  
+  hist_paneled = flexplot(income~1 | + gender, data=d)
+  vdiffr::expect_doppelganger("paneled histogram but stacked in rows", hist_paneled)
 })
