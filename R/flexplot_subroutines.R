@@ -28,6 +28,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   }
   
   ### create the lists that contain the breaks
+  #browser()
   break.me = flexplot_break_me(data, predictors, given, axis)
   breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
@@ -235,8 +236,9 @@ flexplot_break_me = function(data, predictors, given, axis){
   } else {
     second.axis = axis[2]
   }
-
-  non.axis.one = predictors[-1]
+  
+  ### with a ~1 as axis one, I need to add an if statement
+  if (axis[1] != "1") non.axis.one = predictors[-1] else non.axis.one = predictors
   #### get the breaks for the needed variables (remove axis 1 because it's the axis and thus will never be binned)
   #### also, lapply fails when there's just one additional predictor, hence the if statement
   if (length(predictors)>2){
@@ -382,7 +384,7 @@ flexplot_convert_to_categorical = function(data, axis){
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
                                     related, alpha, jitter, suppress_smooth, method, spread  # arguments passed from flexplot
                                    ){
-
+  
   jitter = match_jitter_categorical(jitter)
   if (is.null(formula)){
     list.na = list(outcome, predictors, axis, related, alpha, jitter, suppress_smooth, method, spread)
@@ -398,7 +400,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
   }
   
   #### histograms
-  if (length(outcome)==1 & length(predictors)==0){
+  if (length(outcome)==1 & length(predictors)==0 | axis == "1"){
     
     ### figure out how many levels for the variable
     levels = length(unique(data[,outcome]))	

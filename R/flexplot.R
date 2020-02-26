@@ -106,7 +106,7 @@ flexplot = function(formula, data=NULL, related=F,
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
 
   ### prepare the variables
-
+  
   varprep = flexplot_prep_variables(formula, data, 
                                     breaks = breaks, labels=labels, bins=bins,
                                     related=related,  
@@ -161,7 +161,7 @@ flexplot = function(formula, data=NULL, related=F,
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
-
+    
 	#### all the above should take care of ALL possible plots, but now we add paneling
   facets = flexplot_panel_variables(varprep, 
                                     related=related, labels=labels, bins=bins, 
