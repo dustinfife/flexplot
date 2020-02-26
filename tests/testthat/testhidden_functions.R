@@ -48,6 +48,7 @@ test_that("make flexplot formula works", {
 
 test_that("match.jitter works", {
   expect_equal(match_jitter_categorical(.2), c(.2, 0))
+  expect_equal(match_jitter_categorical(.1), c(.1, 0))
   expect_equal(match_jitter_categorical(T), c(.2, 0))
   expect_equal(match_jitter_categorical(c(.2, .1)), c(.2, .1))
   expect_equal(match_jitter_categorical(F), c(0, 0))

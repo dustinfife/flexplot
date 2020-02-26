@@ -3,6 +3,25 @@ set.seed(1212)
 data(exercise_data); data("relationship_satisfaction")
 d = exercise_data
 
+
+test_that("error messages are correct", {
+  data(avengers)
+  data("exercise_data")
+  
+  expect_error(flexplot(speed~superher, data=avengers),
+               "Ru oh! Somebody done made a mistake!"
+  )
+  
+  expect_error( 
+    flexplot(speed~superhero),
+    "Howdy! Looks like you forgot to include a dataset!")
+  
+  expect_error(
+    flexplot(gender~therapy.type, data=exercise_data, method="logistic"),
+    "Oh wise user of flexplot"
+  )
+})
+
 test_that("scatterplots and options work", {
   # ### scatter plots
   require(MASS)
@@ -76,7 +95,7 @@ test_that("jittered density plots and options work", {
                               flexplot(
                                 weight.loss ~ therapy.type,
                                 data = d,
-                                jitter = c(.3)
+                                jitter = c(.01)
                               ))
   vdiffr::expect_doppelganger("mean both jitter",
                               flexplot(
@@ -85,4 +104,9 @@ test_that("jittered density plots and options work", {
                                 jitter = c(.3, .5)
                               ))
   expect_error(flexplot(gender~therapy.type, data=d, jitter=c(.3, .5), method="logistic"))
+  
+  vdiffr::expect_doppelganger("boxplot",
+                              flexplot(speed~superpower, data=avengers, plot.type="boxplot")) 
+  vdiffr::expect_doppelganger("violin plot",
+                              flexplot(speed~superpower, data=avengers, plot.type="violin"))
 })

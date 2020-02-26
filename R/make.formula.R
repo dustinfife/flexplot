@@ -19,14 +19,16 @@
 ##' make.formula("A", LETTERS[2:5], random="(1|group)")
 make.formula = function(response, predictors, random=NULL){
 	if (is.null(random)){
-		formula(paste(response, "~", 
+		formula <- paste(response, "~", 
 					paste(predictors, collapse="+"),
-				sep=""))
+				sep="")
 	} else {
-		formula(paste(response, "~", 
+	  formula <- paste(response, "~", 
 					paste(predictors, collapse="+"),
 					"+",random,
-				sep=""))
+				sep="")
 	}
+  return(as.formula(formula, env = parent.frame(1)))
+  
 }
 

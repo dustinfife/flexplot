@@ -23,17 +23,29 @@ arrange_jasp_plots = function(plot_list, theme){
   return(plot)
 }
 
-theme_it = function(plot, theme){
-  if (theme == "JASP"){
+theme_it = function(plot, theme) {
+  originalTheme <- theme
+  theme <- tolower(theme)
+  if (!theme %in% c("jasp", "black and white", "minimal", "classic", "dark"))
+    stop("Invalid theme provided: ", originalTheme)
+  
+  if (theme == "jasp")
     plot = themeJasp(plot)
-  } else {
-    themes = list("Black and white"="theme_bw()+ theme(text=element_text(size=18))",
-                 "Minimal" = "theme_minimal()+ theme(text=element_text(size=18))",
-                 "Classic" = "theme_classic()+ theme(text=element_text(size=18))",
-                 "Dark" = "theme_dark() + theme(text=element_text(size=18))")
-    plot = plot + eval(parse(text=themes[[theme]]))
-  }
+  else
+    plot = addGgplotThemeLayer(plot, theme)
+  
   return(plot)
+}
+
+addGgplotThemeLayer <- function(plot, theme) {
+  plotTheme <- switch(theme,
+                      "black and white" = theme_bw(),
+                      "minimal"         = theme_minimal(),
+                      "classic"         = theme_classic(),
+                      "dark"            = theme_dark())
+  plotTheme <- plotTheme + theme(text=element_text(size=18))
+  
+  return(plot + plotTheme)
 }
 
 modify_dv = function(dataset, outcome, family){

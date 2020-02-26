@@ -31,6 +31,9 @@
 ##' Users can export the string, in case they want to modify the ggplot object
 ##' @param silent Should all messages be suppressed? Defaults to F.
 ##' @param third.eye Should the "third eye" be employed? The third eye will be implemented shortly. 
+##' @param plot.type This argument allows the user to control the type of plot used. Flexplot defaults to histograms (for univariate variables)
+##' but could also do qqplots (using "qq" as the argument) or density plots (using "density"). Also, the user can specify "boxplot" for boxplots and
+##' "violin" for violin plots. 
 ##' @author Dustin Fife
 ##' @import tibble ggplot2 R6
 ##' @export
@@ -91,7 +94,8 @@ flexplot = function(formula, data=NULL, related=F,
 		spread=c('quartiles', 'stdev', 'sterr'), jitter=NULL, raw.data=T,
 		sample=Inf, 
 		prediction = NULL, suppress_smooth=F, alpha=.99977, plot.string=F, silent=F,
-		third.eye=NULL){
+		third.eye=NULL,
+		plot.type = c("histogram")){
 			
 	#data = exercise_data
 	##### use the following to debug flexplot
@@ -102,10 +106,11 @@ flexplot = function(formula, data=NULL, related=F,
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
 	#ghost.reference = list(income=90000)
 
-  spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
-  
-  ### prepare the variables
 
+  spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
+
+  ### prepare the variables
+  
   varprep = flexplot_prep_variables(formula, data, 
                                     breaks = breaks, labels=labels, bins=bins,
                                     related=related,  
@@ -124,6 +129,12 @@ flexplot = function(formula, data=NULL, related=F,
   ##### make models into a factor if they supply predictions
 	if (!is.null(prediction)){
 		prediction$model = factor(prediction$model)
+		
+		### make the levels consistent between prediction/data for axis 1
+		if (!is.numeric(data[[varprep$axis[1]]])){
+		  prediction[[varprep$axis[1]]] = factor(prediction[[varprep$axis[1]]], levels=levels(data[[varprep$axis[1]]]))
+		}
+		
 		varprep$prediction = prediction
 	}
 	
@@ -150,19 +161,20 @@ flexplot = function(formula, data=NULL, related=F,
 	### PLOT UNIVARIATE PLOTS
   bivariate = with(varprep, flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread))
+                                                    method=method, spread=spread, plot.type=plot.type))
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
-
+    
 	#### all the above should take care of ALL possible plots, but now we add paneling
+   # browser()
   facets = flexplot_panel_variables(varprep, 
                                     related=related, labels=labels, bins=bins, 
                                     suppress_smooth=suppress_smooth, method=method, 
                                     spread=spread, prediction=prediction)
   
 	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
-	  
+	 
 				### bin the ghost reference if it's not null
     ghost.reference = with(varprep, create_ghost_reference(ghost.reference=ghost.reference, data=data,
                                              bins=bins, breaks=breaks, given=given, axis=axis, labels=labels))
@@ -184,7 +196,7 @@ flexplot = function(formula, data=NULL, related=F,
 	} else {
 		ghost = "xxxx"
 	}	
-                                                             
+                                                        
 	### add prediction lines
 	if (!is.null(prediction)){
 		### see how many models are being compared
@@ -216,7 +228,7 @@ flexplot = function(formula, data=NULL, related=F,
 		#### change the y axis labels
 		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	
 	}
-	
+
 	### put objects in this environment
 	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
 	

@@ -33,7 +33,7 @@ data = exercise_data
 glinmod(weight.loss~gender, data=exercise_data)
 ## pass parameters to flexplot
 glinmod(weight.loss~gender + motivation, data=exercise_data, 
-	se=FALSE, method="lm")
+	method="lm")
 }
 \seealso{
 \code{\link{estimates}}, \code{\link{visualize}}, \code{\link{flexplot}}, \code{\link{model.comparison}}

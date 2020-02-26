@@ -34,7 +34,7 @@ Arxiv](https://psyarxiv.com/kh9c3)
 # install the stable version
 devtools::install_github("dustinfife/flexplot")
 # install the development version
-devtools::install_github("dustinfife/flexplot", repo="development")
+devtools::install_github("dustinfife/flexplot", ref="development")
 ```
 
 ## Usage

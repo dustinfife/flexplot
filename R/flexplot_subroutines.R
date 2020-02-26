@@ -17,6 +17,8 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   given = given.axis$given
   axis = given.axis$axis
   
+  flexplot_errors(variables = variables, data = data, method=method, axis=axis)
+  
   #### identify which variables are numeric and which are factors
   vtypes = variable_types(predictors, data, return.names=T)
   numbers = vtypes$numbers
@@ -26,6 +28,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   }
   
   ### create the lists that contain the breaks
+  #browser()
   break.me = flexplot_break_me(data, predictors, given, axis)
   breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
@@ -218,9 +221,6 @@ flexplot_errors = function(variables, data, method=method, axis){
     }	
   } 
   
-  if (is.null(data)){
-    stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
-  }
 }
 
   #### this function figures out which variables need to be binned
@@ -236,8 +236,9 @@ flexplot_break_me = function(data, predictors, given, axis){
   } else {
     second.axis = axis[2]
   }
-
-  non.axis.one = predictors[-1]
+  
+  ### with a ~1 as axis one, I need to add an if statement
+  if (axis[1] != "1") non.axis.one = predictors[-1] else non.axis.one = predictors
   #### get the breaks for the needed variables (remove axis 1 because it's the axis and thus will never be binned)
   #### also, lapply fails when there's just one additional predictor, hence the if statement
   if (length(predictors)>2){
@@ -344,6 +345,8 @@ flexplot_delete_na = function(data, variables){
 #expect_true(is.ordered(flexplot_convert_to_categorical(data %>% mutate(gender = as.numeric(gender)), c("therapy.type", "gender"))$gender))
 #expect_false(is.ordered(flexplot_convert_to_categorical(data, axis=NULL)$gender))
 flexplot_convert_to_categorical = function(data, axis){
+  
+
   #### if they only have a few levels on the x axis, convert it to categorical
   if (length(axis)>0 & axis[1] != "1"){
     if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){
@@ -379,7 +382,7 @@ flexplot_convert_to_categorical = function(data, axis){
 # bv = flexplot_bivariate_plot(weight.loss~motivation, data=exercise_data)$p
 # expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
-                                    related, alpha, jitter, suppress_smooth, method, spread  # arguments passed from flexplot
+                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type  # arguments passed from flexplot
                                    ){
   
   jitter = match_jitter_categorical(jitter)
@@ -397,14 +400,20 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
   }
   
   #### histograms
-  if (length(outcome)==1 & length(predictors)==0){
+  if (length(outcome)==1 & length(predictors)==0 | axis[1] == "1"){
     
     ### figure out how many levels for the variable
     levels = length(unique(data[,outcome]))	
     
     #### if numeric, do a histogram
     if (is.numeric(data[,outcome])){
-      p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
+      if (plot.type=="qq"){
+        p = 'ggplot(data=data, aes_string(sample = outcome)) + stat_qq() + stat_qq_line() + theme_bw() + labs(x=outcome)'
+      } else if (plot.type == "density") {
+        p = 'ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)'
+      } else {
+        p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
+      }
     } else {
       p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
     } 
@@ -425,8 +434,13 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
       
       p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
       points = points.func(axis.var=axis, data=data, jitter=jitter)
-      fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
-      
+      if (plot.type == "boxplot"){
+        fitted = 'geom_boxplot(alpha=.1)'
+      } else if (plot.type == "violin"){
+        fitted = 'geom_violin(alpha=.1)'
+      } else {
+        fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
+      }
     }	
     
     ### RELATED T-TEST
@@ -488,8 +502,12 @@ flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=
     if (length(break.me)>0){
       given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")
     }	
-    given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
-    
+
+    if (given[1]=="") {
+      given.as.string = paste0(given2[2], "~.")
+    } else {
+      given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
+    }
 
     facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			
   } else {

@@ -61,7 +61,7 @@ variable_types = function(variables, data, return.names=F){
 # data = graduate_income
 # outcome = "Income"
 make_flexplot_formula = function(predictors, outcome, data){
-  
+
   # if there's only one variable, make it
   if (length(predictors)==1){
     f = make.formula(outcome, predictors)
@@ -345,14 +345,15 @@ raw.alph.func = function(raw.data,alpha=1){
 }
 
 
+#match_jitter_categorical(.1)
 match_jitter_categorical = function(x){
   if (is.null(x)){
     return(c(.2, 0))
   }else if (length(x)==2 & is.numeric(x))
     return(x)
-  else if (is.null(x) | x)
-    return(c(.2, 0))
   else if (is.numeric(x) & length(x)==1)
+    return(c(x, 0))  
+  else if (is.null(x) | x==TRUE)
     return(c(.2, 0))
   else if (!x)
     return(c(0,0))
@@ -368,7 +369,7 @@ match_jitter_categorical = function(x){
 #jitter = c(.2, .4); data=exercise_data; axis.var=c("therapy.type", "gender")
 	#### points = the datapoints
 points.func = function(axis.var, data, jitter){
-	
+
   if (is.null(jitter) & !check.non.number(data[,axis.var[1]])){
     jitter = c(0,0)
   } else {

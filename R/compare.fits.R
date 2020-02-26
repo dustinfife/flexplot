@@ -207,7 +207,11 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
 	if (return.preds){
 		prediction.model
 	} else {
-		
+	  ### for logistic, add one to the predictions
+	  if (model1.type == "glm") {
+	    if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
+	      prediction.model$prediction = prediction.model$prediction + 1
+	  }}
 		flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...)
 	}	
 
