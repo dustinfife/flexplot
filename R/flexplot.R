@@ -31,6 +31,9 @@
 ##' Users can export the string, in case they want to modify the ggplot object
 ##' @param silent Should all messages be suppressed? Defaults to F.
 ##' @param third.eye Should the "third eye" be employed? The third eye will be implemented shortly. 
+##' @param plot.type This argument allows the user to control the type of plot used. Flexplot defaults to histograms (for univariate variables)
+##' but could also do qqplots (using "qq" as the argument) or density plots (using "density"). Also, the user can specify "boxplot" for boxplots and
+##' "violin" for violin plots. 
 ##' @author Dustin Fife
 ##' @import tibble ggplot2 R6
 ##' @export
@@ -91,7 +94,8 @@ flexplot = function(formula, data=NULL, related=F,
 		spread=c('quartiles', 'stdev', 'sterr'), jitter=NULL, raw.data=T,
 		sample=Inf, 
 		prediction = NULL, suppress_smooth=F, alpha=.99977, plot.string=F, silent=F,
-		third.eye=NULL){
+		third.eye=NULL,
+		plot.type = c("histogram", "qq", "density", "boxplot", "violin")){
 			
 	#data = exercise_data
 	##### use the following to debug flexplot
@@ -157,7 +161,7 @@ flexplot = function(formula, data=NULL, related=F,
 	### PLOT UNIVARIATE PLOTS
   bivariate = with(varprep, flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread))
+                                                    method=method, spread=spread, plot.type=plot.type))
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted

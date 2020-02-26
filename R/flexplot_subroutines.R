@@ -382,7 +382,7 @@ flexplot_convert_to_categorical = function(data, axis){
 # bv = flexplot_bivariate_plot(weight.loss~motivation, data=exercise_data)$p
 # expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
-                                    related, alpha, jitter, suppress_smooth, method, spread  # arguments passed from flexplot
+                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type  # arguments passed from flexplot
                                    ){
   
   jitter = match_jitter_categorical(jitter)
@@ -407,7 +407,13 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     
     #### if numeric, do a histogram
     if (is.numeric(data[,outcome])){
-      p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
+      if (plot.type=="qq"){
+        p = 'ggplot(data=data, aes_string(sample = outcome)) + stat_qq() + stat_qq_line() + theme_bw() + labs(x=outcome)'
+      } else if (plot.type == "density") {
+        p = 'ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)'
+      } else {
+        p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
+      }
     } else {
       p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
     } 
@@ -428,8 +434,13 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
       
       p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
       points = points.func(axis.var=axis, data=data, jitter=jitter)
-      fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
-      
+      if (plot.type == "boxplot"){
+        fitted = 'geom_boxplot(alpha=.1)'
+      } else if (plot.type == "violin"){
+        fitted = 'geom_violin(alpha=.1)'
+      } else {
+        fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
+      }
     }	
     
     ### RELATED T-TEST
