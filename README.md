@@ -1,5 +1,5 @@
 
-# flexplot <img src='icon.svg' align="right" height="139" /></a>
+# flexplot <img src='flexplot.svg' align="right" height="139" /></a>
 
 <!-- badges: start -->
 
