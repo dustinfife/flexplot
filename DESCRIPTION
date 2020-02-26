@@ -18,7 +18,8 @@ Imports: cowplot,
 	forcats, 
 	purrr,
 	plyr,
-	R6
+	R6,
+	ggplot2
 Suggests: jmvcore (>= 0.8.5), 
 	vdiffr,
 	knitr,

@@ -9,7 +9,8 @@ flexplot(formula, data = NULL, related = F, bins = 3,
   ghost.line = NULL, ghost.reference = NULL, spread = c("quartiles",
   "stdev", "sterr"), jitter = NULL, raw.data = T, sample = Inf,
   prediction = NULL, suppress_smooth = F, alpha = 0.99977,
-  plot.string = F, silent = F, third.eye = NULL)
+  plot.string = F, silent = F, third.eye = NULL,
+  plot.type = c("histogram"))
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}
@@ -54,6 +55,10 @@ Users can export the string, in case they want to modify the ggplot object}
 \item{silent}{Should all messages be suppressed? Defaults to F.}
 
 \item{third.eye}{Should the "third eye" be employed? The third eye will be implemented shortly.}
+
+\item{plot.type}{This argument allows the user to control the type of plot used. Flexplot defaults to histograms (for univariate variables)
+but could also do qqplots (using "qq" as the argument) or density plots (using "density"). Also, the user can specify "boxplot" for boxplots and
+"violin" for violin plots.}
 }
 \description{
 Create a flexible plot. Flexplot will allow users to create histograms, barcharts, jittered density plots, paneled plots, scatterplots, etc.  

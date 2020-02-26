@@ -104,4 +104,9 @@ test_that("jittered density plots and options work", {
                                 jitter = c(.3, .5)
                               ))
   expect_error(flexplot(gender~therapy.type, data=d, jitter=c(.3, .5), method="logistic"))
+  
+  vdiffr::expect_doppelganger("boxplot",
+                              flexplot(speed~superpower, data=avengers, plot.type="boxplot")) 
+  vdiffr::expect_doppelganger("violin plot",
+                              flexplot(speed~superpower, data=avengers, plot.type="violin"))
 })

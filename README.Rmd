@@ -40,7 +40,7 @@ A more complete manual for flexplot can be found at the [Psych Arxiv](https://ps
 # install the stable version
 devtools::install_github("dustinfife/flexplot")
 # install the development version
-devtools::install_github("dustinfife/flexplot", repo="development")
+devtools::install_github("dustinfife/flexplot", ref="development")
 ```
 
 

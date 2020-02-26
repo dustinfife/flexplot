@@ -34,7 +34,7 @@ Arxiv](https://psyarxiv.com/kh9c3)
 # install the stable version
 devtools::install_github("dustinfife/flexplot")
 # install the development version
-devtools::install_github("dustinfife/flexplot", repo="development")
+devtools::install_github("dustinfife/flexplot", ref="development")
 ```
 
 ## Usage
@@ -143,7 +143,7 @@ model.comparison(full.mod, reduced.mod)
 #> 
 #> $pred.difference
 #>    0%   25%   50%   75%  100% 
-#> 0.003 0.040 0.084 0.158 0.585
+#> 0.033 0.460 0.962 1.814 6.736
 ```
 
 ## Getting help

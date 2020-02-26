@@ -21,7 +21,7 @@
 ##' glinmod(weight.loss~gender, data=exercise_data)
 ##' ## pass parameters to flexplot
 ##' glinmod(weight.loss~gender + motivation, data=exercise_data, 
-##'		se=FALSE, method="lm")
+##'		method="lm")
 glinmod = function(f, data, plot=TRUE, ...){
 
 	#### run the lm

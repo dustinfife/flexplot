@@ -17,6 +17,8 @@ README_files/
 tests/
 ^doc$
 ^Meta$
+jasp_documentation/
+paranormal.csv
 EJ notes.rtf
 R/flexplota.b.R
 # stuff to ignore jasp when doing CMD check
