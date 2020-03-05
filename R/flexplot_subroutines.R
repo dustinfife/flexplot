@@ -117,7 +117,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     if (related){
 
       #### extract levels of the predictors
-      levs = levels(data[,axis[1]])
+      levs = unique(data[,axis[1]])
       
       #### create difference scores
       g1 = data[data[, axis[1]]==levs[1], outcome]

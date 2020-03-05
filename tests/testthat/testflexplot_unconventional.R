@@ -10,6 +10,9 @@ k = k[-(deleteme[1:2]), ]
 test_that("unconventional plots", {
   vdiffr::expect_doppelganger("related T",
                               flexplot(weight.loss ~ rewards, data = k, related = T))
+  m = k; m$rewards = as.character(m$rewards)
+  vdiffr::expect_doppelganger("related T with character not factor",
+                              flexplot(weight.loss ~ rewards, data = k, related = T))  
   vdiffr::expect_doppelganger("association plot",
                               flexplot(gender ~ rewards, data = d, jitter = c(.05, 0)))
   vdiffr::expect_doppelganger("interaction plot",
@@ -18,6 +21,7 @@ test_that("unconventional plots", {
                                 data = d,
                                 alpha = .4
                               ))
+  
   vdiffr::expect_doppelganger(
     "interaction plot panel",
     flexplot(
