@@ -449,8 +449,13 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
       p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
                levs[2], "-", levs[1], ")') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())")
       points = points.func(axis.var="Difference", data=data, jitter=jitter*.5)
-      fitted = paste0(fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
-    
+      if (plot.type == "boxplot"){
+        fitted = 'geom_boxplot(alpha=.1)'
+      } else if (plot.type == "violin"){
+        fitted = 'geom_violin(alpha=.1)'
+      } else {
+        fitted = paste0(fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
+      }
     ##### if they have two axis variables
   } else if (length(axis)>1){
 
