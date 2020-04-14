@@ -204,6 +204,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 	if (!modify){
 		step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T, ...)
 	} else {
+	  #browser()
 		#### otherwise...
 		prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	
 
@@ -251,8 +252,13 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 			#means = means %>% dplyr::filter(model=="random effects") 
 			names(means)[ncol(means)] = names(fixed.means)[ncol(fixed.means)] = outcome
 			names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var
-			names(means)[names(means)==unbinned.var] = binned.var			
-			fixed.means[,term.re] = unique(means[,term.re])
+			names(means)[names(means)==unbinned.var] = binned.var	
+			# create a bunch of random names for the random effect
+			# this is there just so the ggplot will work and doesn't mean anything
+			#browser()
+			reunique = unique(means[,term.re])
+			fixed.means[,term.re] = sample(reunique, nrow(fixed.means), replace=T)
+			#unique(means[,term.re])
 			#head(fixed.means)
 			#### plot it
  			step3 = step3 + 
