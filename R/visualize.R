@@ -144,7 +144,9 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 	preds = names(d)[-1]#[which(!(names(d)[-1] %in% term.re))]
 		
 	#### randomly sample the re terms and convert to numeric
-	samp = sample(unique(d[, term.re]), size=sample)
+	#browser()
+	unique.terms = unique(d[,term.re])
+	samp = sample(unique.terms, size=min(sample, length(unique.terms)))
 	k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])
 
 	### come up with formula
@@ -325,6 +327,7 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
   preds = names(d)[-1]#[which(!(names(d)[-1] %in% term.re))]
   
   #### randomly sample the re terms and convert to numeric
+  
   samp = sample(unique(d[, term.re]), size=sample)
   k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])
   
