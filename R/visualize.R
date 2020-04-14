@@ -256,8 +256,9 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 			# create a bunch of random names for the random effect
 			# this is there just so the ggplot will work and doesn't mean anything
 			#browser()
-			reunique = unique(means[,term.re])
+			reunique = c(unique(means[,term.re]))
 			fixed.means[,term.re] = sample(reunique, nrow(fixed.means), replace=T)
+			
 			#unique(means[,term.re])
 			#head(fixed.means)
 			#### plot it

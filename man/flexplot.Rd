@@ -10,7 +10,8 @@ flexplot(formula, data = NULL, related = F, bins = 3,
   "stdev", "sterr"), jitter = NULL, raw.data = T, sample = Inf,
   prediction = NULL, suppress_smooth = F, alpha = 0.99977,
   plot.string = F, silent = F, third.eye = NULL,
-  plot.type = c("histogram"))
+  plot.type = c("histogram", "qq", "density", "boxplot", "violin",
+  "line"))
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}
