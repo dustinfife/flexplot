@@ -60,6 +60,13 @@ test_that("scatterplots and options work", {
            data = exercise_data, 
            bins = 2))
   
+  vdiffr::expect_doppelganger(
+    "line plot",
+    flexplot(weight.loss ~ motivation, 
+             data = exercise_data, 
+             plot.type="line",
+             bins = 2))
+  
 })
 
   

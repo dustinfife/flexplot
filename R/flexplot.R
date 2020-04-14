@@ -95,7 +95,7 @@ flexplot = function(formula, data=NULL, related=F,
 		sample=Inf, 
 		prediction = NULL, suppress_smooth=F, alpha=.99977, plot.string=F, silent=F,
 		third.eye=NULL,
-		plot.type = c("histogram")){
+		plot.type = c("histogram", "qq", "density", "boxplots", "violin", "line")){
 			
 	#data = exercise_data
 	##### use the following to debug flexplot
