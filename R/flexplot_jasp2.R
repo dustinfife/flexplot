@@ -12,7 +12,7 @@
 flexplot_jasp2 = function(jaspResults, dataset, options) {
   
   ### check if they've entered anything	  
-  #save(dataset, options, file="~/Documents/JaspResults.Rdat")
+  
   ready <- (options$dependent != "") 
   
   ### read in the dataset 
@@ -54,21 +54,30 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
   } else {
     vars = variables
   }
-  k[,1] = dataset[[.v(options$dependent)]]
+  k[,1] = dataset[[encodeColNames(options$dependent)]]
   if (length(vars)>0){		#### this statement is necessary to allow histograms
     for (i in 2:(length(vars)+1)){
-      k[,i] = dataset[[.v(vars[i-1])]]
+      k[,i] = dataset[[encodeColNames(vars[i-1])]]
     }
   }
+  dv = encodeColNames(unlist(options$dependent));
+  v = encodeColNames(unlist(options$variables)); 
+  p = encodeColNames(unlist(options$paneledVars))
+  #save(jaspResults, k, dataset, v,p, dv,options, file="~/Documents/JaspResults.Rdata")
   
   if (length(options$variables)==0){
-    formula = as.formula(paste0(options$dependent, "~1"))		
+    formula = as.formula(paste0(dv, "~1"))
   } else if (length(options$paneledVars)>0){
-    formula = as.formula(paste0(options$dependent, "~", paste0(variables, collapse="+"), " | ", paste0(panels, collapse="+")))
+    formula = as.formula(paste0(dv, 
+                                "~", 
+                                paste0(v, collapse="+"), 
+                                " | ", 
+                                paste0(p, collapse="+")
+                                ))
   } else {
-    formula = as.formula(paste0(options$dependent, "~", paste0(variables, collapse="+")))
+    formula = as.formula(paste0(dv, "~", paste0(v, collapse="+")))
   }
-  tst = data.frame(x=1:10, y=1:10)
+  #tst = data.frame(x=1:10, y=1:10)
   
   #### do a ghost line
   if	(options$ghost){
@@ -87,11 +96,10 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
   jitter = c(options$jitx,options$jity)
   if (linetype == "regression") linetype = "lm"
   
-  plot = flexplot(formula, data=k, method=linetype, se=options$confidence, alpha=options$alpha,
+  plot = flexplot(formula, data=dataset, method=linetype, se=options$confidence, alpha=options$alpha,
                             ghost.line=ghost,
                             spread=whiskers[[options$intervals]],
                             jitter = jitter)
-  
   plot <- theme_it(plot, options$theme)
   
   # #### create flexplot object   
@@ -125,9 +133,9 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
     #row <- c(variable, options$dependent, options$confidence, options$type)
     resultsTable$addRows(list(
       "var" = variable,
-      "mean" = mean(dataset[[.v(variable)]]),
-      "median" = median(dataset[[.v(variable)]]), 
-      "typ" = mode(dataset[[.v(variable)]])))
+      "mean" = mean(dataset[[encodeColNames(variable)]]),
+      "median" = median(dataset[[encodeColNames(variable)]]), 
+      "typ" = mode(dataset[[encodeColNames(variable)]])))
   }
   #f <- paste0(options$dependent, "~", paste0(options$variables, collapse="+"))
   #message <- options$variables
