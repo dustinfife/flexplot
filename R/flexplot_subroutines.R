@@ -438,6 +438,8 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
         fitted = 'geom_boxplot(alpha=.1)'
       } else if (plot.type == "violin"){
         fitted = 'geom_violin(alpha=.1)'
+      } else if (plot.type == "line") {
+        fitted = 'geom_line()'
       } else {
         fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
       }

@@ -39,12 +39,14 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			
 		.plot = function(image, ...){
        		#### change case so line type can be read in
+		  linemethod = "histogram"
 			if (self$options$line=="Loess"){line="loess"}
 			if (self$options$line=="Regression"){line ="lm"}
 			if (self$options$line=="Logistic"){line ="logistic"}
 			if (self$options$line=="Polynomial"){line ="polynomial"}
 			if (self$options$line=="Cubic"){line ="cubic"}	
-			if (self$options$line=="Robust"){line ="rlm"}				
+			if (self$options$line=="Robust"){line ="rlm"}
+		  if (self$options$line=="Time Series"){line ="loess"; linemethod="line"}
 			if (self$options$sample==100){samp = Inf} else { samp = self$options$sample*.01*nrow(image$state$data)}					
 			
 		  #### record related = T if the conditions are met
@@ -79,14 +81,16 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             p = flexplot(formula, data=data, se=self$options$se,spread=se.type, 
                          method=line, alpha = self$options$alpha*.01, ghost.line="black", 
                          sample = samp, jitter=c(self$options$jittx, self$options$jitty), 
-                         bins=self$options$bins,suppress_smooth=self$options$suppr, related=related)
+                         bins=self$options$bins,suppress_smooth=self$options$suppr, related=related,
+                         plot.type=linemethod)
             
         ### EVERYTHING ELSE            
       } else {        	
         	p = flexplot(formula, data=data, se=self$options$se, spread=se.type, 
         	             method=line,  alpha = self$options$alpha*.01, sample = samp, 
         	             jitter=c(self$options$jittx, self$options$jitty),
-        	             suppress_smooth=self$options$suppr, bins=self$options$bins, related=related) #+ 
+        	             suppress_smooth=self$options$suppr, bins=self$options$bins, related=related,
+        	             plot.type=linemethod) #+ 
         	#	theme_bw(base_size = 16) +
         	#	theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
       }		

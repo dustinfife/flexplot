@@ -50,7 +50,8 @@ flexplotaOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Regression",
                     "Logistic",
                     "Polynomial",
-                    "Cubic"),
+                    "Cubic",
+                    "Time Series"),
                 default="Loess")
             private$..ghost <- jmvcore::OptionBool$new(
                 "ghost",
@@ -203,7 +204,8 @@ flexplotaBase <- if (requireNamespace('jmvcore')) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = FALSE)
+                completeWhenFilled = FALSE,
+                requiresMissings = FALSE)
         }))
 
 #' Flexplot

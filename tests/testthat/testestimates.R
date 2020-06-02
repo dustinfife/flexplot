@@ -15,7 +15,7 @@ test_that("estimates from linear models", {
   
   ##### interaction
   mod = lm(weight.loss~therapy.type * gender, data=d)	
-  expect_true(estimates(mod)$semi.p<0.01 & estimates(mod)$semi.p>0.009)
+  expect_true(estimates(mod)$semi.p[3]<0.01 & estimates(mod)$semi.p[3]>0.009)
   
   #### numeric variables
   cat1 = lm(weight.loss~motivation, data=d)	
