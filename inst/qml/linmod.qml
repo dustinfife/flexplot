@@ -1,4 +1,4 @@
-import QtQuick			2.12
+ import QtQuick			2.12
 import JASP.Controls	1.0
 import JASP.Widgets		1.0
 import JASP				1.0
