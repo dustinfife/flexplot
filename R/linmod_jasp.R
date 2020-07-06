@@ -162,7 +162,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 }
 
 .linmod_avp_plot <- function(jaspResults, options, ready) {
-  
+
   ### create plot options
   addedplot <- createJaspPlot(title = "Added Variable Plot",  width = 900, height = 500)
   
@@ -204,13 +204,11 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 }
 
 .create_flexplot_linmod <- function(jaspResults, flexplot, options, model.type) {
-  
   linmod_results <- jaspResults[["linmod_results"]]$object
   ## extract variables from the model itself
     ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
   terms = all.vars(formula(linmod_results$model))[-1]
   generated.formula = make_flexplot_formula(terms, options$dependent, linmod_results$model$model)
-
 
   if	(options$ghost & length(options$variables)<4){
     ghost=rgb(1,0,0,.4)
@@ -228,7 +226,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     plot = visualize(linmod_results$model, linmod_results, plot=model.type, plots.as.list=TRUE,
                      alpha=options$alpha, jitter=c(options$jitx, options$jity))
     plot = arrange_jasp_plots(plot, options$theme)
-  } else if (model.type == "added" && length(options$interactions[[1]]$components) > 1){
+  } else if (model.type == "added" && length(options$variables) > 1){
     
     methods = list("Regression"="lm", 
                    "Quadratic"="quadratic", 
