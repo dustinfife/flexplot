@@ -1,12 +1,19 @@
 # ### paranormal dataset
-# n = 1000
+# n = 394
 # #### belief in paranormal dataset
 # 
 # #### conviction about paranormal beliefs - bimodal
 # conviction = c(rnorm(n/2, 40, 10), rnorm(n/2, 70, 10))
 # 
 # ### fear.of.aliens = positive skew
-# fear = c(rnorm(n, 0, 2)^2)		
+# fear = c(rnorm(n, 0, 2)^2)
+# 
+# ## gender (redundant labels)
+# gender = sample(c("male", "female", "women"), size=n, replace=T, prob=c(.4, .5, .1))
+# 
+# ## unknown labels 
+# political = sample(c("republican", "democrat", "independent"), size=n, replace=T, prob=c(.4, .5, .1))
+# political[133] = "aliens are REALLLLLLL"
 # 
 # ### time spent investigating paranormal paranormal outliers
 # time = rnorm(n, 100, 40)
@@ -14,16 +21,16 @@
 # ### 999
 # 
 # ### kidnapped by aliens
-# kidnapped = sample(c("yes", "no"), size=n, replace=T, prob=c(.98, .02))		
+# kidnapped = sample(c("yes", "no"), size=n, replace=T, prob=c(.98, .02))
 # flexplot(kidnapped~1, data=data.frame(kidnapped=kidnapped))
 # 
 # ### paranormal experiences mixed up coding
-# experiences.type = sample(c("eerie feeling", "presence watching", "saw UFO", "saw ghost", "heard voice"), size=n, replace=T, prob=c(5, 1, 3, 6, 2))		
+# experiences.type = sample(c("eerie feeling", "presence watching", "saw UFO", "saw ghost", "heard voice"), size=n, replace=T, prob=c(5, 1, 3, 6, 2))
 # flexplot(experiences.type~1, data=data.frame(experiences.type=experiences.type))
 # 
 # ### NA
 # income = sample(c(">100K", "50-75K", "<50K", "75-100K"), size=n, replace=T, prob=c(1, 8, 2, 3))
-# income[sample(1:n, 25)] = NA		
+# income[sample(1:n, 25)] = NA
 # table(income)
 # 
 # ### something that doesn't make sense (age)
@@ -33,7 +40,10 @@
 # age[11] = 123
 # age[88] = 2
 # 
-# paranormal = data.frame(conviction = conviction, fear=fear, time=time, kidnapped=kidnapped, experiences.type=experiences.type, income=income, age=age)
+# paranormal = data.frame(conviction = conviction, 
+#                         fear=fear, time=time, kidnapped=kidnapped, experiences.type=experiences.type, 
+#                         income=income, age=age, gender, political)
+# write.csv(paranormal, "data/paranormal.csv", row.names=F)
 # usethis::use_data(paranormal, overwrite = TRUE)
 
 #' #' Simulated Dataset About Experiences with the Paranormal
@@ -51,7 +61,10 @@
 #' #'   \item{experiences.type}{What type of experiences they have had with the
 #' #'   paranormal? Can be "eerie feeling," "presence watching", "saw UFO", "saw ghost", or "heard voice"} 
 #' #'   \item{income}{How much money they make}
-#' #'   \item{age}{Age of respondent}}
+#' #'   \item{age}{Age of respondent}
+#' #'   \item{gender}{Gender of respondent}
+#' #'   \item{political}{Political Ideology of respondent} 
+#' }
 #' "paranormal"
 
 #' #'

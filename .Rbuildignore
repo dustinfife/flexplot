@@ -4,7 +4,8 @@ data/create_flexplot_linmod.Rdata
 ^README2.Rmd$
 ^README2.html$
 ^README.html$
-^\.git$     
+^\.git$
+^\.csv$
 jamovi
 .travis.yml
 flexplot.svg
