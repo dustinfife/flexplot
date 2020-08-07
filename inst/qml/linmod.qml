@@ -65,6 +65,7 @@ Form
 			CheckBox { name:"diff"			; label: qsTr("Show mean differences")	; checked: true				}
 			CheckBox { name:"sl"			; label: qsTr("Show slopes/intercepts")	; checked: true				}
 			CheckBox { name:"ci"			; label: qsTr("Show 95% intervals")		; checked: true				}
+			CheckBox { name:"pval"			; label: qsTr("Show p-values")		; checked: false				}
 		}
 	}
 
@@ -113,6 +114,12 @@ Form
 				name: "theme"
 				values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
 				label: qsTr("GGplot theme")
+			}
+			CheckBox
+			{
+				name:"bw";
+				label: qsTr("Convert to Convert to grayscale");
+				checked: false
 			}
 			CheckBox
 			{

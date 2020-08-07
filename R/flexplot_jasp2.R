@@ -101,6 +101,9 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
                             spread=whiskers[[options$intervals]],
                             jitter = jitter)
   plot <- theme_it(plot, options$theme)
+  if (options$bw) {
+    plot = plot + scale_colour_grey(start = 0, end = .9)
+  }
   colsnstuff = ifelse(length(options$variables)>1, options$variables[2], "")
   plot = .fancifyMyLabels(plot, options)
   

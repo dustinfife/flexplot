@@ -243,6 +243,10 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     plot = plot + theme(legend.position = "none")      
   }
   
+  if (options$bw) {
+    plot = plot + scale_colour_grey(start = 0, end = .9)
+  }
+  
   #+ theme(legend.position = "none")
   #flexplot$addFootnote("message")
   flexplot$plotObject <- plot
