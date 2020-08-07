@@ -158,11 +158,11 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
         b = bin.me(break.me[i], data, bins[i], labs, breaks[[i]])
         #### if there's only one category after we've binned things, fix that succa!
         if (length(levels(b))==1 & length(unique(data[[break.me[i]]]))>1){
-          b = factor(data[,given[i]])
+          b = factor(data[,break.me[i]])
         }
         return(b)
       }
-
+      
       new_cols = lapply(1:length(break.me), tempfunc, break.me, bins, labels, breaks, data)
       data[,paste0(break.me, "_binned")] = new_cols
     }
