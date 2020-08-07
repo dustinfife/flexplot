@@ -592,9 +592,20 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     if (term.labels[i] %in% linmod_results$numbers){
       tabdat$teststat[i] = "t"
       tabdat$statval[i] = reg_mod_coef[term.labels[i], "t value"]
+      tabdat$df[i] = anova_mod_coef[term.labels[i], "Df"]
+      tabdat$p[i] = reg_mod_coef[term.labels[i], "Pr(>|t|)"]
     } else {
       tabdat$teststat[i] = "F"
       tabdat$statval[i] = anova_mod_coef[term.labels[i], "F value"]
+      tabdat$df[i] = paste0(
+          anova_mod_coef[term.labels[i], "Df"], 
+          ", ",
+          anova_mod_coef["Residuals", "Df"]) 
+      tabdat$p[i] = pf(
+        anova_mod_coef[term.labels[i], "F value"],
+        anova_mod_coef[term.labels[i], "Df"],
+        anova_mod_coef["Residuals", "Df"],
+          lower.tail=F)
     }
     
   }
