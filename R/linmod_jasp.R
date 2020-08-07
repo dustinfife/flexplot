@@ -458,8 +458,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   if (options$pval){
     linmod_table_modcomp$addColumnInfo(name = "teststat",      title = "Test Statistic",       type = "number", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
     linmod_table_modcomp$addColumnInfo(name = "statval",      title = "Value",       type = "number", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
-    linmod_table_modcomp$addColumnInfo(name = "df",      title = "Degrees of Freedom",       type = "number", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
-    linmod_table_modcomp$addColumnInfo(name = "p",      title = "p-value",       type = "string", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
+    linmod_table_modcomp$addColumnInfo(name = "df",      title = "Degrees of Freedom", type = "string", combine = TRUE, overtitle = "Statistical Significance")
+    linmod_table_modcomp$addColumnInfo(name = "p",      title = "p-value",      type = "number", format = "dp:3", combine = TRUE, overtitle = "Statistical Significance")
   }
   
   
@@ -562,21 +562,58 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   main.effects = main_effects_2_remove(term.labels)
   term.labels = gsub(":", "×", term.labels)
   
+  reg_mod_coef = summary(linmod_results$model)$coefficients
+  anova_mod_coef = anova(linmod_results$model)
+  f = (summary(linmod_results$model))$fstatistic
+  f[2] = round(f[2]); f[3] = round(f[3])
+
   ### output results
   tabdat = list(
     terms = term.labels,
     rsq = mc$rsq,
     bayes = mc$bayes.factor,
-    bayesinv = 1/mc$bayes.factor
+    bayesinv = 1/mc$bayes.factor,
+    teststat = "F",
+    statval = f[1], 
+    df = paste0(f[2], ", ", f[3]), 
+    p = pf(f[1],f[2],f[3],lower.tail=F)
   )
-  save(linmod_results, tabdat, main.effects, file="~/Documents/flexplotObject2.Rdata")
+  tabdat$teststat[2] = "t"
+  save(linmod_results, tabdat, main.effects, file="~/Documents/flexplotObject3.Rdata")
   #### remove main effects where there's an interaction present
   condition.me = term.labels %in% main.effects
   tabdat$rsq[condition.me] = NA
   tabdat$bayes[condition.me] = NA
   tabdat$bayesinv[condition.me] = NA
   
-  tabdat = t_or_f(linmod_results, tabdat)
+  for (i in 2:length(term.labels)){
+    
+    ### check if numeric
+    if (term.labels[i] %in% linmod_results$numbers){
+      tabdat$teststat[i] = "t"
+      tabdat$statval[i] = reg_mod_coef[term.labels[i], "t value"]
+    } else {
+      tabdat$teststat[i] = "F"
+      tabdat$statval[i] = anova_mod_coef[term.labels[i], "F value"]
+    }
+    
+  }
+  
+  
+  # 
+  # # # #find numbers/categories
+  # numbs = tabdat$terms %in% linmod_results$numbers
+  # facts = which(tabdat$terms %in% linmod_results$factors)
+  # ## repopulate with real values
+  # tabdat$teststat[numbs] = "t"
+  # tabdat$statval[numbs] = reg_mod_coef[numbs,3]
+  # tabdat$statval[facts] = anova_mod_coef[facts-1,4]
+  # tabdat$df[numbs] = as.character(round(anova_mod_coef[which(numbs)-1,"Df"]))
+  # tabdat$df[facts] = paste0(anova_mod_coef[facts-1,"Df"], ", ", anova_mod_coef["Residuals", "Df"])
+  # tabdat$p[numbs] = reg_mod_coef[numbs,4]
+  # tabdat$p[facts] = anova_mod_coef[facts-1,5]
+  
+  #tabdat = t_or_f(linmod_results, tabdat)
   
   ### remove the main effects for models with interaction terms
   #save(mc, file="/Users/fife/Documents/jaspresults.rdat")
