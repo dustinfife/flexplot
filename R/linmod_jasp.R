@@ -60,13 +60,13 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   ### show output, depending on results
   if (ready && sum(numeric)>0){
     
-    if (length(options$variables)>1){
+    #if (length(options$variables)>1){
       if (options$modinf){
         if (is.null(jaspResults[["linmod_table_modcomp"]])){
           .create_linmod_table_modcomp(jaspResults, options, ready)
         }
       }
-    }
+    #}
     
     if (options$sl){
       if (is.null(jaspResults[["linmod_table_slopes"]])){
@@ -77,13 +77,13 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   if (ready && sum(character)>0){
     
-    if (length(options$variables)>1){
+    #if (length(options$variables)>1){
       if (options$modinf) {
         if (is.null(jaspResults[["linmod_table_modcomp"]])){
           .create_linmod_table_modcomp(jaspResults, options, ready)
         }
       }
-    }
+    #}
     
     ### check if there's a jasp table already. if not, create it
     if (options$means){
@@ -324,6 +324,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     linmod_table_means$addColumnInfo(name = "lwr",      title = "Lower",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
     linmod_table_means$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
   }
+
   
   ### add message about what type of interval was used
   message <- paste0("")
@@ -441,7 +442,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   linmod_table_modcomp <- createJaspTable(title = "Model Comparisons (Estimating the Effect of Removing Terms)")
   
   ### which options are required
-  linmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions", "means", "diff", "sl", "modinf", "linetype"))
+  linmod_table_modcomp$dependOn(c("dependent", "variables", "ci", "interactions", 
+                                  "means", "diff", "sl", "modinf", "linetype", "pval"))
   
   ### add citation
   linmod_table_modcomp$addCitation("Fife, D. A. (2019). Flexplot: graphically-based data analysis. https://doi.org/10.31234/osf.io/kh9c3 [Computer software].")
@@ -451,6 +453,15 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   linmod_table_modcomp$addColumnInfo(name = "rsq",    title = "Semi-partial R Squared",       type = "number", format = "dp:2", combine = TRUE)	
   linmod_table_modcomp$addColumnInfo(name = "bayes",      title = "Semi-partial Bayes Factor", type = "number", combine = TRUE)
   linmod_table_modcomp$addColumnInfo(name = "bayesinv",      title = "Inverted Bayes Factor", type = "number", combine = TRUE)
+  
+  ### add p-values
+  if (options$pval){
+    linmod_table_modcomp$addColumnInfo(name = "teststat",      title = "Test Statistic",       type = "number", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
+    linmod_table_modcomp$addColumnInfo(name = "statval",      title = "Value",       type = "number", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
+    linmod_table_modcomp$addColumnInfo(name = "df",      title = "Degrees of Freedom",       type = "number", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
+    linmod_table_modcomp$addColumnInfo(name = "p",      title = "p-value",       type = "string", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
+  }
+  
   
   
   message = paste0("Note: Semi-partials indicate the effect of removing that particular term from the model. ",
@@ -545,6 +556,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   mc = linmod_results$model.comparison
   
+  
   ### reformat : to be a times
   term.labels = as.character(mc$all.terms)
   main.effects = main_effects_2_remove(term.labels)
@@ -557,14 +569,14 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     bayes = mc$bayes.factor,
     bayesinv = 1/mc$bayes.factor
   )
-  
+  save(linmod_results, tabdat, main.effects, file="~/Documents/flexplotObject2.Rdata")
   #### remove main effects where there's an interaction present
   condition.me = term.labels %in% main.effects
   tabdat$rsq[condition.me] = NA
   tabdat$bayes[condition.me] = NA
   tabdat$bayesinv[condition.me] = NA
   
-  ### remove stats for main effects
+  #tabdat = .t_or_f(linmod_results, tabdat)
   
   ### remove the main effects for models with interaction terms
   #save(mc, file="/Users/fife/Documents/jaspresults.rdat")
@@ -572,6 +584,45 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   
   return()
+}
+
+.t_or_f = function(linmod_results, tabdat){
+  
+  reg_mod_coef = summary(linmod_results$model)$coefficients
+  anova_mod_coef = anova(linmod_results$model)
+  
+  
+  ### if only one variable is provided, compare to a zero model (ttest)
+  if (length(tabdat$terms)==1) {
+    tabdat$teststat = "t"
+    tabdat$statval = reg_mod_coef[1,3]
+    tabdat$df = as.character(round(summary(linmod_results$model)$df[1]))
+    tabdat$p = reg_mod_coef[1,4]
+    return(tabdat)
+  }  
+  
+  #prepopulate
+  f = (summary(linmod_results$model))$fstatistic
+  f[2] = round(f[2]); f[3] = round(f[3])
+  tabdat$teststat = rep("F", times=length(tabdat$terms))
+  tabdat$statval = rep(f[1], times=length(tabdat$terms))
+  tabdat$df = rep(paste0(f[2], ", ", f[3]), times=length(tabdat$terms))
+  tabdat$p = rep(pf(f[1],f[2],f[3],lower.tail=F), times=length(tabdat$terms))
+  
+  #find numbers/categories
+  numbs = tabdat$terms %in% linmod_results$numbers
+  facts = which(tabdat$terms %in% linmod_results$factors)
+  ## repopulate with real values
+  tabdat$teststat[numbs] = "t"
+  tabdat$statval[numbs] = reg_mod_coef[numbs,3]
+      tabdat$statval[facts] = anova_mod_coef[facts-1,4]
+  tabdat$df[numbs] = as.character(round(anova_mod_coef[which(numbs)-1,"Df"]))
+    tabdat$df[facts] = paste0(anova_mod_coef[facts-1,"Df"], ", ", anova_mod_coef["Residuals", "Df"])
+  tabdat$p[numbs] = reg_mod_coef[numbs,4]
+    tabdat$p[facts] = anova_mod_coef[facts-1,5]
+  
+  return(tabdat)
+
 }
 
 
@@ -592,3 +643,4 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   names(dataset) = JASP:::.unv(names(dataset))
   return(dataset)
 }
+

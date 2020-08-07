@@ -60,7 +60,7 @@ Form
 		Group
 		{
 			title: qsTr("Estimation")
-			CheckBox { name:"modinf"		; label: qsTr("Show model comparisons")	; enabled: varlist.count > 1	}
+			CheckBox { name:"modinf"		; label: qsTr("Show model comparisons"); checked:true }
 			CheckBox { name:"means"			; label: qsTr("Report means")			; checked: true				}
 			CheckBox { name:"diff"			; label: qsTr("Show mean differences")	; checked: true				}
 			CheckBox { name:"sl"			; label: qsTr("Show slopes/intercepts")	; checked: true				}
