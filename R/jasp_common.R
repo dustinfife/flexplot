@@ -7,6 +7,45 @@ add_polynomials = function(variables, data, degree=2){
   sapply(variables[!cat], f)
 }
 
+t_or_f = function(linmod_results, tabdat){
+  
+  reg_mod_coef = summary(linmod_results$model)$coefficients
+  anova_mod_coef = anova(linmod_results$model)
+  
+  
+  ### if only one variable is provided, compare to a zero model (ttest)
+  if (length(tabdat$terms)==1) {
+    tabdat$teststat = "t"
+    tabdat$statval = reg_mod_coef[1,3]
+    tabdat$df = as.character(round(summary(linmod_results$model)$df[1]))
+    tabdat$p = reg_mod_coef[1,4]
+    return(tabdat)
+  }  
+  
+  #prepopulate
+  f = (summary(linmod_results$model))$fstatistic
+  f[2] = round(f[2]); f[3] = round(f[3])
+  tabdat$teststat = rep("F", times=length(tabdat$terms))
+  tabdat$statval = rep(f[1], times=length(tabdat$terms))
+  tabdat$df = rep(paste0(f[2], ", ", f[3]), times=length(tabdat$terms))
+  tabdat$p = rep(pf(f[1],f[2],f[3],lower.tail=F), times=length(tabdat$terms))
+  
+  #find numbers/categories
+  numbs = tabdat$terms %in% linmod_results$numbers
+  facts = which(tabdat$terms %in% linmod_results$factors)
+  ## repopulate with real values
+  tabdat$teststat[numbs] = "t"
+  tabdat$statval[numbs] = reg_mod_coef[numbs,3]
+  tabdat$statval[facts] = anova_mod_coef[facts-1,4]
+  tabdat$df[numbs] = as.character(round(anova_mod_coef[which(numbs)-1,"Df"]))
+  tabdat$df[facts] = paste0(anova_mod_coef[facts-1,"Df"], ", ", anova_mod_coef["Residuals", "Df"])
+  tabdat$p[numbs] = reg_mod_coef[numbs,4]
+  tabdat$p[facts] = anova_mod_coef[facts-1,5]
+  
+  return(tabdat)
+  
+}
+
 
 ### function to organize residual plots
 arrange_jasp_plots = function(plot_list, theme){
