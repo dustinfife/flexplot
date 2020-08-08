@@ -7,43 +7,141 @@ add_polynomials = function(variables, data, degree=2){
   sapply(variables[!cat], f)
 }
 
-t_or_f = function(linmod_results, tabdat){
+make_mctable = function(linmod_results) {
+  save(linmod_results, file="/Users/fife/Documents/jaspresults.Rdata")
+  all_terms = all.vars(formula(linmod_results$model))[-1]
   
-  # reg_mod_coef = summary(linmod_results$model)$coefficients
-  # anova_mod_coef = anova(linmod_results$model)
-  # 
-  # 
-  # ### if only one variable is provided, compare to a zero model (ttest)
-  # if (length(tabdat$terms)==1) {
-  #   tabdat$teststat = "t"
-  #   tabdat$statval = reg_mod_coef[1,3]
-  #   tabdat$df = as.character(round(summary(linmod_results$model)$df[1]))
-  #   tabdat$p = reg_mod_coef[1,4]
-  #   return(tabdat)
-  # } else {
+  reg_mod_coef = summary(linmod_results$model)$coefficients
+  anova_mod_coef = anova(linmod_results$model)
+  f = (summary(linmod_results$model))$fstatistic
+  f[2] = round(f[2]); f[3] = round(f[3])
   
-    # #prepopulate
-    # f = (summary(linmod_results$model))$fstatistic
-    # f[2] = round(f[2]); f[3] = round(f[3])
-    # tabdat$teststat = rep("F", times=length(tabdat$terms))
-    # tabdat$statval = rep(f[1], times=length(tabdat$terms))
-    # tabdat$df = rep(paste0(f[2], ", ", f[3]), times=length(tabdat$terms))
-    # tabdat$p = rep(pf(f[1],f[2],f[3],lower.tail=F), times=length(tabdat$terms))
+  ### take care of situations where terms<2
+  if (length(all_terms)==1) {
+    tabdat = list(
+      rsq = summary(linmod_results$model)$r.squared,
+      bayes = NA,
+      bayesinv = NA
+    )
+  
     
-    # # #find numbers/categories
-    # numbs = tabdat$terms %in% linmod_results$numbers
-    # facts = which(tabdat$terms %in% linmod_results$factors)
-    # ## repopulate with real values
-    # tabdat$teststat[numbs] = "t"
-    # tabdat$statval[numbs] = reg_mod_coef[numbs,3]
-    # tabdat$statval[facts] = anova_mod_coef[facts-1,4]
-    # tabdat$df[numbs] = as.character(round(anova_mod_coef[which(numbs)-1,"Df"]))
-    # tabdat$df[facts] = paste0(anova_mod_coef[facts-1,"Df"], ", ", anova_mod_coef["Residuals", "Df"])
-    # tabdat$p[numbs] = reg_mod_coef[numbs,4]
-    # tabdat$p[facts] = anova_mod_coef[facts-1,5]
     
+    ### check for correlation
+    if (length(linmod_results$numbers)>0) {
+      tabdat$terms = linmod_results$numbers
+      tabdat$teststat = "r"
+      tabdat$statval = coef(linmod_results$model)[2]*
+          (sd(linmod_results$model$model[,2])/sd(linmod_results$model$model[,1])) 
+      tabdat$df = summary(linmod_results$model)$df[2] 
+      tabdat$p = reg_mod_coef[2,"Pr(>|t|)"]
+      return(tabdat)
+      
+    } 
+    
+    ### check for ttest
+    if (length(unique(linmod_results$model$model[,2])) == 2){
+      tabdat$terms = linmod_results$factors
+      tabdat$teststat = "t"
+      tabdat$statval = reg_mod_coef[2,"t value"]
+      tabdat$df = summary(linmod_results$model)$df[2]
+      tabdat$p = reg_mod_coef[2,"Pr(>|t|)"]
+      return(tabdat)
+    } 
+    
+    ### anova
+    if (length(unique(linmod_results$model$model[,2])) > 2){
+      tabdat$terms = linmod_results$factors
+      tabdat$teststat = "F"
+      tabdat$statval = anova_mod_coef[1,"F value"] 
+      tabdat$df = paste0(f[2], ", ", f[3]) 
+      tabdat$p = pf(f[1],f[2],f[3],lower.tail=F)
+      return(tabdat)
+    }
+  }    
+    
+    
+    mc = linmod_results$model.comparison
+    ### reformat : to be a times
+    term.labels = as.character(mc$all.terms)
+    main.effects = main_effects_2_remove(term.labels)
+    term.labels = gsub(":", "×", term.labels)
+    
+      
+    ### output results
+    tabdat = list(
+      terms = term.labels,
+      rsq = mc$rsq,
+      bayes = mc$bayes.factor,
+      bayesinv = 1/mc$bayes.factor,
+      teststat = "F",
+      statval = f[1], 
+      df = paste0(f[2], ", ", f[3]), 
+      p = pf(f[1],f[2],f[3],lower.tail=F)
+    )
+    tabdat$teststat[2] = "t"
+
+    #### remove main effects where there's an interaction present
+    condition.me = term.labels %in% main.effects
+    tabdat$rsq[condition.me] = NA
+    tabdat$bayes[condition.me] = NA
+    tabdat$bayesinv[condition.me] = NA
+      
+    for (i in 2:length(term.labels)){
+      
+      ### check if numeric
+      if (term.labels[i] %in% linmod_results$numbers){
+        tabdat$teststat[i] = "t"
+        tabdat$statval[i] = reg_mod_coef[term.labels[i], "t value"]
+        tabdat$df[i] = anova_mod_coef[term.labels[i], "Df"]
+        tabdat$p[i] = reg_mod_coef[term.labels[i], "Pr(>|t|)"]
+      } else {
+        tabdat$teststat[i] = "F"
+        tabdat$statval[i] = anova_mod_coef[term.labels[i], "F value"]
+        tabdat$df[i] = paste0(
+          anova_mod_coef[term.labels[i], "Df"], 
+          ", ",
+          anova_mod_coef["Residuals", "Df"]) 
+        tabdat$p[i] = pf(
+          anova_mod_coef[term.labels[i], "F value"],
+          anova_mod_coef[term.labels[i], "Df"],
+          anova_mod_coef["Residuals", "Df"],
+          lower.tail=F)
+      }
+        
+  }
+   
+  return(tabdat)
+  
+}
+
+t_or_f = function(reg_mod_coef, anova_mod_coef, term, t.or.f){
+  if (t.or.f=="t"){
+    tabdat = list(
+      teststat = "t",
+      statval = reg_mod_coef[term, "t value"],
+      df = anova_mod_coef[term, "Df"],
+      p = reg_mod_coef[term, "Pr(>|t|)"]
+    )
     return(tabdat)
-  # }
+  }
+  
+  if (t.or.f=="F"){
+    tabdat = list(
+      teststat = "F",
+      statval = anova_mod_coef[term, "F value"],
+      df = paste0(
+        anova_mod_coef[term, "Df"], 
+        ", ",
+        anova_mod_coef["Residuals", "Df"]), 
+      tabdat$p[i] = pf(
+        anova_mod_coef[term, "F value"],
+        anova_mod_coef[term, "Df"],
+        anova_mod_coef["Residuals", "Df"],
+        lower.tail=F)
+    )
+    return(tabdat)
+  }
+  
 }
 
 

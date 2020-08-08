@@ -554,80 +554,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
 .fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
-  mc = linmod_results$model.comparison
-  
-  
-  ### reformat : to be a times
-  term.labels = as.character(mc$all.terms)
-  main.effects = main_effects_2_remove(term.labels)
-  term.labels = gsub(":", "×", term.labels)
-  
-  reg_mod_coef = summary(linmod_results$model)$coefficients
-  anova_mod_coef = anova(linmod_results$model)
-  f = (summary(linmod_results$model))$fstatistic
-  f[2] = round(f[2]); f[3] = round(f[3])
+  tabdat = make_mctable(linmod_results)
 
-  ### output results
-  tabdat = list(
-    terms = term.labels,
-    rsq = mc$rsq,
-    bayes = mc$bayes.factor,
-    bayesinv = 1/mc$bayes.factor,
-    teststat = "F",
-    statval = f[1], 
-    df = paste0(f[2], ", ", f[3]), 
-    p = pf(f[1],f[2],f[3],lower.tail=F)
-  )
-  tabdat$teststat[2] = "t"
-  save(linmod_results, tabdat, main.effects, file="~/Documents/flexplotObject3.Rdata")
-  #### remove main effects where there's an interaction present
-  condition.me = term.labels %in% main.effects
-  tabdat$rsq[condition.me] = NA
-  tabdat$bayes[condition.me] = NA
-  tabdat$bayesinv[condition.me] = NA
-  
-  for (i in 2:length(term.labels)){
-    
-    ### check if numeric
-    if (term.labels[i] %in% linmod_results$numbers){
-      tabdat$teststat[i] = "t"
-      tabdat$statval[i] = reg_mod_coef[term.labels[i], "t value"]
-      tabdat$df[i] = anova_mod_coef[term.labels[i], "Df"]
-      tabdat$p[i] = reg_mod_coef[term.labels[i], "Pr(>|t|)"]
-    } else {
-      tabdat$teststat[i] = "F"
-      tabdat$statval[i] = anova_mod_coef[term.labels[i], "F value"]
-      tabdat$df[i] = paste0(
-          anova_mod_coef[term.labels[i], "Df"], 
-          ", ",
-          anova_mod_coef["Residuals", "Df"]) 
-      tabdat$p[i] = pf(
-        anova_mod_coef[term.labels[i], "F value"],
-        anova_mod_coef[term.labels[i], "Df"],
-        anova_mod_coef["Residuals", "Df"],
-          lower.tail=F)
-    }
-    
-  }
-  
-  
-  # 
-  # # # #find numbers/categories
-  # numbs = tabdat$terms %in% linmod_results$numbers
-  # facts = which(tabdat$terms %in% linmod_results$factors)
-  # ## repopulate with real values
-  # tabdat$teststat[numbs] = "t"
-  # tabdat$statval[numbs] = reg_mod_coef[numbs,3]
-  # tabdat$statval[facts] = anova_mod_coef[facts-1,4]
-  # tabdat$df[numbs] = as.character(round(anova_mod_coef[which(numbs)-1,"Df"]))
-  # tabdat$df[facts] = paste0(anova_mod_coef[facts-1,"Df"], ", ", anova_mod_coef["Residuals", "Df"])
-  # tabdat$p[numbs] = reg_mod_coef[numbs,4]
-  # tabdat$p[facts] = anova_mod_coef[facts-1,5]
-  
-  #tabdat = t_or_f(linmod_results, tabdat)
-  
-  ### remove the main effects for models with interaction terms
-  #save(mc, file="/Users/fife/Documents/jaspresults.rdat")
   linmod_table_modcomp$setData(tabdat)
   
   
