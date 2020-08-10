@@ -11,7 +11,7 @@ return_baseline_model = function(formula) {
 return_baseline_rsq = function(model){
   #browser()
   all_terms = all.vars(formula(model))[-1]
-  if (length(all_terms) == 1 ) return ("")
+  if (length(all_terms) == 1 ) return (NA)
   return(summary(model)$r.squared)
 }
 
@@ -20,9 +20,9 @@ return_baseline_df = function(model) {
   residual_df = anova(model)["Residuals", "Df"]
   model_df = sum(anova(model)[,"Df"]) - residual_df
   
-  if (length(all_terms) > 2) return (residual_df)
-  if (length(all_terms) == 1) return (residual_df + model_df)
-  if (length(all_terms) == 0) return (residual_df + model_df)
+  if (length(all_terms) > 1) return (list("df_num" = model_df, "df_denom" = residual_df))
+  if (length(all_terms) == 1) return (list("df_num" = 1, "df_denom" = residual_df + model_df - 1))
+  if (length(all_terms) == 0) return (list("df_num" = 0, "df_denom" = residual_df + model_df))
   
 }
 
@@ -56,17 +56,20 @@ return_term_df = function(teststatistic, model, term) {
   if (teststatistic == "F") {
     return(
       list(
-        "df" = paste0(df_numerator, ", ", df_denom),
-        "p" = pf(anova(model)[term, "F value"],df_numerator, df_denom,lower.tail=F)
+        "df_denom" = paste0(df_denom),
+        "p" = pf(anova(model)[term, "F value"],df_numerator, df_denom,lower.tail=F),
+        "df_num" = paste0(df_numerator)
       )
     )
   } else {
     return(
       list(
-        "df" = df_denom,
-        "p" = anova(model)[term, "Pr(>F)"])
+        "df_denom" = df_denom,
+        "p" = anova(model)[term, "Pr(>F)"],
+        "df_num" = df_numerator
       )
-    return(df_denom)
+    )
+    #return(df_denom)
   }
 }
 
@@ -82,7 +85,8 @@ return_tabdata = function(linmod_results) {
   tabdat$bayesinv = NA
   tabdat$teststat = ""
   tabdat$statval = NA
-  tabdat$df = return_baseline_df(linmod_results$model)
+  tabdat$df_num = return_baseline_df(linmod_results$model)[[1]]
+  tabdat$df_denom = return_baseline_df(linmod_results$model)[[2]]
   tabdat$p = NA
   
   #### create variables of models
@@ -98,9 +102,11 @@ return_tabdata = function(linmod_results) {
   
   #### return if there's only one variable
   if (length(all_terms) == 1) {
-    
+    #browser()
     #### create new null model
-    null_mod = update(linmod_results$model, . ~ 1) 
+    y = names(linmod_results$model$model)[1]
+    f = make.formula(y, "1")
+    null_mod = lm(f, data=linmod_results$model$model)
     bf = flexplot::bf.bic(linmod_results$model, null_mod)
     
     ### fill in terms unique to this
@@ -110,12 +116,13 @@ return_tabdata = function(linmod_results) {
     tabdat$bayesinv[2] = 1/bf
     
     ## enter test statistic (all this can be in the loop)
-    teststatistics = complete_teststat_when_one_var(linmod_results$model, all_terms[i])
+    teststatistics = complete_teststat_when_one_var(linmod_results$model, all_terms)
     tabdat$teststat[2] = teststatistics[[1]]
     tabdat$statval[2] = teststatistics[[2]]
     
-    df_p = return_term_df(teststatistics[[1]], linmod_results$model, all_terms[i])
-    tabdat$df[2] = as.character(df_p[[1]])
+    df_p = return_term_df(teststatistics[[1]], linmod_results$model, all_terms)
+    tabdat$df_num[2] = as.character(df_p[[1]])
+    tabdat$df_denom[2] = as.character(df_p[[3]])
     tabdat$p[2] = df_p[[2]]
     return(tabdat)
   }
@@ -132,7 +139,8 @@ return_tabdata = function(linmod_results) {
     tabdat$teststat[i+1] = teststatistics[[1]]
     tabdat$statval[i+1] = teststatistics[[2]]
     df_p = return_term_df(teststatistics[[1]], linmod_results$model, all_terms[i])
-    tabdat$df[i+1] = as.character(df_p[[1]])
+    tabdat$df_denom[i+1] = as.character(df_p[[1]])
+    tabdat$df_num[i+1] = as.character(df_p[[3]])
     tabdat$p[i+1] = df_p[[2]]
   }
   
@@ -147,6 +155,7 @@ return_tabdata = function(linmod_results) {
 # )
 # return_tabdata(linmod_results = linmod_results)
 # 
+# data(exercise_data)
 # model = lm(weight.loss~motivation, data=exercise_data)
 # linmod_results = list(
 #   model = model,

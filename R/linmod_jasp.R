@@ -458,7 +458,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   if (options$pval){
     linmod_table_modcomp$addColumnInfo(name = "teststat",      title = "Test Statistic",       type = "string", overtitle = "Statistical Significance")
     linmod_table_modcomp$addColumnInfo(name = "statval",      title = "Value",       type = "number", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
-    linmod_table_modcomp$addColumnInfo(name = "df",      title = "Degrees of Freedom", type = "string", overtitle = "Statistical Significance")
+    linmod_table_modcomp$addColumnInfo(name = "df_num",      title = "df (spent)", type = "string", overtitle = "Statistical Significance")
+    linmod_table_modcomp$addColumnInfo(name = "df_denom",      title = "df (remaining)", combine = TRUE, type = "string", overtitle = "Statistical Significance")
     linmod_table_modcomp$addColumnInfo(name = "p",      title = "p-value",      type = "number", format = "dp:3", combine = TRUE, overtitle = "Statistical Significance")
   }
   
