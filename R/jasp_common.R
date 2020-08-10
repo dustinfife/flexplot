@@ -1,3 +1,187 @@
+# model comparison table
+# figure out baseline model
+return_baseline_model = function(formula) {
+  all_terms = all.vars(formula)[-1]
+  if (length(all_terms) == 0 ) return ("Baseline: Mean Model")
+  if (length(all_terms) == 1) return ("Baseline: Mean Model")
+  if (length(all_terms) > 1) return ("Baseline: Full Model")
+}
+
+# report r squared for baseline model
+return_baseline_rsq = function(model){
+  #browser()
+  all_terms = all.vars(formula(model))[-1]
+  if (length(all_terms) == 1 ) return ("")
+  return(summary(model)$r.squared)
+}
+
+return_baseline_df = function(model) {
+  all_terms = all.vars(formula(model))[-1]
+  residual_df = anova(model)["Residuals", "Df"]
+  model_df = sum(anova(model)[,"Df"]) - residual_df
+  
+  if (length(all_terms) > 2) return (residual_df)
+  if (length(all_terms) == 1) return (residual_df + model_df)
+  if (length(all_terms) == 0) return (residual_df + model_df)
+  
+}
+
+complete_teststat_when_one_var = function(model, term, first.term = TRUE){
+  
+  ### correlation
+  if (is.numeric(model$model[,term]) & first.term) {
+    teststat = "r"
+    statval = coef(model)[2]*
+      (sd(model$model[,2])/sd(model$model[,1])) 
+    return(list("teststat"=teststat, "statval" = statval))
+  } 
+  
+  if (length(unique(model$model[,term])) == 2 | is.numeric(model$model[,term])) {
+    teststat = "t"
+    ## coefs from model display the referent level too...getting the row number from ANOVA instead
+    rownum = which(row.names(anova(model))==term)
+    statval = summary(model)$coefficients[rownum+1,"t value"]
+    return(list("teststat"=teststat, "statval" = statval))
+  }
+  
+  teststat = "F"
+  statval = anova(model)[term, "F value"]
+  return(list("teststat"=teststat, "statval" = statval))
+}
+
+return_term_df = function(teststatistic, model, term) {
+  #browser()
+  df_numerator = anova(model)[term, "Df"]
+  df_denom = anova(model)["Residuals", "Df"]
+  if (teststatistic == "F") {
+    return(
+      list(
+        "df" = paste0(df_numerator, ", ", df_denom),
+        "p" = pf(anova(model)[term, "F value"],df_numerator, df_denom,lower.tail=F)
+      )
+    )
+  } else {
+    return(
+      list(
+        "df" = df_denom,
+        "p" = anova(model)[term, "Pr(>F)"])
+      )
+    return(df_denom)
+  }
+}
+
+
+### this function returns the output table for model comparisons
+return_tabdata = function(linmod_results) {
+  #### set first instance of all
+  #browser()
+  tabdat = list()
+  tabdat$terms = return_baseline_model(formula(linmod_results$model))
+  tabdat$rsq = return_baseline_rsq(linmod_results$model)
+  tabdat$bayes = NA
+  tabdat$bayesinv = NA
+  tabdat$teststat = ""
+  tabdat$statval = NA
+  tabdat$df = return_baseline_df(linmod_results$model)
+  tabdat$p = NA
+  
+  #### create variables of models
+  formula = formula(linmod_results$model)
+  all_terms = attr(terms(formula), "term.labels")
+  reg_mod_coef = summary(linmod_results$model)$coefficients
+  estimates = flexplot::estimates(linmod_results$model)
+  anova_mod_coef = anova(linmod_results$model)
+  mc = estimates$model.comparison
+  
+  #### return tabdat if it's an intercept only model
+  if (length(all_terms) == 0) return(tabdat)
+  
+  #### return if there's only one variable
+  if (length(all_terms) == 1) {
+    
+    #### create new null model
+    null_mod = update(linmod_results$model, . ~ 1) 
+    bf = flexplot::bf.bic(linmod_results$model, null_mod)
+    
+    ### fill in terms unique to this
+    tabdat$terms[2] = all_terms
+    tabdat$rsq[2] = estimates$r.squared[1]
+    tabdat$bayes[2] = bf
+    tabdat$bayesinv[2] = 1/bf
+    
+    ## enter test statistic (all this can be in the loop)
+    teststatistics = complete_teststat_when_one_var(linmod_results$model, all_terms[i])
+    tabdat$teststat[2] = teststatistics[[1]]
+    tabdat$statval[2] = teststatistics[[2]]
+    
+    df_p = return_term_df(teststatistics[[1]], linmod_results$model, all_terms[i])
+    tabdat$df[2] = as.character(df_p[[1]])
+    tabdat$p[2] = df_p[[2]]
+    return(tabdat)
+  }
+  
+  for (i in 1:(length(all_terms))){
+    bf = mc[mc$all.terms == all_terms[i], "bayes.factor"]
+    tabdat$terms[i+1] = all_terms[i]
+    tabdat$rsq[i+1] = estimates$semi.p[all_terms[i]]
+    tabdat$bayes[i+1] = bf
+    tabdat$bayesinv[i+1] = 1/bf
+    
+    ## enter test statistic (all this can be in the loop)
+    teststatistics = complete_teststat_when_one_var(linmod_results$model, all_terms[i], first.term = FALSE)
+    tabdat$teststat[i+1] = teststatistics[[1]]
+    tabdat$statval[i+1] = teststatistics[[2]]
+    df_p = return_term_df(teststatistics[[1]], linmod_results$model, all_terms[i])
+    tabdat$df[i+1] = as.character(df_p[[1]])
+    tabdat$p[i+1] = df_p[[2]]
+  }
+  
+  return(tabdat)
+}
+
+# model = lm(weight.loss~1, data=exercise_data)
+# linmod_results = list(
+#   model = model,
+#   numbers = "x",
+#   factors = "b"
+# )
+# return_tabdata(linmod_results = linmod_results)
+# 
+# model = lm(weight.loss~motivation, data=exercise_data)
+# linmod_results = list(
+#   model = model,
+#   numbers = "motivation",
+#   factors = NA
+# )
+# return_tabdata(linmod_results = linmod_results)
+# 
+# model = lm(weight.loss~therapy.type, data=exercise_data)
+# linmod_results = list(
+#   model = model,
+#   numbers = NA,
+#   factors = "therapy.type"
+# )
+# return_tabdata(linmod_results = linmod_results)
+# 
+# model = lm(weight.loss~rewards, data=exercise_data)
+# linmod_results = list(
+#   model = model,
+#   numbers = NA, 
+#   factors = "rewards"
+# )
+# return_tabdata(linmod_results = linmod_results)
+# 
+# model = lm(weight.loss~rewards + motivation, data=exercise_data)
+# linmod_results = list(
+#   model = model,
+#   numbers = "motivation",
+#   factors = "rewards"
+#     
+# )
+# return_tabdata(linmod_results = linmod_results)
+
+
+
 #jasp
 # variables = options$variables
 # dataset =data = exercise_data
@@ -8,7 +192,7 @@ add_polynomials = function(variables, data, degree=2){
 }
 
 make_mctable = function(linmod_results) {
-  save(linmod_results, file="/Users/fife/Documents/jaspresults.Rdata")
+  #save(linmod_results, file="/Users/fife/Documents/jaspresults.Rdata")
   all_terms = all.vars(formula(linmod_results$model))[-1]
   
   reg_mod_coef = summary(linmod_results$model)$coefficients
@@ -23,9 +207,7 @@ make_mctable = function(linmod_results) {
       bayes = NA,
       bayesinv = NA
     )
-  
-    
-    
+ 
     ### check for correlation
     if (length(linmod_results$numbers)>0) {
       tabdat$terms = linmod_results$numbers
@@ -114,35 +296,35 @@ make_mctable = function(linmod_results) {
   
 }
 
-t_or_f = function(reg_mod_coef, anova_mod_coef, term, t.or.f){
-  if (t.or.f=="t"){
-    tabdat = list(
-      teststat = "t",
-      statval = reg_mod_coef[term, "t value"],
-      df = anova_mod_coef[term, "Df"],
-      p = reg_mod_coef[term, "Pr(>|t|)"]
-    )
-    return(tabdat)
-  }
-  
-  if (t.or.f=="F"){
-    tabdat = list(
-      teststat = "F",
-      statval = anova_mod_coef[term, "F value"],
-      df = paste0(
-        anova_mod_coef[term, "Df"], 
-        ", ",
-        anova_mod_coef["Residuals", "Df"]), 
-      tabdat$p[i] = pf(
-        anova_mod_coef[term, "F value"],
-        anova_mod_coef[term, "Df"],
-        anova_mod_coef["Residuals", "Df"],
-        lower.tail=F)
-    )
-    return(tabdat)
-  }
-  
-}
+# t_or_f = function(reg_mod_coef, anova_mod_coef, term, t.or.f){
+#   if (t.or.f=="t"){
+#     tabdat = list(
+#       teststat = "t",
+#       statval = reg_mod_coef[term, "t value"],
+#       df = anova_mod_coef[term, "Df"],
+#       p = reg_mod_coef[term, "Pr(>|t|)"]
+#     )
+#     return(tabdat)
+#   }
+#   
+#   if (t.or.f=="F"){
+#     tabdat = list(
+#       teststat = "F",
+#       statval = anova_mod_coef[term, "F value"],
+#       df = paste0(
+#         anova_mod_coef[term, "Df"], 
+#         ", ",
+#         anova_mod_coef["Residuals", "Df"]), 
+#       tabdat$p[i] = pf(
+#         anova_mod_coef[term, "F value"],
+#         anova_mod_coef[term, "Df"],
+#         anova_mod_coef["Residuals", "Df"],
+#         lower.tail=F)
+#     )
+#     return(tabdat)
+#   }
+#   
+# }
 
 
 ### function to organize residual plots

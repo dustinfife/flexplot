@@ -456,9 +456,9 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   ### add p-values
   if (options$pval){
-    linmod_table_modcomp$addColumnInfo(name = "teststat",      title = "Test Statistic",       type = "number", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
+    linmod_table_modcomp$addColumnInfo(name = "teststat",      title = "Test Statistic",       type = "string", overtitle = "Statistical Significance")
     linmod_table_modcomp$addColumnInfo(name = "statval",      title = "Value",       type = "number", format = "dp:2", combine = TRUE, overtitle = "Statistical Significance")
-    linmod_table_modcomp$addColumnInfo(name = "df",      title = "Degrees of Freedom", type = "string", combine = TRUE, overtitle = "Statistical Significance")
+    linmod_table_modcomp$addColumnInfo(name = "df",      title = "Degrees of Freedom", type = "string", overtitle = "Statistical Significance")
     linmod_table_modcomp$addColumnInfo(name = "p",      title = "p-value",      type = "number", format = "dp:3", combine = TRUE, overtitle = "Statistical Significance")
   }
   
@@ -554,8 +554,10 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
 .fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
-  tabdat = make_mctable(linmod_results)
-
+  #save(linmod_table_modcomp, linmod_results, file = "/Users/fife/Documents/jaspresults.Rdata")
+  #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+  tabdat = return_tabdata(linmod_results)
+  save(linmod_table_modcomp, linmod_results, tabdat, file = "/Users/fife/Documents/jaspresults.Rdata")
   linmod_table_modcomp$setData(tabdat)
   
   
