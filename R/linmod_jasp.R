@@ -465,7 +465,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   
   
-  message = paste0("Note: Semi-partials indicate the effect of removing that particular term from the model. ",
+  message = paste0("Semi-partials indicate the effect of removing that particular term from the model. ",
                    "Bayes factors are computed using the BIC.")
   if (length(options$interactions)>0){
     message = paste0(message, "\n 

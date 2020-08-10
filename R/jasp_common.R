@@ -21,7 +21,7 @@ return_baseline_df = function(model) {
   model_df = sum(anova(model)[,"Df"]) - residual_df
   
   if (length(all_terms) > 1) return (list("df_num" = model_df, "df_denom" = residual_df))
-  if (length(all_terms) == 1) return (list("df_num" = 1, "df_denom" = residual_df + model_df - 1))
+  if (length(all_terms) == 1) return (list("df_num" = model_df, "df_denom" = residual_df + model_df - 1))
   if (length(all_terms) == 0) return (list("df_num" = 0, "df_denom" = residual_df + model_df))
   
 }
@@ -121,8 +121,8 @@ return_tabdata = function(linmod_results) {
     tabdat$statval[2] = teststatistics[[2]]
     
     df_p = return_term_df(teststatistics[[1]], linmod_results$model, all_terms)
-    tabdat$df_num[2] = as.character(df_p[[1]])
-    tabdat$df_denom[2] = as.character(df_p[[3]])
+    tabdat$df_num[2] = as.character(df_p[[3]])
+    tabdat$df_denom[2] = as.character(df_p[[1]])
     tabdat$p[2] = df_p[[2]]
     return(tabdat)
   }
