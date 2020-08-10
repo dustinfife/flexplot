@@ -12,19 +12,24 @@
 linmod_jasp<- function(jaspResults, dataset, options) {
 
   ### check if they have an IV and a DV
-  ready <- (options$dependent != "" & length(options$variables)>0)
+  ready <- (options$dependent != "")
   
   ### read in the dataset if it's ready
   if (ready){
     dataset = .read_linmod_data(dataset, options)
   
     ### check for categorical/numeric variables
-    check.non.number = function(x){
-      return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
-      return.bool
+    if (length(options$variables)>0){
+      check.non.number = function(x){
+        return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
+        return.bool
+      }
+      character = sapply(dataset[,options$variables, drop=F], check.non.number)
+      numeric = !character
+    } else {
+      character = sapply(dataset[,options$dependent, drop=F], check.non.number)
+      numeric = !character
     }
-    character = sapply(dataset[,options$variables, drop=F], check.non.number)
-    numeric = !character
   }
   
   ### compute results
@@ -68,7 +73,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
       }
     #}
     
-    if (options$sl){
+    if (options$sl && length(options$variables)>1){
       if (is.null(jaspResults[["linmod_table_slopes"]])){
         .create_linmod_table_slopes(jaspResults, options, ready)
       }
@@ -85,22 +90,27 @@ linmod_jasp<- function(jaspResults, dataset, options) {
       }
     #}
     
+    if (options$diff) {
+      if (is.null(jaspResults[["linmod_table_differences"]])){
+        .create_linmod_table_differences(jaspResults, options, ready)
+      }
+    }
+  }
+  
+  if (ready && (sum(character)>0 || length(options$variables) == 0)){
+    
     ### check if there's a jasp table already. if not, create it
     if (options$means){
       if (is.null(jaspResults[["linmod_table_means"]])){
         .create_linmod_table_means(jaspResults, options, ready)
       }
     }
-    
-    if (options$diff) {
-      if (is.null(jaspResults[["linmod_table_differences"]])){
-        .create_linmod_table_differences(jaspResults, options, ready)
-      }
-    }
-    
   }
-  
+
+    
 }
+  
+
 
 .linmod_model_plot <- function(jaspResults, options, ready) {
   
@@ -205,10 +215,12 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
 .create_flexplot_linmod <- function(jaspResults, flexplot, options, model.type) {
   linmod_results <- jaspResults[["linmod_results"]]$object
-  ## extract variables from the model itself
+  save(flexplot,linmod_results, options, model.type, file="/Users/fife/Documents/jaspdata.Rdata")
+  
     ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
   terms = all.vars(formula(linmod_results$model))[-1]
-  generated.formula = make_flexplot_formula(terms, options$dependent, linmod_results$model$model)
+  
+  if (length(terms)!=0)  generated.formula = make_flexplot_formula(terms, options$dependent, linmod_results$model$model)
 
   if	(options$ghost & length(options$variables)<4){
     ghost=rgb(1,0,0,.4)
@@ -219,7 +231,15 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   whiskers = list("quartiles" = "quartiles",
                   "standard errors" = "sterr",
                   "standard deviations", "stdev")
-  if (model.type=="model"){
+  ### create related plot
+  if (model.type == "model" && length(terms) == 0) {
+    # trick flexplot into plotting this
+    new_data = linmod_results$model$model
+    f = make.formula(options$dependent, "1")
+    plot = flexplot(f, data=new_data)
+    
+  
+  } else if (model.type=="model"){
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                         alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
   } else if (model.type == "residuals"){
@@ -285,10 +305,12 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     }
     
     # create formula
-    if (predictors == ""){
-      f = paste0(options$dependent, " ~ ", options$variables)
-    } else {
+    if (predictors != ""){
       f = paste0(options$dependent, " ~ ", predictors, collapse = "")
+    } else if (is.null(unlist(options$variables))) {
+      f = paste0(options$dependent, " ~ ", 1)
+    } else {
+      f = paste0(options$dependent, " ~ ", options$variables)
     }
     
     f = as.formula(f)
@@ -495,16 +517,32 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 .fill_linmod_table_means = function(linmod_table_means, linmod_results){
   
 
+  #### fill in table if they just supply one variable
+  
+  #if (options)
+   save(linmod_table_means, linmod_results, file="/Users/fife/Documents/linmodJASP.rdata") 
   factors = linmod_results$factor.summary
   
-  ### output results
-  tabdat = list(
-    var = as.character(factors$variables),
-    levels = factors$levels,
-    est = factors$estimate,
-    lwr = factors$lower,
-    upr = factors$upper
-  )
+  if (is.na(factors)){
+    mean_ci = predict(linmod_results$model, interval="confidence")[1,]
+    tabdat = list(
+      var = names(linmod_results$model$model),
+      levels = "",
+      est = mean_ci[1],
+      lwr = mean_ci[2],
+      upr = mean_ci[3]
+      
+    )
+  } else {
+    ### output results
+    tabdat = list(
+      var = as.character(factors$variables),
+      levels = factors$levels,
+      est = factors$estimate,
+      lwr = factors$lower,
+      upr = factors$upper
+    )
+  }
   linmod_table_means$setData(tabdat)
   
   
