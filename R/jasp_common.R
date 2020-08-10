@@ -16,13 +16,14 @@ return_baseline_rsq = function(model){
 }
 
 return_baseline_df = function(model) {
+  #browser()
   all_terms = all.vars(formula(model))[-1]
   residual_df = anova(model)["Residuals", "Df"]
   model_df = sum(anova(model)[,"Df"]) - residual_df
   
-  if (length(all_terms) > 1) return (list("df_num" = model_df, "df_denom" = residual_df))
-  if (length(all_terms) == 1) return (list("df_num" = model_df, "df_denom" = residual_df + model_df - 1))
-  if (length(all_terms) == 0) return (list("df_num" = 0, "df_denom" = residual_df + model_df))
+  if (length(all_terms) > 1) return (list("df_num" = model_df+1, "df_denom" = residual_df))
+  if (length(all_terms) == 1) return (list("df_num" = 1, "df_denom" = residual_df + model_df))
+  if (length(all_terms) == 0) return (list("df_num" = 0, "df_denom" = residual_df + model_df + 1))
   
 }
 
