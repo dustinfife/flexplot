@@ -611,7 +611,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
 .fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
-  #save(linmod_table_modcomp, linmod_results, file = "/Users/fife/Documents/jaspresults.Rdata")
+  save(linmod_table_modcomp, linmod_results, file = "/Users/fife/Documents/jaspresults.Rdata")
   #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
   tabdat = return_tabdata(linmod_results)
  

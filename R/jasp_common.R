@@ -28,14 +28,22 @@ return_baseline_df = function(model) {
 }
 
 complete_teststat_when_one_var = function(model, term, first.term = TRUE){
-  
+ 
+  if (length(grep(":", term))>0) {
+    teststat = "t"
+    ## coefs from model display the referent level too...getting the row number from ANOVA instead
+    rownum = which(row.names(anova(model))==term)
+    statval = summary(model)$coefficients[rownum+1,"t value"]
+    return(list("teststat"=teststat, "statval" = statval))
+  }
+
   ### correlation
   if (is.numeric(model$model[,term]) & first.term) {
     teststat = "r"
     statval = coef(model)[2]*
       (sd(model$model[,2])/sd(model$model[,1])) 
     return(list("teststat"=teststat, "statval" = statval))
-  } 
+  }
   
   if (length(unique(model$model[,term])) == 2 | is.numeric(model$model[,term])) {
     teststat = "t"
@@ -150,6 +158,7 @@ return_tabdata = function(linmod_results) {
   }
   
   for (i in 1:(length(all_terms))){
+    
     bf = mc[mc$all.terms == all_terms[i], "bayes.factor"]
     tabdat$terms[i+1] = all_terms[i]
     tabdat$rsq[i+1] = estimates$semi.p[all_terms[i]]
@@ -157,6 +166,7 @@ return_tabdata = function(linmod_results) {
     tabdat$bayesinv[i+1] = 1/bf
     
     ## enter test statistic (all this can be in the loop)
+    #browser()
     teststatistics = complete_teststat_when_one_var(linmod_results$model, all_terms[i], first.term = FALSE)
     tabdat$teststat[i+1] = teststatistics[[1]]
     tabdat$statval[i+1] = teststatistics[[2]]
