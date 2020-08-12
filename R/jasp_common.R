@@ -2,7 +2,7 @@
 # figure out baseline model
 return_baseline_model = function(formula) {
   all_terms = all.vars(formula)[-1]
-  if (length(all_terms) == 0 ) return ("Baseline: Mean Model")
+  if (length(all_terms) == 0 ) return ("Baseline: Zero Model")
   if (length(all_terms) == 1) return ("Baseline: Mean Model")
   if (length(all_terms) > 1) return ("Baseline: Full Model")
 }
@@ -78,7 +78,7 @@ return_term_df = function(teststatistic, model, term) {
 ### this function returns the output table for model comparisons
 return_tabdata = function(linmod_results) {
   #### set first instance of all
-  #browser()
+  save(linmod_results, file="/Users/fife/Documents/jasp_testme.Rdata")
   tabdat = list()
   tabdat$terms = return_baseline_model(formula(linmod_results$model))
   tabdat$rsq = return_baseline_rsq(linmod_results$model)
@@ -99,7 +99,28 @@ return_tabdata = function(linmod_results) {
   mc = estimates$model.comparison
   
   #### return tabdat if it's an intercept only model
-  if (length(all_terms) == 0) return(tabdat)
+  if (length(all_terms) == 0) {
+    #### create new null model
+    y = names(linmod_results$model$model)[1]
+    f = make.formula(y, "0")
+    null_mod = lm(f, data=linmod_results$model$model)
+    bf = flexplot::bf.bic(linmod_results$model, null_mod)
+    
+    ### fill in terms unique to this
+    tabdat$terms[2] = y
+    tabdat$rsq[2] = estimates$r.squared[1]
+    tabdat$bayes[2] = bf
+    tabdat$bayesinv[2] = 1/bf
+    
+    ## enter test statistic (all this can be in the loop)
+    tabdat$teststat[2] = "t"
+    tabdat$statval[2] = reg_mod_coef[,"t value"]
+    tabdat$p[2] = reg_mod_coef[,"Pr(>|t|)"]
+    
+    tabdat$df_num[2] = 1
+    tabdat$df_denom[2] = anova_mod_coef["Residuals", "Df"]
+    return(tabdat)    
+  }
   
   #### return if there's only one variable
   if (length(all_terms) == 1) {

@@ -2,24 +2,27 @@
 # set.seed(2323)
 # n = 207
 # stats_skills = rnorm(n)
-# group = sample(c("control", "hitch", "stats"), size=n, replace=T)
-# gender = sample(c("female", "male"), size=n, replace=T)
+# group = sample(c("control", "mo money", "wealth building"), size=n, replace=T)
+# gender = sample(c("college graduate", "hs graduate"), size=n, replace=T)
 # exercise = rnorm(n)
 # attractiveness = rnorm(n)
 # matrix_mod = model.matrix(attractiveness~stats_skills + group + gender + exercise)
-# coefs = c(0, .5, .3, .8, -.6, .3)
+# head(matrix_mod)
+# coefs = c(0, .5, .8, 1.5, -1.2, .6)
 # attractiveness = t(t(coefs)%*%t(matrix_mod)) + attractiveness
-# attractiveness = data.frame(
+# income = data.frame(
 #   stats_skills = round(fifer::rescale(stats_skills, 60, 15)),
 #   group = group,
-#   gender = gender,
-#   exercise = round(max(fifer::rescale(exercise, 30, 15), 0)), 
-#   attractiveness = round(fifer::rescale(attractiveness, 60, 15))
-# )
-# head(attractiveness)
+#   graduate = gender,
+#   hours = exercise %>% fifer::rescale(., new.mean=30, new.sd=15) %>% round,
+#   income_before = round(fifer::rescale(attractiveness, 60, 15)),
+#   income_after = round(fifer::rescale(attractiveness, 60, 15) + rnorm(n, 5, 1))
 # 
-# write.csv(attractiveness, "data/attractiveness.csv", row.names=F)
-# usethis::use_data(attractiveness, overwrite = TRUE)
+# )
+# head(income)
+# 
+# write.csv(income, "data/income.csv", row.names=F)
+# usethis::use_data(income, overwrite = TRUE)
 
 #' #' Simulated Dataset About People's Attractiveness
 #' #'
@@ -30,7 +33,8 @@
 #' #'   \item{group}{Treatment group (control, watching hitch, receiving stats training)}
 #' #'   \item{gender}{Gender of person being rated}
 #' #'   \item{exercise}{Self-reported average number of minutes exercised per week} 
-#' #'   \item{attractiveness}{Attractiveness score of person being rated}
+#' #'   \item{attractiveness_1}{Attractiveness score of person being rated at baseline}
+#' #'   \item{attractiveness_2}{Attractiveness score of person being rated at follow up} 
 #' #'   \item{age}{Age of respondent}
 #' #'   \item{gender}{Gender of respondent}
 #' #'   \item{political}{Political Ideology of respondent} 

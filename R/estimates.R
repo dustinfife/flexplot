@@ -174,6 +174,7 @@ estimates.lm = function(object, mc=TRUE){
 		coef.matrix = NA
 		difference.matrix=NA
 	}	
+	#browser()
 	#### NUMERIC VARIABLES
 	if (length(numbers)>0){
 		vars = c("(Intercept)", numbers)
