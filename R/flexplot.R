@@ -246,7 +246,9 @@ flexplot = function(formula, data=NULL, related=F,
 	total.call = gsub("+xxxx","",total.call, fixed=T)
 	
 	
-	if (names(d_smooth)[2] == "group") names(d_smooth)[2] = "GGroup"
+	if (exists("d_smooth")) {
+	  if (names(d_smooth)[2] == "group") names(d_smooth)[2] = "GGroup"
+	}
 	final = suppressMessages(eval(parse(text=total.call)))
 	
 # axis = "muscle.gain"; outcome="weight.loss"
