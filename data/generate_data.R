@@ -1,3 +1,43 @@
+# ### attractiveness data
+# set.seed(2323)
+# n = 207
+# stats_skills = rnorm(n)
+# group = sample(c("control", "hitch", "stats"), size=n, replace=T)
+# gender = sample(c("female", "male"), size=n, replace=T)
+# exercise = rnorm(n)
+# attractiveness = rnorm(n)
+# matrix_mod = model.matrix(attractiveness~stats_skills + group + gender + exercise)
+# coefs = c(0, .5, .3, .8, -.6, .3)
+# attractiveness = t(t(coefs)%*%t(matrix_mod)) + attractiveness
+# attractiveness = data.frame(
+#   stats_skills = round(fifer::rescale(stats_skills, 60, 15)),
+#   group = group,
+#   gender = gender,
+#   exercise = round(max(fifer::rescale(exercise, 30, 15), 0)), 
+#   attractiveness = round(fifer::rescale(attractiveness, 60, 15))
+# )
+# head(attractiveness)
+# 
+# write.csv(attractiveness, "data/attractiveness.csv", row.names=F)
+# usethis::use_data(attractiveness, overwrite = TRUE)
+
+#' #' Simulated Dataset About People's Attractiveness
+#' #'
+#' #' A dataset containing 207 observations, containing the following information
+#' #'
+#' #' @format A data frame with 207 rows and 5 variables: \describe{
+#' #'   \item{stats_skills}{performance on a statistics know-how test}
+#' #'   \item{group}{Treatment group (control, watching hitch, receiving stats training)}
+#' #'   \item{gender}{Gender of person being rated}
+#' #'   \item{exercise}{Self-reported average number of minutes exercised per week} 
+#' #'   \item{attractiveness}{Attractiveness score of person being rated}
+#' #'   \item{age}{Age of respondent}
+#' #'   \item{gender}{Gender of respondent}
+#' #'   \item{political}{Political Ideology of respondent} 
+#' }
+#' "attractiveness"
+#' 
+
 # ### paranormal dataset
 # n = 394
 # #### belief in paranormal dataset

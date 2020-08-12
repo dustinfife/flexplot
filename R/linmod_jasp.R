@@ -231,13 +231,27 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   whiskers = list("quartiles" = "quartiles",
                   "standard errors" = "sterr",
                   "standard deviations", "stdev")
+  center = list("quartiles" = "median", 
+                "standard errors" = "mean",
+                "standard deviations" = "mean")
   ### create related plot
   if (model.type == "model" && length(terms) == 0) {
     # trick flexplot into plotting this
     new_data = linmod_results$model$model
     f = make.formula(options$dependent, "1")
-    plot = flexplot(f, data=new_data)
-    
+    plot = ggplot(data = new_data,aes_string(y = options$dependent, x=1)) +
+      labs(x = "") + 
+      geom_hline(yintercept=0, col='lightgray') +
+      geom_jitterd(alpha=options$alpha, width=options$jitx, height=options$jity)+
+      stat_summary(fun="mean", geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+
+      stat_summary(geom='errorbar', 
+                   fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, 
+                   fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, 
+                   width=.2, size = 1.25, 
+                   position=position_dodge(width=.2), color = '#bf0303') +
+      coord_cartesian(xlim=c(.75, 1.25))+
+      theme_bw() 
+      
   
   } else if (model.type=="model"){
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
@@ -261,6 +275,11 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   if (length(options$variables)<4){
     plot = plot + theme(legend.position = "none")      
+  }
+  
+  if (length(options$variables)==0){
+    # remove x axis
+    plot = plot + theme(text=element_text(size=18),axis.text.x=element_blank(), axis.ticks.x=element_blank())
   }
   
   if (options$bw) {
