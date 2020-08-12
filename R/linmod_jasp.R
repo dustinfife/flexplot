@@ -73,7 +73,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
       }
     #}
     
-    if (options$sl && length(options$variables)>1){
+    if (options$sl && length(options$variables)>0){
       if (is.null(jaspResults[["linmod_table_slopes"]])){
         .create_linmod_table_slopes(jaspResults, options, ready)
       }
@@ -215,7 +215,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
 .create_flexplot_linmod <- function(jaspResults, flexplot, options, model.type) {
   linmod_results <- jaspResults[["linmod_results"]]$object
-  save(flexplot,linmod_results, options, model.type, file="/Users/fife/Documents/jaspdata.Rdata")
+  
   
     ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
   terms = all.vars(formula(linmod_results$model))[-1]
@@ -539,7 +539,6 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   #### fill in table if they just supply one variable
   
   #if (options)
-   save(linmod_table_means, linmod_results, file="/Users/fife/Documents/linmodJASP.rdata") 
   factors = linmod_results$factor.summary
   
   if (is.na(factors)){
@@ -615,7 +614,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   #save(linmod_table_modcomp, linmod_results, file = "/Users/fife/Documents/jaspresults.Rdata")
   #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
   tabdat = return_tabdata(linmod_results)
-  save(linmod_table_modcomp, linmod_results, tabdat, file = "/Users/fife/Documents/jaspresults.Rdata")
+ 
   linmod_table_modcomp$setData(tabdat)
   
   
