@@ -615,6 +615,18 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
   tabdat = return_tabdata(linmod_results)
  
+  ### remove main effects for interactions
+  if (length(grep(":", tabdat$terms))>1) {
+    main_effects = unique(unlist(lapply(tabdat$terms[-1], function(x) strsplit(x, ":"))))
+    good_bye_terms = which(tabdat$terms %in% main_effects)
+    for (i in 2:length(tabdat)){
+      if (is.numeric(tabdat[[i]])){
+        tabdat[[i]][good_bye_terms] = NA
+      } else {
+        tabdat[[i]][good_bye_terms] = ""
+      }
+    }
+  }
   linmod_table_modcomp$setData(tabdat)
   
   
