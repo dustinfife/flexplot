@@ -239,11 +239,14 @@ flexplot = function(formula, data=NULL, related=F,
       axis[2] = paste0(axis[2], "_binned")
     }
   }
- 
+ #browser()
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
+	
+	
+	if (names(d_smooth)[2] == "group") names(d_smooth)[2] = "GGroup"
 	final = suppressMessages(eval(parse(text=total.call)))
 	
 # axis = "muscle.gain"; outcome="weight.loss"

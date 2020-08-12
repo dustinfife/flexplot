@@ -215,7 +215,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
 .create_flexplot_linmod <- function(jaspResults, flexplot, options, model.type) {
   linmod_results <- jaspResults[["linmod_results"]]$object
-  
+  #save(linmod_results,options, model.type, file="/Users/fife/Documents/jasp_fix.rdata")
   
     ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
   terms = all.vars(formula(linmod_results$model))[-1]
@@ -255,7 +255,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   } else if (model.type=="model"){
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
-                        alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
+                 alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
   } else if (model.type == "residuals"){
     plot = visualize(linmod_results$model, linmod_results, plot=model.type, plots.as.list=TRUE,
                      alpha=options$alpha, jitter=c(options$jitx, options$jity))
