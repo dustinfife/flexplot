@@ -176,6 +176,7 @@ flexplot = function(formula, data=NULL, related=F,
 	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
 	 
 				### bin the ghost reference if it's not null
+	  #browser()
     ghost.reference = with(varprep, create_ghost_reference(ghost.reference=ghost.reference, data=data,
                                              bins=bins, breaks=breaks, given=given, axis=axis, labels=labels))
    
@@ -238,7 +239,7 @@ flexplot = function(formula, data=NULL, related=F,
       axis[2] = paste0(axis[2], "_binned")
     }
   }
-
+ 
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)
