@@ -89,7 +89,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 	}
 	
 	if (plot=="residuals"){
-	  res.plots = residual.plots(d, object)
+	  res.plots = residual.plots(d, object,...)
 		p = arrange.plot(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl, step3=NULL,plot=plot, terms=res.plots$terms, numbers=res.plots$numbers)
 		if (plots.as.list){
 		  list(histo=res.plots$histo, res.dep=res.plots$res.dep, sl=res.plots$sl)
@@ -529,7 +529,7 @@ arrange.plot  = function(histo, res.dep, sl, step3, plot, terms, numbers){
 
 ### this function just produces residual plots, so I can reuse it between methods
 
-residual.plots = function(data, object){
+residual.plots = function(data, object,...){
 	
 	terms = attr(terms(object), "term.labels")
 	
@@ -572,7 +572,7 @@ residual.plots = function(data, object){
 	if (length(numbers)>0){
 		#res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + 
 		#theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
-		res.dep = flexplot(residuals~fitted, data=data) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
+		res.dep = flexplot(residuals~fitted, data=data,...) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
 		class(res.dep) = c("flexplot", class(res.dep))		
 		
 	} else {
@@ -580,13 +580,13 @@ residual.plots = function(data, object){
 	}
 
 	if (length(unique(data$fitted))<7){
-		sl = flexplot(abs.res~fitted, data=data, method="lm", jitter=c(.2, 0)) + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
+		sl = flexplot(abs.res~fitted, data=data, method="lm", jitter=c(.2, 0),...) + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
 		nd = aggregate(abs.res~fitted, data=data, FUN=median)
 		nd[,1] = 1:nrow(nd)
 		sl = sl + geom_line(data=nd, col="#bf0303", size=1.5)
 		#class(sl) = c("flexplot", class(sl))		
 	} else {
-		sl = flexplot(abs.res~fitted, data=data, method="lm")+ labs(x="fitted", y="Absolute Value\nof Residuals", title="S-L Plot")			
+		sl = flexplot(abs.res~fitted, data=data, method="lm",...)+ labs(x="fitted", y="Absolute Value\nof Residuals", title="S-L Plot")			
 		class(sl) = c("flexplot", class(sl))					
 	}
 	
