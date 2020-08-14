@@ -221,7 +221,15 @@ return_tabdata = function(linmod_results) {
 # )
 # return_tabdata(linmod_results = linmod_results)
 
-
+convert_to_grayscale = function(plot){
+  plot = plot + scale_colour_grey(start = 0, end = .9) + scale_fill_grey()
+  # q <- ggplot_build(plot)
+  # q$data[[2]]$colour <- "black"
+  # q$data[[3]]$colour <- "black"
+  # q <- ggplot_gtable(q)
+  # plot  = ggplotify::as.ggplot(q)
+  return(plot)
+}
 
 #jasp
 # variables = options$variables
@@ -369,9 +377,10 @@ make_mctable = function(linmod_results) {
 
 
 ### function to organize residual plots
-arrange_jasp_plots = function(plot_list, theme){
-  
+arrange_jasp_plots = function(plot_list, theme, bw=FALSE){
+  #browser()
   plot_list = lapply(plot_list, theme_it, theme)
+  if (bw) plot_list =lapply(plot_list, convert_to_grayscale)
   if (is.null(plot_list[["res.dep"]])){
     plot_list[["res.dep"]] = NULL
     plot = cowplot::plot_grid(plotlist = plot_list)
