@@ -247,7 +247,8 @@ flexplot = function(formula, data=NULL, related=F,
 	
 	
 	if (exists("d_smooth")) {
-	  if (names(d_smooth)[2] == "group") names(d_smooth)[2] = "GGroup"
+	  grp_name = grep("group", names(d_smooth))
+	  if (length(grp_name)>0) names(d_smooth)[grp_name] = "GGroup"
 	}
 	final = suppressMessages(eval(parse(text=total.call)))
 	
