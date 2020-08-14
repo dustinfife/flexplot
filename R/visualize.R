@@ -580,7 +580,7 @@ residual.plots = function(data, object,...){
 	}
 
 	if (length(unique(data$fitted))<7){
-		sl = flexplot(abs.res~fitted, data=data, method="lm", jitter=c(.2, 0),...) + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
+		sl = flexplot(abs.res~fitted, data=data, method="lm",...) + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
 		nd = aggregate(abs.res~fitted, data=data, FUN=median)
 		nd[,1] = 1:nrow(nd)
 		sl = sl + geom_line(data=nd, col="#bf0303", size=1.5)
