@@ -182,14 +182,10 @@ return_tabdata = function(linmod_results) {
 }
 
 
-
 convert_to_grayscale = function(plot){
   plot = plot + scale_colour_grey(start = 0, end = .9) + scale_fill_grey()
-  # q <- ggplot_build(plot)
-  # q$data[[2]]$colour <- "black"
-  # q$data[[3]]$colour <- "black"
-  # q <- ggplot_gtable(q)
-  # plot  = ggplotify::as.ggplot(q)
+  plot$layers[[2]]$aes_params$colour <-  "black"
+  if (length(p$layers)>2) plot$layers[[3]]$aes_params$colour <-  "black"
   return(plot)
 }
 
