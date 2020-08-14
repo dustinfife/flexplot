@@ -4,14 +4,29 @@
 \alias{flexplot}
 \title{Create a "flexible plot" or flexplot}
 \usage{
-flexplot(formula, data = NULL, related = F, bins = 3,
-  labels = NULL, breaks = NULL, method = "loess", se = NULL,
-  ghost.line = NULL, ghost.reference = NULL, spread = c("quartiles",
-  "stdev", "sterr"), jitter = NULL, raw.data = T, sample = Inf,
-  prediction = NULL, suppress_smooth = F, alpha = 0.99977,
-  plot.string = F, silent = F, third.eye = NULL,
-  plot.type = c("histogram", "qq", "density", "boxplot", "violin",
-  "line"))
+flexplot(
+  formula,
+  data = NULL,
+  related = F,
+  bins = 3,
+  labels = NULL,
+  breaks = NULL,
+  method = "loess",
+  se = NULL,
+  ghost.line = NULL,
+  ghost.reference = NULL,
+  spread = c("quartiles", "stdev", "sterr"),
+  jitter = NULL,
+  raw.data = T,
+  sample = Inf,
+  prediction = NULL,
+  suppress_smooth = F,
+  alpha = 0.99977,
+  plot.string = F,
+  silent = F,
+  third.eye = NULL,
+  plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line")
+)
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}

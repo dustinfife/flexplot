@@ -4,7 +4,8 @@
 \name{math}
 \alias{math}
 \title{Math Achievement Dataset}
-\format{A data frame with xx rows and 6 variables:
+\format{
+A data frame with xx rows and 6 variables:
 \describe{
   \item{School}{Which school the subject attends}
   \item{Minority}{description}
@@ -12,7 +13,8 @@
   \item{SES}{Socioeconomic status of the subject}
   \item{MathAch}{description}
   \item{MEANSES}{description}
-}}
+}
+}
 \usage{
 math
 }

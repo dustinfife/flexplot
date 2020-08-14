@@ -4,8 +4,7 @@
 \alias{position_jitterd}
 \title{Jitter points based on density to avoid overplotting}
 \usage{
-position_jitterd(width = NULL, height = NULL, quad.points = 100,
-  seed = NA)
+position_jitterd(width = NULL, height = NULL, quad.points = 100, seed = NA)
 }
 \arguments{
 \item{width, height}{Amount of vertical and horizontal jitter. The jitter
@@ -40,6 +39,7 @@ the amount of random noise only increases as the probability of overlap
 increases.
 }
 \seealso{
-Other position adjustments: \code{\link{position_jitterdodged}}
+Other position adjustments: 
+\code{\link{position_jitterdodged}()}
 }
 \concept{position adjustments}

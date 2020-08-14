@@ -4,7 +4,8 @@
 \name{birthweight}
 \alias{birthweight}
 \title{Dataset seeks to examine what can affect birthweight.}
-\format{A data frame with xx rows and 16 variables:
+\format{
+A data frame with xx rows and 16 variables:
 \describe{
   \item{id}{observation id}
 	 \item{headcirumference}{Circumference of baby's head.}
@@ -23,7 +24,8 @@
   \item{lowbwt}{binary indicator of whether it's considered low weight or not}
   \item{mage35}{mother's age, centered on 35}
   \item{LowBirthWeight}{Same as above, but labeled}
-}}
+}
+}
 \usage{
 birthweight
 }

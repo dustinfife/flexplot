@@ -4,14 +4,16 @@
 \name{plant_growth}
 \alias{plant_growth}
 \title{Plant Growth}
-\format{A data frame with xx rows and 5 variables:
+\format{
+A data frame with xx rows and 5 variables:
 \describe{
   \item{Location}{Location stored (greenhouse vs inside)}
   \item{Soil.Type}{Type of soil used}
   \item{Method}{Method of planting (soil blocks versus newspaper)}
   \item{Diameter}{Diameter of trunk}
   \item{Leaves}{Number of leaves}
-}}
+}
+}
 \usage{
 plant_growth
 }

@@ -118,7 +118,7 @@ Form
 			CheckBox
 			{
 				name:"bw";
-				label: qsTr("Convert to Convert to grayscale");
+				label: qsTr("Convert to grayscale");
 				checked: false
 			}
 			CheckBox

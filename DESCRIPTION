@@ -28,5 +28,5 @@ Suggests: jmvcore (>= 0.8.5),
 	lme4,
 	testthat,
 	randomForest
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr
