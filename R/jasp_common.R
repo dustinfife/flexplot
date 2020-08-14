@@ -1,5 +1,4 @@
-# model comparison table
-# figure out baseline model
+#tested
 return_baseline_model = function(formula) {
   all_terms = all.vars(formula)[-1]
   if (length(all_terms) == 0 ) return ("Baseline: Zero Model")
@@ -7,7 +6,7 @@ return_baseline_model = function(formula) {
   if (length(all_terms) > 1) return ("Baseline: Full Model")
 }
 
-# report r squared for baseline model
+#tested
 return_baseline_rsq = function(model){
   #browser()
   all_terms = all.vars(formula(model))[-1]
@@ -15,6 +14,7 @@ return_baseline_rsq = function(model){
   return(summary(model)$r.squared)
 }
 
+#tested
 return_baseline_df = function(model) {
   #browser()
   all_terms = all.vars(formula(model))[-1]
@@ -27,6 +27,8 @@ return_baseline_df = function(model) {
   
 }
 
+
+#tested
 complete_teststat_when_one_var = function(model, term, first.term = TRUE){
  
   if (length(grep(":", term))>0) {
@@ -58,6 +60,7 @@ complete_teststat_when_one_var = function(model, term, first.term = TRUE){
   return(list("teststat"=teststat, "statval" = statval))
 }
 
+#tested
 return_term_df = function(teststatistic, model, term) {
   #browser()
   df_numerator = anova(model)[term, "Df"]
@@ -178,47 +181,7 @@ return_tabdata = function(linmod_results) {
   return(tabdat)
 }
 
-# model = lm(weight.loss~1, data=exercise_data)
-# linmod_results = list(
-#   model = model,
-#   numbers = "x",
-#   factors = "b"
-# )
-# return_tabdata(linmod_results = linmod_results)
-# 
-# data(exercise_data)
-# model = lm(weight.loss~motivation, data=exercise_data)
-# linmod_results = list(
-#   model = model,
-#   numbers = "motivation",
-#   factors = NA
-# )
-# return_tabdata(linmod_results = linmod_results)
-# 
-# model = lm(weight.loss~therapy.type, data=exercise_data)
-# linmod_results = list(
-#   model = model,
-#   numbers = NA,
-#   factors = "therapy.type"
-# )
-# return_tabdata(linmod_results = linmod_results)
-# 
-# model = lm(weight.loss~rewards, data=exercise_data)
-# linmod_results = list(
-#   model = model,
-#   numbers = NA, 
-#   factors = "rewards"
-# )
-# return_tabdata(linmod_results = linmod_results)
-# 
-# model = lm(weight.loss~rewards + motivation, data=exercise_data)
-# linmod_results = list(
-#   model = model,
-#   numbers = "motivation",
-#   factors = "rewards"
-#     
-# )
-# return_tabdata(linmod_results = linmod_results)
+
 
 convert_to_grayscale = function(plot){
   plot = plot + scale_colour_grey(start = 0, end = .9) + scale_fill_grey()
@@ -238,6 +201,7 @@ add_polynomials = function(variables, data, degree=2){
   f = function(x) paste0("I(", x, "^", degree, ")")
   sapply(variables[!cat], f)
 }
+
 
 make_mctable = function(linmod_results) {
   #save(linmod_results, file="/Users/fife/Documents/jaspresults.Rdata")

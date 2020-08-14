@@ -17,6 +17,7 @@ test_that("visualize function plots", {
   suppressWarnings(vdiffr::expect_doppelganger("regression",visualize(mod)))
   suppressWarnings(vdiffr::expect_doppelganger("regression residuals only",visualize(mod, plot="residuals")))
   suppressWarnings(vdiffr::expect_doppelganger("regression model",visualize(mod, plot="model")))
+  suppressWarnings(vdiffr::expect_doppelganger("regression model with alpha",visualize(mod, plot="model", alpha=.2)))
 
   ### ancova
   mod = lm(weight.loss~motivation + rewards, data=d)
