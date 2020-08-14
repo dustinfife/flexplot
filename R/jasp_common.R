@@ -86,7 +86,6 @@ return_term_df = function(teststatistic, model, term) {
 ### this function returns the output table for model comparisons
 return_tabdata = function(linmod_results) {
   #### set first instance of all
-  save(linmod_results, file="/Users/fife/Documents/jasp_testme.Rdata")
   tabdat = list()
   tabdat$terms = return_baseline_model(formula(linmod_results$model))
   tabdat$rsq = return_baseline_rsq(linmod_results$model)
