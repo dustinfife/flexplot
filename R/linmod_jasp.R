@@ -118,7 +118,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   modelplot <- createJaspPlot(title = "Plot of the Statistical Model",  width = 900, height = 500)
   
   ### what options should change the flexplot?
-  modelplot$dependOn(c("variables", "residuals", "model", "dependent", "interactions"))
+  modelplot$dependOn(c("variables", "residuals", "model", "dependent", "interactions", "bw"))
   
   ### fill the plot object
   jaspResults[["modelplot"]] <- modelplot
@@ -140,7 +140,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   uniplot <- createJaspPlot(title = "Univariate Plots",  width = 900, height = 500)
   
   ### what options should change the flexplot?
-  uniplot$dependOn(c("dependent", "variables", "theme", "univariate"))
+  uniplot$dependOn(c("dependent", "variables", "theme", "univariate", "bw"))
   
   ### fill the plot object
   jaspResults[["uniplot"]] <- uniplot
@@ -177,7 +177,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   addedplot <- createJaspPlot(title = "Added Variable Plot",  width = 900, height = 500)
   
   ### what options should change the flexplot?
-  addedplot$dependOn(c("variables", "residuals", "model", "dependent", "avp", "interactions"))
+  addedplot$dependOn(c("variables", "residuals", "model", "dependent", "avp", "interactions", "bw"))
   
   ### fill the plot object
   jaspResults[["avp"]] <- addedplot
@@ -198,7 +198,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   residualplot <- createJaspPlot(title = "Diagnostic Plots",  width = 800, height = 500)
   
   ### what options should change the flexplot?
-  residualplot$dependOn(c("variables", "residuals", "model", "dependent", "interactions"))
+  residualplot$dependOn(c("variables", "residuals", "model", "dependent", "interactions", "bw"))
   
   ### fill the plot object
   jaspResults[["residualplot"]] <- residualplot
@@ -215,7 +215,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
 .create_flexplot_linmod <- function(jaspResults, flexplot, options, model.type) {
   linmod_results <- jaspResults[["linmod_results"]]$object
-  #save(linmod_results,options, model.type, file="/Users/fife/Documents/jasp_fix.rdata")
+
   
     ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
   terms = all.vars(formula(linmod_results$model))[-1]
@@ -224,6 +224,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
   if	(options$ghost & length(options$variables)<4){
     ghost=rgb(1,0,0,.4)
+    if (options$bw) ghost = "gray"
   } else {
     ghost = NULL
   }
@@ -257,9 +258,10 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                  alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
   } else if (model.type == "residuals"){
+    #save(linmod_results, model.type, options, file="/Users/fife/Documents/jaspdebug.Rdata")
     plot = visualize(linmod_results$model, linmod_results, plot=model.type, plots.as.list=TRUE,
                      alpha=options$alpha, jitter=c(options$jitx, options$jity))
-    plot = arrange_jasp_plots(plot, options$theme)
+    plot = arrange_jasp_plots(plot, options$theme, options$bw)
   } else if (model.type == "added" && length(options$variables) > 1){
     
     methods = list("Regression"="lm", 
@@ -283,7 +285,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   }
   
   if (options$bw) {
-    plot = plot + scale_colour_grey(start = 0, end = .9)
+    plot = convert_to_grayscale(plot)
   }
   
   #+ theme(legend.position = "none")
@@ -611,7 +613,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
 .fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
-  save(linmod_table_modcomp, linmod_results, file = "/Users/fife/Documents/jaspresults.Rdata")
+  
   #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
   tabdat = return_tabdata(linmod_results)
  
