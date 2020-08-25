@@ -12,6 +12,7 @@ test_that("rlm and lm can be compared", {
 test_that("nested models have correct r squared", {
   a = lm(weight.loss~motivation, data=exercise_data)
   b = lm(weight.loss~motivation + therapy.type, data=exercise_data)
+  model1 = a; model2 = b
   results = model.comparison(a,b)$statistics$r.squared[2]
   expect_equal(results, .217)
 })
