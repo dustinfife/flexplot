@@ -245,10 +245,9 @@ flexplot = function(formula, data=NULL, related=F,
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
 	
-	
 	if (exists("d_smooth")) {
 	  grp_name = grep("group", names(d_smooth))
-	  if (length(grp_name)>0) names(d_smooth)[grp_name] = "GGroup"
+	  if (length(grp_name)>0) names(d_smooth)[grp_name[2]] = "GGroup"  
 	}
 	final = suppressMessages(eval(parse(text=total.call)))
 	

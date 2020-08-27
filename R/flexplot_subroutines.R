@@ -39,6 +39,21 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
        method = method, spread = spread, alpha = alpha, prediction = prediction)
 }
 
+#flexplot_random_names(10, data.names = c("h", "b"))
+flexplot_random_names = function(data.names=NULL, n=10) {
+  if (!is.null(data.names[1])){
+    nm = data.names[1]
+    while (nm %in% data.names) {
+      nm = paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+    }
+    return (nm)
+  }
+  
+  paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+
+}  
+
+
 flexplot_alpha_default = function(data, axis, alpha){
   if (axis[1] != "1"){
     ### reorder axis and alter default alpha if categorical

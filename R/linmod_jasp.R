@@ -220,7 +220,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
   terms = all.vars(formula(linmod_results$model))[-1]
   
-  if (length(terms)!=0)  generated.formula = make_flexplot_formula(terms, options$dependent, linmod_results$model$model)
+  if (length(terms)!=0)  generated.formula = flexplot:::make_flexplot_formula(terms, options$dependent, linmod_results$model$model)
 
   if	(options$ghost & length(options$variables)<4){
     ghost=rgb(1,0,0,.4)
@@ -235,6 +235,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   center = list("quartiles" = "median", 
                 "standard errors" = "mean",
                 "standard deviations" = "mean")
+  save(linmod_results, model.type, options, file="/Users/fife/Documents/jaspattack.rdata")
   ### create related plot
   if (model.type == "model" && length(terms) == 0) {
     # trick flexplot into plotting this
