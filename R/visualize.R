@@ -14,7 +14,7 @@ visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,..
 #' Visualize a fitted model 
 #'
 #' Visualize a fitted model
-#' @param object a lmer object
+#' @param object a model object
 #' @param plot what should be plotted? Residuals? model plot? All of them?
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
@@ -23,6 +23,46 @@ visualize.default = function(object, plot=c("all", "residuals", "model"),formula
 	class(object) = "visualize"
 	plot(object)
 }
+
+
+#' Visualize a fitted RandomForest model 
+#'
+#' Visualize a RandomForest model
+#' @param object a RandomForest object
+#' @param plot what should be plotted? Residuals? model plot? All of them?
+#' @param formula A flexplot-style formula
+#' @param ... Other arguments passed to flexplot
+#' @export
+visualize.RandomForest = function(object, plot=c("all", "residuals", "model"),formula=NULL) {
+  all_terms = get_terms(object)
+  response = attr(object, "data")@get("response")
+  outcome = attr(object, "data")@get("input")
+  data = cbind(response, outcome)
+  if (is.null(formula)) formula = make_flexplot_formula(all_terms$predictors, all_terms$response, data)
+  compare.fits(formula, data=data, model1=object)
+}
+
+
+#' Visualize a fitted randomForest model 
+#'
+#' Visualize a randomForest model
+#' @param object a randomForest object
+#' @param plot what should be plotted? Residuals? model plot? All of them?
+#' @param formula A flexplot-style formula
+#' @param ... Other arguments passed to flexplot
+#' @export
+visualize.randomForest = function(object, plot=c("all", "residuals", "model"),formula=NULL) {
+
+  
+  # object$terms
+  # all_terms = get_terms(object)
+  # response = attr(object, "data")@get("response")
+  # outcome = attr(object, "data")@get("input")
+  # data = cbind(response, outcome)
+  # if (is.null(formula)) formula = make_flexplot_formula(all_terms$predictors, all_terms$response, data)
+  # compare.fits(formula, data=data, model1=object)
+}
+#mo
 
 
 
@@ -126,9 +166,9 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 	#### figure out what is numeric
 	d = object@frame
 	plot = match.arg(plot, c("all", "residuals", "model"))
-
+#browser()
 	#### generate residuals plots
-	res.plots = residual.plots(data=d, object)
+	if (plot != "model") 	res.plots = residual.plots(data=d, object)
 	
 	#### now generate a model plot
 	levels = apply(d, 2, FUN=function(x) length(unique(x)))
@@ -241,23 +281,28 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 				newd[,binned] = bin.me(variable=binned, data=newd, bins=bins, labels=labs, breaks=NULL, check.breaks=F)				
 				prediction[,binned] = bin.me(variable=binned, data= prediction, bins=bins, labels=labs, breaks=NULL, check.breaks=F)				
 			}			
-
+			
+      prediction %>% dplyr::filter(Sex == "Female" & School == 1224 & SES == "-0.7-0" )
 			#### aggregate the means across variables		
 			means = prediction %>% group_by_at(vars(one_of(c(terms, "model")))) %>% summarize(Value = mean(prediction))
+			means %>% dplyr::filter(Sex == "Female" & School == 1224 & SES == "-0.7-0" )
 			fixed.means = means[means$model=="fixed effects",]
-			fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(c(terms.fixed)))) %>% 
+			fixed.means %>% dplyr::filter(Sex == "Male" & School == 1224 & SES == "-0.7-0" )
+			fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(c(terms)))) %>% 
 			  summarize(Value=mean(Value))
-			
+
 			means = means[means$model=="random effects",]
 			#means = means %>% dplyr::filter(model=="random effects") 
 			names(means)[ncol(means)] = names(fixed.means)[ncol(fixed.means)] = outcome
 			names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var
 			names(means)[names(means)==unbinned.var] = binned.var	
 			# create a bunch of random names for the random effect
+			fixed.means %>% dplyr::filter(Sex == "Female" & School == 1224 & SES_binned == "-0.7-0" )
 			# this is there just so the ggplot will work and doesn't mean anything
-			reunique = unlist(c(unique(means[,term.re])))
-			fixed.means[,term.re] = NA;
-			fixed.means[,term.re] = sample(reunique, nrow(fixed.means), replace=T)
+			# oh, but it screws things up! It only samples some of the schools and so some effects are not included
+			#reunique = unlist(c(unique(means[,term.re])))
+			#fixed.means[,term.re] = NA;
+			#fixed.means[,term.re] = sample(reunique, nrow(fixed.means), replace=T)
 			
 			#unique(means[,term.re])
 			#head(fixed.means)

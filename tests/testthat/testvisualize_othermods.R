@@ -3,11 +3,12 @@ set.seed(1212)
 test_that("visualize mixed models", {
   #### mixed models
   data(math)
+  math = math[1:100,]
   model = lme4::lmer(MathAch~ SES + Sex + (SES|School), data=math)
   set.seed(1212)
   vdiffr::expect_doppelganger("mixed row panels",visualize(model, formula = MathAch~ SES | Sex + School, plot="model"))
   vdiffr::expect_doppelganger("mixed diff lines",visualize(model, formula = MathAch~ SES + School| Sex, sample=11))
-  vdiffr::expect_doppelganger("mixed small sample",visualize(model, formula = MathAch~ Sex | SES+ School, sample=3, plot="model"))
+  vdiffr::expect_doppelganger("mixed small sample",visualize(model, formula = MathAch~ Sex | SES+ School, sample=10, plot="model"))
   
   mod = lme4::lmer(MathAch~1 + (1|School), data=math)
   vdiffr::expect_doppelganger("mixed anova with no formula",visualize(mod, plot="model"))
@@ -20,4 +21,17 @@ test_that("visualize mixed models", {
                                         formula = MathAch ~  Sex + School| SES, 
                                         sample = 30))
             
+})
+
+test_that("visualize rf models", {
+  #### mixed models
+  data(avengers)
+  model = party::cforest(kills~died + ptsd + injuries, data=avengers[1:100,])
+  vdiffr::expect_doppelganger("cforest",visualize(model))
+                              
+  model = randomForest::randomForest(kills~died + ptsd + injuries, data=avengers[1:100,])
+  object = model
+  vdiffr::expect_doppelganger("cforest",visualize(model))                              
+  
+
 })

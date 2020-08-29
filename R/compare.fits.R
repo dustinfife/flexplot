@@ -22,160 +22,72 @@
 ##' mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
 ##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
 compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, report.se=F, re=F, pred.type="response", ...){
-	#### if mod2 is null..
-	if (is.null(model2)){
-		model2 = model1
-		old.mod = 1
-	} else {
-		old.mod = 0
-	}
+	
+  if (is.null(model2)) runme = "yes"
+
+  
+  #### if mod2 is null..
+  if (is.null(model2)){
+    model2 = model1
+  } 
+  
 
 	#### get type of model
 	model1.type = class(model1)[1]
 	model2.type = class(model2)[1]	
 
+	#### get all variables
+	variables_mod1 = get_terms(model1)
+	variables_mod2 = get_terms(model2)
+	testme = unique(c(variables_mod1$predictors, variables_mod2$predictors))
+	all_variables = unique(c(variables_mod1$predictors, variables_mod2$predictors, variables_mod1$response, variables_mod2$response))
+	#### for the rare occasion where deleting missing data changes the levels...
+	
+	data = check_missing(model1, model2, data, all_variables)
 
-	#### extract the terms from each MODEL
-	if (model1.type == "RandomForest") {
-	  testme1 = get_cforest_predictors(model1);
-	  terms.mod1 = testme1
-	} else {
-	  testme1 = formula(model1); terms.mod1=all.vars(testme1)[-1]  
-	}
-	if (model2.type == "RandomForest") {
-	  testme2 = get_cforest_predictors(model2);
-	  terms.mod2 = testme2
-	} else {
-	  testme2 = formula(model2); terms.mod2=all.vars(testme2)[-1]  
+	### make sure they have the same outcome
+	if (variables_mod1$response != variables_mod2$response) {
+	  stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
 	}
 	
-	
-	testme = unique(c(all.vars(testme1)[-1], all.vars(testme2)[-1]))
-	
-	
-	##### extract variable names
+
+
+	##### extract variable names from FORMULA
 	variables = all.vars(formula)
-    outcome = variables[1]
-    predictors = variables[-1]
+  outcome = variables[1]
+  predictors = variables[-1]
     
     ##### make sure they're putting the same variables from formula in terms
+  #browser()
 	if (!(all(predictors %in% testme))){
-		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%terms.mod1)], collapse=",")))
+		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%testme)], collapse=",")))
 	}
 	
 	##### make sure they're using the right dataset
 	if (!(all(predictors %in% names(data)))){
 		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
 	}	
-	
-    #### for the rare occasion where deleting missing data changes the levels...
-    if (length(predict(model1))<nrow(data) | length(predict(model2))<nrow(data)){
-      data = na.omit(data[,variables])
-    }    
-    
-	  #### create random column just to make the applies work (yeah, it's hacky, but it works)
-    data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)
-    predictors = c(predictors, "reject", "reject2")
-
-    #### get variable types
-    numb = names(which(unlist(lapply(data[,predictors], is.numeric))))
-    cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))
-    browser()
-    ##### make "quadriture" points for quant variables
-    var.mins = apply(data[, numb], 2, min, na.rm=T)
-    var.max = apply(data[, numb], 2, max, na.rm=T)    
-    min.max = data.frame(var.mins, var.max); min.max$size = c(50, rep(10, nrow(min.max)-1))
-	f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}
-	min.max = as.list(apply(min.max, 1, f))
-
-    #### get unique values for categorical vars
-    if (length(cat)==1){
-    	un.vars = lapply(data[cat], unique)    	
-    } else {
-		un.vars =lapply(data[,cat], unique); names(un.vars) = cat
-	}
-
-    
-    #### combine into one dataset
-    all.vars = c(min.max, un.vars)    
-    #### get rid of extra variables
-    tot.vars = length(predictors)
-    rejects = grep("reject", names(all.vars))
-	all.vars = all.vars[-rejects]
-	all.vars = lapply(all.vars, function(x) x[!is.na(x)])
-	pred.values = expand.grid(all.vars)
+	#browser()
+  pred.values = generate_predictors(data, predictors, testme)
+  pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
+  
+  ### there's no fixed effect if we don't have these lines
+  model1.type = class(model1)[1]
+  if (model1.type == "lmerMod" | model1.type == "glmerMod"){
+    pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		
+  }
 
 
-
-	# ##### look for interactions and remove them
-	# if (length(grep(":", terms.mod1))>0){
-	# 	terms.mod1 = terms.mod1[-grep(":", terms.mod1)]
-	# 	model1.type = ifelse(model1.type=="lm", "interaction", model1.type)
-	# }
-	# if (length(grep(":", terms.mod2))>0){
-	# 	terms.mod2 = terms.mod2[-grep(":", terms.mod1)]
-	# 	model2.type = ifelse(model2.type=="lm", "interaction", model2.type)
-	# }	
-	# 
-	# ##### look for polynomials and remove them
-	# if (length(grep("^2", terms.mod1, fixed=T, value=T))>0 ){
-	# 	terms.mod1 = terms.mod1[-grep("^2", terms.mod1, fixed=T)]
-	# 	model1.type = ifelse(model1.type=="lm", "polynomial", model1.type)
-	# }
-	# if (length(grep("^2", terms.mod2, fixed=T, value=T))>0 & model1.type=="lm"){
-	# 	terms.mod2 = terms.mod2[-grep("^2", terms.mod1, fixed=T)]
-	# 	model2.type = ifelse(model2.type=="lm", "polynomial", model2.type)
-	# }	
-	
-
-	
-	#### if the outcome is an ordered factor...
-		
-	
-	#### if it's not in model 1:
-	#### input the mean (if numeric) or a value (if categorical)
-	if (length(which(!(terms.mod1 %in% predictors)))>0){
-		not.in.there = terms.mod1[which(!(terms.mod1 %in% predictors))]
-		for (i in 1:length(not.in.there)){
-			if (is.numeric(data[,not.in.there[i]])){
-				message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))
-				pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)
-			} else {
-				val = unique(data[,not.in.there[i]])[1]
-				message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))
-				pred.values[,not.in.there[i]] = val
-			}
-		}
-	}
- 
-
-	#### generate predictions
-	if (model1.type == "lmerMod" | model1.type == "glmerMod"){
-		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		
-	} else if (model1.type == "polr"){
-		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="class", re.form=NA), model= model1.type)		
-	} else if (model1.type == "lm" | model1.type == "polynomial" | model1.type=="interaction"){
-		int = ifelse(report.se, "confidence", "none")
-		pred.mod1 = data.frame(prediction = predict(model1, pred.values, interval=int), model=model1.type)
-	} else {	
-		int = ifelse(report.se, "confidence", "none")
-		pred.mod1 = data.frame(prediction = predict(model1, pred.values, type=pred.type, interval=int), model= model1.type)		
-	}
-
-	#### generate separate predictions for random effects
-	if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){
-		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")	
-		old.mod=0	
-	} else if ((model2.type == "lmerMod" | model2.type == "glmerMod") & !re){
-		pred.mod2 = pred.mod1
-	} else if (model2.type == "polr"){
-		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="class", re.form=NA), model= model2.type)		
-	} else if (model2.type == "lm" | model2.type == "polynomial" | model2.type=="interaction"){
-		int = ifelse(report.se, "confidence", "none")
-		pred.mod2 = data.frame(prediction = predict(model2, pred.values, interval="confidence")[,1], model=model2.type)
-	} else {
-		pred.mod2 = data.frame(prediction = predict(model2, pred.values, type= pred.type), model= model2.type)		
-	}
+  #browser()
+  if (!exists("runme")) {
+    pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
+  } else {
+    pred.mod2 = pred.mod1
+  }
+  if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){
+    pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")	
+    old.mod=0	
+  }
 	
 	#### convert polyr back to numeric (if applicable)
 	if (model1.type == "polr" | model2.type == "polr"){
@@ -185,6 +97,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
 	}
 
 		#### if they have the same name, just call them model1 and model2
+
 	if (!re){
 		pred.mod1$model = paste0(deparse(substitute(model1)), " (", model1.type, ")", collapse="")
     if (pred.mod1$model[1] == pred.mod2$model[1]){
@@ -193,9 +106,11 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
       pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, ")", collapse="")
     }
 	}
+  
+  
 	
 	#### report one or two coefficients, depending on if they supplied it
-	if (old.mod==0){
+	if (!exists("runme") | exists("old.mod")){
 		prediction.model = rbind(pred.mod1, pred.mod2)
 		prediction.model = cbind(pred.values, prediction.model)
 	} else {

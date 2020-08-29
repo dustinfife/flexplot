@@ -122,7 +122,8 @@ flexplot = function(formula, data=NULL, related=F,
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
                         ### (error came at ghost.reference when it couldn't find the binned version)
-	prediction = with(varprep, 
+	
+  prediction = with(varprep, 
 	            flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE))
 
@@ -249,6 +250,7 @@ flexplot = function(formula, data=NULL, related=F,
 	  grp_name = grep("group", names(d_smooth))
 	  if (length(grp_name)>0) names(d_smooth)[grp_name[2]] = "GGroup"  
 	}
+
 	final = suppressMessages(eval(parse(text=total.call)))
 	
 # axis = "muscle.gain"; outcome="weight.loss"

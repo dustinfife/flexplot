@@ -146,9 +146,17 @@ test_that("fit.function works for categorical predictors", {
 
 
 
+test_that("compare.fits_subroutines work", {
+  mod1 = lm(weight.loss~1, data=exercise_data)
+  mod2 = lm(weight.loss~therapy.type, data=exercise_data)
+  testthat::expect_equal(length(all.vars(formula(whats_model2(mod1)))), 1)
+  testthat::expect_equal(length(all.vars(formula(whats_model2(mod1, mod2)))), 2)
 
-
-
+  model = suppressWarnings(party::cforest(weight.loss~therapy.type, data=exercise_data))
+  testthat::expect_equal(get_terms(model), "therapy.type")
+  model = lm(weight.loss~therapy.type, data=exercise_data)
+  testthat::expect_equal(get_terms(model), "therapy.type")
+})
 
 
 
