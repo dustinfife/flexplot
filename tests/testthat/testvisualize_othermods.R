@@ -24,14 +24,13 @@ test_that("visualize mixed models", {
 })
 
 test_that("visualize rf models", {
-  #### mixed models
+  
   data(avengers)
+  set.seed(1212)
   model = party::cforest(kills~died + ptsd + injuries, data=avengers[1:100,])
   vdiffr::expect_doppelganger("cforest",visualize(model))
-                              
   model = randomForest::randomForest(kills~died + ptsd + injuries, data=avengers[1:100,])
-  object = model
-  vdiffr::expect_doppelganger("cforest",visualize(model))                              
+  vdiffr::expect_doppelganger("randomForest",visualize(model))                              
   
 
 })

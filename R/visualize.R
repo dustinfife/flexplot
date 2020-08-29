@@ -20,9 +20,47 @@ visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,..
 #' @param ... Other arguments passed to flexplot
 #' @export
 visualize.default = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){
-	class(object) = "visualize"
-	plot(object)
+  browser()
+  
+  ## get dataset name
+  data = eval(getCall(object)$data)
+  
+  ## get formula
+  variables = all.vars(formula(object))
+  predictors = variables[-1]
+  response = variables[1]
+  new_form = make_flexplot_formula(predictors, response, data)
+  
+  ## call compare.fits
+  compare.fits(new_form, data=data, model1=object)
+  
 }
+
+
+#' Visualize a randomForest model 
+#'
+#' Visualize a randomForest model
+#' @param object a randomForest object
+#' @param plot what should be plotted? Residuals? model plot? All of them?
+#' @param formula A flexplot-style formula
+#' @param ... Other arguments passed to flexplot
+#' @export
+visualize.randomForest = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){
+
+  ## get dataset name
+  data = eval(getCall(object)$data)
+  
+  ## get formula
+  variables = all.vars(formula(object))
+  predictors = variables[-1]
+  response = variables[1]
+  new_form = make_flexplot_formula(predictors, response, data)
+  
+  ## call compare.fits
+  compare.fits(new_form, data=data, model1=object)
+  
+}
+
 
 
 #' Visualize a fitted RandomForest model 
@@ -43,26 +81,6 @@ visualize.RandomForest = function(object, plot=c("all", "residuals", "model"),fo
 }
 
 
-#' Visualize a fitted randomForest model 
-#'
-#' Visualize a randomForest model
-#' @param object a randomForest object
-#' @param plot what should be plotted? Residuals? model plot? All of them?
-#' @param formula A flexplot-style formula
-#' @param ... Other arguments passed to flexplot
-#' @export
-visualize.randomForest = function(object, plot=c("all", "residuals", "model"),formula=NULL) {
-
-  
-  # object$terms
-  # all_terms = get_terms(object)
-  # response = attr(object, "data")@get("response")
-  # outcome = attr(object, "data")@get("input")
-  # data = cbind(response, outcome)
-  # if (is.null(formula)) formula = make_flexplot_formula(all_terms$predictors, all_terms$response, data)
-  # compare.fits(formula, data=data, model1=object)
-}
-#mo
 
 
 
