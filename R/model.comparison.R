@@ -132,7 +132,13 @@ Might I interest you in a suite of other functions, including compare.fits, perh
 ##' @author Dustin Fife
 ##' @export
 sensitivity.table = function(object){
-	predmat = table(Observed = object $model[,1], Predicted=round(predict(object, type="response")))
+
+  if (class(object)[1] == "RandomForest") {
+    predmat = table(Observed = attr(object, "responses")@variables[,1],
+                    Predicted = predict(object))
+  } else {
+	  predmat = table(Observed = object $model[,1], Predicted=round(predict(object, type="response")))
+  }
 	TP = predmat[2,2]
 	FP = predmat[2,1]
 	TN = predmat[1,1]

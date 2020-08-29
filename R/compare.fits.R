@@ -36,8 +36,20 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
 
 
 	#### extract the terms from each MODEL
-	testme1 = formula(model1); terms.mod1=all.vars(testme1)[-1]
-	testme2 = formula(model2); terms.mod2=all.vars(testme2)[-1]
+	if (model1.type == "RandomForest") {
+	  testme1 = get_cforest_predictors(model1);
+	  terms.mod1 = testme1
+	} else {
+	  testme1 = formula(model1); terms.mod1=all.vars(testme1)[-1]  
+	}
+	if (model2.type == "RandomForest") {
+	  testme2 = get_cforest_predictors(model2);
+	  terms.mod2 = testme2
+	} else {
+	  testme2 = formula(model2); terms.mod2=all.vars(testme2)[-1]  
+	}
+	
+	
 	testme = unique(c(all.vars(testme1)[-1], all.vars(testme2)[-1]))
 	
 	
@@ -68,7 +80,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
     #### get variable types
     numb = names(which(unlist(lapply(data[,predictors], is.numeric))))
     cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))
-
+    browser()
     ##### make "quadriture" points for quant variables
     var.mins = apply(data[, numb], 2, min, na.rm=T)
     var.max = apply(data[, numb], 2, max, na.rm=T)    

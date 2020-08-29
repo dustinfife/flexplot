@@ -15,6 +15,11 @@ custom.labeler = function(x){
   })
 }
 
+# function that extracts variables from cforest model
+get_cforest_predictors = function(rf_model) {
+  unlist(strsplit(as.character(attr(rf_model, "data")@formula$input)[2][1], " + ", fixed=T))
+}
+
 ## function that does nested model comparisons on a single fitted model
 nested_model_comparisons = function(object){
   
