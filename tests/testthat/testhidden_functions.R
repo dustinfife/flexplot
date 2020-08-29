@@ -153,9 +153,9 @@ test_that("compare.fits_subroutines work", {
   testthat::expect_equal(length(all.vars(formula(whats_model2(mod1, mod2)))), 2)
 
   model = suppressWarnings(party::cforest(weight.loss~therapy.type, data=exercise_data))
-  testthat::expect_equal(get_terms(model), "therapy.type")
+  testthat::expect_equal(get_terms(model)$predictors, "therapy.type")
   model = lm(weight.loss~therapy.type, data=exercise_data)
-  testthat::expect_equal(get_terms(model), "therapy.type")
+  testthat::expect_equal(get_terms(model)$predictors, "therapy.type")
 })
 
 
