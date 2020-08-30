@@ -300,12 +300,12 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 				prediction[,binned] = bin.me(variable=binned, data= prediction, bins=bins, labels=labs, breaks=NULL, check.breaks=F)				
 			}			
 			
-      prediction %>% dplyr::filter(Sex == "Female" & School == 1224 & SES == "-0.7-0" )
+      #prediction %>% dplyr::filter(Sex == "Female" & School == 1224 & SES == "-0.7-0" )
 			#### aggregate the means across variables		
 			means = prediction %>% group_by_at(vars(one_of(c(terms, "model")))) %>% summarize(Value = mean(prediction))
-			means %>% dplyr::filter(Sex == "Female" & School == 1224 & SES == "-0.7-0" )
+			#means %>% dplyr::filter(Sex == "Female" & School == 1224 & SES == "-0.7-0" )
 			fixed.means = means[means$model=="fixed effects",]
-			fixed.means %>% dplyr::filter(Sex == "Male" & School == 1224 & SES == "-0.7-0" )
+			#fixed.means %>% dplyr::filter(Sex == "Male" & School == 1224 & SES == "-0.7-0" )
 			fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(c(terms)))) %>% 
 			  summarize(Value=mean(Value))
 
@@ -315,7 +315,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 			names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var
 			names(means)[names(means)==unbinned.var] = binned.var	
 			# create a bunch of random names for the random effect
-			fixed.means %>% dplyr::filter(Sex == "Female" & School == 1224 & SES_binned == "-0.7-0" )
+			#fixed.means %>% dplyr::filter(Sex == "Female" & School == 1224 & SES_binned == "-0.7-0" )
 			# this is there just so the ggplot will work and doesn't mean anything
 			# oh, but it screws things up! It only samples some of the schools and so some effects are not included
 			#reunique = unlist(c(unique(means[,term.re])))
