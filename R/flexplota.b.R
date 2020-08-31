@@ -95,7 +95,7 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         	#	theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
       }		
 
-			#save(self$options, data, formula, se.type, formula, data, file="/Users/fife/Documents/flexplot/checkme.Rdat")
+			#
 			
 			#### modify geoms (if they choose to)
       geoms = sapply(p$layers, function(x) class(x$geom)[1])

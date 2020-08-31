@@ -29,7 +29,7 @@ estimates.default = function(object, mc=TRUE){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.lm = function(object, mc=TRUE){
-#browser()
+
 	n = nrow(model.frame(object)) 
 	
 	#### generate list of coefficients
@@ -174,7 +174,7 @@ estimates.lm = function(object, mc=TRUE){
 		coef.matrix = NA
 		difference.matrix=NA
 	}	
-	#browser()
+	
 	#### NUMERIC VARIABLES
 	if (length(numbers)>0){
 		vars = c("(Intercept)", numbers)

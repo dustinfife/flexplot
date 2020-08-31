@@ -91,7 +91,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   		p = NA
   		r.squared = c(NA, NA)
   	}
-  	#browser()
+  	
   	aic = c(AIC(model1), AIC(model2))
   	bic = c(BIC(model1), BIC(model2))
   	bayes.factor = bf.bic(model1, model2)

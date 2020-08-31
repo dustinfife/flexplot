@@ -20,8 +20,7 @@ visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,..
 #' @param ... Other arguments passed to flexplot
 #' @export
 visualize.default = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){
-  browser()
-  
+
   ## get dataset name
   data = eval(getCall(object)$data)
   
@@ -184,7 +183,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   #### figure out what is numeric
   d = object@frame
   plot = match.arg(plot, c("all", "residuals", "model"))
-  #browser()
+  
   #### generate residuals plots
   if (plot != "model") 	res.plots = residual.plots(data=d, object)
   
@@ -202,7 +201,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   preds = names(d)[-1]#[which(!(names(d)[-1] %in% term.re))]
   
   #### randomly sample the re terms and convert to numeric
-  #browser()
+  
   unique.terms = unique(d[,term.re])
   samp = sample(unique.terms, size=min(sample, length(unique.terms)))
   k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])
@@ -256,13 +255,13 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   terms = all.vars(formula)[-1]
   terms.fixed = terms[-which(terms %in% term.re)]
   
-  #browser()
+  
   ##### generate fixed effects predictions
   #### if random is in NOT in the second slot
   if (!modify){
     step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T, ...)
   } else {
-    #browser()
+    
     #### otherwise...
     prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	
     
@@ -272,7 +271,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
     #formula_new = MathAch~SES + School | Sex
     step3 = flexplot(formula, data=k, suppress_smooth=T, ...) 
     
-    #browser()
+    
     #if axis 1 is numeric, do lines
     if (is.numeric(d[,terms[1]])){
       m = prediction[prediction$model=="fixed effects",]
@@ -450,7 +449,7 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
   terms = all.vars(formula)[-1]
   terms.fixed = terms[-which(terms %in% term.re)]
   
-  #browser()
+  
   ##### generate fixed effects predictions
   #### if random is in NOT in the second slot
   if (!modify){
@@ -465,7 +464,7 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
     #formula_new = MathAch~SES + School | Sex
     step3 = flexplot(formula, data=k, suppress_smooth=T, ...) 
     
-    #browser()
+    
     #if axis 1 is numeric, do lines
     if (is.numeric(d[,terms[1]])){
       m = prediction[prediction$model=="fixed effects",]

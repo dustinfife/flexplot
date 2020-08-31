@@ -58,7 +58,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
   predictors = variables[-1]
     
     ##### make sure they're putting the same variables from formula in terms
-  #browser()
+  
 	if (!(all(predictors %in% testme))){
 		stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%testme)], collapse=",")))
 	}
@@ -67,7 +67,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
 	if (!(all(predictors %in% names(data)))){
 		stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
 	}	
-	#browser()
+	
   pred.values = generate_predictors(data, predictors, testme)
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
@@ -78,7 +78,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
   }
 
 
-  #browser()
+  
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
   } else {

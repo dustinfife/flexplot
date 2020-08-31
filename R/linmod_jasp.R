@@ -158,7 +158,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     p = theme_it(flexplot(make.formula(options$variables[i-1], "1"), dataset), options$theme)
     plot.list[[i]] = p
   }
-  #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+  
   if (length(options$variables)<3){
     nc = length(options$variables) + 1
   } else if ((length(options$variables)+1)/2 == round((length(options$variables)+1)/2)){
@@ -235,7 +235,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   center = list("quartiles" = "median", 
                 "standard errors" = "mean",
                 "standard deviations" = "mean")
-  #save(linmod_results, model.type, options, file="/Users/fife/Documents/jaspattack.rdata")
+  
   ### create related plot
   if (model.type == "model" && length(terms) == 0) {
     # trick flexplot into plotting this
@@ -259,7 +259,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                  alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
   } else if (model.type == "residuals"){
-    #save(linmod_results, model.type, options, file="/Users/fife/Documents/jaspdebug.Rdata")
+    
     plot = visualize(linmod_results$model, linmod_results, plot=model.type, plots.as.list=TRUE,
                      alpha=options$alpha, jitter=c(options$jitx, options$jity))
     plot = arrange_jasp_plots(plot, options$theme, options$bw)
@@ -341,7 +341,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     model = lm(f, dataset)
 
     est = estimates(model, mc=TRUE)
-    #save(options, dataset, ready, model, file="/Users/fife/Documents/jaspresults.Rdat")
+    
     est$model = model
     
     linmod_results$object = est
@@ -615,7 +615,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 .fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
   
-  #save(linmod_table_modcomp, linmod_results, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+  
   tabdat = return_tabdata(linmod_results)
  
   ### remove main effects for interactions

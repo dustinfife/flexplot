@@ -220,7 +220,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     p = theme_it(flexplot(make.formula(options$variables[i-1], "1"), dataset), options$theme)
     plot.list[[i]] = p
   }
-  #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+
   if (length(options$variables)<3){
     nc = length(options$variables) + 1
   } else if ((length(options$variables)+1)/2 == round((length(options$variables)+1)/2)){
@@ -296,13 +296,11 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     if (length(random.effects)<1) random.effects = "1"
     random.effects = paste0(random.effects, collapse="+")
     f = paste0(options$dependent, " ~ ", fixed.effects, " + (", random.effects, " | ", options$rvariables, ")", collapse = "")
-    #save(f, dataset,options, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")f
     f = as.formula(f)
-    #save(f, dataset,options, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+    
 
     # fit the model -----------------------------------------------------------
     mod = lme4::lmer(f, data=dataset)
-    #save(options, dataset, mod, f, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
     mixedmod_results$object = mod
     return()
   }

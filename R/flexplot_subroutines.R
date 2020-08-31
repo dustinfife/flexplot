@@ -28,7 +28,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   }
   
   ### create the lists that contain the breaks
-  #browser()
+  
   break.me = flexplot_break_me(data, predictors, given, axis)
   breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
@@ -80,7 +80,7 @@ flexplot_alpha_default = function(data, axis, alpha){
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
-  #browser()
+  
   if (is.null(data)) {
     return(data) 
   } else {
@@ -112,7 +112,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     ### remove missing values
     
     data = flexplot_delete_na(data, variables)
-    #browser()
+    
     
     ### prep data for association plot
     if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1 & axis[1] != "1"){
@@ -346,7 +346,7 @@ flexplot_axis_given = function(formula){
 #expect_true(nrow(flexplot_delete_na(exercise_data, NULL))==200)
 flexplot_delete_na = function(data, variables){
   
-  #browser()
+  
   if (length(variables)>=0){
       keepers = complete.cases(data[,variables,drop=FALSE])
       data = data[keepers,, drop=FALSE]

@@ -8,7 +8,7 @@ return_baseline_model = function(formula) {
 
 #tested
 return_baseline_rsq = function(model){
-  #browser()
+  
   all_terms = all.vars(formula(model))[-1]
   if (length(all_terms) == 1 ) return (NA)
   return(summary(model)$r.squared)
@@ -16,7 +16,7 @@ return_baseline_rsq = function(model){
 
 #tested
 return_baseline_df = function(model) {
-  #browser()
+  
   all_terms = all.vars(formula(model))[-1]
   residual_df = anova(model)["Residuals", "Df"]
   model_df = sum(anova(model)[,"Df"]) - residual_df
@@ -62,7 +62,7 @@ complete_teststat_when_one_var = function(model, term, first.term = TRUE){
 
 #tested
 return_term_df = function(teststatistic, model, term) {
-  #browser()
+  
   df_numerator = anova(model)[term, "Df"]
   df_denom = anova(model)["Residuals", "Df"]
   if (teststatistic == "F") {
@@ -134,7 +134,7 @@ return_tabdata = function(linmod_results) {
   
   #### return if there's only one variable
   if (length(all_terms) == 1) {
-    #browser()
+    
     #### create new null model
     y = names(linmod_results$model$model)[1]
     f = make.formula(y, "1")
@@ -168,7 +168,7 @@ return_tabdata = function(linmod_results) {
     tabdat$bayesinv[i+1] = 1/bf
     
     ## enter test statistic (all this can be in the loop)
-    #browser()
+    
     teststatistics = complete_teststat_when_one_var(linmod_results$model, all_terms[i], first.term = FALSE)
     tabdat$teststat[i+1] = teststatistics[[1]]
     tabdat$statval[i+1] = teststatistics[[2]]
@@ -200,7 +200,7 @@ add_polynomials = function(variables, data, degree=2){
 
 
 make_mctable = function(linmod_results) {
-  #save(linmod_results, file="/Users/fife/Documents/jaspresults.Rdata")
+  #
   all_terms = all.vars(formula(linmod_results$model))[-1]
   
   reg_mod_coef = summary(linmod_results$model)$coefficients
@@ -337,7 +337,7 @@ make_mctable = function(linmod_results) {
 
 ### function to organize residual plots
 arrange_jasp_plots = function(plot_list, theme, bw=FALSE){
-  #browser()
+  
   plot_list = lapply(plot_list, theme_it, theme)
   if (bw) plot_list =lapply(plot_list, convert_to_grayscale)
   if (is.null(plot_list[["res.dep"]])){

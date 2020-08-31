@@ -63,7 +63,7 @@ variable_types = function(variables, data, return.names=F){
 # data = graduate_income
 # outcome = "Income"
 make_flexplot_formula = function(predictors, outcome, data){
-  #browser()
+  
   # omit those variables not in the dataset
   nothere = which (!(predictors %in% names(data)))
   if (length(nothere)>0) predictors = predictors[-nothere]

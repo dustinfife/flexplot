@@ -17,7 +17,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   ### read in the dataset if it's ready
   if (ready){
     dataset = .read_glinmod_data(dataset, options)
-    #save(dataset, options, file="/Users/fife/Documents/jaspdata.rdata")
+    #
     #### modify dataset to convert to numeric (where applicable)
 
     dataset = modify_dv(dataset, options$dependent, options$family)
@@ -128,7 +128,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   glinmod_results <- jaspResults[["glinmod_results"]]$object 
   terms = attr(terms(glinmod_results$model), "term.labels")
-  #save(terms, glinmod_results, modelplot, options, dataset, file="/Users/fife/Documents/jaspbroke.rdata")
+  #
   generated.formula = make_flexplot_formula(terms, options$dependent, dataset)
   
   if	(options$ghost & length(options$variables)<4){
@@ -219,7 +219,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
 # Other stuff -------------------------------------------------------------
 
 .glinmod_compute = function(jaspResults, dataset, options, ready) {
-  #save(dataset, options, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
+  #
   if (ready){
     ## createJaspState allows these results to be recycled
     glinmod_results <- createJaspState()
@@ -245,7 +245,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     )
     
     chosen.family = family[[options$family]]
-    #save(chosen.family, options, file="/Users/fife/Documents/flexplot/jaspresults.rdata")
+    #
     model = glm(f, dataset, family=chosen.family)
     glinmod_results$object = model
     return()
