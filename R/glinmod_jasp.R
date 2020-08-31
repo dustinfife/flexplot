@@ -128,6 +128,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   glinmod_results <- jaspResults[["glinmod_results"]]$object 
   terms = attr(terms(glinmod_results$model), "term.labels")
+  #save(terms, glinmod_results, modelplot, options, dataset, file="/Users/fife/Documents/jaspbroke.rdata")
   generated.formula = make_flexplot_formula(terms, options$dependent, dataset)
   
   if	(options$ghost & length(options$variables)<4){

@@ -235,7 +235,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   center = list("quartiles" = "median", 
                 "standard errors" = "mean",
                 "standard deviations" = "mean")
-  save(linmod_results, model.type, options, file="/Users/fife/Documents/jaspattack.rdata")
+  #save(linmod_results, model.type, options, file="/Users/fife/Documents/jaspattack.rdata")
   ### create related plot
   if (model.type == "model" && length(terms) == 0) {
     # trick flexplot into plotting this
@@ -615,7 +615,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 .fill_linmod_table_modcomp = function(linmod_table_modcomp, linmod_results){
   
   
-  #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
+  #save(linmod_table_modcomp, linmod_results, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
   tabdat = return_tabdata(linmod_results)
  
   ### remove main effects for interactions

@@ -3,6 +3,14 @@ set.seed(1212)
 data(exercise_data); data("relationship_satisfaction")
 d = exercise_data
 
+test_that("things go okay when 'group' is a variable", {
+  data(avengers)
+  avengers$group = avengers$superpower
+  vdiffr::expect_doppelganger("group in slot 3",flexplot(iq~shots.taken|group, data=avengers))
+  vdiffr::expect_doppelganger("group in slot 2",flexplot(iq~shots.taken+group, data=avengers))
+  vdiffr::expect_doppelganger("group in slot 4",flexplot(iq~shots.taken|kills+group, data=avengers))
+  vdiffr::expect_doppelganger("group in slot 1",flexplot(iq~group+kills|shots.taken, data=avengers))
+})
 
 test_that("error messages are correct", {
   data(avengers)

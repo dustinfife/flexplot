@@ -42,8 +42,11 @@ test_that("make flexplot formula works", {
   tst = as.character(make_flexplot_formula(predictors = predictors, outcome, data))[3]
   expect_output(print(tst),'\\[1\\] "Years \\+ Grad\\.School \\| Profession \\+ GPA"')
   
-  tst = as.character(make_flexplot_formula(predictors = "gender", outcome, data))[3]
-  expect_output(print(tst),'gender')
+  tst = as.character(make_flexplot_formula(predictors = "Years", outcome, data))[3]
+  expect_output(print(tst),'Years')
+
+  tst = as.character(make_flexplot_formula(predictors = c("Years", "GPA", "gender:GPA"), outcome, data))[3]
+  expect_output(print(tst),'Years \\| GPA')
 })
 
 test_that("match.jitter works", {
