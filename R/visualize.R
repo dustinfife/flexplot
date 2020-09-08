@@ -56,7 +56,7 @@ visualize.randomForest = function(object, plot=c("all", "residuals", "model"),fo
   new_form = make_flexplot_formula(predictors, response, data)
   
   ## call compare.fits
-  compare.fits(new_form, data=data, model1=object)
+  compare.fits(new_form, data=data, model1=object,...)
   
 }
 
@@ -70,13 +70,13 @@ visualize.randomForest = function(object, plot=c("all", "residuals", "model"),fo
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
 #' @export
-visualize.RandomForest = function(object, plot=c("all", "residuals", "model"),formula=NULL) {
+visualize.RandomForest = function(object, plot=c("all", "residuals", "model"),formula=NULL,...) {
   all_terms = get_terms(object)
   response = attr(object, "data")@get("response")
   outcome = attr(object, "data")@get("input")
   data = cbind(response, outcome)
   if (is.null(formula)) formula = make_flexplot_formula(all_terms$predictors, all_terms$response, data)
-  compare.fits(formula, data=data, model1=object)
+  compare.fits(formula, data=data, model1=object,...)
 }
 
 
