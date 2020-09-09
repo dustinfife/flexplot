@@ -468,6 +468,13 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
     #if axis 1 is numeric, do lines
     if (is.numeric(d[,terms[1]])){
       m = prediction[prediction$model=="fixed effects",]
+      
+      ### 224 of visualize
+      if (is.numeric(m[,terms[1]]) & length(unique(m[,terms[1]]))<5){
+        m[,terms[1]] = factor(m[,terms[1]], ordered=TRUE)
+        newd[,terms[1]] = factor(newd[,terms[1]], ordered=TRUE)
+      }	
+      
       step3 = step3+ 
         geom_line(data=m, 
                   aes_string(terms[1], "prediction", color=NA), linetype=1, lwd=2, col="black") +

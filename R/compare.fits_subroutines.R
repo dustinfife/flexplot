@@ -86,6 +86,12 @@ generate_predictors = function(data, predictors, model_terms) {
   #### get variable types
   numb = names(which(unlist(lapply(data[,predictors], is.numeric))))
   cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))
+  make_cat = names(which(unlist(lapply(data[,predictors], function(x) length(unique(x))<21))))
+  if (sum(numb[1:(length(numb)-2)] %in% make_cat)>0) {
+    byby = which(numb[1:(length(numb)-2)] %in% make_cat)
+    numb = numb[-byby]
+  }
+  make_cat = unique(c(cat, make_cat))
   
   ##### make "quadriture" points for quant variables
   var.mins = apply(data[, numb], 2, min, na.rm=T)
@@ -95,10 +101,11 @@ generate_predictors = function(data, predictors, model_terms) {
   min.max = as.list(apply(min.max, 1, f))
   
   #### get unique values for categorical vars
-  if (length(cat)==1){
-    un.vars = lapply(data[cat], unique)    	
+  if (length(make_cat)==1){
+    un.vars = lapply(data[make_cat], unique)    	
   } else {
-    un.vars =lapply(data[,cat], unique); names(un.vars) = cat
+    ## if the number of unique values is < 50, just use the unique values
+    un.vars =lapply(data[,make_cat], unique); names(un.vars) = make_cat
   }
   
   
