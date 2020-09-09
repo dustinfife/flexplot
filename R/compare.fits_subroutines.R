@@ -87,7 +87,8 @@ generate_predictors = function(data, predictors, model_terms) {
   numb = names(which(unlist(lapply(data[,predictors], is.numeric))))
   cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))
   make_cat = names(which(unlist(lapply(data[,predictors], function(x) length(unique(x))<21))))
-  if (sum(numb[1:(length(numb)-2)] %in% make_cat)>0) {
+  # remove a numb variable if it was found through make_cat
+  if (length(numb)>2 & sum(numb[1:(length(numb)-2)] %in% make_cat)>0) {
     byby = which(numb[1:(length(numb)-2)] %in% make_cat)
     numb = numb[-byby]
   }
