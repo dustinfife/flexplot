@@ -20,6 +20,10 @@ test_that("visualize mixed models", {
                               visualize(model, plot = "model",
                                         formula = MathAch ~  Sex + School| SES, 
                                         sample = 30))
+  
+  mod = lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)
+  vdiffr::expect_doppelganger("mixed when x axis has <5 levels", 
+                              visualize(mod, plot="model"))
             
 })
 

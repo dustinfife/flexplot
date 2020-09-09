@@ -20,7 +20,7 @@ visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,..
 #' @param ... Other arguments passed to flexplot
 #' @export
 visualize.default = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){
-
+  
   ## get dataset name
   data = eval(getCall(object)$data)
   
