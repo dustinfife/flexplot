@@ -17,7 +17,7 @@
 ##' data(exercise_data)
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
 added.plot = function(formula, data, method="loess", ...){
-
+#browser()
 	#### identify variable types
 	variables = all.vars(formula)
 		#### make sure all variables in in data
@@ -44,7 +44,7 @@ added.plot = function(formula, data, method="loess", ...){
 	miss.vals = miss.vals[miss.vals>0]
 	if (length(miss.vals)!=0){
 		warning("Note: I'm removing missing values so the function will work.")
-		data = na.omit(data)
+		data = na.omit(data[,variables])
 	}
 	
 	#### find model type
