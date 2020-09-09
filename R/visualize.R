@@ -275,9 +275,17 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
     #if axis 1 is numeric, do lines
     if (is.numeric(d[,terms[1]])){
       m = prediction[prediction$model=="fixed effects",]
+      
+      ### flexplot turns <5 unique numeric values to ordinal variable
+      ### we need to do the same here
+      if (is.numeric(m[,terms[1]]) & length(unique(m[,terms[1]]))<5){
+        m[,terms[1]] = factor(m[,terms[1]], ordered=TRUE)
+        newd[,terms[1]] = factor(newd[,terms[1]], ordered=TRUE)
+      }	
+      
       step3 = step3+ 
         geom_line(data=m, 
-                  aes_string(terms[1], "prediction", color=NA), linetype=1, lwd=2, col="black") +
+                  aes_string(terms[1], "prediction", color=NA, group=1), linetype=1, lwd=2, col="black") +
         geom_line(data=newd, 
                   aes_string(terms[1], outcome, group=term.re, color=term.re))
       
@@ -469,7 +477,8 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
     if (is.numeric(d[,terms[1]])){
       m = prediction[prediction$model=="fixed effects",]
       
-      ### 224 of visualize
+      ### flexplot turns <5 unique numeric values to ordinal variable
+      ### we need to do the same here
       if (is.numeric(m[,terms[1]]) & length(unique(m[,terms[1]]))<5){
         m[,terms[1]] = factor(m[,terms[1]], ordered=TRUE)
         newd[,terms[1]] = factor(newd[,terms[1]], ordered=TRUE)
@@ -477,7 +486,7 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
       
       step3 = step3+ 
         geom_line(data=m, 
-                  aes_string(terms[1], "prediction", color=NA), linetype=1, lwd=2, col="black") +
+                  aes_string(terms[1], "prediction", color=NA, group=1), linetype=1, lwd=2, col="black") +
         geom_line(data=newd, 
                   aes_string(terms[1], outcome, group=term.re, color=term.re))
       
