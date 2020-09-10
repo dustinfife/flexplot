@@ -78,7 +78,7 @@ get_model_n = function(model) {
 }
 
 ### function to generate prediction matrix spanning the range of the data
-generate_predictors = function(data, predictors, model_terms) {
+generate_predictors = function(data, predictors, model_terms, num_points) {
   #### create random column just to make the applies work (yeah, it's hacky, but it works)
   data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)
   predictors = c(predictors, "reject", "reject2")
@@ -97,7 +97,7 @@ generate_predictors = function(data, predictors, model_terms) {
   ##### make "quadriture" points for quant variables
   var.mins = apply(data[, numb], 2, min, na.rm=T)
   var.max = apply(data[, numb], 2, max, na.rm=T)    
-  min.max = data.frame(var.mins, var.max); min.max$size = c(50, rep(10, nrow(min.max)-1))
+  min.max = data.frame(var.mins, var.max); min.max$size = c(num_points, rep(max(3,round(num_points/4)), nrow(min.max)-1))
   f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}
   min.max = as.list(apply(min.max, 1, f))
   

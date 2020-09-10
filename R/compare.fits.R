@@ -12,6 +12,7 @@
 ##' @param report.se Should standard errors be reported alongside the estimates? Defaults to F. 
 ##' @param re Should random effects be predicted? Only applies to mixed models. Defaults to F. 
 ##' @param pred.type What type of predictions should be outputted? This is mostly for \code{glm} models. Defaults to "response." 
+##' @param num_points Number of points used for predictions. Larger numbers = slower algorithm, but smoother predictions. 
 ##' @param ... Other parameters passed to flexplot
 ##' @author Dustin Fife
 ##' @return Either a graphic or the predictions for the specified model(s)
@@ -21,7 +22,9 @@
 ##' mod1 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
 ##' mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
 ##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
-compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, report.se=F, re=F, pred.type="response", ...){
+compare.fits = function(formula, data, model1, model2=NULL, 
+                        return.preds=F, report.se=F, re=F, 
+                        pred.type="response", num_points = 50,...){
   
   if (is.null(model2)) runme = "yes"
   
@@ -70,7 +73,7 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
   }	
   
 
-  pred.values = generate_predictors(data, predictors, testme)
+  pred.values = generate_predictors(data, predictors, testme, num_points)
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
   ### there's no fixed effect if we don't have these lines
