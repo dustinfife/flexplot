@@ -78,7 +78,7 @@ get_model_n = function(model) {
 }
 
 ### function to generate prediction matrix spanning the range of the data
-generate_predictors = function(data, predictors, model_terms, num_points) {
+generate_predictors = function(data, predictors, model_terms, num_points, mod_class) {
   #### create random column just to make the applies work (yeah, it's hacky, but it works)
   data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)
   predictors = c(predictors, "reject", "reject2")
@@ -96,8 +96,15 @@ generate_predictors = function(data, predictors, model_terms, num_points) {
   
   ##### make "quadriture" points for quant variables
   var.mins = apply(data[, numb], 2, min, na.rm=T)
-  var.max = apply(data[, numb], 2, max, na.rm=T)    
-  min.max = data.frame(var.mins, var.max); min.max$size = c(num_points, rep(max(3,round(num_points/4)), nrow(min.max)-1))
+  var.max = apply(data[, numb], 2, max, na.rm=T)  
+  
+  ### make quadriture points smaller if they're doing RF
+  
+  if (mod_class == "RandomForest" & num_points == 50){
+    min.max = data.frame(var.mins, var.max); min.max$size = c(10, rep(8, nrow(min.max)-1))
+  } else {
+    min.max = data.frame(var.mins, var.max); min.max$size = c(num_points, rep(max(3,round(num_points/4)), nrow(min.max)-1))
+  }  
   f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}
   min.max = as.list(apply(min.max, 1, f))
   
@@ -160,6 +167,7 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
   }
 
   if (model.type=="RandomForest") {
+
     d = data.frame(prediction = predict(model, newdata=pred.values, OOB = TRUE), model=model.type)
     names(d)[1] = "prediction"
     return(
