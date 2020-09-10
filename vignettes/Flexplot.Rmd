@@ -379,7 +379,7 @@ For multivariate data, visualize will default to producing two graphics to match
 ```{r, ancova2, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Demonstration of the visualize function on a \\code{lm} object, but with `flexplot` arguments controlling the output (as well as suppressing residuals).  \\label{fig:ancova2}"}
 model = lm(weight.loss ~ motivation + therapy.type, data = exercise_data)
 visualize(model, formula = weight.loss ~ motivation | therapy.type, 
-          ghost.line = "red", se = F, method = "lm", plot = "model")
+          ghost.line = "red", method = "lm", plot = "model")
 ```
 
 Figure \@ref(fig:mixed) shows the `visualize()` function for a mixed model. With mixed models, `visualize()` randomly samples from the random effects (`Subject` in this case) and plots that as a variable in the graphic, and its location on the graph depends on whether the user specifies `formula`. If they do not, `visualize()` will default to placing it in the second slot (different lines/colors/shapes). This allows the user to visualize a subset of the subjects in a mixed model to ensure the model chosen is appropriate. 

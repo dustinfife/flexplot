@@ -10,8 +10,9 @@ test_that("compare.fits linear models", {
   model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
   model.int2 = lm(weight.loss ~ motivation + therapy.type + motivation:therapy.type, data = exercise_data)
   model.poly = lm(weight.loss ~ motivation + therapy.type + I(motivation^2), data = exercise_data)
-  suppressWarnings(vdiffr::expect_doppelganger("compare interaction vs. me",compare.fits(weight.loss ~ motivation | therapy.type, 
-               data = exercise_data, model.me, model.int, ghost.line = "black")))
+  suppressWarnings(vdiffr::expect_doppelganger("compare interaction vs. me",
+            compare.fits(weight.loss ~ motivation | therapy.type, 
+               data = exercise_data, model.me, model.int, ghost.line = "black", num_points=10)))
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=exercise_data, model.me, model.int))
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=relationship_satisfaction, model.me, model.int))
   expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 

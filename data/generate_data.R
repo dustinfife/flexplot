@@ -24,23 +24,23 @@
 # write.csv(income, "data/income.csv", row.names=F)
 # usethis::use_data(income, overwrite = TRUE)
 
-#' #' Simulated Dataset About People's Attractiveness
-#' #'
-#' #' A dataset containing 207 observations, containing the following information
-#' #'
-#' #' @format A data frame with 207 rows and 5 variables: \describe{
-#' #'   \item{stats_skills}{performance on a statistics know-how test}
-#' #'   \item{group}{Treatment group (control, watching hitch, receiving stats training)}
-#' #'   \item{gender}{Gender of person being rated}
-#' #'   \item{exercise}{Self-reported average number of minutes exercised per week} 
-#' #'   \item{attractiveness_1}{Attractiveness score of person being rated at baseline}
-#' #'   \item{attractiveness_2}{Attractiveness score of person being rated at follow up} 
-#' #'   \item{age}{Age of respondent}
-#' #'   \item{gender}{Gender of respondent}
-#' #'   \item{political}{Political Ideology of respondent} 
-#' }
-#' "attractiveness"
-#' 
+#' Simulated Dataset About People's Attractiveness
+#'
+#' A dataset containing 207 observations, containing the following information
+#'
+#' @format A data frame with 207 rows and 5 variables: \describe{
+#'   \item{stats_skills}{performance on a statistics know-how test}
+#'   \item{group}{Treatment group (control, watching hitch, receiving stats training)}
+#'   \item{gender}{Gender of person being rated}
+#'   \item{exercise}{Self-reported average number of minutes exercised per week}
+#'   \item{attractiveness_1}{Attractiveness score of person being rated at baseline}
+#'   \item{attractiveness_2}{Attractiveness score of person being rated at follow up}
+#'   \item{age}{Age of respondent}
+#'   \item{gender}{Gender of respondent}
+#'   \item{political}{Political Ideology of respondent}
+#'}
+"attractiveness"
+
 
 # ### paranormal dataset
 # n = 394
@@ -90,26 +90,26 @@
 # write.csv(paranormal, "data/paranormal.csv", row.names=F)
 # usethis::use_data(paranormal, overwrite = TRUE)
 
-#' #' Simulated Dataset About Experiences with the Paranormal
-#' #'
-#' #' A dataset containing combat attributes of almost 812 fighters in the final
-#' #' Avengers battle. This dataset illustrates several types of problems one might
-#' #' encounter for univariate variables, including bimodality, zero-inflated data,
-#' #' outliers, mixed up labels, etc.
-#' #'
-#' #' @format A data frame with 1000 rows and 7 variables: \describe{
-#' #'   \item{conviction}{Degree of conviction they have about the existence of the
-#' #'   paranormal} \item{fear}{How much they fear being kidnapped by aliens}
-#' #'   \item{time}{How much time they spend a year researching the paranormal}
-#' #'   \item{kidnapped}{Whether they've been kidnapped by aliens}
-#' #'   \item{experiences.type}{What type of experiences they have had with the
-#' #'   paranormal? Can be "eerie feeling," "presence watching", "saw UFO", "saw ghost", or "heard voice"} 
-#' #'   \item{income}{How much money they make}
-#' #'   \item{age}{Age of respondent}
-#' #'   \item{gender}{Gender of respondent}
-#' #'   \item{political}{Political Ideology of respondent} 
-#' }
-#' "paranormal"
+#' Simulated Dataset About Experiences with the Paranormal
+#'
+#' A dataset containing combat attributes of almost 812 fighters in the final
+#' Avengers battle. This dataset illustrates several types of problems one might
+#' encounter for univariate variables, including bimodality, zero-inflated data,
+#' outliers, mixed up labels, etc.
+#'
+#' @format A data frame with 1000 rows and 7 variables: \describe{
+#'   \item{conviction}{Degree of conviction they have about the existence of the
+#'   paranormal} \item{fear}{How much they fear being kidnapped by aliens}
+#'   \item{time}{How much time they spend a year researching the paranormal}
+#'   \item{kidnapped}{Whether they've been kidnapped by aliens}
+#'   \item{experiences.type}{What type of experiences they have had with the
+#'   paranormal? Can be "eerie feeling," "presence watching", "saw UFO", "saw ghost", or "heard voice"}
+#'   \item{income}{How much money they make}
+#'   \item{age}{Age of respondent}
+#'   \item{gender}{Gender of respondent}
+#'   \item{political}{Political Ideology of respondent}
+#'}
+"paranormal"
 
 #' #'
 #' #'     ### avengers dataset
@@ -266,29 +266,29 @@
 #' head(avengers)
 #' usethis::use_data(avengers, overwrite = TRUE)
 #' write.csv(avengers, "data/avengers.csv", row.names=F)
-#' #' Simulated Statistics on the Final Avengers Battle
-#' #'
-#' #' A dataset containing combat attributes of almost 812
-#' #' fighters in the final Avengers battle
-#' #'
-#' #' @format A data frame with 812 rows and 13 variables:
-#' #' \describe{
-#' #'   \item{iq}{Intelligence}
-#' #'   \item{agility}{weighted scores on an obstacle course}
-#' #'   \item{speed}{Speed in running the 40 meter dash}
-#' #'   \item{strength}{Pounds lifted in a benchpress}
-#' #'   \item{damage.resistance}{Amount of skin deflection (in mm) when slapped with a frozen fish}
-#' #'   \item{flexibility}{Number of inches past their toes they can reach}
-#' #'   \item{willpower}{Length of time they wait at a DMV for a driver's license}
-#' #'   \item{ptsd}{Score on a Likert-scale PTSD questionnaire}
-#' #'   \item{north_south}{whether the individual was assigned to fight on the north or south battlefield}
-#' #'   \item{died}{Whether the person died at the final battle}
-#' #'   \item{kills}{Number of enemies killed in the final battle}
-#' #'   \item{injuries}{Number of injuries sustained. Anything more than 5 is marked as a 5}
-#' #'   \item{minutes.fighting}{Number of minutes spent fighting before dying or giving up}
-#' #'   \item{shots.taken}{Number of shots (with a gun) or punches thrown at an enemy}
-#' #' }
-#' "avengers"
+#' Simulated Statistics on the Final Avengers Battle
+#'
+#' A dataset containing combat attributes of almost 812
+#' fighters in the final Avengers battle
+#'
+#' @format A data frame with 812 rows and 13 variables:
+#' \describe{
+#'   \item{iq}{Intelligence}
+#'   \item{agility}{weighted scores on an obstacle course}
+#'   \item{speed}{Speed in running the 40 meter dash}
+#'   \item{strength}{Pounds lifted in a benchpress}
+#'   \item{damage.resistance}{Amount of skin deflection (in mm) when slapped with a frozen fish}
+#'   \item{flexibility}{Number of inches past their toes they can reach}
+#'   \item{willpower}{Length of time they wait at a DMV for a driver's license}
+#'   \item{ptsd}{Score on a Likert-scale PTSD questionnaire}
+#'   \item{north_south}{whether the individual was assigned to fight on the north or south battlefield}
+#'   \item{died}{Whether the person died at the final battle}
+#'   \item{kills}{Number of enemies killed in the final battle}
+#'   \item{injuries}{Number of injuries sustained. Anything more than 5 is marked as a 5}
+#'   \item{minutes.fighting}{Number of minutes spent fighting before dying or giving up}
+#'   \item{shots.taken}{Number of shots (with a gun) or punches thrown at an enemy}
+#' }
+"avengers"
 #' 
 #' 
 #' 

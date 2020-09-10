@@ -13,12 +13,14 @@
 #'   \item{experiences.type}{What type of experiences they have had with the
 #'   paranormal? Can be "eerie feeling," "presence watching", "saw UFO", "saw ghost", or "heard voice"} 
 #'   \item{income}{How much money they make}
-#'   \item{age}{Age of respondent}}
+#'   \item{age}{Age of respondent}
+#'   \item{gender}{Gender of respondent}
+#'   \item{political}{Political Ideology of respondent}}
 "paranormal"
 
 #' Simulated Statistics on the Final Avengers Battle
 #'
-#' A dataset containing combat attributes of almost 812 
+#' A dataset containing combat attributes of almost 812
 #' fighters in the final Avengers battle
 #'
 #' @format A data frame with 812 rows and 13 variables:
@@ -27,17 +29,38 @@
 #'   \item{agility}{weighted scores on an obstacle course}
 #'   \item{speed}{Speed in running the 40 meter dash}
 #'   \item{strength}{Pounds lifted in a benchpress}
-#'   \item{damage.resistence}{Amount of skin deflection (in mm) when slapped with a frozen fish}
+#'   \item{damage.resistance}{Amount of skin deflection (in mm) when slapped with a frozen fish}
 #'   \item{flexibility}{Number of inches past their toes they can reach}
 #'   \item{willpower}{Length of time they wait at a DMV for a driver's license}
-#'   \item{superpower}{Does this person have a superpower?}   
+#'   \item{ptsd}{Score on a Likert-scale PTSD questionnaire}
+#'   \item{north_south}{whether the individual was assigned to fight on the north or south battlefield}
 #'   \item{died}{Whether the person died at the final battle}
 #'   \item{kills}{Number of enemies killed in the final battle}
 #'   \item{injuries}{Number of injuries sustained. Anything more than 5 is marked as a 5}
 #'   \item{minutes.fighting}{Number of minutes spent fighting before dying or giving up}
 #'   \item{shots.taken}{Number of shots (with a gun) or punches thrown at an enemy}
+#'   \item{superpower}{Whether the individual has a superpower}   
 #' }
 "avengers"
+
+
+
+#' Simulated Dataset About People's Attractiveness
+#'
+#' A dataset containing 207 observations, containing the following information
+#'
+#' @format A data frame with 207 rows and 5 variables: \describe{
+#'   \item{stats_skills}{performance on a statistics know-how test}
+#'   \item{group}{Treatment group (control, watching hitch, receiving stats training)}
+#'   \item{gender}{Gender of person being rated}
+#'   \item{exercise}{Self-reported average number of minutes exercised per week}
+#'   \item{attractiveness_1}{Attractiveness score of person being rated at baseline}
+#'   \item{attractiveness_2}{Attractiveness score of person being rated at follow up}
+#'   \item{age}{Age of respondent}
+#'   \item{gender}{Gender of respondent}
+#'   \item{political}{Political Ideology of respondent}
+#'}
+"attractiveness"
 
 #' Alcohol use among youth
 #'

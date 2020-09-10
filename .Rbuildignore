@@ -7,8 +7,11 @@ data/create_flexplot_linmod.Rdata
 ^\.git$
 ^\.csv$
 jamovi
+data/abuse.sav
+data/income.jasp
 .travis.yml
 flexplot.svg
+Flexplot.svg
 ^build$
 ^icon.svg$
 ^flexplot.jmo$

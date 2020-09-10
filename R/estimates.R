@@ -260,6 +260,13 @@ estimates.lm = function(object, mc=TRUE){
 	return(ret)
 }
 
+
+#' Report RandomForest object Estimates (effect sizes and parameters)
+#'
+#' Report RandomForest object Estimates
+#' @param object a RandomForest object
+#' @return One or more objects containing parameter estimates and effect sizes
+#' @export
 estimates.RandomForest = function(object) {
   y = unlist(attr(object, "data")@get("response"))
   ### compute OOB
@@ -280,8 +287,6 @@ estimates.RandomForest = function(object) {
   } else {
     importance = round(sqrt(sort(importance, decreasing=T)), digits=3)
   }
-  
-  
   
   estimates = list(oob=oob, importance=importance)
   attr(estimates, "class") = "rf_estimates"

@@ -21,11 +21,11 @@ test_that("visualize mixed models", {
                                         formula = MathAch ~  Sex + School| SES, 
                                         sample = 30))
   
-  mod = lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)
+  mod = lme4::lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)
   vdiffr::expect_doppelganger("mixed when x axis has <5 levels", 
                               visualize(mod, plot="model"))
   
-  mod = lmer(ALCUSE~1 + (1|ID), data=alcuse)
+  mod = lme4::lmer(ALCUSE~1 + (1|ID), data=alcuse)
   vdiffr::expect_doppelganger("random effects anova", 
                               visualize(mod, plot="model"))
             
