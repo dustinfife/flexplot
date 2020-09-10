@@ -4,7 +4,8 @@
 \alias{visualize.RandomForest}
 \title{Visualize a fitted RandomForest model}
 \usage{
-\method{visualize}{RandomForest}(object, plot = c("all", "residuals", "model"), formula = NULL)
+\method{visualize}{RandomForest}(object, plot = c("all", "residuals",
+  "model"), formula = NULL, ...)
 }
 \arguments{
 \item{object}{a RandomForest object}

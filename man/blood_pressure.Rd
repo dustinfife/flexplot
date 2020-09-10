@@ -4,15 +4,13 @@
 \name{blood_pressure}
 \alias{blood_pressure}
 \title{Dataset examines what affects blood pressure.}
-\format{
-A data frame with xx rows and 4 variables:
+\format{A data frame with xx rows and 4 variables:
 \describe{
   \item{BP}{Blood pressure level}
   \item{Exercise}{description}
   \item{Vegetarian}{Whether the subject is vegetarian or not.}
   \item{Stress}{Level of stress}
-}
-}
+}}
 \usage{
 blood_pressure
 }

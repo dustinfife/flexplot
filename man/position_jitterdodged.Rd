@@ -4,12 +4,8 @@
 \alias{position_jitterdodged}
 \title{Simultaneously dodge and jitter}
 \usage{
-position_jitterdodged(
-  jitter.width = 0.2,
-  jitter.height = 0,
-  dodge.width = 0.75,
-  seed = NA
-)
+position_jitterdodged(jitter.width = 0.2, jitter.height = 0,
+  dodge.width = 0.75, seed = NA)
 }
 \arguments{
 \item{jitter.width}{degree of jitter in x direction. Defaults to 40\% of the
@@ -27,7 +23,6 @@ This is primarily used for aligning points generated through
 a fill aesthetic supplied).
 }
 \seealso{
-Other position adjustments: 
-\code{\link{position_jitterd}()}
+Other position adjustments: \code{\link{position_jitterd}}
 }
 \concept{position adjustments}

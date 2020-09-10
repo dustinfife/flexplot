@@ -4,8 +4,7 @@
 \name{exercise_data}
 \alias{exercise_data}
 \title{Exercise dataset}
-\format{
-A data frame with xx rows and 13 variables:
+\format{A data frame with xx rows and 13 variables:
 \describe{
   \item{therapy.type}{description}
   \item{health}{description}
@@ -18,8 +17,7 @@ A data frame with xx rows and 13 variables:
   \item{muscle.gain}{description}
   \item{muscle.gain.missing}{description}
   \item{six.mo.weight}{description}
-}
-}
+}}
 \usage{
 exercise_data
 }

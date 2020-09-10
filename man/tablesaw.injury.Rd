@@ -4,16 +4,14 @@
 \name{tablesaw.injury}
 \alias{tablesaw.injury}
 \title{Tablesaw injuries}
-\format{
-A data frame with xx rows and 5 variables:
+\format{A data frame with xx rows and 5 variables:
 \describe{
   \item{safety}{description}
   \item{attention}{description}
   \item{gender}{description}
   \item{probs}{description}
   \item{injury}{description}
-}
-}
+}}
 \usage{
 tablesaw.injury
 }

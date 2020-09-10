@@ -4,14 +4,8 @@
 \alias{visualize.glmerMod}
 \title{Visualize a fitted glmerMod model}
 \usage{
-\method{visualize}{glmerMod}(
-  object,
-  plot = c("all", "residuals", "model"),
-  formula = NULL,
-  sample = 3,
-  plots.as.list = FALSE,
-  ...
-)
+\method{visualize}{glmerMod}(object, plot = c("all", "residuals",
+  "model"), formula = NULL, sample = 3, plots.as.list = FALSE, ...)
 }
 \arguments{
 \item{object}{a glmer object}

@@ -29,7 +29,7 @@ estimates.default = function(object, mc=TRUE){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.lm = function(object, mc=TRUE){
-
+#browser()
 	n = nrow(model.frame(object)) 
 	
 	#### generate list of coefficients
@@ -174,7 +174,6 @@ estimates.lm = function(object, mc=TRUE){
 		coef.matrix = NA
 		difference.matrix=NA
 	}	
-	
 	#### NUMERIC VARIABLES
 	if (length(numbers)>0){
 		vars = c("(Intercept)", numbers)
@@ -261,7 +260,57 @@ estimates.lm = function(object, mc=TRUE){
 	return(ret)
 }
 
+estimates.RandomForest = function(object) {
+  y = unlist(attr(object, "data")@get("response"))
+  ### compute OOB
+  oob = predict(object, OOB=T, type="response")
+  if (!is.numeric(y)){
+    numeric=F
+    oob = round(length(which(oob==y))/length(y), digits=3)
+  } else {
+    ### quantile of differences
+    numeric = T
+    oob = round(quantile(abs(oob-y)), digits=3)
+  }
+  
+  #### compute variable importance
+  importance = varimp(object)
+  if (!numeric){
+    importance = round(sort(importance, decreasing=T), digits=4)
+  } else {
+    importance = round(sqrt(sort(importance, decreasing=T)), digits=3)
+  }
+  
+  
+  
+  estimates = list(oob=oob, importance=importance)
+  attr(estimates, "class") = "rf_estimates"
+  attr(estimates, "numeric") = numeric
+  return(estimates)
+  
+}
 
+#' Print rf_estimates Summary
+#'
+#' Print a rf_estimates object
+#' @aliases print.rf_estimates
+#' @param x an rf_estimates object
+#' @param ... ignored
+#' @export
+print.rf_estimates = function(x,...){
+  if (attr(x, "numeric")) {
+    cat(paste("\n\nQuantiles of absolute value of OOB performance (i.e., abs(predicted - actual)):\n\n", sep=""))
+    print(x$oob)
+    cat(paste("\n\nVariable importance (root MSE of predicted versus permuted):\n\n", sep=""))
+    print(x$importance)
+  } else {
+    cat(paste("\n\nOOB accuracy in prediction:\n\n", sep=""))
+    cat(x$oob)
+    cat(paste("\n\nVariable importance (mean decrease in accuracy when permuted):\n\n", sep=""))
+    print(x$importance)
+  }
+  
+}	
 
 #' Report glm object Estimates (effect sizes and parameters)
 #'

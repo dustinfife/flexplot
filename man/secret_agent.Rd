@@ -4,8 +4,7 @@
 \name{secret_agent}
 \alias{secret_agent}
 \title{Secret agent dataset}
-\format{
-A data frame with xx rows and 7 variables:
+\format{A data frame with xx rows and 7 variables:
 \describe{
   \item{muscle}{bicep circumference}
   \item{height}{height in inches}
@@ -14,8 +13,7 @@ A data frame with xx rows and 7 variables:
   \item{Course.Score}{score on an obstacle course}
   \item{Branch}{Branch of service (CIA versus MI6)}
   \item{Salary}{Annual salary}
-}
-}
+}}
 \usage{
 secret_agent
 }

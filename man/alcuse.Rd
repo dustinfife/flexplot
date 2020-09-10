@@ -4,8 +4,7 @@
 \name{alcuse}
 \alias{alcuse}
 \title{Alcohol use among youth}
-\format{
-A data frame with 246 rows and 9 variables:
+\format{A data frame with 246 rows and 9 variables:
 \describe{
   \item{ID}{ID of participant}
   \item{AGE}{AGE of participant}
@@ -16,8 +15,7 @@ A data frame with 246 rows and 9 variables:
   \item{PEER}{Average number of alcoholic drinks a week among their peers}
   \item{CPEER}{Median-centered amount their peers drink}
   \item{CCOA}{Child of alcoholic, centered}
-}
-}
+}}
 \usage{
 alcuse
 }

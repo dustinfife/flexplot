@@ -4,14 +4,12 @@
 \name{drug_use}
 \alias{drug_use}
 \title{Drug use and SES}
-\format{
-A data frame with xx rows and 3 variables:
+\format{A data frame with xx rows and 3 variables:
 \describe{
   \item{drug.use}{description}
   \item{SES}{Socioeconomic status of the subject}
   \item{therapy}{Whether subjects attends therapy for drug use}
-}
-}
+}}
 \usage{
 drug_use
 }

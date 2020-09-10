@@ -4,7 +4,8 @@
 \alias{visualize}
 \title{Visualize a fitted model}
 \usage{
-visualize(object, plot = c("all", "residuals", "model"), formula = NULL, ...)
+visualize(object, plot = c("all", "residuals", "model"),
+  formula = NULL, ...)
 }
 \arguments{
 \item{object}{a fitted object}

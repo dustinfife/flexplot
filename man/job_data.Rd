@@ -4,15 +4,13 @@
 \name{job_data}
 \alias{job_data}
 \title{Job performance dataset}
-\format{
-A data frame with 187 rows and 4 variables:
+\format{A data frame with 187 rows and 4 variables:
 \describe{
   \item{job.performance}{supervisor ratings of job performance}
   \item{iq}{intelligence}
   \item{conscientiousness}{score on a conscientious scale}
   \item{interview}{Rating on an interview scale}
-}
-}
+}}
 \usage{
 job_data
 }

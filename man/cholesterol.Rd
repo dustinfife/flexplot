@@ -4,15 +4,13 @@
 \name{cholesterol}
 \alias{cholesterol}
 \title{Dataset examines what affects cholesterol.}
-\format{
-A data frame with xx rows and 4 variables:
+\format{A data frame with xx rows and 4 variables:
 \describe{
   \item{ID}{description}
   \item{Margarine}{description}
   \item{Week}{description}
   \item{Cholesterol}{description}
-}
-}
+}}
 \usage{
 cholesterol
 }
