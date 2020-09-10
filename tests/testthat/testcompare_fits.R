@@ -45,6 +45,7 @@ test_that("compare.fits linear models", {
   reduced.mod = lm(satisfaction~communication + separated , data=relationship_satisfaction)
   vdiffr::expect_doppelganger("compare.fits where listwise deletion causes change in levels",
                               compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod))
+
 })
 
 test_that("compare.fits for other models", {

@@ -56,7 +56,8 @@ compare.fits = function(formula, data, model1, model2=NULL, return.preds=F, repo
 	variables = all.vars(formula)
   outcome = variables[1]
   predictors = variables[-1]
-    
+  
+
     ##### make sure they're putting the same variables from formula in terms
   
 	if (!(all(predictors %in% testme))){

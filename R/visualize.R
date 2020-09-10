@@ -136,7 +136,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
     }
     
   } else if (plot=="all" | plot=="model"){
-    step3 = flexplot(formula, data=d, ...)
+    step3 = compare.fits(formula, data=data, model1=object, ...) + labs(title="Analysis Plot")
     ### if they have more than two variables, also include a added variable plot
     if (length(terms)>1){
       step3b = added.plot(f, data=d,...)+ labs(title="Added Variable Plot")

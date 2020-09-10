@@ -9,7 +9,7 @@
 ##' @author Dustin Fife
 ##' @export
 model.comparison = function(model1, model2){
-	
+
   #### find model types
   class.mod1 = class(model1)
   class.mod2 = class(model2)
@@ -132,6 +132,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
 ##' @author Dustin Fife
 ##' @export
 sensitivity.table = function(object){
+  #browser()
 
   if (class(object)[1] == "RandomForest") {
     predmat = table(Observed = attr(object, "responses")@variables[,1],

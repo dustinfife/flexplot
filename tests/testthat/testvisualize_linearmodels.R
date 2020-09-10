@@ -34,8 +34,13 @@ test_that("visualize function plots", {
   mod = lm(weight.loss~gender + rewards + motivation, data=d)
   suppressWarnings(vdiffr::expect_doppelganger("multiple regression",visualize(mod)))
   
+  ### visualize with a formula provided
+  suppressWarnings(vdiffr::expect_doppelganger("visualize with formula",visualize(mod, formula = weight.loss~motivation + rewards | gender)))
+  
   mod = lm(Birthweight~mheight + fheight + motherage, data=birthweight)
   suppressWarnings(vdiffr::expect_doppelganger("four variables",visualize(mod)))
+  
+
 
 })
 
