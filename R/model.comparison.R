@@ -117,8 +117,19 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   	#### compute difference in predicted value (scaled)
   	differences=standardized_differences(model1, model2)
   	to.return = list(statistics=model.table, pred.difference = differences)
+  	## for lmerMod, report change in R squared
+  	if (class(model1)[1] == "lmerMod" & class(model2)[1] == "lmerMod" & nested) {
+  	  if (length(mod1)<length(mod2)){
+  	    r_squared_change = rsq_change(model2, model1)
+  	  } else {
+  	    r_squared_change = rsq_change(model1, model2)
+  	  }
+  	  to.return$r_squared_change =  r_squared_change
+  	}  	
   	
   }
+  
+
 	return(to.return)
 }
 
