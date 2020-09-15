@@ -60,7 +60,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   	#### check for nested models
   	if (all(length(mod1)>length(mod2) & (mod2 %in% mod1)) & class.mod1[1] == class.mod2[1]){
   		nested = T
-  	} else if (all(length(mod2)>length(mod1) & mod1 %in% mod2)) {
+  	} else if (all(length(mod2)>=length(mod1) & mod1 %in% mod2)) {
   		nested = T
   	} else {
   		nested = F
@@ -117,7 +117,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   		model.table[is.na(model.table)] = ""
   		model.table$p.value[1] = format.pval(p, digits=3)
   	}
-  	
+
   	#### compute difference in predicted value (scaled)
   	differences=standardized_differences(model1, model2)
   	to.return = list(statistics=model.table, pred.difference = differences)

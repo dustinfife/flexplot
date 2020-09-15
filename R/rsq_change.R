@@ -21,9 +21,13 @@ rsq_change = function(full, reduced){
   #### create objects for variance terms
   full.var = as.data.frame(VarCorr(full)); names(full.var)[4:5] = c("variance", "sd")
   reduced.var = as.data.frame(VarCorr(reduced))
-  
-  if (nrow(full.var)<nrow(reduced.var)){
-    stop("Your 'full' model must be larger than your 'reduced' model.")
+  #browser()
+  if (nrow(full.var)<=nrow(reduced.var)){
+    #stop("Your 'full' model must be larger than your 'reduced' model.")
+    old.full = full.var
+    old.reduced = reduced.var
+    full.var = reduced.var
+    reduced.var = old.full
   }
   
   #### look only at those that have common terms
