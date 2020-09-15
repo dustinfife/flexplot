@@ -40,6 +40,15 @@ test_that("visualize mixed models with alcuse", {
   
 })
 
+test_that("visualize mixed models with alcuse2", {
+  #### mixed models
+  data(alcuse)
+  mod1 = lme4::lmer(ALCUSE~1 + (1|ID), data=alcuse)
+  a5 = visualize(mod1, plot="model")  
+  vdiffr::expect_doppelganger("random effects anova", a5)
+  
+})
+
 test_that("visualize rf models", {
   
   data(avengers)
