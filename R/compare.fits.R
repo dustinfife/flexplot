@@ -13,6 +13,7 @@
 ##' @param re Should random effects be predicted? Only applies to mixed models. Defaults to F. 
 ##' @param pred.type What type of predictions should be outputted? This is mostly for \code{glm} models. Defaults to "response." 
 ##' @param num_points Number of points used for predictions. Larger numbers = slower algorithm, but smoother predictions. 
+##' @param clusters For visualizing mixed models, this specifies the number of clusters to display
 ##' @param ... Other parameters passed to flexplot
 ##' @author Dustin Fife
 ##' @return Either a graphic or the predictions for the specified model(s)
@@ -24,7 +25,8 @@
 ##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
 compare.fits = function(formula, data, model1, model2=NULL, 
                         return.preds=F, report.se=F, re=F, 
-                        pred.type="response", num_points = 50,...){
+                        pred.type="response", num_points = 50,
+                        clusters=3,...){
   if (is.null(model2)) runme = "yes"
   
   #### if mod2 is null..
@@ -50,7 +52,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   test_same_class(model1, model2)
   
   #### convert random effects to factors for mixed models
-  data = subset_random_model(model1, d=data)
+  data = subset_random_model(model1, d=data, clusters)
   
   ### make sure they have the same outcome
   if (variables_mod1$response != variables_mod2$response) {

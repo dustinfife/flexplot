@@ -6,7 +6,7 @@
 \usage{
 compare.fits(formula, data, model1, model2 = NULL, return.preds = F,
   report.se = F, re = F, pred.type = "response", num_points = 50,
-  ...)
+  clusters = 3, ...)
 }
 \arguments{
 \item{formula}{A formula that can be used in flexplot. The variables inside must not include variables outside the fitted models.}
@@ -26,6 +26,8 @@ compare.fits(formula, data, model1, model2 = NULL, return.preds = F,
 \item{pred.type}{What type of predictions should be outputted? This is mostly for \code{glm} models. Defaults to "response."}
 
 \item{num_points}{Number of points used for predictions. Larger numbers = slower algorithm, but smoother predictions.}
+
+\item{clusters}{For visualizing mixed models, this specifies the number of clusters to display}
 
 \item{...}{Other parameters passed to flexplot}
 }
