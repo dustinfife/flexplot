@@ -62,3 +62,13 @@ test_that("model comparisons with missing data", {
   b = lm(weight.loss~therapy.type, data=exercise_data)
   expect_message(model.comparison(a,b), "Note: your models were fit to two different datasets.")
 })
+
+
+test_that("model comparisons with mixed models", {
+  data(alcuse)
+  mod1 = lme4::lmer(ALCUSE~1 + (1|ID), data=alcuse)
+  mod2 = lme4::lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)
+  mc = model.comparison(mod1, mod2)
+  expect_equal(mc$statistics$bayes.factor[2], 826.257, tolerance = 0.01)
+})
+
