@@ -23,9 +23,9 @@ Compare the improvement in fit from a baseline model, using mixed models
 \examples{
 data(math)
 require(lme4)
-baseline.model = lmer(MathAch~1 + (1|School), data=d)
-full.model = lmer(MathAch~SES + (SES|School), data=d)
-improve.fit(full.model, baseline.model)
+baseline.model = lmer(MathAch~1 + (1|School), data=math)
+full.model = lmer(MathAch~SES + (SES|School), data=math)
+rsq_change(full.model, baseline.model)
 }
 \author{
 Dustin Fife
