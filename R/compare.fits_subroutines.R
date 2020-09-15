@@ -79,6 +79,7 @@ get_model_n = function(model) {
 
 ### function to generate prediction matrix spanning the range of the data
 generate_predictors = function(data, predictors, model_terms, num_points, mod_class) {
+
   #### create random column just to make the applies work (yeah, it's hacky, but it works)
   data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)
   predictors = c(predictors, "reject", "reject2")

@@ -25,9 +25,7 @@
 compare.fits = function(formula, data, model1, model2=NULL, 
                         return.preds=F, report.se=F, re=F, 
                         pred.type="response", num_points = 50,...){
-  
   if (is.null(model2)) runme = "yes"
-  
   
   #### if mod2 is null..
   if (is.null(model2)){
@@ -44,9 +42,15 @@ compare.fits = function(formula, data, model1, model2=NULL,
   variables_mod2 = get_terms(model2)
   testme = unique(c(variables_mod1$predictors, variables_mod2$predictors))
   all_variables = unique(c(variables_mod1$predictors, variables_mod2$predictors, variables_mod1$response, variables_mod2$response))
-  #### for the rare occasion where deleting missing data changes the levels...
   
+  #### for the rare occasion where deleting missing data changes the levels...
   data = check_missing(model1, model2, data, all_variables)
+  
+  #### make sure, if they have lme4, both models are lme4 objects
+  test_same_class(model1, model2)
+  
+  #### convert random effects to factors for mixed models
+  data = subset_random_model(model1, d=data)
   
   ### make sure they have the same outcome
   if (variables_mod1$response != variables_mod2$response) {
@@ -61,8 +65,9 @@ compare.fits = function(formula, data, model1, model2=NULL,
   predictors = variables[-1]
   
 
-  ##### make sure they're putting the same variables from formula in terms
   
+
+  ##### make sure they're putting the same variables from formula in terms
   if (!(all(predictors %in% testme))){
     stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%testme)], collapse=",")))
   }

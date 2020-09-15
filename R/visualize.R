@@ -191,17 +191,14 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   levels = apply(d, 2, FUN=function(x) length(unique(x)))
   outcome = names(d)[1]
   
-  #### extract formula
-  form = as.character(formula(object))[3]
   
   #### identify random effects
-  term.re = trimws(substr(form, regexpr("\\|", form)[1]+1, regexpr("\\)", form)[1]-1))		
+  term.re = extract_random_term(object)
   
   #### find remaining terms
   preds = names(d)[-1]#[which(!(names(d)[-1] %in% term.re))]
   
   #### randomly sample the re terms and convert to numeric
-  
   unique.terms = unique(d[,term.re])
   samp = sample(unique.terms, size=min(sample, length(unique.terms)))
   k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])
@@ -255,7 +252,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   terms = all.vars(formula)[-1]
   terms.fixed = terms[-which(terms %in% term.re)]
   
-  
+  #browser()
   ##### generate fixed effects predictions
   #### if random is in NOT in the second slot
   if (!modify){

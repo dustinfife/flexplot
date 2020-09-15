@@ -147,6 +147,23 @@ test_that("fit.function works for categorical predictors", {
                    "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-sd(z)}, fun.max = function(z) {mean(z)+sd(z)}, fun=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.5), color = \"#bf0303\")")        
 })
 
+test_that("hidden functions for lme4", {
+  require(lme4)
+  data("math")
+  d = math
+  object = lmer(MathAch~SES + (SES|School), data=d)
+  expect_identical(extract_random_term(object), "School")
+  object2 = lm(MathAch~SES, data=d)
+  testthat::expect_true(length(levels(subset_random_model(object, d, samp.size=5)$School))==5)
+  testthat::expect_false(length(levels(subset_random_model(object2, d, samp.size=5)$School))==5)
+  
+  ## make sure the two models in compare.fits for lme4 are both lme4 objects and have the same random terms
+  object3 = lmer(MathAch~SES + (SES|MEANSES), data=d)
+  testthat::expect_null(test_same_class(object, object))
+  testthat::expect_error(test_same_class(object, object2))
+  testthat::expect_error(test_same_class(object, object3))
+})
+
 
 
 test_that("compare.fits_subroutines work", {

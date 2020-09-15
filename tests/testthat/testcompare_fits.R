@@ -90,4 +90,14 @@ test_that("compare.fits for other models", {
   mod2 = glm(injury~safety * attention, data=tablesaw.injury, family=binomial)  
   vdiffr::expect_doppelganger("compare.fits with two glms",
                               compare.fits(injury~safety | attention, data=tablesaw.injury, mod1, mod2))
+  
+  ### compare.fits with mixed models
+  data(alcuse)
+  require(lme4)
+  head(alcuse)
+  mod1 = lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)  
+  mod2 = lmer(ALCUSE~AGE_14 + (AGE_14|ID), data=alcuse)  
+  vdiffr::expect_doppelganger("compare.fits with mixed models",
+                              compare.fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2))
+  
 })
