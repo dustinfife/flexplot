@@ -19,7 +19,6 @@ test_that("error messages are correct", {
   expect_error(flexplot(speed~superher, data=avengers),
                "Ru oh! Somebody done made a mistake!"
   )
-  
   expect_error( 
     flexplot(speed~superhero),
     "Howdy! Looks like you forgot to include a dataset!")
@@ -28,6 +27,9 @@ test_that("error messages are correct", {
     flexplot(gender~therapy.type, data=exercise_data, method="logistic"),
     "Oh wise user of flexplot"
   )
+  
+  expect_error(
+    flexplot(gender~therapy.type + therapy.type, data=exercise_data))
 })
 
 test_that("scatterplots and options work", {

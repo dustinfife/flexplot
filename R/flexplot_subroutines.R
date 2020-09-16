@@ -8,7 +8,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
 
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   
-  variables = all.vars(formula)
+  variables = all.vars(formula, unique=FALSE)
   outcome = variables[1]
   predictors = variables[-1]
   
@@ -16,7 +16,6 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   given.axis = flexplot_axis_given(formula)
   given = given.axis$given
   axis = given.axis$axis
-  
   flexplot_errors(variables = variables, data = data, method=method, axis=axis)
   
   #### identify which variables are numeric and which are factors
@@ -80,7 +79,7 @@ flexplot_alpha_default = function(data, axis, alpha){
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
-  
+
   if (is.null(data)) {
     return(data) 
   } else {
@@ -223,6 +222,11 @@ flexplot_errors = function(variables, data, method=method, axis){
   
   if (is.null(data)){
     stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
+  }
+  
+  if (any(duplicated(variables))){
+    dup = variables[duplicated(variables)]
+    stop(paste0("You know what? It seems you have, my dear user, tried using a variable more than once (specifically, ", dup, "). That's not something I can do! \n\nBut we can still be friends"))
   }
   
   if (!all(variables %in% names(data))){

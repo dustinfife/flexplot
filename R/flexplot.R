@@ -115,7 +115,8 @@ flexplot = function(formula, data=NULL, related=F,
                                     breaks = breaks, labels=labels, bins=bins,
                                     related=related,  
                                     jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
-                                    alpha=alpha, prediction=prediction) 
+                                    alpha=alpha, prediction=prediction)
+
   ### make modifications to the data
 	data = with(varprep, 
 	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
@@ -124,7 +125,7 @@ flexplot = function(formula, data=NULL, related=F,
                         ### (error came at ghost.reference when it couldn't find the binned version)
 	
   prediction = with(varprep, 
-	            flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
+              flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE))
 
   ##### make models into a factor if they supply predictions
