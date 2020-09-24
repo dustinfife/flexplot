@@ -88,10 +88,13 @@ generate_predictors = function(data, predictors, model_terms, num_points, mod_cl
   numb = names(which(unlist(lapply(data[,predictors], is.numeric))))
   cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))
   make_cat = names(which(unlist(lapply(data[,predictors], function(x) length(unique(x))<21))))
+    #### make_cat was there to tell the computer to generate prediction for UNIQUE variables, rather than a range
+    #### but it also converts it to categorical variables, which makes predict fail. The fix falls right before "return"
   # remove a numb variable if it was found through make_cat
   if (length(numb)>2 & sum(numb[1:(length(numb)-2)] %in% make_cat)>0) {
     byby = which(numb[1:(length(numb)-2)] %in% make_cat)
-    numb = numb[-byby]
+    number_me_back = numb[byby]
+    numb = numb[-byby] 
   }
   make_cat = unique(c(cat, make_cat))
   
@@ -126,7 +129,7 @@ generate_predictors = function(data, predictors, model_terms, num_points, mod_cl
   all.vars = all.vars[-rejects]
   all.vars = lapply(all.vars, function(x) x[!is.na(x)])
   pred.values = expand.grid(all.vars)
-  
+
   #### if it's not in model 1:
   #### input the mean (if numeric) or a value (if categorical)
   if (length(which(!(model_terms %in% predictors)))>0){
@@ -142,13 +145,20 @@ generate_predictors = function(data, predictors, model_terms, num_points, mod_cl
       }
     }
   }
-  
+
+  if (exists("number_me_back")) {
+    for (i in 1:length(number_me_back)) {
+      pred.values[,number_me_back[i]] = as.numeric(as.character(pred.values[,number_me_back[i]]))
+      attr(pred.values[,number_me_back[i]], "out.attrs") <- NULL
+    }
+  }
+
   return(pred.values)
 }
 
 
 generate_predictions = function(model, re, pred.values, pred.type, report.se) {
- 
+
   model.type = class(model)[1]
   if ((model.type == "lmerMod" | model.type == "glmerMod") & !re){
     return(data.frame(prediction = 
@@ -168,11 +178,24 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
   }
 
   if (model.type=="RandomForest") {
-
-    d = data.frame(prediction = predict(model, newdata=pred.values, OOB = TRUE), model=model.type)
+    
+    ## get dataset to test that classes are all the same
+    response = attr(model, "data")@get("response")
+    outcome = attr(model, "data")@get("input")
+    data = cbind(response, outcome)
+    # check if classes differ from old to new, and correct if they are
+    class_preds = lapply(pred.values, class)
+    class_data = lapply(data[names(pred.values)], class)
+    if (!identical(class_preds, class_data)) {
+      for (i in 1:length(class_preds)) {
+        class(pred.values[,i]) = class(data[,names(pred.values[i])])
+      }
+    }
+    
+    prediction = predict(model, newdata=pred.values, OOB = TRUE)
+    d = data.frame(prediction = prediction, model=model.type)
     names(d)[1] = "prediction"
-    return(
-      d
+    return(d
     )    
   }
   

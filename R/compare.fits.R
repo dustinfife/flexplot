@@ -79,7 +79,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
     stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
   }	
   
-
   pred.values = generate_predictors(data, predictors, testme, num_points, class(model1)[1])
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
