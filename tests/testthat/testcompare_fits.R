@@ -100,4 +100,10 @@ test_that("compare.fits for other models", {
   vdiffr::expect_doppelganger("compare.fits with mixed models",
                               compare.fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2))
   
+  ## compare.fits returned error when data had integers
+  d = round(data.frame(y=rnorm(100, 50, 20), x=rnorm(100, 50, 20), z=rnorm(100, 50, 20)))
+  class(d$y) = "integer"; class(d$x) = "integer"; class(d$z) = "integer"; 
+  mod = cforest(y~., data=d)
+  testthat::expect_true(names(compare.fits(y~x+z, d, mod, return.preds=TRUE))[2]=="z")
+  
 })
