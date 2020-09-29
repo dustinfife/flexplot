@@ -256,11 +256,11 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   ##### generate fixed effects predictions
   #### if random is in NOT in the second slot
   if (!modify){
-    step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T, ...)
+    step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T, clusters=sample,...)
   } else {
     
     #### otherwise...
-    prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	
+    prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T, clusters=sample)	
     
     ### to prevent conflicts with base::filter
     newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = outcome
