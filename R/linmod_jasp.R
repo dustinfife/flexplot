@@ -230,7 +230,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   } else {
     ghost = NULL
   }
-  
+
   whiskers = list("quartiles" = "quartiles",
                   "standard errors" = "sterr",
                   "standard deviations", "stdev")
@@ -241,7 +241,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     # trick flexplot into plotting this
     new_data = linmod_results$model$model
     f = make.formula(encodeColNames(options$dependent), "1")
-    plot = ggplot(data = new_data,aes_string(y = options$dependent, x=1)) +
+    plot = ggplot(data = new_data,aes_string(y = encodeColNames(options$dependent), x=1)) +
       labs(x = "") + 
       geom_hline(yintercept=0, col='lightgray') +
       geom_jitterd(alpha=options$alpha, width=options$jitx, height=options$jity)+

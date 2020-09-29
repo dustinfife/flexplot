@@ -16,19 +16,19 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   ### read in the dataset if it's ready
   if (ready){
+    
     dataset = .read_glinmod_data(dataset, options)
-    #
+    
     #### modify dataset to convert to numeric (where applicable)
+    dataset = modify_dv(dataset, encodeColNames(options$dependent), options$family)
 
-    dataset = modify_dv(dataset, options$dependent, options$family)
-    #.check_glinmod_error()  #### HOW DO YOU HAVE IT THROW AN ERROR IF THE VARIABLE IS NOT NUMBERIC?
-  
+    
     ### check for categorical/numeric variables
     check.non.number = function(x){
       return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
       return.bool
     }
-    character = sapply(dataset[,options$variables, drop=F], check.non.number)
+    character = sapply(dataset[,encodeColNames(options$variables), drop=F], check.non.number)
     numeric = !character
   }
   
@@ -80,13 +80,15 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     return()
   
   ### loop through and plot everything
-  all.variables = c(options$dependent, options$variables)
+  all.variables = c(encodeColNames(options$dependent), encodeColNames(options$variables))
   
-  a = theme_it(flexplot(make.formula(options$dependent, "1"), dataset), options$theme)
+  a = theme_it(flexplot(make.formula(encodeColNames(options$dependent), "1"), dataset), options$theme)
+  a = a + labs(y="Count", x=(options$dependent))
   plot.list = list(rep(a, times=length(all.variables)))
   plot.list[[1]] = a
   for (i in 2:length(all.variables)){
-    p = theme_it(flexplot(make.formula(options$variables[i-1], "1"), dataset), options$theme)
+    p = theme_it(flexplot(make.formula(encodeColNames(options$variables[i-1]), "1"), dataset), options$theme)
+    p = p + labs(y="Count", x=options$variables[i-1])
     plot.list[[i]] = p
   }
 
@@ -129,7 +131,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   glinmod_results <- jaspResults[["glinmod_results"]]$object 
   terms = attr(terms(glinmod_results$model), "term.labels")
   #
-  generated.formula = make_flexplot_formula(terms, options$dependent, dataset)
+  generated.formula = make_flexplot_formula(terms, encodeColNames(options$dependent), dataset)
   
   if	(options$ghost & length(options$variables)<4){
     ghost=rgb(1,0,0,.4)
@@ -137,9 +139,11 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     ghost = NULL
   }
   
+  save(terms, generated.formula, options,glinmod_results, dataset, file="~/Documents/RPackages/data_before.rdata")
   plot = compare.fits(generated.formula, data=dataset, glinmod_results, 
                       alpha = options$alpha, jitter=c(options$jitx, options$jity),
                       ghost.line=ghost) 
+  plot = fancifyMyLabels(plot, options, formula = generated.formula)
   plot = theme_it(plot, options$theme) + theme(legend.position = "none")
   
   modelplot$plotObject <- plot
@@ -199,7 +203,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   
   ### output results
   tabdat = list(
-    var = term.labels,
+    var = decodeColNames(term.labels),
     est = factors[,1],
     sterr = factors[,2],
     z = factors[, 3]
@@ -229,10 +233,10 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     ## interactions are stored in a deeply nested list. de-listify them
     predictors = paste0(
       unlist(
-        lapply(options$interactions, FUN=function(x) paste0(unlist(x$components), collapse="*"))
+        lapply(encodeColNames(options$interactions), FUN=function(x) paste0(encodeColNames(unlist(x$components)), collapse="*"))
       ), 
       collapse=" + ")
-    f = paste0(options$dependent, " ~ ", predictors, collapse = "")
+    f = paste0(encodeColNames(options$dependent), " ~ ", predictors, collapse = "")
     f = as.formula(f)
     
     ## set up generalIZED models
@@ -268,6 +272,6 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   else
     dataset = .readDataSetToEnd(columns=(c(options$dependent, options$variables))) 
   ## variable names in the dataset are encoded. de-encodify them
-  names(dataset) = JASP:::.unv(names(dataset))
+  #names(dataset) = JASP:::.unv(names(dataset))
   return(dataset)
 }

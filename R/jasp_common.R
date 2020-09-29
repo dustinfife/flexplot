@@ -19,10 +19,9 @@ add_panel_options = function(generated.formula){
 
 #### create function that figures out how to label things
 fancifyMyLabels = function(plot, options, formula=NULL){
-  #browser()
+
   if (!is.null(formula)) options$paneledVars = decodeColNames(add_panel_options(formula))
     
-  
   # univariate plots
   if (length(options$variables) == 0) {
     x = options$dependent
@@ -38,6 +37,10 @@ fancifyMyLabels = function(plot, options, formula=NULL){
     col = options$variables[2]
     lines = options$variables[2]
     shape = options$variables[2]
+  } else if (!is.null(plot$labels$colour)){
+    col = decodeColNames(plot$labels$colour)
+    lines = decodeColNames(plot$labels$linetype)
+    shape = decodeColNames(plot$labels$shape)
   } else {
     col = ""; lines = ""; shape=""
   }
