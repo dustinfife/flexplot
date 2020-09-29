@@ -17,17 +17,17 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   ### read in the dataset if it's ready
   if (ready){
     dataset = .read_linmod_data(dataset, options)
-  
+    
     ### check for categorical/numeric variables
     if (length(options$variables)>0){
       check.non.number = function(x){
         return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
         return.bool
       }
-      character = sapply(dataset[,options$variables, drop=F], check.non.number)
+      character = sapply(dataset[,encodeColNames(options$variables), drop=F], check.non.number)
       numeric = !character
     } else {
-      character = sapply(dataset[,options$dependent, drop=F], check.non.number)
+      character = sapply(dataset[,encodeColNames(options$dependent), drop=F], check.non.number)
       numeric = !character
     }
   }
@@ -149,13 +149,15 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     return()
   
   ### loop through and plot everything
-  all.variables = c(options$dependent, options$variables)
+  all.variables = c(encodeColNames(options$dependent), encodeColNames(options$variables))
   
-  a = theme_it(flexplot(make.formula(options$dependent, "1"), dataset), options$theme)
+  a = theme_it(flexplot(make.formula(encodeColNames(options$dependent), "1"), dataset), options$theme)
+  a = a + labs(y="Count", x=options$dependent)
   plot.list = list(rep(a, times=length(all.variables)))
   plot.list[[1]] = a
   for (i in 2:length(all.variables)){
-    p = theme_it(flexplot(make.formula(options$variables[i-1], "1"), dataset), options$theme)
+    p = theme_it(flexplot(make.formula(encodeColNames(options$variables[i-1]), "1"), dataset), options$theme)
+    p = p + labs(y="Count", x=options$variables[i-1])
     plot.list[[i]] = p
   }
   
@@ -220,7 +222,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
   terms = all.vars(formula(linmod_results$model))[-1]
   
-  if (length(terms)!=0)  generated.formula = flexplot:::make_flexplot_formula(terms, options$dependent, linmod_results$model$model)
+  if (length(terms)!=0)  generated.formula = flexplot:::make_flexplot_formula(terms, encodeColNames(options$dependent), linmod_results$model$model)
 
   if	(options$ghost & length(options$variables)<4){
     ghost=rgb(1,0,0,.4)
@@ -235,12 +237,10 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   center = list("quartiles" = "median", 
                 "standard errors" = "mean",
                 "standard deviations" = "mean")
-  
-  ### create related plot
   if (model.type == "model" && length(terms) == 0) {
     # trick flexplot into plotting this
     new_data = linmod_results$model$model
-    f = make.formula(options$dependent, "1")
+    f = make.formula(encodeColNames(options$dependent), "1")
     plot = ggplot(data = new_data,aes_string(y = options$dependent, x=1)) +
       labs(x = "") + 
       geom_hline(yintercept=0, col='lightgray') +
@@ -258,20 +258,23 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   } else if (model.type=="model"){
     plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                  alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
+    plot = fancifyMyLabels(plot, options, generated.formula)    
   } else if (model.type == "residuals"){
     
     plot = visualize(linmod_results$model, linmod_results, plot=model.type, plots.as.list=TRUE,
                      alpha=options$alpha, jitter=c(options$jitx, options$jity))
     plot = arrange_jasp_plots(plot, options$theme, options$bw)
+    plot = fancifyMyLabels(plot, options)
   } else if (model.type == "added" && length(options$variables) > 1){
     
     methods = list("Regression"="lm", 
                    "Quadratic"="quadratic", 
                    "Cubic"="cubic")
-    formla = make.formula(options$dependent,options$variables)
+    formla = make.formula(encodeColNames(options$dependent),encodeColNames(options$variables))
     
     plot = added.plot(formla, linmod_results$model$model, method=methods[options$linetype], alpha=options$alpha,
                       jitter=c(options$jitx, options$jity))
+    plot = fancifyMyLabels(plot, options)
   }
   
   plot <- theme_it(plot, options$theme)
@@ -309,13 +312,13 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     
     predictors = paste0(
       unlist(
-        lapply(options$interactions, FUN=function(x) paste0(unlist(x$components), collapse="*"))
+        lapply(options$interactions, FUN=function(x) paste0(encodeColNames(unlist(x$components)), collapse="*"))
       ), 
       collapse=" + ")
     
     # add variables with polynomial terms -------------------------------------
-    vars = unlist(lapply(options$interactions, FUN=function(x) unlist(x$components)))
-    polys = unlist(lapply(options$interactions, FUN=function(x) unlist(x$polynoms)))
+    vars = unlist(lapply(encodeColNames(options$interactions), FUN=function(x) encodeColNames(unlist(x$components))))
+    polys = unlist(lapply(encodeColNames(options$interactions), FUN=function(x) encodeColNames(unlist(x$polynoms))))
     vars.with.poly = vars[polys]
     # specify degree
     if (options$linetype=="Quadratic" & length(vars.with.poly)>0){
@@ -328,15 +331,14 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     
     # create formula
     if (predictors != ""){
-      f = paste0(options$dependent, " ~ ", predictors, collapse = "")
+      f = paste0(encodeColNames(options$dependent), " ~ ", predictors, collapse = "")
     } else if (is.null(unlist(options$variables))) {
-      f = paste0(options$dependent, " ~ ", 1)
+      f = paste0(encodeColNames(options$dependent), " ~ ", 1)
     } else {
-      f = paste0(options$dependent, " ~ ", options$variables)
+      f = paste0(encodeColNames(options$dependent), " ~ ", encodeColNames(options$variables))
     }
     
     f = as.formula(f)
-    #fsave(options, dataset, ready, f, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
     ### store all the information
     model = lm(f, dataset)
 
@@ -547,7 +549,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   if (is.na(factors)){
     mean_ci = predict(linmod_results$model, interval="confidence")[1,]
     tabdat = list(
-      var = names(linmod_results$model$model),
+      var = decodeColNames(names(linmod_results$model$model)),
       levels = "",
       est = mean_ci[1],
       lwr = mean_ci[2],
@@ -557,7 +559,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   } else {
     ### output results
     tabdat = list(
-      var = as.character(factors$variables),
+      var = decodeColNames(as.character(factors$variables)),
       levels = factors$levels,
       est = factors$estimate,
       lwr = factors$lower,
@@ -577,7 +579,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   ### output results
   tabdat = list(
-    var = as.character(diff$variables),
+    var = decodeColNames(as.character(diff$variables)),
     comparison = diff$comparison,
     diff = diff$difference,
     lwr = diff$lower,
@@ -597,7 +599,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   ### output results
   tabdat = list(
-    var = as.character(slopes$variables),
+    var = decodeColNames(as.character(slopes$variables)),
     val = slopes$estimate,
     lwr = slopes$lower,
     upr = slopes$upper,
@@ -618,6 +620,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   tabdat = return_tabdata(linmod_results)
  
+  ## convert names
+  tabdat$terms[-1] = decodeColNames(tabdat$terms[-1])
   ### remove main effects for interactions
   if (length(grep(":", tabdat$terms))>1) {
     main_effects = unique(unlist(lapply(tabdat$terms[-1], function(x) strsplit(x, ":"))))
@@ -653,7 +657,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   else
     dataset = .readDataSetToEnd(columns=(c(options$dependent, options$variables))) 
   ## variable names in the dataset are encoded. de-encodify them
-  names(dataset) = JASP:::.unv(names(dataset))
+  #names(dataset) = JASP:::.unv(names(dataset))
   return(dataset)
 }
 

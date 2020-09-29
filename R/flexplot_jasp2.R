@@ -105,48 +105,14 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
     plot = convert_to_grayscale(plot)
   }
   colsnstuff = ifelse(length(options$variables)>1, options$variables[2], "")
-  plot = .fancifyMyLabels(plot, options)
+  plot = fancifyMyLabels(plot, options)
   
   # #### create flexplot object   
   flex_Plot$plotObject <- plot
   return()   
 }
 
-#### create function that figures out how to label things
-.fancifyMyLabels = function(plot, options){
-  
-  # univariate plots
-  if (length(options$variables) == 0) {
-    x = options$dependent
-    y = "Count"
-    # bivariate (or more)
-  } else {
-    y = options$dependent
-    x = options$variables[1]
-  }
-  
-  # if second slot is occupied
-  if (length(options$variables)>1) {
-    col = options$variables[2]
-    lines = options$variables[2]
-    shape = options$variables[2]
-  } else {
-    col = ""; lines = ""; shape=""
-  }
-  
-  ## if there's panels
-  if (length(options$paneledVars) == 1) {
-    names(plot$facet$params$cols) = options$paneledVars[1]
-  } else if (length(options$paneledVars) == 2) {
-    names(plot$facet$params$cols) = options$paneledVars[1]
-    names(plot$facet$params$rows) = options$paneledVars[2]
-  }
-  
-  plot = plot + labs(x=x, y=y, col=col, linetype=lines, shape=shape)
-  
-  
-  
-}
+
 
 #### create a table
 .printedResults = function(jaspResults, dataset, options, ready){

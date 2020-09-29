@@ -6,6 +6,53 @@ return_baseline_model = function(formula) {
   if (length(all_terms) > 1) return ("Baseline: Full Model")
 }
 
+
+# function to convert formula into paneled variables to fanciyMyLabels works
+add_panel_options = function(generated.formula){
+  panels = strsplit(as.character(generated.formula), "|", fixed = T)[[3]][2]
+  if (is.na(panels)){
+    return(NULL) 
+  }
+  return(lapply(strsplit(panels, "+", TRUE), trimws)[[1]])
+}
+
+
+#### create function that figures out how to label things
+fancifyMyLabels = function(plot, options, formula=NULL){
+  #browser()
+  if (!is.null(formula)) options$paneledVars = decodeColNames(add_panel_options(formula))
+    
+  
+  # univariate plots
+  if (length(options$variables) == 0) {
+    x = options$dependent
+    y = "Count"
+    # bivariate (or more)
+  } else {
+    y = options$dependent
+    x = options$variables[1]
+  }
+  
+  # if second slot is occupied
+  if (length(options$variables)>1) {
+    col = options$variables[2]
+    lines = options$variables[2]
+    shape = options$variables[2]
+  } else {
+    col = ""; lines = ""; shape=""
+  }
+  
+  ## if there's panels
+  if (length(options$paneledVars) == 1) {
+    names(plot$facet$params$cols) = options$paneledVars[1]
+  } else if (length(options$paneledVars) == 2) {
+    names(plot$facet$params$cols) = options$paneledVars[1]
+    names(plot$facet$params$rows) = options$paneledVars[2]
+  }
+  
+  plot = plot + labs(x=x, y=y, col=col, linetype=lines, shape=shape)
+}
+
 #tested
 return_baseline_rsq = function(model){
   

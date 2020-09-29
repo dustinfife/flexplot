@@ -58,3 +58,8 @@ test_that("model comparison figures out the right statistic to report", {
   
   
 })
+
+test_that("add panel options differentiates formulas", {
+  testthat::expect_true(length(add_panel_options(as.formula("y~x | x2 + x3")))==2)
+  testthat::expect_true(is.null(add_panel_options(as.formula("y~x + x2 + x3"))))
+})
