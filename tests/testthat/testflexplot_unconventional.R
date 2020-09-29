@@ -62,4 +62,6 @@ test_that("given with few categories isn't collapsed",{
   d = exercise_data %>% mutate(gender=as.numeric(gender))
   a = flexplot(weight.loss~health | gender, data=d)
   vdiffr::expect_doppelganger("categories not collapsed", a)
+  
+
 })

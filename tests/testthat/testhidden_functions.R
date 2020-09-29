@@ -42,8 +42,11 @@ test_that("make flexplot formula works", {
   tst = as.character(make_flexplot_formula(predictors = predictors, outcome, data))[3]
   expect_output(print(tst),'\\[1\\] "Years \\+ Grad\\.School \\| Profession \\+ GPA"')
   
-  tst = as.character(make_flexplot_formula(predictors = "gender", outcome, data))[3]
-  expect_output(print(tst),'gender')
+  tst = as.character(make_flexplot_formula(predictors = "Years", outcome, data))[3]
+  expect_output(print(tst),'Years')
+
+  tst = as.character(make_flexplot_formula(predictors = c("Years", "GPA", "gender:GPA"), outcome, data))[3]
+  expect_output(print(tst),'Years \\| GPA')
 })
 
 test_that("match.jitter works", {
@@ -127,28 +130,53 @@ test_that("fit.function works for categorical predictors", {
   expect_identical(fit.function("weight.loss", "gender", data=exercise_data, suppress_smooth=T), "xxxx+xxxx+xxxx")
   expect_output(print(fit.function("weight.loss", "gender", data=exercise_data, method="stdev")), "\\+xxxx")
   expect_identical(fit.function("weight.loss", "gender", data=exercise_data, mean.line=T), 
-                   "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun.y=\"mean\", position=position_dodge(width=.2), color = \"#bf0303\")")
+                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.2), color = \"#bf0303\")")
   expect_identical(fit.function("weight.loss", "gender", data=exercise_data, mean.line=F), 
-                   "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2), color = '#bf0303')+xxxx")  
+                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2), color = '#bf0303')+xxxx")  
   expect_identical(fit.function("weight.loss", "gender", spread="sterr", data=exercise_data, mean.line=T), 
-                   "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun.y=\"mean\", position=position_dodge(width=.2), color = \"#bf0303\")")
+                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.2), color = \"#bf0303\")")
   expect_identical(fit.function("weight.loss", "gender", spread="sterr", data=exercise_data, mean.line=F), 
-                   "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2), color = '#bf0303')+xxxx")
+                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.2), color = '#bf0303')+xxxx")
   expect_identical(fit.function("weight.loss", "gender", spread = "quartiles", data=exercise_data, mean.line=F), 
-                   "stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+xxxx")
+                   "stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},size = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+xxxx")
   expect_identical(fit.function("weight.loss", "gender", spread = "quartiles", data=exercise_data, mean.line=T), 
-                   "stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(aes_string(group=axis[2]), geom=\"line\", fun.y=\"median\", position=position_dodge(width=.4), color = \"#bf0303\")")  
+                   "stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},size = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(aes_string(group=axis[2]), geom=\"line\", fun=\"median\", position=position_dodge(width=.4), color = \"#bf0303\")")  
   expect_identical(fit.function("weight.loss", "gender", spread = "stdev", data=exercise_data, mean.line=F), 
-                   "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+xxxx")      
+                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-sd(z)}, fun.max = function(z) {mean(z)+sd(z)}, fun=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+xxxx")      
   expect_identical(fit.function("weight.loss", "gender", spread = "stdev", data=exercise_data, mean.line=T), 
-                   "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun.y=\"mean\", position=position_dodge(width=.5), color = \"#bf0303\")")        
+                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-sd(z)}, fun.max = function(z) {mean(z)+sd(z)}, fun=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.5), color = \"#bf0303\")")        
+})
+
+test_that("hidden functions for lme4", {
+  require(lme4)
+  data("math")
+  d = math
+  object = lmer(MathAch~SES + (SES|School), data=d)
+  expect_identical(extract_random_term(object), "School")
+  object2 = lm(MathAch~SES, data=d)
+  testthat::expect_true(length(levels(subset_random_model(object, d, samp.size=5)$School))==5)
+  testthat::expect_false(length(levels(subset_random_model(object2, d, samp.size=5)$School))==5)
+  
+  ## make sure the two models in compare.fits for lme4 are both lme4 objects and have the same random terms
+  object3 = lmer(MathAch~SES + (SES|MEANSES), data=d)
+  testthat::expect_null(test_same_class(object, object))
+  testthat::expect_error(test_same_class(object, object2))
+  testthat::expect_error(test_same_class(object, object3))
 })
 
 
 
+test_that("compare.fits_subroutines work", {
+  mod1 = lm(weight.loss~1, data=exercise_data)
+  mod2 = lm(weight.loss~therapy.type, data=exercise_data)
+  testthat::expect_equal(length(all.vars(formula(whats_model2(mod1)))), 1)
+  testthat::expect_equal(length(all.vars(formula(whats_model2(mod1, mod2)))), 2)
 
-
-
+  model = suppressWarnings(party::cforest(weight.loss~therapy.type, data=exercise_data))
+  testthat::expect_equal(get_terms(model)$predictors, "therapy.type")
+  model = lm(weight.loss~therapy.type, data=exercise_data)
+  testthat::expect_equal(get_terms(model)$predictors, "therapy.type")
+})
 
 
 

@@ -12,7 +12,9 @@
   \item{experiences.type}{What type of experiences they have had with the
   paranormal? Can be "eerie feeling," "presence watching", "saw UFO", "saw ghost", or "heard voice"} 
   \item{income}{How much money they make}
-  \item{age}{Age of respondent}}}
+  \item{age}{Age of respondent}
+  \item{gender}{Gender of respondent}
+  \item{political}{Political Ideology of respondent}}}
 \usage{
 paranormal
 }

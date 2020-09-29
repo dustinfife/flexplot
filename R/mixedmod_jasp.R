@@ -23,7 +23,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
       return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
       return.bool
     }
-    character = sapply(dataset[,options$variables, drop=F], check.non.number)
+    character = sapply(dataset[,encodeColNames(options$variables), drop=F], check.non.number)
     numeric = !character
     
   }
@@ -105,7 +105,6 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   factors = summary(mixedmod_results, correlation=FALSE)$varcor
   random.name = names(factors)
   params = colnames(factors[[random.name]])
-  
   source.filler = NULL
   if (length(params) > 1)
     source.filler = rep("", length(params) - 1)
@@ -115,8 +114,8 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   
   ### output results
   tabdat = list(
-    source = c(random.name, source.filler, "Residual"),
-    param = c(params, ""),
+    source = c(decodeColNames(random.name), source.filler, "Residual"),
+    param = c(params[1], decodeColNames(params[-1]), ""),
     std = c(stddevs.random, stddev.resid)
   )
   mixedmod_table_random$setData(tabdat)
@@ -162,7 +161,7 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   
   ### output results
   tabdat = list(
-    var = row.names(factors),
+    var = decodeColNames(row.names(factors)),
     est = factors[,1],
     sterr = factors[,2],
     t = factors[, 3]
@@ -211,19 +210,22 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     return()
   
   ### loop through and plot everything
-  all.variables = c(options$dependent, options$variables)
+  all.variables = c(encodeColNames(options$dependent), encodeColNames(options$variables))
   
-  a = theme_it(flexplot(make.formula(options$dependent, "1"), dataset), options$theme)
+  a = theme_it(flexplot(make.formula(encodeColNames(options$dependent), "1"), dataset), options$theme)
+  a = a + labs(y="Count", x=options$dependent)
   plot.list = list(rep(a, times=length(all.variables)))
   plot.list[[1]] = a
   for (i in 2:length(all.variables)){
-    p = theme_it(flexplot(make.formula(options$variables[i-1], "1"), dataset), options$theme)
+    p = theme_it(flexplot(make.formula(all.variables[i], "1"), dataset), options$theme)
+    p = p + labs(y="Count", x=decodeColNames(all.variables)[i])
     plot.list[[i]] = p
   }
-  #save(all.variables, options, dataset, plot.list, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
-  if (length(options$variables)<3){
-    nc = length(options$variables) + 1
-  } else if ((length(options$variables)+1)/2 == round((length(options$variables)+1)/2)){
+
+
+  if (length(encodeColNames(options$variables))<3){
+    nc = length(encodeColNames(options$variables)) + 1
+  } else if ((length(encodeColNames(options$variables))+1)/2 == round((length(encodeColNames(options$variables))+1)/2)){
     nc = 2
   } else {
     nc = 3
@@ -263,6 +265,14 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   mixedmod_results <- jaspResults[["mixedmod_results"]]$object
   plot = visualize(mixedmod_results, plot="model", alpha = options$alpha, sample = options$nsamp,
                    jitter=c(options$jitx, options$jity))
+  plot = fancifyMyLabels(plot, options)
+    if (length(plot$labels$x)>0) plot$labels$x = decodeColNames(plot$labels$x)
+    if (length(plot$labels$y)>0) plot$labels$y = decodeColNames(plot$labels$y)
+    if (length(plot$labels$colour)>0) plot$labels$colour = options$rvariables
+    if (length(plot$labels$shape)>0) plot$labels$shape = options$rvariables
+    if (length(plot$labels$linetype)>0) plot$labels$linetype = options$rvariables
+    if (length(plot$facet$params$cols)>0) names(plot$facet$params$cols) = decodeColNames(names(plot$facet$params$cols))
+    if (length(plot$facet$params$rows)>0) names(plot$facet$params$rows) = decodeColNames(names(plot$facet$params$rows))
   plot = theme_it(plot, options$theme)
 
   flexplot$plotObject <- plot
@@ -283,26 +293,21 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
     mixedmod_results$dependOn(c("dependent", "variables", "interactions", "randeff2"))
 
     # create the mixed model formula ------------------------------------------
-    fe = unlist(lapply(options$interactions, FUN=function(x) unlist(x$components)))
+    fe = unlist(lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$components))))
     fixed.effects = paste0(
       unlist(
-        lapply(options$interactions, FUN=function(x) paste0(unlist(x$components), collapse="*"))
+        lapply(options$interactions, FUN=function(x) paste0(encodeColNames(unlist(x$components)), collapse="*"))
       ), 
       collapse=" + ")
     random.effects = unlist(
-      lapply(options$interactions, FUN=function(x) unlist(x$randeff2))
+      lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$randeff2)))
     )
     random.effects = fe[random.effects]
     if (length(random.effects)<1) random.effects = "1"
     random.effects = paste0(random.effects, collapse="+")
-    f = paste0(options$dependent, " ~ ", fixed.effects, " + (", random.effects, " | ", options$rvariables, ")", collapse = "")
-    #save(f, dataset,options, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")f
-    f = as.formula(f)
-    #save(f, dataset,options, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
-
+    f = paste0(encodeColNames(options$dependent), " ~ ", fixed.effects, " + (", random.effects, " | ", encodeColNames(options$rvariables), ")", collapse = "")
     # fit the model -----------------------------------------------------------
     mod = lme4::lmer(f, data=dataset)
-    #save(options, dataset, mod, f, file="/Users/fife/Documents/flexplot/jaspresults.Rdata")
     mixedmod_results$object = mod
     return()
   }
@@ -322,6 +327,6 @@ mixedmod_jasp<- function(jaspResults, dataset, options) {
   else
     dataset = .readDataSetToEnd(columns=(c(options$dependent, options$variables, options$rvariables))) 
   ## variable names in the dataset are encoded. de-encodify them
-  names(dataset) = JASP:::.unv(names(dataset))
+  #names(dataset) = JASP:::.unv(names(dataset))
   return(dataset)
 }

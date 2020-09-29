@@ -17,6 +17,7 @@ test_that("visualize function plots", {
   suppressWarnings(vdiffr::expect_doppelganger("regression",visualize(mod)))
   suppressWarnings(vdiffr::expect_doppelganger("regression residuals only",visualize(mod, plot="residuals")))
   suppressWarnings(vdiffr::expect_doppelganger("regression model",visualize(mod, plot="model")))
+  suppressWarnings(vdiffr::expect_doppelganger("regression model with alpha",visualize(mod, plot="model", alpha=.2)))
 
   ### ancova
   mod = lm(weight.loss~motivation + rewards, data=d)
@@ -33,8 +34,13 @@ test_that("visualize function plots", {
   mod = lm(weight.loss~gender + rewards + motivation, data=d)
   suppressWarnings(vdiffr::expect_doppelganger("multiple regression",visualize(mod)))
   
+  ### visualize with a formula provided
+  suppressWarnings(vdiffr::expect_doppelganger("visualize with formula",visualize(mod, formula = weight.loss~motivation + rewards | gender)))
+  
   mod = lm(Birthweight~mheight + fheight + motherage, data=birthweight)
   suppressWarnings(vdiffr::expect_doppelganger("four variables",visualize(mod)))
+  
+
 
 })
 

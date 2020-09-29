@@ -8,7 +8,7 @@
   "model"), formula = NULL, ...)
 }
 \arguments{
-\item{object}{a lmer object}
+\item{object}{a model object}
 
 \item{plot}{what should be plotted? Residuals? model plot? All of them?}
 

@@ -12,6 +12,7 @@ test_that("rlm and lm can be compared", {
 test_that("nested models have correct r squared", {
   a = lm(weight.loss~motivation, data=exercise_data)
   b = lm(weight.loss~motivation + therapy.type, data=exercise_data)
+  model1 = a; model2 = b
   results = model.comparison(a,b)$statistics$r.squared[2]
   expect_equal(results, .217)
 })
@@ -61,3 +62,13 @@ test_that("model comparisons with missing data", {
   b = lm(weight.loss~therapy.type, data=exercise_data)
   expect_message(model.comparison(a,b), "Note: your models were fit to two different datasets.")
 })
+
+
+test_that("model comparisons with mixed models", {
+  data(alcuse)
+  mod1 = lme4::lmer(ALCUSE~1 + (1|ID), data=alcuse)
+  mod2 = lme4::lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)
+  mc = model.comparison(mod1, mod2)
+  expect_equal(mc$statistics$bayes.factor[2], 826.257, tolerance = 0.01)
+})
+

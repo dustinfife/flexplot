@@ -1,12 +1,17 @@
+data/create_flexplot_linmod.Rdata
 ^README.Rmd$
 ^README.md$
 ^README2.Rmd$
 ^README2.html$
 ^README.html$
-^\.git$     
+^\.git$
+^\.csv$
 jamovi
+data/abuse.sav
+data/income.jasp
 .travis.yml
 flexplot.svg
+Flexplot.svg
 ^build$
 ^icon.svg$
 ^flexplot.jmo$
@@ -26,6 +31,7 @@ R/flexplota.b.R
 # R/linmod_jasp.R
 # R/flexplot_jasp2.R
 # R/mixedmod_jasp.R
+# R/jasp_common.R
 # R/jasp_common.R
 R/flexplota.h.R
 R/glmbasic.b.R

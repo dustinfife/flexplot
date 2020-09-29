@@ -8,7 +8,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
 
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   
-  variables = all.vars(formula)
+  variables = all.vars(formula, unique=FALSE)
   outcome = variables[1]
   predictors = variables[-1]
   
@@ -16,7 +16,6 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   given.axis = flexplot_axis_given(formula)
   given = given.axis$given
   axis = given.axis$axis
-  
   flexplot_errors(variables = variables, data = data, method=method, axis=axis)
   
   #### identify which variables are numeric and which are factors
@@ -28,7 +27,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   }
   
   ### create the lists that contain the breaks
-  #browser()
+  
   break.me = flexplot_break_me(data, predictors, given, axis)
   breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
@@ -38,6 +37,21 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
        related = related, labels=labels, bins=bins, breaks=breaks, jitter=jitter, suppress_smooth=suppress_smooth,
        method = method, spread = spread, alpha = alpha, prediction = prediction)
 }
+
+#flexplot_random_names(10, data.names = c("h", "b"))
+flexplot_random_names = function(data.names=NULL, n=10) {
+  if (!is.null(data.names[1])){
+    nm = data.names[1]
+    while (nm %in% data.names) {
+      nm = paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+    }
+    return (nm)
+  }
+  
+  paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+
+}  
+
 
 flexplot_alpha_default = function(data, axis, alpha){
   if (axis[1] != "1"){
@@ -65,6 +79,7 @@ flexplot_alpha_default = function(data, axis, alpha){
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
+
   if (is.null(data)) {
     return(data) 
   } else {
@@ -94,8 +109,9 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     }
     
     ### remove missing values
+    
     data = flexplot_delete_na(data, variables)
-    #browser()
+    
     
     ### prep data for association plot
     if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1 & axis[1] != "1"){
@@ -158,11 +174,11 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
         b = bin.me(break.me[i], data, bins[i], labs, breaks[[i]])
         #### if there's only one category after we've binned things, fix that succa!
         if (length(levels(b))==1 & length(unique(data[[break.me[i]]]))>1){
-          b = factor(data[,given[i]])
+          b = factor(data[,break.me[i]])
         }
         return(b)
       }
-
+      
       new_cols = lapply(1:length(break.me), tempfunc, break.me, bins, labels, breaks, data)
       data[,paste0(break.me, "_binned")] = new_cols
     }
@@ -206,6 +222,11 @@ flexplot_errors = function(variables, data, method=method, axis){
   
   if (is.null(data)){
     stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
+  }
+  
+  if (any(duplicated(variables))){
+    dup = variables[duplicated(variables)]
+    stop(paste0("You know what? It seems you have, my dear user, tried using a variable more than once (specifically, ", dup, "). That's not something I can do! \n\nBut we can still be friends"))
   }
   
   if (!all(variables %in% names(data))){

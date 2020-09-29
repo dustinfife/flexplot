@@ -36,6 +36,9 @@ create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, gh
   } else {	
     ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line, show.legend=F)'
   }
+  
+  ### odd condition where if they name the group "group" it will conflict with ggplot
+  if (names(d_smooth)[1] == names(d_smooth)[2]) names(d_smooth)[1] = paste0(letters[sample(1:26, 10, T)], collapse="")
 
   list(ghost=ghost, d_smooth = d_smooth)
 }

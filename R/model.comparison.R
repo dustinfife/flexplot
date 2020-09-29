@@ -9,7 +9,7 @@
 ##' @author Dustin Fife
 ##' @export
 model.comparison = function(model1, model2){
-	
+
   #### find model types
   class.mod1 = class(model1)
   class.mod2 = class(model2)
@@ -39,8 +39,13 @@ Might I interest you in a suite of other functions, including compare.fits, perh
     aic = c(AIC(model1), AIC(model2))
     bic = c(BIC(model1), BIC(model2))
     bayes.factor = bf.bic(model1, model2)
-    
-    model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor))
+
+    ### make sure bayes factor is attached to the more likely model
+    if ((bic[1]<bic[2] & bayes.factor<1) | bic[2]<bic[1] & bayes.factor>1){
+      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(1/bayes.factor, bayes.factor))  
+    } else if ((bic[2]<bic[1] & bayes.factor<1) | (bic[1]<bic[2] & bayes.factor>1)){
+      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor))  
+    }  
     
     predictions = data.frame(rbind(predictions, difference)); row.names(predictions)[3] = "Difference"
     to.return = list(statistics=model.table, predictions=predictions)
@@ -55,7 +60,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   	#### check for nested models
   	if (all(length(mod1)>length(mod2) & (mod2 %in% mod1)) & class.mod1[1] == class.mod2[1]){
   		nested = T
-  	} else if (all(length(mod2)>length(mod1) & mod1 %in% mod2)) {
+  	} else if (all(length(mod2)>=length(mod1) & mod1 %in% mod2)) {
   		nested = T
   	} else {
   		nested = F
@@ -82,16 +87,28 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   		p = unlist(anova.res["Pr(>F)"])[2]
   		r.squared = c(summary(model1)$r.squared, summary(model2)$r.squared)
   		#1-pchisq( abs(anova.res$Deviance[2]), abs(anova.res$Df[2]))
-  	} else {
-  		p = NA
+  	} else if (nested & class(model1)[1] == "lmerMod"){
+  	  anova.res = anova(model1, model2)
+  	  p = unlist(anova.res["Pr(>Chisq)"])[2]
   		r.squared = c(NA, NA)
+  	} else {
+  	  p = NA
+  	  r.squared = c(NA, NA)
   	}
   	
   	aic = c(AIC(model1), AIC(model2))
   	bic = c(BIC(model1), BIC(model2))
   	bayes.factor = bf.bic(model1, model2)
   	
-  	model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor), p.value=c(p, NA), r.squared=r.squared)
+  	### make sure bayes factor is attached to the more likely model
+  	if ((bic[1]<bic[2] & bayes.factor<1) | bic[2]<bic[1] & bayes.factor>1){
+  	  model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(1/bayes.factor, bayes.factor), p.value=c(p, NA), r.squared=r.squared)  
+  	} else if ((bic[2]<bic[1] & bayes.factor<1) | (bic[1]<bic[2] & bayes.factor>1)){
+  	  model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor), p.value=c(p, NA), r.squared=r.squared)  
+  	} 
+  	  
+  
+  	
   	row.names(model.table) = c(m1.name, m2.name)
   	if (is.na(model.table$p.value[1])){
   		model.table = round(model.table[,!is.na(model.table[1,])], digits=3)	
@@ -100,12 +117,23 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   		model.table[is.na(model.table)] = ""
   		model.table$p.value[1] = format.pval(p, digits=3)
   	}
-  	
+
   	#### compute difference in predicted value (scaled)
   	differences=standardized_differences(model1, model2)
   	to.return = list(statistics=model.table, pred.difference = differences)
+  	## for lmerMod, report change in R squared
+  	if (class(model1)[1] == "lmerMod" & class(model2)[1] == "lmerMod" & nested) {
+  	  if (length(mod1)<length(mod2)){
+  	    r_squared_change = rsq_change(model2, model1)
+  	  } else {
+  	    r_squared_change = rsq_change(model1, model2)
+  	  }
+  	  to.return$r_squared_change =  r_squared_change
+  	}  	
   	
   }
+  
+
 	return(to.return)
 }
 
@@ -119,7 +147,14 @@ Might I interest you in a suite of other functions, including compare.fits, perh
 ##' @author Dustin Fife
 ##' @export
 sensitivity.table = function(object){
-	predmat = table(Observed = object $model[,1], Predicted=round(predict(object, type="response")))
+  #browser()
+
+  if (class(object)[1] == "RandomForest") {
+    predmat = table(Observed = attr(object, "responses")@variables[,1],
+                    Predicted = predict(object))
+  } else {
+	  predmat = table(Observed = object $model[,1], Predicted=round(predict(object, type="response")))
+  }
 	TP = predmat[2,2]
 	FP = predmat[2,1]
 	TN = predmat[1,1]
