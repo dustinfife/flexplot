@@ -242,7 +242,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     new_data = linmod_results$model$model
     f = make.formula(encodeColNames(options$dependent), "1")
     plot = ggplot(data = new_data,aes_string(y = encodeColNames(options$dependent), x=1)) +
-      labs(x = "") + 
+      labs(x = "", y=decodeColNames(options$dependent)) + 
       geom_hline(yintercept=0, col='lightgray') +
       geom_jitterd(alpha=options$alpha, width=options$jitx, height=options$jity)+
       stat_summary(fun="mean", geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+
