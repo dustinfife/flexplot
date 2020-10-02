@@ -9,6 +9,7 @@
 #'
 #' @return a flexplot graphic. 
 #' @export
+#' @importFrom ggsci scale_color_npg scale_color_aaas scale_color_lancet scale_color_tron 
 flexplot_jasp2 = function(jaspResults, dataset, options) {
   
   ### check if they've entered anything	  
@@ -92,15 +93,24 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
   
   linetype = tolower(options$type)
   
-  #save(k, formula, file="/Users/fife/Documents/jaspbroke.rdata")
   jitter = c(options$jitx,options$jity)
   if (linetype == "regression") linetype = "lm"
+  if (linetype == "none") {linetype = "loess"; suppress_smooth = T; } else { suppress_smooth=F}
   
   plot = flexplot(formula, data=dataset, method=linetype, se=options$confidence, alpha=options$alpha,
                             ghost.line=ghost,
+                            suppress_smooth = suppress_smooth,
                             spread=whiskers[[options$intervals]],
                             jitter = jitter)
   plot <- theme_it(plot, options$theme)
+  
+  # modify color palette
+  if (options$palette!="GGplot Default") {
+    ops = c("Nature", "AAAS", "Lancet", "JCO", "Tron")
+    fun = c(ggsci::scale_color_npg(), ggsci::scale_color_aaas(), ggsci::scale_color_lancet(), ggsci::scale_color_jco(), ggsci::scale_color_tron())
+    plot = plot + fun[ops == options$palette]
+  }
+  
   colsnstuff = ifelse(length(options$variables)>1, options$variables[2], "")
   plot = .fancifyMyLabels(plot, options)
   

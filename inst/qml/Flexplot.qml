@@ -21,7 +21,7 @@ Form
 
 		Group
 		{
-			title: qsTr("Point controls")
+			title: qsTr("<br>Point controls</br>")
 			columns: 4
 			Slider
 			{
@@ -56,7 +56,7 @@ Form
 		{
 			Group
 			{
-				title: qsTr("Visual Statistics")
+				title: qsTr("<strong>Visual Statistics</strong>")
 				CheckBox
 				{
 					name:"confidence";
@@ -66,7 +66,7 @@ Form
 				DropDown
 				{
 					name: "type"
-					values: ["Loess", "Regression", "Quadratic", "Cubic"]
+					values: ["Loess", "Regression", "Quadratic", "Cubic", "None"]
 					label: qsTr("Fitted line (scatterplots)")
 					enabled: varlist.count > 0
 				}
@@ -81,13 +81,19 @@ Form
 
 			Group
 			{
-				title: qsTr("Other Plot Controls")
+				title: qsTr("<br><strong>Other Plot Controls</strong>")
 				DropDown
 				{
 					name: "theme"
 					values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
 					label: qsTr("GGplot theme")
 				}
+				DropDown
+				{
+					name: "palette"
+					values: ["GGplot Default", "Nature", "AAAS", "Lancet", "JCO", "Dark"]
+					label: qsTr("Color Palette")
+				}				
 				CheckBox
 				{
 					name:"ghost";
