@@ -3,7 +3,7 @@ import JASP.Controls	1.0
 import JASP.Widgets		1.0
 import JASP				1.0
 
-Form 
+Form
 {
 	usesJaspResults: true
 
@@ -93,7 +93,21 @@ Form
 					name: "palette"
 					values: ["GGplot Default", "Nature", "AAAS", "Lancet", "JCO", "Dark"]
 					label: qsTr("Color Palette")
+				}
+				CheckBox
+				{
+					name:"bw";
+					label: qsTr("Convert to grayscale");
+					checked: false
 				}				
+
+				CheckBox
+				{
+					name:"ghost";
+					label: qsTr("Ghost lines");
+					checked: true
+					enabled: paneledVars.count > 0
+				}
 				CheckBox
 				{
 					name:"ghost";

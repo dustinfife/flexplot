@@ -5,3 +5,7 @@ build/
 .Ruserdata
 doc
 Meta
+
+*.svg
+
+*.svg

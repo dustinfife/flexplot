@@ -115,15 +115,17 @@ flexplot = function(formula, data=NULL, related=F,
                                     breaks = breaks, labels=labels, bins=bins,
                                     related=related,  
                                     jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
-                                    alpha=alpha, prediction=prediction) 
+                                    alpha=alpha, prediction=prediction)
+
   ### make modifications to the data
 	data = with(varprep, 
 	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
                         ### (error came at ghost.reference when it couldn't find the binned version)
-	prediction = with(varprep, 
-	            flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
+	
+  prediction = with(varprep, 
+              flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE))
 
   ##### make models into a factor if they supply predictions
@@ -167,7 +169,7 @@ flexplot = function(formula, data=NULL, related=F,
     fitted = bivariate$fitted
     
 	#### all the above should take care of ALL possible plots, but now we add paneling
-   # browser()
+
   facets = flexplot_panel_variables(varprep, 
                                     related=related, labels=labels, bins=bins, 
                                     suppress_smooth=suppress_smooth, method=method, 
@@ -176,6 +178,7 @@ flexplot = function(formula, data=NULL, related=F,
 	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
 	 
 				### bin the ghost reference if it's not null
+	  
     ghost.reference = with(varprep, create_ghost_reference(ghost.reference=ghost.reference, data=data,
                                              bins=bins, breaks=breaks, given=given, axis=axis, labels=labels))
    
@@ -238,11 +241,18 @@ flexplot = function(formula, data=NULL, related=F,
       axis[2] = paste0(axis[2], "_binned")
     }
   }
-
+ 
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
+	
+	if (exists("d_smooth")) {
+	  grp_name = grep("group", names(d_smooth))
+	  if (length(grp_name)==1) names(d_smooth)[grp_name[1]] = "GGroup"
+	  if (length(grp_name)>1) names(d_smooth)[grp_name[2]] = "GGroup"  
+	}
+
 	final = suppressMessages(eval(parse(text=total.call)))
 	
 # axis = "muscle.gain"; outcome="weight.loss"

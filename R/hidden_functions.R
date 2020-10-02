@@ -15,6 +15,8 @@ custom.labeler = function(x){
   })
 }
 
+
+
 ## function that does nested model comparisons on a single fitted model
 nested_model_comparisons = function(object){
   
@@ -61,7 +63,10 @@ variable_types = function(variables, data, return.names=F){
 # data = graduate_income
 # outcome = "Income"
 make_flexplot_formula = function(predictors, outcome, data){
-
+  
+  # omit those variables not in the dataset
+  nothere = which (!(predictors %in% names(data)))
+  if (length(nothere)>0) predictors = predictors[-nothere]
   # if there's only one variable, make it
   if (length(predictors)==1){
     f = make.formula(outcome, predictors)
@@ -89,164 +94,50 @@ make_flexplot_formula = function(predictors, outcome, data){
   return(f)
 }
 
-	### taken from gtools::permutations
-# permute.vector = function (n, r, v = 1:n, set = TRUE, repeats.allowed = FALSE) 
-# {
-#     if (mode(n) != "numeric" || length(n) != 1 || n < 1 || (n%%1) != 
-#         0) 
-#         stop("bad value of n")
-#     if (mode(r) != "numeric" || length(r) != 1 || r < 1 || (r%%1) != 
-#         0) 
-#         stop("bad value of r")
-#     if (!is.atomic(v) || length(v) < n) 
-#         stop("v is either non-atomic or too short")
-#     if ((r > n) & repeats.allowed == FALSE) 
-#         stop("r > n and repeats.allowed=FALSE")
-#     if (set) {
-#         v <- unique(sort(v))
-#         if (length(v) < n) 
-#             stop("too few different elements")
-#     }
-#     v0 <- vector(mode(v), 0)
-#     if (repeats.allowed) 
-#         sub <- function(n, r, v) {
-#             if (r == 1) 
-#                 matrix(v, n, 1)
-#             else if (n == 1) 
-#                 matrix(v, 1, r)
-#             else {
-#                 inner <- Recall(n, r - 1, v)
-#                 cbind(rep(v, rep(nrow(inner), n)), matrix(t(inner), 
-#                   ncol = ncol(inner), nrow = nrow(inner) * n, 
-#                   byrow = TRUE))
-#             }
-#         }
-#     else sub <- function(n, r, v) {
-#         if (r == 1) 
-#             matrix(v, n, 1)
-#         else if (n == 1) 
-#             matrix(v, 1, r)
-#         else {
-#             X <- NULL
-#             for (i in 1:n) X <- rbind(X, cbind(v[i], Recall(n - 
-#                 1, r - 1, v[-i])))
-#             X
-#         }
-#     }
-#     sub(n, r, v[1:n])
-# }
-# 
-# 
-# 
-# 
-# rotate.view = function(formula, fixed.positions, which.perms = NULL, return.perms=F){
-# 
-# 	variables = all.vars(formula)
-# 	outcome = variables[1]
-# 	predictors = variables[-1]
-# 	given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
-# 	given = gsub(" ", "", given)		
-# 	given = unlist(strsplit(given, "+", fixed=T))	
-# 	axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
-# 	axis = gsub(" ", "", axis)			
-# 	axis = unlist(strsplit(axis, "+", fixed=T))
-# 	
-# 	if (is.null(fixed.positions)){
-# 		fixed.positions = rep(T, times=4)
-# 	}	
-# 	
-# 	if (length(predictors)>1){
-# 		
-# 		### if their list is longer than the number of variables, delete the last ones
-# 		if (length(fixed.positions)>4){
-# 			message("You provided more slots in fixed.positions than possible. I'm deleting the latter ones.\n")
-# 			fixed.positions = fixed.positions[1:4]
-# 		
-# 		### if their list is shorter than the number of variables, assume the rest are free to vary		
-# 		} else if (length(fixed.positions)<4){
-# 			message("fixed.positions expects four slots (two axes, two panels). You provided less, but I'll assume you want to vary the locations of the other slots as well.\n")
-# 			a = rep(T, times=4)
-# 			a[1:length(fixed.positions)] = fixed.positions
-# 			fixed.positions = a
-# 		}
-# 		
-# 		### make a vector of all slots
-# 		all.vars = rep("", times=4)
-# 		all.vars[1:length(axis)] = axis
-# 		if (!is.na(given[1])){
-# 			all.vars[3:(2+length(given))] = given			
-# 		}
-# 		all.nums = 1:4; if (sum(fixed.positions)!=4) all.nums = all.nums[-which(!fixed.positions)]
-# 		
-# 		#### specify which slots are allowed to vary and which are fixed
-# 		fixed = all.vars[!fixed.positions]
-# 		free = all.vars[which(!(all.vars %in% fixed))]
-# 	
-# 		#### figure out numbers of slots allowed to vary
-# 		slots.to.randomize = which(!(all.vars %in% fixed))
-# 	
-# 		#### find all possible permutations
-# 		if (length(variables)==2){
-# 			perms = matrix(c(
-# 				1,2,3,4,
-# 				2,1,3,4,
-# 				1,3,2,4,
-# 				2,3,1,4), ncol=4)
-# 		} else {
-# 			perms = permute.vector(length(slots.to.randomize), length(slots.to.randomize), slots.to.randomize)
-# 		}
-# 		
-# 		#### remove perms rows that are the same ordering
-# 		# same.order = which(apply(perms, 1, paste0, collapse=",")==paste0(all.nums, collapse=","))
-# 		# if (length(same.order)>0){
-# 			# perms = perms[-same.order,]
-# 		# }
-# 		
-# 		### make sure axis[1] is not random
-# 		if (fixed.positions[1]){
-# 			### find those where ""
-# 			mis = which(free=="")
-# 			
-# 			#### remove those situations where mis (missing value) is given a 1 in perm
-# 			good.bye=which(perms[,mis] == 1)
-# 			if (length(good.bye)>0) perms = perms[-good.bye,]
-# 		}
-# 
-# 		### get rid of those ones that leave the first axis blank
-# 		blanks = which(all.vars == "")
-# 		if (length(blanks)>0){
-# 			perms = perms[-which(perms[,1] %in% blanks),]
-# 		}				
-# 
-# 		#### randomly decide permutation
-# 		if (is.null(which.perms)){
-# 			rand.row = sample(1:nrow(perms), size=1)			
-# 		} else {
-# 			rand.row = which.perms
-# 		}
-# 
-# 		#### create new formula
-# 		new.allvars = all.vars
-# 		new.allvars[perms[rand.row,]] = free
-# 		
-# 		new.allvars[new.allvars==""] = "xxx"
-# 		stay = which(new.allvars!="xxx")
-# 		symbols = c("~", "+", "|", "+")
-# 		f = paste0(symbols, new.allvars, collapse="")
-# 		f = gsub("xxx+", "", f, fixed=T)
-# 		f = gsub("+xxx", "", f, fixed=T)		
-# 		f = gsub("|xxx", "", f, fixed=T)				
-# 		f = gsub("xxx|", "", f, fixed=T)						
-# 		formula = formula(paste0(outcome, f, collapse=""))
-# 		
-# 	} 
-# 	
-# 	if(return.perms){
-# 		perms
-# 	} else {
-# 		formula
-# 	}
-# }
+
+# tested
+extract_random_term = function(object) {
+  #### extract formula
+  form = as.character(formula(object))[3]
+  
+  #### identify random effects
+  term.re = trimws(substr(form, regexpr("\\|", form)[1]+1, regexpr("\\)", form)[1]-1))		
+  return(term.re)
+}
+
+# tested
+test_same_class = function(model1, model2) {
+  # if neither are lme4
+  if (class(model1)[1] != "lmerMod" & class(model2)[1] != "lmerMod") return(NULL)
+  
+  # if one, but not both are lme4
+  if (class(model1)[1] != class(model2)[1]) stop("It looks like you're trying to compare two models that are not both lme4 models. I can't do that! Sorry! \n\n Maybe you should go binge Netflix.")
+  
+  # if they have different random terms
+  re_one = extract_random_term(model1)
+  re_two = extract_random_term(model2)
+  if (re_one != re_two) stop("Whoa there, tiger. You can't have different random effects for the two models.")
+}
+
+
+### return dataset containing factorized random effects (tested)
+subset_random_model = function(object, d, samp.size = 3) {
+  
+  if (class(object)[1] == "lmerMod") {
+    
+    ## get random term
+    term.re = extract_random_term(object)
+    
+    #### randomly sample the re terms and convert to numeric
+    unique.terms = unique(d[,term.re])
+    samp = sample(unique.terms, size=min(samp.size, length(unique.terms)))
+    k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])
+    return(k)
+  }
+  
+  return(d)
+}
+
 
 prep.breaks = function(variable, data, breaks=NULL, bins=3){
 

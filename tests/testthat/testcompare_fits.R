@@ -10,8 +10,9 @@ test_that("compare.fits linear models", {
   model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
   model.int2 = lm(weight.loss ~ motivation + therapy.type + motivation:therapy.type, data = exercise_data)
   model.poly = lm(weight.loss ~ motivation + therapy.type + I(motivation^2), data = exercise_data)
-  suppressWarnings(vdiffr::expect_doppelganger("compare interaction vs. me",compare.fits(weight.loss ~ motivation | therapy.type, 
-               data = exercise_data, model.me, model.int, ghost.line = "black")))
+  suppressWarnings(vdiffr::expect_doppelganger("compare interaction vs. me",
+            compare.fits(weight.loss ~ motivation | therapy.type, 
+               data = exercise_data, model.me, model.int, ghost.line = "black", num_points=10)))
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=exercise_data, model.me, model.int))
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=relationship_satisfaction, model.me, model.int))
   expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
@@ -45,6 +46,7 @@ test_that("compare.fits linear models", {
   reduced.mod = lm(satisfaction~communication + separated , data=relationship_satisfaction)
   vdiffr::expect_doppelganger("compare.fits where listwise deletion causes change in levels",
                               compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod))
+
 })
 
 test_that("compare.fits for other models", {
@@ -88,4 +90,20 @@ test_that("compare.fits for other models", {
   mod2 = glm(injury~safety * attention, data=tablesaw.injury, family=binomial)  
   vdiffr::expect_doppelganger("compare.fits with two glms",
                               compare.fits(injury~safety | attention, data=tablesaw.injury, mod1, mod2))
+  
+  ### compare.fits with mixed models
+  data(alcuse)
+  require(lme4)
+  head(alcuse)
+  mod1 = lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)  
+  mod2 = lmer(ALCUSE~AGE_14 + (AGE_14|ID), data=alcuse)  
+  vdiffr::expect_doppelganger("compare.fits with mixed models",
+                              compare.fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2))
+  
+  ## compare.fits returned error when data had integers
+  d = round(data.frame(y=rnorm(100, 50, 20), x=rnorm(100, 50, 20), z=rnorm(100, 50, 20)))
+  class(d$y) = "integer"; class(d$x) = "integer"; class(d$z) = "integer"; 
+  mod = suppressWarnings(party::cforest(y~., data=d))
+  testthat::expect_true(names(compare.fits(y~x+z, d, mod, return.preds=TRUE))[2]=="z")
+  
 })
