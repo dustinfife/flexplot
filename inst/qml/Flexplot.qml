@@ -10,9 +10,32 @@ Form
 	VariablesForm
 	{
 		AvailableVariablesList	{ name: "allVariables" }
-		AssignedVariablesList	{ name: "dependent"		; title: qsTr("Dependent Variable")	; singleVariable: true	}
-		AssignedVariablesList	{ name: "variables"		; title: qsTr("Independent Variable(s)") ; id: varlist		}
-		AssignedVariablesList	{ name: "paneledVars"	; title: qsTr("Paneled Variable(s)")	 ; id: paneledVars	}
+		AssignedVariablesList	{
+				name: "dependent"		;
+				title: qsTr("Dependent Variable")	;
+				singleVariable: true
+				onCountChanged:  nameY.value = count > 0 ? model.data(model.index(0,0)) : ""
+		}
+		AssignedVariablesList	{
+				name: "variables"		;
+				title: qsTr("Independent Variable(s)") ;
+				id: varlist
+				onCountChanged: {
+					nameLegend.value = count > 1 ? model.data(model.index(1,0)) : "";
+					nameX.value = count > 0 ? model.data(model.index(0,0)) : "";
+				}
+
+		}
+		AssignedVariablesList	{
+			name: "paneledVars"	;
+			title: qsTr("Paneled Variable(s)");
+			id: paneledVars
+			onCountChanged: {
+				nameCols.value = count > 0 ? model.data(model.index(0,0)) : "";
+				nameRows.value = count > 1 ? model.data(model.index(1,0)) : "";
+			}
+
+		}
 	}
 
 	Section
@@ -21,7 +44,7 @@ Form
 
 		Group
 		{
-			title: qsTr("<br>Point controls</br>")
+			title: qsTr("<br><strong>Point controls</br></strong>")
 			columns: 4
 			Slider
 			{
@@ -99,15 +122,8 @@ Form
 					name:"bw";
 					label: qsTr("Convert to grayscale");
 					checked: false
-				}				
-
-				CheckBox
-				{
-					name:"ghost";
-					label: qsTr("Ghost lines");
-					checked: true
-					enabled: paneledVars.count > 0
 				}
+
 				CheckBox
 				{
 					name:"ghost";
@@ -119,4 +135,46 @@ Form
 		}
 	}
 
+	Section
+	{
+		title: qsTr("Plot Labels")
+		Group
+		{
+		  title: qsTr("<br><strong>Plot Labels</strong>")
+		  TextField
+      {
+	      id: nameX;
+	      label: "X Axis Label";
+	      name: "nameX";
+      }
+		  TextField
+      {
+	      id: nameY
+	      label: "Y Axis Label"
+	      name: "nameY";
+				value: xAxis.value
+      }
+			TextField
+      {
+	      id: nameLegend
+	      label: "Legend Label"
+	      name: "nameLegend";
+				value: legend.value
+      }
+			TextField
+      {
+	      id: nameCols
+	      label: "Column Panel Label"
+	      name: "nameCols";
+				value: cols.value
+      }
+			TextField
+      {
+	      id: nameRows
+	      label: "Row Panel Label"
+	      name: "nameRows";
+				value: rows.value
+      }
+		}
+	}
 }

@@ -229,6 +229,7 @@ estimates.lm = function(object, mc=TRUE){
 	  }
 	  ### this requires superassignment to work with JASP
 	  dataset<<-object$model
+	  #dataset = object$model
 	  all.terms = attr(terms(object), "term.labels")
 	  mc = t(sapply(1:length(all.terms), removed.one.at.a.time, terms=all.terms, object=object))
 	  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
@@ -265,9 +266,12 @@ estimates.lm = function(object, mc=TRUE){
 #'
 #' Report RandomForest object Estimates
 #' @param object a RandomForest object
+#' @param mc Should model comparisons be performed? 
+#' Currently not implemented for RandomForest objects
 #' @return One or more objects containing parameter estimates and effect sizes
+#' @importFrom party varimp
 #' @export
-estimates.RandomForest = function(object) {
+estimates.RandomForest = function(object, mc=TRUE) {
   y = unlist(attr(object, "data")@get("response"))
   ### compute OOB
   oob = predict(object, OOB=T, type="response")
@@ -281,7 +285,7 @@ estimates.RandomForest = function(object) {
   }
   
   #### compute variable importance
-  importance = varimp(object)
+  importance = party::varimp(object)
   if (!numeric){
     importance = round(sort(importance, decreasing=T), digits=4)
   } else {

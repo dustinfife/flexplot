@@ -45,22 +45,19 @@
 
 
 
-#' Simulated Dataset About People's Attractiveness
+#' Simulated Dataset About People's Income
 #'
 #' A dataset containing 207 observations, containing the following information
 #'
-#' @format A data frame with 207 rows and 5 variables: \describe{
+#' @format A data frame with 207 rows and 6 variables: \describe{
 #'   \item{stats_skills}{performance on a statistics know-how test}
-#'   \item{group}{Treatment group (control, watching hitch, receiving stats training)}
-#'   \item{gender}{Gender of person being rated}
-#'   \item{exercise}{Self-reported average number of minutes exercised per week}
-#'   \item{attractiveness_1}{Attractiveness score of person being rated at baseline}
-#'   \item{attractiveness_2}{Attractiveness score of person being rated at follow up}
-#'   \item{age}{Age of respondent}
-#'   \item{gender}{Gender of respondent}
-#'   \item{political}{Political Ideology of respondent}
+#'   \item{group}{Treatment group (control, mo money, wealth building)}
+#'   \item{graduate}{hs graduate vs. college graduate}
+#'   \item{hours}{hours they work a week}
+#'   \item{income_before}{Income before starting training}
+#'   \item{income_after}{Income after starting training}
 #'}
-"attractiveness"
+"income"
 
 #' Alcohol use among youth
 #'
