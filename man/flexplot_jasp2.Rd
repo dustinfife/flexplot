@@ -17,6 +17,6 @@ flexplot_jasp2(jaspResults, dataset, options)
 a flexplot graphic.
 }
 \description{
-This function was developed for use in JASP. It takes a dataset as input with user 
+This function was developed for use in JASP. It takes a dataset as input with user
 options and returns a flexplot graphic
 }

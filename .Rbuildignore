@@ -24,6 +24,7 @@ tests/
 ^Meta$
 jasp_documentation/
 paranormal.csv
+FlexplotLogo.svg
 EJ notes.rtf
 R/flexplota.b.R
 # stuff to ignore jasp when doing CMD check
@@ -31,7 +32,6 @@ R/flexplota.b.R
 # R/linmod_jasp.R
 # R/flexplot_jasp2.R
 # R/mixedmod_jasp.R
-# R/jasp_common.R
 # R/jasp_common.R
 R/flexplota.h.R
 R/glmbasic.b.R

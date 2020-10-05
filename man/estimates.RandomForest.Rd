@@ -4,10 +4,13 @@
 \alias{estimates.RandomForest}
 \title{Report RandomForest object Estimates (effect sizes and parameters)}
 \usage{
-\method{estimates}{RandomForest}(object)
+\method{estimates}{RandomForest}(object, mc = TRUE)
 }
 \arguments{
 \item{object}{a RandomForest object}
+
+\item{mc}{Should model comparisons be performed? 
+Currently not implemented for RandomForest objects}
 }
 \value{
 One or more objects containing parameter estimates and effect sizes
