@@ -56,6 +56,35 @@ fancifyMyLabels = function(plot, options, formula=NULL){
   plot = plot + labs(x=x, y=y, col=col, linetype=lines, shape=shape)
 }
 
+
+fancifyMyLabels_strings = function(plot, options, formula=NULL){
+  
+  x = ifelse(options$nameX == "", options$variables[1], options$nameX)
+  y = ifelse(options$nameY == "", options$dependent, options$nameY)
+  col = ifelse(options$nameLegend == "", options$variables[2], options$nameLegend)
+  lines = col
+  shape = col
+  
+  ## if there's panels
+  if (length(options$paneledVars) > 0) {
+    if (options$nameCols == "") {
+      names(plot$facet$params$cols) = decodeColNames(options$paneledVars[1])
+    } else {
+      names(plot$facet$params$cols) = options$nameCols
+    }
+  }
+    
+  if (length(options$paneledVars) > 1) {
+    if (options$nameRows == "") {
+      names(plot$facet$params$rows) = decodeColNames(options$paneledVars[2])
+    } else {
+      names(plot$facet$params$rows) = options$nameRows
+    }
+  }
+    
+  plot = plot + labs(x=x, y=y, col=col, linetype=lines, shape=shape)
+}
+
 #tested
 return_baseline_rsq = function(model){
   
