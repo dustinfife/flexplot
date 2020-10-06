@@ -8,6 +8,9 @@
 ##' variables between ~ and | will fall on the x axis and categorical predictors will be color-coded/symbol-coded/line-coded (if user specifies). If more than one numeric variable is specified
 ##' after ~, the second (and third) will be binned. No more than four variables are allow (otherwise, cognitive load is too high). If the user wishes to include another variable,
 ##'  I recommend they create separate plots, one for each level of the new variable (or a binned level of a numeric variable). 
+##'  
+##'  To better enable comparisons across panels, Flexplot implements "ghost lines," which simply repeat the line from one panel to another. For more information about ghost lines, see the vignette (also
+##'  available at https://psyarxiv.com/kh9c3/)
 ##' @param formula A formula of the form  y~x + a | b + z
 ##' @param data The dataset
 ##' @param related Are variables related? If so, it will show a plot of difference scores, rather than the raw scores (for a related t test). 
