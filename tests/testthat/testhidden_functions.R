@@ -3,6 +3,10 @@ context("hidden_functions works as expected")
 data(exercise_data)
 d = exercise_data
 set.seed(1212)
+test_that("rescale works", {
+  expect_true(round(mean(rescale(d$weight.loss, 0, 2)), 0) == 0)
+  expect_true(round(sd(rescale(d$weight.loss, 0, 2)), 0) == 2)
+})
 test_that("standardized difference works", {
   
   mod1 = lm(weight.loss~therapy.type, data=d)	
