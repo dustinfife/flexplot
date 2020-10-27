@@ -27,7 +27,7 @@
 ##' anchor.predictions(glm.mod, c("safety", "gender"))
 anchor.predictions = function(model, reference, shutup=F){
 
-	terms = attr(terms(model), "term.labels")
+	terms = remove_interaction_terms(model)
 
 		#### extract dataset
 	d = model$model
