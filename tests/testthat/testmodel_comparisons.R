@@ -48,6 +48,7 @@ test_that("interaction vs lm works", {
 })
 
 
+
 test_that("random forest vs lm works returns predictions only", {
   set.seed(1212)
   a = randomForest(weight.loss~therapy.type, data=exercise_data)
@@ -72,3 +73,45 @@ test_that("model comparisons with mixed models", {
   expect_equal(mc$statistics$bayes.factor[2], 826.257, tolerance = 0.01)
 })
 
+
+test_that("generate_predictions_table works", {
+  big = glm(died~willpower + minutes.fighting + superpower + damage.resistance + speed + agility + iq + strength + flexibility, 
+             data=avengers, family=binomial)
+  small = glm(died~minutes.fighting, data=avengers, family=binomial)
+  expect_true(generate_predictions_table(big)[1,1] == 17)
+  expect_true(generate_predictions_table(small)[1,1] == 0)
+  expect_true(length(unique(check_logistic_all_same(big)))==2)
+  expect_true(length(levels(check_logistic_all_same(small)))==2)
+
+})
+
+test_that("sensitivity.table works", {
+  small = glm(died~minutes.fighting, data=avengers, family=binomial)
+  expect_true(sensitivity.table(small)$npv == 0)
+  set.seed(232)
+  rfmod = party::cforest(died~minutes.fighting, data=avengers, control = party::cforest_unbiased(ntree=10))
+  expect_true(sensitivity.table(rfmod)$acc %>% round(2) ==.88)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#

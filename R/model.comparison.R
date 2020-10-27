@@ -153,9 +153,10 @@ sensitivity.table = function(object){
     predmat = table(Observed = attr(object, "responses")@variables[,1],
                     Predicted = predict(object))
   } else {
-	  predmat = table(Observed = object $model[,1], Predicted=round(predict(object, type="response")))
+    predmat = generate_predictions_table(object)
   }
-	TP = predmat[2,2]
+  
+  TP = predmat[2,2]
 	FP = predmat[2,1]
 	TN = predmat[1,1]
 	FN = predmat[1,2]
@@ -165,4 +166,23 @@ sensitivity.table = function(object){
 	npv = TN/(TN+FN)
 	acc = (TP+TN)/(TP+FP+TN+FN)
 	list(acc=acc,sens=sens, spec=spec, ppv=ppv, npv=npv)
+}
+
+
+generate_predictions_table = function(object) {
+  dv = object$model[,1]
+  predictions = check_logistic_all_same(object)
+  predmat = table(Observed=dv, Predicted=predictions)
+  predmat
+  
+}
+
+check_logistic_all_same = function(object) {
+  predictions = round(predict(object, type="response"))
+  
+  if (var(predictions) != 0) return(predictions)
+  
+  # convert predictions to a factor (to preserve zeroes)
+  predictions = factor(predictions, levels=c(0,1), labels=c(0,1))
+  return(predictions)
 }
