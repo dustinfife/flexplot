@@ -58,7 +58,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
     #### collect terms
   	mod1 = attr(terms(model1), "term.labels")
   	mod2 = attr(terms(model2), "term.labels")	
-  	
+  	#browser()
   	#### check for nested models
   	if (all(length(mod1)>length(mod2) & (mod2 %in% mod1)) & class.mod1[1] == class.mod2[1]){
   		nested = T
@@ -93,8 +93,9 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   	  anova.res = anova(model1, model2)
   	  p = unlist(anova.res["Pr(>Chisq)"])[2]
   		r.squared = c(NA, NA)
-  	} else {
-  	  p = NA
+  	} else if (nested & class(model1)[1] == "glm") {
+  	  anova.res = anova(model1, model2, test="LRT")
+  	  p = unlist(anova.res["Pr(>Chi)"])[2]
   	  r.squared = c(NA, NA)
   	}
   	

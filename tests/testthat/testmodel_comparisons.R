@@ -38,6 +38,9 @@ test_that("glm and glm works", {
   model2 = glm(injury~safety + attention, data=tablesaw.injury, family=binomial)  
   res = model.comparison(model1, model2)
   expect_output(print(res), "1765.236 1775.706 6.145538e-03")
+  model1 = glm(safety~attention, data=tablesaw.injury, family=poisson)  
+  model2 = glm(safety~gender + attention, data=tablesaw.injury, family=poisson) 
+  expect_true(model.comparison(model1, model2)$statistics$p.value[1] == "0.000356")
 })
 
 test_that("interaction vs lm works", {
