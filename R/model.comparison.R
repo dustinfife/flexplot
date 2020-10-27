@@ -39,13 +39,15 @@ Might I interest you in a suite of other functions, including compare.fits, perh
     aic = c(AIC(model1), AIC(model2))
     bic = c(BIC(model1), BIC(model2))
     bayes.factor = bf.bic(model1, model2)
-
+    p = sort(anova(model1, model2, test="LRT")[,"Pr(>Chi)"])
     ### make sure bayes factor is attached to the more likely model
     if ((bic[1]<bic[2] & bayes.factor<1) | bic[2]<bic[1] & bayes.factor>1){
-      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(1/bayes.factor, bayes.factor))  
+      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(1/bayes.factor, bayes.factor), p = c(p, NA))  
     } else if ((bic[2]<bic[1] & bayes.factor<1) | (bic[1]<bic[2] & bayes.factor>1)){
-      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor))  
+      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor), p = c(p, NA))  
     }  
+    
+    row.names(model.table) = c(m1.name, m2.name)
     
     predictions = data.frame(rbind(predictions, difference)); row.names(predictions)[3] = "Difference"
     to.return = list(statistics=model.table, predictions=predictions)
