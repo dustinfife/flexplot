@@ -68,7 +68,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   		nested = F
   	}
   	
-  	if (nested & class(model1) == "lm"){
+  	if (nested & class(model1)[1] == "lm"){
   	  #### check for different Ns for each dataset (if missing data was omitted)
   	  if (nrow(model1$model) != nrow(model2$model)){
   	    message(paste0("Note: your models were fit to two different datasets. ",

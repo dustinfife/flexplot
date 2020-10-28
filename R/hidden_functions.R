@@ -341,20 +341,20 @@ fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method
 				stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
 			}
 
-			fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)'			
+			fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se, formula = y~x)'			
 		} else if (method=="rlm"){
-			fit.string = 'geom_smooth(method = "rlm", se = se)'
+			fit.string = 'geom_smooth(method = "rlm", se = se, formula = y~x)'
 		}else if (method=="poisson" | method=="Gamma") {
 			#### specify the curve
-			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se)'
+			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se, formula = y~x)'
 		} else if (method=="polynomial" | method == "quadratic"){
 			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 2, raw=TRUE))'
 		} else if (method=="cubic"){
 			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 3, raw=TRUE))'
 		} else if (method=="lm"){
-			fit.string = 'stat_smooth(method="lm", se=se)'
+			fit.string = 'stat_smooth(method="lm", se=se, formula = y~x)'
 		} else {
-			fit.string = 'geom_smooth(method="loess", se=se)'
+			fit.string = 'geom_smooth(method="loess", se=se, formula = y~x)'
 		}
 		
 
