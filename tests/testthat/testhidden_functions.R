@@ -115,17 +115,17 @@ test_that("fit.function works for numeric predictors", {
   expect_identical(fit.function("motivation", "weight.loss", data=exercise_data, suppress_smooth=T), "xxxx")
   expect_error(fit.function("motivation", "weight.loss", method="logistic", data=exercise_data))
   expect_identical(fit.function("gender", "weight.loss", method="logistic", data=exercise_data),
-    "geom_smooth(method = \"glm\", method.args = list(family = \"binomial\"), se = se)")
+    "geom_smooth(method = \"glm\", method.args = list(family = \"binomial\"), se = se, formula = y~x)")
   expect_identical(fit.function("motivation", "weight.loss", method="rlm", data=exercise_data),
-                   "geom_smooth(method = \"rlm\", se = se)")
+                   "geom_smooth(method = \"rlm\", se = se, formula = y~x)")
   expect_identical(fit.function("motivation", "weight.loss", method="lm", data=exercise_data),
-                   "stat_smooth(method=\"lm\", se=se)")  
+                   "stat_smooth(method=\"lm\", se=se, formula = y~x)")  
   expect_identical(fit.function("motivation", "weight.loss", method="cubic", data=exercise_data),
                    "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 3, raw=TRUE))") 
   expect_identical(fit.function("motivation", "weight.loss", method="quadratic", data=exercise_data),
                    "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 2, raw=TRUE))")   
   expect_identical(fit.function("motivation", "weight.loss", method="loess", data=exercise_data),
-                   "geom_smooth(method=\"loess\", se=se)")     
+                   "geom_smooth(method=\"loess\", se=se, formula = y~x)")     
   
 })
 
