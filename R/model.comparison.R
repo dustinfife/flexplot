@@ -39,13 +39,15 @@ Might I interest you in a suite of other functions, including compare.fits, perh
     aic = c(AIC(model1), AIC(model2))
     bic = c(BIC(model1), BIC(model2))
     bayes.factor = bf.bic(model1, model2)
-
+    p = sort(anova(model1, model2, test="LRT")[,"Pr(>Chi)"])
     ### make sure bayes factor is attached to the more likely model
     if ((bic[1]<bic[2] & bayes.factor<1) | bic[2]<bic[1] & bayes.factor>1){
-      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(1/bayes.factor, bayes.factor))  
+      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(1/bayes.factor, bayes.factor), p = c(p, NA))  
     } else if ((bic[2]<bic[1] & bayes.factor<1) | (bic[1]<bic[2] & bayes.factor>1)){
-      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor))  
+      model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor), p = c(p, NA))  
     }  
+    
+    row.names(model.table) = c(m1.name, m2.name)
     
     predictions = data.frame(rbind(predictions, difference)); row.names(predictions)[3] = "Difference"
     to.return = list(statistics=model.table, predictions=predictions)
@@ -56,7 +58,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
     #### collect terms
   	mod1 = attr(terms(model1), "term.labels")
   	mod2 = attr(terms(model2), "term.labels")	
-  	
+  	#browser()
   	#### check for nested models
   	if (all(length(mod1)>length(mod2) & (mod2 %in% mod1)) & class.mod1[1] == class.mod2[1]){
   		nested = T
@@ -91,8 +93,9 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   	  anova.res = anova(model1, model2)
   	  p = unlist(anova.res["Pr(>Chisq)"])[2]
   		r.squared = c(NA, NA)
-  	} else {
-  	  p = NA
+  	} else if (nested & class(model1)[1] == "glm") {
+  	  anova.res = anova(model1, model2, test="LRT")
+  	  p = unlist(anova.res["Pr(>Chi)"])[2]
   	  r.squared = c(NA, NA)
   	}
   	
@@ -153,9 +156,10 @@ sensitivity.table = function(object){
     predmat = table(Observed = attr(object, "responses")@variables[,1],
                     Predicted = predict(object))
   } else {
-	  predmat = table(Observed = object $model[,1], Predicted=round(predict(object, type="response")))
+    predmat = generate_predictions_table(object)
   }
-	TP = predmat[2,2]
+  
+  TP = predmat[2,2]
 	FP = predmat[2,1]
 	TN = predmat[1,1]
 	FN = predmat[1,2]
@@ -165,4 +169,23 @@ sensitivity.table = function(object){
 	npv = TN/(TN+FN)
 	acc = (TP+TN)/(TP+FP+TN+FN)
 	list(acc=acc,sens=sens, spec=spec, ppv=ppv, npv=npv)
+}
+
+
+generate_predictions_table = function(object) {
+  dv = object$model[,1]
+  predictions = check_logistic_all_same(object)
+  predmat = table(Observed=dv, Predicted=predictions)
+  predmat
+  
+}
+
+check_logistic_all_same = function(object) {
+  predictions = round(predict(object, type="response"))
+  
+  if (var(predictions) != 0) return(predictions)
+  
+  # convert predictions to a factor (to preserve zeroes)
+  predictions = factor(predictions, levels=c(0,1), labels=c(0,1))
+  return(predictions)
 }

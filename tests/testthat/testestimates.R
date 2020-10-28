@@ -49,6 +49,9 @@ test_that("estimates from generalized linear models", {
   
   mod = glm(aggression~ses + empathy + depression, data=d, family=Gamma)
   expect_equal(estimates(mod)$raw.coefficients[1], .164)
+  
+  mod = glm(aggression~ses*depression, data=d, family=Gamma)
+  expect_equal(estimates(mod)$raw.coefficients[1], .161)
 })  
   
 test_that("bic works", {
@@ -61,4 +64,9 @@ test_that("icc works", {
   data(math)
   mod = lmer(MathAch~1 + (1|School), data=math)
   expect_equal(icc(mod)$icc, .18, tol=.01)
+})
+
+test_that("removing interactions works", {
+  mod = lm(kills~agility*speed, data=avengers)
+  expect_true(length(remove_interaction_terms(mod))==2)
 })

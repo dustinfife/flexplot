@@ -40,10 +40,7 @@ estimates.lm = function(object, mc=TRUE){
 	predictors = variables[-1]
 	    
     #### look for interaction terms
-	interaction = length(grep(":", terms))>0
-	if (interaction){
-		terms = terms[-grep(":", terms)]
-	}
+	terms = remove_interaction_terms(object)
 	#### get dataset
 	d = object$model
   #}dataset=NULL
@@ -329,8 +326,9 @@ print.rf_estimates = function(x,...){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.glm = function(object, mc=FALSE){
+
 	#### generate list of coefficients
-	terms = attr(terms(object), "term.labels")
+	terms = remove_interaction_terms(object)
 	
 	#### get dataset
 	d = object$model
@@ -347,10 +345,10 @@ estimates.glm = function(object, mc=FALSE){
 	#### output predictions
 	n.func = function(term){anchor.predictions(object, term, shutup=T)$prediction}
 	preds = lapply(terms, n.func); names(preds) = terms
+
 	
 	
 	#### output coefficients
-	options(warn=-1)
 	if (family(object)$link=="logit"){
 		coef.matrix = data.frame(raw.coefficients = coef(object), OR = exp(coef(object)), inverse.OR = 1/exp(coef(object)), standardized.OR = exp(standardized.beta(object, sd.y=F)), inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))
 		
@@ -431,7 +429,15 @@ estimates.zeroinfl = function(object, mc=FALSE){
 }
 
 
-
+remove_interaction_terms = function(object) {
+  #### generate list of coefficients
+  terms = attr(terms(object), "term.labels")
+  interaction = length(grep(":", terms))>0
+  if (interaction){
+    terms = terms[-grep(":", terms)]
+  }
+  return(terms)
+}
 
 
 #' Print estimates Summary

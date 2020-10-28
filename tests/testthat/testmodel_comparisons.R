@@ -38,6 +38,9 @@ test_that("glm and glm works", {
   model2 = glm(injury~safety + attention, data=tablesaw.injury, family=binomial)  
   res = model.comparison(model1, model2)
   expect_output(print(res), "1765.236 1775.706 6.145538e-03")
+  model1 = glm(safety~attention, data=tablesaw.injury, family=poisson)  
+  model2 = glm(safety~gender + attention, data=tablesaw.injury, family=poisson) 
+  expect_true(model.comparison(model1, model2)$statistics$p.value[1] == "0.000356")
 })
 
 test_that("interaction vs lm works", {
@@ -46,6 +49,7 @@ test_that("interaction vs lm works", {
   results = model.comparison(a,b)
   expect_equal(results$statistics$bayes.factor[1], .01)
 })
+
 
 
 test_that("random forest vs lm works returns predictions only", {
@@ -72,3 +76,45 @@ test_that("model comparisons with mixed models", {
   expect_equal(mc$statistics$bayes.factor[2], 826.257, tolerance = 0.01)
 })
 
+
+test_that("generate_predictions_table works", {
+  big = glm(died~willpower + minutes.fighting + superpower + damage.resistance + speed + agility + iq + strength + flexibility, 
+             data=avengers, family=binomial)
+  small = glm(died~minutes.fighting, data=avengers, family=binomial)
+  expect_true(generate_predictions_table(big)[1,1] == 17)
+  expect_true(generate_predictions_table(small)[1,1] == 0)
+  expect_true(length(unique(check_logistic_all_same(big)))==2)
+  expect_true(length(levels(check_logistic_all_same(small)))==2)
+
+})
+
+test_that("sensitivity.table works", {
+  small = glm(died~minutes.fighting, data=avengers, family=binomial)
+  expect_true(sensitivity.table(small)$npv == 0)
+  set.seed(232)
+  rfmod = party::cforest(died~minutes.fighting, data=avengers, control = party::cforest_unbiased(ntree=10))
+  expect_true(sensitivity.table(rfmod)$acc %>% round(2) ==.88)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
