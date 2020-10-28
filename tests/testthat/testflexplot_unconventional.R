@@ -44,7 +44,7 @@ test_that("unconventional plots", {
     compare.fits(gender~attention, data=tablesaw.injury, mod, jitter=c(0, .1))
   )
   
-  compare.fits(gender~attention, data=tablesaw.injury, mod, jitter=c(0, .1))
+  
   vdiffr::expect_doppelganger(
     "panelled logistic with sampling",
     flexplot(
@@ -62,6 +62,13 @@ test_that("given with few categories isn't collapsed",{
   d = exercise_data %>% mutate(gender=as.numeric(gender))
   a = flexplot(weight.loss~health | gender, data=d)
   vdiffr::expect_doppelganger("categories not collapsed", a)
-  
+})
 
+test_that("y axis is truncated when predictions go beyond limits", {
+
+  d = avengers %>% mutate(kills = kills + 1)
+  full =    glm(kills~minutes.fighting*willpower, data=d, family=Gamma(link="log"))
+
+  vdiffr::expect_doppelganger("truncated axis", 
+                              compare.fits(injuries~willpower | minutes.fighting, data=d, full))
 })

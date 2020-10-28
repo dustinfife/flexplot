@@ -97,6 +97,9 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   	  anova.res = anova(model1, model2, test="LRT")
   	  p = unlist(anova.res["Pr(>Chi)"])[2]
   	  r.squared = c(NA, NA)
+  	} else {
+  	  p = NA
+  	  r.squared = c(NA, NA)
   	}
   	
   	aic = c(AIC(model1), AIC(model2))
