@@ -130,7 +130,7 @@ test_that("fit.function works for numeric predictors", {
 })
 
 test_that("there are no 'browser' or 'save' calls", {
-  expect_message(fif("browser()"), "(No results found)")
+  expect_message(fif("browser()", where="R"), "(No results found)")
   expect_message(fif("save", where="R"), "(No results found)")
 })
 
