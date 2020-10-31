@@ -5,7 +5,7 @@ test_that("filling in model comparison table", {
   set.seed(1212)
   x = rnorm(111); y = rnorm(111); b = sample(c("a", "b"), 111, T)
   moda = lm(y~x + b); mod = lm(y~x); mod2 = lm(y~1)
-  testthat::expect_equal(round(return_baseline_rsq(moda)*100, digits=2), 0.21)
+  testthat::expect_equal(round(return_baseline_rsq(moda)*100, digits=2), 1.87)
   testthat::expect_equal(return_baseline_rsq(mod), NA)
   testthat::expect_equal(return_baseline_rsq(mod2), 0)
   

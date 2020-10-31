@@ -139,7 +139,6 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     ghost = NULL
   }
   
-  save(terms, generated.formula, options,glinmod_results, dataset, file="~/Documents/RPackages/data_before.rdata")
   plot = compare.fits(generated.formula, data=dataset, glinmod_results, 
                       alpha = options$alpha, jitter=c(options$jitx, options$jity),
                       ghost.line=ghost) 

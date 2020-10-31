@@ -58,7 +58,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
     #### collect terms
   	mod1 = attr(terms(model1), "term.labels")
   	mod2 = attr(terms(model2), "term.labels")	
-  	#browser()
+  	
   	#### check for nested models
   	if (all(length(mod1)>length(mod2) & (mod2 %in% mod1)) & class.mod1[1] == class.mod2[1]){
   		nested = T
@@ -153,7 +153,6 @@ Might I interest you in a suite of other functions, including compare.fits, perh
 ##' @author Dustin Fife
 ##' @export
 sensitivity.table = function(object){
-  #browser()
 
   if (class(object)[1] == "RandomForest") {
     predmat = table(Observed = attr(object, "responses")@variables[,1],

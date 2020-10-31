@@ -33,7 +33,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (is.null(model2)){
     model2 = model1
   } 
-  #browser()
+  
   
   #### get type of model
   model1.type = class(model1)[1]

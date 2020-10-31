@@ -252,7 +252,6 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   terms = all.vars(formula)[-1]
   terms.fixed = terms[-which(terms %in% term.re)]
   
-  #browser()
   ##### generate fixed effects predictions
   #### if random is in NOT in the second slot
   if (!modify){
