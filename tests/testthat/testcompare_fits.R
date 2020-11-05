@@ -3,7 +3,7 @@ context("use compare.fits to visualize linear models")
 data(exercise_data)
 d = exercise_data
 d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)
-
+options(warn=-1)
 test_that("compare.fits linear models", {
   set.seed(1212)
   model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
@@ -30,7 +30,7 @@ test_that("compare.fits linear models", {
   mod = lm(wl ~motivation+rewards, data=d)
   mod2 = lm(wl ~motivation*rewards, data=d)
   vdiffr::expect_doppelganger("compare.fits with strong interaction",
-                              compare.fits(wl~motivation|rewards, data=d, model1=mod, model2=mod2))
+                              suppressWarnings(compare.fits(wl~motivation|rewards, data=d, model1=mod, model2=mod2)))
   
   mod = lm(weight.loss~motivation, data=d)
   vdiffr::expect_doppelganger("compare.fits with one model",compare.fits(weight.loss~motivation, data=d, model1=mod))
@@ -48,6 +48,7 @@ test_that("compare.fits linear models", {
                               compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod))
 
 })
+
 
 test_that("compare.fits for other models", {
   set.seed(1212)
@@ -107,3 +108,4 @@ test_that("compare.fits for other models", {
   testthat::expect_true(names(compare.fits(y~x+z, d, mod, return.preds=TRUE))[2]=="z")
   
 })
+options(warn=0)

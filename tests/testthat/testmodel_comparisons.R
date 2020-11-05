@@ -1,4 +1,5 @@
 context("model.comparison works")
+options(warn=-1)
 
 data("exercise_data")
 
@@ -96,10 +97,16 @@ test_that("sensitivity.table works", {
   expect_true(sensitivity.table(rfmod)$acc %>% round(2) ==.88)
 })
 
+test_that("missing data in a variable doesn't screw things up", {
+  d = avengers
+  d$willpower[1:10] = NA
+  full = lm(ptsd~superpower + willpower, data=d)
+  reduced = lm(ptsd~superpower, data=d)
+  model.comparison(full, reduced)
+})
 
 
-
-
+options(warn=0)
 
 
 

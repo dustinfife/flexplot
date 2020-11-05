@@ -17,6 +17,52 @@ custom.labeler = function(x){
 
 
 
+extract_data_from_fitted_object = function(object) {
+  if (class(object)[1]=="lm" | class(object)[1]=="glm") return(object$model)
+  if (class(object)[1]=="RandomForest") {
+    outcome = object@responses@variables
+    predictors = object@data@get("input")
+    data = cbind(outcome, predictors)
+    return(data)
+  }  
+  # this should work for the rest??
+  return(eval(getCall(object)$data))
+}
+
+
+
+check_nested = function(model1, model2) {
+  #### collect terms
+  mod1 = get_predictors(model1)
+  mod2 = get_predictors(model2)
+  
+  #### check for nested models
+  if (all(length(mod1)> length(mod2) & (mod2 %in% mod1) & (class(model1) == class(model2)))) return(T)
+  if (all(length(mod2)>=length(mod1) & (mod1 %in% mod2) & (class(model1) == class(model2)))) return(T)
+  return(F)
+}
+
+get_predictors = function(model) {
+  
+  # try to get the terms and see if it fails
+  mod1 = try({attr(terms(model), "term.labels")}, silent=TRUE)
+  
+  # no failure = return
+  if (class(mod1)!="try-error") return(unlist(mod1))
+  
+  # now try another way (this will get randomForest)
+  mod = try({getCall(model1)$formula}, silent=TRUE)
+  
+  # no failure = return
+  if (class(mod)!="try-error") return(all.vars(mod)[-1])
+  
+  # now deal with cases where there is a failure
+  if (class(model)[1]=="RandomForest") {
+    return(all.vars(model@data@formula$input))
+  }
+}
+
+
 ## function that does nested model comparisons on a single fitted model
 nested_model_comparisons = function(object){
   

@@ -10,6 +10,7 @@
 ##' @export
 model.comparison = function(model1, model2){
 
+  
   #### find model types
   class.mod1 = class(model1)
   class.mod2 = class(model2)
@@ -17,6 +18,13 @@ model.comparison = function(model1, model2){
   #### extract the names
   m1.name = deparse(substitute(model1))
   m2.name = deparse(substitute(model2))	
+  
+  ### check for nested functions
+  nested = check_nested(model1, model2)
+  
+  ### handle missing data from one model to the next
+  new_models = check_model_rows(model1, model2, nested)
+  model1 = new_models[[1]]; model2 = new_models[[2]]
   
   #### if class is randomForest, tell them to do something else
   if (length(grep("randomForest", class.mod1))>0 | length(grep("randomForest", class.mod2))>0){
@@ -114,7 +122,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   	} 
   	  
   
-  	
+  	#browser()
   	row.names(model.table) = c(m1.name, m2.name)
   	if (is.na(model.table$p.value[1])){
   		model.table = round(model.table[,!is.na(model.table[1,])], digits=3)	
@@ -143,6 +151,35 @@ Might I interest you in a suite of other functions, including compare.fits, perh
 	return(to.return)
 }
 
+check_model_rows = function(model1, model2, nested) {
+  
+  # if they're not nested, it doesn't matter. Just return the models
+  if (!nested) {
+    return(list(model1, model2))
+  }
+  
+  data_1 = extract_data_from_fitted_object(model1)
+  data_2 = extract_data_from_fitted_object(model2)
+  
+  # if theyre not the same, give a message
+  if (nrow(data_1) != nrow(data_2)) {
+    msg = paste0("Note: your models were fit to two different datasets. ",
+                 "This is *probably* because you have missing data in one, but not the other.",
+                 "I'm going to make the dangerous assumption this is the case and do some ninja moves",
+                 " in the background (hiya!). If you don't want me to do this, handle the missing data in advance", sep="")
+    message(msg)
+    
+    ### refit the larger n model with the smaller dataset
+    if (nrow(model1$model)>nrow(model2$model)){
+      model1 = update(model1, data=data_2)
+    } else {
+      model2 = update(model2, data=data_1)
+    }    
+  }
+
+  return(list(model1, model2))
+}  
+  
 ##' Compute sensitivity/specificity/etc. 
 ##'
 ##' Compute sensitivity/specificity/etc. 

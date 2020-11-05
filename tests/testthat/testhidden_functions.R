@@ -1,5 +1,5 @@
 context("hidden_functions works as expected")
-
+options(warn=-1)
 data(exercise_data)
 d = exercise_data
 set.seed(1212)
@@ -188,6 +188,41 @@ test_that("compare.fits_subroutines work", {
   testthat::expect_equal(get_terms(model)$predictors, "therapy.type")
 })
 
+lm_mod = lm(weight.loss~therapy.type, data=exercise_data)
+glm_mod = glm(kills~superpower, data=avengers %>% mutate(kills = kills + 1), family=Gamma)
+rf_mod_cf = party::cforest(kills~superpower+ speed , data=avengers)
+rf_mod_rf = randomForest::randomForest(kills~superpower+ speed , data=avengers)
+
+test_that("extract_data_from_fitted_objects works", {
+
+  expect_true(nrow(extract_data_from_fitted_object(lm_mod))==200)
+  expect_true(nrow(extract_data_from_fitted_object(glm_mod))==812)
+  expect_true(nrow(extract_data_from_fitted_object(rf_mod_cf))==812)
+  expect_true(nrow(extract_data_from_fitted_object(rf_mod_rf))==812)
+})
+
+test_that("get_predictors works", {
+  expect_true(get_predictors(lm_mod) == "therapy.type")
+  expect_true(get_predictors(glm_mod)== "superpower")
+  expect_true(get_predictors(rf_mod_cf)[1] == "superpower")
+  expect_true(get_predictors(rf_mod_rf)[1] == "superpower")
+})
+
+test_that("check_nested works", {
+  lm_mod2 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
+  expect_true(check_nested(lm_mod, lm_mod2))
+  glm_mod2 = glm(kills~north_south, data=avengers %>% mutate(kills = kills + 1), family=Gamma)
+  expect_false(check_nested(glm_mod, glm_mod2))
+  expect_false(check_nested(rf_mod_cf, rf_mod_rf))
+})
+
+test_that("check_model_rows works", {
+  mod1 = lm(weight.loss~therapy.type, data=exercise_data)
+  mod2 = lm(weight.loss~therapy.type + motivation, data=exercise_data %>% mutate(motivation = ifelse(motivation>70, NA, motivation)))
+  expect_message(check_model_rows(mod1, mod2, T))
+  new_mods = suppressMessages(check_model_rows(mod1, mod2, T))
+  expect_true(nrow(new_mods[[1]]$model) == nrow(new_mods[[2]]$model))
+})
 
 
 
@@ -196,7 +231,5 @@ test_that("compare.fits_subroutines work", {
 
 
 
-
-
-
+options(warn=0)
 #

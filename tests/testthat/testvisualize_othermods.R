@@ -1,4 +1,5 @@
 context("visualize function on other models (random forest, mixed, rlm, imputed)")
+options(warn=-1)
 set.seed(1212)
 test_that("visualize mixed models", {
   #### mixed models
@@ -60,3 +61,4 @@ test_that("visualize rf models", {
   
 
 })
+options(warn=0)
