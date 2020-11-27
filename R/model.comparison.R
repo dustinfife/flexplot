@@ -47,6 +47,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
     aic = c(AIC(model1), AIC(model2))
     bic = c(BIC(model1), BIC(model2))
     bayes.factor = bf.bic(model1, model2)
+    browser()
     p = sort(anova(model1, model2, test="LRT")[,"Pr(>Chi)"])
     ### make sure bayes factor is attached to the more likely model
     if ((bic[1]<bic[2] & bayes.factor<1) | bic[2]<bic[1] & bayes.factor>1){
@@ -190,7 +191,7 @@ check_model_rows = function(model1, model2, nested) {
 ##' @author Dustin Fife
 ##' @export
 sensitivity.table = function(object){
-browser()
+
   if (class(object)[1] == "RandomForest") {
     predmat = table(Observed = attr(object, "responses")@variables[,1],
                     Predicted = predict(object))
@@ -212,7 +213,9 @@ browser()
 
 
 generate_predictions_table = function(object) {
-  dv = object$model[,1]
+  data = extract_data_from_fitted_object(object)
+  dv_name = all.vars(formula(object))[1]
+  dv = data[[dv_name]]
   predictions = check_logistic_all_same(object)
   predmat = table(Observed=dv, Predicted=predictions)
   predmat
