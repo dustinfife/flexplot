@@ -47,8 +47,7 @@ Might I interest you in a suite of other functions, including compare.fits, perh
     aic = c(AIC(model1), AIC(model2))
     bic = c(BIC(model1), BIC(model2))
     bayes.factor = bf.bic(model1, model2)
-    browser()
-    p = sort(anova(model1, model2, test="LRT")[,"Pr(>Chi)"])
+    p = get_p_value(model1, model2)
     ### make sure bayes factor is attached to the more likely model
     if ((bic[1]<bic[2] & bayes.factor<1) | bic[2]<bic[1] & bayes.factor>1){
       model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(1/bayes.factor, bayes.factor), p = c(p, NA))  
@@ -150,6 +149,11 @@ Might I interest you in a suite of other functions, including compare.fits, perh
   
 
 	return(to.return)
+}
+
+get_p_value = function(model1, model2 ) {
+  if (class(model1)[1]=="glm" & family(model1)$link=="logit") return(sort(anova(model1, model2, test="LRT")[,"Pr(>Chi)"]))
+  if (class(model1)[1]=="glmerMod" & family(model1)$link=="logit") return(sort(anova(model1, model2, test="LRT")[,"Pr(>Chisq)"]))
 }
 
 check_model_rows = function(model1, model2, nested) {
