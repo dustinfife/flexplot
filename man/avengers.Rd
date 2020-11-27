@@ -4,7 +4,8 @@
 \name{avengers}
 \alias{avengers}
 \title{Simulated Statistics on the Final Avengers Battle}
-\format{A data frame with 812 rows and 13 variables:
+\format{
+A data frame with 812 rows and 13 variables:
 \describe{
   \item{iq}{Intelligence}
   \item{agility}{weighted scores on an obstacle course}
@@ -21,7 +22,8 @@
   \item{minutes.fighting}{Number of minutes spent fighting before dying or giving up}
   \item{shots.taken}{Number of shots (with a gun) or punches thrown at an enemy}
   \item{superpower}{Whether the individual has a superpower}   
-}}
+}
+}
 \usage{
 avengers
 }

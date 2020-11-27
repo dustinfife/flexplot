@@ -4,14 +4,16 @@
 \name{income}
 \alias{income}
 \title{Simulated Dataset About People's Income}
-\format{A data frame with 207 rows and 6 variables: \describe{
+\format{
+A data frame with 207 rows and 6 variables: \describe{
   \item{stats_skills}{performance on a statistics know-how test}
   \item{group}{Treatment group (control, mo money, wealth building)}
   \item{graduate}{hs graduate vs. college graduate}
   \item{hours}{hours they work a week}
   \item{income_before}{Income before starting training}
   \item{income_after}{Income after starting training}
-}}
+}
+}
 \usage{
 income
 }

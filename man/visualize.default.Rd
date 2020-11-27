@@ -4,8 +4,7 @@
 \alias{visualize.default}
 \title{Visualize a fitted model}
 \usage{
-\method{visualize}{default}(object, plot = c("all", "residuals",
-  "model"), formula = NULL, ...)
+\method{visualize}{default}(object, plot = c("all", "residuals", "model"), formula = NULL, ...)
 }
 \arguments{
 \item{object}{a model object}

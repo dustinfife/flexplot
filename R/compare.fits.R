@@ -38,7 +38,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   #### get type of model
   model1.type = class(model1)[1]
   model2.type = class(model2)[1]	
-  
+
   #### get all variables
   variables_mod1 = get_terms(model1)
   variables_mod2 = get_terms(model2)
@@ -60,7 +60,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   }
   
   
-  
+
   ##### extract variable names from FORMULA
   variables = all.vars(formula)
   outcome = variables[1]
@@ -145,13 +145,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
     #### if they supply a factor, convert it to a number!!!!!
     prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
   }
-  
+
   #### create flexplot
   if (return.preds){
     prediction.model
   } else {
     ### for logistic, add one to the predictions
-    if (model1.type == "glm") {
+    if (model1.type == "glm" ) {
       if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
         prediction.model$prediction = prediction.model$prediction + 1
       }

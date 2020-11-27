@@ -108,4 +108,12 @@ test_that("compare.fits for other models", {
   testthat::expect_true(names(compare.fits(y~x+z, d, mod, return.preds=TRUE))[2]=="z")
   
 })
+
+test_that("get_re works", {
+  expect_true(get_re(lmer(MathAch~SES + (SES | School), data=math))=="School")
+  expect_true(get_re(lmer(MathAch~SES + (SES |School), data=math))=="School")
+  expect_true(get_re(lmer(MathAch~1 + (1 | School), data=math))=="School")
+  expect_null(get_re(lm(MathAch~1 + (1 | School), data=math)))
+})  
+
 options(warn=0)

@@ -190,7 +190,7 @@ check_model_rows = function(model1, model2, nested) {
 ##' @author Dustin Fife
 ##' @export
 sensitivity.table = function(object){
-
+browser()
   if (class(object)[1] == "RandomForest") {
     predmat = table(Observed = attr(object, "responses")@variables[,1],
                     Predicted = predict(object))

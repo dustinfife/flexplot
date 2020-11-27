@@ -4,14 +4,29 @@
 \alias{flexplot}
 \title{Create a "flexible plot" or flexplot}
 \usage{
-flexplot(formula, data = NULL, related = F, bins = 3,
-  labels = NULL, breaks = NULL, method = "loess", se = NULL,
-  ghost.line = NULL, ghost.reference = NULL, spread = c("quartiles",
-  "stdev", "sterr"), jitter = NULL, raw.data = T, sample = Inf,
-  prediction = NULL, suppress_smooth = F, alpha = 0.99977,
-  plot.string = F, silent = F, third.eye = NULL,
-  plot.type = c("histogram", "qq", "density", "boxplot", "violin",
-  "line"))
+flexplot(
+  formula,
+  data = NULL,
+  related = F,
+  bins = 3,
+  labels = NULL,
+  breaks = NULL,
+  method = "loess",
+  se = NULL,
+  ghost.line = NULL,
+  ghost.reference = NULL,
+  spread = c("quartiles", "stdev", "sterr"),
+  jitter = NULL,
+  raw.data = T,
+  sample = Inf,
+  prediction = NULL,
+  suppress_smooth = F,
+  alpha = 0.99977,
+  plot.string = F,
+  silent = F,
+  third.eye = NULL,
+  plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line")
+)
 }
 \arguments{
 \item{formula}{A formula of the form  y~x + a | b + z}
@@ -69,7 +84,10 @@ Much of the decision-making is automated, which is pretty freaking awesome.
 Formula takes the form of y~x + a | b + z. Everything on the right of | will occur in panels (in this case, b will be in the columns and z will be in the rows). Any numeric
 variables between ~ and | will fall on the x axis and categorical predictors will be color-coded/symbol-coded/line-coded (if user specifies). If more than one numeric variable is specified
 after ~, the second (and third) will be binned. No more than four variables are allow (otherwise, cognitive load is too high). If the user wishes to include another variable,
- I recommend they create separate plots, one for each level of the new variable (or a binned level of a numeric variable).
+ I recommend they create separate plots, one for each level of the new variable (or a binned level of a numeric variable). 
+ 
+ To better enable comparisons across panels, Flexplot implements "ghost lines," which simply repeat the line from one panel to another. For more information about ghost lines, see the vignette (also
+ available at https://psyarxiv.com/kh9c3/)
 }
 \examples{
 data(exercise_data)

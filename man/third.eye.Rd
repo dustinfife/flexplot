@@ -4,8 +4,14 @@
 \alias{third.eye}
 \title{Visualize flexplot with the "third eye"}
 \usage{
-third.eye(formula, data, fixed.positions = NULL, which.perms = NULL,
-  plot = NULL, ...)
+third.eye(
+  formula,
+  data,
+  fixed.positions = NULL,
+  which.perms = NULL,
+  plot = NULL,
+  ...
+)
 }
 \arguments{
 \item{formula}{A \code{"flexplot()"}-style formula (e.g., \code{"y~x1 + x2 | x3 + x4"})}

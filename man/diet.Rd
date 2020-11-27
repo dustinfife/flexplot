@@ -4,7 +4,8 @@
 \name{diet}
 \alias{diet}
 \title{Diet dataset}
-\format{A data frame with xx rows and 6 variables:
+\format{
+A data frame with xx rows and 6 variables:
 \describe{
   \item{Person}{description}
   \item{gender}{The subject's gender}
@@ -13,7 +14,8 @@
   \item{pre.weight}{Weight of the subject before the diet}
   \item{weight6weeks}{Weight of the subject after 6 weeks}
   \item{Diet}{Type of diet the subject went on}
-}}
+}
+}
 \usage{
 diet
 }

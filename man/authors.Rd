@@ -4,7 +4,8 @@
 \name{authors}
 \alias{authors}
 \title{Sales of books on Amazon}
-\format{A data frame with 197,197 rows and 22 variables:
+\format{
+A data frame with 197,197 rows and 22 variables:
 \describe{
 \item{Sold.by}{Publisher of book}
 \item{Title}{Deidentified book title}
@@ -28,7 +29,8 @@
 \item{Year}{Year published}
 \item{Month}{Month Published}
 \item{age}{Age of book}
-}}
+}
+}
 \usage{
 authors
 }
