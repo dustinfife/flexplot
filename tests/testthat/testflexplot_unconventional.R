@@ -6,7 +6,7 @@ d = exercise_data
 k = d
 deleteme = which(k$rewards == "no rewards")
 k = k[-(deleteme[1:2]), ]
-
+options(warn=-1)
 test_that("unconventional plots", {
   vdiffr::expect_doppelganger("related T",
                               flexplot(weight.loss ~ rewards, data = k, related = T))
@@ -72,3 +72,4 @@ test_that("y axis is truncated when predictions go beyond limits", {
   vdiffr::expect_doppelganger("truncated axis", 
                               compare.fits(injuries~willpower | minutes.fighting, data=d, full))
 })
+options(warn=0)

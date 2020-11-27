@@ -331,7 +331,7 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 	terms = remove_interaction_terms(object)
 	
 	#### get dataset
-	d = extract_data_from_fitted_object(model)
+	d = extract_data_from_fitted_object(object)
 	
 	#### identify factors
 	if (length(terms)>1){
@@ -375,7 +375,7 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 	
 	
 	#options(warn=0)
-	if (!is.na(preds)){
+	if (!is.na(preds)[1]){
 	  coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
 	  nms = row.names(coef.matrix); nms2 = names(coef.matrix)
   	coef.matrix = data.frame(lapply(coef.matrix, function(y) if(is.numeric(y)) round(y, 3) else y), row.names=nms); names(coef.matrix) = nms2

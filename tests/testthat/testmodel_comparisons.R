@@ -106,9 +106,9 @@ test_that("missing data in a variable doesn't screw things up", {
 })
 
 
-test_that("get_p_value work", {
-  full = glmer(progressed~redroom + class_size  + (1 | class_id), data=d, family=binomial)         
-  reduced = glmer(progressed~redroom  + (1 | class_id), data=d, family=binomial) 
+test_that("get_p_value works", {
+  full = glmer(progressed~redroom + class_size  + (1 | class_id), data=photo_lessons, family=binomial)         
+  reduced = glmer(progressed~redroom  + (1 | class_id), data=photo_lessons, family=binomial) 
   expect_true(get_p_value(full, reduced)>.6 & get_p_value(full, reduced)<.63)
   full = glm(died~superpower + speed, data=avengers, family=binomial)
   reduced = glm(died~superpower, data=avengers, family=binomial)
