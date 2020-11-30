@@ -244,7 +244,9 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
 	if (is.null(labels)){
 		labels = 1:(length(breaks)-1)		
 		for (i in 1:(length(breaks)-1)){
-			labels[i] = paste0(round(breaks[i], digits=1), "-", round(breaks[i+1], digits=1))
+		  digs1 = round_digits(breaks[i])
+		  digs2 = round_digits(breaks[i+1])
+			labels[i] = paste0(round(breaks[i], digits=digs1), "-", round(breaks[i+1], digits=digs2))
 		}
 	}
 	
@@ -257,6 +259,15 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
 		binned.variable
 	}
 	
+}
+
+round_digits = function(breaks) {
+  if (abs(breaks<.0001)) return(6)
+  if (abs(breaks<.001)) return(5)
+  if (abs(breaks<.01)) return(4)
+  if (abs(breaks<.1)) return(3)
+  if (abs(breaks<1)) return(2)
+  return(1)
 }
 
 

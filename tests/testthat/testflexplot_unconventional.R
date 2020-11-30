@@ -72,4 +72,12 @@ test_that("y axis is truncated when predictions go beyond limits", {
   vdiffr::expect_doppelganger("truncated axis", 
                               compare.fits(injuries~willpower | minutes.fighting, data=d, full))
 })
+
+test_that("flexplot bins when binned variable is very small", {
+  
+  d = avengers %>% mutate(kills = kills *.001)
+  p = flexplot(ptsd~strength | kills, data=d)
+  vdiffr::expect_doppelganger("small_variable values", 
+                              p)
+})
 options(warn=0)

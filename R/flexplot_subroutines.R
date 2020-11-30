@@ -27,7 +27,6 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   }
   
   ### create the lists that contain the breaks
-  
   break.me = flexplot_break_me(data, predictors, given, axis)
   breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   

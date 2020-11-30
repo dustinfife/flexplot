@@ -224,8 +224,14 @@ test_that("check_model_rows works", {
   expect_true(nrow(new_mods[[1]]$model) == nrow(new_mods[[2]]$model))
 })
 
-
-
+test_that("round_digits works", {
+  expect_true(round_digits(.00000034)==6)
+  expect_true(round_digits(.00034)==5)
+  expect_true(round_digits(.0034)==4)
+  expect_true(round_digits(.034)==3)
+  expect_true(round_digits(.34)==2)  
+  expect_true(round_digits(3.4)==1)  
+})
 
 
 
