@@ -1,28 +1,28 @@
-### attractiveness data
-# set.seed(2323)
-# n = 207
-# stats_skills = rnorm(n)
-# group = sample(c("control", "mo money", "wealth building"), size=n, replace=T)
-# gender = sample(c("college graduate", "hs graduate"), size=n, replace=T)
-# exercise = rnorm(n)
-# attractiveness = rnorm(n)
-# matrix_mod = model.matrix(attractiveness~stats_skills + group + gender + exercise)
-# head(matrix_mod)
-# coefs = c(0, .5, .8, 1.5, -1.2, .6)
-# attractiveness = t(t(coefs)%*%t(matrix_mod)) + attractiveness
-# income = data.frame(
-#   stats_skills = round(fifer::rescale(stats_skills, 60, 15)),
-#   group = group,
-#   graduate = gender,
-#   hours = exercise %>% fifer::rescale(., new.mean=30, new.sd=15) %>% round,
-#   income_before = round(fifer::rescale(attractiveness, 60, 15)),
-#   income_after = round(fifer::rescale(attractiveness, 60, 15) + rnorm(n, 5, 1))
-# 
-# )
-# head(income)
-# 
-# write.csv(income, "data/income.csv", row.names=F)
-# usethis::use_data(income, overwrite = TRUE)
+## attractiveness data
+set.seed(2323)
+n = 207
+stats_skills = rnorm(n)
+group = sample(c("control", "mo money", "wealth building"), size=n, replace=T)
+gender = sample(c("college graduate", "hs graduate"), size=n, replace=T)
+exercise = rnorm(n)
+attractiveness = rnorm(n)
+matrix_mod = model.matrix(attractiveness~stats_skills + group + gender + exercise)
+head(matrix_mod)
+coefs = c(0, .5, .8, 1.5, -1.2, .6)
+attractiveness = t(t(coefs)%*%t(matrix_mod)) + attractiveness
+income = data.frame(
+  stats_skills = round(fifer::rescale(stats_skills, 60, 15)),
+  group = group,
+  graduate = gender,
+  hours = exercise %>% fifer::rescale(., new.mean=30, new.sd=15) %>% round,
+  income_before = round(fifer::rescale(attractiveness, 60, 15)),
+  income_after = round(fifer::rescale(attractiveness, 60, 15) + rnorm(n, 5, 1))
+
+)
+head(income)
+
+write.csv(income, "data/income.csv", row.names=F)
+usethis::use_data(income, overwrite = TRUE)
 
 #' Simulated Dataset About People's Income
 #'
@@ -39,53 +39,53 @@
 "income"
 
 
-# ### paranormal dataset
-# n = 394
-# #### belief in paranormal dataset
-# 
-# #### conviction about paranormal beliefs - bimodal
-# conviction = c(rnorm(n/2, 30, 10), rnorm(n/2, 70, 10))
-# 
-# ### fear.of.aliens = positive skew
-# fear = c(rnorm(n, 0, 2)^2)
-# 
-# ## gender (redundant labels)
-# gender = sample(c("male", "female", "women"), size=n, replace=T, prob=c(.4, .5, .1))
-# 
-# ## unknown labels 
-# political = sample(c("republican", "democrat", "independent"), size=n, replace=T, prob=c(.4, .5, .1))
-# political[133] = "aliens are REALLLLLLL"
-# 
-# ### time spent investigating paranormal paranormal outliers
-# time = rnorm(n, 100, 40)
-# time[231] = 6000
-# ### 999
-# 
-# ### kidnapped by aliens
-# kidnapped = sample(c("yes", "no"), size=n, replace=T, prob=c(.98, .02))
-# flexplot(kidnapped~1, data=data.frame(kidnapped=kidnapped))
-# 
-# ### paranormal experiences mixed up coding
-# experiences.type = sample(c("eerie feeling", "presence watching", "saw UFO", "saw ghost", "heard voice"), size=n, replace=T, prob=c(5, 1, 3, 6, 2))
-# flexplot(experiences.type~1, data=data.frame(experiences.type=experiences.type))
-# 
-# ### NA
-# income = sample(c(">100K", "50-75K", "<50K", "75-100K"), size=n, replace=T, prob=c(1, 8, 2, 3))
-# income[sample(1:n, 25)] = NA
-# table(income)
-# 
-# ### something that doesn't make sense (age)
-# age = rnorm(n, 5, 2)^2 + 17
-# age[age>70] = runif(1, 18, 75)
-# age[age<18] = runif(1, 18, 65)
-# age[11] = 123
-# age[88] = 2
-# 
-# paranormal = data.frame(conviction = conviction, 
-#                         fear=fear, time=time, kidnapped=kidnapped, experiences.type=experiences.type, 
-#                         income=income, age=age, gender, political)
-# write.csv(paranormal, "data/paranormal.csv", row.names=F)
-# usethis::use_data(paranormal, overwrite = TRUE)
+### paranormal dataset
+n = 394
+#### belief in paranormal dataset
+
+#### conviction about paranormal beliefs - bimodal
+conviction = c(rnorm(n/2, 30, 10), rnorm(n/2, 70, 10))
+
+### fear.of.aliens = positive skew
+fear = c(rnorm(n, 0, 2)^2)
+
+## gender (redundant labels)
+gender = sample(c("male", "female", "women"), size=n, replace=T, prob=c(.4, .5, .1))
+
+## unknown labels
+political = sample(c("republican", "democrat", "independent"), size=n, replace=T, prob=c(.4, .5, .1))
+political[133] = "aliens are REALLLLLLL"
+
+### time spent investigating paranormal paranormal outliers
+time = rnorm(n, 100, 40)
+time[231] = 6000
+### 999
+
+### kidnapped by aliens
+kidnapped = sample(c("yes", "no"), size=n, replace=T, prob=c(.98, .02))
+flexplot(kidnapped~1, data=data.frame(kidnapped=kidnapped))
+
+### paranormal experiences mixed up coding
+experiences.type = sample(c("eerie feeling", "presence watching", "saw UFO", "saw ghost", "heard voice"), size=n, replace=T, prob=c(5, 1, 3, 6, 2))
+flexplot(experiences.type~1, data=data.frame(experiences.type=experiences.type))
+
+### NA
+income = sample(c(">100K", "50-75K", "<50K", "75-100K"), size=n, replace=T, prob=c(1, 8, 2, 3))
+income[sample(1:n, 25)] = NA
+table(income)
+
+### something that doesn't make sense (age)
+age = rnorm(n, 5, 2)^2 + 17
+age[age>70] = runif(1, 18, 75)
+age[age<18] = runif(1, 18, 65)
+age[11] = 123
+age[88] = 2
+
+paranormal = data.frame(conviction = conviction,
+                        fear=fear, time=time, kidnapped=kidnapped, experiences.type=experiences.type,
+                        income=income, age=age, gender, political)
+write.csv(paranormal, "data/paranormal.csv", row.names=F)
+usethis::use_data(paranormal, overwrite = TRUE)
 
 #' Simulated Dataset About Experiences with the Paranormal
 #'
