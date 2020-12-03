@@ -262,9 +262,9 @@ flexplot_break_me = function(data, predictors, given, axis){
   #### get the breaks for the needed variables (remove axis 1 because it's the axis and thus will never be binned)
   #### also, lapply fails when there's just one additional predictor, hence the if statement
   if (length(predictors)>2){
-    break.me = non.axis.one[unlist(lapply(data[,non.axis.one], FUN=is.numeric)) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
+    break.me = non.axis.one[unlist(lapply(data[[non.axis.one]], FUN=is.numeric)) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   } else {
-    break.me = non.axis.one[is.numeric(data[,non.axis.one]) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
+    break.me = non.axis.one[is.numeric(data[[non.axis.one]]) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
 
   #if (length(break.me)==0) break.me = NA
@@ -280,7 +280,7 @@ flexplot_break_me = function(data, predictors, given, axis){
 #flexplot_create_breaks(break.me = c("weight.loss", "motivation"), breaks=list(weight.loss = c(30)), data = data, labels=list(weight.loss = c("low", "high")))
 # This function creates the breaks for the binning
 flexplot_create_breaks = function(break.me, breaks, data, labels, bins=3){
-
+  
   #### did they provide the breaks?
   if (!is.null(breaks)) {
     named.breaks = names(breaks)
