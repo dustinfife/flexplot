@@ -7,19 +7,7 @@ test_that("rescale works", {
   expect_true(round(mean(rescale(d$weight.loss, 0, 2)), 0) == 0)
   expect_true(round(sd(rescale(d$weight.loss, 0, 2)), 0) == 2)
 })
-test_that("standardized difference works", {
-  
-  mod1 = lm(weight.loss~therapy.type, data=d)	
-  mod2 = lm(weight.loss~therapy.type+gender, data=d)	
-  diff = standardized_differences(mod1, mod2)
-  expect_output(print(diff), "0.156")
-  
-  data("criminal_data")
-  mod1 = glm(aggression~ses + empathy + depression, data=criminal_data, family=Gamma)
-  mod2 = glm(aggression~ses * empathy + depression, data=criminal_data, family=Gamma)
-  diff = standardized_differences(mod1, mod2)
-  expect_output(print(diff), "0.294")
-})
+
 
 test_that("nested model comparisons returns bf", {
   mod = lm(weight.loss~motivation + therapy.type + gender, data=exercise_data)

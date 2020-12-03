@@ -1,5 +1,21 @@
 ## function to generate predicted differences, standardized
 standardized_differences = function(model1, model2, sigma=TRUE){
+  
+  ### check for nested functions
+  nested = check_nested(model1, model2)
+  
+  ### handle missing data from one model to the next
+  new_models = check_model_rows(model1, model2, nested)
+  model1 = new_models[[1]]; model2 = new_models[[2]]  
+  
+  # make sure the two models have the same DV
+  dv1 = extract_data_from_fitted_object(model1)[,1]
+  dv2 = extract_data_from_fitted_object(model2)[,1]
+
+  if (all(dv1 != dv2)) {
+    stop("It looks like you're trying to compare two models with different outcome variables.")
+  }
+  
   pred1 = predict(model1, type="response")
   pred2 = predict(model2, type="response")
   differences = round(
@@ -18,14 +34,19 @@ custom.labeler = function(x){
 
 
 extract_data_from_fitted_object = function(object) {
-  if (class(object)[1]=="lm" | class(object)[1]=="glm") return(object$model)
+  if (class(object)[1]=="lm" | class(object)[1]=="glm" | class(object)[1] == "rlm") return(object$model)
   if (class(object)[1]=="RandomForest") {
     outcome = object@responses@variables
     predictors = object@data@get("input")
     data = cbind(outcome, predictors)
     return(data)
   }  
-  # this should work for the rest??
+  if (class(object)[1] == "randomForest.formula") {
+    vars = all.vars(formula(object))
+    data = eval(getCall(object)$data)
+    return(data[,vars])
+  }
+  # this should work for the rest?? But it won't be in the right order!
   return(eval(getCall(object)$data))
 }
 
