@@ -47,6 +47,12 @@ model_comparison_table = function(model1, model2, m1.name="Full", m2.name="Reduc
     return(NULL)
   }
   
+  # check if AIC is infinity (can be when you have a poisson)
+  if(is.infinite(AIC(model1)) | is.infinite(AIC(model2))) {
+    message("Your AIC is infinite. I can't be sure why, but it may be because you tried to fit continuous data with a poisson model? If so, use a Gamma and try again.\n")
+    return(NULL)
+  }
+  
   aic = c(AIC(model1), AIC(model2))
   bic = c(BIC(model1), BIC(model2))
   bayes.factor = bf.bic(model1, model2)
@@ -74,6 +80,10 @@ model_comparison_table = function(model1, model2, m1.name="Full", m2.name="Reduc
   keep = colSums(apply(model.table, 2, is.na))!=2
   
   return(model.table[,keep])
+}
+
+check_AIC = function(model1, model2) {
+  
 }
 
 
@@ -145,7 +155,7 @@ check_model_rows = function(model1, model2, nested) {
     msg = paste0("Note: your models were fit to two different datasets. ",
                  "This is *probably* because you have missing data in one, but not the other.",
                  "I'm going to make the dangerous assumption this is the case and do some ninja moves",
-                 " in the background (hiya!). If you don't want me to do this, handle the missing data in advance", sep="")
+                 " in the background (hiya!). If you don't want me to do this, handle the missing data in advance\n", sep="")
     message(msg)
     
     ### refit the larger n model with the smaller dataset
