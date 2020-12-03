@@ -482,7 +482,7 @@ fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method
 		}
 		
 	}
-	
+
 	return(fit.string)
 	
 }
@@ -491,9 +491,8 @@ fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method
 # find in file. Thanks to https://stackoverflow.com/questions/45502010/is-there-an-r-version-of-rstudios-find-in-files
 fif <- function(what, where=".", in_files="\\.[Rr]$", recursive = TRUE,
                 ignore.case = TRUE) {
-  
-  fils <- list.files(path = where, pattern = in_files, recursive = recursive)
-  
+
+  fils <- list.files(path = where, pattern = in_files, recursive = recursive, full.names = TRUE)
   found <- FALSE
   
   file_cmd <- Sys.which("file")
@@ -501,11 +500,11 @@ fif <- function(what, where=".", in_files="\\.[Rr]$", recursive = TRUE,
   for (fil in fils) {
     
     if (nchar(file_cmd) > 0) {
-      ftype <- system2(file_cmd, fil, TRUE)
+      ftype <- system2("file",fil, TRUE)
       if (!grepl("text", ftype)[1]) next
     }
     
-    contents <- readLines(fil)
+    contents <- readLines(fil, warn=FALSE)
     
     res <- grepl(what, contents, ignore.case = ignore.case)
     res <- which(res)

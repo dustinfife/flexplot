@@ -118,7 +118,6 @@ flexplot = function(formula, data=NULL, related=F,
   if (tibble::is_tibble(data)){
     data = as.data.frame(data)
   }
-  #browser()
   
   ### prepare the variables
   

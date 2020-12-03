@@ -123,7 +123,6 @@ test_that("there are no 'browser' or 'save' calls", {
 })
 
 
-
 test_that("fit.function works for categorical predictors", {
   expect_identical(fit.function("weight.loss", "gender", data=exercise_data, suppress_smooth=T), "xxxx+xxxx+xxxx")
   expect_output(print(fit.function("weight.loss", "gender", data=exercise_data, method="stdev")), "\\+xxxx")

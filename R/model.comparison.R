@@ -9,7 +9,7 @@
 ##' @author Dustin Fife
 ##' @export
 model.comparison = function(model1, model2){
-browser()
+
   #### find model types
   class.mod1 = class(model1)
   class.mod2 = class(model2)
