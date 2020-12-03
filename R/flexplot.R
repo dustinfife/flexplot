@@ -113,6 +113,13 @@ flexplot = function(formula, data=NULL, related=F,
 
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   plot.type = match.arg(plot.type, c("histogram", "qq", "density", "boxplot", "violin", "line"))
+  
+  ### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
+  if (tibble::is_tibble(data)){
+    data = as.data.frame(data)
+  }
+  #browser()
+  
   ### prepare the variables
   
   varprep = flexplot_prep_variables(formula, data, 
@@ -127,7 +134,7 @@ flexplot = function(formula, data=NULL, related=F,
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
                         ### (error came at ghost.reference when it couldn't find the binned version)
-	
+
   prediction = with(varprep, 
               flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE))
@@ -245,7 +252,7 @@ flexplot = function(formula, data=NULL, related=F,
       axis[2] = paste0(axis[2], "_binned")
     }
   }
- #browser()
+	
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)
@@ -258,16 +265,6 @@ flexplot = function(formula, data=NULL, related=F,
 	}
 
 	final = suppressMessages(eval(parse(text=total.call)))
-	
-# axis = "muscle.gain"; outcome="weight.loss"
-# 	ggplot(data=data, aes_string(x=axis, y=outcome))+
-# 	  geom_jitterd(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=0, height=0)+
-# 	  facet_grid(as.formula(health_binned~motivation_binned),labeller = custom.labeler)+
-# 	  geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)
-	
-  ### suppress messages only works for print messages, but print messages actually show the plot (even when i want to store it for laster use). Thus, I need both. Weird. 
-	#return(final)
-	#class(final) <- c("flexplot", class(final))
 
 	if(plot.string){
 		return(total.call)
