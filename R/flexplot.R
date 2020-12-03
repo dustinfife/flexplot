@@ -37,6 +37,7 @@
 ##' @param plot.type This argument allows the user to control the type of plot used. Flexplot defaults to histograms (for univariate variables)
 ##' but could also do qqplots (using "qq" as the argument) or density plots (using "density"). Also, the user can specify "boxplot" for boxplots and
 ##' "violin" for violin plots. 
+##' @param ... Other arguments passed to \code{\link[ggplot2]{aes}}
 ##' @author Dustin Fife
 ##' @import tibble ggplot2 R6
 ##' @export
@@ -98,7 +99,7 @@ flexplot = function(formula, data=NULL, related=F,
 		sample=Inf, 
 		prediction = NULL, suppress_smooth=F, alpha=.99977, plot.string=F, silent=F,
 		third.eye=NULL,
-		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line")){
+		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), ...){
 			
 	#data = exercise_data
 	##### use the following to debug flexplot
@@ -244,7 +245,7 @@ flexplot = function(formula, data=NULL, related=F,
       axis[2] = paste0(axis[2], "_binned")
     }
   }
- 
+ #browser()
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)
