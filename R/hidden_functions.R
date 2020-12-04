@@ -31,6 +31,15 @@ custom.labeler = function(x){
   })
 }
 
+#### make sure all variables are in data
+check_all_variables_exist_in_data = function(variables, data) {
+  missing.preds = variables[which(!(variables %in% names(data)))]
+  if (length(missing.preds)>0){
+    stop(paste0("One or more of your predictor variables: ", paste0(missing.preds, collapse=","), " are missing. Did you specify the right dataset and spell the variables correctly?"))
+  }
+  return(NULL)
+}  
+
 
 
 extract_data_from_fitted_object = function(object) {

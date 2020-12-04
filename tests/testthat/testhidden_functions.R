@@ -220,6 +220,11 @@ test_that("round_digits works", {
   expect_true(round_digits(3.4)==1)  
 })
 
+test_that("check_all_variables_exist_in_data works", {
+  expect_null(check_all_variables_exist_in_data(c("weight.loss", "therapy.type"), exercise_data))
+  expect_error(check_all_variables_exist_in_data(c("weight.loss", "therrapy.type"), exercise_data))
+})
+
 
 
 
