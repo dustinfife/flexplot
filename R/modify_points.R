@@ -17,5 +17,6 @@ modify_points = function(p, shape=19, colour="black", size=1.5) {
   c = ggplot2::ggplot_gtable(c)
   
   # return plot
-  plot(c)
+  c = plot(c)
+  return(c)
 }
