@@ -120,7 +120,6 @@ flexplot = function(formula, data=NULL, related=F,
   }
   
   ### prepare the variables
-  
   varprep = flexplot_prep_variables(formula, data, 
                                     breaks = breaks, labels=labels, bins=bins,
                                     related=related,  
