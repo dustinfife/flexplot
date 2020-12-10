@@ -15,7 +15,7 @@ affiliation:
     institution   : "Rowan University"
 
 authornote: |
-  I wish to thank the dozens of students who very patiently discovered bugs in the flexplot software. Your efforts have resulted in a much more robust tool. 
+  I wish to thank the dozens of students who very patiently discovered bugs in the flexplot software. Your efforts have resulted in a much more robust tool. Many of the ideas and information contained in this article have been disseminated elsewhere, including at APA's annual conference and on my YouTube channel. Furthermore, Flexplot is the engine driving the visualizations in JASP and Jamovi and various publications have referenced the ideas contained within Flexplot (including blog posts both on JASP and Jamovi's website, as well as a Behavioral Research Methods publication). 
 
 abstract: >
    The human visual processing system has enormous bandwidth, able to interpret vast amounts of data in fractions of a second [@Otten2015]. Despite this amazing ability, there is a troubling lack of graphics in scientific literature [@Healy2014a], and the graphics most traditionally used tend to bias perception in unintentional ways [@Weissgerber2015]. I suspect the reason for the underuse and misuse of graphics is because sound graphs are difficult to produce with existing software [@Wainer2010]. While `ggplot2` allows immense flexibility in creating graphics, its learning curve is quite steep, and even basic graphics require multiple lines of code. `flexplot` is an R package that aims to address these issues by providing a formula-based suite of tools that simplifies and automates much of the graphical decision-making. Additionally, `flexplot` pairs well with statistical modeling, making it easy for researchers to produce graphs that map onto statistical procedures. With one-line functions, users can visualize bivariate statistical models (e.g., scatterplots for regression, beeswarm plots for ANOVA/$t$-tests), multivariate statistical models (e.g., ANCOVA and multiple regression), and even more sophisticated models like multi-level models and logistic regressions. Further, this package utilizes old tools (e.g., added variable plots and coplots) as well as introduces new tools for complex visualizations, including ghost lines and point sampling. 
@@ -54,6 +54,8 @@ set.seed(42)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed, eval=TRUE)
 require(tidyverse)
 ```
+
+
 
 # Introduction
 

@@ -1,3 +1,28 @@
+# @importFrom rlang `:=`
+add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
+  # variable isn't binned/summarized!
+  are_any_binned = grep("_binned", names(plot$data))
+  if (length(are_any_binned)==0) return(d)
+  
+  # figure out which is binned
+  binned_var = names(plot$data)[are_any_binned]
+  variable_to_be_binned = gsub("_binned", "", binned_var)
+  gg_dataset = plot$data
+  
+  # extract breakpoints from plot data, then break the new one
+  break_vals = as.numeric(sort(unique(gsub("(.*)-(.*)", "\\2", gg_dataset[[binned_var]]))))
+  breaks = prep.breaks(variable_to_be_binned, gg_dataset, breaks=break_vals)
+  d[[binned_var]] = bin.me(variable_to_be_binned, d, breaks=breaks)
+  
+  # create a new string of terms that needs to be summarized by
+  nt = c(terms[-which(terms %in% variable_to_be_binned)], binned_var)
+  
+  # remove extra REs because we don't need any of them,e xcept ggplot requires a column name for it
+  if ("model" %in% names(d)) d[[term.re]] = factor(d[[term.re]]) else d[[term.re]] = d[[term.re]][1] %>% factor(d[[term.re]][1]) 
+  d = d %>% group_by_at(nt) %>% summarize(!!rlang::sym(outcomevar) := mean(!!(rlang::sym(outcomevar))))
+  return(d)
+}
+
 ## function to generate predicted differences, standardized
 standardized_differences = function(model1, model2, sigma=TRUE){
   

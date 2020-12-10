@@ -179,7 +179,7 @@ utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation")
 #' @export
 visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formula=NULL, 
                              sample = 3, plots.as.list=FALSE,...){
-  
+
   #### figure out what is numeric
   d = object@frame
   plot = match.arg(plot, c("all", "residuals", "model"))
@@ -278,6 +278,10 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
         m[,terms[1]] = factor(m[,terms[1]], ordered=TRUE)
         newd[,terms[1]] = factor(newd[,terms[1]], ordered=TRUE)
       }	
+      
+      # variable isn't binned/summarized!
+      m = add_bin_to_new_dataset(step3, m, terms, term.re, "prediction")
+      newd = add_bin_to_new_dataset(step3, newd, terms, term.re, outcome)
       
       step3 = step3+ 
         geom_line(data=m, 
