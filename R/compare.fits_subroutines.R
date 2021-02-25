@@ -76,11 +76,12 @@ check_missing = function(model1, model2, data, variables) {
 }
 
 get_model_n = function(model) {
+
   mod_class = class(model)[1]
-  
   if (mod_class == "RandomForest") return(attr(model, "responses")@nobs)
   if (mod_class == "randomForest.formula") return(length(model$predicted))
   if (mod_class == "lmerMod" | mod_class == "glmerMod") return(nobs(model))
+  if (mod_class == "rpart") return(length(model$y))
   
   return(nrow(model$model))
   
@@ -212,6 +213,12 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
     names(d)[1] = "prediction"
     return(d
     )    
+  }
+  
+  if (model.type == "rpart") {
+    return(
+      data.frame(prediction = predict(model, pred.values), model= model.type)		
+    )
   }
   
   int = ifelse(report.se, "confidence", "none")
