@@ -4,14 +4,16 @@
 \name{graduate_income}
 \alias{graduate_income}
 \title{Graduate income}
-\format{A data frame with xx rows and 4 variables:
+\format{
+A data frame with xx rows and 4 variables:
 \describe{
   \item{Grad.School}{Whether the subject attended grad school}
   \item{Profession}{Profession of the subject}
   \item{GPA}{GPA of the subject}
   \item{Income}{The current income of the subject}
   \item{Years}{Years since they graduated}
-}}
+}
+}
 \usage{
 graduate_income
 }

@@ -2,7 +2,7 @@ context("Bivariate plots")
 set.seed(1212)
 data(exercise_data); data("relationship_satisfaction")
 d = exercise_data
-
+options(warn=-1)
 test_that("things go okay when 'group' is a variable", {
   data(avengers)
   avengers$group = avengers$superpower
@@ -127,3 +127,5 @@ test_that("jittered density plots and options work", {
   vdiffr::expect_doppelganger("violin plot",
                               flexplot(speed~superpower, data=avengers, plot.type="violin"))
 })
+
+options(warn=0)

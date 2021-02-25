@@ -27,7 +27,6 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   }
   
   ### create the lists that contain the breaks
-  
   break.me = flexplot_break_me(data, predictors, given, axis)
   breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
@@ -91,15 +90,11 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
       }
     }
     
+
     if (!is.null(formula)){
       prep_vars = flexplot_prep_variables(formula, data=data)
       variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; given = prep_vars$given
       break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors; spread = prep_vars$spread
-    }
-    
-    ### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
-    if (tibble::is_tibble(data)){
-      data = as.data.frame(data)
     }
     
     if (pred.data) {
@@ -262,10 +257,11 @@ flexplot_break_me = function(data, predictors, given, axis){
   if (axis[1] != "1") non.axis.one = predictors[-1] else non.axis.one = predictors
   #### get the breaks for the needed variables (remove axis 1 because it's the axis and thus will never be binned)
   #### also, lapply fails when there's just one additional predictor, hence the if statement
+
   if (length(predictors)>2){
     break.me = non.axis.one[unlist(lapply(data[,non.axis.one], FUN=is.numeric)) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   } else {
-    break.me = non.axis.one[is.numeric(data[,non.axis.one]) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
+    break.me = non.axis.one[is.numeric(data[,non.axis.one] ) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
 
   #if (length(break.me)==0) break.me = NA

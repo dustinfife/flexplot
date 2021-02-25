@@ -12,7 +12,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 	            formula <- make.formula(self$options$out, self$options$preds)
 	            model = lm(formula, data=self$data)
               results <- estimates.lm(model, mc=FALSE)
-        	#### save formula/dataset to a file (to be used for plotting)
+        	#### s*ve formula/dataset to a file (to be used for plotting)
         	if (length(self$options$preds)>0){
 			    	output = list(formula=formula, data=self$data)
 			    	image <- self$results$plot

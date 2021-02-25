@@ -1,3 +1,12 @@
+get_re = function(model) {
+  if (!(class(model)[1] %in% c("lmerMod", "glmerMod"))) {
+    return(NULL)
+  }
+  text_formula = paste0(formula(model))[3]
+  re = gsub(".* | [.+]", "\\1", text_formula)
+  re = gsub(")", "", re)
+  return(re)
+}
 
 whats_model2 = function(model1,model2=NULL) {
   if (is.null(model2)){
@@ -67,11 +76,12 @@ check_missing = function(model1, model2, data, variables) {
 }
 
 get_model_n = function(model) {
+
   mod_class = class(model)[1]
-  
   if (mod_class == "RandomForest") return(attr(model, "responses")@nobs)
   if (mod_class == "randomForest.formula") return(length(model$predicted))
   if (mod_class == "lmerMod" | mod_class == "glmerMod") return(nobs(model))
+  if (mod_class == "rpart") return(length(model$y))
   
   return(nrow(model$model))
   
@@ -132,15 +142,21 @@ generate_predictors = function(data, predictors, model_terms, num_points, mod_cl
 
   #### if it's not in model 1:
   #### input the mean (if numeric) or a value (if categorical)
-  if (length(which(!(model_terms %in% predictors)))>0){
+  # but first check whether its a RE model
+  if (length(which(!(model_terms %in% predictors)))>0 ){
     not.in.there = model_terms[which(!(model_terms %in% predictors))]
     for (i in 1:length(not.in.there)){
       if (is.numeric(data[,not.in.there[i]])){
         message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))
         pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)
       } else {
-        val = unique(data[,not.in.there[i]])[1]
-        message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting '", val, "'\n"))
+        # this had issues when a random effect (as factor) was
+        val = unique(as.character(data[[not.in.there[i]]]))[1]
+        #only display the message if it's not a glmer mod
+        if (!(mod_class %in% c("lmerMod", "glmerMod"))) {
+          message(paste0("Note: You didn't choose to plot ", 
+                       not.in.there[i], " so I am inputting '", val, "'\n"))
+        }  
         pred.values[,not.in.there[i]] = val
       }
     }
@@ -162,7 +178,7 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
   model.type = class(model)[1]
   if ((model.type == "lmerMod" | model.type == "glmerMod") & !re){
     return(data.frame(prediction = 
-                 predict(model, pred.values), model="fixed effects"))
+                 predict(model, pred.values, type="response"), model="fixed effects"))
   }  
   
   if ((model.type == "lmerMod" | model.type == "glmerMod") & re){
@@ -197,6 +213,12 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
     names(d)[1] = "prediction"
     return(d
     )    
+  }
+  
+  if (model.type == "rpart") {
+    return(
+      data.frame(prediction = predict(model, pred.values), model= model.type)		
+    )
   }
   
   int = ifelse(report.se, "confidence", "none")

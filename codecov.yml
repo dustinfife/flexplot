@@ -1,0 +1,5 @@
+ignore:
+  - flexplota*.R
+  - glinmod*.R
+  - linmod*.R
+  - *jasp*.R

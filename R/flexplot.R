@@ -8,6 +8,9 @@
 ##' variables between ~ and | will fall on the x axis and categorical predictors will be color-coded/symbol-coded/line-coded (if user specifies). If more than one numeric variable is specified
 ##' after ~, the second (and third) will be binned. No more than four variables are allow (otherwise, cognitive load is too high). If the user wishes to include another variable,
 ##'  I recommend they create separate plots, one for each level of the new variable (or a binned level of a numeric variable). 
+##'  
+##'  To better enable comparisons across panels, Flexplot implements "ghost lines," which simply repeat the line from one panel to another. For more information about ghost lines, see the vignette (also
+##'  available at https://psyarxiv.com/kh9c3/)
 ##' @param formula A formula of the form  y~x + a | b + z
 ##' @param data The dataset
 ##' @param related Are variables related? If so, it will show a plot of difference scores, rather than the raw scores (for a related t test). 
@@ -34,6 +37,7 @@
 ##' @param plot.type This argument allows the user to control the type of plot used. Flexplot defaults to histograms (for univariate variables)
 ##' but could also do qqplots (using "qq" as the argument) or density plots (using "density"). Also, the user can specify "boxplot" for boxplots and
 ##' "violin" for violin plots. 
+##' @param ... Other arguments passed to \code{\link[ggplot2]{aes}}
 ##' @author Dustin Fife
 ##' @import tibble ggplot2 R6
 ##' @export
@@ -95,7 +99,7 @@ flexplot = function(formula, data=NULL, related=F,
 		sample=Inf, 
 		prediction = NULL, suppress_smooth=F, alpha=.99977, plot.string=F, silent=F,
 		third.eye=NULL,
-		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line")){
+		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), ...){
 			
 	#data = exercise_data
 	##### use the following to debug flexplot
@@ -109,8 +113,13 @@ flexplot = function(formula, data=NULL, related=F,
 
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   plot.type = match.arg(plot.type, c("histogram", "qq", "density", "boxplot", "violin", "line"))
-  ### prepare the variables
   
+  ### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
+  if (tibble::is_tibble(data)){
+    data = as.data.frame(data)
+  }
+  
+  ### prepare the variables
   varprep = flexplot_prep_variables(formula, data, 
                                     breaks = breaks, labels=labels, bins=bins,
                                     related=related,  
@@ -123,7 +132,7 @@ flexplot = function(formula, data=NULL, related=F,
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
                         ### (error came at ghost.reference when it couldn't find the binned version)
-	
+
   prediction = with(varprep, 
               flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE))
@@ -241,7 +250,7 @@ flexplot = function(formula, data=NULL, related=F,
       axis[2] = paste0(axis[2], "_binned")
     }
   }
- 
+	
 	#### evaluate the plot
 	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
 	### remove +xxxx (happens when I've made an element blank)
@@ -254,16 +263,6 @@ flexplot = function(formula, data=NULL, related=F,
 	}
 
 	final = suppressMessages(eval(parse(text=total.call)))
-	
-# axis = "muscle.gain"; outcome="weight.loss"
-# 	ggplot(data=data, aes_string(x=axis, y=outcome))+
-# 	  geom_jitterd(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=0, height=0)+
-# 	  facet_grid(as.formula(health_binned~motivation_binned),labeller = custom.labeler)+
-# 	  geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)
-	
-  ### suppress messages only works for print messages, but print messages actually show the plot (even when i want to store it for laster use). Thus, I need both. Weird. 
-	#return(final)
-	#class(final) <- c("flexplot", class(final))
 
 	if(plot.string){
 		return(total.call)

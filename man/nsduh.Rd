@@ -4,7 +4,8 @@
 \name{nsduh}
 \alias{nsduh}
 \title{NSDUH Dataset}
-\format{A data frame with xx rows and 27 variables:
+\format{
+A data frame with xx rows and 27 variables:
 \describe{
   \item{cig.rec}{smoked cigarettes recently?}
   \item{alc.rec}{used alcohol recently?}
@@ -32,7 +33,8 @@
   \item{race}{race}
   \item{county}{type of county they live in (small metro, large metro, etc)}
   \item{income}{how much bank they make}
-}}
+}
+}
 \usage{
 nsduh
 }

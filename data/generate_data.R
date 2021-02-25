@@ -44,7 +44,7 @@
 # #### belief in paranormal dataset
 # 
 # #### conviction about paranormal beliefs - bimodal
-# conviction = c(rnorm(n/2, 40, 10), rnorm(n/2, 70, 10))
+# conviction = c(rnorm(n/2, 30, 10), rnorm(n/2, 70, 10))
 # 
 # ### fear.of.aliens = positive skew
 # fear = c(rnorm(n, 0, 2)^2)
@@ -58,7 +58,7 @@
 # 
 # ### time spent investigating paranormal paranormal outliers
 # time = rnorm(n, 100, 40)
-# time = 6000
+# time[231] = 6000
 # ### 999
 # 
 # ### kidnapped by aliens

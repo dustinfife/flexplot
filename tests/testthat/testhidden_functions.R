@@ -1,21 +1,13 @@
 context("hidden_functions works as expected")
-
+options(warn=-1)
 data(exercise_data)
 d = exercise_data
 set.seed(1212)
-test_that("standardized difference works", {
-  
-  mod1 = lm(weight.loss~therapy.type, data=d)	
-  mod2 = lm(weight.loss~therapy.type+gender, data=d)	
-  diff = standardized_differences(mod1, mod2)
-  expect_output(print(diff), "0.156")
-  
-  data("criminal_data")
-  mod1 = glm(aggression~ses + empathy + depression, data=criminal_data, family=Gamma)
-  mod2 = glm(aggression~ses * empathy + depression, data=criminal_data, family=Gamma)
-  diff = standardized_differences(mod1, mod2)
-  expect_output(print(diff), "0.294")
+test_that("rescale works", {
+  expect_true(round(mean(rescale(d$weight.loss, 0, 2)), 0) == 0)
+  expect_true(round(sd(rescale(d$weight.loss, 0, 2)), 0) == 2)
 })
+
 
 test_that("nested model comparisons returns bf", {
   mod = lm(weight.loss~motivation + therapy.type + gender, data=exercise_data)
@@ -111,18 +103,23 @@ test_that("fit.function works for numeric predictors", {
   expect_identical(fit.function("motivation", "weight.loss", data=exercise_data, suppress_smooth=T), "xxxx")
   expect_error(fit.function("motivation", "weight.loss", method="logistic", data=exercise_data))
   expect_identical(fit.function("gender", "weight.loss", method="logistic", data=exercise_data),
-    "geom_smooth(method = \"glm\", method.args = list(family = \"binomial\"), se = se)")
+    "geom_smooth(method = \"glm\", method.args = list(family = \"binomial\"), se = se, formula = y~x)")
   expect_identical(fit.function("motivation", "weight.loss", method="rlm", data=exercise_data),
-                   "geom_smooth(method = \"rlm\", se = se)")
+                   "geom_smooth(method = \"rlm\", se = se, formula = y~x)")
   expect_identical(fit.function("motivation", "weight.loss", method="lm", data=exercise_data),
-                   "stat_smooth(method=\"lm\", se=se)")  
+                   "stat_smooth(method=\"lm\", se=se, formula = y~x)")  
   expect_identical(fit.function("motivation", "weight.loss", method="cubic", data=exercise_data),
                    "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 3, raw=TRUE))") 
   expect_identical(fit.function("motivation", "weight.loss", method="quadratic", data=exercise_data),
                    "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 2, raw=TRUE))")   
   expect_identical(fit.function("motivation", "weight.loss", method="loess", data=exercise_data),
-                   "geom_smooth(method=\"loess\", se=se)")     
+                   "geom_smooth(method=\"loess\", se=se, formula = y~x)")     
   
+})
+
+test_that("there are no 'browser' or 'save' calls", {
+  expect_message(fif("browser()", where="R"), "(No results found)")
+  expect_message(fif("save", where="R"), "(No results found)")
 })
 
 
@@ -178,15 +175,59 @@ test_that("compare.fits_subroutines work", {
   testthat::expect_equal(get_terms(model)$predictors, "therapy.type")
 })
 
+lm_mod = lm(weight.loss~therapy.type, data=exercise_data)
+glm_mod = glm(kills~superpower, data=avengers %>% mutate(kills = kills + 1), family=Gamma)
+rf_mod_cf = party::cforest(kills~superpower+ speed , data=avengers)
+rf_mod_rf = randomForest::randomForest(kills~superpower+ speed , data=avengers)
+
+test_that("extract_data_from_fitted_objects works", {
+
+  expect_true(nrow(extract_data_from_fitted_object(lm_mod))==200)
+  expect_true(nrow(extract_data_from_fitted_object(glm_mod))==812)
+  expect_true(nrow(extract_data_from_fitted_object(rf_mod_cf))==812)
+  expect_true(nrow(extract_data_from_fitted_object(rf_mod_rf))==812)
+})
+
+test_that("get_predictors works", {
+  expect_true(get_predictors(lm_mod) == "therapy.type")
+  expect_true(get_predictors(glm_mod)== "superpower")
+  expect_true(get_predictors(rf_mod_cf)[1] == "superpower")
+  expect_true(get_predictors(rf_mod_rf)[1] == "superpower")
+})
+
+test_that("check_nested works", {
+  lm_mod2 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
+  expect_true(check_nested(lm_mod, lm_mod2))
+  glm_mod2 = glm(kills~north_south, data=avengers %>% mutate(kills = kills + 1), family=Gamma)
+  expect_false(check_nested(glm_mod, glm_mod2))
+  expect_false(check_nested(rf_mod_cf, rf_mod_rf))
+})
+
+test_that("check_model_rows works", {
+  mod1 = lm(weight.loss~therapy.type, data=exercise_data)
+  mod2 = lm(weight.loss~therapy.type + motivation, data=exercise_data %>% mutate(motivation = ifelse(motivation>70, NA, motivation)))
+  expect_message(check_model_rows(mod1, mod2, T))
+  new_mods = suppressMessages(check_model_rows(mod1, mod2, T))
+  expect_true(nrow(new_mods[[1]]$model) == nrow(new_mods[[2]]$model))
+})
+
+test_that("round_digits works", {
+  expect_true(round_digits(.00000034)==6)
+  expect_true(round_digits(.00034)==5)
+  expect_true(round_digits(.0034)==4)
+  expect_true(round_digits(.034)==3)
+  expect_true(round_digits(.34)==2)  
+  expect_true(round_digits(3.4)==1)  
+})
+
+test_that("check_all_variables_exist_in_data works", {
+  expect_null(check_all_variables_exist_in_data(c("weight.loss", "therapy.type"), exercise_data))
+  expect_error(check_all_variables_exist_in_data(c("weight.loss", "therrapy.type"), exercise_data))
+})
 
 
 
 
 
-
-
-
-
-
-
+options(warn=0)
 #

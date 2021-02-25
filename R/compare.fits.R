@@ -38,7 +38,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   #### get type of model
   model1.type = class(model1)[1]
   model2.type = class(model2)[1]	
-  
+
   #### get all variables
   variables_mod1 = get_terms(model1)
   variables_mod2 = get_terms(model2)
@@ -60,7 +60,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   }
   
   
-  
+
   ##### extract variable names from FORMULA
   variables = all.vars(formula)
   outcome = variables[1]
@@ -118,7 +118,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     }
   }
   
-  
+
   
   #### report one or two coefficients, depending on if they supplied it
   if (!exists("runme") | exists("old.mod")){
@@ -133,24 +133,40 @@ compare.fits = function(formula, data, model1, model2=NULL,
   #### eliminate those predictions that are higher than the range of the data
   if (!is.factor(data[,outcome])){
     min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)
-    if (length(which(prediction.model$prediction>max.dat)>0 | length(which(prediction.model$prediction<min.dat)))){
-      prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]
+    if (length(which(
+        prediction.model$prediction>(max.dat))>0 |
+          length(which(prediction.model$prediction<(min.dat))))){
+      #prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]
+      warning("Some of the model's predicted values are beyond the range of the original y-values. 
+              I'm truncating the y-axis to preserve the original scale.")
+      
     }
   } else {
     #### if they supply a factor, convert it to a number!!!!!
     prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
   }
-  
+
   #### create flexplot
   if (return.preds){
     prediction.model
   } else {
     ### for logistic, add one to the predictions
-    if (model1.type == "glm") {
+    if (model1.type == "glm" ) {
       if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
         prediction.model$prediction = prediction.model$prediction + 1
-      }}
-    flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...)
+      }
+    } 
+    
+    final_geom = return_lims_geom(outcome, data, model1)
+    flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
+      final_geom
   }	
   
 }	
+
+return_lims_geom = function(outcome, data, model1) {
+  if (!(class(model1)[1] == "lm" | class(model1)[1] == "glm")) return(theme_bw())
+  if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])) return(theme_bw())
+  if (is.factor(data[,outcome]) | is.character(data[,outcome])) return(theme_bw())
+  return(coord_cartesian(ylim=c(min(data[,outcome]), max(data[,outcome]))))
+}

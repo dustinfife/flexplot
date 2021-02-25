@@ -8,48 +8,31 @@
 ##' @param formula A formula with exactly two predictors and an outcome variable
 ##' @param data The dataset used
 ##' @param method The smoothing method. Defaults to "loess"
+##' @param x The variable you wish to place on the x axis. 
 ##' @param ... Other parameters passed to flexplot
 ##' @seealso \code{\link{flexplot}}
 ##' @author Dustin Fife
 ##' @export
+##' @aliases added.plot added_plot avp
 ##' @import tibble
 ##' @examples
 ##' data(exercise_data)
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
-added.plot = function(formula, data, method="loess", ...){
+added.plot = added_plot = avp = function(formula, data, method="loess", x=NULL, ...){
 	#### identify variable types
 	variables = all.vars(formula)
-		#### make sure all variables in in data
-	missing.preds = variables[which(!(variables %in% names(data)))]
-	if (length(missing.preds)>0){
-		stop(paste0("One or more of your predictor variables: ", paste0(missing.preds, collapse=","), " are missing. Did you specify the right dataset and spell the variables correctly?"))
-	}	
+
+	check_all_variables_exist_in_data(variables, data)
+	
+	#pick out the variables
 	outcome = variables[1]
 	predictors = variables[-1]
-	res.variable = predictors[length(predictors)]
+	res.variable = find_variable_of_interest(predictors, x)
 	remaining.vars = predictors[which(!(predictors %in% res.variable))]
 	
-	#### bark if there's not two variables
-	# if (length(predictors) != 2){
-		# stop("You must have exactly two predictor variables")
-	# }
+  # prep data
+	data = prep_data_for_avp(data, variables)
 	
-	if (tibble::is_tibble(data)){
-		data = data.frame(data)
-	}
-	
-	#### remove missing data
-	miss.vals = sapply(data[,variables], function(x) sum(is.na(x)))
-	miss.vals = miss.vals[miss.vals>0]
-	if (length(miss.vals)!=0){
-		warning("Note: I'm removing missing values so the function will work.")
-		data = na.omit(data[,variables])
-	}
-	
-	#### find model type
-	
-
-
 	#### model the first chosen variable
 	new.form = make.formula(outcome, remaining.vars)
 	
@@ -62,7 +45,6 @@ added.plot = function(formula, data, method="loess", ...){
 	    data$residuals = residuals(lm(new.form, data=data)) + mean(data[,outcome])    
 	 }
 	
-	
 	##### now plot that succa
 	new.form = make.formula("residuals", res.variable)
 
@@ -71,3 +53,32 @@ added.plot = function(formula, data, method="loess", ...){
 	class(plot) <- c("flexplot", class(plot))
 	return(plot)
 }
+
+prep_data_for_avp = function(data, variables) {
+  # convert from tibble
+  if (tibble::is_tibble(data)){
+    data = data.frame(data)
+  }
+  
+  #### remove missing data
+  miss.vals = sapply(data[,variables], function(x) sum(is.na(x)))
+  miss.vals = miss.vals[miss.vals>0]
+  if (length(miss.vals)!=0){
+    warning("Note: I'm removing missing values so the function will work.")
+    data = na.omit(data[,variables])
+  }
+  return(data)
+}
+
+find_variable_of_interest = function(predictors, x=NULL) {
+  
+  if (is.null(x)) return(predictors[length(predictors)])
+  
+  # make sure x is in the data
+  if (is.numeric(x) & x>length(predictors)) stop("Oops! You're asking for a variable position that is larger than the number of predictors in your formula! Pick a smaller number for x.")
+  if (is.numeric(x)) return(predictors[x])
+  if (x %!in% predictors) stop(paste0("Oops! I can't find the variable ", x, " in your formula"))
+  return(x)
+}
+
+'%!in%' <- function(x,y)!('%in%'(x,y))

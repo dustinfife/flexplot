@@ -21,7 +21,6 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
     ### read in the dataset
     if (is.null(dataset)){
       dataset = (.readDataSetToEnd(columns=c(options$dependent, options$variables, options$paneledVars)))
-      #save(dataset, ready, options, file="~/Users/Documents/jaspdata.rdat")
     } else {
       return(dataset)
     }
@@ -64,7 +63,6 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
   dv = encodeColNames(unlist(options$dependent));
   v = encodeColNames(unlist(options$variables));
   p = encodeColNames(unlist(options$paneledVars))
-  #save(jaspResults, k, dataset, v,p, dv,options, file="~/Documents/JaspResults.Rdata")
 
   if (length(options$variables)==0){
     formula = as.formula(paste0(dv, "~1"))

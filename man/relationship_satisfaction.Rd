@@ -4,7 +4,8 @@
 \name{relationship_satisfaction}
 \alias{relationship_satisfaction}
 \title{Relationship satisfaction dataset}
-\format{A data frame with xx rows and 7 variables:
+\format{
+A data frame with xx rows and 7 variables:
 \describe{
   \item{conscientiousness}{description}
   \item{honesty}{description}
@@ -13,7 +14,8 @@
   \item{satisfaction}{description}
   \item{separated}{description}
   \item{gender}{description}
-}}
+}
+}
 \usage{
 relationship_satisfaction
 }

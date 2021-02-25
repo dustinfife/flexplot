@@ -4,7 +4,8 @@
 \name{criminal_data}
 \alias{criminal_data}
 \title{Criminal dataset}
-\format{A data frame with xx rows and 6 variables:
+\format{
+A data frame with xx rows and 6 variables:
 \describe{
   \item{ses}{Socioeconomic status of the subject}
   \item{empathy}{description}
@@ -12,7 +13,8 @@
   \item{rape}{description}
   \item{convictions}{How many times the subject has been convicted of a crime}
   \item{aggression}{How aggressive the subject is}
-}}
+}
+}
 \usage{
 criminal_data
 }

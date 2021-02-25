@@ -2,9 +2,11 @@
 % Please edit documentation in R/added.plot.R
 \name{added.plot}
 \alias{added.plot}
+\alias{added_plot}
+\alias{avp}
 \title{Create an added variable plot}
 \usage{
-added.plot(formula, data, method = "loess", ...)
+added.plot(formula, data, method = "loess", x = NULL, ...)
 }
 \arguments{
 \item{formula}{A formula with exactly two predictors and an outcome variable}
@@ -12,6 +14,8 @@ added.plot(formula, data, method = "loess", ...)
 \item{data}{The dataset used}
 
 \item{method}{The smoothing method. Defaults to "loess"}
+
+\item{x}{The variable you wish to place on the x axis.}
 
 \item{...}{Other parameters passed to flexplot}
 }

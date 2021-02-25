@@ -40,10 +40,7 @@ estimates.lm = function(object, mc=TRUE){
 	predictors = variables[-1]
 	    
     #### look for interaction terms
-	interaction = length(grep(":", terms))>0
-	if (interaction){
-		terms = terms[-grep(":", terms)]
-	}
+	terms = remove_interaction_terms(object)
 	#### get dataset
 	d = object$model
   #}dataset=NULL
@@ -58,6 +55,7 @@ estimates.lm = function(object, mc=TRUE){
 	} else {
 
 		### convert characters to factors
+	  attr(terms(object), "factors")
 		chars = terms[which(is.character(d[,terms]))]
 		if (length(chars)>0){
 			d[,chars] = as.factor(d[,chars])
@@ -328,12 +326,13 @@ print.rf_estimates = function(x,...){
 #' @param mc Should model comparisons be performed? Currently not used
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
-estimates.glm = function(object, mc=FALSE){
+estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
+
 	#### generate list of coefficients
-	terms = attr(terms(object), "term.labels")
+	terms = remove_interaction_terms(object)
 	
 	#### get dataset
-	d = object$model
+	d = extract_data_from_fitted_object(object)
 	
 	#### identify factors
 	if (length(terms)>1){
@@ -345,13 +344,24 @@ estimates.glm = function(object, mc=FALSE){
 	}
 
 	#### output predictions
-	n.func = function(term){anchor.predictions(object, term, shutup=T)$prediction}
+	if (class(object)[1]=="glmerMod") {
+	  preds = NA
+	} else {
+	n.func = function(term){
+	  anchor.predictions(object, term, shutup=T)$prediction
+	  }
 	preds = lapply(terms, n.func); names(preds) = terms
+	}
 	
-	
+
 	#### output coefficients
-	options(warn=-1)
-	if (family(object)$link=="logit"){
+	
+	if (class(object)[1] == "glmerMod" & family(object)$link == "logit"){
+	  coef.matrix = data.frame(raw.coefficients = fixef(object), 
+	                           OR = exp(fixef(object)), 
+	                           inverse.OR = 1/exp(fixef(object)) 
+	                           )
+	} else if (family(object)$link=="logit"){
 		coef.matrix = data.frame(raw.coefficients = coef(object), OR = exp(coef(object)), inverse.OR = 1/exp(coef(object)), standardized.OR = exp(standardized.beta(object, sd.y=F)), inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))
 		
 	} else if (family(object)$link=="log"){
@@ -366,10 +376,11 @@ estimates.glm = function(object, mc=FALSE){
 	
 	
 	#options(warn=0)
-	coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
-	nms = row.names(coef.matrix); nms2 = names(coef.matrix)
+	if (!is.na(preds)[1]){
+	  coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
+	  nms = row.names(coef.matrix); nms2 = names(coef.matrix)
   	coef.matrix = data.frame(lapply(coef.matrix, function(y) if(is.numeric(y)) round(y, 3) else y), row.names=nms); names(coef.matrix) = nms2
-	
+	}
 	
 	#### for those that are factors, put the first prediction in the -1 SD column
 	string.round = function(x, digits){
@@ -431,7 +442,15 @@ estimates.zeroinfl = function(object, mc=FALSE){
 }
 
 
-
+remove_interaction_terms = function(object) {
+  #### generate list of coefficients
+  terms = attr(terms(object), "term.labels")
+  interaction = length(grep(":", terms))>0
+  if (interaction){
+    terms = terms[-grep(":", terms)]
+  }
+  return(terms)
+}
 
 
 #' Print estimates Summary

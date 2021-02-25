@@ -68,7 +68,7 @@ flexplot(satisfaction~1, data=relationship_satisfaction)
 flexplot(gender~1, data=relationship_satisfaction)
 
 ### added variable plot
-added.plot(satisfaction~communication + separated | gender + interests, data=relationship_satisfaction, method="polynomial", se=F)
+added.plot(satisfaction~communication + separated | gender + interests, data=relationship_satisfaction, method="quadratic", se=F)
 
 ### modeling + graphics
 full.mod = lm(satisfaction~communication * separated , data=relationship_satisfaction)

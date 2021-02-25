@@ -6,7 +6,7 @@ d = exercise_data
 k = d
 deleteme = which(k$rewards == "no rewards")
 k = k[-(deleteme[1:2]), ]
-
+options(warn=-1)
 test_that("unconventional plots", {
   vdiffr::expect_doppelganger("related T",
                               flexplot(weight.loss ~ rewards, data = k, related = T))
@@ -44,7 +44,7 @@ test_that("unconventional plots", {
     compare.fits(gender~attention, data=tablesaw.injury, mod, jitter=c(0, .1))
   )
   
-  compare.fits(gender~attention, data=tablesaw.injury, mod, jitter=c(0, .1))
+  
   vdiffr::expect_doppelganger(
     "panelled logistic with sampling",
     flexplot(
@@ -62,6 +62,22 @@ test_that("given with few categories isn't collapsed",{
   d = exercise_data %>% mutate(gender=as.numeric(gender))
   a = flexplot(weight.loss~health | gender, data=d)
   vdiffr::expect_doppelganger("categories not collapsed", a)
-  
-
 })
+
+test_that("y axis is truncated when predictions go beyond limits", {
+
+  d = avengers %>% mutate(kills = kills + 1)
+  full =    glm(kills~minutes.fighting*willpower, data=d, family=Gamma(link="log"))
+
+  vdiffr::expect_doppelganger("truncated axis", 
+                              compare.fits(injuries~willpower | minutes.fighting, data=d, full))
+})
+
+test_that("flexplot bins when binned variable is very small", {
+  
+  d = avengers %>% mutate(kills = kills *.001)
+  p = flexplot(ptsd~strength | kills, data=d)
+  vdiffr::expect_doppelganger("small_variable values", 
+                              p)
+})
+options(warn=0)

@@ -1,5 +1,46 @@
+# @importFrom rlang `:=`
+add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
+  # variable isn't binned/summarized!
+  are_any_binned = grep("_binned", names(plot$data))
+  if (length(are_any_binned)==0) return(d)
+  
+  # figure out which is binned
+  binned_var = names(plot$data)[are_any_binned]
+  variable_to_be_binned = gsub("_binned", "", binned_var)
+  gg_dataset = plot$data
+  
+  # extract breakpoints from plot data, then break the new one
+  break_vals = as.numeric(sort(unique(gsub("(.*)-(.*)", "\\2", gg_dataset[[binned_var]]))))
+  breaks = prep.breaks(variable_to_be_binned, gg_dataset, breaks=break_vals)
+  d[[binned_var]] = bin.me(variable_to_be_binned, d, breaks=breaks)
+  
+  # create a new string of terms that needs to be summarized by
+  nt = c(terms[-which(terms %in% variable_to_be_binned)], binned_var)
+  
+  # remove extra REs because we don't need any of them,e xcept ggplot requires a column name for it
+  if ("model" %in% names(d)) d[[term.re]] = factor(d[[term.re]]) else d[[term.re]] = d[[term.re]][1] %>% factor(d[[term.re]][1]) 
+  d = d %>% group_by_at(nt) %>% summarize(!!rlang::sym(outcomevar) := mean(!!(rlang::sym(outcomevar))))
+  return(d)
+}
+
 ## function to generate predicted differences, standardized
 standardized_differences = function(model1, model2, sigma=TRUE){
+  
+  ### check for nested functions
+  nested = check_nested(model1, model2)
+  
+  ### handle missing data from one model to the next
+  new_models = check_model_rows(model1, model2, nested)
+  model1 = new_models[[1]]; model2 = new_models[[2]]  
+  
+  # make sure the two models have the same DV
+  dv1 = extract_data_from_fitted_object(model1)[,1]
+  dv2 = extract_data_from_fitted_object(model2)[,1]
+
+  if (all(dv1 != dv2)) {
+    stop("It looks like you're trying to compare two models with different outcome variables.")
+  }
+  
   pred1 = predict(model1, type="response")
   pred2 = predict(model2, type="response")
   differences = round(
@@ -15,6 +56,66 @@ custom.labeler = function(x){
   })
 }
 
+#### make sure all variables are in data
+check_all_variables_exist_in_data = function(variables, data) {
+  missing.preds = variables[which(!(variables %in% names(data)))]
+  if (length(missing.preds)>0){
+    stop(paste0("One or more of your predictor variables: ", paste0(missing.preds, collapse=","), " are missing. Did you specify the right dataset and spell the variables correctly?"))
+  }
+  return(NULL)
+}  
+
+
+
+extract_data_from_fitted_object = function(object) {
+  if (class(object)[1]=="lm" | class(object)[1]=="glm" | class(object)[1] == "rlm") return(object$model)
+  if (class(object)[1]=="RandomForest") {
+    outcome = object@responses@variables
+    predictors = object@data@get("input")
+    data = cbind(outcome, predictors)
+    return(data)
+  }  
+  if (class(object)[1] == "randomForest.formula") {
+    vars = all.vars(formula(object))
+    data = eval(getCall(object)$data)
+    return(data[,vars])
+  }
+  # this should work for the rest?? But it won't be in the right order!
+  return(eval(getCall(object)$data))
+}
+
+
+
+check_nested = function(model1, model2) {
+  #### collect terms
+  mod1 = get_predictors(model1)
+  mod2 = get_predictors(model2)
+  
+  #### check for nested models
+  if (all(length(mod1)> length(mod2) & (mod2 %in% mod1) & (class(model1) == class(model2)))) return(T)
+  if (all(length(mod2)>=length(mod1) & (mod1 %in% mod2) & (class(model1) == class(model2)))) return(T)
+  return(F)
+}
+
+get_predictors = function(model) {
+  
+  # try to get the terms and see if it fails
+  mod1 = try({attr(terms(model), "term.labels")}, silent=TRUE)
+  
+  # no failure = return
+  if (class(mod1)!="try-error") return(unlist(mod1))
+  
+  # now try another way (this will get randomForest)
+  mod = try({getCall(model1)$formula}, silent=TRUE)
+  
+  # no failure = return
+  if (class(mod)!="try-error") return(all.vars(mod)[-1])
+  
+  # now deal with cases where there is a failure
+  if (class(model)[1]=="RandomForest") {
+    return(all.vars(model@data@formula$input))
+  }
+}
 
 
 ## function that does nested model comparisons on a single fitted model
@@ -198,7 +299,9 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
 	if (is.null(labels)){
 		labels = 1:(length(breaks)-1)		
 		for (i in 1:(length(breaks)-1)){
-			labels[i] = paste0(round(breaks[i], digits=1), "-", round(breaks[i+1], digits=1))
+		  digs1 = round_digits(breaks[i])
+		  digs2 = round_digits(breaks[i+1])
+			labels[i] = paste0(round(breaks[i], digits=digs1), "-", round(breaks[i+1], digits=digs2))
 		}
 	}
 	
@@ -211,6 +314,15 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
 		binned.variable
 	}
 	
+}
+
+round_digits = function(breaks) {
+  if (abs(breaks<.0001)) return(6)
+  if (abs(breaks<.001)) return(5)
+  if (abs(breaks<.01)) return(4)
+  if (abs(breaks<.1)) return(3)
+  if (abs(breaks<1)) return(2)
+  return(1)
 }
 
 
@@ -341,20 +453,20 @@ fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method
 				stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
 			}
 
-			fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se)'			
+			fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se, formula = y~x)'			
 		} else if (method=="rlm"){
-			fit.string = 'geom_smooth(method = "rlm", se = se)'
+			fit.string = 'geom_smooth(method = "rlm", se = se, formula = y~x)'
 		}else if (method=="poisson" | method=="Gamma") {
 			#### specify the curve
-			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se)'
+			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se, formula = y~x)'
 		} else if (method=="polynomial" | method == "quadratic"){
 			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 2, raw=TRUE))'
 		} else if (method=="cubic"){
 			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 3, raw=TRUE))'
 		} else if (method=="lm"){
-			fit.string = 'stat_smooth(method="lm", se=se)'
+			fit.string = 'stat_smooth(method="lm", se=se, formula = y~x)'
 		} else {
-			fit.string = 'geom_smooth(method="loess", se=se)'
+			fit.string = 'geom_smooth(method="loess", se=se, formula = y~x)'
 		}
 		
 
@@ -404,7 +516,44 @@ fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method
 		}
 		
 	}
-	
+
 	return(fit.string)
 	
+}
+
+
+# find in file. Thanks to https://stackoverflow.com/questions/45502010/is-there-an-r-version-of-rstudios-find-in-files
+fif <- function(what, where=".", in_files="\\.[Rr]$", recursive = TRUE,
+                ignore.case = TRUE) {
+
+  fils <- list.files(path = where, pattern = in_files, recursive = recursive, full.names = TRUE)
+  found <- FALSE
+  
+  file_cmd <- Sys.which("file")
+  
+  for (fil in fils) {
+    
+    if (nchar(file_cmd) > 0) {
+      ftype <- system2("file",fil, TRUE)
+      if (!grepl("text", ftype)[1]) next
+    }
+    
+    contents <- readLines(fil, warn=FALSE)
+    
+    res <- grepl(what, contents, ignore.case = ignore.case)
+    res <- which(res)
+    
+    if (length(res) > 0) {
+      
+      found <-  TRUE
+      
+      cat(sprintf("%s\n", fil), sep="")
+      cat(sprintf(" % 4s: %s\n", res, contents[res]), sep="")
+      
+    }
+    
+  }
+  
+  if (!found) message("(No results found)")
+  
 }

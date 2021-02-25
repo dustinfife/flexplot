@@ -27,10 +27,10 @@
 ##' anchor.predictions(glm.mod, c("safety", "gender"))
 anchor.predictions = function(model, reference, shutup=F){
 
-	terms = attr(terms(model), "term.labels")
+	terms = remove_interaction_terms(model)
 
 		#### extract dataset
-	d = model$model
+	d = extract_data_from_fitted_object(model)
 
 		##### figure out which terms need to be aggregated across
 	included = terms[which(terms %in% reference)]
@@ -79,7 +79,7 @@ anchor.predictions = function(model, reference, shutup=F){
 			
 	if (length(numeric.included)>1){
 		numeric.preds = lapply(d[,numeric.included], f)
-	} else if (length(numeric.included) ==1){
+	} else if (length(numeric.included) ==1 & length(unique(d[,numeric.included]))>5){
 		numeric.preds = list(f(d[,numeric.included]))
 		names(numeric.preds)[[1]] = numeric.included
 	} else {
@@ -106,6 +106,8 @@ anchor.predictions = function(model, reference, shutup=F){
 			final.prediction = expand.grid(c(factor.levs, average.predictions))
 		}
 		
+	} else {
+	  final.prediction = NULL
 	}
 	
 	##### now predict

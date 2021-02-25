@@ -3,7 +3,7 @@ context("use compare.fits to visualize linear models")
 data(exercise_data)
 d = exercise_data
 d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)
-
+options(warn=-1)
 test_that("compare.fits linear models", {
   set.seed(1212)
   model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
@@ -30,7 +30,7 @@ test_that("compare.fits linear models", {
   mod = lm(wl ~motivation+rewards, data=d)
   mod2 = lm(wl ~motivation*rewards, data=d)
   vdiffr::expect_doppelganger("compare.fits with strong interaction",
-                              compare.fits(wl~motivation|rewards, data=d, model1=mod, model2=mod2))
+                              suppressWarnings(compare.fits(wl~motivation|rewards, data=d, model1=mod, model2=mod2)))
   
   mod = lm(weight.loss~motivation, data=d)
   vdiffr::expect_doppelganger("compare.fits with one model",compare.fits(weight.loss~motivation, data=d, model1=mod))
@@ -48,6 +48,7 @@ test_that("compare.fits linear models", {
                               compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod))
 
 })
+
 
 test_that("compare.fits for other models", {
   set.seed(1212)
@@ -106,4 +107,29 @@ test_that("compare.fits for other models", {
   mod = suppressWarnings(party::cforest(y~., data=d))
   testthat::expect_true(names(compare.fits(y~x+z, d, mod, return.preds=TRUE))[2]=="z")
   
+  ### compare.fits with rpart
+  fit = rpart::rpart(weight.loss~motivation + therapy.type, data=exercise_data, method="anova")
+  vdiffr::expect_doppelganger("compare.fits with rpart numeric",
+                              compare.fits(weight.loss~motivation + therapy.type, data=exercise_data, fit))
+  fit2 = rpart::rpart(therapy.type~motivation + rewards, data=exercise_data, method="anova")
+  vdiffr::expect_doppelganger("compare.fits with rpart categorical",
+                              compare.fits(therapy.type~motivation + rewards, data=exercise_data, fit2))  
 })
+
+test_that("get_re works", {
+  expect_true(get_re(lmer(MathAch~SES + (SES | School), data=math))=="School")
+  expect_true(get_re(lmer(MathAch~SES + (SES |School), data=math))=="School")
+  expect_true(get_re(lmer(MathAch~1 + (1 | School), data=math))=="School")
+  expect_null(get_re(lm(MathAch~1 + (1 | School), data=math)))
+})  
+
+test_that("get_model_n works", {
+  expect_equal(get_model_n(lm(weight.loss~therapy.type, data=exercise_data)), 200)
+  expect_equal(get_model_n(rlm(weight.loss~therapy.type, data=exercise_data)), 200)
+  suppressWarnings(expect_equal(get_model_n(party::cforest(weight.loss~therapy.type, data=exercise_data)), 200))
+  expect_equal(get_model_n(randomForest::randomForest(weight.loss~therapy.type, data=exercise_data)), 200)
+  expect_equal(get_model_n(rpart::rpart(weight.loss~motivation, data=exercise_data)), 200)
+    
+})
+
+options(warn=0)
