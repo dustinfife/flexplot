@@ -557,6 +557,7 @@ flexplot_modify_prediction = function(flexplot_vars, prediction=NULL,
   
   
   #### bin the predictions, where needed
+
   if (length(break.me)>0){
     for (i in 1:length(break.me)){
       ### find that variable in the model and bin it
