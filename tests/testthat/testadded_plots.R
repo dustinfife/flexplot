@@ -41,14 +41,14 @@ test_that("label_avp_axis works", {
 })
 
 test_that("make_avp_formula works", {
-  expect_equal(make_avp_formula(y~x+z, y~a_b)[[3]], "y | x") 
+  expect_equal(make_avp_formula(y~x+z, y~a_b)[[3]], "y | a_b") 
   expect_equal(make_avp_formula(y~x+z, x=1)[[3]], "y | z")
   expect_equal(make_avp_formula(y~x+z, x=2)[[3]], "y | x") 
 })
 test_that("check_variables_in_lm works", {
   expect_null(check_variables_in_lm(y~x+x2, y~x))
   expect_error(check_variables_in_lm("a", y~x))
-  expect_error(check_variables_in_lm(y~xz, y~x))
+  expect_null(check_variables_in_lm(y~xz, y~x))
   expect_error(check_variables_in_lm(x~y + z, y~x))
 })
 
