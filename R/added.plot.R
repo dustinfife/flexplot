@@ -2,13 +2,25 @@
 ##'
 ##' Create an added variable plot
 ##'	
-##' This function first residualizes the outcome variable based on the first variables listed in the formula.
+##' This function first residualizes the outcome variable based whatever variables the user decides to condition on.
 ##' The mean of the outcome variable is then added to the residuals (to maintain the interpretation of the variable),
-##' then the function plots the residuals against the second variable. 
-##' @param formula A formula with exactly two predictors and an outcome variable
+##' then the function plots the residuals against the other variables the user specifies.
+##' 
+##' More specifically, if the user specifies `formula` but leaves the options `x` and `lm_formula` as NULL, it will 
+##' default to residualizing the first variable(s) in the formula and plot the last variable entered against those residuals.
+##' For example, if the user specifies y~x + z, this function will residualize y~x, then plot z against those residuals. 
+##' 
+##' If the user specifies a value of `x`, that tells the function which variable to residualize. So, again, if the user specifies
+##' `y~x + z` then sets `x` to 2, the function will instead residualize based on z instead of x. 
+##' 
+##' For multivariate AVPs, the user can specify a value for `lm_formula`. The value of `lm_formula` specifies the fitted model
+##' that is then residualized, while the value of `formula` specifies how the remaining variables are displayed, using `flexplot`
+##' formula conventions.
+##' @param formula A flexplot formula, specifying how the avp will visualize the variables. 
 ##' @param data The dataset used
+##' @param lm_formula Optional. A formula specifying how to condition variables.  
 ##' @param method The smoothing method. Defaults to "loess"
-##' @param x The variable you wish to place on the x axis. 
+##' @param x The variable you wish to place on the x axis. Defaults to NULL. 
 ##' @param ... Other parameters passed to flexplot
 ##' @seealso \code{\link{flexplot}}
 ##' @author Dustin Fife
@@ -18,40 +30,90 @@
 ##' @examples
 ##' data(exercise_data)
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
-added.plot = added_plot = avp = function(formula, data, method="loess", x=NULL, ...){
+##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data, x=2)
+##' added.plot(weight.loss~motivation + therapy.type, formula = weight.loss~health*muscle.gain, data=exercise_data)
+added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method="loess", x=NULL, ...){
+  
 	#### identify variable types
 	variables = all.vars(formula)
 
 	check_all_variables_exist_in_data(variables, data)
+	check_all_variables_exist_in_data(all.vars(lm_formula), data)
+	check_variables_in_lm(formula, lm_formula)
 	
-	#pick out the variables
-	outcome = variables[1]
-	predictors = variables[-1]
-	res.variable = find_variable_of_interest(predictors, x)
-	remaining.vars = predictors[which(!(predictors %in% res.variable))]
-	
-  # prep data
+	# prep data
 	data = prep_data_for_avp(data, variables)
-	
-	#### model the first chosen variable
-	new.form = make.formula(outcome, remaining.vars)
-	
+	formulae = make_avp_formula(formula, lm_formula, x)
   #### if they ask for logistic
 	if (method == "logistic"){
-	    fitted = fitted(glm(new.form, data=data, family=binomial))
-	    data$residuals = factor.to.logistic(data=data, outcome=outcome)[,outcome] - fitted
+	    fitted = fitted(glm(formulae[[1]], data=data, family=binomial))
+	    data$residuals = factor.to.logistic(data=data, outcome=variables[[1]])[,variables[1]] - fitted
 	    method = "loess"
 	 } else {
-	    data$residuals = residuals(lm(new.form, data=data)) + mean(data[,outcome])    
+	    data$residuals = residuals(lm(formulae[[1]], data=data)) + mean(data[,variables[1]])    
 	 }
 	
-	##### now plot that succa
-	new.form = make.formula("residuals", res.variable)
 
-	#### if they ask for
-	plot = flexplot(new.form, data=data, method=method, ...) + labs(y=paste0(outcome, " | ", paste0(remaining.vars, collapse=", ")))
+	#### plot it
+	plot = flexplot(formulae[[2]], data=data, method=method, ...) + labs(y=formulae[[3]])
 	class(plot) <- c("flexplot", class(plot))
 	return(plot)
+}
+
+
+label_avp_axis = function(formula) {
+  terms = strsplit(deparse(formula), "~")[[1]]
+  return(paste0(terms[1], "|", terms[2]))
+}
+
+
+make_avp_formula = function(formula, lm_formula=NULL, x=NULL) {
+  if (!is.null(lm_formula)){
+    axis_label = label_avp_axis(lm_formula)
+    return(list(lm_formula, formula, axis_label))
+  }
+  
+  #pick out the variables
+  variables = all.vars(formula)
+  outcome = variables[1]
+  predictors = variables[-1]
+  res.variable = find_variable_of_interest(predictors, x)
+  remaining.vars = predictors[which(!(predictors %in% res.variable))]
+  
+
+  #### model the first chosen variable
+  lm_formula = make.formula(outcome, remaining.vars)
+  formula = make.formula("residuals", res.variable)
+  list(lm_formula, formula, paste0(outcome, " | ", paste0(remaining.vars, collapse=", ")))
+  
+}
+
+# this function ensures all variables in lm_formula are there in formula
+check_variables_in_lm = function(formula, lm_formula){
+  
+  if (is.null(lm_formula)) {
+    return(NULL)
+  }
+  # make sure the outcome variable is the same
+  if (all.vars(formula)[1] != all.vars(lm_formula)[1]) {
+    msg = paste0("Your outcome variable for your model (", all.vars(lm_formula)[1], 
+                 ") is not the same as your outcome variable for your avp (", all.vars(formula)[1], ")")
+    stop(msg)
+  }
+  
+  # make sure it's a valid formula
+  if (!rlang::is_bare_formula(lm_formula)) {
+    stop("You need to specify a valid formula for added variable plots")
+  }
+  
+  # make sure all the variables in lm are the same as avp
+  # if (!all(all.vars(lm_formula) %in% all.vars(formula))) {
+  #   msg = paste0("One or more of the variables provided in the lm formula (", deparse(lm_formula), 
+  #                ") don't match your avp formula (", deparse(formula), ")")
+  #   stop(msg)
+  # }
+  
+  return(NULL)
 }
 
 prep_data_for_avp = function(data, variables) {
