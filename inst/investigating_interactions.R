@@ -23,7 +23,7 @@ p = flexplot(y~x3 + x2 | x1 + x4, data=d, method="lm")
 marginal_plot(p)
 # plot ghost line as a function of marginal effects
 # probably best to do as the prediction matrix
-mod1 = lm(y~x3, data=d)
+mod1 = lm(y~x1+x2+x3+x4, data=d)
 mod2 = lm(y~x1*x2*x3*x4, data=d)
 compare.fits(y~x3 | x1 + x4, data=d, mod1, mod2) +
   scale_color_manual(values=c("gray", "red"))
@@ -95,4 +95,14 @@ c = flexplot(y~x3 | x1 + x4, data=d, method="lm")
 require(patchwork)
 (b + gap + plot_layout(widths=c(5,1)))/(c + a + plot_layout(widths=c(5,1))) +
   plot_layout(heights = c(1,5))  
+
+
+# 1. Compare full model to main effects model (see if lines are different)
+# 2. Alternate variables on the x axis
+# 3. Identify where slopes are changing (across panels, rows, or colors) using marginal_plots
+# 4. Model that interaction and residualize
+# 5. Do AVP, after removing the interaction.
+    # for each variable in interaction, place on x-axis to make sure it doesn't interact anymore as a three-way
+    # if all variables are parallel, you have extracted the interaction
+# 6. Repeat with variables not included in interaction. 
 
