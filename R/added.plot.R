@@ -33,7 +33,7 @@
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data, x=2)
 ##' added.plot(weight.loss~motivation + therapy.type, formula = weight.loss~health*muscle.gain, data=exercise_data)
 added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method="loess", x=NULL, ...){
-  
+
 	#### identify variable types
 	variables = all.vars(formula)
 
@@ -68,8 +68,14 @@ label_avp_axis = function(formula) {
 
 
 make_avp_formula = function(formula, lm_formula=NULL, x=NULL) {
+
   if (!is.null(lm_formula)){
     axis_label = label_avp_axis(lm_formula)
+    
+    # substitute formula
+    y_var = all.vars(formula)[1]
+    formula = formula(gsub(y_var, "residuals", deparse(formula)))
+    
     return(list(lm_formula, formula, axis_label))
   }
   
