@@ -265,6 +265,9 @@ flexplot = function(formula, data=NULL, related=F,
 	}
 
 	final = suppressMessages(eval(parse(text=total.call)))
+	
+	# add formula (to make it easier for marginal_plot)
+	final$formula = formula
 
 	if(plot.string){
 		return(total.call)

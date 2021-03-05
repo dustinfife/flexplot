@@ -19,13 +19,18 @@ d = MASS::mvrnorm(3000, mu=c(0,0,0,0,0), Sigma=covmat) %>%
 # flexplot(y2~x4 + x3 | x2+x1, data=d, method="lm", alpha=0)
 #   # do lines deslopify across row panels? column panels? Or across color?
 
-
+p = flexplot(y~x3 + x2 | x1 + x4, data=d, method="lm")
+marginal_plot(p)
 # plot ghost line as a function of marginal effects
 # probably best to do as the prediction matrix
 mod1 = lm(y~x3, data=d)
 mod2 = lm(y~x1*x2*x3*x4, data=d)
 compare.fits(y~x3 | x1 + x4, data=d, mod1, mod2) +
   scale_color_manual(values=c("gray", "red"))
+
+d$residuals = residuals(lm(y~x3*x4, data=d))
+flexplot(residuals~x3 | x2 + x4, data=d, method="lm")
+marginal_plot(added_plot(y~x3|x1 + x4, data=d, lm_formula = y~x3*x4, method="lm"))
 
 
 mod1 = lm(y~x1+x2+x3+x4, data=d)
@@ -67,13 +72,27 @@ compare.fits(residuals_int~x2 | x3, data=d3, mod1, mod2, sample = 100)
 # create a plot that averages rows/columns. Maybe ghost.line = c("row_mean", "col_mean", "grand_mean")
 mod1 = lm(y~x3*x4, data=d)
 dnew = flexplot(y~x3 | x1 + x4, data=d, method="lm", return_data = T)
-a = ggplot(data=dnew, aes(x=x3, y=y)) + facet_grid(x4_binned~.)  + geom_smooth(method="lm", formula = y~x) +coord_fixed() + theme_bw() + theme(axis.title.y = element_blank(),  
-                                                                                                                                axis.text.y = element_blank()) + labs(x="", y="")
-b = ggplot(data=dnew, aes(x=x3, y=y)) + facet_grid(~x1_binned) + geom_smooth(method="lm") +coord_fixed() + theme_bw() + theme(axis.title.y = element_blank(),  
-                                                                                                                              axis.text.y = element_blank()) + labs(x="", y="")
-gap = ggplot() + theme_void()
+
+layers = list(geom_smooth(method="lm", formula = y~x),
+              coord_fixed(),   
+              theme_bw(),
+              theme(axis.title.y = element_blank(), axis.title.x = element_blank(),
+                    axis.text.y = element_blank(), axis.text.x = element_blank(),
+                    axis.ticks.x = element_blank(), 
+                    axis.ticks.y = element_blank()))
+              
+a = ggplot(data=dnew, aes(x=x3, y=y)) + 
+  facet_grid(x4_binned~.)  + 
+  layers
+b = ggplot(data=dnew, aes(x=x3, y=y)) + 
+  facet_grid(~x1_binned)  + 
+  layers
+gap = ggplot(data=dnew, aes(x=x3, y=y)) + 
+  layers +
+  theme(plot.background = element_rect(fill = 'yellow', linetype = 'solid', colour = 'black'),
+  plot.margin = unit(c(0,0,0,0), "cm"))
 c = flexplot(y~x3 | x1 + x4, data=d, method="lm")
 require(patchwork)
-(b + plot_spacer())/(c + a) +
-  plot_layout(widths = c(4,1), heights = c(1,4))  & theme(plot.margin = unit(c(1, 1, .1, .1), "mm"))
+(b + gap + plot_layout(widths=c(5,1)))/(c + a + plot_layout(widths=c(5,1))) +
+  plot_layout(heights = c(1,5))  
 
