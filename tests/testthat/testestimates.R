@@ -36,6 +36,9 @@ test_that("estimates from linear models", {
   ##### polynomial
   mod = lm(weight.loss~motivation + I(motivation^2), data=d)	
   expect_equal(estimates(mod)$numbers.summary$std.upper[3], -.53, tolerance = 0.002)
+  
+  mod = lm(weight.loss~1, data=exercise_data)
+  expect_equal(estimates(mod)$Mean, 6.56, tolerance = 0.002)
 })
 
 test_that("estimates from generalized linear models", {

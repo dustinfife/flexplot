@@ -38,6 +38,17 @@ estimates.lm = function(object, mc=TRUE){
 	variables = as.character(attr(terms(object), "variables")); variables = variables[-1]
 	outcome = variables[1]
 	predictors = variables[-1]
+	
+	# for intercept only models, return the mean
+
+	if (length(predictors) == 0 ) {
+	  f = as.formula(paste0(outcome, "~1"))
+	  est = compare.fits(formula = f, data=object$model, model1=object, model2=NULL, return.preds=T, report.se=T)
+	  return = est[2:4]
+	  names(return) = c("Mean", "Lower", "Upper")
+	  return$d = coef(object)/summary(object)$sigma
+	  return(return)
+	}
 	    
     #### look for interaction terms
 	terms = remove_interaction_terms(object)
