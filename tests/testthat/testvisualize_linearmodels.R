@@ -40,6 +40,10 @@ test_that("visualize function plots", {
   mod = lm(Birthweight~mheight + fheight + motherage, data=birthweight)
   suppressWarnings(vdiffr::expect_doppelganger("four variables",visualize(mod)))
   
+  # visualize related t
+  diet$difference = diet$weight6weeks - diet$pre.weight
+  related_t_as_glm = lm(difference~1, data=diet)
+  vdiffr::expect_doppelganger("related t test", visualize(related_t_as_glm))
 
 
 })

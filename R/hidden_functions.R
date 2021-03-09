@@ -171,31 +171,37 @@ make_flexplot_formula = function(predictors, outcome, data){
   # omit those variables not in the dataset
   nothere = which (!(predictors %in% names(data)))
   if (length(nothere)>0) predictors = predictors[-nothere]
+  
+  # if they don't have predictors (i.e., fitting a means model)
+  if (length(predictors) == 0) {
+    return(make.formula(outcome, "1"))
+  }
   # if there's only one variable, make it
   if (length(predictors)==1){
-    f = make.formula(outcome, predictors)
-  } else {
+    return(make.formula(outcome, predictors))
+  } 
   
-    # algorithm that puts numeric in first slot, categorical in second slot
-    favored.slots = c(1,4,3,2)
-    vtypes = variable_types(predictors, data)
-    numb = vtypes$numbers
-    cat = vtypes$characters
-    levs = sapply(data[,predictors], function(x) length(levels(x)))
-    custom.sort = numb*1000 + cat*levs
-    custom.sort = sort(custom.sort, decreasing=T)
-    slots = names(custom.sort)[favored.slots]
-    
-    
-    #### now create formula
-    x = c(outcome, "~",slots[1], slots[2], "|", slots[3], slots[4])
-    if (any(is.na(x)))  x = x[-which(is.na(x))]
-    x = paste0(x, collapse="+")
-    x = gsub("+|+", "|", x, fixed=T);x = gsub("+~+", "~", x, fixed=T)
-    x = gsub("+|", "", x, fixed=T)
-    f = as.formula(x)	
-  }
+  
+  # algorithm that puts numeric in first slot, categorical in second slot
+  favored.slots = c(1,4,3,2)
+  vtypes = variable_types(predictors, data)
+  numb = vtypes$numbers
+  cat = vtypes$characters
+  levs = sapply(data[,predictors], function(x) length(levels(x)))
+  custom.sort = numb*1000 + cat*levs
+  custom.sort = sort(custom.sort, decreasing=T)
+  slots = names(custom.sort)[favored.slots]
+  
+  
+  #### now create formula
+  x = c(outcome, "~",slots[1], slots[2], "|", slots[3], slots[4])
+  if (any(is.na(x)))  x = x[-which(is.na(x))]
+  x = paste0(x, collapse="+")
+  x = gsub("+|+", "|", x, fixed=T);x = gsub("+~+", "~", x, fixed=T)
+  x = gsub("+|", "", x, fixed=T)
+  f = as.formula(x)	
   return(f)
+  
 }
 
 

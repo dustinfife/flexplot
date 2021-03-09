@@ -39,6 +39,8 @@ test_that("make flexplot formula works", {
 
   tst = as.character(make_flexplot_formula(predictors = c("Years", "GPA", "gender:GPA"), outcome, data))[3]
   expect_output(print(tst),'Years \\| GPA')
+  
+  expect_equal(paste0(make_flexplot_formula(NULL, "therapy.type", exercise_data))[3], "1")
 })
 
 test_that("match.jitter works", {

@@ -80,6 +80,10 @@ compare.fits = function(formula, data, model1, model2=NULL,
   }	
 
   pred.values = generate_predictors(data, predictors, testme, num_points, class(model1)[1])
+  # for intercept only models
+  if (nrow(pred.values)==0) {
+    pred.values = data.frame("(Intercept)" = 1)
+  }
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
   ### there's no fixed effect if we don't have these lines
@@ -156,8 +160,10 @@ compare.fits = function(formula, data, model1, model2=NULL,
         prediction.model$prediction = prediction.model$prediction + 1
       }
     } 
-    
+
     final_geom = return_lims_geom(outcome, data, model1)
+    #when we have an intercept only model
+    if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
   }	

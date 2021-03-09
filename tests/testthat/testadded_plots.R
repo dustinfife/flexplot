@@ -15,7 +15,6 @@ test_that("avp plots work for linear models", {
   vdiffr::expect_doppelganger("multivariate avp 2",
                               added.plot(weight.loss ~ motivation | therapy.type, 
                                          lm_formula = weight.loss~rewards*gender, data=d))
-  head(exercise_data)
 })
 
 test_that("avp plots work with x specified", {
