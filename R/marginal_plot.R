@@ -12,8 +12,8 @@
 #'
 #' @examples
 #' p = flexplot(weight.loss~motivation | gender + rewards, data=exercise_data)
-#' margin_plot(p)
-#' margin_plot(p, rows=FALSE)
+#' marginal_plot(p)
+#' marginal_plot(p, rows=FALSE)
 marginal_plot = function(p, columns=TRUE, rows=TRUE, grand_mean=TRUE) {
 
   # return paneled variables

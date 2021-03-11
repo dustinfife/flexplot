@@ -24,6 +24,6 @@ This makes it easier to see the average effect across the rows (or columns).
 }
 \examples{
 p = flexplot(weight.loss~motivation | gender + rewards, data=exercise_data)
-margin_plot(p)
-margin_plot(p, rows=FALSE)
+marginal_plot(p)
+marginal_plot(p, rows=FALSE)
 }

@@ -31,7 +31,7 @@
 ##' data(exercise_data)
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data, x=2)
-##' added.plot(weight.loss~motivation + therapy.type, formula = weight.loss~health*muscle.gain, data=exercise_data)
+##' added.plot(weight.loss~motivation + therapy.type, lm_formula = weight.loss~health*muscle.gain, data=exercise_data)
 added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method="loess", x=NULL, ...){
 
 	#### identify variable types
