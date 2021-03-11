@@ -8,6 +8,12 @@ test_that("rescale works", {
   expect_true(round(sd(rescale(d$weight.loss, 0, 2)), 0) == 2)
 })
 
+test_that("floor_ceiling work", {
+  testval = c(-1, 0, 0, 60, 100, 101)
+  expect_true(min(floor_ceiling(testval, 0))==0)
+  expect_true(max(floor_ceiling(testval, 0, 100))==100)
+})
+
 
 test_that("nested model comparisons returns bf", {
   mod = lm(weight.loss~motivation + therapy.type + gender, data=exercise_data)
