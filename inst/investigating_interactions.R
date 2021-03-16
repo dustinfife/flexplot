@@ -1,12 +1,52 @@
 require(flexplot)
 require(tidyverse)
-## two way interaction, but both are paneled
+
 covmat = matrix(.3, nrow=5, ncol=5)
 diag(covmat) = 1
 d = MASS::mvrnorm(3000, mu=c(0,0,0,0,0), Sigma=covmat) %>% 
   data.frame %>% 
   set_names(nm=c("y", paste0("x", 1:4))) %>% 
-  mutate(y2 = y + .5*scale(x3)*scale(x4), y=y2)
+  mutate(y2 = y + .5*scale(x3)*scale(x4) + -.3*I(x2^2), y=y2)
+
+## two way interaction, but both are paneled
+# data-generating model: y = b0 + b1 X1 +                   # main effect of x1
+#                                 b2 X2 + b3 X2^2           # nonlinear x2
+#                                 b4 X3 + b5 X4 + b6 X3*X4  # interaction between x3/x4
+
+# Basic strategy
+# 1. Plot all variables at once, looking for interactions or nonlinear effects
+#       - make sure to alternate having each variable on the x axis
+p = flexplot(y~x3 + x2 | x1 + x4, data=d, method="lm", alpha=.2,
+             labels=list("x1" = c("low", "mid", "high"), 
+                         "x4" = c("low", "mid", "high")))
+flexplot(weight.loss~motivation | therapy.type, data=exercise_data, 
+         method="lm")
+# use marginal plots to see the row/column trends
+marginal_plot(p)
+
+# 2. Use AVPs to visually subtract out interactions/nonlinear effects
+added.plot(y~x3 | x1 + x4, data=d, lm_formula = y~x3*x4, method="lm")
+added.plot(y~x3 | x2 + x4, data=d, lm_formula = y~x3*x4, method="lm")
+  # interaction has been removed
+
+added.plot(y~x2 | x1 + x4, data=d, lm_formula = y~x3*x4 + x2, method="quadratic")
+  # we can see the quadratic relationship, now let's remove it
+added.plot(y~x2 | x1 + x4, data=d, lm_formula = y~x3*x4 + x2 + I(x2^2), method="quadratic")
+  # polynomial has been removed
+
+
+# anything with x1?
+added.plot(y~x1 | x2 + x3, data=d, lm_formula = y~x3*x4 + x2 + I(x2^2), method="quadratic")
+  # small parallel slopes, so let's model the slope
+added.plot(y~x1 | x2 + x3, data=d, lm_formula = y~x3*x4 + x2 + x1 + I(x2^2), method="quadratic")
+  # there's nothing left
+
+# visual conditioning instead of visual partitioning
+a = added.plot(y~x1, data=d, lm_formula = y~x3*x4 + x2 + I(x2^2), method="lm")
+b = added.plot(y~x2, data=d, lm_formula = y~x3*x4 + x1, method="quadratic")
+c = added.plot(y~x3 | x4, data=d, lm_formula = y~ x2 + x1 + I(x2^2), method="lm")
+require(patchwork)
+a+b+c
 
 # flexplot(y2~x1 + x2 | x3+x4, data=d, method="lm", alpha=.1)
 #   # no interaction visible
@@ -19,8 +59,7 @@ d = MASS::mvrnorm(3000, mu=c(0,0,0,0,0), Sigma=covmat) %>%
 # flexplot(y2~x4 + x3 | x2+x1, data=d, method="lm", alpha=0)
 #   # do lines deslopify across row panels? column panels? Or across color?
 
-p = flexplot(y~x3 + x2 | x1 + x4, data=d, method="lm")
-marginal_plot(p)
+
 # plot ghost line as a function of marginal effects
 # probably best to do as the prediction matrix
 mod1 = lm(y~x1+x2+x3+x4, data=d)

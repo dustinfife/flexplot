@@ -64,3 +64,16 @@ test_that("prep_data_for_avp works", {
   expect_true(nrow(prep_data_for_avp(data.frame(x=c(1,2,NA), y=c(4,5,6)), c("x", "y")))==2)
   expect_true(nrow(prep_data_for_avp(data.frame(x=c(1,2,NA), y=c(4,5,6), z=5:7), c("y", "z")))==3)
 })
+
+test_that("partial_residual works", {
+  mod = lm(health~motivation + weight.loss, data=exercise_data)
+  d = exercise_data
+  d$residual = partial_residual(mod, "motivation")
+  a = flexplot(residual~motivation, data=d, method="lm")
+  a + geom_abline(slope=coef(mod)[2])
+  b = added.plot(weight.loss~therapy.type+motivation , data=exercise_data)
+  c = flexplot(weight.loss~motivation, data=exercise_data)
+  q = crPlots(lm(weight.loss~motivation + therapy.type, data=exercise_data), variable="motivation")
+
+  
+})
