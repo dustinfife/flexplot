@@ -76,8 +76,8 @@ test_that("return_term_location works", {
 
 test_that("partial_residual works", {
   mod = lm(health~motivation + therapy.type + muscle.gain, data=exercise_data)
-  expect_equal(dim(partial_residual(mod, c("motivation", "therapy.type"))), c(200,2)) 
-  expect_equal(round(as.numeric(partial_residual(mod, ~motivation)[1])*100), -345)
+  expect_equal(sum(partial_residual(mod, c("motivation", "therapy.type"))), -894.6831, tol=.001) 
+  expect_equal(round(as.numeric(partial_residual(mod, ~motivation)[1])*100), 30)
 })
 
 test_that("partial_residual_plot works", {
