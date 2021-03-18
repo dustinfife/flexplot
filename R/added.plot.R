@@ -95,7 +95,7 @@ make_avp_formula = function(formula, lm_formula=NULL, x=NULL) {
 }
 
 # this function ensures all variables in lm_formula are there in formula
-check_variables_in_lm = function(formula, lm_formula){
+check_variables_in_lm = function(formula, lm_formula, check_both = FALSE){
   
   if (is.null(lm_formula)) {
     return(NULL)
@@ -112,13 +112,15 @@ check_variables_in_lm = function(formula, lm_formula){
     stop("You need to specify a valid formula for added variable plots")
   }
   
-  # make sure all the variables in lm are the same as avp
-  # if (!all(all.vars(lm_formula) %in% all.vars(formula))) {
-  #   msg = paste0("One or more of the variables provided in the lm formula (", deparse(lm_formula), 
-  #                ") don't match your avp formula (", deparse(formula), ")")
-  #   stop(msg)
-  # }
   
+  if (check_both) {
+  #make sure all the variables in lm are the same as avp
+  if (!all(all.vars(formula) %in% all.vars(lm_formula) )) {
+    msg = paste0("One or more of the variables provided in the lm formula (", deparse(lm_formula),
+                 ") don't match your plotting formula (", deparse(formula), ")")
+    stop(msg)
+  }
+  }
   return(NULL)
 }
 
