@@ -140,6 +140,76 @@ prep_data_for_avp = function(data, variables) {
   return(data)
 }
 
+#' Create a plot for mediation analysis
+#'
+#' @param formula A formula with y on the left side and the predictors on the right. The last variable
+#' entered will be plotted on the x-axis
+#' @param data The dataset
+#' @param method The fitted line. Defaults to "lm". 
+#' @param ... Other parameters passed to flexplot
+#'
+#' @return a plot
+#' @export
+#'
+#' @examples
+#' mediate_plot(weight.loss~motivation + health, data=exercise_data)
+#' mediate_plot(weight.loss~motivation + therapy.type, data=exercise_data)
+mediate_plot = function(formula, data, method="lm", ...) {
+  
+  p = added.plot(formula=formula, data=data, method=method, ...)
+  
+  # identify the last predictor
+  vars = all.vars(formula)
+  interest = vars[length(vars)]
+  
+  # make dv
+  dv = vars[1]
+  fnew = make.formula(dv, interest)
+  
+  # fit model
+  mod = lm(fnew, data=data)
+  
+  if (check.non.number(data[,interest])) {
+    new_data = data 
+    new_data[,"residuals"] = predict(mod)
+    return(p + geom_point(data=new_data, col="blue") +
+             geom_line(data=new_data, aes(group=1)))
+    
+  }
+  return(p + geom_abline(slope=coef(mod)[2], intercept=coef(mod)[1]))
+  
+  
+}
+
+
+# I started working on this to make it super general, but I'm quitting here. 
+
+# p = added.plot(formula, data, lm_formula, method, x, ...)
+# 
+# # identify the last predictor
+# vars = all.vars(formula)
+# interest = vars[length(vars)]
+# 
+# # make dv
+# newf1 = make_avp_formula(formula, lm_formula, x)
+# newf = update(newf1[[2]], as.formula(paste0(all.vars(formula)[1], "~.")))
+# 
+# # fit model
+# mod = lm(fnew, data=data)
+# new_data = data
+# newf1
+# if (check.non.number(data[,all.vars(newf1[[2]])[2]])) {
+#   new_data = data 
+#   new_data[,"residuals"] = predict(mod)
+#   return(p + geom_point(data=new_data, col="blue") +
+#            geom_line(data=new_data, aes(group=1)))
+#   
+# }
+# return(p + geom_abline(data=new_dataslope=coef(mod)[2], intercept=coef(mod)[1]))
+# 
+# 
+# }
+
 find_variable_of_interest = function(predictors, x=NULL) {
   
   if (is.null(x)) return(predictors[length(predictors)])
