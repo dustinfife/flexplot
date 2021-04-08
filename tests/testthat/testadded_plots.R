@@ -43,6 +43,8 @@ test_that("make_avp_formula works", {
   expect_equal(make_avp_formula(y~x+z, y~a_b)[[3]], "y | a_b") 
   expect_equal(make_avp_formula(y~x+z, x=1)[[3]], "y | z")
   expect_equal(make_avp_formula(y~x+z, x=2)[[3]], "y | x") 
+  # for when the y variable is a string in predictors as well
+  expect_equal(deparse(make_avp_formula(y~y_old + b, y~y_old + b + c)[[2]]), "residuals ~ y_old + b")
 })
 test_that("check_variables_in_lm works", {
   expect_null(check_variables_in_lm(y~x+x2, y~x))
