@@ -163,7 +163,7 @@ test_that("interaction vs lm works", {
 
 test_that("random forest vs lm works returns predictions only", {
   set.seed(1212)
-  a = randomForest(weight.loss~therapy.type, data=exercise_data)
+  a = randomForest::randomForest(weight.loss~therapy.type, data=exercise_data)
   b = lm(weight.loss~therapy.type, data=exercise_data)
   results = model.comparison(rf2, nlf)
   expect_equal(length(results), 1)

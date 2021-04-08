@@ -20,16 +20,23 @@ d = MASS::mvrnorm(3000, mu=c(0,0,0,0,0), Sigma=covmat) %>%
          depression_c = depression - mean(depression),
          friend_ideation_c = friend_ideation - mean(friend_ideation),
          stress_c = stress - mean(stress))
-
-right_model = lm(ideation~depression_c*friend_ideation_c + stress_c + I(stress_c^2) + health, data=d)
-partial_residual_plot(ideation~friend_ideation_c | depression_c, 
-                      model=right_model, 
-                      added_term = ~friend_ideation_c*depression_c, data=d)
-head(d_scaled)
-d_scaled$depression
-partial_residual_plot(ideation~friend_ideation | depression, model=right_model, 
-                      added_term = ~friend_ideation+depression, data=d_scaled) 
-theme_bw()  
+ideation = d
+usethis::use_data(ideation, overwrite = TRUE)
+#' Simulated Dataset About Suicide Ideation 
+#'
+#' A dataset containing 3000 observations. This dataset contains interaction and nonlinear effects
+#' and was used for the manuscript about Visual partitioning
+#'
+#' @format A data frame with 300 rows and 8 variables: \describe{
+#'   \item{ideation}{Suicide ideation scores}
+#'   \item{stress}{Self-reported stress score}
+#'   \item{health}{Self-reported health score}
+#'   \item{friend_ideation}{Suicide ideation score of each individual's best friend}
+#'   \item{depression_c}{Centered BDI depression score}
+#'   \item{friend_ideation_c}{Centered friend ideation score}
+#'   \item{stress}{centered stress score}   
+#'}
+"ideation"
 
 
 ## attractiveness data
