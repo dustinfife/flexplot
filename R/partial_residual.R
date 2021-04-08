@@ -72,7 +72,7 @@ partial_residual = function(model, term=NULL) {
                              byrow=T)
   
   # return it
-  if (ncol(matrix_coded)>1) return(rowSums(res + betas_of_interest*matrix_coded) - coef(model)[1])
+  if (ncol(matrix_coded)>1) return(rowSums(res + betas_of_interest*keep_columns) - coef(model)[1])
   return(res + betas_of_interest*matrix_coded)
   
 }
