@@ -62,7 +62,12 @@ partial_residual = function(model, term=NULL) {
   
   # create model matrix
   matrix_coded = model.matrix(term, data=data)
-  betas_of_interest = matrix(coef(model)[dimnames(matrix_coded)[[2]]], 
+  
+  # if the user specifies a*b but in the model it was b*a, there will be an error. Fix that
+  # just identify which columns are identical
+  keep_columns = get_same_columns(model.matrix(model), matrix_coded)
+
+  betas_of_interest = matrix(coef(model)[dimnames(keep_columns)[[2]]], 
                              nrow=nrow(matrix_coded), ncol=ncol(matrix_coded),
                              byrow=T)
   
@@ -71,6 +76,12 @@ partial_residual = function(model, term=NULL) {
   return(res + betas_of_interest*matrix_coded)
   
 }
+
+get_same_columns = function(original_model, new_model) {
+  columns_to_keep = which(duplicated(as.list(data.frame(original_model,new_model)), fromLast=TRUE))
+  return(original_model[,columns_to_keep])
+}
+
 
 return_term_location = function(model, term) {
   

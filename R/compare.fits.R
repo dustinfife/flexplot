@@ -84,6 +84,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (nrow(pred.values)==0) {
     pred.values = data.frame("(Intercept)" = 1)
   }
+
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
   ### there's no fixed effect if we don't have these lines

@@ -1,3 +1,37 @@
+#suicide ideation
+require(tidyverse)
+set.seed(23242)
+covmat = matrix(c(
+  1, .3, .3, .3, .6,
+  .3, 1, -.2, .2, .3,
+  .3, -.2, 1, .1, -.3,
+  .3, .2, .1, 1, .3,
+  .6, .3, -.3, .3, 1
+), nrow=5)
+d = MASS::mvrnorm(3000, mu=c(0,0,0,0,0), Sigma=covmat) %>% 
+  data.frame %>% 
+  set_names(nm=c("ideation", "stress", "health", "friend_ideation", "depression")) %>% 
+  mutate(ideation = ideation + .5*scale(stress)^2 + .4*scale(friend_ideation)*scale(depression)) %>% 
+  mutate(ideation = rescale(ideation, 20, 3),
+         stress = rescale(stress, 10, 2),
+         health = rescale(health, 30, 6),
+         friend_ideation = rescale(friend_ideation, 20, 3), 
+         depression = rescale(depression, 15, 4), 
+         depression_c = depression - mean(depression),
+         friend_ideation_c = friend_ideation - mean(friend_ideation),
+         stress_c = stress - mean(stress))
+
+right_model = lm(ideation~depression_c*friend_ideation_c + stress_c + I(stress_c^2) + health, data=d)
+partial_residual_plot(ideation~friend_ideation_c | depression_c, 
+                      model=right_model, 
+                      added_term = ~friend_ideation_c*depression_c, data=d)
+head(d_scaled)
+d_scaled$depression
+partial_residual_plot(ideation~friend_ideation | depression, model=right_model, 
+                      added_term = ~friend_ideation+depression, data=d_scaled) 
+theme_bw()  
+
+
 ## attractiveness data
 set.seed(2323)
 n = 207
