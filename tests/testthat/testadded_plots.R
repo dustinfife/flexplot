@@ -43,6 +43,8 @@ test_that("make_avp_formula works", {
   expect_equal(make_avp_formula(y~x+z, y~a_b)[[3]], "y | a_b") 
   expect_equal(make_avp_formula(y~x+z, x=1)[[3]], "y | z")
   expect_equal(make_avp_formula(y~x+z, x=2)[[3]], "y | x") 
+  # for when the y variable is a string in predictors as well
+  expect_equal(deparse(make_avp_formula(y~y_old + b, y~y_old + b + c)[[2]]), "residuals ~ y_old + b")
 })
 test_that("check_variables_in_lm works", {
   expect_null(check_variables_in_lm(y~x+x2, y~x))
@@ -96,6 +98,14 @@ test_that("partial_residual_plot works", {
                         added_term = ~motivation*therapy.type, data=exercise_data) +
       geom_abline(slope = -.17438))
   
+  right_model = lm(ideation~depression_c*friend_ideation_c + stress_c + I(stress_c^2) + health, data=ideation)
+  p = partial_residual_plot(ideation~friend_ideation_c | depression_c,
+                        model=right_model,
+                        added_term = ~friend_ideation_c*depression_c, data=ideation)
+  vdiffr::expect_doppelganger("partial_residual with interaction specified backward", 
+                              p)
+  
+  
 })
 
 test_that("mediate_plot works", {
@@ -105,4 +115,12 @@ test_that("mediate_plot works", {
   vdiffr::expect_doppelganger("mediate_plot with categorical",
     mediate_plot(weight.loss~motivation + therapy.type, data=exercise_data))
   
+})
+
+test_that("get_same_columns works", {
+  d = data.frame(a=1:5*.1, b=1:5*.2, c=1:5*.4)
+  d$ab = d$a*d$b
+  e = d[,c("a", "b", "ab")]
+  names(d)[3] = "ba"
+  expect_true(duplicated(list(d$ab, get_same_columns(d,e)[,"ab"]))[2])
 })

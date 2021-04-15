@@ -67,7 +67,6 @@ test_that("compare.fits for other models", {
   
   
   ##### compare predictions with random forest
-  require(randomForest)
   model1 = randomForest::randomForest(wl~motivation + gender + rewards, data=d)
   model2 = lm(wl~motivation * gender * rewards, data=d)		### use the same predictors in both models
   vdiffr::expect_doppelganger("compare.fits with rf",compare.fits(wl~motivation | gender + rewards, data=d, model1, model2))

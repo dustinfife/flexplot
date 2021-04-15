@@ -74,7 +74,9 @@ make_avp_formula = function(formula, lm_formula=NULL, x=NULL) {
     
     # substitute formula
     y_var = all.vars(formula)[1]
-    formula = formula(gsub(y_var, "residuals", deparse(formula)))
+    # remove white space from entire formula
+    newf = gsub(" ", "", deparse(formula))
+    formula = formula(gsub(paste0(y_var, "~"), "residuals~", newf))
     
     return(list(lm_formula, formula, axis_label))
   }
