@@ -116,13 +116,13 @@ test_that("standardized difference works", {
   expect_output(print(diff), "0.152")
   
   diff = standardized_differences(rf, rf2)
-  expect_output(print(diff), "0.745")  
+  expect_output(print(diff), "0.709")  
   
   diff = standardized_differences(rlm, rlm2)
   expect_output(print(diff), "1.115")   
   
   diff = standardized_differences(rf, rlm2)
-  expect_output(print(diff), "0.817")   
+  expect_output(print(diff), "0.861")   
   
   expect_error(standardized_differences(gamma_full, pois_reduced))
   

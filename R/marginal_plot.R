@@ -37,6 +37,7 @@ marginal_plot = function(p, columns=TRUE, rows=TRUE, grand_mean=TRUE) {
   # make the plots
   if (length(paneled_variables)>1 & rows) {
     row_plot = ggplot(data=data, aes_string(x=x, y=dv)) +
+      coord_cartesian(ylim=c(min(data[,dv]), max(data[,dv]))) + 
       facet_grid(as.formula(paste0(paneled_variables_binned[2], "~."))) +
       common_layers_margin_plot()
   } else {
@@ -45,6 +46,7 @@ marginal_plot = function(p, columns=TRUE, rows=TRUE, grand_mean=TRUE) {
   
   if (columns) {
     column_plot = ggplot(data=data, aes_string(x=x, y=dv)) +
+      coord_cartesian(ylim=c(min(data[,dv]), max(data[,dv]))) +       
       facet_grid(as.formula(paste0("~",paneled_variables_binned[1]))) +
       common_layers_margin_plot() 
   } else {
@@ -53,6 +55,7 @@ marginal_plot = function(p, columns=TRUE, rows=TRUE, grand_mean=TRUE) {
   
   if (grand_mean) {
     grand_plot = ggplot(data=data, aes_string(x=x, y=dv)) +
+        coord_cartesian(ylim=c(min(data[,dv]), max(data[,dv]))) +       
         common_layers_margin_plot() 
   } else {
     grand_plot = plot_spacer()

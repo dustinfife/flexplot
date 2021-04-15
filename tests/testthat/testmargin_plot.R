@@ -1,6 +1,9 @@
 context("margin_plot functions works as expected")
 options(warn=-1)
-
+test_that("marginal_plot works", {
+  a = flexplot(ptsd~speed | agility + strength, data=avengers)
+  vdiffr::expect_doppelganger("marginal plot", marginal_plot(a))
+})
 test_that("return_panel_vars works", {
   expect_error(return_panel_vars(y~x))
   expect_error(return_panel_vars(y~x+b))
