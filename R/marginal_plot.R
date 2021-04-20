@@ -32,12 +32,14 @@ marginal_plot = function(p, columns=TRUE, rows=TRUE, grand_mean=TRUE) {
   # convert paneled variables to "_binned" version
   paneled_variables_binned = replace_text_with_binned(data, paneled_variables)
   
-  
+  # get the smoothing method
+  plot_method = extract_plot_method(p)
   
   # make the plots
   if (length(paneled_variables)>1 & rows) {
     row_plot = ggplot(data=data, aes_string(x=x, y=dv)) +
       coord_cartesian(ylim=c(min(data[,dv]), max(data[,dv]))) + 
+      geom_smooth(method=plot_method$method, formula = plot_method$formula, se=plot_method$se) + 
       facet_grid(as.formula(paste0(paneled_variables_binned[2], "~."))) +
       common_layers_margin_plot()
   } else {
@@ -47,6 +49,7 @@ marginal_plot = function(p, columns=TRUE, rows=TRUE, grand_mean=TRUE) {
   if (columns) {
     column_plot = ggplot(data=data, aes_string(x=x, y=dv)) +
       coord_cartesian(ylim=c(min(data[,dv]), max(data[,dv]))) +       
+      geom_smooth(method=plot_method$method, formula = plot_method$formula, se=plot_method$se) +       
       facet_grid(as.formula(paste0("~",paneled_variables_binned[1]))) +
       common_layers_margin_plot() 
   } else {
@@ -56,6 +59,7 @@ marginal_plot = function(p, columns=TRUE, rows=TRUE, grand_mean=TRUE) {
   if (grand_mean) {
     grand_plot = ggplot(data=data, aes_string(x=x, y=dv)) +
         coord_cartesian(ylim=c(min(data[,dv]), max(data[,dv]))) +       
+        geom_smooth(method=plot_method$method, formula = plot_method$formula, se=plot_method$se) +       
         common_layers_margin_plot() 
   } else {
     grand_plot = plot_spacer()
@@ -75,7 +79,7 @@ make_paneled_formula = function(dv, x, col=NULL, panel) {
 }
 
 common_layers_margin_plot = function() {
-  layers = list(geom_smooth(method="lm", formula = y~x, se=F),
+  layers = list(
                 
                 theme_bw(),
                 theme(axis.title.y = element_blank(), axis.title.x = element_blank(),
@@ -107,5 +111,32 @@ return_panel_vars = function(formula) {
   split_panels = trimws(strsplit(split_string[2], "+", fixed=T)[[1]])
   return(split_panels)
 }
+
+#plot = flexplot(weight.loss~health | motivation + muscle.gain, data=exercise_data, method="lm")
+#extract_plot_method(plot)
+# thanks to https://stackoverflow.com/questions/40854225/how-to-identify-the-function-used-by-geom-smooth
+extract_plot_method = function(plot) {
+  layer.data <- plot$layers[[2]]$layer_data(plot$data)
+  layout <- ggplot2:::create_layout(plot$facet, plot$coordinates)
+  data <- layout$setup(list(layer.data), plot$data, plot$plot_env)
+  data[[1]] <- plot$layers[[2]]$compute_aesthetics(data[[1]], plot)
+  scales <- plot$scales
+  data[[1]] <- ggplot2:::scales_transform_df(scales = scales, df = data[[1]])
+  layout$train_position(data, scales$get_scales("x"), scales$get_scales("y"))
+  data <- layout$map_position(data)[[1]]
+  
+  # set up stat params (e.g. replace "auto" with actual method / formula)
+  stat.params <- suppressMessages(
+    plot$layers[[2]]$stat$setup_params(data = data, 
+                                       params = plot$layers[[2]]$stat_params)
+  )
+  
+  # reverse the last step in setup_params; we don't need the actual function
+  # for mgcv::gam, just the name
+  if(identical(stat.params$method, mgcv::gam)) stat.params$method <- "gam"
+  
+  return(stat.params)
+}
+
 
 
