@@ -41,9 +41,13 @@ test_that("partial_residual_plot works", {
                             model=right_model,
                             added_term = ~friend_ideation_c*depression_c, data=ideation,
                             method="quadratic")
-  vdiffr::expect_doppelganger("partial_residual with flexplot arguments", 
-                              p)
   
+  #prp with no added_term arguments
+  vdiffr::expect_doppelganger("prp with no added_term argument specified", 
+                              partial_residual_plot(ideation~friend_ideation_c | depression_c,
+                                                    model=right_model,
+                                                    data=ideation,
+                                                    method="quadratic"))
 })
 
 test_that("terms_to_modelmatrix works", {

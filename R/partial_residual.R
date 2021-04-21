@@ -4,7 +4,8 @@
 #' @param lm_formula Optional. A lm-style formula for the model being fit
 #' @param model Optional. A lm model
 #' @param data The dataset
-#' @param added_term a formula, which specifies which terms should be de-residualized
+#' @param added_term a formula, which specifies which terms should be de-residualized. By default,
+#' it will use the residuals from `model`. 
 #' @param ... Other arguments passed to flexplot
 #'
 #' @return a partial residual plot
@@ -28,24 +29,21 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
   data = prep_data_for_avp(data, variables)
   
   if (is.null(model)) model = lm(lm_formula, data=data)
-  # compute the partial residuals
-  if (!is.null(added_term)) {
-    residual = partial_residual(model, added_term) 
-  } else {
-    residual = partial_residual(model, term=all.vars(plot_formula)[-1])
-    added_term = all.vars(plot_formula)[-1]
-  }
 
+  # compute the partial residuals
+  residual = partial_residual(model, added_term) 
+  
   # if model is provided, use compare.fits to get actual fitted values
   if (!is.null(model)) {
     preds = suppressMessages(compare.fits(plot_formula, data=data, model1=model, return.preds=T))
-    model_matrix = terms_to_modelmatrix(added_term, data)
+    if (is.null(added_term)) model_matrix = model.matrix(model) else model_matrix = terms_to_modelmatrix(added_term, data)
     columns_to_subract = keep_singles(model.matrix(model), model_matrix)
     if (length(columns_to_subract)>1) 
       preds$prediction = preds$prediction - sum(coef(model)[columns_to_subract]*colMeans(model.matrix(model)[,columns_to_subract])) #- coef(model)[1] 
-    else 
+    else if (length(columns_to_subract)==1)
       preds$prediction = preds$prediction - sum(coef(model)[columns_to_subract]*mean(model.matrix(model)[,columns_to_subract])) #- coef(model)[1] 
-    
+    else 
+      preds$prediction = preds$prediction - preds$prediction
   }
 
   # replace original dv with residual
@@ -74,6 +72,7 @@ partial_residual = function(model, term=NULL) {
 
   # extract model residuals  
   res = residuals(model)
+  if (is.null(term)) return(res)
   
   # get data
   data = extract_data_from_fitted_object(model)
