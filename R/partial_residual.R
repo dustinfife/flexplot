@@ -35,13 +35,11 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     residual = partial_residual(model, term=all.vars(plot_formula)[-1])
     added_term = all.vars(plot_formula)[-1]
   }
-  
+
   # if model is provided, use compare.fits to get actual fitted values
   if (!is.null(model)) {
-
     preds = suppressMessages(compare.fits(plot_formula, data=data, model1=model, return.preds=T))
     model_matrix = terms_to_modelmatrix(added_term, data)
-    head(model.matrix(model))
     columns_to_subract = keep_singles(model.matrix(model), model_matrix)
     if (length(columns_to_subract)>1) 
       preds$prediction = preds$prediction - sum(coef(model)[columns_to_subract]*colMeans(model.matrix(model)[,columns_to_subract])) #- coef(model)[1] 
@@ -73,15 +71,13 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
 #term = ~therapy.type*motivation
 #term = c("motivation", "therapy.type")
 partial_residual = function(model, term=NULL) {
-  
+
   # extract model residuals  
   res = residuals(model)
   
   # get data
   data = extract_data_from_fitted_object(model)
-  
   matrix_coded = terms_to_modelmatrix(term, data)
-  
   # if the user specifies a*b but in the model it was b*a, there will be an error. Fix that
   # just identify which columns are identical
   keep_columns = keep_duplicates(model.matrix(model), matrix_coded)
@@ -89,7 +85,7 @@ partial_residual = function(model, term=NULL) {
                              nrow=nrow(matrix_coded), ncol=ncol(keep_columns),
                              byrow=T)
   # return it
-  if (ncol(matrix_coded)>1) return(rowSums(res + betas_of_interest*keep_columns) )
+  if (ncol(matrix_coded)>1) return(res + rowSums(betas_of_interest*keep_columns) )
   return(res + betas_of_interest*matrix_coded)
   
 }
