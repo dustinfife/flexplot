@@ -28,19 +28,42 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
   data = prep_data_for_avp(data, variables)
   
   if (is.null(model)) model = lm(lm_formula, data=data)
-  
   # compute the partial residuals
-  if (!is.null(added_term)) 
+  if (!is.null(added_term)) {
     residual = partial_residual(model, added_term) 
-  else 
+  } else {
     residual = partial_residual(model, term=all.vars(plot_formula)[-1])
+    added_term = all.vars(plot_formula)[-1]
+  }
   
+  # if model is provided, use compare.fits to get actual fitted values
+  if (!is.null(model)) {
+
+    preds = suppressMessages(compare.fits(plot_formula, data=data, model1=model, return.preds=T))
+    model_matrix = terms_to_modelmatrix(added_term, data)
+    head(model.matrix(model))
+    columns_to_subract = keep_singles(model.matrix(model), model_matrix)
+    if (length(columns_to_subract)>1) 
+      preds$prediction = preds$prediction - sum(coef(model)[columns_to_subract]*colMeans(model.matrix(model)[,columns_to_subract])) #- coef(model)[1] 
+    else 
+      preds$prediction = preds$prediction - sum(coef(model)[columns_to_subract]*mean(model.matrix(model)[,columns_to_subract])) #- coef(model)[1] 
+    
+  }
+
   # replace original dv with residual
   data[,all.vars(lm_formula)[1]] = residual
+
+ 
   
   # plot it
   y_label = paste0(paste0(lm_formula)[2], " ~ ", paste0(lm_formula)[3])
-  flexplot(plot_formula, data=data,...) +
+  
+  ## suppress smooth if they leave it on defaults
+  #browser()
+  args = list(...)
+  if (any(c("suppress_smooth", "method") %in% names(args))) return(flexplot(plot_formula, data=data, prediction = preds, ...) + labs(y=y_label))
+  
+  flexplot(plot_formula, data=data, prediction = preds, suppress_smooth=T,...) +
     labs(y=y_label)
   
 }
@@ -57,29 +80,53 @@ partial_residual = function(model, term=NULL) {
   # get data
   data = extract_data_from_fitted_object(model)
   
+  matrix_coded = terms_to_modelmatrix(term, data)
+  
+  # if the user specifies a*b but in the model it was b*a, there will be an error. Fix that
+  # just identify which columns are identical
+  keep_columns = keep_duplicates(model.matrix(model), matrix_coded)
+  betas_of_interest = matrix(coef(model)[dimnames(keep_columns)[[2]]], 
+                             nrow=nrow(matrix_coded), ncol=ncol(keep_columns),
+                             byrow=T)
+  # return it
+  if (ncol(matrix_coded)>1) return(rowSums(res + betas_of_interest*keep_columns) )
+  return(res + betas_of_interest*matrix_coded)
+  
+}
+
+
+terms_to_modelmatrix = function(term, data) {
+  
   # convert terms to formula
   if (typeof(term)!= "language") term = formula(paste0("~", paste0(term, collapse="+")))
   
   # create model matrix
   matrix_coded = model.matrix(term, data=data)
-  
-  # if the user specifies a*b but in the model it was b*a, there will be an error. Fix that
-  # just identify which columns are identical
-  keep_columns = get_same_columns(model.matrix(model), matrix_coded)
-
-  betas_of_interest = matrix(coef(model)[dimnames(keep_columns)[[2]]], 
-                             nrow=nrow(matrix_coded), ncol=ncol(matrix_coded),
-                             byrow=T)
-  
-  # return it
-  if (ncol(matrix_coded)>1) return(rowSums(res + betas_of_interest*keep_columns) - coef(model)[1])
-  return(res + betas_of_interest*matrix_coded)
-  
+  return(matrix_coded)
 }
 
-get_same_columns = function(original_model, new_model) {
+get_same_columns = function(original_model, new_model, return_unique = T) {
   columns_to_keep = which(duplicated(as.list(data.frame(original_model,new_model)), fromLast=TRUE))
-  return(original_model[,columns_to_keep])
+  if (return_unique) return(original_model[,columns_to_keep])
+  
+  # return those not duplicated
+  v = as.list(data.frame(original_model,new_model))
+  return(keep_singles(v))
+}
+
+data_columns_as_list = function(...) {
+  return(as.list(data.frame(...)))
+}
+# from https://stackoverflow.com/questions/37381174/r-removing-duplicate-elements-in-a-vector
+keep_singles = function(...){
+  v = data_columns_as_list(...)
+  keep = which(!(v %in% v[duplicated(v)]))
+  return(colnames(list(...)[[1]])[keep]) 
+}
+keep_duplicates = function(...){
+  v = data_columns_as_list(...)
+  keep = which(duplicated(v, fromLast=TRUE))
+  return(list(...)[[1]][,keep])
 }
 
 

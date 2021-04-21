@@ -116,18 +116,18 @@ test_that("standardized difference works", {
   expect_output(print(diff), "0.152")
   
   diff = standardized_differences(rf, rf2)
-  expect_output(print(diff), "0.709")  
+  expect_output(print(diff), "50%")  
   
   diff = standardized_differences(rlm, rlm2)
   expect_output(print(diff), "1.115")   
   
   diff = standardized_differences(rf, rlm2)
-  expect_output(print(diff), "0.861")   
+  expect_output(print(diff), "0%")   
   
   expect_error(standardized_differences(gamma_full, pois_reduced))
   
 })
-rlm$model
+
 test_that("rlm and lm can be compared", {
   model1 = lm(weight.loss~motivation + therapy.type, data=exercise_data)
   model2 = MASS::rlm(weight.loss~motivation + therapy.type, data=exercise_data)
