@@ -238,6 +238,13 @@ test_that("is_model_outcome_binary works", {
   expect_true(is_model_outcome_binary(mod))
 })
 
+test_that("model_comparison p-values are right", {
+  full = lm(weight.loss~therapy.type + muscle.gain, data=exercise_data)
+  reduced = lm(weight.loss~therapy.type, data=exercise_data)
+  a = model.comparison(full, reduced)$statistic$p[1]
+  b = as.character(round(anova(full, reduced)$`Pr(>F)`[2], digits=3))
+  expect_true(a==b)
+})
 
 options(warn=0)
 

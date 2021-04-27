@@ -73,7 +73,7 @@ model_comparison_table = function(model1, model2, m1.name="Full", m2.name="Reduc
   } else {
     model.table = round(model.table[,!is.na(model.table[1,])], digits=3)
     model.table[is.na(model.table)] = ""
-    model.table$p[1] = format.pval(model.table$p[1], digits=3)
+    model.table$p[1] = format.pval(as.numeric(model.table$p[1]), digits=3)
   }
   
   # get rid of columns with NA
