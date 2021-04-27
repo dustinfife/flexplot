@@ -9,6 +9,7 @@
 #'
 #' @return A graphic with marginal plots
 #' @export
+#' @import patchwork
 #'
 #' @examples
 #' p = flexplot(weight.loss~motivation | gender + rewards, data=exercise_data)
@@ -64,7 +65,7 @@ marginal_plot = function(p, columns=TRUE, rows=TRUE, grand_mean=TRUE) {
   } else {
     grand_plot = plot_spacer()
   }
-require(patchwork)
+
   (column_plot + grand_plot + plot_layout(widths = c(4,1))) /
     (p + row_plot + plot_layout(widths = c(4,1))) + plot_layout(heights=c(1,4))
     

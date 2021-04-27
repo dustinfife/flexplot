@@ -22,7 +22,8 @@ partial_residual_plot(
 
 \item{data}{The dataset}
 
-\item{added_term}{a formula, which specifies which terms should be de-residualized}
+\item{added_term}{a formula, which specifies which terms should be de-residualized. By default,
+it will use the residuals from `model`.}
 
 \item{...}{Other arguments passed to flexplot}
 }
