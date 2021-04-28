@@ -225,7 +225,7 @@ flexplot = function(formula, data=NULL, related=F,
 	  pred.line = "xxxx"
 	}
 
-	theme = "theme_bw() + theme(text=element_text(size=18))"
+	theme = "theme_bw() + theme(text=element_text(size=14))"
   
 	outcome = varprep$outcome
 	### without this, the scale of the y axis changes if the user samples
