@@ -645,12 +645,16 @@ residual.plots = function(data, object,...){
   levels = length(unique(round(data[,"residuals"], digits=2)))	
   data$fitted = round(data$fitted, digits=2)	
   
-  histo = ggplot2::ggplot(data=data, aes(x=residuals)) + geom_histogram(fill='lightgray', col='black', bins=min(30, round(levels/2))) + theme_bw() + labs(x="Residuals", title="Histogram of Residuals")
+  histo = ggplot2::ggplot(data=data, aes(x=residuals)) + 
+    geom_histogram(fill='lightgray', col='black', bins=min(30, round(levels/2))) +
+    theme_bw() + theme(text=element_text(size=14)) +
+    labs(x="Residuals", y = "Count", title="Histogram of Residuals")
   class(histo) = c("flexplot", class(histo))
   if (length(numbers)>0){
     #res.dep = ggplot2::ggplot(data=d, aes(x=fitted, y=residuals)) + geom_point() + geom_smooth(method="loess", se=F) + 
     #theme_bw() + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
-    res.dep = flexplot(residuals~fitted, data=data,...) + labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
+    res.dep = flexplot(residuals~fitted, data=data,...) + 
+      labs(x="Fitted", y="Residuals", title="Residual Dependence Plot")
     class(res.dep) = c("flexplot", class(res.dep))		
     
   } else {
