@@ -3,7 +3,6 @@
 \PassOptionsToPackage{hyphens}{url}
 %
 \documentclass[
-  english,
   man]{apa6}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -38,8 +37,7 @@
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
   pdftitle={Flexplot: Graphically-Based Data Analysis},
-  pdfauthor={Dustin Fife1},
-  pdflang={en-EN},
+  pdfauthor={Dustin Fife},
   pdfkeywords={flexplot, statistical assumptions, statistical modeling, graphics, exploratory data analysis, graphical data analysis},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
@@ -101,75 +99,37 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
-% Make \paragraph and \subparagraph free-standing
-\ifx\paragraph\undefined\else
-  \let\oldparagraph\paragraph
-  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
-\fi
-\ifx\subparagraph\undefined\else
-  \let\oldsubparagraph\subparagraph
-  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
-\fi
-% Manuscript styling
+\shorttitle{Flexplot: Graphically-Based Data Analysis}
+\affiliation{
+\vspace{0.5cm}
+\textsuperscript{1} Rowan University}
+\keywords{flexplot, statistical assumptions, statistical modeling, graphics, exploratory data analysis, graphical data analysis}
+\usepackage{csquotes}
 \usepackage{upgreek}
 \captionsetup{font=singlespacing,justification=justified}
 
-% Table formatting
 \usepackage{longtable}
 \usepackage{lscape}
-% \usepackage[counterclockwise]{rotating}   % Landscape page setup for large tables
-\usepackage{multirow}		% Table styling
-\usepackage{tabularx}		% Control Column width
-\usepackage[flushleft]{threeparttable}	% Allows for three part tables with a specified notes section
-\usepackage{threeparttablex}            % Lets threeparttable work with longtable
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage[flushleft]{threeparttable}
+\usepackage{threeparttablex}
 
-% Create new environments so endfloat can handle them
-% \newenvironment{ltable}
-%   {\begin{landscape}\begin{center}\begin{threeparttable}}
-%   {\end{threeparttable}\end{center}\end{landscape}}
 \newenvironment{lltable}{\begin{landscape}\begin{center}\begin{ThreePartTable}}{\end{ThreePartTable}\end{center}\end{landscape}}
 
-% Enables adjusting longtable caption width to table width
-% Solution found at http://golatex.de/longtable-mit-caption-so-breit-wie-die-tabelle-t15767.html
 \makeatletter
 \newcommand\LastLTentrywidth{1em}
 \newlength\longtablewidth
 \setlength{\longtablewidth}{1in}
 \newcommand{\getlongtablewidth}{\begingroup \ifcsname LT@\roman{LT@tables}\endcsname \global\longtablewidth=0pt \renewcommand{\LT@entry}[2]{\global\advance\longtablewidth by ##2\relax\gdef\LastLTentrywidth{##2}}\@nameuse{LT@\roman{LT@tables}} \fi \endgroup}
 
-% \setlength{\parindent}{0.5in}
-% \setlength{\parskip}{0pt plus 0pt minus 0pt}
 
-% \usepackage{etoolbox}
-\makeatletter
-\patchcmd{\HyOrg@maketitle}
-  {\section{\normalfont\normalsize\abstractname}}
-  {\section*{\normalfont\normalsize\abstractname}}
-  {}{\typeout{Failed to patch abstract.}}
-\patchcmd{\HyOrg@maketitle}
-  {\section{\protect\normalfont{\@title}}}
-  {\section*{\protect\normalfont{\@title}}}
-  {}{\typeout{Failed to patch title.}}
-\makeatother
-\shorttitle{Flexplot: Graphically-Based Data Analysis}
-\keywords{flexplot, statistical assumptions, statistical modeling, graphics, exploratory data analysis, graphical data analysis}
 \DeclareDelayedFloatFlavor{ThreePartTable}{table}
 \DeclareDelayedFloatFlavor{lltable}{table}
 \DeclareDelayedFloatFlavor*{longtable}{table}
 \makeatletter
 \renewcommand{\efloat@iwrite}[1]{\immediate\expandafter\protected@write\csname efloat@post#1\endcsname{}}
 \makeatother
-\usepackage{csquotes}
-\ifxetex
-  % Load polyglossia as late as possible: uses bidi with RTL langages (e.g. Hebrew, Arabic)
-  \usepackage{polyglossia}
-  \setmainlanguage[]{english}
-\else
-  \usepackage[shorthands=off,main=english]{babel}
-\fi
-\ifluatex
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
 \newenvironment{cslreferences}%
@@ -181,22 +141,15 @@
 \author{Dustin Fife\textsuperscript{1}}
 \date{}
 
+\authornote{I wish to thank the dozens of students who very patiently discovered bugs in the flexplot software. Your efforts have resulted in a much more robust tool. Many of the ideas and information contained in this article have been disseminated elsewhere, including at APA's annual conference and on my YouTube channel. Furthermore, Flexplot is the engine driving the visualizations in JASP and Jamovi and various publications have referenced the ideas contained within Flexplot (including blog posts both on JASP and Jamovi's website, as well as a Behavioral Research Methods publication).
 
-\authornote{
-
-I wish to thank the dozens of students who very patiently discovered bugs in the flexplot software. Your efforts have resulted in a much more robust tool. Many of the ideas and information contained in this article have been disseminated elsewhere, including at APA's annual conference and on my YouTube channel. Furthermore, Flexplot is the engine driving the visualizations in JASP and Jamovi and various publications have referenced the ideas contained within Flexplot (including blog posts both on JASP and Jamovi's website, as well as a \emph{Behavioral Research Methods publication}).
-
-Correspondence concerning this article should be addressed to Dustin Fife, 201 Mullica Hill Road Glassboro, NJ 08028. E-mail: \href{mailto:fife.dustin@gmail.com}{\nolinkurl{fife.dustin@gmail.com}}
-
-}
-
-\affiliation{\vspace{0.5cm}\textsuperscript{1} Rowan University}
+Correspondence concerning this article should be addressed to Dustin Fife, 201 Mullica Hill Road Glassboro, NJ 08028. E-mail: \href{mailto:fife.dustin@gmail.com}{\nolinkurl{fife.dustin@gmail.com}}}
 
 \abstract{
 The human visual processing system has enormous bandwidth, able to interpret vast amounts of data in fractions of a second (Otten, Cheng, \& Drewnowski, 2015). Despite this amazing ability, there is a troubling lack of graphics in scientific literature (Healy \& Moody, 2014), and the graphics most traditionally used tend to bias perception in unintentional ways (Weissgerber, Milic, Winham, \& Garovic, 2015). I suspect the reason for the underuse and misuse of graphics is because sound graphs are difficult to produce with existing software (Wainer, 2010). While \texttt{ggplot2} allows immense flexibility in creating graphics, its learning curve is quite steep, and even basic graphics require multiple lines of code. \texttt{flexplot} is an R package that aims to address these issues by providing a formula-based suite of tools that simplifies and automates much of the graphical decision-making. Additionally, \texttt{flexplot} pairs well with statistical modeling, making it easy for researchers to produce graphs that map onto statistical procedures. With one-line functions, users can visualize bivariate statistical models (e.g., scatterplots for regression, beeswarm plots for ANOVA/\(t\)-tests), multivariate statistical models (e.g., ANCOVA and multiple regression), and even more sophisticated models like multi-level models and logistic regressions. Further, this package utilizes old tools (e.g., added variable plots and coplots) as well as introduces new tools for complex visualizations, including ghost lines and point sampling.
+
+
 }
-
-
 
 \begin{document}
 \maketitle
@@ -204,9 +157,7 @@ The human visual processing system has enormous bandwidth, able to interpret vas
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-In light of the recent ``replication crisis'' in science (Open Science Collaboration, 2015; Pashler \& Wagenmakers, 2012), researchers are becoming increasingly concerned with the validity of psychological science, and science in general (Baker, 2016). In light of this, many are pushing for larger sample sizes (Anderson \& Maxwell, 2017), preregistration (Nelson, Simmons, \& Simonsohn, 2018; Nosek, Ebersole, DeHaven, \& Mellor, 2018), and stricter controls of probabilities (Benjamin et al., 2018). Many of these efforts place greater emphasis on \emph{confirmatory} data analysis, yet there are also some pushing for a proportional push toward greater use of \emph{exploratory} data analysis (Fife \& Rodgers, 2019), and the use of graphical data analysis in particular (Fife, 2020; Tay, Parrigon, Huang, \& LeBreton, 2016).
-
-Graphics offer many advantages over traditional methods that rely on tables and reported statistics. First, graphs are perhaps the most important tool available to enhance transparency, as they provide a medium to display the data in their entirety (Pastore, Lionetti, \& Altoè, 2017; Tay et al., 2016). Audiences can see, at a glance, the appropriateness of the model, the size of the effect, and the degree of uncertainty.
+Graphics offer many advantages over traditional methods that rely on tables and reported statistics. First, graphs are perhaps the most important tool available to enhance transparency, as they provide a medium to display the data in their entirety (Pastore, Lionetti, \& Altoè, 2017; Tay, Parrigon, Huang, \& LeBreton, 2016). Audiences can see, at a glance, the appropriateness of the model, the size of the effect, and the degree of uncertainty.
 
 Furthermore, graphs improve communication between the scientific community and the public (Otten et al., 2015). Lay people can understand relatively sophisticated statistical procedures when that information is presented graphically (Correll, 2015), which may mitigate the recent uptick in scientific mistrust (Camargo \& Grant, 2015).
 
@@ -223,13 +174,13 @@ Finally, and perhaps most importantly, graphics improve encoding (Hansen, Chen, 
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/ses-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/ses-1.pdf}
 \caption{\label{fig:ses}Simulated relationship between \texttt{Treatment}, \texttt{Depression}, and \texttt{SES}. The graph makes it clear there's an interaction effect, which would be masked if one simply computed a main effects model.}
 \end{figure}
 
-While visualizations have many advantages, they can also be used to mislead, sometimes intentionally, and sometimes not (Correll, 2015; Kosslyn, 2006; Pandey, Rall, Satterthwaite, Nov, \& Bertini, 2015). For example, when means/standard errors are presented as barcharts, people tend to judge values below the mean (i.e., within the confines of the bar) as far more likely than values above the mean, even when the underlying distribution is symmetric (Correll, 2015). To further complicate matters, the default images in most point-and-click statistical software violate important visualization heuristics (Fife et al., 2019; Healy \& Moody, 2014; Wainer, 2010). For example, in \texttt{SPSS} it is impossible (as far as I know) to produce standard error plots that display raw data (jittered or otherwise). Also, in standard error plots, the axes are scaled to the means, not the range of the actual data, which visually inflates the size of the effect. In addition, producing some types of graphics (e.g., Skew-Location plots) requires more effort than many are willing to perform (the user must model the data, export the residuals, then produce a scatterplot).
+While visualizations have many advantages, they can also be used to mislead, sometimes intentionally, and sometimes not (Correll, 2015; Kosslyn, 2006; Pandey, Rall, Satterthwaite, Nov, \& Bertini, 2015). For example, when means/standard errors are presented as barcharts, people tend to judge values below the mean (i.e., within the confines of the bar) as far more likely than values above the mean, even when the underlying distribution is symmetric (Correll, 2015). To further complicate matters, the default images in most point-and-click statistical software violate important visualization heuristics (Fife, Tremoulet, \& Longo, 2019; Healy \& Moody, 2014; Wainer, 2010). For example, in \texttt{SPSS} it is impossible (as far as I know) to produce standard error plots that display raw data (jittered or otherwise). Also, in standard error plots, the axes are scaled to the means, not the range of the actual data, which visually inflates the size of the effect. In addition, producing some types of graphics (e.g., Skew-Location plots) requires more effort than many are willing to perform (the user must model the data, export the residuals, then produce a scatterplot).
 
-This paper introduces \texttt{flexplot}, an R package specifically designed to remove obstacles to sound visualizations. The graphics produced by \texttt{flexplot} were developed using empirically-derived heurstics that maximize perceptual understanding, while minimizing perceptual biases (Fife, Longo, Correll, \& Tremoulet, in press; Fife et al., 2019). Also, the graphics produced are simple to generate and permit analysts to quickly shift between statistical modeling and graphical interpretation.
+This paper introduces \texttt{flexplot}, an R package specifically designed to remove obstacles to sound visualizations. The graphics produced by \texttt{flexplot} were developed using empirically-derived heurstics (see Fife et al., 2020 for a review). Also, the graphics produced are simple to generate and permit analysts to quickly shift between statistical modeling and graphical interpretation.
 
 In the following section, I begin by outlining the guiding philosophy behind \texttt{flexplot}, then introduce its grammar. I then spend the remainder of the paper demonstrating how to produce intuitive graphics with \texttt{flexplot} and illustrate how to pair these tools with statistical modeling.
 
@@ -240,7 +191,7 @@ The traditional approach to data analysis requires a great deal of decision-maki
 
 This approach has been routinely criticized (Cohen, 1994; Gigerenzer, 2004; Tyron, 1998), particularly in how results are interpreted (significant versus not). While the traditional approach requires great effort to choose the analysis and little effort to interpret it, \texttt{flexplot} takes the opposite approach: little effort is required to \emph{choose} the analysis, leaving more resources to \emph{interpret} the analysis. This is as it should be.
 
-To accomplish this goal, \texttt{flexplot} is based on the following principles (Fife et al., in press):
+To accomplish this goal, \texttt{flexplot} is based on the following principles (Fife et al., 2020):
 
 \emph{1. Minimize obstacles to producing graphics.} The easier it is to produce graphics, the more likely they will be used, and the more resources the researcher will have available to interpret the results. Technology companies spend millions of dollars attempting to make the interaction between humans and technology as seamless as possible. One-click purchasing, voice-activated personal assistants like Siri, movies-on-demand, and audible app notifications are all innovations that are successful because they make it easy for humans to use their technology. Likewise, if producing a graphic is as simple (or simpler) than performing a statistical analysis, they too will become heavily utilized (and, dare I say, addictive?). Furthermore, the less effort required to produce them, the more resources available to invest in \emph{interpreting} graphics. To make producing graphics as simple as possible, \texttt{flexplot} automates much of the decision-making in the background, such as choosing between types of graphics (e.g., histograms versus bar charts) and how those graphics are displayed.
 
@@ -290,7 +241,7 @@ Naturally, this simplicity comes at a cost; \texttt{flexplot} is more limited th
 \hypertarget{the-grammar-of-the-general-linear-model}{%
 \section{The Grammar of the General Linear Model}\label{the-grammar-of-the-general-linear-model}}
 
-\texttt{flexplot}'s grammar is also a layered grammar (but incidentally, because it was developed within \texttt{ggplot2}'s grammar), though its grammar is actually based on the general linear model (GLM). Recall that most statistical procedures are subsumed within the GLM, which is essentially regression. For example, a \(t\)-test is simply a regression where the intercept is the mean of the referent group (e.g., the control group) and the slope is simply the difference between the treatment and control groups. The base \texttt{R} function \texttt{lm} utilizes GLMs to do various sorts of modeling, and all this is accomplished using a simple formula (e.g., \texttt{y\ \textasciitilde{}\ x1\ +\ x2}). Likewise, \texttt{flexplot} adopts the same convention, utilizing a similar formula to produce graphics. The advantage of this approach is that there is notational consistency from modeling to visualization. Very often the exact code used to produce a fitted model can also be used to visualize the data, as in the following example:
+\texttt{flexplot}'s grammar is also a layered grammar (but incidentally, because it was developed within \texttt{ggplot2}'s grammar), though its grammar is actually based on the general linear model (GLM).\footnote{The package \texttt{vizreg} (Breheny \& Burchett, 2017) is another R package that provides seamless integration with linear models.} Recall that most statistical procedures are subsumed within the GLM, which is essentially regression. For example, a \(t\)-test is simply a regression where the intercept is the mean of the referent group (e.g., the control group) and the slope is simply the difference between the treatment and control groups. The base \texttt{R} function \texttt{lm} utilizes GLMs to do various sorts of modeling, and all this is accomplished using a simple formula (e.g., \texttt{y\ \textasciitilde{}\ x1\ +\ x2}). Likewise, \texttt{flexplot} adopts the same convention, utilizing a similar formula to produce graphics. The advantage of this approach is that there is notational consistency from modeling to visualization. Very often the exact code used to produce a fitted model can also be used to visualize the data, as in the following example:
 
 \small
 
@@ -342,7 +293,7 @@ In \texttt{lm()}, one can fit an ``intercept only'' model, using the code \textt
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/bar-1.pdf}
 \caption{\label{fig:bar}A histogram (left) and barchart (right) produced within \texttt{flexplot} in R.}
 \end{figure}
 
@@ -354,7 +305,7 @@ In \texttt{lm()}, one can fit an ``intercept only'' model, using the code \textt
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/chunkit-1.pdf}
 \caption{\label{fig:chunkit}Two displays of the same data. In the left image, categories are sorted alphabetically (which is the default of \texttt{ggplot2}). In \texttt{flexplot} the categories are sorted by sample size, which enables better chunking of information. \label{fig:chunkit}}
 \end{figure}
 
@@ -374,7 +325,7 @@ Visualizing raw data can become tricky, particularly when categorical variables 
 \hypertarget{categorical-predictor-numeric-outcome-beeswarm-plots}{%
 \subsection{Categorical Predictor, Numeric Outcome (Beeswarm Plots)}\label{categorical-predictor-numeric-outcome-beeswarm-plots}}
 
-There are many different ways to graph a categorical predictor/numeric outcome relationship, including bar plots of means, box plots, violin plots, gradient plots, etc. Some are misleading (e.g., barplots of means and standard error plots). Others are mediocre (e.g., boxplots). Finally, some perform exceptionally well in human testing, including violin plots and gradient plots (Correll, 2015). As mentioned in the previous section, raw data are essential. To minimize overlap, a common strategy is to utilize ``jittering,'' which means that categorical variables are first converted to values (e.g., control group = 1, treatment group = 2), then random noise is added to each participant's score (e.g., a 1 may become 1.012 or 0.097). This reduces overlap between datapoints. However, simply jittering values uniformly robs one of a valuable opportunity to convey additional information in a graphic. \texttt{flexplot} instead jitters data proportional to the density of the data. In other words, regions of little density will have very little jittering and regions of high density (e.g., at the mode) will have more jittering. These sorts of plots are essentially violin plots with raw data, where the maximum amount of jittering is the outline of the violin plot. Traditionally, these were called ``textured dot strips,'' which were invented by Tukey and Tukey (1990; see also Wilkinson, 1999). Others (e.g., Eklund, 2012) call them ``bee swarm'' plots. I am not too fond of the original name, so I'll refer to them as bee swarm plots throughout this text.
+There are many different ways to graph a categorical predictor/numeric outcome relationship, including bar plots of means, box plots, violin plots, gradient plots, etc. Some are misleading (e.g., barplots of means and standard error plots). Others are mediocre (e.g., boxplots). Finally, some perform exceptionally well in human testing, including violin plots and gradient plots (Correll, 2015). As mentioned in the previous section, raw data are essential. To minimize overlap, a common strategy is to utilize ``jittering,'' which means that categorical variables are first converted to values (e.g., control group = 1, treatment group = 2), then random noise is added to each participant's score (e.g., a 1 may become 1.012 or 0.097). This reduces overlap between datapoints. However, simply jittering values uniformly robs one of a valuable opportunity to convey additional information in a graphic. \texttt{flexplot} instead jitters data proportional to the density of the data. In other words, regions of little density will have very little jittering and regions of high density (e.g., at the mode) will have more jittering. These sorts of plots are essentially violin plots with raw data, where the maximum amount of jittering is the outline of the violin plot. Traditionally, these were called ``textured dot strips,'' which were invented by Tukey \& Tukey (1990; see also Wilkinson, 1999). Others (e.g., Eklund, 2012) call them ``bee swarm'' plots. I am not too fond of the original name, so I'll refer to them as bee swarm plots throughout this text.
 
 While violin plots partially solve the problem mentioned earlier (i.e., that summary statistics can be generated from a diverse set of patterns of raw data), they too have their limitations. For one, it is impossible to tell the difference between a dataset with 15,000 versus 15 observations. For example, the two distributions in the left image in Figure \ref{fig:raw} look essentially the same, while the same data, plotted as beeswarm plots, very clearly show the sample size.
 
@@ -396,7 +347,7 @@ While violin plots partially solve the problem mentioned earlier (i.e., that sum
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/raw-1} 
+{\centering \includegraphics[width=0.9\linewidth]{flexplot_psychmeth_files/figure-latex/raw-1} 
 
 }
 
@@ -431,7 +382,7 @@ Users can also specify what the ``whiskers'' mean for the summary statistics. Th
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/jitterit-1} 
+{\centering \includegraphics[width=0.9\linewidth]{flexplot_psychmeth_files/figure-latex/jitterit-1} 
 
 }
 
@@ -461,7 +412,7 @@ The indisputed king of numeric on numeric visualization is the scatterplot. Once
 
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/scatter-1} 
+{\centering \includegraphics{flexplot_psychmeth_files/figure-latex/scatter-1} 
 
 }
 
@@ -494,7 +445,7 @@ Any binary variable can be graphed as a logistic regression in \texttt{flexplot}
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/logistic-1.pdf}
 \caption{\label{fig:logistic}Example of a logistic plot in the \texttt{flexplot} package.\label{fig:logistic}}
 \end{figure}
 
@@ -519,7 +470,7 @@ In the example below, I had to convert \texttt{injury} to a factor to get a barp
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/association-1.pdf}
 \caption{\label{fig:association}Example of an association plot for categorical predictor/categorical outcome.\label{fig:association}}
 \end{figure}
 
@@ -542,7 +493,7 @@ One of the guiding tenets of \texttt{flexplot} is that every statistical analysi
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/plant-1.pdf}
 \caption{\label{fig:plant}A plot of repeated measures data.\label{fig:plant}}
 \end{figure}
 
@@ -574,7 +525,7 @@ A second option is to reduce the transparency (e.g., bottom-left in Figure \ref{
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/sample-1.pdf}
 \caption{\label{fig:sample}Four graphics showing different ways to handle overlapping datapoints. The top-left image does nothing. The top-right omits raw data. The bottom-left reduces the opacity of the points. The bottom-right samples datapoints. \label{fig:sample}}
 \end{figure}
 
@@ -602,7 +553,7 @@ AVPs are underused, yet extremely useful.\footnote{The \texttt{car} package allo
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/avp-1.pdf}
 \caption{\label{fig:avp-1}An Added Variable Plot (AVP) showing the relationship between \texttt{therapy.type} and \texttt{weight.loss}, after controlling for \texttt{motivation}. \label{fig:avp}}
 \end{figure}
 
@@ -614,7 +565,7 @@ AVPs are underused, yet extremely useful.\footnote{The \texttt{car} package allo
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/avp-2.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/avp-2.pdf}
 \caption{\label{fig:avp-2}An Added Variable Plot (AVP) showing the relationship between \texttt{therapy.type} and \texttt{weight.loss}, after controlling for \texttt{motivation}. \label{fig:avp}}
 \end{figure}
 
@@ -626,7 +577,7 @@ AVPs are underused, yet extremely useful.\footnote{The \texttt{car} package allo
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/avp-3.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/avp-3.pdf}
 \caption{\label{fig:avp-3}An Added Variable Plot (AVP) showing the relationship between \texttt{therapy.type} and \texttt{weight.loss}, after controlling for \texttt{motivation}. \label{fig:avp}}
 \end{figure}
 
@@ -652,7 +603,7 @@ As shown in Figure \ref{fig:flexplotgrammar}, the second slot in the \texttt{fle
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/symbols-1.pdf}
 \caption{\label{fig:symbols}Two multivariate graphs illustrating how the second slot in a \texttt{flexplot} formula controls the graph. The left image demonstrates what happens to the second slot variable (\(X2\)) when a numeric predictor is on the X-axis, while the right image demonstrates what happens to the second slot variable when a categorical predictor is on the X-axis.}
 \end{figure}
 
@@ -693,7 +644,7 @@ Figure \ref{fig:panels} shows the same relationships in Figure \ref{fig:symbols}
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/panels-1.pdf}
 \caption{\label{fig:panels}A multivariate plot where \texttt{therapy.type} and \texttt{gender} are now shown in panels. \label{fig:panels}}
 \end{figure}
 
@@ -736,7 +687,7 @@ Whether using breakpoints or bins, the user can also specify labels for the bins
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/panels2-1} 
+{\centering \includegraphics[width=1\linewidth]{flexplot_psychmeth_files/figure-latex/panels2-1} 
 
 }
 
@@ -765,7 +716,7 @@ There are advantages and disadvantages to plotting a variable as a color/symbol/
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.8\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/ghost-1} 
+{\centering \includegraphics[width=0.8\linewidth]{flexplot_psychmeth_files/figure-latex/ghost-1} 
 
 }
 
@@ -804,7 +755,7 @@ Another strategy is to mentally block out all panels but the diagonal (the botto
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/threeway-1.pdf}
 \caption{\label{fig:threeway}Multivariate relationship between five variables. Each \texttt{flexplot} slot is occupied and it is difficult to interpret what is going on in the top figure, though the use of regression lines instead of loess lines, removing standard errors, reducing transparency of the datapoints, adding ghost lines, and reducing the number of bins have made it easier to interpret (bottom image). \label{fig:threeway}}
 \end{figure}
 
@@ -832,7 +783,7 @@ As I've mentioned repeatedly, one of the primary purposes of \texttt{flexplot} i
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/ancova-1.pdf}
 \caption{\label{fig:ancova}Demonstration of the \texttt{visualize} function on a \texttt{lm} object. The top row shows a representation of the statistical model. The bottom row shows diagnostic plots. \label{fig:ancova}}
 \end{figure}
 
@@ -852,7 +803,7 @@ For multivariate data, \texttt{visualize} will create a plot that will use panel
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/ancova2-1.pdf}
 \caption{\label{fig:ancova2}Demonstration of the \texttt{visualize} function on a \texttt{lm} object, but with \texttt{flexplot} arguments controlling the output (as well as suppressing residuals). \label{fig:ancova2}}
 \end{figure}
 
@@ -876,7 +827,7 @@ Figure \ref{fig:mixed} shows the \texttt{visualize()} function for a mixed model
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/mixed-1.pdf}
 \caption{\label{fig:mixed}Demonstration of the \texttt{visualize} function for a mixed model. In this graphic, each thin line represents the fit of a particular school. \label{fig:mixed}}
 \end{figure}
 
@@ -905,7 +856,7 @@ That is where \texttt{compare.fits()} comes in. It is simply a wrapper for the \
 
 \begin{figure}
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpYr8WPX/preview-10d7394bd910.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf}
+\includegraphics{flexplot_psychmeth_files/figure-latex/compare-1.pdf}
 \caption{\label{fig:compare}Demonstration of the \texttt{compare.fits()} function, comparing a main effects and an interaction model. Ghost lines have been added from the \texttt{cog} condition for easier comparison across panels. \label{fig:compare}}
 \end{figure}
 
@@ -975,9 +926,9 @@ The final function I will mention is the \texttt{model.comparison()} function. T
 
 \begin{verbatim}
 ## $statistics
-##                aic      bic bayes.factor      p   rsq
-## model.int 1223.041 1246.129        0.010 <2e-16 0.222
-## model.me  1220.523 1237.015       95.294        0.217
+##                aic      bic bayes.factor     p   rsq
+## model.int 1223.041 1246.129        0.010 0.487 0.222
+## model.me  1220.523 1237.015       95.294       0.217
 ## 
 ## $predicted_differences
 ##    0%   25%   50%   75%  100% 
@@ -1007,28 +958,22 @@ To use \texttt{flexplot}, users can download and install the R package through g
 \hypertarget{refs}{}
 \begin{cslreferences}
 \leavevmode\hypertarget{ref-Abbott2012}{}%
-Abbott, G. R., Do, M., \& Byrne, L. K. (2012). Diminished subjective wellbeing in schizotypy is more than just negative affect. \emph{Personality and Individual Differences}, \emph{52}(8), 914--918. \url{https://doi.org/10.1016/j.paid.2012.01.018}
-
-\leavevmode\hypertarget{ref-Anderson2017}{}%
-Anderson, S. F., \& Maxwell, S. E. (2017). Addressing the ``Replication Crisis'': Using Original Studies to Design Replication Studies with Appropriate Statistical Power. \emph{Multivariate Behavioral Research}, \emph{52}(3), 305--324. \url{https://doi.org/10.1080/00273171.2017.1289361}
+Abbott, G. R., Do, M., \& Byrne, L. K. (2012). Diminished subjective wellbeing in schizotypy is more than just negative affect. \emph{Personality and Individual Differences}, \emph{52}(8), 914--918. doi:\href{https://doi.org/10.1016/j.paid.2012.01.018}{10.1016/j.paid.2012.01.018}
 
 \leavevmode\hypertarget{ref-anscombe1973graphs}{}%
 Anscombe, F. J. (1973). Graphs in statistical analysis. \emph{The American Statistician}, \emph{27}(1), 17--21.
 
-\leavevmode\hypertarget{ref-Baker2016a}{}%
-Baker, M. (2016). 1,500 scientists lift the lid on reproducibility. \emph{Nature}, \emph{533}(7604), 452--454. \url{https://doi.org/10.1038/533452a}
-
-\leavevmode\hypertarget{ref-Benjamin2018}{}%
-Benjamin, D. J., Berger, J. O., Johannesson, M., Nosek, B. A., Wagenmakers, E.-J., Berk, R., \ldots{} Johnson, V. E. (2018). Redefine statistical significance. \emph{Nature Human Behaviour}, \emph{2}(1), 6--10. \url{https://doi.org/10.1038/s41562-017-0189-z}
+\leavevmode\hypertarget{ref-Breheny}{}%
+Breheny, P., \& Burchett, W. (2017). Visualization of Regression Models Using visreg. \emph{The R Journal}, 56--71. doi:\href{https://doi.org/10.32614/rj-2017-046}{10.32614/rj-2017-046}
 
 \leavevmode\hypertarget{ref-Camargo2015}{}%
-Camargo, K., \& Grant, R. (2015). Public health, science, and policy debate: being right is not enough. \emph{American Journal of Public Health}, \emph{105}(2), 232--235. \url{https://doi.org/10.2105/AJPH.2014.302241}
+Camargo, K., \& Grant, R. (2015). Public health, science, and policy debate: being right is not enough. \emph{American Journal of Public Health}, \emph{105}(2), 232--5. doi:\href{https://doi.org/10.2105/AJPH.2014.302241}{10.2105/AJPH.2014.302241}
 
 \leavevmode\hypertarget{ref-Cleveland1994}{}%
 Cleveland, W. S. (1994). Coplots, nonparametric regression, and conditionally parametric fits. \emph{Lecture Notes-Monograph Series}, 21--36.
 
 \leavevmode\hypertarget{ref-cohen_earth_1994}{}%
-Cohen, J. (1994). The earth is round (p \textless{} .05). \emph{American Psychologist}, \emph{49}(12), 997--1003. \url{https://doi.org/10.1037/0003-066X.49.12.997}
+Cohen, J. (1994). The earth is round (p \textless{} .05). \emph{American Psychologist}, \emph{49}(12), 997--1003. doi:\href{https://doi.org/10.1037/0003-066X.49.12.997}{10.1037/0003-066X.49.12.997}
 
 \leavevmode\hypertarget{ref-Correll2015}{}%
 Correll, M. A. (2015). \emph{Visual Statistics} (Doctoral Dissertation). University of Wisconsin-Madison.
@@ -1037,28 +982,25 @@ Correll, M. A. (2015). \emph{Visual Statistics} (Doctoral Dissertation). Univers
 Eklund, A. (2012). Beeswarm: The bee swarm plot, an alternative to stripchart. \emph{R Package Version 0.1}, \emph{5}.
 
 \leavevmode\hypertarget{ref-Fife2019e}{}%
-Fife, D. A. (2020). The Eight Steps of Data Analysis: A Graphical Framework to Promote Sound Statistical Analysis. \emph{Perspectives on Psychological Science}, \emph{15}(4). \url{https://doi.org/https://doi.org/10.1177/1745691620917333}
+Fife, D. A. (2020). The Eight Steps of Data Analysis: A Graphical Framework to Promote Sound Statistical Analysis. \emph{Perspectives on Psychological Science}, \emph{15}(4). doi:\href{https://doi.org/https://doi.org/10.1177/1745691620917333}{https://doi.org/10.1177/1745691620917333}
 
 \leavevmode\hypertarget{ref-fife2020bb}{}%
-Fife, D. A., Longo, G., Correll, M., \& Tremoulet, P. (in press). A graph for every analysis: Mapping visuals onto common analyses. \emph{Behavioral Research Methods}.
-
-\leavevmode\hypertarget{ref-Fife2019a}{}%
-Fife, D. A., \& Rodgers, J. L. (2019). Exonerating EDA: Addressing the Replication Crisis By Expanding the EDA/CDA Continuum. \emph{PsyArXiv}. Retrieved from \url{https://psyarxiv.com/5vfq6/}
+Fife, D. A., Longo, G., Correll, M., \& Tremoulet, P. (2020). A graph for every analysis: Mapping visuals onto common analyses. \emph{Behavioral Research Methods}.
 
 \leavevmode\hypertarget{ref-Fife2019d}{}%
 Fife, D. A., Tremoulet, P., \& Longo, G. (2019). \emph{Developing and Empirically Validating Flexplot: A Tool for Mapping Statistical Analyses into Graphical Presentation}. Chicago, IL: American Psychological Association.
 
 \leavevmode\hypertarget{ref-Gigerenzer2004}{}%
-Gigerenzer, G. (2004). Mindless statistics. \emph{The Journal of Socio-Economics}, \emph{33}(5), 587--606. \url{https://doi.org/10.1016/J.SOCEC.2004.09.033}
+Gigerenzer, G. (2004). Mindless statistics. \emph{The Journal of Socio-Economics}, \emph{33}(5), 587--606. doi:\href{https://doi.org/10.1016/J.SOCEC.2004.09.033}{10.1016/J.SOCEC.2004.09.033}
 
 \leavevmode\hypertarget{ref-Hansen}{}%
 Hansen, C. D., Chen, M., Johnson, C. R., Kaufman, A. E., \& Hagen, H. (2014). \emph{Scientific Visualization: Uncertainty, Multifield, Biomedical, and Scalable Visualization}. London: Springer. Retrieved from \url{http://www.springer.com/series/4562}
 
 \leavevmode\hypertarget{ref-Healy2014a}{}%
-Healy, K., \& Moody, J. (2014). Data Visualization in Sociology. \emph{Annual Review of Sociology}, \emph{40}(1), 105--128. \url{https://doi.org/10.1146/ANNUREV-SOC-071312-145551}
+Healy, K., \& Moody, J. (2014). Data Visualization in Sociology. \emph{Annual Review of Sociology}, \emph{40}(1), 105--128. doi:\href{https://doi.org/10.1146/ANNUREV-SOC-071312-145551}{10.1146/ANNUREV-SOC-071312-145551}
 
 \leavevmode\hypertarget{ref-hoekstra_are_2012}{}%
-Hoekstra, R., Kiers, H., \& Johnson, A. (2012). Are Assumptions of Well-Known Statistical Techniques Checked, and Why Not? \emph{Frontiers in Psychology}, \emph{3}(137). \url{https://doi.org/10.3389/fpsyg.2012.00137}
+Hoekstra, R., Kiers, H., \& Johnson, A. (2012). Are Assumptions of Well-Known Statistical Techniques Checked, and Why Not? \emph{Frontiers in Psychology}, \emph{3}(137). doi:\href{https://doi.org/10.3389/fpsyg.2012.00137}{10.3389/fpsyg.2012.00137}
 
 \leavevmode\hypertarget{ref-inbar2007minimalism}{}%
 Inbar, O., Tractinsky, N., \& Meyer, J. (2007). Minimalism in information visualization: Attitudes towards maximizing the data-ink ratio. In \emph{ECCE} (Vol. 7, pp. 185--188).
@@ -1067,43 +1009,31 @@ Inbar, O., Tractinsky, N., \& Meyer, J. (2007). Minimalism in information visual
 Kosslyn, S. M. (2006). \emph{Graph design for eye and mind}. New York, NY: Oxford University Press.
 
 \leavevmode\hypertarget{ref-Levine2018}{}%
-Levine, S. S. (2018). Show us your data: Connect the dots, improve science. \emph{Management and Organization Review}, \emph{14}(2), 433--437. \url{https://doi.org/10.1017/mor.2018.19}
+Levine, S. S. (2018). Show us your data: Connect the dots, improve science. \emph{Management and Organization Review}, \emph{14}(2), 433--437. doi:\href{https://doi.org/10.1017/mor.2018.19}{10.1017/mor.2018.19}
 
 \leavevmode\hypertarget{ref-marieb1992human}{}%
 Marieb, E. N. (1992). Human anatomy and physiology. Redwood city. \emph{CA: Benjamin/Cummings Publishing Company, Ine}, \emph{1}(992), 306--307.
 
-\leavevmode\hypertarget{ref-Nelson2018a}{}%
-Nelson, L. D., Simmons, J. P., \& Simonsohn, U. (2018). \emph{Annual Review of Psychology}, \emph{69}, 511--534.
-
-\leavevmode\hypertarget{ref-Nosek2018}{}%
-Nosek, B. A., Ebersole, C. R., DeHaven, A. C., \& Mellor, D. T. (2018). The preregistration revolution. \emph{Proceedings of the National Academy of Sciences}. \url{https://doi.org/10.1073/pnas.1708274114}
-
-\leavevmode\hypertarget{ref-open_science_collaboration_estimating_2015}{}%
-Open Science Collaboration. (2015). Estimating the reproducibility of psychological science. \emph{Science}, \emph{349}(6251), aac4716. \url{https://doi.org/10.1126/science.aac4716}
-
 \leavevmode\hypertarget{ref-Otten2015}{}%
-Otten, J. J., Cheng, K., \& Drewnowski, A. (2015). Infographics And Public Policy: Using Data Visualization To Convey Complex Information. \emph{Health Affairs}, \emph{34}(11), 1901--1907. \url{https://doi.org/10.1377/hlthaff.2015.0642}
+Otten, J. J., Cheng, K., \& Drewnowski, A. (2015). Infographics And Public Policy: Using Data Visualization To Convey Complex Information. \emph{Health Affairs}, \emph{34}(11), 1901--1907. doi:\href{https://doi.org/10.1377/hlthaff.2015.0642}{10.1377/hlthaff.2015.0642}
 
 \leavevmode\hypertarget{ref-pandey2015deceptive}{}%
 Pandey, A. V., Rall, K., Satterthwaite, M. L., Nov, O., \& Bertini, E. (2015). How deceptive are deceptive visualizations?: An empirical analysis of common distortion techniques. In \emph{Proceedings of the 33rd annual acm conference on human factors in computing systems} (pp. 1469--1478). ACM.
 
-\leavevmode\hypertarget{ref-Pashler2012a}{}%
-Pashler, H., \& Wagenmakers, E.-J. (2012). Editors' Introduction to the Special Section on Replicability in Psychological Science. \emph{Perspectives on Psychological Science}, \emph{7}(6), 528--530. \url{https://doi.org/10.1177/1745691612465253}
-
 \leavevmode\hypertarget{ref-Pastore2017}{}%
-Pastore, M., Lionetti, F., \& Altoè, G. (2017). When one shape does not fit all: A commentary essay on the use of graphs in psychological research. Frontiers Media S.A. \url{https://doi.org/10.3389/fpsyg.2017.01666}
+Pastore, M., Lionetti, F., \& Altoè, G. (2017, September). When one shape does not fit all: A commentary essay on the use of graphs in psychological research. Frontiers Media S.A. doi:\href{https://doi.org/10.3389/fpsyg.2017.01666}{10.3389/fpsyg.2017.01666}
 
 \leavevmode\hypertarget{ref-ripley2013package}{}%
 Ripley, B., Venables, B., Bates, D. M., Hornik, K., Gebhardt, A., Firth, D., \& Ripley, M. B. (2013). Package ``mass''. \emph{Cran R}, \emph{538}.
 
 \leavevmode\hypertarget{ref-rodgers_epistemology_2010}{}%
-Rodgers, J. L. (2010). The epistemology of mathematical and statistical modeling: a quiet methodological revolution. \emph{The American Psychologist}, \emph{65}(1), 1--12. \url{https://doi.org/10.1037/a0018326}
+Rodgers, J. L. (2010). The epistemology of mathematical and statistical modeling: a quiet methodological revolution. \emph{The American Psychologist}, \emph{65}(1), 1--12. doi:\href{https://doi.org/10.1037/a0018326}{10.1037/a0018326}
 
 \leavevmode\hypertarget{ref-semetko2012sage}{}%
 Semetko, H. A., \& Scammell, M. (2012). \emph{The sage handbook of political communication}. Sage Publications.
 
 \leavevmode\hypertarget{ref-Tay2016a}{}%
-Tay, L., Parrigon, S., Huang, Q., \& LeBreton, J. M. (2016). Graphical Descriptives: A Way to Improve Data Transparency and Methodological Rigor in Psychology. \emph{Perspectives on Psychological Science}, \emph{11}(5), 692--701. \url{https://doi.org/10.1177/1745691616663875}
+Tay, L., Parrigon, S., Huang, Q., \& LeBreton, J. M. (2016). Graphical Descriptives: A Way to Improve Data Transparency and Methodological Rigor in Psychology. \emph{Perspectives on Psychological Science}, \emph{11}(5), 692--701. doi:\href{https://doi.org/10.1177/1745691616663875}{10.1177/1745691616663875}
 
 \leavevmode\hypertarget{ref-Tufte2001}{}%
 Tufte, E. R. (2001). \emph{The visual display of quantitative information}. Cheshire, CT: Graphics press.
@@ -1112,7 +1042,7 @@ Tufte, E. R. (2001). \emph{The visual display of quantitative information}. Ches
 Tukey, J. W., \& Tukey, P. A. (1990). \emph{Strips Displaying Empirical Distributions: I. Textured Dot Strips}. Bellcore.
 
 \leavevmode\hypertarget{ref-Tyron1998}{}%
-Tyron, W. W. (1998). The inscrutable null hypothesis. \emph{American Psychologist}, \emph{53}(7), 796--796. \url{https://doi.org/10.1037/0003-066X.53.7.796.b}
+Tyron, W. W. (1998). The inscrutable null hypothesis. \emph{American Psychologist}, \emph{53}(7), 796--796. doi:\href{https://doi.org/10.1037/0003-066X.53.7.796.b}{10.1037/0003-066X.53.7.796.b}
 
 \leavevmode\hypertarget{ref-umanath1994multiattribute}{}%
 Umanath, N. S., \& Vessey, I. (1994). Multiattribute data presentation and human judgment: A cognitive fit perspective. \emph{Decision Sciences}, \emph{25}(5-6), 795--824.
@@ -1124,10 +1054,118 @@ Vessey, I. (1991). Cognitive fit: A theory-based analysis of the graphs versus t
 Wainer, H. (2010). Prelude. In J. Berkson (Ed.), \emph{Semiology of graphics: Diagrams, networks, maps} (2nd ed., pp. ix--x). Redlands, CA: ESRI Press.
 
 \leavevmode\hypertarget{ref-Weissgerber2015}{}%
-Weissgerber, T. L., Milic, N. M., Winham, S. J., \& Garovic, V. D. (2015). Beyond Bar and Line Graphs: Time for a New Data Presentation Paradigm. \emph{PLoS Biology}, \emph{13}(4). \url{https://doi.org/10.1371/journal.pbio.1002128}
+Weissgerber, T. L., Milic, N. M., Winham, S. J., \& Garovic, V. D. (2015). Beyond Bar and Line Graphs: Time for a New Data Presentation Paradigm. \emph{PLoS Biology}, \emph{13}(4). doi:\href{https://doi.org/10.1371/journal.pbio.1002128}{10.1371/journal.pbio.1002128}
 
 \leavevmode\hypertarget{ref-Wickham2010}{}%
-Wickham, H. (2010). A Layered Grammar of Graphics. \emph{Journal of Computational and Graphical Statistics}, \emph{19}(1), 3--28. \url{https://doi.org/10.1198/jcgs.2009.07098}
+Wickham, H. (2010). A Layered Grammar of Graphics. \emph{Journal of Computational and Graphical Statistics}, \emph{19}(1), 3--28. doi:\href{https://doi.org/10.1198/jcgs.2009.07098}{10.1198/jcgs.2009.07098}
+
+\leavevmode\hypertarget{ref-Wilkinson1999}{}%
+Wilkinson, L. (1999). Dot plots. \emph{The American Statistician}, \emph{53}(3), 276--281.
+
+\leavevmode\hypertarget{ref-Wilkinson1999a}{}%
+Wilkinson, L., \& Task Force on Statistical Inference. (1999). Statistical Methods in Psychology Journals: Guidelines and Explanations. \emph{American Psychologist}, \emph{54}(8), 594--601.
+
+\leavevmode\hypertarget{ref-Abbott2012}{}%
+Abbott, G. R., Do, M., \& Byrne, L. K. (2012). Diminished subjective wellbeing in schizotypy is more than just negative affect. \emph{Personality and Individual Differences}, \emph{52}(8), 914--918. doi:\href{https://doi.org/10.1016/j.paid.2012.01.018}{10.1016/j.paid.2012.01.018}
+
+\leavevmode\hypertarget{ref-anscombe1973graphs}{}%
+Anscombe, F. J. (1973). Graphs in statistical analysis. \emph{The American Statistician}, \emph{27}(1), 17--21.
+
+\leavevmode\hypertarget{ref-Breheny}{}%
+Breheny, P., \& Burchett, W. (2017). Visualization of Regression Models Using visreg. \emph{The R Journal}, 56--71. doi:\href{https://doi.org/10.32614/rj-2017-046}{10.32614/rj-2017-046}
+
+\leavevmode\hypertarget{ref-Camargo2015}{}%
+Camargo, K., \& Grant, R. (2015). Public health, science, and policy debate: being right is not enough. \emph{American Journal of Public Health}, \emph{105}(2), 232--5. doi:\href{https://doi.org/10.2105/AJPH.2014.302241}{10.2105/AJPH.2014.302241}
+
+\leavevmode\hypertarget{ref-Cleveland1994}{}%
+Cleveland, W. S. (1994). Coplots, nonparametric regression, and conditionally parametric fits. \emph{Lecture Notes-Monograph Series}, 21--36.
+
+\leavevmode\hypertarget{ref-cohen_earth_1994}{}%
+Cohen, J. (1994). The earth is round (p \textless{} .05). \emph{American Psychologist}, \emph{49}(12), 997--1003. doi:\href{https://doi.org/10.1037/0003-066X.49.12.997}{10.1037/0003-066X.49.12.997}
+
+\leavevmode\hypertarget{ref-Correll2015}{}%
+Correll, M. A. (2015). \emph{Visual Statistics} (Doctoral Dissertation). University of Wisconsin-Madison.
+
+\leavevmode\hypertarget{ref-eklund2012beeswarm}{}%
+Eklund, A. (2012). Beeswarm: The bee swarm plot, an alternative to stripchart. \emph{R Package Version 0.1}, \emph{5}.
+
+\leavevmode\hypertarget{ref-Fife2019e}{}%
+Fife, D. A. (2020). The Eight Steps of Data Analysis: A Graphical Framework to Promote Sound Statistical Analysis. \emph{Perspectives on Psychological Science}, \emph{15}(4). doi:\href{https://doi.org/https://doi.org/10.1177/1745691620917333}{https://doi.org/10.1177/1745691620917333}
+
+\leavevmode\hypertarget{ref-fife2020bb}{}%
+Fife, D. A., Longo, G., Correll, M., \& Tremoulet, P. (2020). A graph for every analysis: Mapping visuals onto common analyses. \emph{Behavioral Research Methods}.
+
+\leavevmode\hypertarget{ref-Fife2019d}{}%
+Fife, D. A., Tremoulet, P., \& Longo, G. (2019). \emph{Developing and Empirically Validating Flexplot: A Tool for Mapping Statistical Analyses into Graphical Presentation}. Chicago, IL: American Psychological Association.
+
+\leavevmode\hypertarget{ref-Gigerenzer2004}{}%
+Gigerenzer, G. (2004). Mindless statistics. \emph{The Journal of Socio-Economics}, \emph{33}(5), 587--606. doi:\href{https://doi.org/10.1016/J.SOCEC.2004.09.033}{10.1016/J.SOCEC.2004.09.033}
+
+\leavevmode\hypertarget{ref-Hansen}{}%
+Hansen, C. D., Chen, M., Johnson, C. R., Kaufman, A. E., \& Hagen, H. (2014). \emph{Scientific Visualization: Uncertainty, Multifield, Biomedical, and Scalable Visualization}. London: Springer. Retrieved from \url{http://www.springer.com/series/4562}
+
+\leavevmode\hypertarget{ref-Healy2014a}{}%
+Healy, K., \& Moody, J. (2014). Data Visualization in Sociology. \emph{Annual Review of Sociology}, \emph{40}(1), 105--128. doi:\href{https://doi.org/10.1146/ANNUREV-SOC-071312-145551}{10.1146/ANNUREV-SOC-071312-145551}
+
+\leavevmode\hypertarget{ref-hoekstra_are_2012}{}%
+Hoekstra, R., Kiers, H., \& Johnson, A. (2012). Are Assumptions of Well-Known Statistical Techniques Checked, and Why Not? \emph{Frontiers in Psychology}, \emph{3}(137). doi:\href{https://doi.org/10.3389/fpsyg.2012.00137}{10.3389/fpsyg.2012.00137}
+
+\leavevmode\hypertarget{ref-inbar2007minimalism}{}%
+Inbar, O., Tractinsky, N., \& Meyer, J. (2007). Minimalism in information visualization: Attitudes towards maximizing the data-ink ratio. In \emph{ECCE} (Vol. 7, pp. 185--188).
+
+\leavevmode\hypertarget{ref-Kosslyn2006e}{}%
+Kosslyn, S. M. (2006). \emph{Graph design for eye and mind}. New York, NY: Oxford University Press.
+
+\leavevmode\hypertarget{ref-Levine2018}{}%
+Levine, S. S. (2018). Show us your data: Connect the dots, improve science. \emph{Management and Organization Review}, \emph{14}(2), 433--437. doi:\href{https://doi.org/10.1017/mor.2018.19}{10.1017/mor.2018.19}
+
+\leavevmode\hypertarget{ref-marieb1992human}{}%
+Marieb, E. N. (1992). Human anatomy and physiology. Redwood city. \emph{CA: Benjamin/Cummings Publishing Company, Ine}, \emph{1}(992), 306--307.
+
+\leavevmode\hypertarget{ref-Otten2015}{}%
+Otten, J. J., Cheng, K., \& Drewnowski, A. (2015). Infographics And Public Policy: Using Data Visualization To Convey Complex Information. \emph{Health Affairs}, \emph{34}(11), 1901--1907. doi:\href{https://doi.org/10.1377/hlthaff.2015.0642}{10.1377/hlthaff.2015.0642}
+
+\leavevmode\hypertarget{ref-pandey2015deceptive}{}%
+Pandey, A. V., Rall, K., Satterthwaite, M. L., Nov, O., \& Bertini, E. (2015). How deceptive are deceptive visualizations?: An empirical analysis of common distortion techniques. In \emph{Proceedings of the 33rd annual acm conference on human factors in computing systems} (pp. 1469--1478). ACM.
+
+\leavevmode\hypertarget{ref-Pastore2017}{}%
+Pastore, M., Lionetti, F., \& Altoè, G. (2017, September). When one shape does not fit all: A commentary essay on the use of graphs in psychological research. Frontiers Media S.A. doi:\href{https://doi.org/10.3389/fpsyg.2017.01666}{10.3389/fpsyg.2017.01666}
+
+\leavevmode\hypertarget{ref-ripley2013package}{}%
+Ripley, B., Venables, B., Bates, D. M., Hornik, K., Gebhardt, A., Firth, D., \& Ripley, M. B. (2013). Package ``mass''. \emph{Cran R}, \emph{538}.
+
+\leavevmode\hypertarget{ref-rodgers_epistemology_2010}{}%
+Rodgers, J. L. (2010). The epistemology of mathematical and statistical modeling: a quiet methodological revolution. \emph{The American Psychologist}, \emph{65}(1), 1--12. doi:\href{https://doi.org/10.1037/a0018326}{10.1037/a0018326}
+
+\leavevmode\hypertarget{ref-semetko2012sage}{}%
+Semetko, H. A., \& Scammell, M. (2012). \emph{The sage handbook of political communication}. Sage Publications.
+
+\leavevmode\hypertarget{ref-Tay2016a}{}%
+Tay, L., Parrigon, S., Huang, Q., \& LeBreton, J. M. (2016). Graphical Descriptives: A Way to Improve Data Transparency and Methodological Rigor in Psychology. \emph{Perspectives on Psychological Science}, \emph{11}(5), 692--701. doi:\href{https://doi.org/10.1177/1745691616663875}{10.1177/1745691616663875}
+
+\leavevmode\hypertarget{ref-Tufte2001}{}%
+Tufte, E. R. (2001). \emph{The visual display of quantitative information}. Cheshire, CT: Graphics press.
+
+\leavevmode\hypertarget{ref-Tukey1990}{}%
+Tukey, J. W., \& Tukey, P. A. (1990). \emph{Strips Displaying Empirical Distributions: I. Textured Dot Strips}. Bellcore.
+
+\leavevmode\hypertarget{ref-Tyron1998}{}%
+Tyron, W. W. (1998). The inscrutable null hypothesis. \emph{American Psychologist}, \emph{53}(7), 796--796. doi:\href{https://doi.org/10.1037/0003-066X.53.7.796.b}{10.1037/0003-066X.53.7.796.b}
+
+\leavevmode\hypertarget{ref-umanath1994multiattribute}{}%
+Umanath, N. S., \& Vessey, I. (1994). Multiattribute data presentation and human judgment: A cognitive fit perspective. \emph{Decision Sciences}, \emph{25}(5-6), 795--824.
+
+\leavevmode\hypertarget{ref-vessey1991cognitive}{}%
+Vessey, I. (1991). Cognitive fit: A theory-based analysis of the graphs versus tables literature. \emph{Decision Sciences}, \emph{22}(2), 219--240.
+
+\leavevmode\hypertarget{ref-Wainer2010}{}%
+Wainer, H. (2010). Prelude. In J. Berkson (Ed.), \emph{Semiology of graphics: Diagrams, networks, maps} (2nd ed., pp. ix--x). Redlands, CA: ESRI Press.
+
+\leavevmode\hypertarget{ref-Weissgerber2015}{}%
+Weissgerber, T. L., Milic, N. M., Winham, S. J., \& Garovic, V. D. (2015). Beyond Bar and Line Graphs: Time for a New Data Presentation Paradigm. \emph{PLoS Biology}, \emph{13}(4). doi:\href{https://doi.org/10.1371/journal.pbio.1002128}{10.1371/journal.pbio.1002128}
+
+\leavevmode\hypertarget{ref-Wickham2010}{}%
+Wickham, H. (2010). A Layered Grammar of Graphics. \emph{Journal of Computational and Graphical Statistics}, \emph{19}(1), 3--28. doi:\href{https://doi.org/10.1198/jcgs.2009.07098}{10.1198/jcgs.2009.07098}
 
 \leavevmode\hypertarget{ref-Wilkinson1999}{}%
 Wilkinson, L. (1999). Dot plots. \emph{The American Statistician}, \emph{53}(3), 276--281.
@@ -1137,6 +1175,5 @@ Wilkinson, L., \& Task Force on Statistical Inference. (1999). Statistical Metho
 \end{cslreferences}
 
 \endgroup
-
 
 \end{document}

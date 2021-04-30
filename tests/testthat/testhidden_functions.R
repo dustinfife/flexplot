@@ -234,7 +234,22 @@ test_that("check_all_variables_exist_in_data works", {
   expect_error(check_all_variables_exist_in_data(c("weight.loss", "therrapy.type"), exercise_data))
 })
 
+test_that("formula_functions works", {
+  a = 1:5
+  b = a*2
+  y = 1:5*.1
+  d = data.frame(a,b, y)
+  expect_true(is.factor(formula_functions(y~a + as.factor(b), d)$b))
+})
 
+test_that("perform_function works", {
+  expect_true(all(sqrt(avengers$kills) == perform_function("sqrt(kills)", avengers)))
+})
+
+test_that("get_var_names_within_function works", {
+  expect_true(get_var_names_within_function("sqrt(a)")=="a")
+  expect_true(get_var_names_within_function("sqrt(a)", return.var = F)(4)==2)
+})
 
 
 

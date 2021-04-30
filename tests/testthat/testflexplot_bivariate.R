@@ -77,6 +77,11 @@ test_that("scatterplots and options work", {
              plot.type="line",
              bins = 2))
   
+  vdiffr::expect_doppelganger(
+    "flexplot with function in formula",
+    flexplot(weight.loss ~ sqrt(motivation), 
+             data = exercise_data))  
+  
 })
 
   
