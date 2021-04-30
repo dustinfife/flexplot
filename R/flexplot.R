@@ -111,8 +111,11 @@ flexplot = function(formula, data=NULL, related=F,
 	#d = exercise_data
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
 	#ghost.reference = list(income=90000)
-
-
+  
+  # modify data if they have an equation in the formula
+  ff = formula_functions(formula, data)
+  data = ff$data; formula =ff$formula
+  
   spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   plot.type = match.arg(plot.type, c("histogram", "qq", "density", "boxplot", "violin", "line"))
   
