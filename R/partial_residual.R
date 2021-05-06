@@ -32,18 +32,18 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
 
   # compute the partial residuals
   residual = partial_residual(model, added_term) 
-  
+
   # if model is provided, use compare.fits to get actual fitted values
   if (!is.null(model)) {
     preds = suppressMessages(compare.fits(plot_formula, data=data, model1=model, return.preds=T))
     if (is.null(added_term)) model_matrix = model.matrix(model) else model_matrix = terms_to_modelmatrix(added_term, data)
     columns_to_subract = keep_singles(model.matrix(model), model_matrix)
-    if (length(columns_to_subract)>1) 
-      preds$prediction = preds$prediction - sum(coef(model)[columns_to_subract]*colMeans(model.matrix(model)[,columns_to_subract])) #- coef(model)[1] 
+    if (length(columns_to_subract)>1)
+      preds$prediction = preds$prediction - (sum(coef(model)[columns_to_subract]*colMeans(model.matrix(model)[,columns_to_subract])) + coef(model)[1])
     else if (length(columns_to_subract)==1)
-      preds$prediction = preds$prediction - sum(coef(model)[columns_to_subract]*mean(model.matrix(model)[,columns_to_subract])) #- coef(model)[1] 
+      preds$prediction = preds$prediction - (sum(coef(model)[columns_to_subract]*mean(model.matrix(model)[,columns_to_subract])) + coef(model)[1])
     else 
-      preds$prediction = preds$prediction - preds$prediction
+      preds$prediction = preds$prediction
   }
 
   # replace original dv with residual
@@ -58,7 +58,6 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
   #browser()
   args = list(...)
   if (any(c("suppress_smooth", "method") %in% names(args))) return(flexplot(plot_formula, data=data, prediction = preds, ...) + labs(y=y_label))
-  
   flexplot(plot_formula, data=data, prediction = preds, suppress_smooth=T,...) +
     labs(y=y_label)
   
@@ -84,7 +83,7 @@ partial_residual = function(model, term=NULL) {
                              nrow=nrow(matrix_coded), ncol=ncol(keep_columns),
                              byrow=T)
   # return it
-  if (ncol(matrix_coded)>1) return(res + rowSums(betas_of_interest*keep_columns) )
+  if (ncol(matrix_coded)>1) return(res + rowSums(betas_of_interest*keep_columns) - coef(model)[1])
   return(res + betas_of_interest*matrix_coded)
   
 }
