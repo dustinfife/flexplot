@@ -122,6 +122,8 @@ Hadley Wickham, the author of `ggplot2`, developed a grammar of graphics [@Wickh
 
 
 ```{r, message=FALSE, echo=TRUE, warning=FALSE, options(prompt=" ", continue=" "), size="small"}
+require(ggplot2)
+require(flexplot)
 plot = ggplot(data = exercise_data, aes(x=therapy.type, y=weight.loss)) + 
       # x/y axis layer
   geom_jitter(width = .2, alpha = .4) + 
@@ -342,7 +344,7 @@ AVPs are underused, yet extremely useful.[^avp] Essentially, an AVP shows the re
 
 [^avp]: The `car` package allows users to construct AVPs, but does so with R's native plots. This means one cannot leverage the advantages of `ggplot` (e.g., layering). 
 
-`flexplot's` version of AVPs have a slightly different flavor. In my experience, AVPs can be confusing to lay audiences because the scale of the outcome variable has changed to be centered on zero; if one is expecting the outcome variable to range from 0 to 30, yet the graph shows scores from -15 to +15, this will violate users' intuitions, which will create ostacles to proper interpretation of graphics [@Kosslyn2006e]. To counter this confusion, `flexplot` adds the mean back into the residuals so the $Y$-axis retains the original scale. The notation for `added.plot()` is similar to `flexplot`, though the vertical pipes aren't necessary. By default, `flexplot` will do is take the *last* variable entered (`therapy.type` in the first example below) and plot that on the $X$ axis, while plotting the residuals of the model on the $Y$ axis (i.e., the residuals of the model `weight.loss ~ motivation`). Alternatively, one can specify either a number (indicating the ordinal position of the variable they wish to plot on the $X$ axis) or the variable name in quotes (see the latter two examples). Other arguments can be passed to `added.plot()` as well (such as `alpha`, `sample`, `method`, etc.)
+`flexplot's` version of AVPs have a slightly different flavor. In my experience, AVPs can be confusing to lay audiences because the scale of the outcome variable has changed to be centered on zero; if one is expecting the outcome variable to range from 0 to 30, yet the graph shows scores from -15 to +15, this will violate users' intuitions, which will create obstacles to proper interpretation of graphics [@Kosslyn2006e]. To counter this confusion, `flexplot` adds the mean back into the residuals so the $Y$-axis retains the original scale. The notation for `added.plot()` is similar to `flexplot`, though the vertical pipes aren't necessary. By default, `flexplot` will do is take the *last* variable entered (`therapy.type` in the first example below) and plot that on the $X$ axis, while plotting the residuals of the model on the $Y$ axis (i.e., the residuals of the model `weight.loss ~ motivation`). Alternatively, one can specify either a number (indicating the ordinal position of the variable they wish to plot on the $X$ axis) or the variable name in quotes (see the latter two examples). Other arguments can be passed to `added.plot()` as well (such as `alpha`, `sample`, `method`, etc.)
 
 ```{r, avp, message=FALSE, echo=TRUE, warning=FALSE, fig.width = 5, fig.height = 3, fig.cap = "An Added Variable Plot (AVP) showing the relationship between `therapy.type` and `weight.loss`, after controlling for `motivation`. \\label{fig:avp}", size="small"}
 added.plot(weight.loss ~ motivation + therapy.type, data = exercise_data)
@@ -374,7 +376,8 @@ Figure \@ref(fig:panels) shows the same relationships in Figure \@ref(fig:symbol
 [^foot]: I also do not show the code where I actually plot the graphics. This required some advanced manipulation of the layout and I didn't want to detract from what `flexplot` is doing. However, interested readers are welcome to see the source code of this document at https://github.com/dustinfife/flexplot/tree/master/vignettes. 
 
 ```{r, message=FALSE, echo=TRUE, warning=FALSE, size="small", eval=FALSE}
-theme_update(axis.text.x = element_text(angle=90, hjust=1, vjust=.2))
+theme_
+update(axis.text.x = element_text(angle=90, hjust=1, vjust=.2))
 a = flexplot(weight.loss ~ motivation | gender, 
              data = exercise_data) 
 b = flexplot(weight.loss ~ therapy.type | gender, 
