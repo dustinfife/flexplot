@@ -24,7 +24,7 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
   check_all_variables_exist_in_data(all.vars(plot_formula), data)
   check_all_variables_exist_in_data(all.vars(lm_formula), data)
   check_variables_in_lm(plot_formula, lm_formula, check_both = TRUE)
-  browser()
+
   # remove missing data
   variables = all.vars(lm_formula)
   data = prep_data_for_avp(data, variables)
@@ -48,7 +48,7 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     
     # select all variables in the plot
     all_variables = all.vars(plot_formula)                # all variables in flexplot formula
-    all_model_variables = all.vars(formula(model))   # all variables in model 
+    all_model_variables = all.vars(formula(model))        # all variables in model 
     not_plotted_vars = 
       all_model_variables[!all_model_variables 
                           %in% all_variables]        # variables in model, but not plot
@@ -61,10 +61,18 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
       mutate_at(not_plotted_vars, mean) %>% 
       data.frame 
     
-    
+
     # 5. identify which components go into the model
     # just use predict on the plot data
-    k$predict = predict(model, newdata=k)
+    if (!is.null(added_term)) {
+      #terms_string = attr(model.matrix(added_terms, k), "dimnames")[[2]]
+      browser()
+      head(k)
+      k$predict = rowSums(predict(model, newdata=k, terms = attr(terms(added_term), "term.labels"), type = "terms"))
+    } else {
+      k$predict = predict(model, newdata=k)
+    }
+    
     # fix the intercepts by making the means of prediction/residuals the same
     k$predict = k$predict - (mean(k$predict) - mean(data[,all.vars(lm_formula)[1]]))
     fitted_line = geom_line(data=k, aes(y=predict)) 
