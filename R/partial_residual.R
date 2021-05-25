@@ -15,7 +15,7 @@
 #' partial_residual_plot(weight.loss~therapy.type, lm_formula = weight.loss~therapy.type + motivation, 
 #'    data=exercise_data)
 partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data, 
-                                 added_term = NULL, ...) {
+                                 added_term = NULL, suppress_model=F, ...) {
 
   if (is.null(lm_formula) & is.null(model)) stop("You must provide either a lm formula or a model")
   if (is.null(lm_formula)) lm_formula = formula(model)
@@ -38,17 +38,16 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     preds = suppressMessages(compare.fits(plot_formula, data=data, model1=model, return.preds=T))
     # recenter predictions
     preds$prediction = rescale(preds$prediction, mean(data[,variables[1]]), sd(data[,variables[1]]))
-    #browser()
-    #mean(preds$prediction)
-    #mean(data$ideation)
     if (is.null(added_term)) model_matrix = model.matrix(model) else model_matrix = terms_to_modelmatrix(added_term, data)
     columns_to_subract = keep_singles(model.matrix(model), model_matrix)
     if (length(columns_to_subract)>1)
       preds$prediction = preds$prediction - (sum(coef(model)[columns_to_subract]*colMeans(model.matrix(model)[,columns_to_subract])) + coef(model)[1])
     else if (length(columns_to_subract)==1)
       preds$prediction = preds$prediction - (sum(coef(model)[columns_to_subract]*mean(model.matrix(model)[,columns_to_subract])) + coef(model)[1])
+    else if (!is.null(added_term))
+      preds$prediction = preds$prediction - mean(data[,variables[1]])+ coef(model)[1]
     else 
-      preds$prediction = preds$prediction
+      preds$prediction = 0 #preds$prediction
   }
 
   # replace original dv with residual
@@ -62,7 +61,12 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
   ## suppress smooth if they leave it on defaults
   #browser()
   args = list(...)
-  if (any(c("suppress_smooth", "method") %in% names(args))) return(flexplot(plot_formula, data=data, prediction = preds, ...) + labs(y=y_label))
+  if (any(c("suppress_smooth", "method") %in% names(args))) {
+    if (suppress_model) return(flexplot(plot_formula, data=data, ...) + labs(y=y_label))
+    return(flexplot(plot_formula, data=data, prediction = preds, ...) + labs(y=y_label))
+  }
+  
+  if (suppress_model) return(flexplot(plot_formula, data=data, suppress_smooth=T,...) + labs(y=y_label))
   flexplot(plot_formula, data=data, prediction = preds, suppress_smooth=T,...) +
     labs(y=y_label)
   

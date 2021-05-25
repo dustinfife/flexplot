@@ -3,9 +3,10 @@
 \PassOptionsToPackage{hyphens}{url}
 %
 \documentclass[
+  english,
   man]{apa6}
+\usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
@@ -37,7 +38,8 @@
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
   pdftitle={Flexplot: Graphically-Based Data Analysis},
-  pdfauthor={Dustin Fife},
+  pdfauthor={Dustin Fife1},
+  pdflang={en-EN},
   pdfkeywords={flexplot, statistical assumptions, statistical modeling, graphics, exploratory data analysis, graphical data analysis},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
@@ -99,57 +101,119 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
-\shorttitle{Flexplot: Graphically-Based Data Analysis}
-\affiliation{
-\vspace{0.5cm}
-\textsuperscript{1} Rowan University}
-\keywords{flexplot, statistical assumptions, statistical modeling, graphics, exploratory data analysis, graphical data analysis}
-\usepackage{csquotes}
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+% Manuscript styling
 \usepackage{upgreek}
 \captionsetup{font=singlespacing,justification=justified}
 
+% Table formatting
 \usepackage{longtable}
 \usepackage{lscape}
-\usepackage{multirow}
-\usepackage{tabularx}
-\usepackage[flushleft]{threeparttable}
-\usepackage{threeparttablex}
+% \usepackage[counterclockwise]{rotating}   % Landscape page setup for large tables
+\usepackage{multirow}		% Table styling
+\usepackage{tabularx}		% Control Column width
+\usepackage[flushleft]{threeparttable}	% Allows for three part tables with a specified notes section
+\usepackage{threeparttablex}            % Lets threeparttable work with longtable
 
+% Create new environments so endfloat can handle them
+% \newenvironment{ltable}
+%   {\begin{landscape}\begin{center}\begin{threeparttable}}
+%   {\end{threeparttable}\end{center}\end{landscape}}
 \newenvironment{lltable}{\begin{landscape}\begin{center}\begin{ThreePartTable}}{\end{ThreePartTable}\end{center}\end{landscape}}
 
+% Enables adjusting longtable caption width to table width
+% Solution found at http://golatex.de/longtable-mit-caption-so-breit-wie-die-tabelle-t15767.html
 \makeatletter
 \newcommand\LastLTentrywidth{1em}
 \newlength\longtablewidth
 \setlength{\longtablewidth}{1in}
 \newcommand{\getlongtablewidth}{\begingroup \ifcsname LT@\roman{LT@tables}\endcsname \global\longtablewidth=0pt \renewcommand{\LT@entry}[2]{\global\advance\longtablewidth by ##2\relax\gdef\LastLTentrywidth{##2}}\@nameuse{LT@\roman{LT@tables}} \fi \endgroup}
 
+% \setlength{\parindent}{0.5in}
+% \setlength{\parskip}{0pt plus 0pt minus 0pt}
 
+% \usepackage{etoolbox}
+\makeatletter
+\patchcmd{\HyOrg@maketitle}
+  {\section{\normalfont\normalsize\abstractname}}
+  {\section*{\normalfont\normalsize\abstractname}}
+  {}{\typeout{Failed to patch abstract.}}
+\patchcmd{\HyOrg@maketitle}
+  {\section{\protect\normalfont{\@title}}}
+  {\section*{\protect\normalfont{\@title}}}
+  {}{\typeout{Failed to patch title.}}
+\makeatother
+\shorttitle{Flexplot: Graphically-Based Data Analysis}
+\keywords{flexplot, statistical assumptions, statistical modeling, graphics, exploratory data analysis, graphical data analysis}
 \DeclareDelayedFloatFlavor{ThreePartTable}{table}
 \DeclareDelayedFloatFlavor{lltable}{table}
 \DeclareDelayedFloatFlavor*{longtable}{table}
 \makeatletter
 \renewcommand{\efloat@iwrite}[1]{\immediate\expandafter\protected@write\csname efloat@post#1\endcsname{}}
 \makeatother
+\usepackage{csquotes}
+\ifxetex
+  % Load polyglossia as late as possible: uses bidi with RTL langages (e.g. Hebrew, Arabic)
+  \usepackage{polyglossia}
+  \setmainlanguage[]{english}
+\else
+  \usepackage[main=english]{babel}
+% get rid of language-specific shorthands (see #6817):
+\let\LanguageShortHands\languageshorthands
+\def\languageshorthands#1{}
+\fi
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
-\newenvironment{cslreferences}%
-  {\setlength{\parindent}{0pt}%
-  \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces}%
-  {\par}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
+  % set entry spacing
+  \ifnum #2 > 0
+  \setlength{\parskip}{#2\baselineskip}
+  \fi
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 \title{Flexplot: Graphically-Based Data Analysis}
 \author{Dustin Fife\textsuperscript{1}}
 \date{}
 
-\authornote{I wish to thank the dozens of students who very patiently discovered bugs in the flexplot software. Your efforts have resulted in a much more robust tool. Many of the ideas and information contained in this article have been disseminated elsewhere, including at APA's annual conference and on my YouTube channel. Furthermore, Flexplot is the engine driving the visualizations in JASP and Jamovi and various publications have referenced the ideas contained within Flexplot (including blog posts both on JASP and Jamovi's website, as well as a Behavioral Research Methods publication).
 
-Correspondence concerning this article should be addressed to Dustin Fife, 201 Mullica Hill Road Glassboro, NJ 08028. E-mail: \href{mailto:fife.dustin@gmail.com}{\nolinkurl{fife.dustin@gmail.com}}}
+\authornote{
+
+I wish to thank the dozens of students who very patiently discovered bugs in the flexplot software. Your efforts have resulted in a much more robust tool. Many of the ideas and information contained in this article have been disseminated elsewhere, including at APA's annual conference and on my YouTube channel. Furthermore, Flexplot is the engine driving the visualizations in JASP and Jamovi and various publications have referenced the ideas contained within Flexplot (including blog posts both on JASP and Jamovi's website, as well as a Behavioral Research Methods publication).
+
+Correspondence concerning this article should be addressed to Dustin Fife, 201 Mullica Hill Road Glassboro, NJ 08028. E-mail: \href{mailto:fife.dustin@gmail.com}{\nolinkurl{fife.dustin@gmail.com}}
+
+}
+
+\affiliation{\vspace{0.5cm}\textsuperscript{1} Rowan University}
 
 \abstract{
 The human visual processing system has enormous bandwidth, able to interpret vast amounts of data in fractions of a second (Otten, Cheng, \& Drewnowski, 2015). Despite this amazing ability, there is a troubling lack of graphics in scientific literature (Healy \& Moody, 2014), and the graphics most traditionally used tend to bias perception in unintentional ways (Weissgerber, Milic, Winham, \& Garovic, 2015). I suspect the reason for the underuse and misuse of graphics is because sound graphs are difficult to produce with existing software (Wainer, 2010). While \texttt{ggplot2} allows immense flexibility in creating graphics, its learning curve is quite steep, and even basic graphics require multiple lines of code. \texttt{flexplot} is an R package that aims to address these issues by providing a formula-based suite of tools that simplifies and automates much of the graphical decision-making. Additionally, \texttt{flexplot} pairs well with statistical modeling, making it easy for researchers to produce graphs that map onto statistical procedures. With one-line functions, users can visualize bivariate statistical models (e.g., scatterplots for regression, beeswarm plots for ANOVA/\(t\)-tests), multivariate statistical models (e.g., ANCOVA and multiple regression), and even more sophisticated models like multi-level models and logistic regressions. Further, this package utilizes old tools (e.g., added variable plots and coplots) as well as introduces new tools for complex visualizations, including ghost lines and point sampling.
-
-
 }
+
+
 
 \begin{document}
 \maketitle
@@ -159,15 +223,15 @@ The human visual processing system has enormous bandwidth, able to interpret vas
 
 Graphics offer many advantages over traditional methods that rely on tables and reported statistics. First, graphs are perhaps the most important tool available to enhance transparency, as they provide a medium to display the data in their entirety (Pastore, Lionetti, \& Altoè, 2017; Tay, Parrigon, Huang, \& LeBreton, 2016). Audiences can see, at a glance, the appropriateness of the model, the size of the effect, and the degree of uncertainty.
 
-Furthermore, graphs improve communication between the scientific community and the public (Otten et al., 2015). Lay people can understand relatively sophisticated statistical procedures when that information is presented graphically (Correll, 2015), which may mitigate the recent uptick in scientific mistrust (Camargo \& Grant, 2015).
+Furthermore, graphs improve communication between the scientific community and the public (Otten, Cheng, \& Drewnowski, 2015). Lay people can understand relatively sophisticated statistical procedures when that information is presented graphically (Correll, 2015), which may mitigate the recent uptick in scientific mistrust (Camargo \& Grant, 2015).
 
 Another advantage of graphics is that they highlight problems with models that are masked by traditional statistical procedures, such as nonlinearity, outliers, and heteroscedasticity (Healy \& Moody, 2014; Levine, 2018). As such, graphics serve as an important diagnostic check, one that is overwhelmingly ignored by most researchers (Hoekstra, Kiers, \& Johnson, 2012).\footnote{It is possible that, while graphs are underused for \emph{presentation} of results, they might be heavily used for \emph{analysis}. Plots for analyses are often less polished and can be used to guide analytic decisions, while plots for presentation are more refined and are designed for clear communication. Both plots are important, though (arguably) the latter is more important since it allows audiences to evaluate the merits of the statistical model. Flexplot aims to have plots that are near-presentation worthy, though some tweaks may be required (e.g., changing the axis labels).} As noted by Wilkinson, ``If you assess hypotheses without examining your data, you risk publishing nonsense'' (Wilkinson \& Task Force on Statistical Inference, 1999, p. 597).
 
-Finally, and perhaps most importantly, graphics improve encoding (Hansen, Chen, Johnson, Kaufman, \& Hagen, 2014). Nearly half of the brain is devoted to visual processing, and human visual processing can encode information in as little as a tenth of a second (Abbott, Do, \& Byrne, 2012; Marieb, 1992; Otten et al., 2015; Semetko \& Scammell, 2012). Consider the image displayed in Figure \ref{fig:smiley}, taken from Correll (2015). The table on the left presents the same information as the one on the right, though the encoding of the information on the right is much easier because that information is conveyed \emph{visually.}
+Finally, and perhaps most importantly, graphics improve encoding (Hansen, Chen, Johnson, Kaufman, \& Hagen, 2014). Nearly half of the brain is devoted to visual processing, and human visual processing can encode information in as little as a tenth of a second (Abbott, Do, \& Byrne, 2012; Marieb, 1992; Otten, Cheng, \& Drewnowski, 2015; Semetko \& Scammell, 2012). Consider the image displayed in Figure \ref{fig:smiley}, taken from Correll (2015). The table on the left presents the same information as the one on the right, though the encoding of the information on the right is much easier because that information is conveyed \emph{visually.}
 
 \begin{figure}
 \centering
-\includegraphics{images/smiley.png}
+\includegraphics{images/screenshots/smiley.png}
 \caption{A table of numbers on the left, and a color-coded table on the right, where the 2's have been highlighted in yellow. With the color, a pattern emerges that was not easy to see without the graphic. Figure used with permission from Correll (2015).}
 \label{fig:smiley}
 \end{figure}
@@ -180,7 +244,7 @@ Finally, and perhaps most importantly, graphics improve encoding (Hansen, Chen, 
 
 While visualizations have many advantages, they can also be used to mislead, sometimes intentionally, and sometimes not (Correll, 2015; Kosslyn, 2006; Pandey, Rall, Satterthwaite, Nov, \& Bertini, 2015). For example, when means/standard errors are presented as barcharts, people tend to judge values below the mean (i.e., within the confines of the bar) as far more likely than values above the mean, even when the underlying distribution is symmetric (Correll, 2015). To further complicate matters, the default images in most point-and-click statistical software violate important visualization heuristics (Fife, Tremoulet, \& Longo, 2019; Healy \& Moody, 2014; Wainer, 2010). For example, in \texttt{SPSS} it is impossible (as far as I know) to produce standard error plots that display raw data (jittered or otherwise). Also, in standard error plots, the axes are scaled to the means, not the range of the actual data, which visually inflates the size of the effect. In addition, producing some types of graphics (e.g., Skew-Location plots) requires more effort than many are willing to perform (the user must model the data, export the residuals, then produce a scatterplot).
 
-This paper introduces \texttt{flexplot}, an R package specifically designed to remove obstacles to sound visualizations. The graphics produced by \texttt{flexplot} were developed using empirically-derived heurstics (see Fife et al., 2020 for a review). Also, the graphics produced are simple to generate and permit analysts to quickly shift between statistical modeling and graphical interpretation.
+This paper introduces \texttt{flexplot}, an R package specifically designed to remove obstacles to sound visualizations. The graphics produced by \texttt{flexplot} were developed using empirically-derived heurstics (see Fife, Longo, Correll, \& Tremoulet, 2020 for a review). Also, the graphics produced are simple to generate and permit analysts to quickly shift between statistical modeling and graphical interpretation.
 
 In the following section, I begin by outlining the guiding philosophy behind \texttt{flexplot}, then introduce its grammar. I then spend the remainder of the paper demonstrating how to produce intuitive graphics with \texttt{flexplot} and illustrate how to pair these tools with statistical modeling.
 
@@ -191,7 +255,7 @@ The traditional approach to data analysis requires a great deal of decision-maki
 
 This approach has been routinely criticized (Cohen, 1994; Gigerenzer, 2004; Tyron, 1998), particularly in how results are interpreted (significant versus not). While the traditional approach requires great effort to choose the analysis and little effort to interpret it, \texttt{flexplot} takes the opposite approach: little effort is required to \emph{choose} the analysis, leaving more resources to \emph{interpret} the analysis. This is as it should be.
 
-To accomplish this goal, \texttt{flexplot} is based on the following principles (Fife et al., 2020):
+To accomplish this goal, \texttt{flexplot} is based on the following principles (Fife, Longo, Correll, \& Tremoulet, 2020):
 
 \emph{1. Minimize obstacles to producing graphics.} The easier it is to produce graphics, the more likely they will be used, and the more resources the researcher will have available to interpret the results. Technology companies spend millions of dollars attempting to make the interaction between humans and technology as seamless as possible. One-click purchasing, voice-activated personal assistants like Siri, movies-on-demand, and audible app notifications are all innovations that are successful because they make it easy for humans to use their technology. Likewise, if producing a graphic is as simple (or simpler) than performing a statistical analysis, they too will become heavily utilized (and, dare I say, addictive?). Furthermore, the less effort required to produce them, the more resources available to invest in \emph{interpreting} graphics. To make producing graphics as simple as possible, \texttt{flexplot} automates much of the decision-making in the background, such as choosing between types of graphics (e.g., histograms versus bar charts) and how those graphics are displayed.
 
@@ -206,16 +270,18 @@ Hadley Wickham, the author of \texttt{ggplot2}, developed a grammar of graphics 
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{plot =}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ exercise\_data, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{therapy.type, }\DataTypeTok{y=}\NormalTok{weight.loss)) }\OperatorTok{+}\StringTok{ }
-\StringTok{      }\CommentTok{\# x/y axis layer}
-\StringTok{  }\KeywordTok{geom\_jitter}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.4}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{      }\CommentTok{\# point layer}
-\StringTok{  }\KeywordTok{stat\_summary}\NormalTok{(}\DataTypeTok{fun.y =} \StringTok{\textquotesingle{}mean\textquotesingle{}}\NormalTok{, }\DataTypeTok{geom =} \StringTok{\textquotesingle{}point\textquotesingle{}}\NormalTok{, }
-        \DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{position =} \KeywordTok{position\_dodge}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.2}\NormalTok{)) }\OperatorTok{+}\StringTok{ }
-\StringTok{      }\CommentTok{\# summary point layer}
-\StringTok{  }\KeywordTok{stat\_summary}\NormalTok{(}\DataTypeTok{geom =} \StringTok{\textquotesingle{}errorbar\textquotesingle{}}\NormalTok{, }\DataTypeTok{fun.ymin =} \ControlFlowTok{function}\NormalTok{(z)\{}\KeywordTok{mean}\NormalTok{(z)}\OperatorTok{{-}}\FloatTok{1.96}\OperatorTok{*}\KeywordTok{sd}\NormalTok{(z)\}, }
-        \DataTypeTok{fun.ymax=}\ControlFlowTok{function}\NormalTok{(z) \{}\KeywordTok{mean}\NormalTok{(z)}\OperatorTok{+}\FloatTok{1.96}\OperatorTok{*}\KeywordTok{sd}\NormalTok{(z)\}, }
-        \DataTypeTok{size =} \FloatTok{1.25}\NormalTok{, }\DataTypeTok{width =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{position =} \KeywordTok{position\_dodge}\NormalTok{(}\DataTypeTok{width =} \FloatTok{.2}\NormalTok{))  }
+\FunctionTok{require}\NormalTok{(ggplot2)}
+\FunctionTok{require}\NormalTok{(flexplot)}
+\NormalTok{plot }\OtherTok{=} \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =}\NormalTok{ exercise\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{therapy.type, }\AttributeTok{y=}\NormalTok{weight.loss)) }\SpecialCharTok{+} 
+      \CommentTok{\# x/y axis layer}
+  \FunctionTok{geom\_jitter}\NormalTok{(}\AttributeTok{width =}\NormalTok{ .}\DecValTok{2}\NormalTok{, }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{4}\NormalTok{) }\SpecialCharTok{+} 
+      \CommentTok{\# point layer}
+  \FunctionTok{stat\_summary}\NormalTok{(}\AttributeTok{fun.y =} \StringTok{\textquotesingle{}mean\textquotesingle{}}\NormalTok{, }\AttributeTok{geom =} \StringTok{\textquotesingle{}point\textquotesingle{}}\NormalTok{, }
+        \AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{position =} \FunctionTok{position\_dodge}\NormalTok{(}\AttributeTok{width =}\NormalTok{ .}\DecValTok{2}\NormalTok{)) }\SpecialCharTok{+} 
+      \CommentTok{\# summary point layer}
+  \FunctionTok{stat\_summary}\NormalTok{(}\AttributeTok{geom =} \StringTok{\textquotesingle{}errorbar\textquotesingle{}}\NormalTok{, }\AttributeTok{fun.ymin =} \ControlFlowTok{function}\NormalTok{(z)\{}\FunctionTok{mean}\NormalTok{(z)}\SpecialCharTok{{-}}\FloatTok{1.96}\SpecialCharTok{*}\FunctionTok{sd}\NormalTok{(z)\}, }
+        \AttributeTok{fun.ymax=}\ControlFlowTok{function}\NormalTok{(z) \{}\FunctionTok{mean}\NormalTok{(z)}\SpecialCharTok{+}\FloatTok{1.96}\SpecialCharTok{*}\FunctionTok{sd}\NormalTok{(z)\}, }
+        \AttributeTok{size =} \FloatTok{1.25}\NormalTok{, }\AttributeTok{width =}\NormalTok{ .}\DecValTok{2}\NormalTok{, }\AttributeTok{position =} \FunctionTok{position\_dodge}\NormalTok{(}\AttributeTok{width =}\NormalTok{ .}\DecValTok{2}\NormalTok{))  }
       \CommentTok{\# "errorbar" layer}
 \end{Highlighting}
 \end{Shaded}
@@ -230,7 +296,7 @@ As noted earlier, the more difficult it is to produce a graphic, the more likely
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{plot =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data)}
+\NormalTok{plot }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -241,14 +307,14 @@ Naturally, this simplicity comes at a cost; \texttt{flexplot} is more limited th
 \hypertarget{the-grammar-of-the-general-linear-model}{%
 \section{The Grammar of the General Linear Model}\label{the-grammar-of-the-general-linear-model}}
 
-\texttt{flexplot}'s grammar is also a layered grammar (but incidentally, because it was developed within \texttt{ggplot2}'s grammar), though its grammar is actually based on the general linear model (GLM).\footnote{The package \texttt{vizreg} (Breheny \& Burchett, 2017) is another R package that provides seamless integration with linear models.} Recall that most statistical procedures are subsumed within the GLM, which is essentially regression. For example, a \(t\)-test is simply a regression where the intercept is the mean of the referent group (e.g., the control group) and the slope is simply the difference between the treatment and control groups. The base \texttt{R} function \texttt{lm} utilizes GLMs to do various sorts of modeling, and all this is accomplished using a simple formula (e.g., \texttt{y\ \textasciitilde{}\ x1\ +\ x2}). Likewise, \texttt{flexplot} adopts the same convention, utilizing a similar formula to produce graphics. The advantage of this approach is that there is notational consistency from modeling to visualization. Very often the exact code used to produce a fitted model can also be used to visualize the data, as in the following example:
+\texttt{flexplot}'s grammar is also a layered grammar (but incidentally, because it was developed within \texttt{ggplot2}'s grammar), though its grammar is actually based on the linear model (LM).\footnote{The package \texttt{vizreg} (Breheny \& Burchett, 2017) is another R package that provides seamless integration with linear models.} Recall that most statistical procedures are subsumed within the LM, which is essentially regression. For example, a \(t\)-test is simply a regression where the intercept is the mean of the referent group (e.g., the control group) and the slope is simply the difference between the treatment and control groups. The base \texttt{R} function \texttt{lm} utilizes LMs to do various sorts of modeling, and all this is accomplished using a simple formula (e.g., \texttt{y\ \textasciitilde{}\ x1\ +\ x2}). Likewise, \texttt{flexplot} adopts the same convention, utilizing a similar formula to produce graphics. The advantage of this approach is that there is notational consistency from modeling to visualization. Very often the exact code used to produce a fitted model can also be used to visualize the data, as in the following example:
 
 \small
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{model =}\StringTok{       }\KeywordTok{lm}\NormalTok{(A }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{B }\OperatorTok{+}\StringTok{ }\NormalTok{C, }\DataTypeTok{data =}\NormalTok{ d)}
-\NormalTok{plot  =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(A }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{B }\OperatorTok{+}\StringTok{ }\NormalTok{C, }\DataTypeTok{data =}\NormalTok{ d)}
+\NormalTok{model }\OtherTok{=}       \FunctionTok{lm}\NormalTok{(A }\SpecialCharTok{\textasciitilde{}}\NormalTok{ B }\SpecialCharTok{+}\NormalTok{ C, }\AttributeTok{data =}\NormalTok{ d)}
+\NormalTok{plot  }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(A }\SpecialCharTok{\textasciitilde{}}\NormalTok{ B }\SpecialCharTok{+}\NormalTok{ C, }\AttributeTok{data =}\NormalTok{ d)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -258,7 +324,7 @@ This simplifies the choice of graphics immensely; one only needs to specify the 
 
 Figure \ref{fig:flexplotgrammar} is an illustration that identifies which components of a \texttt{flexplot} equation produce each element of a \texttt{flexplot}-style graphic. The first variable in the equation (\(X1\)) specifies which variable is displayed on the \(X\) axis. The second variable (\(X2\)) is displayed as different colors/symbols/lines. The third and fourth elements are shown as column and row panels, respectively.
 
-By following the grammar of a GLM, there is consistency between statistical modeling and graphing, with a few notable exceptions. Most obviously, a GLM equation (e.g., \texttt{plot(y\ \textasciitilde{}\ x1\ +\ x2\ +\ x3,\ data\ =\ data)}) does not have any vertical pipes (\texttt{\textbar{}}) as \texttt{flexplot} does. This is necessary in \texttt{flexplot} to allow more specificity in paneling. Additionally, with GLMs, one must explicitly specify interaction (e.g., \texttt{X1:X2}) and polynomial terms (e.g., \texttt{I(X2\^{}2)}). This is not necessary with \texttt{flexplot}; the raw data are displayed exactly as they are and if interactions are present, the graph will show it.
+By following the grammar of a LM, there is consistency between statistical modeling and graphing, with a few notable exceptions. Most obviously, a LM formula (e.g., \texttt{plot(y\ \textasciitilde{}\ x1\ +\ x2\ +\ x3,\ data\ =\ data)}) does not have any vertical pipes (\texttt{\textbar{}}) as \texttt{flexplot} does (though other modeling procedures and R packages do, such as mixed models in \texttt{lmer}; coplots in the \texttt{car} packages; and the \texttt{visreg} package). The vertical pipe is necessary in \texttt{flexplot} to allow more specificity in paneling. Additionally, with LMs, one must explicitly specify interaction (e.g., \texttt{X1:X2}) and polynomial terms (e.g., \texttt{I(X2\^{}2)}). This is not necessary with \texttt{flexplot}; the raw data are displayed exactly as they are and if interactions are present, the graph will show it.
 
 \begin{figure}
 \centering
@@ -280,14 +346,13 @@ In \texttt{lm()}, one can fit an ``intercept only'' model, using the code \textt
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{require}\NormalTok{(patchwork) }\CommentTok{\#\#\#\# for combining plots into one}
-\KeywordTok{require}\NormalTok{(flexplot)}
-\KeywordTok{data}\NormalTok{(exercise\_data) }\CommentTok{\#\#\#\# these are simulated data available }
-                    \CommentTok{\#\#\#\# in flexplot. Please don\textquotesingle{}t base your }
-                    \CommentTok{\#\#\#\# weight loss program on this dataset}
-\NormalTok{a =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\DecValTok{1}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ exercise\_data)}
-\NormalTok{b =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(therapy.type }\OperatorTok{\textasciitilde{}}\StringTok{ }\DecValTok{1}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ exercise\_data)}
-\NormalTok{a }\OperatorTok{+}\StringTok{ }\NormalTok{b}
+\FunctionTok{require}\NormalTok{(patchwork) }\DocumentationTok{\#\#\#\# for combining plots into one}
+\FunctionTok{require}\NormalTok{(flexplot)}
+\FunctionTok{data}\NormalTok{(exercise\_data) }\DocumentationTok{\#\#\#\# these are simulated data available }
+                    \DocumentationTok{\#\#\#\# in flexplot. }
+\NormalTok{a }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}} \DecValTok{1}\NormalTok{, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
+\NormalTok{b }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(therapy.type }\SpecialCharTok{\textasciitilde{}} \DecValTok{1}\NormalTok{, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
+\NormalTok{a }\SpecialCharTok{+}\NormalTok{ b}
 \end{Highlighting}
 \end{Shaded}
 
@@ -311,7 +376,7 @@ In \texttt{lm()}, one can fit an ``intercept only'' model, using the code \textt
 
 \normalsize
 
-Sometimes, \texttt{flexplot} will make a wrong guess, if, for example, a categorical variable is recorded as a number (e.g., 1 = Group 1, 2 = Group 2, 3 = Group 3). To force \texttt{flexplot} to produce a barchart, simply convert the variable to a factor (e.g., \texttt{data\$group\ =\ factor(data\$group,\ levels\ =\ 1:3,\ labels\ =\ c("Group1",\ "Group2",\ "Group3"))}).
+Sometimes, \texttt{flexplot} will make a wrong guess, if, for example, a categorical variable is recorded as a number (e.g., 1 = Group 1, 2 = Group 2, 3 = Group 3). To force \texttt{flexplot} to produce a barchart, one can either convert the variable to a factor (e.g., \texttt{data\$group\ =\ factor(data\$group,\ levels\ =\ 1:3,\ labels\ =\ c("Group1",\ "Group2",\ "Group3"))}). Alternatively, one can use the \texttt{factor} function within a \texttt{flexplot} function (e.g., \texttt{flexplot(y\textasciitilde{}factor(group),\ data=d)}).
 
 \hypertarget{bivariate-graphics}{%
 \section{Bivariate Graphics}\label{bivariate-graphics}}
@@ -325,7 +390,7 @@ Visualizing raw data can become tricky, particularly when categorical variables 
 \hypertarget{categorical-predictor-numeric-outcome-beeswarm-plots}{%
 \subsection{Categorical Predictor, Numeric Outcome (Beeswarm Plots)}\label{categorical-predictor-numeric-outcome-beeswarm-plots}}
 
-There are many different ways to graph a categorical predictor/numeric outcome relationship, including bar plots of means, box plots, violin plots, gradient plots, etc. Some are misleading (e.g., barplots of means and standard error plots). Others are mediocre (e.g., boxplots). Finally, some perform exceptionally well in human testing, including violin plots and gradient plots (Correll, 2015). As mentioned in the previous section, raw data are essential. To minimize overlap, a common strategy is to utilize ``jittering,'' which means that categorical variables are first converted to values (e.g., control group = 1, treatment group = 2), then random noise is added to each participant's score (e.g., a 1 may become 1.012 or 0.097). This reduces overlap between datapoints. However, simply jittering values uniformly robs one of a valuable opportunity to convey additional information in a graphic. \texttt{flexplot} instead jitters data proportional to the density of the data. In other words, regions of little density will have very little jittering and regions of high density (e.g., at the mode) will have more jittering. These sorts of plots are essentially violin plots with raw data, where the maximum amount of jittering is the outline of the violin plot. Traditionally, these were called ``textured dot strips,'' which were invented by Tukey \& Tukey (1990; see also Wilkinson, 1999). Others (e.g., Eklund, 2012) call them ``bee swarm'' plots. I am not too fond of the original name, so I'll refer to them as bee swarm plots throughout this text.
+There are many different ways to graph a categorical predictor/numeric outcome relationship, including bar plots of means, box plots, violin plots, gradient plots, etc. Some are misleading (e.g., barplots of means and standard error plots). Others are mediocre (e.g., boxplots). Finally, some perform exceptionally well in human testing, including violin plots and gradient plots (Correll, 2015). As mentioned in the previous section, raw data are essential. To minimize overlap, a common strategy is to utilize ``jittering,'' which means that categorical variables are first converted to values (e.g., control group = 1, treatment group = 2), then random noise is added to each participant's score (e.g., a 1 may become 1.012 or 0.097). This reduces overlap between datapoints. However, simply jittering values uniformly robs one of a valuable opportunity to convey additional information in a graphic. \texttt{flexplot} instead jitters data proportional to the density of the data. In other words, regions of little density will have very little jittering and regions of high density (e.g., at the mode) will have more jittering. These sorts of plots are essentially violin plots with raw data, where the maximum amount of jittering is the outline of the violin plot. Traditionally, these were called ``textured dot strips,'' which were invented by Tukey and Tukey (1990; see also Wilkinson, 1999). Others (e.g., Eklund, 2012) call them ``bee swarm'' plots. I am not too fond of the original name, so I'll refer to them as bee swarm plots throughout this text.
 
 While violin plots partially solve the problem mentioned earlier (i.e., that summary statistics can be generated from a diverse set of patterns of raw data), they too have their limitations. For one, it is impossible to tell the difference between a dataset with 15,000 versus 15 observations. For example, the two distributions in the left image in Figure \ref{fig:raw} look essentially the same, while the same data, plotted as beeswarm plots, very clearly show the sample size.
 
@@ -333,15 +398,15 @@ While violin plots partially solve the problem mentioned earlier (i.e., that sum
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{group1 =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{6}\NormalTok{)}
-\NormalTok{group2 =}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DecValTok{10000}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{1}\NormalTok{)}
-\NormalTok{d =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{score =} \KeywordTok{c}\NormalTok{(group1, group2), }
-               \DataTypeTok{group =} \KeywordTok{factor}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\StringTok{"group 1"}\NormalTok{, }\DataTypeTok{times =} \KeywordTok{length}\NormalTok{(group1)), }
-                       \KeywordTok{rep}\NormalTok{(}\StringTok{"group 2"}\NormalTok{, }\DataTypeTok{times =} \KeywordTok{length}\NormalTok{(group2))), }\DataTypeTok{ordered=}\NormalTok{T))}
-\NormalTok{a =}\StringTok{ }\NormalTok{ggplot2}\OperatorTok{::}\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ d, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ group, }\DataTypeTok{y =}\NormalTok{ score)) }\OperatorTok{+}\StringTok{  }
-\StringTok{  }\KeywordTok{geom\_violin}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{theme\_bw}\NormalTok{()}
-\NormalTok{b =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(score }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{group, }\DataTypeTok{data =}\NormalTok{ d)}
-\NormalTok{a }\OperatorTok{+}\StringTok{ }\NormalTok{b}
+\NormalTok{group1 }\OtherTok{=} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{6}\NormalTok{)}
+\NormalTok{group2 }\OtherTok{=} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{10000}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{1}\NormalTok{)}
+\NormalTok{d }\OtherTok{=} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{score =} \FunctionTok{c}\NormalTok{(group1, group2), }
+               \AttributeTok{group =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\StringTok{"group 1"}\NormalTok{, }\AttributeTok{times =} \FunctionTok{length}\NormalTok{(group1)), }
+                       \FunctionTok{rep}\NormalTok{(}\StringTok{"group 2"}\NormalTok{, }\AttributeTok{times =} \FunctionTok{length}\NormalTok{(group2))), }\AttributeTok{ordered=}\NormalTok{T))}
+\NormalTok{a }\OtherTok{=}\NormalTok{ ggplot2}\SpecialCharTok{::}\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =}\NormalTok{ d, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ group, }\AttributeTok{y =}\NormalTok{ score)) }\SpecialCharTok{+}  
+  \FunctionTok{geom\_violin}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{()}
+\NormalTok{b }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(score }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group, }\AttributeTok{data =}\NormalTok{ d)}
+\NormalTok{a }\SpecialCharTok{+}\NormalTok{ b}
 \end{Highlighting}
 \end{Shaded}
 
@@ -364,19 +429,17 @@ Users can also specify what the ``whiskers'' mean for the summary statistics. Th
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{a =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data, }
-              \DataTypeTok{jitter =}\NormalTok{ F, }\DataTypeTok{spread =} \StringTok{"quartile"}\NormalTok{) }\OperatorTok{+}
-\StringTok{              }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{""}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{              }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{90}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{))}
-\NormalTok{b =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data, }
-              \DataTypeTok{jitter =} \KeywordTok{c}\NormalTok{(.}\DecValTok{4}\NormalTok{,.}\DecValTok{5}\NormalTok{), }\DataTypeTok{spread =} \StringTok{"sterr"}\NormalTok{) }\OperatorTok{+}
-\StringTok{              }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{""}\NormalTok{)}\OperatorTok{+}
-\StringTok{              }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{90}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{))  }
-\NormalTok{c =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data, }
-              \DataTypeTok{jitter =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{spread =} \StringTok{"stdev"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{              }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{""}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{              }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{90}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{))  }
-\NormalTok{a }\OperatorTok{+}\StringTok{ }\NormalTok{b }\OperatorTok{+}\StringTok{ }\NormalTok{c }\OperatorTok{+}\StringTok{ }\KeywordTok{plot\_layout}\NormalTok{(}\DataTypeTok{nrow =} \DecValTok{1}\NormalTok{)}
+\FunctionTok{theme\_update}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle=}\DecValTok{90}\NormalTok{, }\AttributeTok{hjust=}\DecValTok{100}\NormalTok{))}
+\NormalTok{a }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data, }
+              \AttributeTok{jitter =}\NormalTok{ F, }\AttributeTok{spread =} \StringTok{"quartile"}\NormalTok{) }\SpecialCharTok{+}
+              \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\StringTok{""}\NormalTok{) }
+\NormalTok{b }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data, }
+              \AttributeTok{jitter =} \FunctionTok{c}\NormalTok{(.}\DecValTok{4}\NormalTok{,.}\DecValTok{5}\NormalTok{), }\AttributeTok{spread =} \StringTok{"sterr"}\NormalTok{) }\SpecialCharTok{+}
+              \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\StringTok{""}\NormalTok{)}
+\NormalTok{c }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data, }
+              \AttributeTok{jitter =}\NormalTok{ .}\DecValTok{2}\NormalTok{, }\AttributeTok{spread =} \StringTok{"stdev"}\NormalTok{) }\SpecialCharTok{+} 
+              \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\StringTok{""}\NormalTok{)}
+\NormalTok{a }\SpecialCharTok{+}\NormalTok{ b }\SpecialCharTok{+}\NormalTok{ c }\SpecialCharTok{+} \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{nrow =} \DecValTok{1}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -394,19 +457,19 @@ Users can also specify what the ``whiskers'' mean for the summary statistics. Th
 \hypertarget{numeric-predictor-numeric-outcome-scatterplots}{%
 \subsection{Numeric Predictor, Numeric Outcome (Scatterplots)}\label{numeric-predictor-numeric-outcome-scatterplots}}
 
-The indisputed king of numeric on numeric visualization is the scatterplot. Once again, \texttt{flexplot} is smart enough to choose a scatterplot when it is passed a numeric predictor and numeric outcome. Except for severe departures, people tend to believe the fit of a line overlaid on raw data, even when the line is not appropriate (Fife et al., 2019). For this reason, \texttt{flexplot} defaults to graphing a loess line as the summary statistic, so as to highlight deviations from linearity. However, the user can specify other sorts of fits, such as \texttt{"lm"} (for regression), \texttt{"quadratic"}, \texttt{"cubic"}, \texttt{"logistic"}, ``\texttt{poisson}'', ``\texttt{gamma}'', and \texttt{"rlm"} (robust linear model) in the \texttt{MASS} package (Ripley et al., 2013). The user can also choose to remove the confidence interval by specifying \texttt{se\ =\ F}, as well as jitter one or both variables, as shown below and in Figure \ref{fig:scatter}.
+The indisputed king of numeric on numeric visualization is the scatterplot. Once again, \texttt{flexplot} is smart enough to choose a scatterplot when it is passed a numeric predictor and numeric outcome. Except for severe departures, people tend to believe the fit of a line overlaid on raw data, even when the line is not appropriate (Fife, Tremoulet, \& Longo, 2019). For this reason, \texttt{flexplot} defaults to graphing a loess line as the summary statistic, so as to highlight deviations from linearity. However, the user can specify other sorts of fits, such as \texttt{"lm"} (for regression), \texttt{"quadratic"}, \texttt{"cubic"}, \texttt{"logistic"}, ``\texttt{poisson},'' ``\texttt{gamma},'' and \texttt{"rlm"} (robust linear model) in the \texttt{MASS} package (Ripley et al., 2013). The user can also choose to remove the confidence interval by specifying \texttt{se\ =\ F}, as well as jitter one or both variables, as shown below and in Figure \ref{fig:scatter}.
 
 \small
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{a =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{satisfaction, }\DataTypeTok{data =}\NormalTok{ exercise\_data) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{theme\_minimal}\NormalTok{() }\CommentTok{\#\#\# using layering to change theme}
-\NormalTok{b =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{satisfaction, }\DataTypeTok{data =}\NormalTok{ exercise\_data, }
-             \DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F)}
-\NormalTok{c =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{satisfaction, }\DataTypeTok{data =}\NormalTok{ exercise\_data, }
-             \DataTypeTok{method =} \StringTok{"polynomial"}\NormalTok{, }\DataTypeTok{jitter =} \FloatTok{.4}\NormalTok{)}
-\NormalTok{a }\OperatorTok{+}\StringTok{ }\NormalTok{b }\OperatorTok{+}\StringTok{ }\NormalTok{c }\OperatorTok{+}\StringTok{ }\KeywordTok{plot\_layout}\NormalTok{(}\DataTypeTok{nrow =} \DecValTok{1}\NormalTok{)}
+\NormalTok{a }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ satisfaction, }\AttributeTok{data =}\NormalTok{ exercise\_data) }\SpecialCharTok{+} 
+  \FunctionTok{theme\_minimal}\NormalTok{() }\DocumentationTok{\#\#\# using layering to change theme}
+\NormalTok{b }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ satisfaction, }\AttributeTok{data =}\NormalTok{ exercise\_data, }
+             \AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{se =}\NormalTok{ F)}
+\NormalTok{c }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ satisfaction, }\AttributeTok{data =}\NormalTok{ exercise\_data, }
+             \AttributeTok{method =} \StringTok{"polynomial"}\NormalTok{, }\AttributeTok{jitter =}\NormalTok{ .}\DecValTok{4}\NormalTok{)}
+\NormalTok{a }\SpecialCharTok{+}\NormalTok{ b }\SpecialCharTok{+}\NormalTok{ c }\SpecialCharTok{+} \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{nrow =} \DecValTok{1}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -434,12 +497,10 @@ Any binary variable can be graphed as a logistic regression in \texttt{flexplot}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{data}\NormalTok{(}\StringTok{"tablesaw.injury"}\NormalTok{) }\CommentTok{\#\#\# also simulated data available }
-                        \CommentTok{\#\#\# in flexplot package}
-                        \CommentTok{\#\#\# always remember to be safe }
-                        \CommentTok{\#\#\# and attentive when woodworking}
-\KeywordTok{flexplot}\NormalTok{(injury }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{attention, }\DataTypeTok{data =}\NormalTok{ tablesaw.injury, }
-             \DataTypeTok{method =} \StringTok{"logistic"}\NormalTok{, }\DataTypeTok{jitter =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\FloatTok{.05}\NormalTok{))}
+\FunctionTok{data}\NormalTok{(}\StringTok{"tablesaw.injury"}\NormalTok{) }\DocumentationTok{\#\#\# also simulated data available }
+                        \DocumentationTok{\#\#\# in flexplot package}
+\FunctionTok{flexplot}\NormalTok{(injury }\SpecialCharTok{\textasciitilde{}}\NormalTok{ attention, }\AttributeTok{data =}\NormalTok{ tablesaw.injury, }
+             \AttributeTok{method =} \StringTok{"logistic"}\NormalTok{, }\AttributeTok{jitter =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, .}\DecValTok{05}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -454,7 +515,7 @@ Any binary variable can be graphed as a logistic regression in \texttt{flexplot}
 \hypertarget{categorical-outcome-categorical-predictor-association-plots}{%
 \subsection{Categorical Outcome, Categorical Predictor (Association Plots)}\label{categorical-outcome-categorical-predictor-association-plots}}
 
-Sometimes the analyst may wish to graph the relationship between two categorical variables. Once again, \texttt{flexplot} is smart enough to determine that information from the formula, provided the user supplies two factors. In this situation, \texttt{flexplot} will generate an ``association'' plot, which plots the deviation of each cell from its expected frequencies (divided by the expected values within that cell). The reason for an association plot (as opposed to a traditional barplot) is because it best maps into what sorts of questions viewers are interested in asking. When users model the association between categorical variables, they traditionally use a \(\chi^2\) test, which compares observed versus expected frequencies. An association plot displays observed (height of bar) versus expected (y axis at zero) frequencies, thus following the principle of cognitive fit (Umanath \& Vessey, 1994; Vessey, 1991; see also Kosslyn, 2006 for a similar principle, the ``principle of compatibility'').
+Sometimes the analyst may wish to graph the relationship between two categorical variables. Once again, \texttt{flexplot} is smart enough to determine that information from the formula, provided the user supplies two factors. In this situation, \texttt{flexplot} will generate an ``association'' plot, which plots the deviation of each cell from its expected frequencies (divided by the expected values within that cell). The reason for an association plot (as opposed to a traditional barplot) is because it best maps into what sorts of questions viewers are interested in asking. When users model the association between categorical variables, they traditionally use a \(\chi^2\) test, which compares observed versus expected frequencies. An association plot displays observed (height of bar) versus expected (y axis at zero) frequencies, thus following the principle of cognitive fit (Umanath \& Vessey, 1994; Vessey, 1991; see also Kosslyn, 2006 for a similar principle, the {``principle of compatibility''}).
 
 In the example below, I had to convert \texttt{injury} to a factor to get a barplot. The graphic (Figure \ref{fig:association}) shows that females are less likely to be injured than males, relatively speaking.
 
@@ -462,9 +523,9 @@ In the example below, I had to convert \texttt{injury} to a factor to get a barp
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{tablesaw.injury}\OperatorTok{$}\NormalTok{injury =}\StringTok{ }\KeywordTok{factor}\NormalTok{(tablesaw.injury}\OperatorTok{$}\NormalTok{injury, }
-                  \DataTypeTok{levels=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{), }\DataTypeTok{labels=}\KeywordTok{c}\NormalTok{(}\StringTok{"all good"}\NormalTok{, }\StringTok{"ouch"}\NormalTok{))}
-\KeywordTok{flexplot}\NormalTok{(injury }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{gender, }\DataTypeTok{data =}\NormalTok{ tablesaw.injury)}
+\NormalTok{tablesaw.injury }\OtherTok{=} \FunctionTok{within}\NormalTok{(tablesaw.injury, \{injury }\OtherTok{=} \FunctionTok{factor}\NormalTok{(injury, }
+                    \AttributeTok{levels=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{), }\AttributeTok{labels=}\FunctionTok{c}\NormalTok{(}\StringTok{"all good"}\NormalTok{, }\StringTok{"ouch"}\NormalTok{))\})}
+\FunctionTok{flexplot}\NormalTok{(injury }\SpecialCharTok{\textasciitilde{}}\NormalTok{ gender, }\AttributeTok{data =}\NormalTok{ tablesaw.injury)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -485,9 +546,9 @@ One of the guiding tenets of \texttt{flexplot} is that every statistical analysi
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{data}\NormalTok{(}\StringTok{"plant\_growth"}\NormalTok{)}
-\KeywordTok{flexplot}\NormalTok{(Diameter }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{Soil.Type, }\DataTypeTok{data =}\NormalTok{ plant\_growth, }\DataTypeTok{related=}\NormalTok{T) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.title=}\KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size=}\DecValTok{12}\NormalTok{,}\DataTypeTok{face=}\StringTok{"bold"}\NormalTok{))}
+\FunctionTok{data}\NormalTok{(}\StringTok{"plant\_growth"}\NormalTok{)}
+\FunctionTok{flexplot}\NormalTok{(Diameter }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Soil.Type, }\AttributeTok{data =}\NormalTok{ plant\_growth, }\AttributeTok{related=}\NormalTok{T) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.title=}\FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size=}\DecValTok{12}\NormalTok{,}\AttributeTok{face=}\StringTok{"bold"}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -514,12 +575,12 @@ A second option is to reduce the transparency (e.g., bottom-left in Figure \ref{
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{data}\NormalTok{(}\StringTok{"nsduh"}\NormalTok{)}
-\NormalTok{a =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(distress }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{major.dep, }\DataTypeTok{data =}\NormalTok{ nsduh)}
-\NormalTok{b =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(distress }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{major.dep, }\DataTypeTok{data =}\NormalTok{ nsduh, }\DataTypeTok{raw.data =}\NormalTok{ F)}
-\NormalTok{c =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(distress }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{major.dep, }\DataTypeTok{data =}\NormalTok{ nsduh, }\DataTypeTok{alpha =} \FloatTok{.005}\NormalTok{)}
-\NormalTok{d =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(distress }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{major.dep, }\DataTypeTok{data =}\NormalTok{ nsduh, }\DataTypeTok{sample =} \DecValTok{200}\NormalTok{)}
-\NormalTok{a }\OperatorTok{+}\StringTok{ }\NormalTok{b }\OperatorTok{+}\StringTok{ }\NormalTok{c }\OperatorTok{+}\StringTok{ }\NormalTok{d }\OperatorTok{+}\StringTok{ }\KeywordTok{plot\_layout}\NormalTok{(}\DataTypeTok{nrow =} \DecValTok{2}\NormalTok{)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"nsduh"}\NormalTok{)}
+\NormalTok{a }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(distress }\SpecialCharTok{\textasciitilde{}}\NormalTok{ major.dep, }\AttributeTok{data =}\NormalTok{ nsduh)}
+\NormalTok{b }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(distress }\SpecialCharTok{\textasciitilde{}}\NormalTok{ major.dep, }\AttributeTok{data =}\NormalTok{ nsduh, }\AttributeTok{raw.data =}\NormalTok{ F)}
+\NormalTok{c }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(distress }\SpecialCharTok{\textasciitilde{}}\NormalTok{ major.dep, }\AttributeTok{data =}\NormalTok{ nsduh, }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{005}\NormalTok{)}
+\NormalTok{d }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(distress }\SpecialCharTok{\textasciitilde{}}\NormalTok{ major.dep, }\AttributeTok{data =}\NormalTok{ nsduh, }\AttributeTok{sample =} \DecValTok{200}\NormalTok{)}
+\NormalTok{a }\SpecialCharTok{+}\NormalTok{ b }\SpecialCharTok{+}\NormalTok{ c }\SpecialCharTok{+}\NormalTok{ d }\SpecialCharTok{+} \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{nrow =} \DecValTok{2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -539,15 +600,17 @@ Graphing multivariate relationships can become quite tricky. It is very easy to 
 \hypertarget{added-variable-plots-avps-with-added.plot}{%
 \subsection{\texorpdfstring{Added Variable Plots (AVPs) With \texttt{added.plot()}}{Added Variable Plots (AVPs) With added.plot()}}\label{added-variable-plots-avps-with-added.plot}}
 
-AVPs are underused, yet extremely useful.\footnote{The \texttt{car} package allows users to construct AVPs, but does so with R's native plots. This means one cannot leverage the advantages of \texttt{ggplot} (e.g., layering).} Essentially, an AVP shows the relationship between a predictor of interest and the \emph{residuals} of an existing model. For example, if one wanted to understand the relationship between \texttt{therapy.type} and \texttt{weight.loss} after controlling for \texttt{motivation}, that person could build a model predicting \texttt{weight.loss} from \texttt{motivation}, residualize that relationship, then show a beeswarm plot of the residuals for each type of therapy. This is what AVPs do (see Figure \ref{fig:avp}). These reduce cognitive load substantially, since users only need to interpret two dimensions.
+AVPs are underused, yet extremely useful.\footnote{The \texttt{car} package allows users to construct AVPs, but does so with R's native plots. This means one cannot leverage the advantages of \texttt{ggplot} (e.g., layering).} Essentially, an AVP shows the relationship between a predictor of interest and the \emph{residuals} of an existing model. (Alternatively, one can use partial residual plots, which are based on a similar principle. See Fife, 2021). For example, if one wanted to understand the relationship between \texttt{therapy.type} and \texttt{weight.loss} after controlling for \texttt{motivation}, that person could build a model predicting \texttt{weight.loss} from \texttt{motivation}, residualize that relationship, then show a beeswarm plot of the residuals for each type of therapy. This is what AVPs do (see Figure \ref{fig:avp}). These reduce cognitive load substantially, since users only need to interpret two dimensions.
 
-\texttt{flexplot\textquotesingle{}s} version of AVPs have a slightly different flavor. In my experience, AVPs can be confusing to lay audiences because the scale of the outcome variable has changed to be centered on zero; if one is expecting the outcome variable to range from 0 to 30, yet the graph shows scores from -15 to +15, this will violate users' intuitions, which will create ostacles to proper interpretation of graphics (Kosslyn, 2006). To counter this confusion, \texttt{flexplot} adds the mean back into the residuals so the \(Y\)-axis retains the original scale. The notation for \texttt{added.plot()} is similar to \texttt{flexplot}, though the vertical pipes aren't necessary. By default, \texttt{flexplot} will do is take the \emph{last} variable entered (\texttt{therapy.type} in the first example below) and plot that on the \(X\) axis, while plotting the residuals of the model on the \(Y\) axis (i.e., the residuals of the model \texttt{weight.loss\ \textasciitilde{}\ motivation}). Alternatively, one can specify either a number (indicating the ordinal position of the variable they wish to plot on the \(X\) axis) or the variable name in quotes (see the latter two examples). Other arguments can be passed to \texttt{added.plot()} as well (such as \texttt{alpha}, \texttt{sample}, \texttt{method}, etc.)
+\texttt{flexplot\textquotesingle{}s} version of AVPs have a slightly different flavor. In my experience, AVPs can be confusing to lay audiences because the scale of the outcome variable has changed to be centered on zero; if one is expecting the outcome variable to range from 0 to 30, yet the graph shows scores from -15 to +15, this will violate users' intuitions, which will create obstacles to proper interpretation of graphics (Kosslyn, 2006). To counter this confusion, \texttt{flexplot} adds the mean back into the residuals so the \(Y\)-axis retains the original scale. The notation for \texttt{added.plot()} is similar to \texttt{flexplot}, though the vertical pipes aren't necessary.
+
+There are multiple ways to specify the display of added variable plots. By default, \texttt{flexplot} will do is take the \emph{last} variable entered (\texttt{therapy.type} in the first example below) and plot that on the \(X\) axis, while plotting the residuals of the model on the \(Y\) axis (i.e., the residuals of the model \texttt{weight.loss\ \textasciitilde{}\ motivation}). Another option is to specify either a number (indicating the ordinal position of the variable they wish to plot on the \(X\) axis) or the variable name in quotes (see the latter two examples). Other arguments can be passed to \texttt{added.plot()} as well (such as \texttt{alpha}, \texttt{sample}, \texttt{method}, etc.). A final option is to specify explicitly how the residuals are computed (using the \texttt{lm\_formula} argument), separately from how the data are displayed (via the formula argument). This final method allows one to specify a multivariate plot, as in Figure \ref{fig:avp}.
 
 \small
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{added.plot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data)}
+\FunctionTok{added.plot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -559,7 +622,7 @@ AVPs are underused, yet extremely useful.\footnote{The \texttt{car} package allo
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{added.plot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data, }\DataTypeTok{x=}\DecValTok{1}\NormalTok{) }
+\FunctionTok{added.plot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data, }\AttributeTok{x=}\DecValTok{1}\NormalTok{) }
 \end{Highlighting}
 \end{Shaded}
 
@@ -571,7 +634,7 @@ AVPs are underused, yet extremely useful.\footnote{The \texttt{car} package allo
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{added.plot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data, }\DataTypeTok{x=}\StringTok{"motivation"}\NormalTok{) }
+\FunctionTok{added.plot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data, }\AttributeTok{x=}\StringTok{"motivation"}\NormalTok{) }
 \end{Highlighting}
 \end{Shaded}
 
@@ -579,6 +642,18 @@ AVPs are underused, yet extremely useful.\footnote{The \texttt{car} package allo
 \centering
 \includegraphics{flexplot_psychmeth_files/figure-latex/avp-3.pdf}
 \caption{\label{fig:avp-3}An Added Variable Plot (AVP) showing the relationship between \texttt{therapy.type} and \texttt{weight.loss}, after controlling for \texttt{motivation}. \label{fig:avp}}
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{added.plot}\NormalTok{(weight.loss}\SpecialCharTok{\textasciitilde{}}\NormalTok{motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data=}\NormalTok{exercise\_data, }\AttributeTok{lm\_formula =}\NormalTok{ weight.loss}\SpecialCharTok{\textasciitilde{}}\NormalTok{health)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+\centering
+\includegraphics{flexplot_psychmeth_files/figure-latex/avp-4.pdf}
+\caption{\label{fig:avp-4}An Added Variable Plot (AVP) showing the relationship between \texttt{therapy.type} and \texttt{weight.loss}, after controlling for \texttt{motivation}. \label{fig:avp}}
 \end{figure}
 
 \normalsize
@@ -592,12 +667,12 @@ As shown in Figure \ref{fig:flexplotgrammar}, the second slot in the \texttt{fle
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{a =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{gender, }
-    \DataTypeTok{data =}\NormalTok{ exercise\_data, }\DataTypeTok{se =}\NormalTok{ F, }\DataTypeTok{alpha =} \FloatTok{.3}\NormalTok{)}
-\NormalTok{b =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{therapy.type }\OperatorTok{+}\StringTok{ }\NormalTok{gender, }
-    \DataTypeTok{data =}\NormalTok{ exercise\_data, }\DataTypeTok{se =}\NormalTok{ F, }\DataTypeTok{alpha =} \FloatTok{.3}\NormalTok{) }\OperatorTok{+}
-\StringTok{    }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{angle=}\DecValTok{90}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{1}\NormalTok{, }\DataTypeTok{vjust=}\NormalTok{.}\DecValTok{2}\NormalTok{))}
-\NormalTok{a }\OperatorTok{+}\StringTok{ }\NormalTok{b}
+\NormalTok{a }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ gender, }
+    \AttributeTok{data =}\NormalTok{ exercise\_data, }\AttributeTok{se =}\NormalTok{ F, }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{3}\NormalTok{)}
+\NormalTok{b }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ therapy.type }\SpecialCharTok{+}\NormalTok{ gender, }
+    \AttributeTok{data =}\NormalTok{ exercise\_data, }\AttributeTok{se =}\NormalTok{ F, }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle=}\DecValTok{90}\NormalTok{, }\AttributeTok{hjust=}\DecValTok{1}\NormalTok{, }\AttributeTok{vjust=}\NormalTok{.}\DecValTok{2}\NormalTok{))}
+\NormalTok{a }\SpecialCharTok{+}\NormalTok{ b}
 \end{Highlighting}
 \end{Shaded}
 
@@ -622,19 +697,17 @@ Figure \ref{fig:panels} shows the same relationships in Figure \ref{fig:symbols}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{a =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{|}\StringTok{ }\NormalTok{gender, }
-             \DataTypeTok{data =}\NormalTok{ exercise\_data) }\OperatorTok{+}
-\StringTok{              }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{angle=}\DecValTok{90}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{1}\NormalTok{, }\DataTypeTok{vjust=}\NormalTok{.}\DecValTok{2}\NormalTok{))}
-\NormalTok{b =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{therapy.type }\OperatorTok{|}\StringTok{ }\NormalTok{gender, }
-             \DataTypeTok{data =}\NormalTok{ exercise\_data)}\OperatorTok{+}
-\StringTok{              }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{angle=}\DecValTok{90}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{1}\NormalTok{, }\DataTypeTok{vjust=}\NormalTok{.}\DecValTok{2}\NormalTok{))}
-\NormalTok{c =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{|}\StringTok{  }\NormalTok{gender }\OperatorTok{+}\StringTok{ }\NormalTok{therapy.type, }
-             \DataTypeTok{data =}\NormalTok{ exercise\_data) }\OperatorTok{+}
-\StringTok{      }\NormalTok{ggplot2}\OperatorTok{::}\KeywordTok{facet\_grid}\NormalTok{(therapy.type }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{gender, }
-              \DataTypeTok{labeller =}\NormalTok{ ggplot2}\OperatorTok{::}\KeywordTok{labeller}\NormalTok{(}\DataTypeTok{therapy.type =}\NormalTok{ label\_value)) }\OperatorTok{+}
-\StringTok{              }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{angle=}\DecValTok{90}\NormalTok{, }\DataTypeTok{hjust=}\DecValTok{1}\NormalTok{, }\DataTypeTok{vjust=}\NormalTok{.}\DecValTok{2}\NormalTok{))}
-\CommentTok{\#\#\#\# edit point size}
-\NormalTok{c =}\StringTok{ }\KeywordTok{modify\_points}\NormalTok{(c, }\DataTypeTok{size=}\NormalTok{.}\DecValTok{25}\NormalTok{)}
+\FunctionTok{theme\_update}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle=}\DecValTok{90}\NormalTok{, }\AttributeTok{hjust=}\DecValTok{1}\NormalTok{, }\AttributeTok{vjust=}\NormalTok{.}\DecValTok{2}\NormalTok{))}
+\NormalTok{a }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{|}\NormalTok{ gender, }
+             \AttributeTok{data =}\NormalTok{ exercise\_data) }
+\NormalTok{b }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ therapy.type }\SpecialCharTok{|}\NormalTok{ gender, }
+             \AttributeTok{data =}\NormalTok{ exercise\_data)}
+\NormalTok{c }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{|}\NormalTok{  gender }\SpecialCharTok{+}\NormalTok{ therapy.type, }
+             \AttributeTok{data =}\NormalTok{ exercise\_data) }\SpecialCharTok{+}
+\NormalTok{      ggplot2}\SpecialCharTok{::}\FunctionTok{facet\_grid}\NormalTok{(therapy.type }\SpecialCharTok{\textasciitilde{}}\NormalTok{ gender, }
+              \AttributeTok{labeller =}\NormalTok{ ggplot2}\SpecialCharTok{::}\FunctionTok{labeller}\NormalTok{(}\AttributeTok{therapy.type =}\NormalTok{ label\_value)) }
+\DocumentationTok{\#\#\#\# edit point size}
+\NormalTok{c }\OtherTok{=} \FunctionTok{modify\_points}\NormalTok{(c, }\AttributeTok{size=}\NormalTok{.}\DecValTok{25}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -663,21 +736,21 @@ Whether using breakpoints or bins, the user can also specify labels for the bins
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{a =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{|}\StringTok{ }\NormalTok{satisfaction, }
-             \DataTypeTok{data =}\NormalTok{ exercise\_data, }
-             \DataTypeTok{breaks =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{satisfaction=}\KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{7}\NormalTok{))) }\OperatorTok{+}
-\StringTok{  }\NormalTok{ggplot2}\OperatorTok{::}\KeywordTok{facet\_grid}\NormalTok{( }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{therapy.type, }
-              \DataTypeTok{labeller =}\NormalTok{ ggplot2}\OperatorTok{::}\KeywordTok{labeller}\NormalTok{(}\DataTypeTok{therapy.type =}\NormalTok{ label\_value)) }\OperatorTok{+}
-\StringTok{  }\CommentTok{\# change font size to eliminate overlap}
-\StringTok{    }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} 
-            \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size =} \DecValTok{12}\NormalTok{, }\DataTypeTok{angle =} \DecValTok{90}\NormalTok{, }\DataTypeTok{hjust=}\FloatTok{0.95}\NormalTok{,}\DataTypeTok{vjust=}\FloatTok{0.5}\NormalTok{))}
-\NormalTok{b =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{satisfaction, }
-             \DataTypeTok{data =}\NormalTok{ exercise\_data, }
-             \DataTypeTok{breaks =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{satisfaction=}\KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{7}\NormalTok{)), }
-             \DataTypeTok{labels =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{satisfaction=}\KeywordTok{c}\NormalTok{(}\StringTok{"low"}\NormalTok{, }\StringTok{"medium"}\NormalTok{, }\StringTok{"high"}\NormalTok{)))}
-\NormalTok{c =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{satisfaction, }
-             \DataTypeTok{data =}\NormalTok{ exercise\_data, }
-             \DataTypeTok{bins =} \DecValTok{2}\NormalTok{) }
+\NormalTok{a }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{|}\NormalTok{ satisfaction, }
+             \AttributeTok{data =}\NormalTok{ exercise\_data, }
+             \AttributeTok{breaks =} \FunctionTok{list}\NormalTok{(}\AttributeTok{satisfaction=}\FunctionTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{7}\NormalTok{))) }\SpecialCharTok{+}
+\NormalTok{  ggplot2}\SpecialCharTok{::}\FunctionTok{facet\_grid}\NormalTok{( }\SpecialCharTok{\textasciitilde{}}\NormalTok{ therapy.type, }
+              \AttributeTok{labeller =}\NormalTok{ ggplot2}\SpecialCharTok{::}\FunctionTok{labeller}\NormalTok{(}\AttributeTok{therapy.type =}\NormalTok{ label\_value)) }\SpecialCharTok{+}
+  \CommentTok{\# change font size to eliminate overlap}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} 
+            \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{12}\NormalTok{, }\AttributeTok{angle =} \DecValTok{90}\NormalTok{, }\AttributeTok{hjust=}\FloatTok{0.95}\NormalTok{,}\AttributeTok{vjust=}\FloatTok{0.5}\NormalTok{))}
+\NormalTok{b }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ satisfaction, }
+             \AttributeTok{data =}\NormalTok{ exercise\_data, }
+             \AttributeTok{breaks =} \FunctionTok{list}\NormalTok{(}\AttributeTok{satisfaction=}\FunctionTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{7}\NormalTok{)), }
+             \AttributeTok{labels =} \FunctionTok{list}\NormalTok{(}\AttributeTok{satisfaction=}\FunctionTok{c}\NormalTok{(}\StringTok{"low"}\NormalTok{, }\StringTok{"medium"}\NormalTok{, }\StringTok{"high"}\NormalTok{)))}
+\NormalTok{c }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ satisfaction, }
+             \AttributeTok{data =}\NormalTok{ exercise\_data, }
+             \AttributeTok{bins =} \DecValTok{2}\NormalTok{) }
 \end{Highlighting}
 \end{Shaded}
 
@@ -705,12 +778,12 @@ There are advantages and disadvantages to plotting a variable as a color/symbol/
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{|}\StringTok{ }\NormalTok{satisfaction, }
-             \DataTypeTok{data =}\NormalTok{ exercise\_data, }\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }
-             \DataTypeTok{bins =} \DecValTok{3}\NormalTok{, }\DataTypeTok{ghost.line =} \StringTok{"red"}\NormalTok{)}\OperatorTok{+}
-\StringTok{  }\CommentTok{\# change font size to eliminate overlap}
-\StringTok{    }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} 
-            \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size =} \DecValTok{14}\NormalTok{))}
+\CommentTok{\# change font size to eliminate overlap}
+\FunctionTok{theme\_update}\NormalTok{(}\AttributeTok{axis.text.x =} 
+            \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{14}\NormalTok{))}
+\FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{|}\NormalTok{ satisfaction, }
+             \AttributeTok{data =}\NormalTok{ exercise\_data, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }
+             \AttributeTok{bins =} \DecValTok{3}\NormalTok{, }\AttributeTok{ghost.line =} \StringTok{"red"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -737,19 +810,13 @@ Another strategy is to mentally block out all panels but the diagonal (the botto
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{a =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{|}\StringTok{ }\NormalTok{satisfaction }\OperatorTok{+}\StringTok{ }\NormalTok{health, }
-    \DataTypeTok{data =}\NormalTok{ exercise\_data) }\OperatorTok{+}
-\StringTok{  }\CommentTok{\# change font size to eliminate overlap}
-\StringTok{    }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} 
-            \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size =} \DecValTok{12}\NormalTok{))}
-\NormalTok{b =}\StringTok{ }\KeywordTok{flexplot}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{gender }\OperatorTok{|}\StringTok{ }\NormalTok{satisfaction }\OperatorTok{+}\StringTok{ }\NormalTok{health, }
-    \DataTypeTok{data =}\NormalTok{ exercise\_data, }
-    \DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F, }\DataTypeTok{bins =} \DecValTok{2}\NormalTok{, }\DataTypeTok{ghost.line =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.2}\NormalTok{,}
-    \DataTypeTok{ghost.reference =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{satisfaction =} \DecValTok{0}\NormalTok{, }\DataTypeTok{health =} \DecValTok{10}\NormalTok{, }\DataTypeTok{gender =} \StringTok{"male"}\NormalTok{))}\OperatorTok{+}
-\StringTok{  }\CommentTok{\# change font size to eliminate overlap}
-\StringTok{    }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} 
-            \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{size =} \DecValTok{12}\NormalTok{))}
-\NormalTok{a }\OperatorTok{+}\StringTok{ }\NormalTok{b }\OperatorTok{+}\StringTok{ }\KeywordTok{plot\_layout}\NormalTok{(}\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{)}
+\NormalTok{a }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ gender }\SpecialCharTok{|}\NormalTok{ satisfaction }\SpecialCharTok{+}\NormalTok{ health, }
+    \AttributeTok{data =}\NormalTok{ exercise\_data) }
+\NormalTok{b }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ gender }\SpecialCharTok{|}\NormalTok{ satisfaction }\SpecialCharTok{+}\NormalTok{ health, }
+    \AttributeTok{data =}\NormalTok{ exercise\_data, }
+    \AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{se =}\NormalTok{ F, }\AttributeTok{bins =} \DecValTok{2}\NormalTok{, }\AttributeTok{ghost.line =} \StringTok{"black"}\NormalTok{, }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{2}\NormalTok{,}
+    \AttributeTok{ghost.reference =} \FunctionTok{list}\NormalTok{(}\AttributeTok{satisfaction =} \DecValTok{0}\NormalTok{, }\AttributeTok{health =} \DecValTok{10}\NormalTok{, }\AttributeTok{gender =} \StringTok{"male"}\NormalTok{))}
+\NormalTok{a }\SpecialCharTok{+}\NormalTok{ b }\SpecialCharTok{+} \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{ncol =} \DecValTok{1}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -775,9 +842,9 @@ As I've mentioned repeatedly, one of the primary purposes of \texttt{flexplot} i
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{model =}\StringTok{ }\KeywordTok{lm}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{therapy.type, }
-           \DataTypeTok{data =}\NormalTok{ exercise\_data)}
-\KeywordTok{visualize}\NormalTok{(model)}
+\NormalTok{model }\OtherTok{=} \FunctionTok{lm}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }
+           \AttributeTok{data =}\NormalTok{ exercise\_data)}
+\FunctionTok{visualize}\NormalTok{(model)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -795,9 +862,9 @@ For multivariate data, \texttt{visualize} will create a plot that will use panel
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{model =}\StringTok{ }\KeywordTok{lm}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data)}
-\KeywordTok{visualize}\NormalTok{(model, }\DataTypeTok{formula =}\NormalTok{ weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{|}\StringTok{ }\NormalTok{therapy.type, }
-          \DataTypeTok{ghost.line =} \StringTok{"red"}\NormalTok{, }\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{plot =} \StringTok{"model"}\NormalTok{)}
+\NormalTok{model }\OtherTok{=} \FunctionTok{lm}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
+\FunctionTok{visualize}\NormalTok{(model, }\AttributeTok{formula =}\NormalTok{ weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{|}\NormalTok{ therapy.type, }
+          \AttributeTok{ghost.line =} \StringTok{"red"}\NormalTok{, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{plot =} \StringTok{"model"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -815,13 +882,13 @@ Figure \ref{fig:mixed} shows the \texttt{visualize()} function for a mixed model
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{require}\NormalTok{(lme4)}
-\KeywordTok{data}\NormalTok{(math)}
-\NormalTok{model =}\StringTok{ }\KeywordTok{lmer}\NormalTok{(MathAch }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{Sex }\OperatorTok{+}\StringTok{ }\NormalTok{SES }\OperatorTok{+}\StringTok{ }\NormalTok{(SES}\OperatorTok{|}\NormalTok{School), }\DataTypeTok{data =}\NormalTok{ math)}
-\KeywordTok{visualize}\NormalTok{(model, }
-  \DataTypeTok{plot =} \StringTok{"model"}\NormalTok{,}
-  \DataTypeTok{formula =}\NormalTok{ MathAch }\OperatorTok{\textasciitilde{}}\StringTok{  }\NormalTok{SES }\OperatorTok{+}\StringTok{ }\NormalTok{School}\OperatorTok{|}\StringTok{ }\NormalTok{Sex, }
-  \DataTypeTok{sample =} \DecValTok{3}\NormalTok{)}
+\FunctionTok{require}\NormalTok{(lme4)}
+\FunctionTok{data}\NormalTok{(math)}
+\NormalTok{model }\OtherTok{=} \FunctionTok{lmer}\NormalTok{(MathAch }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Sex }\SpecialCharTok{+}\NormalTok{ SES }\SpecialCharTok{+}\NormalTok{ (SES}\SpecialCharTok{|}\NormalTok{School), }\AttributeTok{data =}\NormalTok{ math)}
+\FunctionTok{visualize}\NormalTok{(model, }
+  \AttributeTok{plot =} \StringTok{"model"}\NormalTok{,}
+  \AttributeTok{formula =}\NormalTok{ MathAch }\SpecialCharTok{\textasciitilde{}}\NormalTok{  SES }\SpecialCharTok{+}\NormalTok{ School}\SpecialCharTok{|}\NormalTok{ Sex, }
+  \AttributeTok{sample =} \DecValTok{3}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -844,13 +911,13 @@ That is where \texttt{compare.fits()} comes in. It is simply a wrapper for the \
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{model.me =}\StringTok{ }\KeywordTok{lm}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{+}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data)}
-\NormalTok{model.int =}\StringTok{ }\KeywordTok{lm}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{*}\StringTok{ }\NormalTok{therapy.type, }\DataTypeTok{data =}\NormalTok{ exercise\_data)}
-\KeywordTok{compare.fits}\NormalTok{(weight.loss }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{motivation }\OperatorTok{|}\StringTok{ }\NormalTok{therapy.type, }
-             \DataTypeTok{data =}\NormalTok{ exercise\_data, model.me, model.int, }\DataTypeTok{ghost.line =} \StringTok{"black"}\NormalTok{)}\OperatorTok{+}
-\StringTok{  }\CommentTok{\# get rid of variable name in panels (just put in the level)}
-\StringTok{      }\NormalTok{ggplot2}\OperatorTok{::}\KeywordTok{facet\_grid}\NormalTok{( }\OperatorTok{\textasciitilde{}}\StringTok{ }\NormalTok{therapy.type, }
-          \DataTypeTok{labeller =}\NormalTok{ ggplot2}\OperatorTok{::}\KeywordTok{labeller}\NormalTok{(}\DataTypeTok{therapy.type =}\NormalTok{ label\_value))}
+\NormalTok{model.me }\OtherTok{=} \FunctionTok{lm}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
+\NormalTok{model.int }\OtherTok{=} \FunctionTok{lm}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{*}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
+\FunctionTok{compare.fits}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{|}\NormalTok{ therapy.type, }
+             \AttributeTok{data =}\NormalTok{ exercise\_data, model.me, model.int, }\AttributeTok{ghost.line =} \StringTok{"black"}\NormalTok{)}\SpecialCharTok{+}
+  \CommentTok{\# get rid of variable name in panels (just put in the level)}
+\NormalTok{      ggplot2}\SpecialCharTok{::}\FunctionTok{facet\_grid}\NormalTok{( }\SpecialCharTok{\textasciitilde{}}\NormalTok{ therapy.type, }
+          \AttributeTok{labeller =}\NormalTok{ ggplot2}\SpecialCharTok{::}\FunctionTok{labeller}\NormalTok{(}\AttributeTok{therapy.type =}\NormalTok{ label\_value))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -876,7 +943,7 @@ The \texttt{estimates()} method was designed to report paremeter estimates and e
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{estimates}\NormalTok{(model.int)}
+\FunctionTok{estimates}\NormalTok{(model.int)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -920,7 +987,7 @@ The final function I will mention is the \texttt{model.comparison()} function. T
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{model.comparison}\NormalTok{(model.int, model.me)}
+\FunctionTok{model.comparison}\NormalTok{(model.int, model.me)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -944,7 +1011,7 @@ There's little doubt that psychology is undergoing a methodological revolution. 
 
 Traditionally, producing graphs has been a cumbersome and extraneous procedure, quite divorced from the actual analyses. In this paper, I have introduced \texttt{flexplot}. \texttt{flexplot} aims to automate much of the graphical analysis that accompany data analysis. These graphs, which are based on scientifically-derived principles of visual perception, promise to promote sound data analysis and enhance data decision-making.
 
-To use \texttt{flexplot}, users can download and install the R package through github, at www.github.com/dustinfife/flexplot. Alternatively, a point-and-click version of flexplot can be accessed via JASP (through the visual modeling module) or through Jamovi (through the flexplot module). For additional information on using flexplot, visit the following YouTube playlist: \url{https://www.youtube.com/playlist?list=PL8F480DgtpW8cFY8diRWcNeq6bsleAoe_}
+To use \texttt{flexplot}, users can download and install the R package through github, at www.github.com/dustinfife/flexplot. Alternatively, a point-and-click version of flexplot can be accessed via JASP (through the visual modeling module) or through Jamovi (through the flexplot module). For additional information on using flexplot, visit the following YouTube playlist: \url{https://bit.ly/2Qn4yoi}
 
 \newpage
 
@@ -956,51 +1023,54 @@ To use \texttt{flexplot}, users can download and install the R package through g
 \setlength{\leftskip}{0.5in}
 
 \hypertarget{refs}{}
-\begin{cslreferences}
+\begin{CSLReferences}{1}{0}
 \leavevmode\hypertarget{ref-Abbott2012}{}%
-Abbott, G. R., Do, M., \& Byrne, L. K. (2012). Diminished subjective wellbeing in schizotypy is more than just negative affect. \emph{Personality and Individual Differences}, \emph{52}(8), 914--918. doi:\href{https://doi.org/10.1016/j.paid.2012.01.018}{10.1016/j.paid.2012.01.018}
+Abbott, G. R., Do, M., \& Byrne, L. K. (2012). {Diminished subjective wellbeing in schizotypy is more than just negative affect}. \emph{Personality and Individual Differences}, \emph{52}(8), 914--918. \url{https://doi.org/10.1016/j.paid.2012.01.018}
 
 \leavevmode\hypertarget{ref-anscombe1973graphs}{}%
 Anscombe, F. J. (1973). Graphs in statistical analysis. \emph{The American Statistician}, \emph{27}(1), 17--21.
 
 \leavevmode\hypertarget{ref-Breheny}{}%
-Breheny, P., \& Burchett, W. (2017). Visualization of Regression Models Using visreg. \emph{The R Journal}, 56--71. doi:\href{https://doi.org/10.32614/rj-2017-046}{10.32614/rj-2017-046}
+Breheny, P., \& Burchett, W. (2017). {Visualization of Regression Models Using visreg}. \emph{The R Journal}, 56--71. \url{https://doi.org/10.32614/rj-2017-046}
 
 \leavevmode\hypertarget{ref-Camargo2015}{}%
-Camargo, K., \& Grant, R. (2015). Public health, science, and policy debate: being right is not enough. \emph{American Journal of Public Health}, \emph{105}(2), 232--5. doi:\href{https://doi.org/10.2105/AJPH.2014.302241}{10.2105/AJPH.2014.302241}
+Camargo, K., \& Grant, R. (2015). {Public health, science, and policy debate: being right is not enough.} \emph{American Journal of Public Health}, \emph{105}(2), 232--235. \url{https://doi.org/10.2105/AJPH.2014.302241}
 
 \leavevmode\hypertarget{ref-Cleveland1994}{}%
-Cleveland, W. S. (1994). Coplots, nonparametric regression, and conditionally parametric fits. \emph{Lecture Notes-Monograph Series}, 21--36.
+Cleveland, W. S. (1994). {Coplots, nonparametric regression, and conditionally parametric fits}. \emph{Lecture Notes-Monograph Series}, 21--36.
 
 \leavevmode\hypertarget{ref-cohen_earth_1994}{}%
-Cohen, J. (1994). The earth is round (p \textless{} .05). \emph{American Psychologist}, \emph{49}(12), 997--1003. doi:\href{https://doi.org/10.1037/0003-066X.49.12.997}{10.1037/0003-066X.49.12.997}
+Cohen, J. (1994). {The earth is round (p {\textless{}} .05).} \emph{American Psychologist}, \emph{49}(12), 997--1003. \url{https://doi.org/10.1037/0003-066X.49.12.997}
 
 \leavevmode\hypertarget{ref-Correll2015}{}%
-Correll, M. A. (2015). \emph{Visual Statistics} (Doctoral Dissertation). University of Wisconsin-Madison.
+Correll, M. A. (2015). \emph{{Visual Statistics}} (Doctoral Dissertation). University of Wisconsin-Madison.
 
 \leavevmode\hypertarget{ref-eklund2012beeswarm}{}%
 Eklund, A. (2012). Beeswarm: The bee swarm plot, an alternative to stripchart. \emph{R Package Version 0.1}, \emph{5}.
 
 \leavevmode\hypertarget{ref-Fife2019e}{}%
-Fife, D. A. (2020). The Eight Steps of Data Analysis: A Graphical Framework to Promote Sound Statistical Analysis. \emph{Perspectives on Psychological Science}, \emph{15}(4). doi:\href{https://doi.org/https://doi.org/10.1177/1745691620917333}{https://doi.org/10.1177/1745691620917333}
+Fife, D. A. (2020). {The Eight Steps of Data Analysis: A Graphical Framework to Promote Sound Statistical Analysis}. \emph{Perspectives on Psychological Science}, \emph{15}. https://doi.org/\url{https://doi.org/10.1177/1745691620917333}
+
+\leavevmode\hypertarget{ref-fifeprp}{}%
+Fife, D. A. (2021). Visual partitioning for multivariate models: An approach for identifying and visualizing complex multivariate dataset. \emph{PsyArxiv}. \url{https://doi.org/10.31234/osf.io/avu2n}
 
 \leavevmode\hypertarget{ref-fife2020bb}{}%
 Fife, D. A., Longo, G., Correll, M., \& Tremoulet, P. (2020). A graph for every analysis: Mapping visuals onto common analyses. \emph{Behavioral Research Methods}.
 
 \leavevmode\hypertarget{ref-Fife2019d}{}%
-Fife, D. A., Tremoulet, P., \& Longo, G. (2019). \emph{Developing and Empirically Validating Flexplot: A Tool for Mapping Statistical Analyses into Graphical Presentation}. Chicago, IL: American Psychological Association.
+Fife, D. A., Tremoulet, P., \& Longo, G. (2019). \emph{{Developing and Empirically Validating Flexplot: A Tool for Mapping Statistical Analyses into Graphical Presentation}}. Chicago, IL: American Psychological Association.
 
 \leavevmode\hypertarget{ref-Gigerenzer2004}{}%
-Gigerenzer, G. (2004). Mindless statistics. \emph{The Journal of Socio-Economics}, \emph{33}(5), 587--606. doi:\href{https://doi.org/10.1016/J.SOCEC.2004.09.033}{10.1016/J.SOCEC.2004.09.033}
+Gigerenzer, G. (2004). {Mindless statistics}. \emph{The Journal of Socio-Economics}, \emph{33}(5), 587--606. \url{https://doi.org/10.1016/J.SOCEC.2004.09.033}
 
 \leavevmode\hypertarget{ref-Hansen}{}%
-Hansen, C. D., Chen, M., Johnson, C. R., Kaufman, A. E., \& Hagen, H. (2014). \emph{Scientific Visualization: Uncertainty, Multifield, Biomedical, and Scalable Visualization}. London: Springer. Retrieved from \url{http://www.springer.com/series/4562}
+Hansen, C. D., Chen, M., Johnson, C. R., Kaufman, A. E., \& Hagen, H. (2014). \emph{{Scientific Visualization: Uncertainty, Multifield, Biomedical, and Scalable Visualization}}. London: Springer. Retrieved from \url{http://www.springer.com/series/4562}
 
 \leavevmode\hypertarget{ref-Healy2014a}{}%
-Healy, K., \& Moody, J. (2014). Data Visualization in Sociology. \emph{Annual Review of Sociology}, \emph{40}(1), 105--128. doi:\href{https://doi.org/10.1146/ANNUREV-SOC-071312-145551}{10.1146/ANNUREV-SOC-071312-145551}
+Healy, K., \& Moody, J. (2014). {Data Visualization in Sociology}. \emph{Annual Review of Sociology}, \emph{40}(1), 105--128. \url{https://doi.org/10.1146/ANNUREV-SOC-071312-145551}
 
 \leavevmode\hypertarget{ref-hoekstra_are_2012}{}%
-Hoekstra, R., Kiers, H., \& Johnson, A. (2012). Are Assumptions of Well-Known Statistical Techniques Checked, and Why Not? \emph{Frontiers in Psychology}, \emph{3}(137). doi:\href{https://doi.org/10.3389/fpsyg.2012.00137}{10.3389/fpsyg.2012.00137}
+Hoekstra, R., Kiers, H., \& Johnson, A. (2012). {Are Assumptions of Well-Known Statistical Techniques Checked, and Why Not?} \emph{Frontiers in Psychology}, \emph{3}(137). \url{https://doi.org/10.3389/fpsyg.2012.00137}
 
 \leavevmode\hypertarget{ref-inbar2007minimalism}{}%
 Inbar, O., Tractinsky, N., \& Meyer, J. (2007). Minimalism in information visualization: Attitudes towards maximizing the data-ink ratio. In \emph{ECCE} (Vol. 7, pp. 185--188).
@@ -1009,40 +1079,40 @@ Inbar, O., Tractinsky, N., \& Meyer, J. (2007). Minimalism in information visual
 Kosslyn, S. M. (2006). \emph{Graph design for eye and mind}. New York, NY: Oxford University Press.
 
 \leavevmode\hypertarget{ref-Levine2018}{}%
-Levine, S. S. (2018). Show us your data: Connect the dots, improve science. \emph{Management and Organization Review}, \emph{14}(2), 433--437. doi:\href{https://doi.org/10.1017/mor.2018.19}{10.1017/mor.2018.19}
+Levine, S. S. (2018). {Show us your data: Connect the dots, improve science}. \emph{Management and Organization Review}, \emph{14}(2), 433--437. \url{https://doi.org/10.1017/mor.2018.19}
 
 \leavevmode\hypertarget{ref-marieb1992human}{}%
 Marieb, E. N. (1992). Human anatomy and physiology. Redwood city. \emph{CA: Benjamin/Cummings Publishing Company, Ine}, \emph{1}(992), 306--307.
 
 \leavevmode\hypertarget{ref-Otten2015}{}%
-Otten, J. J., Cheng, K., \& Drewnowski, A. (2015). Infographics And Public Policy: Using Data Visualization To Convey Complex Information. \emph{Health Affairs}, \emph{34}(11), 1901--1907. doi:\href{https://doi.org/10.1377/hlthaff.2015.0642}{10.1377/hlthaff.2015.0642}
+Otten, J. J., Cheng, K., \& Drewnowski, A. (2015). {Infographics And Public Policy: Using Data Visualization To Convey Complex Information}. \emph{Health Affairs}, \emph{34}(11), 1901--1907. \url{https://doi.org/10.1377/hlthaff.2015.0642}
 
 \leavevmode\hypertarget{ref-pandey2015deceptive}{}%
-Pandey, A. V., Rall, K., Satterthwaite, M. L., Nov, O., \& Bertini, E. (2015). How deceptive are deceptive visualizations?: An empirical analysis of common distortion techniques. In \emph{Proceedings of the 33rd annual acm conference on human factors in computing systems} (pp. 1469--1478). ACM.
+Pandey, A. V., Rall, K., Satterthwaite, M. L., Nov, O., \& Bertini, E. (2015). How deceptive are deceptive visualizations?: An empirical analysis of common distortion techniques. In \emph{Proceedings of the 33rd annual ACM conference on human factors in computing systems} (pp. 1469--1478). ACM.
 
 \leavevmode\hypertarget{ref-Pastore2017}{}%
-Pastore, M., Lionetti, F., \& Altoè, G. (2017, September). When one shape does not fit all: A commentary essay on the use of graphs in psychological research. Frontiers Media S.A. doi:\href{https://doi.org/10.3389/fpsyg.2017.01666}{10.3389/fpsyg.2017.01666}
+Pastore, M., Lionetti, F., \& Altoè, G. (2017). {When one shape does not fit all: A commentary essay on the use of graphs in psychological research}. Frontiers Media S.A. \url{https://doi.org/10.3389/fpsyg.2017.01666}
 
 \leavevmode\hypertarget{ref-ripley2013package}{}%
-Ripley, B., Venables, B., Bates, D. M., Hornik, K., Gebhardt, A., Firth, D., \& Ripley, M. B. (2013). Package ``mass''. \emph{Cran R}, \emph{538}.
+Ripley, B., Venables, B., Bates, D. M., Hornik, K., Gebhardt, A., Firth, D., \& Ripley, M. B. (2013). Package {`mass.'} \emph{Cran R}, \emph{538}.
 
 \leavevmode\hypertarget{ref-rodgers_epistemology_2010}{}%
-Rodgers, J. L. (2010). The epistemology of mathematical and statistical modeling: a quiet methodological revolution. \emph{The American Psychologist}, \emph{65}(1), 1--12. doi:\href{https://doi.org/10.1037/a0018326}{10.1037/a0018326}
+Rodgers, J. L. (2010). {The epistemology of mathematical and statistical modeling: a quiet methodological revolution}. \emph{The American Psychologist}, \emph{65}(1), 1--12. \url{https://doi.org/10.1037/a0018326}
 
 \leavevmode\hypertarget{ref-semetko2012sage}{}%
-Semetko, H. A., \& Scammell, M. (2012). \emph{The sage handbook of political communication}. Sage Publications.
+Semetko, H. A., \& Scammell, M. (2012). \emph{The SAGE handbook of political communication}. Sage Publications.
 
 \leavevmode\hypertarget{ref-Tay2016a}{}%
-Tay, L., Parrigon, S., Huang, Q., \& LeBreton, J. M. (2016). Graphical Descriptives: A Way to Improve Data Transparency and Methodological Rigor in Psychology. \emph{Perspectives on Psychological Science}, \emph{11}(5), 692--701. doi:\href{https://doi.org/10.1177/1745691616663875}{10.1177/1745691616663875}
+Tay, L., Parrigon, S., Huang, Q., \& LeBreton, J. M. (2016). {Graphical Descriptives: A Way to Improve Data Transparency and Methodological Rigor in Psychology}. \emph{Perspectives on Psychological Science}, \emph{11}(5), 692--701. \url{https://doi.org/10.1177/1745691616663875}
 
 \leavevmode\hypertarget{ref-Tufte2001}{}%
 Tufte, E. R. (2001). \emph{The visual display of quantitative information}. Cheshire, CT: Graphics press.
 
 \leavevmode\hypertarget{ref-Tukey1990}{}%
-Tukey, J. W., \& Tukey, P. A. (1990). \emph{Strips Displaying Empirical Distributions: I. Textured Dot Strips}. Bellcore.
+Tukey, J. W., \& Tukey, P. A. (1990). \emph{{Strips Displaying Empirical Distributions: I. Textured Dot Strips}}. Bellcore.
 
 \leavevmode\hypertarget{ref-Tyron1998}{}%
-Tyron, W. W. (1998). The inscrutable null hypothesis. \emph{American Psychologist}, \emph{53}(7), 796--796. doi:\href{https://doi.org/10.1037/0003-066X.53.7.796.b}{10.1037/0003-066X.53.7.796.b}
+Tyron, W. W. (1998). {The inscrutable null hypothesis.} \emph{American Psychologist}, \emph{53}(7), 796--796. \url{https://doi.org/10.1037/0003-066X.53.7.796.b}
 
 \leavevmode\hypertarget{ref-umanath1994multiattribute}{}%
 Umanath, N. S., \& Vessey, I. (1994). Multiattribute data presentation and human judgment: A cognitive fit perspective. \emph{Decision Sciences}, \emph{25}(5-6), 795--824.
@@ -1051,129 +1121,23 @@ Umanath, N. S., \& Vessey, I. (1994). Multiattribute data presentation and human
 Vessey, I. (1991). Cognitive fit: A theory-based analysis of the graphs versus tables literature. \emph{Decision Sciences}, \emph{22}(2), 219--240.
 
 \leavevmode\hypertarget{ref-Wainer2010}{}%
-Wainer, H. (2010). Prelude. In J. Berkson (Ed.), \emph{Semiology of graphics: Diagrams, networks, maps} (2nd ed., pp. ix--x). Redlands, CA: ESRI Press.
+Wainer, H. (2010). {Prelude}. In J. Berkson (Ed.), \emph{Semiology of graphics: Diagrams, networks, maps} (2nd ed., pp. ix--x). Redlands, CA: ESRI Press.
 
 \leavevmode\hypertarget{ref-Weissgerber2015}{}%
-Weissgerber, T. L., Milic, N. M., Winham, S. J., \& Garovic, V. D. (2015). Beyond Bar and Line Graphs: Time for a New Data Presentation Paradigm. \emph{PLoS Biology}, \emph{13}(4). doi:\href{https://doi.org/10.1371/journal.pbio.1002128}{10.1371/journal.pbio.1002128}
+Weissgerber, T. L., Milic, N. M., Winham, S. J., \& Garovic, V. D. (2015). {Beyond Bar and Line Graphs: Time for a New Data Presentation Paradigm}. \emph{PLoS Biology}, \emph{13}(4). \url{https://doi.org/10.1371/journal.pbio.1002128}
 
 \leavevmode\hypertarget{ref-Wickham2010}{}%
-Wickham, H. (2010). A Layered Grammar of Graphics. \emph{Journal of Computational and Graphical Statistics}, \emph{19}(1), 3--28. doi:\href{https://doi.org/10.1198/jcgs.2009.07098}{10.1198/jcgs.2009.07098}
+Wickham, H. (2010). {A Layered Grammar of Graphics}. \emph{Journal of Computational and Graphical Statistics}, \emph{19}(1), 3--28. \url{https://doi.org/10.1198/jcgs.2009.07098}
 
 \leavevmode\hypertarget{ref-Wilkinson1999}{}%
-Wilkinson, L. (1999). Dot plots. \emph{The American Statistician}, \emph{53}(3), 276--281.
+Wilkinson, L. (1999). {Dot plots}. \emph{The American Statistician}, \emph{53}(3), 276--281.
 
 \leavevmode\hypertarget{ref-Wilkinson1999a}{}%
-Wilkinson, L., \& Task Force on Statistical Inference. (1999). Statistical Methods in Psychology Journals: Guidelines and Explanations. \emph{American Psychologist}, \emph{54}(8), 594--601.
+Wilkinson, L., \& Task Force on Statistical Inference. (1999). {Statistical Methods in Psychology Journals: Guidelines and Explanations}. \emph{American Psychologist}, \emph{54}(8), 594--601.
 
-\leavevmode\hypertarget{ref-Abbott2012}{}%
-Abbott, G. R., Do, M., \& Byrne, L. K. (2012). Diminished subjective wellbeing in schizotypy is more than just negative affect. \emph{Personality and Individual Differences}, \emph{52}(8), 914--918. doi:\href{https://doi.org/10.1016/j.paid.2012.01.018}{10.1016/j.paid.2012.01.018}
-
-\leavevmode\hypertarget{ref-anscombe1973graphs}{}%
-Anscombe, F. J. (1973). Graphs in statistical analysis. \emph{The American Statistician}, \emph{27}(1), 17--21.
-
-\leavevmode\hypertarget{ref-Breheny}{}%
-Breheny, P., \& Burchett, W. (2017). Visualization of Regression Models Using visreg. \emph{The R Journal}, 56--71. doi:\href{https://doi.org/10.32614/rj-2017-046}{10.32614/rj-2017-046}
-
-\leavevmode\hypertarget{ref-Camargo2015}{}%
-Camargo, K., \& Grant, R. (2015). Public health, science, and policy debate: being right is not enough. \emph{American Journal of Public Health}, \emph{105}(2), 232--5. doi:\href{https://doi.org/10.2105/AJPH.2014.302241}{10.2105/AJPH.2014.302241}
-
-\leavevmode\hypertarget{ref-Cleveland1994}{}%
-Cleveland, W. S. (1994). Coplots, nonparametric regression, and conditionally parametric fits. \emph{Lecture Notes-Monograph Series}, 21--36.
-
-\leavevmode\hypertarget{ref-cohen_earth_1994}{}%
-Cohen, J. (1994). The earth is round (p \textless{} .05). \emph{American Psychologist}, \emph{49}(12), 997--1003. doi:\href{https://doi.org/10.1037/0003-066X.49.12.997}{10.1037/0003-066X.49.12.997}
-
-\leavevmode\hypertarget{ref-Correll2015}{}%
-Correll, M. A. (2015). \emph{Visual Statistics} (Doctoral Dissertation). University of Wisconsin-Madison.
-
-\leavevmode\hypertarget{ref-eklund2012beeswarm}{}%
-Eklund, A. (2012). Beeswarm: The bee swarm plot, an alternative to stripchart. \emph{R Package Version 0.1}, \emph{5}.
-
-\leavevmode\hypertarget{ref-Fife2019e}{}%
-Fife, D. A. (2020). The Eight Steps of Data Analysis: A Graphical Framework to Promote Sound Statistical Analysis. \emph{Perspectives on Psychological Science}, \emph{15}(4). doi:\href{https://doi.org/https://doi.org/10.1177/1745691620917333}{https://doi.org/10.1177/1745691620917333}
-
-\leavevmode\hypertarget{ref-fife2020bb}{}%
-Fife, D. A., Longo, G., Correll, M., \& Tremoulet, P. (2020). A graph for every analysis: Mapping visuals onto common analyses. \emph{Behavioral Research Methods}.
-
-\leavevmode\hypertarget{ref-Fife2019d}{}%
-Fife, D. A., Tremoulet, P., \& Longo, G. (2019). \emph{Developing and Empirically Validating Flexplot: A Tool for Mapping Statistical Analyses into Graphical Presentation}. Chicago, IL: American Psychological Association.
-
-\leavevmode\hypertarget{ref-Gigerenzer2004}{}%
-Gigerenzer, G. (2004). Mindless statistics. \emph{The Journal of Socio-Economics}, \emph{33}(5), 587--606. doi:\href{https://doi.org/10.1016/J.SOCEC.2004.09.033}{10.1016/J.SOCEC.2004.09.033}
-
-\leavevmode\hypertarget{ref-Hansen}{}%
-Hansen, C. D., Chen, M., Johnson, C. R., Kaufman, A. E., \& Hagen, H. (2014). \emph{Scientific Visualization: Uncertainty, Multifield, Biomedical, and Scalable Visualization}. London: Springer. Retrieved from \url{http://www.springer.com/series/4562}
-
-\leavevmode\hypertarget{ref-Healy2014a}{}%
-Healy, K., \& Moody, J. (2014). Data Visualization in Sociology. \emph{Annual Review of Sociology}, \emph{40}(1), 105--128. doi:\href{https://doi.org/10.1146/ANNUREV-SOC-071312-145551}{10.1146/ANNUREV-SOC-071312-145551}
-
-\leavevmode\hypertarget{ref-hoekstra_are_2012}{}%
-Hoekstra, R., Kiers, H., \& Johnson, A. (2012). Are Assumptions of Well-Known Statistical Techniques Checked, and Why Not? \emph{Frontiers in Psychology}, \emph{3}(137). doi:\href{https://doi.org/10.3389/fpsyg.2012.00137}{10.3389/fpsyg.2012.00137}
-
-\leavevmode\hypertarget{ref-inbar2007minimalism}{}%
-Inbar, O., Tractinsky, N., \& Meyer, J. (2007). Minimalism in information visualization: Attitudes towards maximizing the data-ink ratio. In \emph{ECCE} (Vol. 7, pp. 185--188).
-
-\leavevmode\hypertarget{ref-Kosslyn2006e}{}%
-Kosslyn, S. M. (2006). \emph{Graph design for eye and mind}. New York, NY: Oxford University Press.
-
-\leavevmode\hypertarget{ref-Levine2018}{}%
-Levine, S. S. (2018). Show us your data: Connect the dots, improve science. \emph{Management and Organization Review}, \emph{14}(2), 433--437. doi:\href{https://doi.org/10.1017/mor.2018.19}{10.1017/mor.2018.19}
-
-\leavevmode\hypertarget{ref-marieb1992human}{}%
-Marieb, E. N. (1992). Human anatomy and physiology. Redwood city. \emph{CA: Benjamin/Cummings Publishing Company, Ine}, \emph{1}(992), 306--307.
-
-\leavevmode\hypertarget{ref-Otten2015}{}%
-Otten, J. J., Cheng, K., \& Drewnowski, A. (2015). Infographics And Public Policy: Using Data Visualization To Convey Complex Information. \emph{Health Affairs}, \emph{34}(11), 1901--1907. doi:\href{https://doi.org/10.1377/hlthaff.2015.0642}{10.1377/hlthaff.2015.0642}
-
-\leavevmode\hypertarget{ref-pandey2015deceptive}{}%
-Pandey, A. V., Rall, K., Satterthwaite, M. L., Nov, O., \& Bertini, E. (2015). How deceptive are deceptive visualizations?: An empirical analysis of common distortion techniques. In \emph{Proceedings of the 33rd annual acm conference on human factors in computing systems} (pp. 1469--1478). ACM.
-
-\leavevmode\hypertarget{ref-Pastore2017}{}%
-Pastore, M., Lionetti, F., \& Altoè, G. (2017, September). When one shape does not fit all: A commentary essay on the use of graphs in psychological research. Frontiers Media S.A. doi:\href{https://doi.org/10.3389/fpsyg.2017.01666}{10.3389/fpsyg.2017.01666}
-
-\leavevmode\hypertarget{ref-ripley2013package}{}%
-Ripley, B., Venables, B., Bates, D. M., Hornik, K., Gebhardt, A., Firth, D., \& Ripley, M. B. (2013). Package ``mass''. \emph{Cran R}, \emph{538}.
-
-\leavevmode\hypertarget{ref-rodgers_epistemology_2010}{}%
-Rodgers, J. L. (2010). The epistemology of mathematical and statistical modeling: a quiet methodological revolution. \emph{The American Psychologist}, \emph{65}(1), 1--12. doi:\href{https://doi.org/10.1037/a0018326}{10.1037/a0018326}
-
-\leavevmode\hypertarget{ref-semetko2012sage}{}%
-Semetko, H. A., \& Scammell, M. (2012). \emph{The sage handbook of political communication}. Sage Publications.
-
-\leavevmode\hypertarget{ref-Tay2016a}{}%
-Tay, L., Parrigon, S., Huang, Q., \& LeBreton, J. M. (2016). Graphical Descriptives: A Way to Improve Data Transparency and Methodological Rigor in Psychology. \emph{Perspectives on Psychological Science}, \emph{11}(5), 692--701. doi:\href{https://doi.org/10.1177/1745691616663875}{10.1177/1745691616663875}
-
-\leavevmode\hypertarget{ref-Tufte2001}{}%
-Tufte, E. R. (2001). \emph{The visual display of quantitative information}. Cheshire, CT: Graphics press.
-
-\leavevmode\hypertarget{ref-Tukey1990}{}%
-Tukey, J. W., \& Tukey, P. A. (1990). \emph{Strips Displaying Empirical Distributions: I. Textured Dot Strips}. Bellcore.
-
-\leavevmode\hypertarget{ref-Tyron1998}{}%
-Tyron, W. W. (1998). The inscrutable null hypothesis. \emph{American Psychologist}, \emph{53}(7), 796--796. doi:\href{https://doi.org/10.1037/0003-066X.53.7.796.b}{10.1037/0003-066X.53.7.796.b}
-
-\leavevmode\hypertarget{ref-umanath1994multiattribute}{}%
-Umanath, N. S., \& Vessey, I. (1994). Multiattribute data presentation and human judgment: A cognitive fit perspective. \emph{Decision Sciences}, \emph{25}(5-6), 795--824.
-
-\leavevmode\hypertarget{ref-vessey1991cognitive}{}%
-Vessey, I. (1991). Cognitive fit: A theory-based analysis of the graphs versus tables literature. \emph{Decision Sciences}, \emph{22}(2), 219--240.
-
-\leavevmode\hypertarget{ref-Wainer2010}{}%
-Wainer, H. (2010). Prelude. In J. Berkson (Ed.), \emph{Semiology of graphics: Diagrams, networks, maps} (2nd ed., pp. ix--x). Redlands, CA: ESRI Press.
-
-\leavevmode\hypertarget{ref-Weissgerber2015}{}%
-Weissgerber, T. L., Milic, N. M., Winham, S. J., \& Garovic, V. D. (2015). Beyond Bar and Line Graphs: Time for a New Data Presentation Paradigm. \emph{PLoS Biology}, \emph{13}(4). doi:\href{https://doi.org/10.1371/journal.pbio.1002128}{10.1371/journal.pbio.1002128}
-
-\leavevmode\hypertarget{ref-Wickham2010}{}%
-Wickham, H. (2010). A Layered Grammar of Graphics. \emph{Journal of Computational and Graphical Statistics}, \emph{19}(1), 3--28. doi:\href{https://doi.org/10.1198/jcgs.2009.07098}{10.1198/jcgs.2009.07098}
-
-\leavevmode\hypertarget{ref-Wilkinson1999}{}%
-Wilkinson, L. (1999). Dot plots. \emph{The American Statistician}, \emph{53}(3), 276--281.
-
-\leavevmode\hypertarget{ref-Wilkinson1999a}{}%
-Wilkinson, L., \& Task Force on Statistical Inference. (1999). Statistical Methods in Psychology Journals: Guidelines and Explanations. \emph{American Psychologist}, \emph{54}(8), 594--601.
-\end{cslreferences}
+\end{CSLReferences}
 
 \endgroup
+
 
 \end{document}
