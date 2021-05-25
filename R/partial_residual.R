@@ -17,13 +17,14 @@
 partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data, 
                                  added_term = NULL, suppress_model=F, ...) {
 
+  # error messages and data checking
   if (is.null(lm_formula) & is.null(model)) stop("You must provide either a lm formula or a model")
   if (is.null(lm_formula)) lm_formula = formula(model)
   if (!is.null(added_term)) check_all_variables_exist_in_data(all.vars(added_term), data)
   check_all_variables_exist_in_data(all.vars(plot_formula), data)
   check_all_variables_exist_in_data(all.vars(lm_formula), data)
   check_variables_in_lm(plot_formula, lm_formula, check_both = TRUE)
-  
+  browser()
   # remove missing data
   variables = all.vars(lm_formula)
   data = prep_data_for_avp(data, variables)
@@ -32,43 +33,53 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
 
   # compute the partial residuals
   residual = partial_residual(model, added_term) 
-
-  # if model is provided, use compare.fits to get actual fitted values
-  if (!is.null(model)) {
-    preds = suppressMessages(compare.fits(plot_formula, data=data, model1=model, return.preds=T))
-    # recenter predictions
-    preds$prediction = rescale(preds$prediction, mean(data[,variables[1]]), sd(data[,variables[1]]))
-    if (is.null(added_term)) model_matrix = model.matrix(model) else model_matrix = terms_to_modelmatrix(added_term, data)
-    columns_to_subract = keep_singles(model.matrix(model), model_matrix)
-    if (length(columns_to_subract)>1)
-      preds$prediction = preds$prediction - (sum(coef(model)[columns_to_subract]*colMeans(model.matrix(model)[,columns_to_subract])) + coef(model)[1])
-    else if (length(columns_to_subract)==1)
-      preds$prediction = preds$prediction - (sum(coef(model)[columns_to_subract]*mean(model.matrix(model)[,columns_to_subract])) + coef(model)[1])
-    else if (!is.null(added_term))
-      preds$prediction = preds$prediction - mean(data[,variables[1]])+ coef(model)[1]
-    else 
-      preds$prediction = 0 #preds$prediction
-  }
-
   # replace original dv with residual
   data[,all.vars(lm_formula)[1]] = residual
-
- 
   
+  ## create plot so we can get the "binned" variables (if they exist)
+  plot_data = flexplot(plot_formula, data=data, suppress_smooth=T) 
+  
+  # if model is provided, use model to generate predictions
+  if (!is.null(model)) {
+
+    # identify variables with _binned in the name
+    binned_vars = grep("_binned", names(plot_data$data), fixed=T, value=T)
+    unbinned_name = gsub("_binned", "", binned_vars)
+    
+    # select all variables in the plot
+    all_variables = all.vars(plot_formula)                # all variables in flexplot formula
+    all_model_variables = all.vars(formula(model))   # all variables in model 
+    not_plotted_vars = 
+      all_model_variables[!all_model_variables 
+                          %in% all_variables]        # variables in model, but not plot
+    
+    # merge the means with the dataset and replace the original variable with the binned mean
+    k = plot_data$data %>% 
+      group_by_at(vars(binned_vars)) %>% 
+      summarize_at(unbinned_name, mean) %>% 
+      full_join(plot_data$data, by=binned_vars, suffix = c("", ".y")) %>% 
+      mutate_at(not_plotted_vars, mean) %>% 
+      data.frame 
+    
+    
+    # 5. identify which components go into the model
+    # just use predict on the plot data
+    k$predict = predict(model, newdata=k)
+    # fix the intercepts by making the means of prediction/residuals the same
+    k$predict = k$predict - (mean(k$predict) - mean(data[,all.vars(lm_formula)[1]]))
+    fitted_line = geom_line(data=k, aes(y=predict)) 
+  } else {
+    fitted_line = geom_blank()
+  }
+
   # plot it
   y_label = paste0(paste0(lm_formula)[2], " ~ ", paste0(lm_formula)[3])
   
   ## suppress smooth if they leave it on defaults
-  #browser()
+
   args = list(...)
-  if (any(c("suppress_smooth", "method") %in% names(args))) {
-    if (suppress_model) return(flexplot(plot_formula, data=data, ...) + labs(y=y_label))
-    return(flexplot(plot_formula, data=data, prediction = preds, ...) + labs(y=y_label))
-  }
-  
-  if (suppress_model) return(flexplot(plot_formula, data=data, suppress_smooth=T,...) + labs(y=y_label))
-  flexplot(plot_formula, data=data, prediction = preds, suppress_smooth=T,...) +
-    labs(y=y_label)
+  if (any(c("suppress_smooth", "method") %in% names(args))) return(flexplot(plot_formula, data=data,...) + fitted_line + labs(y=y_label))
+  return(plot_data + fitted_line + labs(y=y_label))
   
 }
 

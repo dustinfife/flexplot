@@ -3,12 +3,10 @@ model = lm(ideation~stress +
              depression * friend_ideation + 
              health, 
            data=ideation)
-formula = ideation~depression | friend_ideation + health
+formula = ideation~depression + friend_ideation
 data = ideation
-added_term = ~depression*friend_ideation + health
+added_term = ~depression*friend_ideation
 
-# 1. compute all residuals
-residuals_all = residuals(model)
 
 # 2. add fitted terms back into residuals
 residual = partial_residual(model, added_term) 
@@ -21,12 +19,14 @@ plot_data = flexplot(formula, data=data, suppress_smooth=T)
     # identify variables with _binned in the name
     binned_vars = grep("_binned", names(plot_data$data), fixed=T, value=T)
     unbinned_name = gsub("_binned", "", binned_vars)
-    mean_names = paste0(unbinned_name, "_mean")
     
     # select all variables in the plot
-    all_variables = all.vars(formula)
-    all_model_variables = all.vars(formula(model))
-    not_plotted_vars = all_model_variables[!all_model_variables %in% all_variables]
+    all_variables = all.vars(formula)                # all variables in flexplot formula
+    all_model_variables = all.vars(formula(model))   # all variables in model 
+    not_plotted_vars = 
+      all_model_variables[!all_model_variables 
+                          %in% all_variables]        # variables in model, but not plot
+    
     # merge the means with the dataset and replace the original variable with the binned mean
     k = plot_data$data %>% 
       group_by_at(vars(binned_vars)) %>% 

@@ -18,8 +18,7 @@ test_that("partial_residual works", {
 test_that("partial_residual_plot works", {
   mod = lm(health~motivation + weight.loss , data=exercise_data)
   vdiffr::expect_doppelganger("partial_residual plot with one variable",
-                              partial_residual_plot(health~weight.loss, model=mod, data=exercise_data) + 
-                                geom_abline(slope = coef(mod)[3], intercept = coef(mod)[1]))
+                              partial_residual_plot(health~weight.loss, model=mod, data=exercise_data))
   mod = lm(health~motivation + weight.loss + therapy.type , data=exercise_data)
   vdiffr::expect_doppelganger("partial_residual plot with two variables",
                               partial_residual_plot(health~weight.loss + therapy.type, model=mod, data=exercise_data)) 
