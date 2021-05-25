@@ -3,9 +3,9 @@ model = lm(ideation~stress +
              depression * friend_ideation + 
              health, 
            data=ideation)
-formula = ideation~depression | friend_ideation
+formula = ideation~depression | friend_ideation + health
 data = ideation
-added_term = ~depression*friend_ideation 
+added_term = ~depression*friend_ideation + health
 
 # 1. compute all residuals
 residuals_all = residuals(model)
@@ -21,13 +21,37 @@ plot_data = flexplot(formula, data=data, suppress_smooth=T)
     # identify variables with _binned in the name
     binned_vars = grep("_binned", names(plot_data$data), fixed=T, value=T)
     unbinned_name = gsub("_binned", "", binned_vars)
-    # merge the means with the dataset
-    plot_data$data = plot_data$data %>% 
-      group_by_at(vars(binned_vars)) %>% 
-      summarize(Mean = mean(!!sym(unbinned_name))) %>% 
-      full_join(plot_data$data)
+    mean_names = paste0(unbinned_name, "_mean")
     
+    # select all variables in the plot
+    all_variables = all.vars(formula)
+    all_model_variables = all.vars(formula(model))
+    not_plotted_vars = all_model_variables[!all_model_variables %in% all_variables]
+    # merge the means with the dataset and replace the original variable with the binned mean
+    k = plot_data$data %>% 
+      group_by_at(vars(binned_vars)) %>% 
+      summarize_at(!!mean_names := mean(!!sym(unbinned_name))) %>% 
+      full_join(plot_data$data, by=binned_vars) %>% 
+      select(-all_of(unbinned_name)) %>% 
+      rename_at(vars(starts_with(mean_names)), ~ unbinned_name) %>%  
+      mutate_at(not_plotted_vars, mean) %>% 
+      data.frame 
+?summarize_at
 # 5. identify which components go into the model
+    
+    # just use predict on the plot data
+    k$predict = predict(model, newdata=k)
+      # fix the intercepts by making the means of prediction/residuals the same
+    k$predict = k$predict - (mean(k$predict) - mean(data$ideation))
+    plot_data +
+      geom_line(data=k, aes(y=predict)) +
+      geom_smooth(method="lm")
+    
+    
+    
+    
+    
+    
     
     keep_columns = dimnames(keep_duplicates(model.matrix(model), model.matrix(added_term, data=data))[,-1])[[2]]
     plot_data$data %>% select_at(all_of(keep_columns))
