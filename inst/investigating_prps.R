@@ -30,13 +30,11 @@ plot_data = flexplot(formula, data=data, suppress_smooth=T)
     # merge the means with the dataset and replace the original variable with the binned mean
     k = plot_data$data %>% 
       group_by_at(vars(binned_vars)) %>% 
-      summarize(!!mean_names := mean(!!sym(unbinned_name))) %>% 
-      full_join(plot_data$data, by=binned_vars) %>% 
-      select(-all_of(unbinned_name)) %>% 
-      rename_at(vars(starts_with(mean_names)), ~ unbinned_name) %>%  
+      summarize_at(unbinned_name, mean) %>% 
+      full_join(plot_data$data, by=binned_vars, suffix = c("", ".y")) %>% 
       mutate_at(not_plotted_vars, mean) %>% 
       data.frame 
-?summarize_at
+
 # 5. identify which components go into the model
     
     # just use predict on the plot data
