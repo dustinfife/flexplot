@@ -30,7 +30,7 @@ plot_data = flexplot(formula, data=data, suppress_smooth=T)
     # merge the means with the dataset and replace the original variable with the binned mean
     k = plot_data$data %>% 
       group_by_at(vars(binned_vars)) %>% 
-      summarize_at(!!mean_names := mean(!!sym(unbinned_name))) %>% 
+      summarize(!!mean_names := mean(!!sym(unbinned_name))) %>% 
       full_join(plot_data$data, by=binned_vars) %>% 
       select(-all_of(unbinned_name)) %>% 
       rename_at(vars(starts_with(mean_names)), ~ unbinned_name) %>%  
