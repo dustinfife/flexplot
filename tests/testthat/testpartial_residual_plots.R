@@ -3,15 +3,22 @@ context("partial_residual_plots")
 test_that("partial_residual_plot works", {
   mod = lm(health~motivation + weight.loss , data=exercise_data)
   vdiffr::expect_doppelganger("partial_residual plot with one variable",
-                              partial_residual_plot(health~weight.loss, model=mod, data=exercise_data))
+                              partial_residual_plot(health~weight.loss, 
+                                                    model=mod, 
+                                                    added_term = ~weight.loss, 
+                                                    data=exercise_data)+geom_smooth(method="lm"))
   mod = lm(health~motivation + weight.loss + therapy.type , data=exercise_data)
   vdiffr::expect_doppelganger("partial_residual plot with two variables",
-                              partial_residual_plot(health~weight.loss + therapy.type, model=mod, data=exercise_data)) 
+                              partial_residual_plot(health~weight.loss + therapy.type, 
+                                                    model=mod, 
+                                                    added_term = ~weight.loss + therapy.type, 
+                                                    data=exercise_data) ) 
   mod = lm(health~weight.loss + motivation * therapy.type, data=exercise_data)
   vdiffr::expect_doppelganger("partial_residual plot with formula term",
                               partial_residual_plot(health~ motivation + therapy.type, 
                                                     model=mod,
-                                                    added_term = ~motivation*therapy.type, data=exercise_data))
+                                                    added_term = ~motivation*therapy.type, 
+                                                    data=exercise_data))
   
   right_model = lm(ideation~depression_c*friend_ideation_c + stress_c + I(stress_c^2) + health, data=ideation)
   p = partial_residual_plot(ideation~friend_ideation_c | depression_c,
@@ -39,8 +46,8 @@ test_that("return_term_location works", {
 
 test_that("partial_residual works", {
   mod = lm(health~motivation + therapy.type + muscle.gain, data=exercise_data)
-  expect_equal(sum(partial_residual(mod, c("motivation", "therapy.type"))), 4818.57, tol=.001) 
-  expect_equal(round(as.numeric(partial_residual(mod, ~motivation)[1])*100), 2887)
+  expect_equal(sum(partial_residual(mod, c("motivation", "therapy.type"))), -894.6831, tol=.001) 
+  expect_equal(round(as.numeric(partial_residual(mod, ~motivation)[1])*100), -358)
 })
 
 test_that("return_matching_terms works", {

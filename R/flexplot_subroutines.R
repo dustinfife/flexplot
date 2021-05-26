@@ -1,6 +1,5 @@
 # this function tests for functions within an R formula and returns those results
 formula_functions = function(formula, data) {
-
   term_labels = attr(terms(formula), "term.labels")
   
   # return original data if there's no functions
@@ -19,7 +18,7 @@ formula_functions = function(formula, data) {
   
   # replace formula with unmodified formula
   string_formula = deparse(formula)
-  new_string_formula = gsub(term_labels[which_are_functions], vars[which_are_functions], string_formula, fixed=T)
+  new_string_formula = gsub(term_labels[which_are_functions], vars, string_formula, fixed=T)
   new_formula = as.formula(new_string_formula)
   list(data=data, formula = new_formula)
 }

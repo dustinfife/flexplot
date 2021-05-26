@@ -68,7 +68,7 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
       terms_2_predict = return_matching_terms(added_term, model)
       k$predict = rowSums(predict(model, newdata=k, terms = terms_2_predict, type = "terms"))
     } else {
-      k$predict = predict(model, newdata=k)
+      k$predict = 0#predict(model, newdata=k)
     }
     
     # fix the intercepts by making the means of prediction/residuals the same

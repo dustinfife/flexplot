@@ -239,7 +239,7 @@ test_that("formula_functions works", {
   b = a*2
   y = 1:5*.1
   d = data.frame(a,b, y)
-  expect_true(is.factor(formula_functions(y~a + as.factor(b), d)$b))
+  expect_true(is.factor(formula_functions(y~a + as.factor(b), d)$data$b))
 })
 
 test_that("perform_function works", {
