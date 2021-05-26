@@ -65,10 +65,8 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     # 5. identify which components go into the model
     # just use predict on the plot data
     if (!is.null(added_term)) {
-      #terms_string = attr(model.matrix(added_terms, k), "dimnames")[[2]]
-      browser()
-      head(k)
-      k$predict = rowSums(predict(model, newdata=k, terms = attr(terms(added_term), "term.labels"), type = "terms"))
+      terms_2_predict = return_matching_terms(added_term, model)
+      k$predict = rowSums(predict(model, newdata=k, terms = terms_2_predict, type = "terms"))
     } else {
       k$predict = predict(model, newdata=k)
     }
@@ -91,7 +89,36 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
   
 }
 
-
+# model = lm(health~weight.loss + motivation * therapy.type, data=exercise_data)
+# all(return_matching_terms(~therapy.type*motivation, model)==c("motivation", "therapy.type", "motivation:therapy.type"))
+# all(return_matching_terms(~therapy.type+motivation, model)==c("therapy.type","motivation"))
+# all(return_matching_terms(~motivation*therapy.type, model)==c("motivation", "therapy.type", "motivation:therapy.type"))
+return_matching_terms = function(added_terms, model) {
+  # extract terms as a vector
+  terms_added = attr(terms(added_terms), "term.labels")
+  terms_model = attr(terms(model), "term.labels")
+  interaction_components = grep(":", terms_added)
+  # return "terms_added" if there are no interactions
+  if (length(interaction_components)==0) return(terms_added)
+  # return "terms_added" if all terms specified are in the model
+  if (all(terms_added %in% terms_model)) return(terms_added)
+  # loop through all interaction components and flip then check
+  reordered_added_terms = terms_added %>% purrr::map_chr(reorder_interaction_terms)
+  reordered_model_terms = terms_model %>% purrr::map_chr(reorder_interaction_terms)
+  matching_terms = reordered_model_terms %in% reordered_added_terms
+  return(terms_model[matching_terms])
+  
+}
+# reorder_interaction_terms("a:c:b")=="a:b:c"
+# reorder_interaction_terms("a")=="a"
+reorder_interaction_terms = function(term) {
+  # if it's not an interaction, return the term
+  if (length(grep(":", term))==0) return (term)
+  return(strsplit(term, ":", fixed=T) %>% 
+           unlist %>% 
+           sort %>% 
+           paste0(collapse=":"))
+}
 #model = lm(weight.loss~therapy.type * motivation + health, data=exercise_data)
 #term = ~therapy.type*motivation
 #term = c("motivation", "therapy.type")

@@ -1,20 +1,5 @@
 context("partial_residual_plots")
 
-test_that("return_term_location works", {
-  model = lm(weight.loss~therapy.type + motivation + health, data=exercise_data)
-  expect_error(return_term_location(model, NULL))
-  expect_error(return_term_location(model, "motiv"))
-  expect_error(return_term_location(model, c("motiv", "health")))  
-  expect_equal(return_term_location(model, "therapy.type"), 2)
-  expect_equal(return_term_location(model, c("therapy.type", "health")), c(2,4))
-})
-
-test_that("partial_residual works", {
-  mod = lm(health~motivation + therapy.type + muscle.gain, data=exercise_data)
-  expect_equal(sum(partial_residual(mod, c("motivation", "therapy.type"))), 4818.57, tol=.001) 
-  expect_equal(round(as.numeric(partial_residual(mod, ~motivation)[1])*100), 2887)
-})
-
 test_that("partial_residual_plot works", {
   mod = lm(health~motivation + weight.loss , data=exercise_data)
   vdiffr::expect_doppelganger("partial_residual plot with one variable",
@@ -35,12 +20,6 @@ test_that("partial_residual_plot works", {
   vdiffr::expect_doppelganger("partial_residual with interaction specified backward", 
                               p)
   
-  # partial residual with flexplot arguments
-  p = partial_residual_plot(ideation~friend_ideation_c | depression_c,
-                            model=right_model,
-                            added_term = ~friend_ideation_c*depression_c, data=ideation,
-                            method="quadratic")
-  
   #prp with no added_term arguments
   vdiffr::expect_doppelganger("prp with no added_term argument specified", 
                               partial_residual_plot(ideation~friend_ideation_c | depression_c,
@@ -49,6 +28,31 @@ test_that("partial_residual_plot works", {
                                                     method="quadratic"))
 })
 
+test_that("return_term_location works", {
+  model = lm(weight.loss~therapy.type + motivation + health, data=exercise_data)
+  expect_error(return_term_location(model, NULL))
+  expect_error(return_term_location(model, "motiv"))
+  expect_error(return_term_location(model, c("motiv", "health")))  
+  expect_equal(return_term_location(model, "therapy.type"), 2)
+  expect_equal(return_term_location(model, c("therapy.type", "health")), c(2,4))
+})
+
+test_that("partial_residual works", {
+  mod = lm(health~motivation + therapy.type + muscle.gain, data=exercise_data)
+  expect_equal(sum(partial_residual(mod, c("motivation", "therapy.type"))), 4818.57, tol=.001) 
+  expect_equal(round(as.numeric(partial_residual(mod, ~motivation)[1])*100), 2887)
+})
+
+test_that("return_matching_terms works", {
+  model = lm(health~weight.loss + motivation * therapy.type, data=exercise_data)
+  expect_true(all(return_matching_terms(~therapy.type*motivation, model)==c("motivation", "therapy.type", "motivation:therapy.type")))
+  expect_true(all(return_matching_terms(~therapy.type+motivation, model)==c("therapy.type","motivation")))
+              expect_true(all(return_matching_terms(~motivation*therapy.type, model)==c("motivation", "therapy.type", "motivation:therapy.type")))
+})
+test_that("reorder_interaction_terms works", {
+  expect_true(reorder_interaction_terms("a:c:b")=="a:b:c")
+  expect_true(reorder_interaction_terms("a")=="a")
+})
 test_that("terms_to_modelmatrix works", {
   expect_true(ncol(terms_to_modelmatrix("motivation", exercise_data))==2)
               expect_true(ncol(terms_to_modelmatrix(~motivation, exercise_data))==2)
