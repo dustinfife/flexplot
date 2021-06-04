@@ -37,10 +37,10 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
   data[,all.vars(lm_formula)[1]] = residual
   
   ## create plot so we can get the "binned" variables (if they exist)
-  plot_data = flexplot(plot_formula, data=data, suppress_smooth=T) 
+  plot_data = flexplot(plot_formula, data=data, suppress_smooth=T, ...) 
   
   # if model is provided, use model to generate predictions
-  if (!is.null(model)) {
+  if (!is.null(model) & !suppress_model) {
 
     # identify variables with _binned in the name
     binned_vars = grep("_binned", names(plot_data$data), fixed=T, value=T)
@@ -73,7 +73,10 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     
     # fix the intercepts by making the means of prediction/residuals the same
     k$predict = k$predict - (mean(k$predict) - mean(data[,all.vars(lm_formula)[1]]))
-    fitted_line = geom_line(data=k, aes(y=predict)) 
+    
+    # color line depending on if there's a group aesthetic
+    if (is.null(plot_data$mapping$colour)) fitted_line = geom_line(data=k, aes(y=predict), colour="#8F0000", size=1.5) else fitted_line = geom_line(data=k, aes(y=predict)) 
+    
   } else {
     fitted_line = geom_blank()
   }
