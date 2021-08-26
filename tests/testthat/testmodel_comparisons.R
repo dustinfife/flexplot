@@ -27,6 +27,11 @@ test_that("model_comparisons works", {
   expect_true(length(model.comparison(nlr, nlf))==2)
   expect_true(length(model.comparison(log_full, log_reduced))==3)
   expect_true(length(model.comparison(rf, rf2))==1)
+  model.comparison(mixed_full, mixed_reduced) %>% 
+    names() %>% 
+    purrr::pluck(4) %>% 
+    {if(.=="r_squared_change") TRUE else FALSE} %>% 
+    expect_true()
 })
 test_that("model_comparison_table works", {
   # identical models
@@ -88,6 +93,8 @@ test_that("get_r_squared works", {
   b = sum(get_r_squared(nlr, nnl))
   expect_equal(b, .214, tol=.001)
   # other models
+  c = sum(get_r_squared(mixed_full, mixed_reduced))
+  expect_equal(c, .501, tol=.001)
   
 })
 
