@@ -236,12 +236,6 @@ Finally, and perhaps most importantly, graphics improve encoding (Hansen, Chen, 
 \label{fig:smiley}
 \end{figure}
 
-\begin{figure}
-\centering
-\includegraphics{flexplot_psychmeth_files/figure-latex/ses-1.pdf}
-\caption{\label{fig:ses}Simulated relationship between \texttt{Treatment}, \texttt{Depression}, and \texttt{SES}. The graph makes it clear there's an interaction effect, which would be masked if one simply computed a main effects model.}
-\end{figure}
-
 While visualizations have many advantages, they can also be used to mislead, sometimes intentionally, and sometimes not (Correll, 2015; Kosslyn, 2006; Pandey, Rall, Satterthwaite, Nov, \& Bertini, 2015). For example, when means/standard errors are presented as barcharts, people tend to judge values below the mean (i.e., within the confines of the bar) as far more likely than values above the mean, even when the underlying distribution is symmetric (Correll, 2015). To further complicate matters, the default images in most point-and-click statistical software violate important visualization heuristics (Fife, Tremoulet, \& Longo, 2019; Healy \& Moody, 2014; Wainer, 2010). For example, in \texttt{SPSS} it is impossible (as far as I know) to produce standard error plots that display raw data (jittered or otherwise). Also, in standard error plots, the axes are scaled to the means, not the range of the actual data, which visually inflates the size of the effect. In addition, producing some types of graphics (e.g., Skew-Location plots) requires more effort than many are willing to perform (the user must model the data, export the residuals, then produce a scatterplot).
 
 This paper introduces \texttt{flexplot}, an R package specifically designed to remove obstacles to sound visualizations. The graphics produced by \texttt{flexplot} were developed using empirically-derived heurstics (see Fife, Longo, Correll, \& Tremoulet, 2020 for a review). Also, the graphics produced are simple to generate and permit analysts to quickly shift between statistical modeling and graphical interpretation.
@@ -604,57 +598,26 @@ AVPs are underused, yet extremely useful.\footnote{The \texttt{car} package allo
 
 \texttt{flexplot\textquotesingle{}s} version of AVPs have a slightly different flavor. In my experience, AVPs can be confusing to lay audiences because the scale of the outcome variable has changed to be centered on zero; if one is expecting the outcome variable to range from 0 to 30, yet the graph shows scores from -15 to +15, this will violate users' intuitions, which will create obstacles to proper interpretation of graphics (Kosslyn, 2006). To counter this confusion, \texttt{flexplot} adds the mean back into the residuals so the \(Y\)-axis retains the original scale. The notation for \texttt{added.plot()} is similar to \texttt{flexplot}, though the vertical pipes aren't necessary.
 
-There are multiple ways to specify the display of added variable plots. By default, \texttt{flexplot} will do is take the \emph{last} variable entered (\texttt{therapy.type} in the first example below) and plot that on the \(X\) axis, while plotting the residuals of the model on the \(Y\) axis (i.e., the residuals of the model \texttt{weight.loss\ \textasciitilde{}\ motivation}). Another option is to specify either a number (indicating the ordinal position of the variable they wish to plot on the \(X\) axis) or the variable name in quotes (see the latter two examples). Other arguments can be passed to \texttt{added.plot()} as well (such as \texttt{alpha}, \texttt{sample}, \texttt{method}, etc.). A final option is to specify explicitly how the residuals are computed (using the \texttt{lm\_formula} argument), separately from how the data are displayed (via the formula argument). This final method allows one to specify a multivariate plot, as in Figure \ref{fig:avp}.
+There are multiple ways to specify the display of added variable plots. By default, \texttt{flexplot} will do is take the \emph{last} variable entered (\texttt{therapy.type} in the first line of the code below) and plot that on the \(X\) axis, while plotting the residuals of the model on the \(Y\) axis (i.e., the residuals of the model \texttt{weight.loss\ \textasciitilde{}\ motivation}). Another option is to specify either a number (indicating the ordinal position of the variable they wish to plot on the \(X\) axis, as in the second example below) or the variable name in quotes (see the third line in the example code below). Other arguments can be passed to \texttt{added.plot()} as well (such as \texttt{alpha}, \texttt{sample}, \texttt{method}, etc.). A final option is to specify explicitly how the residuals are computed (using the \texttt{lm\_formula} argument), separately from how the data are displayed (via the formula argument). This final method allows one to specify a multivariate plot, as in Figure \ref{fig:avp}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{added.plot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
+\FunctionTok{added.plot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data, }\AttributeTok{x=}\DecValTok{1}\NormalTok{) }
+\FunctionTok{added.plot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data, }\AttributeTok{x=}\StringTok{"motivation"}\NormalTok{) }
+\FunctionTok{added.plot}\NormalTok{(weight.loss}\SpecialCharTok{\textasciitilde{}}\NormalTok{motivation }\SpecialCharTok{|}\NormalTok{ therapy.type, }\AttributeTok{data=}\NormalTok{exercise\_data, }
+           \AttributeTok{lm\_formula =}\NormalTok{ weight.loss}\SpecialCharTok{\textasciitilde{}}\NormalTok{health)}
+\end{Highlighting}
+\end{Shaded}
 
 \small
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{added.plot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
+\FunctionTok{added.plot}\NormalTok{(weight.loss}\SpecialCharTok{\textasciitilde{}}\NormalTok{motivation }\SpecialCharTok{|}\NormalTok{ therapy.type, }\AttributeTok{data=}\NormalTok{exercise\_data, }
+           \AttributeTok{lm\_formula =}\NormalTok{ weight.loss}\SpecialCharTok{\textasciitilde{}}\NormalTok{health)}
 \end{Highlighting}
 \end{Shaded}
-
-\begin{figure}
-\centering
-\includegraphics{flexplot_psychmeth_files/figure-latex/avp-1.pdf}
-\caption{\label{fig:avp-1}An Added Variable Plot (AVP) showing the relationship between \texttt{therapy.type} and \texttt{weight.loss}, after controlling for \texttt{motivation}. \label{fig:avp}}
-\end{figure}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{added.plot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data, }\AttributeTok{x=}\DecValTok{1}\NormalTok{) }
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}
-\centering
-\includegraphics{flexplot_psychmeth_files/figure-latex/avp-2.pdf}
-\caption{\label{fig:avp-2}An Added Variable Plot (AVP) showing the relationship between \texttt{therapy.type} and \texttt{weight.loss}, after controlling for \texttt{motivation}. \label{fig:avp}}
-\end{figure}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{added.plot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data, }\AttributeTok{x=}\StringTok{"motivation"}\NormalTok{) }
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}
-\centering
-\includegraphics{flexplot_psychmeth_files/figure-latex/avp-3.pdf}
-\caption{\label{fig:avp-3}An Added Variable Plot (AVP) showing the relationship between \texttt{therapy.type} and \texttt{weight.loss}, after controlling for \texttt{motivation}. \label{fig:avp}}
-\end{figure}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{added.plot}\NormalTok{(weight.loss}\SpecialCharTok{\textasciitilde{}}\NormalTok{motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data=}\NormalTok{exercise\_data, }\AttributeTok{lm\_formula =}\NormalTok{ weight.loss}\SpecialCharTok{\textasciitilde{}}\NormalTok{health)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}
-\centering
-\includegraphics{flexplot_psychmeth_files/figure-latex/avp-4.pdf}
-\caption{\label{fig:avp-4}An Added Variable Plot (AVP) showing the relationship between \texttt{therapy.type} and \texttt{weight.loss}, after controlling for \texttt{motivation}. \label{fig:avp}}
-\end{figure}
 
 \normalsize
 
@@ -738,9 +701,7 @@ Whether using breakpoints or bins, the user can also specify labels for the bins
 \begin{Highlighting}[]
 \NormalTok{a }\OtherTok{=} \FunctionTok{flexplot}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{|}\NormalTok{ satisfaction, }
              \AttributeTok{data =}\NormalTok{ exercise\_data, }
-             \AttributeTok{breaks =} \FunctionTok{list}\NormalTok{(}\AttributeTok{satisfaction=}\FunctionTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{7}\NormalTok{))) }\SpecialCharTok{+}
-\NormalTok{  ggplot2}\SpecialCharTok{::}\FunctionTok{facet\_grid}\NormalTok{( }\SpecialCharTok{\textasciitilde{}}\NormalTok{ therapy.type, }
-              \AttributeTok{labeller =}\NormalTok{ ggplot2}\SpecialCharTok{::}\FunctionTok{labeller}\NormalTok{(}\AttributeTok{therapy.type =}\NormalTok{ label\_value)) }\SpecialCharTok{+}
+             \AttributeTok{breaks =} \FunctionTok{list}\NormalTok{(}\AttributeTok{satisfaction=}\FunctionTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{,}\DecValTok{7}\NormalTok{)))  }\SpecialCharTok{+}
   \CommentTok{\# change font size to eliminate overlap}
     \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} 
             \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{12}\NormalTok{, }\AttributeTok{angle =} \DecValTok{90}\NormalTok{, }\AttributeTok{hjust=}\FloatTok{0.95}\NormalTok{,}\AttributeTok{vjust=}\FloatTok{0.5}\NormalTok{))}
@@ -801,8 +762,7 @@ There are advantages and disadvantages to plotting a variable as a color/symbol/
 \hypertarget{general-strategy-for-plotting-multivariate-relationships}{%
 \subsection{General Strategy for Plotting Multivariate Relationships}\label{general-strategy-for-plotting-multivariate-relationships}}
 
-It is easy for multivariate graphs to become unnecessarily complicated. For example, the top image in Figure \ref{fig:threeway} shows a graphic where all four \texttt{flexplot} slots are occupied. This is very difficult to interpret. To simplify things, we could utilize several strategies. First, we can specify two bins instead of the default three. We can also remove confidence intervals, reduce the opacity of the data, and plot regression lines.{[}\^{}foot2{]} Also, I generally try to have only two levels for the variable in the second slot (in this case, Male versus Female). Finally, we could add ghost lines. The bottom image in Figure \ref{fig:threeway} utilizes all these strategies and simplifies the visual interpretation immensely.
-{[}\^{}foot2{]}: These are great strategies to use \emph{after} one has determined that the model generally fits the data. If the data are curvilinear, for example, it would not make sense to plot straight lines or make the datapoints overly transparent.
+It is easy for multivariate graphs to become unnecessarily complicated. For example, the top image in Figure \ref{fig:threeway} shows a graphic where all four \texttt{flexplot} slots are occupied. This is very difficult to interpret. To simplify things, we could utilize several strategies. (See Fife, 2021 for a more detailed review of these and other strategies). First, we can specify two bins instead of the default three. We can also remove confidence intervals, reduce the opacity of the data, and plot regression lines.\footnote{These are great strategies to use \emph{after} one has determined that the model generally fits the data. If the data are curvilinear, for example, it would not make sense to plot straight lines or make the datapoints overly transparent.} Also, I generally try to have only two levels for the variable in the second slot (in this case, Male versus Female). Finally, we could add ghost lines. The bottom image in Figure \ref{fig:threeway} utilizes all these strategies and simplifies the visual interpretation immensely.
 
 Another strategy is to mentally block out all panels but the diagonal (the bottom-left to top-right). The diagonal reflects the influence of \emph{both} variables as they increase (or decrease). In other words, they are a rough approximation of the average effect of the \(X1/Y\) relationship as you increase (or decrease) the paneled variables. If there is a general pattern of the lines consistently getting steeper (or shallower) as they move up the diagonal, that indicates there may be a three-way interaction effect. In Figure \ref{fig:threeway}, the lines seem pretty parallel going from bottom-left to top-right. The one thing that \emph{does} seem to change is that the colored lines go from below the ghost line to above it (indicating a main effect of \texttt{health} and/or \texttt{satisfaction}). In other words, we may be safe to do AVPs. However, before doing so, it may be best to combine graphs with statistical modeling.
 
@@ -864,7 +824,7 @@ For multivariate data, \texttt{visualize} will create a plot that will use panel
 \begin{Highlighting}[]
 \NormalTok{model }\OtherTok{=} \FunctionTok{lm}\NormalTok{(weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{+}\NormalTok{ therapy.type, }\AttributeTok{data =}\NormalTok{ exercise\_data)}
 \FunctionTok{visualize}\NormalTok{(model, }\AttributeTok{formula =}\NormalTok{ weight.loss }\SpecialCharTok{\textasciitilde{}}\NormalTok{ motivation }\SpecialCharTok{|}\NormalTok{ therapy.type, }
-          \AttributeTok{ghost.line =} \StringTok{"red"}\NormalTok{, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{plot =} \StringTok{"model"}\NormalTok{)}
+          \AttributeTok{ghost.line =} \StringTok{"gray"}\NormalTok{, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{plot =} \StringTok{"model"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
