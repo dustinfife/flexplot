@@ -11,28 +11,28 @@
 
 \centering
 \includegraphics{images/flexplot_diagram.jpg}
-\caption{A diagram showing how elements of Flexplot's graphics are represented in a plot. $X1$ is shown on the $X$ axis, $X2$ shows up as different colors/symbols/lines, $X3$ panels in columns, and $X4$ panels in rows.}
+\caption{A diagram showing how elements of flexplot's graphics are represented in a plot. $X1$ is shown on the $X$ axis, $X2$ shows up as different colors/symbols/lines, $X3$ panels in columns, and $X4$ panels in rows.}
 \label{fig:flexplotgrammar}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/bar-1.pdf}
 \caption{\label{fig:bar}A histogram (left) and barchart (right) produced within \texttt{flexplot} in R.}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/chunkit-1.pdf}
 \caption{\label{fig:chunkit}Two displays of the same data. In the left image, categories are sorted alphabetically (which is the default of \texttt{ggplot2}). In \texttt{flexplot} the categories are sorted by sample size, which enables better chunking of information. \label{fig:chunkit}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 
-{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/raw-1}
+{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/raw-1}
 
 }
 
@@ -42,7 +42,7 @@
 \ifnextchar[{\eatarg}{}
 
 
-{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/jitterit-1}
+{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/jitterit-1}
 
 }
 
@@ -52,7 +52,7 @@
 \ifnextchar[{\eatarg}{}
 
 
-{\centering \includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/scatter-1}
+{\centering \includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/scatter-1}
 
 }
 
@@ -62,49 +62,56 @@
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/logistic-1.pdf}
 \caption{\label{fig:logistic}Example of a logistic plot in the \texttt{flexplot} package.\label{fig:logistic}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/association-1.pdf}
 \caption{\label{fig:association}Example of an association plot for categorical predictor/categorical outcome.\label{fig:association}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/plant-1.pdf}
 \caption{\label{fig:plant}A plot of repeated measures data.\label{fig:plant}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/sample-1.pdf}
 \caption{\label{fig:sample}Four graphics showing different ways to handle overlapping datapoints. The top-left image does nothing. The top-right omits raw data. The bottom-left reduces the opacity of the points. The bottom-right samples datapoints. \label{fig:sample}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/avp-1.pdf}
+\caption{\label{fig:avp}An Added Variable Plot (AVP) showing the relationship between therapy.type/motivation and weight.loss, after controlling for health. Here, the added variable plot allows the user to specify more than a simple bivariate graphic.}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/symbols-1.pdf}
 \caption{\label{fig:symbols}Two multivariate graphs illustrating how the second slot in a \texttt{flexplot} formula controls the graph. The left image demonstrates what happens to the second slot variable (\(X2\)) when a numeric predictor is on the X-axis, while the right image demonstrates what happens to the second slot variable when a categorical predictor is on the X-axis.}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/panels-1.pdf}
 \caption{\label{fig:panels}A multivariate plot where \texttt{therapy.type} and \texttt{gender} are now shown in panels. \label{fig:panels}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/panels2-1}
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/panels2-1}
 
 }
 
@@ -114,44 +121,44 @@
 \ifnextchar[{\eatarg}{}
 
 
-{\centering \includegraphics[width=0.8\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/ghost-1}
+{\centering \includegraphics[width=0.8\linewidth]{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/ghost-1}
 
 }
 
-\caption{Ghost lines repeat the pattern from one panel to the others, making it easier to compare across panels. In this case, the line from the middle panel (Satisfaction = 4-6) is repeated in red across the other panels. \label{fig:ghost}}\label{fig:ghost}
+\caption{Ghost lines repeat the pattern from one panel to the others, making it easier to compare across panels. In this case, the line from the middle panel (Satisfaction = 4-6) is repeated in gray across the other panels. \label{fig:ghost}}\label{fig:ghost}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/threeway-1.pdf}
 \caption{\label{fig:threeway}Multivariate relationship between five variables. Each \texttt{flexplot} slot is occupied and it is difficult to interpret what is going on in the top figure, though the use of regression lines instead of loess lines, removing standard errors, reducing transparency of the datapoints, adding ghost lines, and reducing the number of bins have made it easier to interpret (bottom image). \label{fig:threeway}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/ancova-1.pdf}
 \caption{\label{fig:ancova}Demonstration of the \texttt{visualize} function on a \texttt{lm} object. The top row shows a representation of the statistical model. The bottom row shows diagnostic plots. \label{fig:ancova}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/ancova2-1.pdf}
 \caption{\label{fig:ancova2}Demonstration of the \texttt{visualize} function on a \texttt{lm} object, but with \texttt{flexplot} arguments controlling the output (as well as suppressing residuals). \label{fig:ancova2}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/mixed-1.pdf}
 \caption{\label{fig:mixed}Demonstration of the \texttt{visualize} function for a mixed model. In this graphic, each thin line represents the fit of a particular school. \label{fig:mixed}}
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
 
 \centering
-\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/Rtmp0RS9jW/preview-6426aeb0a89.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf}
+\includegraphics{/private/var/folders/yn/14y1l5z55b18j7j3zmfjkrd40000gn/T/RtmpZN4DxZ/preview-803624fd668.dir/flexplot_psychmeth_files/figure-latex/compare-1.pdf}
 \caption{\label{fig:compare}Demonstration of the \texttt{compare.fits()} function, comparing a main effects and an interaction model. Ghost lines have been added from the \texttt{cog} condition for easier comparison across panels. \label{fig:compare}}
 \end{figure*}
