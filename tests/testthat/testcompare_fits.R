@@ -100,6 +100,13 @@ test_that("compare.fits for other models", {
   vdiffr::expect_doppelganger("compare.fits with mixed models",
                               compare.fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2))
   
+  # compare.fits with tibbles
+  d = as_tibble(alcuse)
+  mod1 = lmer(ALCUSE~AGE_14 + (1|ID), data=d)  
+  mod2 = lmer(ALCUSE~AGE_14 + (AGE_14|ID), data=d)  
+  vdiffr::expect_doppelganger("compare.fits with tibbles",
+                              compare.fits(ALCUSE~AGE_14 | ID, data=d, mod1, mod2))
+  
   ## compare.fits returned error when data had integers
   d = round(data.frame(y=rnorm(100, 50, 20), x=rnorm(100, 50, 20), z=rnorm(100, 50, 20)))
   class(d$y) = "integer"; class(d$x) = "integer"; class(d$z) = "integer"; 

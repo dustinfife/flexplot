@@ -2,7 +2,7 @@ context("added.plots")
 
 data(exercise_data)
 d = exercise_data
-
+options(warn=-1)
 test_that("avp plots work for linear models", {
   set.seed(1212)
   vdiffr::expect_doppelganger("avp for therapy.type",
@@ -76,3 +76,4 @@ test_that("mediate_plot works", {
     mediate_plot(weight.loss~motivation + therapy.type, data=exercise_data))
   
 })
+options(warn=0)
