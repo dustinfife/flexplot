@@ -45,6 +45,10 @@ compare.fits = function(formula, data, model1, model2=NULL,
   testme = unique(c(variables_mod1$predictors, variables_mod2$predictors))
   all_variables = unique(c(variables_mod1$predictors, variables_mod2$predictors, variables_mod1$response, variables_mod2$response))
   
+  if (tibble::is_tibble(data)){
+    data = as.data.frame(data)
+  }
+  
   #### for the rare occasion where deleting missing data changes the levels...
   data = check_missing(model1, model2, data, all_variables)
   
