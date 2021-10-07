@@ -239,9 +239,9 @@ subset_random_model = function(object, d, samp.size = 3) {
     term.re = extract_random_term(object)
     
     #### randomly sample the re terms and convert to numeric
-    unique.terms = unique(d[,term.re])
+    unique.terms = unique(d[[term.re]])
     samp = sample(unique.terms, size=min(samp.size, length(unique.terms)))
-    k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])
+    k = d[d[[term.re]]%in%samp,]; k[[term.re]] = as.factor(k[[term.re]])
     return(k)
   }
   
