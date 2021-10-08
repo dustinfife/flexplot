@@ -27,6 +27,11 @@ test_that("model_comparisons works", {
   expect_true(length(model.comparison(nlr, nlf))==2)
   expect_true(length(model.comparison(log_full, log_reduced))==3)
   expect_true(length(model.comparison(rf, rf2))==1)
+  model.comparison(mixed_full, mixed_reduced) %>% 
+    names() %>% 
+    purrr::pluck(4) %>% 
+    {if(.=="r_squared_change") TRUE else FALSE} %>% 
+    expect_true()
 })
 test_that("model_comparison_table works", {
   # identical models
@@ -88,6 +93,8 @@ test_that("get_r_squared works", {
   b = sum(get_r_squared(nlr, nnl))
   expect_equal(b, .214, tol=.001)
   # other models
+  c = sum(get_r_squared(mixed_full, mixed_reduced))
+  expect_equal(c, .501, tol=.001)
   
 })
 
@@ -116,18 +123,18 @@ test_that("standardized difference works", {
   expect_output(print(diff), "0.152")
   
   diff = standardized_differences(rf, rf2)
-  expect_output(print(diff), "0.745")  
+  expect_output(print(diff), "50%")  
   
   diff = standardized_differences(rlm, rlm2)
   expect_output(print(diff), "1.115")   
   
   diff = standardized_differences(rf, rlm2)
-  expect_output(print(diff), "0.817")   
+  expect_output(print(diff), "0%")   
   
   expect_error(standardized_differences(gamma_full, pois_reduced))
   
 })
-rlm$model
+
 test_that("rlm and lm can be compared", {
   model1 = lm(weight.loss~motivation + therapy.type, data=exercise_data)
   model2 = MASS::rlm(weight.loss~motivation + therapy.type, data=exercise_data)
@@ -163,7 +170,7 @@ test_that("interaction vs lm works", {
 
 test_that("random forest vs lm works returns predictions only", {
   set.seed(1212)
-  a = randomForest(weight.loss~therapy.type, data=exercise_data)
+  a = randomForest::randomForest(weight.loss~therapy.type, data=exercise_data)
   b = lm(weight.loss~therapy.type, data=exercise_data)
   results = model.comparison(rf2, nlf)
   expect_equal(length(results), 1)
@@ -238,6 +245,13 @@ test_that("is_model_outcome_binary works", {
   expect_true(is_model_outcome_binary(mod))
 })
 
+test_that("model_comparison p-values are right", {
+  full = lm(weight.loss~therapy.type + muscle.gain, data=exercise_data)
+  reduced = lm(weight.loss~therapy.type, data=exercise_data)
+  a = model.comparison(full, reduced)$statistic$p[1]
+  b = as.character(round(anova(full, reduced)$`Pr(>F)`[2], digits=3))
+  expect_true(a==b)
+})
 
 options(warn=0)
 

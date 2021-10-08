@@ -36,7 +36,27 @@ test_that("estimates from linear models", {
   ##### polynomial
   mod = lm(weight.loss~motivation + I(motivation^2), data=d)	
   expect_equal(estimates(mod)$numbers.summary$std.upper[3], -.53, tolerance = 0.002)
+  
+  mod = lm(weight.loss~1, data=exercise_data)
+  expect_equal(estimates(mod)$Mean, 6.56, tolerance = 0.002)
 })
+
+test_that("estimates from mixed models", {
+  
+  mod1 = lme4::lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)  
+  expect_true(all(names(estimates(mod1)) %in% c("fixed", "r.squared", "rand", "icc")))
+  expect_equal(as.numeric(round(estimates(mod1)$icc[1]*1000)), expected=548, tolerance = .01)
+  
+  # with tibbles
+  mod2 = update(mod1, data=as_tibble(alcuse))
+  expect_true(all(names(estimates(mod2)) %in% c("fixed", "r.squared", "rand", "icc")))
+  
+  # with missing data in some columns
+  alcuse_missing = alcuse 
+  alcuse_missing$ALCUSE[sample(1:nrow(alcuse), 5)] = NA
+  mod2 = update(mod1, data=alcuse_missing)
+  expect_true(all(names(estimates(mod2)) %in% c("fixed", "r.squared", "rand", "icc")))
+})  
 
 test_that("estimates from generalized linear models", {
   data("criminal_data")

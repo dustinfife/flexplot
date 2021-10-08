@@ -204,7 +204,10 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
     class_data = lapply(data[names(pred.values)], class)
     if (!identical(class_preds, class_data)) {
       for (i in 1:length(class_preds)) {
-        class(pred.values[,i]) = class(data[,names(pred.values[i])])
+        if (class(data[,names(pred.values[i])])== "factor") 
+          pred.values[,i] = factor(pred.values[,i], levels=levels(data[,names(pred.values[i])]))
+        else 
+          class(pred.values[,i]) = class(data[,names(pred.values[i])])
       }
     }
     

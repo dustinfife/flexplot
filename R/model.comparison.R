@@ -34,6 +34,17 @@ model.comparison = function(model1, model2){
   #### compute difference in predicted value (scaled)
   differences=standardized_differences(model1, model2)
   
+  # for mixed models, put as separate R squared
+  if (class(model1)[1] == "lmerMod" & class(model2)[1] == "lmerMod" & nested) {
+    r_squared_change = get_r_squared(model1, model2, nested)
+    model.table[,"rsq"] = NULL
+    final_output = list(accuracy_table = predictions, 
+                        statistics = model.table, 
+                        predicted_differences = differences, 
+                        r_squared_change = r_squared_change)
+    return(final_output)
+  }
+  
   final_output = list(accuracy_table = predictions, statistics = model.table, predicted_differences = differences)
   return(final_output[!sapply(final_output, is.null)])
 
@@ -57,7 +68,7 @@ model_comparison_table = function(model1, model2, m1.name="Full", m2.name="Reduc
   bic = c(BIC(model1), BIC(model2))
   bayes.factor = bf.bic(model1, model2)
   p = get_p_value(model1, model2, nested)
-  rsq = get_r_squared(model1, model2)
+  rsq = get_r_squared(model1, model2, nested)
   
   ### make sure bayes factor is attached to the more likely model
   if ((bic[1]<=bic[2] & bayes.factor<=1) | bic[2]<=bic[1] & bayes.factor>=1){
@@ -73,7 +84,7 @@ model_comparison_table = function(model1, model2, m1.name="Full", m2.name="Reduc
   } else {
     model.table = round(model.table[,!is.na(model.table[1,])], digits=3)
     model.table[is.na(model.table)] = ""
-    model.table$p[1] = format.pval(model.table$p[1], digits=3)
+    model.table$p[1] = format.pval(as.numeric(model.table$p[1]), digits=3)
   }
   
   # get rid of columns with NA
@@ -96,11 +107,20 @@ get_p_value = function(model1, model2, nested=TRUE) {
   if (class(model1)[1]=="glmerMod" | class(model1)[1] == "lmerMod") return(sort(anova(model1, model2, test="LRT")[,"Pr(>Chisq)"]))
 }
 
-get_r_squared = function(model1, model2){
+get_r_squared = function(model1, model2, nested=TRUE){
+
+  mod1_terms = attr(terms(model1), "term.labels")
+  mod2_terms = attr(terms(model2), "term.labels")
+  
   if (class(model1)[1] == "lm" & class(model2)[1] == "lm") {
     rsq1 = summary(model1)$r.squared %>% round(digits=3)
     rsq2 = summary(model2)$r.squared%>% round(digits=3)
     return(c(rsq1, rsq2))
+  }
+  # mixed models
+  if (class(model1)[1] == "lmerMod" & class(model2)[1] == "lmerMod" & nested) {
+    if (length(mod1_terms)<length(mod2_terms)) return(rsq_change(model2, model1))
+    return(rsq_change(model1, model2))
   }
   
   return(c(NA, NA))

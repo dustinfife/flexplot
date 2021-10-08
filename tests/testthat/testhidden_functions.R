@@ -8,6 +8,12 @@ test_that("rescale works", {
   expect_true(round(sd(rescale(d$weight.loss, 0, 2)), 0) == 2)
 })
 
+test_that("floor_ceiling work", {
+  testval = c(-1, 0, 0, 60, 100, 101)
+  expect_true(min(floor_ceiling(testval, 0))==0)
+  expect_true(max(floor_ceiling(testval, 0, 100))==100)
+})
+
 
 test_that("nested model comparisons returns bf", {
   mod = lm(weight.loss~motivation + therapy.type + gender, data=exercise_data)
@@ -39,6 +45,8 @@ test_that("make flexplot formula works", {
 
   tst = as.character(make_flexplot_formula(predictors = c("Years", "GPA", "gender:GPA"), outcome, data))[3]
   expect_output(print(tst),'Years \\| GPA')
+  
+  expect_equal(paste0(make_flexplot_formula(NULL, "therapy.type", exercise_data))[3], "1")
 })
 
 test_that("match.jitter works", {
@@ -222,10 +230,26 @@ test_that("round_digits works", {
 
 test_that("check_all_variables_exist_in_data works", {
   expect_null(check_all_variables_exist_in_data(c("weight.loss", "therapy.type"), exercise_data))
+  expect_null(check_all_variables_exist_in_data(NULL, exercise_data))
   expect_error(check_all_variables_exist_in_data(c("weight.loss", "therrapy.type"), exercise_data))
 })
 
+test_that("formula_functions works", {
+  a = 1:5
+  b = a*2
+  y = 1:5*.1
+  d = data.frame(a,b, y)
+  expect_true(is.factor(formula_functions(y~a + as.factor(b), d)$data$b))
+})
 
+test_that("perform_function works", {
+  expect_true(all(sqrt(avengers$kills) == perform_function("sqrt(kills)", avengers)))
+})
+
+test_that("get_var_names_within_function works", {
+  expect_true(get_var_names_within_function("sqrt(a)")=="a")
+  expect_true(get_var_names_within_function("sqrt(a)", return.var = F)(4)==2)
+})
 
 
 

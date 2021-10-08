@@ -26,6 +26,7 @@ flexplot(
   silent = F,
   third.eye = NULL,
   plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"),
+  return_data = F,
   ...
 )
 }
@@ -76,6 +77,8 @@ Users can export the string, in case they want to modify the ggplot object}
 \item{plot.type}{This argument allows the user to control the type of plot used. Flexplot defaults to histograms (for univariate variables)
 but could also do qqplots (using "qq" as the argument) or density plots (using "density"). Also, the user can specify "boxplot" for boxplots and
 "violin" for violin plots.}
+
+\item{return_data}{Should flexplot return the dataset? Defaults to No. This is useful if you want to recycle the bin assigments from flexplot.}
 
 \item{...}{Other arguments passed to \code{\link[ggplot2]{aes}}}
 }

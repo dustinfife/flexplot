@@ -1,3 +1,44 @@
+# this function tests for functions within an R formula and returns those results
+formula_functions = function(formula, data) {
+  term_labels = attr(terms(formula), "term.labels")
+  
+  # return original data if there's no functions
+  which_are_functions = grep("(", term_labels, fixed=T)
+  if (length(which_are_functions)==0) return(list(data=data, formula=formula))
+  
+  # extract names of variables
+  vars = unlist(lapply(term_labels[which_are_functions], 
+                       get_var_names_within_function, return.var=T))
+  # apply function to the variables
+  new_vars = term_labels[which_are_functions] %>% 
+        purrr::map(perform_function, data=data) %>% 
+        purrr::set_names(vars) %>% 
+        data.frame
+  data[,vars] = new_vars
+  
+  # replace formula with unmodified formula
+  string_formula = deparse(formula)
+  new_string_formula = gsub(term_labels[which_are_functions], vars, string_formula, fixed=T)
+  new_formula = as.formula(new_string_formula)
+  list(data=data, formula = new_formula)
+}
+
+# this function applied a function passed as string to the data
+perform_function = function(string, data) {
+  with(data, eval(parse(text=string)))
+}
+
+# function that returns the variables or functions passed from a string
+get_var_names_within_function = function(string, return.var=TRUE) {
+  components = unlist(strsplit(string, split="(", fixed=T))
+  var = gsub(")", "", components[2], fixed=T)
+  fun = match.fun(components[1])
+  if (return.var) return(var)
+  fun
+}
+
+
+
 # expect_true(length(names(flexplot_prep_variables(weight.loss~therapy.type, data=exercise_data)))==23)
 # expect_true(length(flexplot_prep_variables(weight.loss~therapy.type + motivation, data=exercise_data)$variables)==3)
 # this function takes all the arguments needed for the rest of the --------
@@ -78,7 +119,7 @@ flexplot_alpha_default = function(data, axis, alpha){
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
-
+  
   if (is.null(data)) {
     return(data) 
   } else {
@@ -557,6 +598,7 @@ flexplot_modify_prediction = function(flexplot_vars, prediction=NULL,
   
   
   #### bin the predictions, where needed
+
   if (length(break.me)>0){
     for (i in 1:length(break.me)){
       ### find that variable in the model and bin it

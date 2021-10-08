@@ -6,16 +6,18 @@
 \alias{avp}
 \title{Create an added variable plot}
 \usage{
-added.plot(formula, data, method = "loess", x = NULL, ...)
+added.plot(formula, data, lm_formula = NULL, method = "loess", x = NULL, ...)
 }
 \arguments{
-\item{formula}{A formula with exactly two predictors and an outcome variable}
+\item{formula}{A flexplot formula, specifying how the avp will visualize the variables.}
 
 \item{data}{The dataset used}
 
+\item{lm_formula}{Optional. A formula specifying how to condition variables.}
+
 \item{method}{The smoothing method. Defaults to "loess"}
 
-\item{x}{The variable you wish to place on the x axis.}
+\item{x}{The variable you wish to place on the x axis. Defaults to NULL.}
 
 \item{...}{Other parameters passed to flexplot}
 }
@@ -23,13 +25,26 @@ added.plot(formula, data, method = "loess", x = NULL, ...)
 Create an added variable plot
 }
 \details{
-This function first residualizes the outcome variable based on the first variables listed in the formula.
+This function first residualizes the outcome variable based whatever variables the user decides to condition on.
 The mean of the outcome variable is then added to the residuals (to maintain the interpretation of the variable),
-then the function plots the residuals against the second variable.
+then the function plots the residuals against the other variables the user specifies.
+
+More specifically, if the user specifies `formula` but leaves the options `x` and `lm_formula` as NULL, it will 
+default to residualizing the first variable(s) in the formula and plot the last variable entered against those residuals.
+For example, if the user specifies y~x + z, this function will residualize y~x, then plot z against those residuals. 
+
+If the user specifies a value of `x`, that tells the function which variable to residualize. So, again, if the user specifies
+`y~x + z` then sets `x` to 2, the function will instead residualize based on z instead of x. 
+
+For multivariate AVPs, the user can specify a value for `lm_formula`. The value of `lm_formula` specifies the fitted model
+that is then residualized, while the value of `formula` specifies how the remaining variables are displayed, using `flexplot`
+formula conventions.
 }
 \examples{
 data(exercise_data)
 added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
+added.plot(weight.loss~motivation + therapy.type, data=exercise_data, x=2)
+added.plot(weight.loss~motivation + therapy.type, lm_formula = weight.loss~health*muscle.gain, data=exercise_data)
 }
 \seealso{
 \code{\link{flexplot}}

@@ -1,3 +1,19 @@
+#' Simulated Dataset About Suicide Ideation 
+#'
+#' A dataset containing 3000 observations. This dataset contains interaction and nonlinear effects
+#' and was used for the manuscript about Visual partitioning
+#'
+#' @format A data frame with 300 rows and 8 variables: \describe{
+#'   \item{ideation}{Suicide ideation scores}
+#'   \item{stress}{Self-reported stress score}
+#'   \item{health}{Self-reported health score}
+#'   \item{friend_ideation}{Suicide ideation score of each individual's best friend}
+#'   \item{depression_c}{Centered BDI depression score}
+#'   \item{friend_ideation_c}{Centered friend ideation score}
+#'   \item{stress}{centered stress score}   
+#'}
+"ideation"
+
 #' Simulated Dataset About Experiences with the Paranormal
 #'
 #' A dataset containing combat attributes of almost 812 fighters in the final

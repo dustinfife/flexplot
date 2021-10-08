@@ -45,6 +45,10 @@ compare.fits = function(formula, data, model1, model2=NULL,
   testme = unique(c(variables_mod1$predictors, variables_mod2$predictors))
   all_variables = unique(c(variables_mod1$predictors, variables_mod2$predictors, variables_mod1$response, variables_mod2$response))
   
+  if (tibble::is_tibble(data)){
+    data = as.data.frame(data)
+  }
+  
   #### for the rare occasion where deleting missing data changes the levels...
   data = check_missing(model1, model2, data, all_variables)
   
@@ -78,8 +82,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (!(all(predictors %in% names(data)))){
     stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
   }	
-
+  
   pred.values = generate_predictors(data, predictors, testme, num_points, class(model1)[1])
+  # for intercept only models
+  if (nrow(pred.values)==0) {
+    pred.values = data.frame("(Intercept)" = 1)
+  }
+
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
   ### there's no fixed effect if we don't have these lines
@@ -156,8 +165,10 @@ compare.fits = function(formula, data, model1, model2=NULL,
         prediction.model$prediction = prediction.model$prediction + 1
       }
     } 
-    
+
     final_geom = return_lims_geom(outcome, data, model1)
+    #when we have an intercept only model
+    if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
   }	

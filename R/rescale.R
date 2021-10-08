@@ -16,3 +16,23 @@ rescale = function(x, new.mean, new.sd){
   m2 = new.mean+(x-mean(x, na.rm=T))*(new.sd/sd(x, na.rm=T))
   m2
 }
+
+#' Replace minimum value with a specified floor
+#'
+#' @param x A numeric vector
+#' @param min.val The minimum value of the dataset
+#' @param max.val The maximum value of the dataset
+#'
+#' @return A new vector where the values < min.val are replaced with min.val (and
+#' likewise for the max values)
+#' @export
+#'
+#' @examples
+#' testval = c(-1, 0, 0, 60, 100, 101)
+#' floor_ceiling(testval, min.val=-1, max.val=100)
+floor_ceiling = function(x, min.val=NULL, max.val=NULL) {
+  if (!is.null(min.val)) x[x<min.val] = min.val 
+  if (!is.null(max.val)) x[x>max.val] = max.val 
+  return(x)
+}
+
