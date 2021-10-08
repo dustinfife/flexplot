@@ -21,6 +21,64 @@ estimates.default = function(object, mc=TRUE){
 	out
 }
 
+#' Report lmerMod object Estimates (effect sizes and parameters)
+#'
+#' Report lmerMod object Estimates
+#' @param object a lm object
+#' @param mc Should model comparisons be performed?
+#' @return One or more objects containing parameter estimates and effect sizes
+#' @export
+estimates.lmerMod = function(object, mc=TRUE){
+  fixed = lme4::fixef(object)
+  rand = lme4::VarCorr(object)
+  icc_stats = unlist(icc(object))
+  
+  # fit a baseline model
+  baseline = fit_baseline_model(object)
+  
+  # compute rsq 
+  rsq = model.comparison(object, baseline)$r_squared_change
+  
+  # return the objects
+  ret = list( fixed = fixed,
+              r.squared=rsq,
+              rand = rand, 
+              icc = icc_stats
+             )
+  attr(ret, "class") = "lmer_estimates"
+  return(ret)
+}
+
+#' Print lmer_estimates Summary
+#'
+#' Print a lmer_estimates object
+#' @aliases print.lmer_estimates
+#' @param x an lmer_estimates object
+#' @param ... ignored
+#' @export
+print.lmer_estimates = function(x,...){
+    cat(paste("Fixed Effects: \n", sep=""))
+    print(x$fixed)
+    cat(paste("\n\nRandom Effects: \n", sep=""))
+    print(x$rand)
+    cat(paste("\n\nICC and Design Effect: \n", sep=""))
+    print(x$icc)
+    cat(paste("\n\nR Squared: \n\n", sep=""))
+    print(x$r.squared)    
+}	
+
+
+
+fit_baseline_model = function(object) {
+  dv = get_terms(object)$response
+  re = get_re(object)
+  form = as.formula(
+                paste0(dv, "~1+(1|", re, ")")
+              )
+  return(update(object, formula=form))
+}
+
+
 #' Report lm object Estimates (effect sizes and parameters)
 #'
 #' Report lm object Estimates

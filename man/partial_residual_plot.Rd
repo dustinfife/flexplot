@@ -10,6 +10,7 @@ partial_residual_plot(
   model = NULL,
   data,
   added_term = NULL,
+  suppress_model = F,
   ...
 )
 }
