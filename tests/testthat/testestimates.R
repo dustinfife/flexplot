@@ -52,10 +52,11 @@ test_that("estimates from mixed models", {
   expect_true(all(names(estimates(mod2)) %in% c("fixed", "r.squared", "rand", "icc")))
   
   # with missing data in some columns
+  data(alcuse)
   alcuse_missing = alcuse 
   alcuse_missing$ALCUSE[sample(1:nrow(alcuse), 5)] = NA
-  mod2 = update(mod1, data=alcuse_missing)
-  expect_true(all(names(estimates(mod2)) %in% c("fixed", "r.squared", "rand", "icc")))
+  mod3 = update(mod1, data=alcuse_missing)
+  expect_true(all(names(estimates(mod3)) %in% c("fixed", "r.squared", "rand", "icc")))
 })  
 
 test_that("estimates from generalized linear models", {

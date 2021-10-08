@@ -29,7 +29,7 @@ test_that("model_comparisons works", {
   expect_true(length(model.comparison(rf, rf2))==1)
   model.comparison(mixed_full, mixed_reduced) %>% 
     names() %>% 
-    purrr::pluck(4) %>% 
+    purrr::pluck(3) %>% 
     {if(.=="r_squared_change") TRUE else FALSE} %>% 
     expect_true()
 })
@@ -253,6 +253,13 @@ test_that("model_comparison p-values are right", {
   expect_true(a==b)
 })
 
+
+test_that("rsq comparison doesn't error", {
+  full    = lmer(MathAch~SES + Minority + (SES | School), data=math)
+  reduced = lmer(MathAch~SES            + (SES | School), data=math)
+  expect_true(names(model.comparison(full, reduced))[1] == "statistics")
+  
+})
 options(warn=0)
 
 
