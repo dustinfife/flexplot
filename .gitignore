@@ -6,5 +6,9 @@ build/
 doc
 Meta
 inst/datasets/health_depression.csv
-
+vignettes/psychmethods/
+vignettes/flexplot_psychmeth_cache
+vignettes/flexplot_psychmeth_files
+vignettes/submission
+vignettes/archive
 *.svg

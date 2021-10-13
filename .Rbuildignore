@@ -42,3 +42,7 @@ R/scratch/
 data/generate_data.R
 vignettes/regex_syntax.txt
 vignettes/psychmethods/
+vignettes/flexplot_psychmeth_cache
+vignettes/flexplot_psychmeth_files
+vignettes/submission
+vignettes/archive
