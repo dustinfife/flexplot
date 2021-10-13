@@ -20,6 +20,22 @@ test_that("nested model comparisons returns bf", {
   expect_output(print(nested_model_comparisons(mod)), "1212109")
 }) 
 
+
+test_that("add_bin_to_new_dataset works", {
+  # make fake mixed model data
+  mod = lmer(weight.loss~motivation + muscle.gain + 
+         (motivation | satisfaction), data=exercise_data %>% 
+         mutate(across(c(weight.loss, motivation, muscle.gain), scale)))
+  plot = flexplot(weight.loss~motivation | muscle.gain, data=exercise_data)
+  new_bins = add_bin_to_new_dataset(plot, 
+                         d=exercise_data, 
+                         terms=c("weight.loss", "motivation", "muscle.gain", "satisfaction"), 
+                         term.re = "satisfaction", outcomevar="weight.loss")$muscle.gain_binned
+  old_bins = plot$data$muscle.gain_binned
+  # this failed prior to flexplot 0.11.1 because negative numbers weren't accounted for
+  expect_true(all(levels(new_bins) == levels(old_bins)))
+})
+
 test_that("check.non.number returns nonnumber", {
   expect_false(check.non.number(c(1,1,2,3,2,1)))
   expect_true(check.non.number(c(letters[1:10])))
