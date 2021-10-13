@@ -38,7 +38,6 @@ R/glmbasic.b.R
 R/glmbasic.h.R
 R/modelcomp.b.R
 R/modelcomp.h.R
-R/scratch/
 data/generate_data.R
 vignettes/regex_syntax.txt
 vignettes/psychmethods/
@@ -46,3 +45,7 @@ vignettes/flexplot_psychmeth_cache
 vignettes/flexplot_psychmeth_files
 vignettes/submission
 vignettes/archive
+^R/scratch$
+^README_files$
+^jasp_documentation$
+^tests$
