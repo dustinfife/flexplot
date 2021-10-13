@@ -8,9 +8,10 @@
 #'   \item{stress}{Self-reported stress score}
 #'   \item{health}{Self-reported health score}
 #'   \item{friend_ideation}{Suicide ideation score of each individual's best friend}
+#'   \item{depression}{Simulated BDI scores}
 #'   \item{depression_c}{Centered BDI depression score}
 #'   \item{friend_ideation_c}{Centered friend ideation score}
-#'   \item{stress}{centered stress score}   
+#'   \item{stress_c}{centered stress score}   
 #'}
 "ideation"
 
@@ -23,16 +24,37 @@
 #'
 #' @format A data frame with 1000 rows and 7 variables: \describe{
 #'   \item{conviction}{Degree of conviction they have about the existence of the
-#'   paranormal} \item{fear}{How much they fear being kidnapped by aliens}
+#'   paranormal} 
+#'   \item{fear}{How much they fear being kidnapped by aliens}
 #'   \item{time}{How much time they spend a year researching the paranormal}
 #'   \item{kidnapped}{Whether they've been kidnapped by aliens}
 #'   \item{experiences.type}{What type of experiences they have had with the
 #'   paranormal? Can be "eerie feeling," "presence watching", "saw UFO", "saw ghost", or "heard voice"} 
 #'   \item{income}{How much money they make}
+#'   \item{blogs}{Do they maintain a blog about the paranormal? 1=yes}
 #'   \item{age}{Age of respondent}
 #'   \item{gender}{Gender of respondent}
 #'   \item{political}{Political Ideology of respondent}}
 "paranormal"
+
+#' An actual dataset of photography students
+#'
+#' This dataset contains 162 rows of repeated measures data for photography 
+#' students across 8 variables. These data were recorded from 2008-2012 
+#' from a photography-training school. 
+#'
+#' @format A tibble with 162 rows and 7 variables: \describe{
+#'   \item{clientid}{A unique identifier for each student taking a class} 
+#'   \item{link_name}{The name of the class each student took}
+#'   \item{class_size}{The number of students in that specific class}
+#'   \item{classes_taken}{The total number of classes each student has taken}
+#'   \item{redroom}{Whether the student took class in a very large, dark 
+#'   room called the red room}
+#'   \item{dates_between}{The number of days between their first class and their next class}
+#'   \item{progre3ssed}{A Binary variable indicating whether the student decided 
+#'   to take advanced classes}
+#'   \item{class_id}{A unique identifer for the class}
+"photo_lessons"
 
 #' Simulated Statistics on the Final Avengers Battle
 #'

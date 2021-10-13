@@ -38,6 +38,10 @@ classoption       : "man"
 output            : 
   papaja::apa6_pdf:
     keep_tex: TRUE
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Title of your vignette}
+  %\usepackage[UTF-8]{inputenc}    
 ---
 
 ```{r setup}

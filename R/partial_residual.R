@@ -6,13 +6,15 @@
 #' @param data The dataset
 #' @param added_term a formula, which specifies which terms should be de-residualized. By default,
 #' it will use the residuals from `model`. 
+#' @param suppress_modl A boolean. Should the model be suppressed? Defaults to T. 
 #' @param ... Other arguments passed to flexplot
 #'
 #' @return a partial residual plot
 #' @export
 #'
 #' @examples
-#' partial_residual_plot(weight.loss~therapy.type, lm_formula = weight.loss~therapy.type + motivation, 
+#' partial_residual_plot(weight.loss~therapy.type, 
+#'    lm_formula = weight.loss~therapy.type + motivation, 
 #'    data=exercise_data)
 partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data, 
                                  added_term = NULL, suppress_model=F, ...) {
@@ -140,7 +142,6 @@ partial_residual = function(model, term=NULL) {
                              nrow=nrow(matrix_coded), ncol=ncol(keep_columns),
                              byrow=T)
   # return it
-  head(res + rowSums(betas_of_interest*keep_columns) - coef(model)[1])
   if (ncol(matrix_coded)>1) return(res + rowSums(betas_of_interest*keep_columns) - coef(model)[1])
   return(res + betas_of_interest*matrix_coded- coef(model)[1])
   

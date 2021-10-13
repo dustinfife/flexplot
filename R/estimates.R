@@ -425,9 +425,9 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 	#### output coefficients
 	
 	if (class(object)[1] == "glmerMod" & family(object)$link == "logit"){
-	  coef.matrix = data.frame(raw.coefficients = fixef(object), 
-	                           OR = exp(fixef(object)), 
-	                           inverse.OR = 1/exp(fixef(object)) 
+	  coef.matrix = data.frame(raw.coefficients = lme4::fixef(object), 
+	                           OR = exp(lme4::fixef(object)), 
+	                           inverse.OR = 1/exp(lme4::fixef(object)) 
 	                           )
 	} else if (family(object)$link=="logit"){
 		coef.matrix = data.frame(raw.coefficients = coef(object), OR = exp(coef(object)), inverse.OR = 1/exp(coef(object)), standardized.OR = exp(standardized.beta(object, sd.y=F)), inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))

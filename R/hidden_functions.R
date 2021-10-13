@@ -117,7 +117,7 @@ get_predictors = function(model) {
   if (class(mod)!="try-error") return(all.vars(mod)[-1])
   
   # now deal with cases where there is a failure
-  if (class(model)[1]=="RandomForest") {
+  if (class(mod1)[1]=="RandomForest") {
     return(all.vars(model@data@formula$input))
   }
 }

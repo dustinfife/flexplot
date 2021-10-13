@@ -21,15 +21,17 @@ Imports: cowplot,
 	purrr,
 	plyr,
 	R6,
-	lme4,	
-	party,
 	ggplot2,
 	patchwork,
-	ggsci
+	ggsci, 
+	rlang
 Suggests: jmvcore (>= 0.8.5), 
 	vdiffr,
 	knitr,
 	testthat,
-	randomForest
+	randomForest,
+	lme4,	
+	party,
+
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
