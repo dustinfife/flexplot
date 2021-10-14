@@ -31,10 +31,11 @@ estimates.default = function(object, mc=TRUE){
 estimates.lmerMod = function(object, mc=TRUE){
   fixed = lme4::fixef(object)
   rand = lme4::VarCorr(object)
-  icc_stats = unlist(icc(object))
+
   
   # fit a baseline model
   baseline = fit_baseline_model(object)
+  icc_stats = unlist(icc(baseline))
   
   # compute rsq 
   rsq = model.comparison(object, baseline)$r_squared_change
