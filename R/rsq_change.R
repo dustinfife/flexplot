@@ -19,8 +19,8 @@
 rsq_change = function(full, reduced){
   
   #### create objects for variance terms
-  full.var = as.data.frame(VarCorr(full)); names(full.var)[4:5] = c("variance", "sd")
-  reduced.var = as.data.frame(VarCorr(reduced))
+  full.var = as.data.frame(lme4::VarCorr(full)); names(full.var)[4:5] = c("variance", "sd")
+  reduced.var = as.data.frame(lme4::VarCorr(reduced))
   
   if (nrow(full.var)<=nrow(reduced.var)){
     #stop("Your 'full' model must be larger than your 'reduced' model.")

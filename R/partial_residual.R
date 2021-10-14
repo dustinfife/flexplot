@@ -6,7 +6,7 @@
 #' @param data The dataset
 #' @param added_term a formula, which specifies which terms should be de-residualized. By default,
 #' it will use the residuals from `model`. 
-#' @param suppress_modl A boolean. Should the model be suppressed? Defaults to T. 
+#' @param suppress_model A boolean. Should the model be suppressed? Defaults to T. 
 #' @param ... Other arguments passed to flexplot
 #'
 #' @return a partial residual plot

@@ -1,4 +1,4 @@
-# @importFrom rlang `:=`
+#' @importFrom rlang ":="
 add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   # variable isn't binned/summarized!
   are_any_binned = grep("_binned", names(plot$data))
@@ -21,7 +21,9 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   
   # remove extra REs because we don't need any of them,e xcept ggplot requires a column name for it
   if ("model" %in% names(d)) d[[term.re]] = factor(d[[term.re]]) else d[[term.re]] = d[[term.re]][1] %>% factor(d[[term.re]][1]) 
-  d = d %>% group_by_at(nt) %>% summarize(!!rlang::sym(outcomevar) := mean(!!(rlang::sym(outcomevar))))
+  d = d %>% 
+    group_by_at(nt) %>% 
+    summarize(!!rlang::sym(outcomevar) := mean(!!(rlang::sym(outcomevar))))
   return(d)
 }
 
@@ -111,7 +113,7 @@ get_predictors = function(model) {
   if (class(mod1)!="try-error") return(unlist(mod1))
   
   # now try another way (this will get randomForest)
-  mod = try({getCall(model1)$formula}, silent=TRUE)
+  mod = try({getCall(model)$formula}, silent=TRUE)
   
   # no failure = return
   if (class(mod)!="try-error") return(all.vars(mod)[-1])

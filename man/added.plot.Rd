@@ -44,7 +44,8 @@ formula conventions.
 data(exercise_data)
 added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
 added.plot(weight.loss~motivation + therapy.type, data=exercise_data, x=2)
-added.plot(weight.loss~motivation + therapy.type, lm_formula = weight.loss~health*muscle.gain, data=exercise_data)
+added.plot(weight.loss~motivation + therapy.type, 
+lm_formula = weight.loss~health*muscle.gain, data=exercise_data)
 }
 \seealso{
 \code{\link{flexplot}}

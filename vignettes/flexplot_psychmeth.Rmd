@@ -40,7 +40,7 @@ output            :
     keep_tex: TRUE
 vignette: >
   %\VignetteEngine{knitr::knitr}
-  %\VignetteIndexEntry{Title of your vignette}
+  %\VignetteIndexEntry{Flexplot: Graphically Based Data Analysis}
   %\usepackage[UTF-8]{inputenc}    
 ---
 
@@ -50,6 +50,7 @@ knitr::knit_hooks$set(chunk = function(x, options) {
   x <- def.chunk.hook(x, options)
   ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
 })
+#' @import papaja tidyverse
 library("papaja")
 ```
 

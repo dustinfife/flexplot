@@ -10,9 +10,10 @@ A data frame with 300 rows and 8 variables: \describe{
   \item{stress}{Self-reported stress score}
   \item{health}{Self-reported health score}
   \item{friend_ideation}{Suicide ideation score of each individual's best friend}
+  \item{depression}{Simulated BDI scores}
   \item{depression_c}{Centered BDI depression score}
   \item{friend_ideation_c}{Centered friend ideation score}
-  \item{stress}{centered stress score}   
+  \item{stress_c}{centered stress score}   
 }
 }
 \usage{

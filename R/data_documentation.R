@@ -43,7 +43,8 @@
 #' students across 8 variables. These data were recorded from 2008-2012 
 #' from a photography-training school. 
 #'
-#' @format A tibble with 162 rows and 7 variables: \describe{
+#' @format A tibble with 162 rows and 7 variables: 
+#' \describe{
 #'   \item{clientid}{A unique identifier for each student taking a class} 
 #'   \item{link_name}{The name of the class each student took}
 #'   \item{class_size}{The number of students in that specific class}
@@ -54,6 +55,7 @@
 #'   \item{progre3ssed}{A Binary variable indicating whether the student decided 
 #'   to take advanced classes}
 #'   \item{class_id}{A unique identifer for the class}
+#'   }
 "photo_lessons"
 
 #' Simulated Statistics on the Final Avengers Battle

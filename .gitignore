@@ -12,4 +12,5 @@ vignettes/flexplot_psychmeth_files
 vignettes/submission
 vignettes/archive
 R/scratch
+..Rcheck/
 *.svg

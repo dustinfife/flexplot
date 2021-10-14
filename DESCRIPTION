@@ -24,14 +24,17 @@ Imports: cowplot,
 	ggplot2,
 	patchwork,
 	ggsci, 
+	lme4,	
+	party,
+	mgcv,
 	rlang
 Suggests: jmvcore (>= 0.8.5), 
 	vdiffr,
 	knitr,
 	testthat,
 	randomForest,
-	lme4,	
-	party,
-
+	markdown, 
+	papaja,
+	tidyverse
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
