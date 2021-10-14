@@ -38,7 +38,7 @@ model.comparison = function(model1, model2){
   if (class(model1)[1] == "lmerMod" & class(model2)[1] == "lmerMod" & nested) {
     r_squared_change = get_r_squared(model1, model2, nested)
     model.table[,"rsq"] = NULL
-    final_output = list(accuracy_table = predictions, 
+    final_output = list(
                         statistics = model.table, 
                         predicted_differences = differences, 
                         r_squared_change = r_squared_change)
@@ -72,9 +72,9 @@ model_comparison_table = function(model1, model2, m1.name="Full", m2.name="Reduc
   
   ### make sure bayes factor is attached to the more likely model
   if ((bic[1]<=bic[2] & bayes.factor<=1) | bic[2]<=bic[1] & bayes.factor>=1){
-    model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(1/bayes.factor, bayes.factor), p = c(p, NA), rsq = rsq)  
+    model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(1/bayes.factor, bayes.factor), p = c(p, NA), rsq = as.numeric(rsq[1:2]) )
   } else if ((bic[2]<bic[1] & bayes.factor<1) | (bic[1]<bic[2] & bayes.factor>1)){
-    model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor), p = c(p, NA), rsq = rsq)  
+    model.table = data.frame(aic=aic, bic=bic, bayes.factor=c(bayes.factor, 1/bayes.factor), p = c(p, NA), rsq = as.numeric(rsq[1:2])  )
   }  
   row.names(model.table) = c(m1.name, m2.name)
   

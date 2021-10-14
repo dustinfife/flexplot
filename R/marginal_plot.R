@@ -116,13 +116,14 @@ return_panel_vars = function(formula) {
 #plot = flexplot(weight.loss~health | motivation + muscle.gain, data=exercise_data, method="lm")
 #extract_plot_method(plot)
 # thanks to https://stackoverflow.com/questions/40854225/how-to-identify-the-function-used-by-geom-smooth
+#' @importFrom mgcv gam
 extract_plot_method = function(plot) {
   layer.data <- plot$layers[[2]]$layer_data(plot$data)
-  layout <- ggplot2:::create_layout(plot$facet, plot$coordinates)
+  layout <- create_layout_flex(plot$facet, plot$coordinates)
   data <- layout$setup(list(layer.data), plot$data, plot$plot_env)
   data[[1]] <- plot$layers[[2]]$compute_aesthetics(data[[1]], plot)
   scales <- plot$scales
-  data[[1]] <- ggplot2:::scales_transform_df(scales = scales, df = data[[1]])
+  data[[1]] <- scales_transform_df_flex(scales = scales, df = data[[1]])
   layout$train_position(data, scales$get_scales("x"), scales$get_scales("y"))
   data <- layout$map_position(data)[[1]]
   
@@ -140,4 +141,43 @@ extract_plot_method = function(plot) {
 }
 
 
+create_layout_flex = function (facet = FacetNull, coord = CoordCartesian) 
+{
+  ggproto(NULL, Layout, facet = facet, coord = coord)
+}
+empty_flex = function (df) 
+{
+  is.null(df) || nrow(df) == 0 || ncol(df) == 0 
+}
 
+scales_transform_df_flex = function (scales, df) 
+{
+  if (empty_flex(df) || length(scales$scales) == 0) 
+    return(df)
+  transformed <- unlist(lapply(scales$scales, function(s) s$transform_df(df = df)), 
+                        recursive = FALSE)
+  new_data_frame_flex(c(transformed, df[setdiff(names(df), names(transformed))]))
+}
+new_data_frame_flex = function (x = list(), n = NULL) 
+{
+  if (length(x) != 0 && is.null(names(x))) {
+    rlang::abort("Elements must be named")
+  }
+  lengths <- vapply(x, length, integer(1))
+  if (is.null(n)) {
+    n <- if (length(x) == 0 || min(lengths) == 0) 
+      0
+    else max(lengths)
+  }
+  for (i in seq_along(x)) {
+    if (lengths[i] == n) 
+      next
+    if (lengths[i] != 1) {
+      rlang::abort("Elements must equal the number of rows or 1")
+    }
+    x[[i]] <- rep(x[[i]], n)
+  }
+  class(x) <- "data.frame"
+  attr(x, "row.names") <- .set_row_names(n)
+  x
+}

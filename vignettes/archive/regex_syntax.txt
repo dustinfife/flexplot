@@ -1,6 +1,0 @@
-# go from \ref{fig:hello} to \@ref(fig:hello)
-\\ref{([a-z]+):([a-z]+)} -> \\@ref(\1:\2)
-
-
-
-\\texttt\{([a-z]+[0-9]?)\}

@@ -280,9 +280,9 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
       }	
       
       # variable isn't binned/summarized!
+      #browser()
       m = add_bin_to_new_dataset(step3, m, terms, term.re, "prediction")
       newd = add_bin_to_new_dataset(step3, newd, terms, term.re, outcome)
-      
       step3 = step3+ 
         geom_line(data=m, 
                   aes_string(terms[1], "prediction", color=NA, group=1), linetype=1, lwd=2, col="black") +

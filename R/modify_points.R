@@ -7,6 +7,7 @@
 #'
 #' @return A new plot with the modifications
 #' @export
+#' @importFrom graphics plot
 modify_points = function(p, shape=19, colour="black", size=1.5) {
   c = ggplot2::ggplot_build(p)
   
@@ -17,6 +18,6 @@ modify_points = function(p, shape=19, colour="black", size=1.5) {
   c = ggplot2::ggplot_gtable(c)
   
   # return plot
-  c = plot(c)
+  c = graphics::plot(c)
   return(c)
 }

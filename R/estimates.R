@@ -294,8 +294,8 @@ estimates.lm = function(object, mc=TRUE){
 	    )
 	  }
 	  ### this requires superassignment to work with JASP
-	  dataset<<-object$model
-	  #dataset = object$model
+	  #dataset<<-object$model
+	  dataset = object$model
 	  all.terms = attr(terms(object), "term.labels")
 	  mc = t(sapply(1:length(all.terms), removed.one.at.a.time, terms=all.terms, object=object))
 	  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
@@ -335,7 +335,6 @@ estimates.lm = function(object, mc=TRUE){
 #' @param mc Should model comparisons be performed? 
 #' Currently not implemented for RandomForest objects
 #' @return One or more objects containing parameter estimates and effect sizes
-#' @importFrom party varimp
 #' @export
 estimates.RandomForest = function(object, mc=TRUE) {
   y = unlist(attr(object, "data")@get("response"))
@@ -425,9 +424,9 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 	#### output coefficients
 	
 	if (class(object)[1] == "glmerMod" & family(object)$link == "logit"){
-	  coef.matrix = data.frame(raw.coefficients = fixef(object), 
-	                           OR = exp(fixef(object)), 
-	                           inverse.OR = 1/exp(fixef(object)) 
+	  coef.matrix = data.frame(raw.coefficients = lme4::fixef(object), 
+	                           OR = exp(lme4::fixef(object)), 
+	                           inverse.OR = 1/exp(lme4::fixef(object)) 
 	                           )
 	} else if (family(object)$link=="logit"){
 		coef.matrix = data.frame(raw.coefficients = coef(object), OR = exp(coef(object)), inverse.OR = 1/exp(coef(object)), standardized.OR = exp(standardized.beta(object, sd.y=F)), inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))

@@ -1,4 +1,4 @@
-# @importFrom rlang `:=`
+#' @importFrom rlang ":="
 add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   # variable isn't binned/summarized!
   are_any_binned = grep("_binned", names(plot$data))
@@ -10,7 +10,9 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   gg_dataset = plot$data
   
   # extract breakpoints from plot data, then break the new one
-  break_vals = as.numeric(sort(unique(gsub("(.*)-(.*)", "\\2", gg_dataset[[binned_var]]))))
+  regex_cmd = gsub("(-?[0-9]*.?[0-9]*)-(-?[0-9]*.?[0-9]*)", "\\2", gg_dataset[[binned_var]])
+  
+  break_vals = as.numeric(sort(unique(regex_cmd)))
   breaks = prep.breaks(variable_to_be_binned, gg_dataset, breaks=break_vals)
   d[[binned_var]] = bin.me(variable_to_be_binned, d, breaks=breaks)
   
@@ -19,7 +21,9 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   
   # remove extra REs because we don't need any of them,e xcept ggplot requires a column name for it
   if ("model" %in% names(d)) d[[term.re]] = factor(d[[term.re]]) else d[[term.re]] = d[[term.re]][1] %>% factor(d[[term.re]][1]) 
-  d = d %>% group_by_at(nt) %>% summarize(!!rlang::sym(outcomevar) := mean(!!(rlang::sym(outcomevar))))
+  d = d %>% 
+    group_by_at(nt) %>% 
+    summarize(!!rlang::sym(outcomevar) := mean(!!(rlang::sym(outcomevar))))
   return(d)
 }
 
@@ -109,7 +113,7 @@ get_predictors = function(model) {
   if (class(mod1)!="try-error") return(unlist(mod1))
   
   # now try another way (this will get randomForest)
-  mod = try({getCall(model1)$formula}, silent=TRUE)
+  mod = try({getCall(model)$formula}, silent=TRUE)
   
   # no failure = return
   if (class(mod)!="try-error") return(all.vars(mod)[-1])

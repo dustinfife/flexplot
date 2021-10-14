@@ -26,6 +26,8 @@ partial_residual_plot(
 \item{added_term}{a formula, which specifies which terms should be de-residualized. By default,
 it will use the residuals from `model`.}
 
+\item{suppress_model}{A boolean. Should the model be suppressed? Defaults to T.}
+
 \item{...}{Other arguments passed to flexplot}
 }
 \value{
@@ -35,6 +37,7 @@ a partial residual plot
 Partial Residual Plot
 }
 \examples{
-partial_residual_plot(weight.loss~therapy.type, lm_formula = weight.loss~therapy.type + motivation, 
+partial_residual_plot(weight.loss~therapy.type, 
+   lm_formula = weight.loss~therapy.type + motivation, 
    data=exercise_data)
 }
