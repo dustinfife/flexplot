@@ -45,7 +45,7 @@ test_that("estimates from mixed models", {
   
   mod1 = lme4::lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)  
   expect_true(all(names(estimates(mod1)) %in% c("fixed", "r.squared", "rand", "icc")))
-  expect_equal(as.numeric(round(estimates(mod1)$icc[1]*1000)), expected=548, tolerance = .01)
+  expect_equal(as.numeric(round(estimates(mod1)$icc[1]*1000)), expected=505, tolerance = .01)
   
   # with tibbles
   mod2 = update(mod1, data=as_tibble(alcuse))
