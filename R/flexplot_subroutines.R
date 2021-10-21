@@ -530,7 +530,15 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
                    ', color=', axis2_binned, ', linetype = ', axis2_binned, 
                    ', shape=', axis2_binned, ')) + labs(color= "', axis2_binned, '", linetype= "', axis2_binned, '", shape= "', axis2_binned, '")')
       } else {
-        p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
+        # if they're trying to plot more than 10 symbols...
+        if (length(unique(data[,axis[2]]))>10) {
+          message("It looks like you're trying to plot more than 10 colors/lines/symbols. 
+                  I gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.
+                  I hope we can still be friends.")
+          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome))'
+        } else {
+          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
+        }
       }
       ### remove the default color if they have categorical variables		
     }
