@@ -535,7 +535,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
           message("It looks like you're trying to plot more than 10 colors/lines/symbols. 
                   I gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.
                   I hope we can still be friends.")
-          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome))'
+          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2]))'
         } else {
           p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
         }
