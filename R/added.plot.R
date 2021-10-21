@@ -27,6 +27,7 @@
 ##' @export
 ##' @aliases added.plot added_plot avp
 ##' @import tibble
+##' @return An added variable plot
 ##' @examples
 ##' data(exercise_data)
 ##' added.plot(weight.loss~motivation + therapy.type, data=exercise_data)
@@ -151,7 +152,7 @@ prep_data_for_avp = function(data, variables) {
 #' @param method The fitted line. Defaults to "lm". 
 #' @param ... Other parameters passed to flexplot
 #'
-#' @return a plot
+#' @return a plot showing the mediation effect
 #' @export
 #'
 #' @examples

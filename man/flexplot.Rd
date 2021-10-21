@@ -82,6 +82,9 @@ but could also do qqplots (using "qq" as the argument) or density plots (using "
 
 \item{...}{Other arguments passed to \code{\link[ggplot2]{aes}}}
 }
+\value{
+a ggplot2 object
+}
 \description{
 Create a flexible plot. Flexplot will allow users to create histograms, barcharts, jittered density plots, paneled plots, scatterplots, etc.  
 Much of the decision-making is automated, which is pretty freaking awesome.

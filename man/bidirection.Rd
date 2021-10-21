@@ -51,6 +51,8 @@ unchanged if `flip = FALSE` and the data with flipped aesthetic names if
 `flip = FALSE` the name of the element will correspond to the element, e.g.
 `flipped_names(FALSE)$x == "x"` and if `flip = TRUE` it will correspond to
 the flipped name, e.g. `flipped_names(FALSE)$x == "y"`
+
+a boolean
 }
 \description{
 These functions are what underpins the ability of certain geoms to work

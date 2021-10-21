@@ -42,6 +42,7 @@
 ##' @author Dustin Fife
 ##' @import tibble ggplot2 R6
 ##' @export
+##' @return a ggplot2 object
 ##' @examples
 #' data(exercise_data)
 #' d = exercise_data
@@ -283,16 +284,7 @@ flexplot = function(formula, data=NULL, related=F,
 	return(final)
 }	
 
-#' Print flexplot object
-#'
-#' Print flexplot object
-#' @aliases print.flexplots
-#' @param x a flexplot object
-#' @param ... ignored
-#' @export
-# print.flexplot <- function(x,...) {
-  # suppressMessages(print.ggplot(x))
-# }
+
 
 
 # ### I am including the code below because CRAN does not permit :::

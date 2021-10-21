@@ -17,6 +17,8 @@ will generate predictions at +1 and -1 standard deviations away from the mean.}
 }
 \value{
 A data frame containing the predicted values (along with the values of the predictor variables used to estimate the prediction)
+
+A data frame containing predictions
 }
 \description{
 Generate Predictions for a Model

@@ -21,6 +21,9 @@ added.plot(formula, data, lm_formula = NULL, method = "loess", x = NULL, ...)
 
 \item{...}{Other parameters passed to flexplot}
 }
+\value{
+An added variable plot
+}
 \description{
 Create an added variable plot
 }

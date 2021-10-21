@@ -5,6 +5,7 @@
 #' @param plot what should be plotted? Residuals? Bivariate plot? All of them?
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
+#' @return a plot containing a visual of the chosen model
 #' @import ggplot2
 #' @export
 visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){
@@ -18,6 +19,7 @@ visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,..
 #' @param plot what should be plotted? Residuals? model plot? All of them?
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
+#' @return a plot containing a visual of the chosen model
 #' @export
 visualize.default = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){
   
@@ -43,6 +45,7 @@ visualize.default = function(object, plot=c("all", "residuals", "model"),formula
 #' @param plot what should be plotted? Residuals? model plot? All of them?
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
+#' @return a plot containing a visual of the chosen model
 #' @export
 visualize.randomForest = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){
   
@@ -69,6 +72,7 @@ visualize.randomForest = function(object, plot=c("all", "residuals", "model"),fo
 #' @param plot what should be plotted? Residuals? model plot? All of them?
 #' @param formula A flexplot-style formula
 #' @param ... Other arguments passed to flexplot
+#' @return a plot containing a visual of the chosen model
 #' @export
 visualize.RandomForest = function(object, plot=c("all", "residuals", "model"),formula=NULL,...) {
   all_terms = get_terms(object)
@@ -91,6 +95,7 @@ visualize.RandomForest = function(object, plot=c("all", "residuals", "model"),fo
 #' @param formula A flexplot-style formula
 #' @param plots.as.list Should the plots be returned as a list? Defaults to FALSE. 
 #' @param ... Other arguments passed to flexplot
+#' @return a plot containing a visual of the chosen model
 #' @export
 visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL, plots.as.list=FALSE,...){
   
@@ -176,6 +181,7 @@ utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation")
 #' @param sample The number of individuals' datapoints to sample as raw data. Defaults to 3
 #' @param plots.as.list Should the plots be returned as a list? Defaults to FALSE. 
 #' @rawNamespace import(dplyr, except = c(filter, lag))
+#' @return a plot containing a visual of the chosen model
 #' @export
 visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formula=NULL, 
                              sample = 3, plots.as.list=FALSE,...){
@@ -280,9 +286,9 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
       }	
       
       # variable isn't binned/summarized!
-      #browser()
       m = add_bin_to_new_dataset(step3, m, terms, term.re, "prediction")
       newd = add_bin_to_new_dataset(step3, newd, terms, term.re, outcome)
+      newd$neg_thinking_binned
       step3 = step3+ 
         geom_line(data=m, 
                   aes_string(terms[1], "prediction", color=NA, group=1), linetype=1, lwd=2, col="black") +
@@ -379,6 +385,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
 #' @param sample The number of individuals' datapoints to sample as raw data. Defaults to 3
 #' @param plots.as.list Should the plots be returned as a list? Defaults to FALSE. 
 #' @rawNamespace import(dplyr, except = c(filter, lag))
+#' @return a plot containing a visual of the chosen model
 #' @export
 visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formula=NULL, 
                               sample = 3, plots.as.list=FALSE,...){

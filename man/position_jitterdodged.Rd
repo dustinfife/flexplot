@@ -21,6 +21,9 @@ resolution of the data.}
 
 \item{seed}{Random seed.}
 }
+\value{
+a geom of jittered data
+}
 \description{
 This is primarily used for aligning points generated through
 `geom_point()` with dodged boxplots (e.g., a `geom_boxplot()` with

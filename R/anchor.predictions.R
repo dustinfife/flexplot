@@ -13,6 +13,7 @@
 ##' @return A data frame containing the predicted values (along with the values of the predictor variables used to estimate the prediction)
 ##' @author Dustin Fife
 ##' @export
+##' @return A data frame containing predictions
 ##' @examples
 ##' data(exercise_data)
 ##' linear.model = lm(weight.loss~health + gender, data= exercise_data)

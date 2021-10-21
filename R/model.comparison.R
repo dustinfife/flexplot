@@ -199,6 +199,7 @@ check_model_rows = function(model1, model2, nested) {
 ##' them as a list. 
 ##' @param object an object that can be predicted (e.g., glm). Note the thing to be predicted must have only two outcomes
 ##' @author Dustin Fife
+##' @return A table containing sensitivity/specificity/etc.
 ##' @export
 sensitivity.table = function(object){
 

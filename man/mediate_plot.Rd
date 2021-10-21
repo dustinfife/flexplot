@@ -17,7 +17,7 @@ entered will be plotted on the x-axis}
 \item{...}{Other parameters passed to flexplot}
 }
 \value{
-a plot
+a plot showing the mediation effect
 }
 \description{
 Create a plot for mediation analysis

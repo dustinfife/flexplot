@@ -56,6 +56,7 @@ estimates.lmerMod = function(object, mc=TRUE){
 #' @aliases print.lmer_estimates
 #' @param x an lmer_estimates object
 #' @param ... ignored
+#' @return A printed list of estimates
 #' @export
 print.lmer_estimates = function(x,...){
     cat(paste("Fixed Effects: \n", sep=""))
@@ -371,6 +372,7 @@ estimates.RandomForest = function(object, mc=TRUE) {
 #' @aliases print.rf_estimates
 #' @param x an rf_estimates object
 #' @param ... ignored
+#' @return A printed list of estimates
 #' @export
 print.rf_estimates = function(x,...){
   if (attr(x, "numeric")) {
@@ -476,6 +478,7 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 #' Report zeroinfl object Estimates
 #' @param object a zeroinfl object
 #' @param mc Should model comparisons be performed? Currently not used
+#' @return Estimates for a zero inflated model
 #' @export
 estimates.zeroinfl = function(object, mc=FALSE){
 	
@@ -527,6 +530,7 @@ remove_interaction_terms = function(object) {
 #' @aliases print.estimates
 #' @param x an estimates object
 #' @param ... ignored
+#' @return A printed list of estimates
 #' @export
 print.estimates = function(x,...){
 	#### print summary

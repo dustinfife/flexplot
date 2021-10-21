@@ -1,10 +1,10 @@
 Package: flexplot
 Type: Package
-Title: Graphically Based Data Analysis Using Flexplot
+Title: Graphically Based Data Analysis Using 'flexplot'
 Version: 0.11.3
 Author: Dustin Fife
 Maintainer: Dustin Fife <fife.dustin@gmail.com>
-Description: The ‘flexplot’ suite is a graphically-based set of tools for doing data analysis. flexplot() allows users to specify a formula and the software automatically chooses what sort of graphic to present. Analysis can be paired with visuals using the visualize() function, such that the software will choose an appropriate graphic to match an R model object.
+Description: The 'flexplot' suite is a graphically-based set of tools for doing data analysis. 'flexplot' allows users to specify a formula and the software automatically chooses what sort of graphic to present. Analysis can be paired with visuals using the visualize() function, such that the software will choose an appropriate graphic to match an R model object.
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
@@ -34,7 +34,6 @@ Suggests: jmvcore (>= 0.8.5),
 	testthat,
 	randomForest,
 	markdown, 
-	papaja,
 	tidyverse
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
