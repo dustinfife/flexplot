@@ -84,7 +84,7 @@ test_that("bin.me works", {
   res = levels(bin.me(variable="satisfaction", data=relationship_satisfaction, bins=3))
   expect_output(print(res), "46.7-58")
   res = levels(bin.me(variable="satisfaction", data=relationship_satisfaction, breaks = c(20, 60)))
-  expect_output(print(res), "-7-20")
+  expect_output(print(res), "20-60")
   res = levels(bin.me(variable="satisfaction", data=relationship_satisfaction, breaks = c(20, 60), check.breaks = F))
   expect_output(print(res), "20-60")
   res = levels(bin.me(variable="satisfaction", data=relationship_satisfaction, labels = c("a", "b", "c")))  
