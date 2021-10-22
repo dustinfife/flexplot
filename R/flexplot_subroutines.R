@@ -68,7 +68,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   }
   
   ### create the lists that contain the breaks
-  break.me = flexplot_break_me(data, predictors, given, axis)
+  break.me = flexplot_break_me(data, predictors, given, axis, bins)
   breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
   list(variables=variables, outcome=outcome, predictors=predictors, 
@@ -285,7 +285,7 @@ flexplot_errors = function(variables, data, method=method, axis){
 #expect_identical(flexplot_break_me(exercise_data, c("weight.loss", "income"), given="income"), "income")
 #expect_equal(length(flexplot_break_me(exercise_data, c("weight.loss", "income"), given=NULL)), 0)
 #expect_equal(length(flexplot_break_me(exercise_data, c("weight.loss", "income", "weight.loss", "motivation", "therapy.type"), given=c("weight.loss", "motivation"))), 2)
-flexplot_break_me = function(data, predictors, given, axis){
+flexplot_break_me = function(data, predictors, given, axis, bins){
 
   ### without this line of code, there's an error for those situations where there is no second axis
   if (length(axis)<2){
@@ -298,12 +298,16 @@ flexplot_break_me = function(data, predictors, given, axis){
   if (axis[1] != "1") non.axis.one = predictors[-1] else non.axis.one = predictors
   #### get the breaks for the needed variables (remove axis 1 because it's the axis and thus will never be binned)
   #### also, lapply fails when there's just one additional predictor, hence the if statement
-
+  
   if (length(predictors)>2){
     break.me = non.axis.one[unlist(lapply(data[,non.axis.one], FUN=is.numeric)) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   } else {
     break.me = non.axis.one[is.numeric(data[,non.axis.one] ) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
+  
+  # drop those break.me's that have the same number of levels as bins
+  num_unique = apply(data[,break.me, drop=FALSE], 2, function(x) length(unique(x)))
+  break.me = break.me[-which(num_unique<=bins)]
 
   #if (length(break.me)==0) break.me = NA
   return(break.me)
