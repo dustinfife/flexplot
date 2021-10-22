@@ -10,10 +10,16 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   gg_dataset = plot$data
   
   # extract breakpoints from plot data, then break the new one
-  regex_cmd = gsub("(-?[0-9]*.?[0-9]*)-(-?[0-9]*.?[0-9]*)", "\\2", gg_dataset[[binned_var]])
-  
+  regex_cmd = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\2", gg_dataset[[binned_var]])
+  regex_cmd = gsub("[)]", "", gsub("[(]", "", regex_cmd))
   break_vals = as.numeric(sort(unique(regex_cmd)))
+  rep = gg_dataset[,variable_to_be_binned]>max(break_vals)
+  gg_dataset[rep,variable_to_be_binned] = max(break_vals)-.0001
   breaks = prep.breaks(variable_to_be_binned, gg_dataset, breaks=break_vals)
+  
+  # replace observations > max with the max
+  rep = d[,variable_to_be_binned]>max(break_vals)
+  d[rep,variable_to_be_binned] = max(break_vals)-.0001
   d[[binned_var]] = bin.me(variable_to_be_binned, d, breaks=breaks)
   
   # create a new string of terms that needs to be summarized by
@@ -309,12 +315,24 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
   }
   
 	### if they don't provide labels, make them easier to read (than R's native bin labels)\
+  
 	if (is.null(labels)){
 		labels = 1:(length(breaks)-1)		
 		for (i in 1:(length(breaks)-1)){
 		  digs1 = round_digits(breaks[i])
 		  digs2 = round_digits(breaks[i+1])
-			labels[i] = paste0(round(breaks[i], digits=digs1), "-", round(breaks[i+1], digits=digs2))
+		  # put parenthases around the negative numbers
+		  if (breaks[i]<0) {
+		    first = paste0("(", round(breaks[i], digits=digs1), ")") 
+		  } else {
+		    first = round(breaks[i], digits=digs1)
+		  }
+		  if (breaks[i+1]<0) {
+		    second = paste0("(", round(breaks[i+1], digits=digs2), ")") 
+      } else {
+        second = round(breaks[i+1], digits=digs2)
+      }
+			labels[i] = paste0(first, "-", second)
 		}
 	}
 	
@@ -330,11 +348,11 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
 }
 
 round_digits = function(breaks) {
-  if (abs(breaks<.0001)) return(6)
-  if (abs(breaks<.001)) return(5)
-  if (abs(breaks<.01)) return(4)
-  if (abs(breaks<.1)) return(3)
-  if (abs(breaks<1)) return(2)
+  if (abs(breaks)<.0001) return(6)
+  if (abs(breaks)<.001) return(5)
+  if (abs(breaks)<.01) return(4)
+  if (abs(breaks)<.1) return(3)
+  if (abs(breaks)<1) return(2)
   return(1)
 }
 

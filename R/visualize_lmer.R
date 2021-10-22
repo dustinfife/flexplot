@@ -44,15 +44,11 @@ are_re_plotted = function (formula, term.re) {
 
 # converts numeric to ordinal when there's < 5 unique values
 convert_numeric_to_ordinal = function(data, term) {
-  ### flexplot turns <5 unique numeric values to ordinal variable
-  ### we need to do the same here
   if (is.numeric(data[,term]) & length(unique(data[,term]))<5){
     data[,term] = factor(data[,term], ordered=TRUE)
     return(data)
   }	
-  
   return(data)
-  
 }
 
 
@@ -60,6 +56,10 @@ convert_numeric_to_ordinal = function(data, term) {
 # set.seed(1212)
 # objects = mixed_model_plot(MathAch~SES + School,
 #                  lme4::lmer(MathAch~SES + (SES | School), math),
+#                  T, sample=3, return_objects = T)
+# add_geoms_to_mixed_plot(objects$prediction, objects$step3, objects$object)
+# objects = mixed_model_plot(MathAch~Sex + School,
+#                  lme4::lmer(MathAch~Sex + (Sex | School), math),
 #                  T, sample=3, return_objects = T)
 # add_geoms_to_mixed_plot(objects$prediction, objects$step3, objects$object)
 add_geoms_to_mixed_plot = function(prediction, step3, object) {
@@ -79,7 +79,7 @@ add_geoms_to_mixed_plot = function(prediction, step3, object) {
   # bin the numeric variables if they were binned in the flexplot
   m =    add_bin_to_new_dataset(step3, m,    terms, term.re, "prediction")
   newd = add_bin_to_new_dataset(step3, newd, terms, term.re, outcome)
-  browser()
+
   #if axis 1 is numeric, do lines
   if (is.numeric(d[,terms[1]])){
 
@@ -96,36 +96,51 @@ add_geoms_to_mixed_plot = function(prediction, step3, object) {
   }  
   
   #### aggregate the means across variables		
+
   means = prediction %>% group_by_at(vars(one_of(c(terms, "model")))) %>% summarize(Value = mean(prediction))
+  means = add_bin_to_new_dataset(step3, means, c(terms, "model"), term.re, "Value")
+  
+  # change name of terms to "_binned" if there is one
+  binned_vars = grep("_binned", names(step3$data), value=T)
+  if (length(binned_vars)>0) {
+    unbinned_name = gsub("_binned", "", binned_vars)
+    terms[terms==unbinned_name] = paste0(unbinned_name, "_binned")
+  }
   fixed.means = means[means$model=="fixed effects",]
-  fixed.means = fixed.means %>% dplyr::group_by_at(vars(one_of(c(terms)))) %>% 
+  fixed.means = fixed.means %>% dplyr::group_by_at(vars(all_of(c(terms)))) %>% 
     summarize(Value=mean(Value))
+
+  # figure out which ones are binned
+  binned.var = grep("_binned",names(step3$data), value=T) 
+  unbinned.var = binned = gsub("_binned", "", binned.var)
   
   means = means[means$model=="random effects",]
   names(means)[ncol(means)] = names(fixed.means)[ncol(fixed.means)] = outcome
   names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var
   names(means)[names(means)==unbinned.var] = binned.var	
-  
+  fixed.means$SES_binned
   random_geom = 
       ### random effects
-      geom_point(data=means, aes_string(x=terms[1], y=outcome), size=.5) +
-      geom_line(data=means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=.25, linetype=2, alpha = .10) +	
+      list(
+        geom_point(data=means, aes_string(x=terms[1], y=outcome), size=.5),
+        geom_line(data=means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=.25, linetype=2, alpha = .90))
       
-  fixed_geom =   
+  fixed_geom =  
       ### fixed effects
-      geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3, color="black", shape=16) +
-      geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=2, color="black", linetype=1) 
+      list(
+        geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3, color="black", shape=16),
+        geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=2, color="black", linetype=1)) 
     
   return(list(random_geom = random_geom, fixed_geom = fixed_geom))
 }
 
 
 # set.seed(1212)
-# mixed_model_plot(MathAch~SES + School, 
-#                  lme4::lmer(MathAch~SES + (SES | School), math), 
-#                  T, sample=3)
+# mixed_model_plot(MathAch~SES + School,
+#                  lme4::lmer(MathAch~SES + (SES | School), math),
+#                  T, sample=3) + coord_cartesian(ylim=c(0, 25), xlim=c(-2, 2))
 mixed_model_plot = function(formula, object, random_plot, sample=3, return_objects = F,...){
-
+  
   data = object@frame
   
   # if they're plotting without random effects...
@@ -139,9 +154,11 @@ mixed_model_plot = function(formula, object, random_plot, sample=3, return_objec
   re = extract_random_term(object)
   selected_REs = prediction[,re]
   data_sampled = data[data[,re] %in% selected_REs,]
-  
+  data_sampled[,re] = factor(data_sampled[,re])
   # return the flexplot as the base
-  step3 = flexplot(formula, data=data_sampled, suppress_smooth=T, ...) 
+  step3 = flexplot(formula, data=data_sampled, suppress_smooth=T, ...)
+  step3 = step3 +
+    add_geoms_to_mixed_plot(prediction, step3, object)
 
     #### remove legend if n>10
   if (sample>10){
@@ -188,8 +205,10 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   preds = names(d)[-1]
   outcome = names(d)[1]
   
+  # convert re to factor (otherwise flexplot will try to bin it)
+  d[,term.re] = factor(term.re, ordered=T)
   # get a new dataset that samples the clusters
-  k = randomly_sample_clusters(d, term.re, sample)
+  k = d#randomly_sample_clusters(d, term.re, sample)
   
   # get the formula
   formula = make_formula_mixed(preds, term.re, outcome, formula)
@@ -203,15 +222,14 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   
   ##### generate fixed effects predictions
   #### if random is in NOT in the second slot
+  step3 = mixed_model_plot(formula,
+                   object,
+                   random_plot, sample=sample)
   
   
-  
-if (plot=="model"){
-    return(step3)
-  } else {
-    p = arrange.plot(res.plots$histo, res.plots$res.dep, res.plots$sl, step3, plot, res.plots$terms, res.plots$numbers)
-    return(p)
-  }	
+  if (plot=="model") return(step3)
+  p = arrange.plot(res.plots$histo, res.plots$res.dep, res.plots$sl, step3, plot, res.plots$terms, res.plots$numbers)
+  return(p)
   
 }
 
