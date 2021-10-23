@@ -214,14 +214,16 @@ make_flexplot_formula = function(predictors, outcome, data){
   
 }
 
-
+remove_nonlinear_terms = function(terms) {
+  return(grep("[/^:]", terms, value=T, invert=T))
+}
 # tested
 extract_random_term = function(object) {
   #### extract formula
   form = as.character(formula(object))[3]
   
   #### identify random effects
-  term.re = trimws(substr(form, regexpr("\\|", form)[1]+1, regexpr("\\)", form)[1]-1))		
+  term.re = trimws(gsub("(.*\\|)(.*)[)]", "\\2", form))
   return(term.re)
 }
 

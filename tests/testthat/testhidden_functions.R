@@ -168,11 +168,20 @@ test_that("fit.function works for categorical predictors", {
                    "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-sd(z)}, fun.max = function(z) {mean(z)+sd(z)}, fun=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.5), color = \"#bf0303\")")        
 })
 
+test_that("remove_nonlinear_terms works", {
+  formula = y~a*b + I(c^2) + I(d^4)
+  terms = attr(terms(formula), "term.labels")
+  expect_true(all(c("a", "b") %in% remove_nonlinear_terms(terms)))
+})
+
 test_that("hidden functions for lme4", {
   require(lme4)
   data("math")
   d = math
   object = lmer(MathAch~SES + (SES|School), data=d)
+  expect_identical(extract_random_term(object), "School")
+  # when there's a polynomial in lmers
+  object = lmer(MathAch~SES + (SES^2) + (SES|School), data=d)
   expect_identical(extract_random_term(object), "School")
   object2 = lm(MathAch~SES, data=d)
   testthat::expect_true(length(levels(subset_random_model(object, d, samp.size=5)$School))==5)

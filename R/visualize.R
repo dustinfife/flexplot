@@ -418,7 +418,7 @@ residual.plots = function(data, object,...){
   terms = attr(terms(object), "term.labels")
   
   #### remove interaction and polynomial terms from "terms"
-  terms = grep("[/^:]", terms, value=T, invert=T)
+  terms = remove_nonlinear_terms(terms)
   
   
   #### identify factors

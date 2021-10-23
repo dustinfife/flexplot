@@ -202,14 +202,14 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   
   #### get the objects of interest
   term.re = extract_random_term(object)
-  preds = names(d)[-1]
+  preds = remove_nonlinear_terms(names(d)[-1])
   outcome = names(d)[1]
   
   # convert re to factor (otherwise flexplot will try to bin it)
   d[,term.re] = factor(term.re, ordered=T)
   # get a new dataset that samples the clusters
   k = d#randomly_sample_clusters(d, term.re, sample)
-  
+
   # get the formula
   formula = make_formula_mixed(preds, term.re, outcome, formula)
 
