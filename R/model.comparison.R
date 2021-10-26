@@ -166,23 +166,25 @@ check_model_rows = function(model1, model2, nested) {
   if (!nested) {
     return(list(model1, model2))
   }
-  
   data_1 = extract_data_from_fitted_object(model1)
   data_2 = extract_data_from_fitted_object(model2)
-  
+ 
   # if theyre not the same, give a message
   if (nrow(data_1) != nrow(data_2)) {
-    msg = paste0("Note: your models were fit to two different datasets. ",
-                 "This is *probably* because you have missing data in one, but not the other.",
-                 "I'm going to make the dangerous assumption this is the case and do some ninja moves",
+    msg = paste0("Note: your models were fit to two different datasets.\n",
+                 "This is *probably* because you have missing data in one, but not the other.\n",
+                 "I'm going to make the dangerous assumption this is the case and do some ninja moves\n",
                  " in the background (hiya!). If you don't want me to do this, handle the missing data in advance\n", sep="")
     message(msg)
     
     ### refit the larger n model with the smaller dataset
-    if (nrow(model1$model)>nrow(model2$model)){
+    ### note: lme4 requires the datasets to have the same name so I'm refitting both
+    if (nrow(data_1)>nrow(data_2)){
       model1 = update(model1, data=data_2)
+      model2 = update(model2, data=data_2)
     } else {
       model2 = update(model2, data=data_1)
+      model1 = update(model1, data=data_1)
     }    
   }
 

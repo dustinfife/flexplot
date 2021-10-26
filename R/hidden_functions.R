@@ -93,6 +93,11 @@ extract_data_from_fitted_object = function(object) {
     data = eval(getCall(object)$data)
     return(data[,vars])
   }
+  
+  if (class(object)[1] == "lmerMod") {
+    data = model.frame(object)
+    return(data)
+  }
   # this should work for the rest?? But it won't be in the right order!
   return(eval(getCall(object)$data))
 }
