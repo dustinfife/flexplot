@@ -27,6 +27,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
                         return.preds=F, report.se=F, re=F, 
                         pred.type="response", num_points = 50,
                         clusters=3,...){
+  
   if (is.null(model2)) runme = "yes"
   
   #### if mod2 is null..
@@ -97,8 +98,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		
   }
   
-  
-  
+
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
   } else {
