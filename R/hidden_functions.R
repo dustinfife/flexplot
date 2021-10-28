@@ -1,5 +1,6 @@
 #' @importFrom rlang ":="
 add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
+  
   # variable isn't binned/summarized!
   are_any_binned = grep("_binned", names(plot$data))
   if (length(are_any_binned)==0) return(d)
@@ -10,16 +11,23 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   gg_dataset = plot$data
   
   # extract breakpoints from plot data, then break the new one
-  regex_cmd = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\2", gg_dataset[[binned_var]])
+  regex_cmd_one = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\1", gg_dataset[[binned_var]])
+  regex_cmd_two = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\2", gg_dataset[[binned_var]])
+  regex_cmd = c(regex_cmd_one, regex_cmd_two)
   regex_cmd = gsub("[)]", "", gsub("[(]", "", regex_cmd))
-  break_vals = as.numeric(sort(unique(regex_cmd)))
+  break_vals = sort(as.numeric(unique(regex_cmd)))
   rep = gg_dataset[,variable_to_be_binned]>max(break_vals)
   gg_dataset[rep,variable_to_be_binned] = max(break_vals)-.0001
+  rep = gg_dataset[,variable_to_be_binned]<min(break_vals)
+  
+  gg_dataset[rep,variable_to_be_binned] = min(break_vals)+.0001  
   breaks = prep.breaks(variable_to_be_binned, gg_dataset, breaks=break_vals)
   
   # replace observations > max with the max
   rep = d[,variable_to_be_binned]>max(break_vals)
   d[rep,variable_to_be_binned] = max(break_vals)-.0001
+  rep = d[,variable_to_be_binned]<min(break_vals)
+  d[rep,variable_to_be_binned] = min(break_vals)+.0001  
   d[[binned_var]] = bin.me(variable_to_be_binned, d, breaks=breaks)
   
   # create a new string of terms that needs to be summarized by

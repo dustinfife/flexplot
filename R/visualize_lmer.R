@@ -76,7 +76,7 @@ add_geoms_to_mixed_plot = function(prediction, step3, object) {
   m = prediction[prediction$model=="fixed effects",]
   newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = outcome
   
-  # bin the numeric variables if they were binned in the flexplot
+    # bin the numeric variables if they were binned in the flexplot
   m =    add_bin_to_new_dataset(step3, m,    terms, term.re, "prediction")
   newd = add_bin_to_new_dataset(step3, newd, terms, term.re, outcome)
 
@@ -86,7 +86,9 @@ add_geoms_to_mixed_plot = function(prediction, step3, object) {
     # convert to ordinal when there's <5 unique values
     m    = convert_numeric_to_ordinal(m,    terms[1])
     newd = convert_numeric_to_ordinal(newd, terms[1])
-
+    step3 + geom_line(data=newd, 
+                      aes_string(terms[1], outcome, group=term.re, color=term.re), alpha = .5)
+    
     # generate the geoms
     random_geom = geom_line(data=newd, 
                 aes_string(terms[1], outcome, group=term.re, color=term.re), alpha = .5)
