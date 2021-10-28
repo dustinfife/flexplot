@@ -62,7 +62,7 @@ convert_numeric_to_ordinal = function(data, term) {
 #                  lme4::lmer(MathAch~Sex + (Sex | School), math),
 #                  T, sample=3, return_objects = T)
 # add_geoms_to_mixed_plot(objects$prediction, objects$step3, objects$object)
-add_geoms_to_mixed_plot = function(prediction, step3, object) {
+add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
 
   # get necessary objects
   d = object@frame
@@ -226,7 +226,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   #### if random is in NOT in the second slot
   step3 = mixed_model_plot(formula,
                    object,
-                   random_plot, sample=sample)
+                   random_plot, sample=sample,...)
   
   
   if (plot=="model") return(step3)
