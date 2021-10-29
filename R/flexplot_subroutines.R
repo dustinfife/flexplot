@@ -197,6 +197,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     
     ## bin things
     if (length(break.me)>0){
+      
       #### bin the variables that need to be binned
       tempfunc = function(i=1, break.me, bins, labels, breaks, data){
         
@@ -536,8 +537,8 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
                    ', shape=', axis2_binned, ')) + labs(color= "', axis2_binned, '", linetype= "', axis2_binned, '", shape= "', axis2_binned, '")')
       } else {
         # if they're trying to plot more than 10 symbols...
-        if (length(unique(data[,axis[2]]))>10) {
-          message("It looks like you're trying to plot more than 10 colors/lines/symbols.\nI gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.\n I hope we can still be friends.")
+        if (length(unique(data[,axis[2]]))>6) {
+          message("It looks like you're trying to plot more than 6 colors/lines/symbols.\nI gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.\n I hope we can still be friends.")
           p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2]))'
         } else {
           p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
