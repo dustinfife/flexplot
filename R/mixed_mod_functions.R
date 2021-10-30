@@ -184,3 +184,13 @@ are_re_plotted = function (formula, term.re) {
   ### if random component is in slot 2, modify the formula
   if (length(grep(criteria, f.char))>0) return(T) else return(F)
 }
+
+
+# converts numeric to ordinal when there's < 5 unique values
+convert_numeric_to_ordinal = function(data, term) {
+  if (is.numeric(data[,term]) & length(unique(data[,term]))<5){
+    data[,term] = factor(data[,term], ordered=TRUE)
+    return(data)
+  }	
+  return(data)
+}

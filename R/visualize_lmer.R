@@ -1,13 +1,4 @@
 
-# converts numeric to ordinal when there's < 5 unique values
-convert_numeric_to_ordinal = function(data, term) {
-  if (is.numeric(data[,term]) & length(unique(data[,term]))<5){
-    data[,term] = factor(data[,term], ordered=TRUE)
-    return(data)
-  }	
-  return(data)
-}
-
 # set.seed(1212)
 # objects = mixed_model_plot(MathAch~SES + School,
 #                  lme4::lmer(MathAch~SES + (SES | School), math),
