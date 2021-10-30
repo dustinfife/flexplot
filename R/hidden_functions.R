@@ -339,12 +339,10 @@ round_digits = function(breaks) {
 	### create custom function to sample data
 sample.subset = function(sample, data){
 	if (sample!=Inf){
-		m = data[sample(1:nrow(data), size=sample),]
-		
-	} else {
-		m = data
-	}
-	return(m)
+		m = data[sample(1:nrow(data), size=min(sample, nrow(data))),]
+		return(m)
+	} 
+	return(data)
 }
 
 	### if they don't want raw data, just make alpha = 0

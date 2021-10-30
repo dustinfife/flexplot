@@ -74,7 +74,7 @@ test_that("convert_numeric_to_ordinal works", {
   d = data.frame(x=rnorm(100), y = sample(1:4, size=25, replace=T))
   expect_equal(convert_numeric_to_ordinal(d, "x"),d)
   expect_equal(convert_numeric_to_ordinal(d, "y")$y,factor(d$y, ordered=T))
-  
+  expect_false(is.factor(convert_numeric_to_ordinal(d, "x")$y))
 })
 
 

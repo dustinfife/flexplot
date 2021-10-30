@@ -98,6 +98,8 @@ test_that("sample.subset returns a dataset the right rows", {
   d = exercise_data
   expect_equal(nrow(sample.subset(10, d)), 10)
   expect_equal(nrow(sample.subset(Inf, d)), nrow(d))
+  # when user asks to sample more than the number of rows
+  expect_equal(nrow(sample.subset(111111111, d)), nrow(d))
 })
 
 test_that("points.func works",{
