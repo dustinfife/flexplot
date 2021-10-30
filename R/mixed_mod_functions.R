@@ -83,9 +83,6 @@ stratified_sample_re = function(formula, data, re, samp.size=6) {
   
   panaled = paneled %>% purrr::pluck(2) %>% strsplit("\\+") %>% unlist %>% trimws
   
-  # if there are no paneled variables, no need for complex sampling
-  if (length(paneled)==0) 
-  
   # remove id from formula
   formula_sans_re = remove_term_from_formula(formula, re)
 
