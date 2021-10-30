@@ -37,11 +37,18 @@ gsub_data_first = function(data, old, new, ...) {
 # expect_equal(remove_term_from_formula(y~a + b | c + d, "c", F), "y~a+b|d")
 # expect_equal(remove_term_from_formula(y~a + b | c + d, "d", F), "y~a+b|c")
 # expect_equal(remove_term_from_formula(y~a + b | c + d, "d", T), y~a+b|c)
-remove_term_from_formula = function(formula, re, as_formula = T) {
+remove_term_from_formula = function(formula, term, as_formula = T) {
+  
   formula_no_ws = gsub(" ", "",  format(formula)) %>%
-    gsub_data_first(paste0(re, "+"), "", fixed=T) %>%
-    gsub_data_first(paste0("+",re), "", fixed=T) %>%
-    gsub_data_first(paste0("|",re), "|", fixed=T) 
+    gsub_data_first(paste0(term, "+"), "", fixed=T) %>%
+    gsub_data_first(paste0("+",term), "", fixed=T) %>%
+    gsub_data_first(paste0("|",term), "|", fixed=T) 
+  
+  # check for hanging pipe at the end
+  last_char = nchar(formula_no_ws)
+  if (substr(formula_no_ws, last_char, last_char) == "|") formula_no_ws = gsub("|", "", formula_no_ws, fixed=T)
+  
+  # return as either a formula or as text
   if (as_formula) return(formula(formula_no_ws))
   return(formula_no_ws)
 }
@@ -132,4 +139,48 @@ find_paneled_variables = function(formula) {
   paneled = strsplit(rhs, "\\|") %>% unlist %>% purrr::pluck(2) %>% strsplit("\\+") %>% unlist %>% trimws
   
   return(paneled)
+}
+
+# randomly_sample_clusters = function(d, term.re, sample){
+#   #### randomly sample the re terms and convert to numeric
+#   unique.terms = unique(d[,term.re])
+#   samp = sample(unique.terms, size=min(sample, length(unique.terms)))
+#   k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])
+#   return(k)
+# }
+
+# this will return a flexplot formula for mixed models
+make_formula_mixed = function(preds, term.re, outcome, formula=NULL) {
+  if (!is.null(formula)) return(formula)
+  
+  ### come up with formula
+  slots = c(1,3,4)
+  form.slots = rep(NA, times=4)
+  for (i in 1:min(4,length(preds))){
+    if (preds[i]!=term.re){
+      form.slots[slots[i]] = preds[i]
+    }
+  }
+  
+  ### for random effects models, just put school in first slot
+  if (length(preds)>1) form.slots[2] = term.re else form.slots[1] = term.re
+  
+  symbol.slots = c("~","+", "|", "+")
+  formula = paste0(symbol.slots, form.slots, collapse="")
+  formula = gsub("\\|NA", "", formula);formula = gsub("\\+NA", "", formula);
+  formula = paste0(outcome, formula, collapse="")
+  
+  formula = formula(formula)
+  return(formula)
+}
+
+# this function identifies whether RE are going to be plotted
+are_re_plotted = function (formula, term.re) {
+  
+  ### figure out where random component is
+  f.char = as.character(formula)[3]
+  criteria = paste0("\\+.*", term.re)
+  
+  ### if random component is in slot 2, modify the formula
+  if (length(grep(criteria, f.char))>0) return(T) else return(F)
 }

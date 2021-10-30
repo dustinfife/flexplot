@@ -174,27 +174,6 @@ test_that("remove_nonlinear_terms works", {
   expect_true(all(c("a", "b") %in% remove_nonlinear_terms(terms)))
 })
 
-test_that("hidden functions for lme4", {
-  require(lme4)
-  data("math")
-  d = math
-  object = lmer(MathAch~SES + (SES|School), data=d)
-  expect_identical(extract_random_term(object), "School")
-  # when there's a polynomial in lmers
-  object = lmer(MathAch~SES + (SES^2) + (SES|School), data=d)
-  expect_identical(extract_random_term(object), "School")
-  object2 = lm(MathAch~SES, data=d)
-  testthat::expect_true(length(levels(subset_random_model(object, d, samp.size=5)$School))==5)
-  testthat::expect_false(length(levels(subset_random_model(object2, d, samp.size=5)$School))==5)
-  
-  ## make sure the two models in compare.fits for lme4 are both lme4 objects and have the same random terms
-  object3 = lmer(MathAch~SES + (SES|MEANSES), data=d)
-  testthat::expect_null(test_same_class(object, object))
-  testthat::expect_error(test_same_class(object, object2))
-  testthat::expect_error(test_same_class(object, object3))
-})
-
-
 
 test_that("compare.fits_subroutines work", {
   mod1 = lm(weight.loss~1, data=exercise_data)

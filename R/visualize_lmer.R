@@ -1,46 +1,3 @@
-randomly_sample_clusters = function(d, term.re, sample){
-  #### randomly sample the re terms and convert to numeric
-  unique.terms = unique(d[,term.re])
-  samp = sample(unique.terms, size=min(sample, length(unique.terms)))
-  k = d[d[,term.re]%in%samp,]; k[,term.re] = as.factor(k[,term.re])
-  return(k)
-}
-
-# this will return a flexplot formula for mixed models
-make_formula_mixed = function(preds, term.re, outcome, formula=NULL) {
-  if (!is.null(formula)) return(formula)
-  
-  ### come up with formula
-  slots = c(1,3,4)
-  form.slots = rep(NA, times=4)
-  for (i in 1:min(4,length(preds))){
-    if (preds[i]!=term.re){
-      form.slots[slots[i]] = preds[i]
-    }
-  }
-    
-  ### for random effects models, just put school in first slot
-  if (length(preds)>1) form.slots[2] = term.re else form.slots[1] = term.re
-  
-  symbol.slots = c("~","+", "|", "+")
-  formula = paste0(symbol.slots, form.slots, collapse="")
-  formula = gsub("\\|NA", "", formula);formula = gsub("\\+NA", "", formula);
-  formula = paste0(outcome, formula, collapse="")
-  
-  formula = formula(formula)
-  return(formula)
-}
-
-# this function identifies whether RE are going to be plotted
-are_re_plotted = function (formula, term.re) {
-
-  ### figure out where random component is
-  f.char = as.character(formula)[3]
-  criteria = paste0("\\+.*", term.re)
-  
-  ### if random component is in slot 2, modify the formula
-  if (length(grep(criteria, f.char))>0) return(T) else return(F)
-}
 
 # converts numeric to ordinal when there's < 5 unique values
 convert_numeric_to_ordinal = function(data, term) {
@@ -50,8 +7,6 @@ convert_numeric_to_ordinal = function(data, term) {
   }	
   return(data)
 }
-
-
 
 # set.seed(1212)
 # objects = mixed_model_plot(MathAch~SES + School,
