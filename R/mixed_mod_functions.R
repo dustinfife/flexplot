@@ -5,7 +5,6 @@ subset_random_model = function(object, formula, d, samp.size = 3) {
     
     ## get random term
     term.re = extract_random_term(object)
-    
     samp = stratified_sample_re(formula, data=d, re=term.re, samp.size)
     
     #### randomly sample the re terms and convert to numeric

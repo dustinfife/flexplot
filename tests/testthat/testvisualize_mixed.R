@@ -17,12 +17,12 @@ set.seed(1212)
 test_that("visualize mixed models", {
   #### mixed models
   data(math)
-  math = math[1:100,]
+  math = math[1:1000,]
   model = lme4::lmer(MathAch~ SES + Sex + (SES|School), data=math)
   set.seed(1212)
   a = visualize(model, formula = MathAch~ SES | Sex + School, plot="model")
-  b = visualize(model, formula = MathAch~ SES + School| Sex, sample=11)
-  c = visualize(model, formula = MathAch~ Sex | SES+ School, sample=10, plot="model")
+  b = visualize(model, formula = MathAch~ SES + School| Sex)
+  c = visualize(model, formula = MathAch~ Sex | SES+ School, plot="model")
   
   mod = lme4::lmer(MathAch~1 + (1|School), data=math)
   a1 = visualize(mod, plot="model")

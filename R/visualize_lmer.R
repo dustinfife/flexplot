@@ -148,7 +148,6 @@ mixed_model_plot = function(formula, object, random_plot, sample=3, return_objec
   # if they're plotting without random effects...
   if (!random_plot) return(compare.fits(formula, data=data, model1=object, re=F, clusters=sample,...))
 
-  
   #### otherwise...
   prediction = compare.fits(formula, data=data, model1=object, re=T, return.preds=T, clusters=sample)	
 
