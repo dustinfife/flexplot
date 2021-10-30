@@ -57,7 +57,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   test_same_class(model1, model2)
   
   #### convert random effects to factors for mixed models
-  data = subset_random_model(model1, d=data, clusters)
+  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
   
   ### make sure they have the same outcome
   if (variables_mod1$response != variables_mod2$response) {

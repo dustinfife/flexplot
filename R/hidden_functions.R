@@ -86,8 +86,6 @@ check_all_variables_exist_in_data = function(variables, data) {
   return(NULL)
 }  
 
-
-
 extract_data_from_fitted_object = function(object) {
   if (class(object)[1]=="lm" | class(object)[1]=="glm" | class(object)[1] == "rlm") return(object$model)
   if (class(object)[1]=="RandomForest") {
@@ -109,8 +107,6 @@ extract_data_from_fitted_object = function(object) {
   # this should work for the rest?? But it won't be in the right order!
   return(eval(getCall(object)$data))
 }
-
-
 
 check_nested = function(model1, model2) {
   #### collect terms
@@ -143,7 +139,6 @@ get_predictors = function(model) {
   }
 }
 
-
 ## function that does nested model comparisons on a single fitted model
 nested_model_comparisons = function(object){
   
@@ -169,8 +164,6 @@ check.non.number = function(x){
   return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
   return.bool
 }
-
-
 
 variable_types = function(variables, data, return.names=F){
   if (length(variables)>0){
@@ -231,15 +224,6 @@ remove_nonlinear_terms = function(terms) {
   return(grep("[/^:]", terms, value=T, invert=T))
 }
 # tested
-extract_random_term = function(object) {
-  #### extract formula
-  form = as.character(formula(object))[3]
-  
-  #### identify random effects
-  term.re = trimws(gsub("(.*\\|)(.*)[)]", "\\2", form))
-  return(term.re)
-}
-
 # tested
 test_same_class = function(model1, model2) {
   # if neither are lme4
@@ -254,28 +238,8 @@ test_same_class = function(model1, model2) {
   if (re_one != re_two) stop("Whoa there, tiger. You can't have different random effects for the two models.")
 }
 
-
-### return dataset containing factorized random effects (tested)
-subset_random_model = function(object, d, samp.size = 3) {
-  
-  if (class(object)[1] == "lmerMod") {
-    
-    ## get random term
-    term.re = extract_random_term(object)
-    
-    #### randomly sample the re terms and convert to numeric
-    unique.terms = unique(d[[term.re]])
-    samp = sample(unique.terms, size=min(samp.size, length(unique.terms)))
-    k = d[d[[term.re]]%in%samp,]; k[[term.re]] = as.factor(k[[term.re]])
-    return(k)
-  }
-  
-  return(d)
-}
-
-
 prep.breaks = function(variable, data, breaks=NULL, bins=3){
-
+  
 		breaks = unlist(breaks)	
 		if (is.null(bins)){bins=3}
 
@@ -469,21 +433,6 @@ factor.to.logistic = function(data, outcome, labels=F){
   }
   
 }
-
-
-# factor_to_logistic_x = function(x){
-#   
-#   #### check if they have 2 unique values
-#   if (length(unique(x))!=2){
-#     stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
-#   }	
-#   
-#   ### now do the converstion
-#     
-#   x = as.numeric(as.character(factor(x, levels=levels(x), labels=c(0,1))))
-#   x
-# }
-
 
 ##' @importFrom MASS rlm	
 #### identify the correct "fit"
