@@ -72,19 +72,17 @@ get_row_col <- function(p) {
 #stratified_sample_re(MathAch~ SES + School| Sex, data=math, re="School", 11)
 stratified_sample_re = function(formula, data, re, samp.size=6) {
 
+  paneled = find_paneled_variables(formula)
+  
   # identify the panels from the formula
   rhs = labels(terms(formula))
   predictors = strsplit(rhs, "\\|") %>% unlist %>% strsplit("\\+") %>% unlist %>% trimws
   
-  # group_by variables are those that were panelled. identify using the formula
-  paneled = strsplit(rhs, "\\|") %>% unlist
-  if (length(paneled) == 1) return(sample(data[,re], min(samp.size, nrow(data))))
-  
-  panaled = paneled %>% purrr::pluck(2) %>% strsplit("\\+") %>% unlist %>% trimws
+  if (is.null(paneled)) return(sample(data[,re], min(samp.size, nrow(data))))
   
   # remove id from formula
   formula_sans_re = remove_term_from_formula(formula, re)
-
+  
   # make preliminary flexplot (without ID)
   flexplot_data = flexplot(formula_sans_re, data=data) 
   
@@ -118,4 +116,20 @@ stratified_sample_re = function(formula, data, re, samp.size=6) {
     unique() 
   IDs = c(selected_IDs, sample(remaining_IDs, min(additional_n, length(remaining_IDs))))
   return(IDs)
+}
+
+
+find_paneled_variables = function(formula) {
+  
+  # see if there's a vertical pipe in there
+  if (length(grep("|", format(formula), fixed=T))==0) return(NULL)
+      
+  # identify the panels from the formula
+  rhs = labels(terms(formula))
+  predictors = strsplit(rhs, "\\|") %>% unlist %>% strsplit("\\+") %>% unlist %>% trimws
+  
+  # group_by variables are those that were panelled. identify using the formula
+  paneled = strsplit(rhs, "\\|") %>% unlist %>% purrr::pluck(2) %>% strsplit("\\+") %>% unlist %>% trimws
+  
+  return(paneled)
 }

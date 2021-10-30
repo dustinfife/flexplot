@@ -7,6 +7,11 @@ test_that("make_formula_mixed works", {
   expect_equal(as.character(make_formula_mixed(c("a", "b", "c"), "c", "q", a~b))[3], "b")
 })
 
+test_that("find_paneled_variables works", {
+  expect_equal(find_paneled_variables(y~a + b | x), "x")
+  expect_equal(find_paneled_variables(y~a + b + x), NULL)
+  expect_equal(find_paneled_variables(y~a | a + x), c("a", "x"))
+})
 
 test_that("randomly_sample_clusters works", {
   expect_true(length(unique(randomly_sample_clusters(math, "School", 1)$School))==1)
