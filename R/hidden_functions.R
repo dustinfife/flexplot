@@ -76,9 +76,9 @@ custom.labeler = function(x){
 
 #### make sure all variables are in data
 check_all_variables_exist_in_data = function(variables, data) {
-  if (is.null(variables)) {
-    return(NULL)
-  }
+  
+  if (is.null(variables)) return(NULL)
+  
   missing.preds = variables[which(!(variables %in% names(data)))]
   if (length(missing.preds)>0){
     stop(paste0("One or more of your predictor variables: ", paste0(missing.preds, collapse=","), " are missing. Did you specify the right dataset and spell the variables correctly?"))
@@ -261,70 +261,7 @@ prep.breaks = function(variable, data, breaks=NULL, bins=3){
 }
 
 
-bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE, return.breaks=FALSE){
 
-
-	### if they come as a list, unlist them
-	if (is.list(breaks)){
-		breaks = unlist(breaks)
-	}
-	if (is.list(labels)){
-		labels = unlist(labels)
-	}
-	
-	#### if they provide labels or breaks, choose the number of bins
-	if (!is.null(labels)){
-		bins = length(labels)
-	} else if (!is.null(breaks)){
-		bins = length(breaks)+1
-	#### otherwise, set bins to 3
-	} else {
-		bins = 3
-	}
-
-
-	#### if they supply breaks, make sure there's a good min/max value	
-	if (!is.null(breaks) & check.breaks){
-		breaks = prep.breaks(variable, data, breaks)
-	} 
-
-  ### if we don't have breaks at this point, make some
-  if (is.null(breaks)){
-    breaks = quantile(as.numeric(data[[variable]]), seq(from=0, to=1, length.out=bins+1), na.rm=T)
-  }
-  
-	### if they don't provide labels, make them easier to read (than R's native bin labels)\
-  
-	if (is.null(labels)){
-		labels = 1:(length(breaks)-1)		
-		for (i in 1:(length(breaks)-1)){
-		  digs1 = round_digits(breaks[i])
-		  digs2 = round_digits(breaks[i+1])
-		  # put parenthases around the negative numbers
-		  if (breaks[i]<0) {
-		    first = paste0("(", round(breaks[i], digits=digs1), ")") 
-		  } else {
-		    first = round(breaks[i], digits=digs1)
-		  }
-		  if (breaks[i+1]<0) {
-		    second = paste0("(", round(breaks[i+1], digits=digs2), ")") 
-      } else {
-        second = round(breaks[i+1], digits=digs2)
-      }
-			labels[i] = paste0(first, "-", second)
-		}
-	}
-	
-
-
-	if (return.breaks){
-		return(breaks)
-	} else {
-		binned.variable = cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
-		binned.variable
-	}
-	
-}
 
 round_digits = function(breaks) {
   if (abs(breaks)<.0001) return(6)
