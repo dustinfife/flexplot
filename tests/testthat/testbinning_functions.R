@@ -47,3 +47,31 @@ test_that("bin_variables_loop works", {
   expect_equal(levels(bin_variables_loop(1, d, "a", 3, labels = NULL, breaks = c(1,5,8)))[2], "5")
 })
 
+# test_that("bin_variables works", {
+#   bin_variables()
+# })
+
+test_that("label_bins_loop works", {
+  expect_equal(label_bins_loop(1, c(-3.684, -1, 0, 1)), "(-3.7)-(-1)")
+  expect_equal(label_bins_loop(2, c(-3.684, -1, 0, 1)), "(-1)-0")
+})
+
+test_that("label_bins works", {
+  breaks = seq(from = -10.3, to = 3, length.out = 3)
+  expect_equal(label_bins(NULL, breaks)[2], "(-3.7)-3" )
+  expect_equal(label_bins(c("a", "b"), breaks)[2], "b")
+})
+
+test_that("label_negatives works", {
+  expect_equal(label_negatives(-3.4, 1), "(-3.4)")
+  expect_equal(label_negatives(3.4, 1), "3.4")
+})
+
+test_that("round_digits works", {
+  expect_true(round_digits(.00000034)==6)
+  expect_true(round_digits(.00034)==5)
+  expect_true(round_digits(.0034)==4)
+  expect_true(round_digits(.034)==3)
+  expect_true(round_digits(.34)==2)  
+  expect_true(round_digits(3.4)==1)  
+})

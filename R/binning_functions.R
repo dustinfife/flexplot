@@ -73,9 +73,7 @@ bin_variables = function(data, bins, labels, break.me, breaks) {
   return(data)
 }
 
-# expect_equal(label_bins_loop(1, c(-3.684, -1, 0, 1)), "(-3.7)-(-1)")
-# expect_equal(label_bins_loop(2, c(-3.684, -1, 0, 1)), "(-1)-0")
-# this receives the breakpoints, labels them all pretty, and returns the labels for a particular i
+#   this receives the breakpoints, labels them all pretty, and returns the labels for a particular i
 label_bins_loop = function(i, breaks) {
   digs1 = round_digits(breaks[i])
   digs2 = round_digits(breaks[i+1])
@@ -87,10 +85,6 @@ label_bins_loop = function(i, breaks) {
   return(paste0(first, "-", second))
 }
 
-
-# breaks = seq(from = -10.3, to = 3, length.out = 3)
-# expect_equal(label_bins(NULL, breaks)[2], "(-3.7)-3" )
-# expect_equal(label_bins(c("a", "b"), breaks)[2], "b")
 label_bins = function(labels, breaks) {
   
   # if they give labels, return them
@@ -102,13 +96,10 @@ label_bins = function(labels, breaks) {
   
 }
 
-# expect_equal(label_negatives(-3.4, 1), "(-3.4)")
-# expect_equal(label_negatives(3.4, 1), "3.4")
 label_negatives = function(breaks, digits) {
   if (breaks<0) return(paste0("(", round(breaks, digits=digits), ")"))
   return(paste0(round(breaks, digits=digits)))
 }
-
 
 round_digits = function(breaks) {
   if (abs(breaks)<.0001) return(6)
