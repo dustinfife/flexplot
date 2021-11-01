@@ -52,12 +52,10 @@ prep.breaks = function(variable, data, breaks=NULL, bins=3){
   
 }
 
-# this function bins a specific variable
 bin_variables_loop = function(i=1, data, break.me, bins, labels, breaks) {
 
   # indexing fails if i > the number of slots in the list
   if (length(labels)>= i) labs = labels[[i]] else labs = NULL
-  
   b = bin.me(break.me[i], data, bins[i], labs, breaks[[i]])
   
   #### if there's only one category after we've binned things, fix that succa!

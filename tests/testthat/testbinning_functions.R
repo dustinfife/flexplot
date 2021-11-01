@@ -28,3 +28,22 @@ test_that("prep.breaks works", {
   expect_output(print(prep.breaks(variable = "satisfaction", data = relationship_satisfaction, breaks=c(20, 60))), "-7  20  60 117")
 })
 
+test_that("bin_variables_loop works", {
+  # this function bins a specific variable
+  fake_labels = c("low", "mid", "high")
+  d= data.frame(a = sample(c(1,5), size=8, replace=T), b=1:8, c = rnorm(8))
+  bin_variables_loop(1, d, c("a", "b"), 3, 
+     labels = list(a = fake_labels[1:2], b = fake_labels),
+     breaks = list(c(1,5,8), c(-1, 0, 1)))                %>%
+              levels          %>% 
+              purrr::pluck(2) %>%
+              expect_equal("mid")
+  bin_variables_loop(2, d, c("a", "b"), 3, 
+                     labels=NULL,
+                     breaks = list(c(1,5,8), c(-1, 0, 1))) %>%
+              levels          %>% 
+              purrr::pluck(2) %>%
+              expect_equal("0-1")
+  expect_equal(levels(bin_variables_loop(1, d, "a", 3, labels = NULL, breaks = c(1,5,8)))[2], "5")
+})
+
