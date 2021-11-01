@@ -43,28 +43,9 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
   ### if we don't have breaks at this point, make some
   if (is.null(breaks)) breaks = quantile(as.numeric(data[[variable]]), seq(from=0, to=1, length.out=bins+1), na.rm=T)
   
-  ### if they don't provide labels, make them easier to read (than R's native bin labels)\
+  ### if they don't provide labels, make them easier to read (than R's native bin labels)
   
-  if (is.null(labels)){
-    labels = 1:(length(breaks)-1)		
-    for (i in 1:(length(breaks)-1)){
-      digs1 = round_digits(breaks[i])
-      digs2 = round_digits(breaks[i+1])
-      # put parenthases around the negative numbers
-      if (breaks[i]<0) {
-        first = paste0("(", round(breaks[i], digits=digs1), ")") 
-      } else {
-        first = round(breaks[i], digits=digs1)
-      }
-      if (breaks[i+1]<0) {
-        second = paste0("(", round(breaks[i+1], digits=digs2), ")") 
-      } else {
-        second = round(breaks[i+1], digits=digs2)
-      }
-      labels[i] = paste0(first, "-", second)
-    }
-  }
-  
+ 
   
   
   if (return.breaks){
@@ -74,4 +55,48 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
     binned.variable
   }
   
+}
+
+label_bins_loop = function(i, breaks, labels) {
+  digs1 = round_digits(breaks[i])
+  digs2 = round_digits(breaks[i+1])
+  
+  # put parenthases around the negative numbers
+  if (breaks[i]<0) first = paste0("(", round(breaks[i], digits=digs1), ")") else first = round(breaks[i], digits=digs1)
+  
+  if (breaks[i+1]<0) {
+    second = paste0("(", round(breaks[i+1], digits=digs2), ")") 
+  } else {
+    second = round(breaks[i+1], digits=digs2)
+  }
+  labels[i] = paste0(first, "-", second)
+}
+
+
+# expect_equal(label_negatives(-3.4, 1), "(-3.4)")
+# expect_equal(label_negatives(3.4, 1), "3.4")
+label_negatives = function(breaks, digits) {
+  if (breaks<0) return(paste0("(", round(breaks, digits=digits), ")"))
+  return(paste0(round(breaks, digits=digits)))
+}
+
+
+label_bins = function(labels, breaks) {
+
+  # if they give labels, return them
+  if (!is.null(labels)) return(labels)
+  
+  labels = 1:(length(breaks)-1)		
+    for (i in 1:(length(breaks)-1)){
+
+    }
+}
+
+round_digits = function(breaks) {
+  if (abs(breaks)<.0001) return(6)
+  if (abs(breaks)<.001) return(5)
+  if (abs(breaks)<.01) return(4)
+  if (abs(breaks)<.1) return(3)
+  if (abs(breaks)<1) return(2)
+  return(1)
 }

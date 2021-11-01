@@ -260,19 +260,6 @@ prep.breaks = function(variable, data, breaks=NULL, bins=3){
 		
 }
 
-
-
-
-round_digits = function(breaks) {
-  if (abs(breaks)<.0001) return(6)
-  if (abs(breaks)<.001) return(5)
-  if (abs(breaks)<.01) return(4)
-  if (abs(breaks)<.1) return(3)
-  if (abs(breaks)<1) return(2)
-  return(1)
-}
-
-
 	### create custom function to sample data
 sample.subset = function(sample, data){
 	if (sample!=Inf){
