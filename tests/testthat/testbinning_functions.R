@@ -22,9 +22,9 @@ test_that("choose_bins works", {
   expect_equal(choose_bins(1:3, 1:3), 3)
 })
 
+
 test_that("prep.breaks works", {
   expect_output(print(prep.breaks(variable = "satisfaction", data = relationship_satisfaction, breaks=NULL, bins=3)), "46.66667")
   expect_output(print(prep.breaks(variable = "satisfaction", data = relationship_satisfaction, breaks=c(20, 60))), "-7  20  60 117")
-  expect_output(print(prep.breaks(variable = "satisfaction", data = relationship_satisfaction, breaks=NULL, bins=NULL)), "46.66667")
 })
 

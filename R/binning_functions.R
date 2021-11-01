@@ -32,8 +32,7 @@ choose_bins = function(labels, breaks) {
 prep.breaks = function(variable, data, breaks=NULL, bins=3){
   
   breaks = unlist(breaks)	
-  if (is.null(bins)) bins=3
-  
+
   # return quantiles if they don't give breaks
   if (is.null(breaks)){
     quants = quantile(data[[variable]], seq(from=0, to=1, length.out=bins+1), na.rm=T)
