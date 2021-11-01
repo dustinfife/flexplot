@@ -1,5 +1,8 @@
+#expect_equal(levels(bin.me("weight.loss", exercise_data, bins=3, breaks = list(-5, 0, 5)))[1], "(-9)-(-5)")
+#expect_equal(levels(bin.me("weight.loss", exercise_data, bins=3, labels = list("low", "mid", "high")))[1], "low")
+#expect_true(length(bin.me("weight.loss", exercise_data, bins=3, return.breaks = T))==4)
 bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE, return.breaks=FALSE){
-  
+
   ### if they come as a list, unlist them
   if (is.list(breaks)) breaks = unlist(breaks)
   if (is.list(labels)) labels = unlist(labels)
@@ -36,6 +39,7 @@ prep.breaks = function(variable, data, breaks=NULL, bins=3){
   breaks = unlist(breaks)	
   if (is.null(bins)) bins=3
   
+  # return quantiles if they don't give breaks
   if (is.null(breaks)){
     quants = quantile(data[[variable]], seq(from=0, to=1, length.out=bins+1), na.rm=T)
     breaks = quants[!duplicated(quants)]
@@ -49,7 +53,6 @@ prep.breaks = function(variable, data, breaks=NULL, bins=3){
   if (max(breaks,na.rm=T)<max(data[[variable]], na.rm=T)){
     breaks = c(breaks, max(data[[variable]], na.rm=T))
   }	
-  
   
   return(breaks)
   
