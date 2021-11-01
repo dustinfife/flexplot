@@ -57,20 +57,36 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
   
 }
 
-label_bins_loop = function(i, breaks, labels) {
+
+
+# expect_equal(label_bins_loop(1, c(-3.684, -1, 0, 1)), "(-3.7)-(-1)")
+# expect_equal(label_bins_loop(2, c(-3.684, -1, 0, 1)), "(-1)-0")
+# this receives the breakpoints, labels them all pretty, and returns the labels for a particular i
+label_bins_loop = function(i, breaks) {
   digs1 = round_digits(breaks[i])
   digs2 = round_digits(breaks[i+1])
   
   # put parenthases around the negative numbers
-  if (breaks[i]<0) first = paste0("(", round(breaks[i], digits=digs1), ")") else first = round(breaks[i], digits=digs1)
+  first  = label_negatives(breaks[i], digs1)
+  second = label_negatives(breaks[i+1], digs2) 
   
-  if (breaks[i+1]<0) {
-    second = paste0("(", round(breaks[i+1], digits=digs2), ")") 
-  } else {
-    second = round(breaks[i+1], digits=digs2)
-  }
-  labels[i] = paste0(first, "-", second)
+  return(paste0(first, "-", second))
 }
+
+
+# breaks = seq(from = -10.3, to = 3, length.out = 3)
+# labels = NULL
+label_bins = function(labels, breaks) {
+  
+  # if they give labels, return them
+  if (!is.null(labels)) return(labels)
+  
+  # otherwise, loop through all the breaks and create labels
+  labels = 1:(length(breaks)-1)		
+  labels %>% purrr::map(label_bins_loop, breaks)
+                 
+}
+
 
 
 # expect_equal(label_negatives(-3.4, 1), "(-3.4)")
@@ -81,16 +97,6 @@ label_negatives = function(breaks, digits) {
 }
 
 
-label_bins = function(labels, breaks) {
-
-  # if they give labels, return them
-  if (!is.null(labels)) return(labels)
-  
-  labels = 1:(length(breaks)-1)		
-    for (i in 1:(length(breaks)-1)){
-
-    }
-}
 
 round_digits = function(breaks) {
   if (abs(breaks)<.0001) return(6)
