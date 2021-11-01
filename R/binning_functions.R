@@ -1,11 +1,9 @@
-#expect_equal(levels(bin.me("weight.loss", exercise_data, bins=3, breaks = list(-5, 0, 5)))[1], "(-9)-(-5)")
-#expect_equal(levels(bin.me("weight.loss", exercise_data, bins=3, labels = list("low", "mid", "high")))[1], "low")
-#expect_true(length(bin.me("weight.loss", exercise_data, bins=3, return.breaks = T))==4)
 bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE, return.breaks=FALSE){
 
   ### if they come as a list, unlist them
-  if (is.list(breaks)) breaks = unlist(breaks)
-  if (is.list(labels)) labels = unlist(labels)
+  # no need for if because unlist will return vectors if passed a vector
+  breaks = unlist(breaks)
+  labels = unlist(labels) 
   
   bins = choose_bins(labels, breaks)
   
@@ -24,9 +22,6 @@ bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.bre
   return(binned.variable)
 }
 
-# expect_equal(choose_bins(NULL, NULL), 3)
-# expect_equal(choose_bins(NULL, 1:3), 4)
-# expect_equal(choose_bins(1:3, 1:3), 3)
 choose_bins = function(labels, breaks) {
   #### if they provide labels or breaks, choose the number of bins
   if (!is.null(labels)) return(length(labels))
@@ -81,9 +76,6 @@ bin_variables = function(data, bins, labels, break.me, breaks) {
   return(data)
 }
 
-
-
-
 # expect_equal(label_bins_loop(1, c(-3.684, -1, 0, 1)), "(-3.7)-(-1)")
 # expect_equal(label_bins_loop(2, c(-3.684, -1, 0, 1)), "(-1)-0")
 # this receives the breakpoints, labels them all pretty, and returns the labels for a particular i
@@ -119,13 +111,6 @@ label_negatives = function(breaks, digits) {
   if (breaks<0) return(paste0("(", round(breaks, digits=digits), ")"))
   return(paste0(round(breaks, digits=digits)))
 }
-
-
-
-
-
-
-
 
 
 round_digits = function(breaks) {
