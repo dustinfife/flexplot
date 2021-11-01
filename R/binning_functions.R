@@ -1,6 +1,63 @@
+bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE, return.breaks=FALSE){
+  
+  ### if they come as a list, unlist them
+  if (is.list(breaks)) breaks = unlist(breaks)
+  if (is.list(labels)) labels = unlist(labels)
+  
+  bins = choose_bins(labels, breaks)
+  
+  #### if they supply breaks, make sure there's a good min/max value	
+  if (!is.null(breaks) & check.breaks) breaks = prep.breaks(variable, data, breaks)
+  
+  ### if we don't have breaks at this point, make some
+  if (is.null(breaks)) breaks = quantile(as.numeric(data[[variable]]), seq(from=0, to=1, length.out=bins+1), na.rm=T)
+  
+  ### if they don't provide labels, make them easier to read (than R's native bin labels)
+  labels = label_bins(labels, breaks)
+  
+  if (return.breaks) return(breaks)
+  
+  binned.variable = cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
+  return(binned.variable)
+}
+
+# expect_equal(choose_bins(NULL, NULL), 3)
+# expect_equal(choose_bins(NULL, 1:3), 4)
+# expect_equal(choose_bins(1:3, 1:3), 3)
+choose_bins = function(labels, breaks) {
+  #### if they provide labels or breaks, choose the number of bins
+  if (!is.null(labels)) return(length(labels))
+  if (!is.null(breaks)) return(length(breaks)+1)
+  return(3)
+}
+
+prep.breaks = function(variable, data, breaks=NULL, bins=3){
+  
+  breaks = unlist(breaks)	
+  if (is.null(bins)) bins=3
+  
+  if (is.null(breaks)){
+    quants = quantile(data[[variable]], seq(from=0, to=1, length.out=bins+1), na.rm=T)
+    breaks = quants[!duplicated(quants)]
+    return(breaks)
+  }
+  
+  #### give min as breaks, if the user doesn't
+  if (min(breaks)>min(data[[variable]], na.rm=T)){
+    breaks = c(min(data[[variable]], na.rm=T), breaks)
+  }
+  if (max(breaks,na.rm=T)<max(data[[variable]], na.rm=T)){
+    breaks = c(breaks, max(data[[variable]], na.rm=T))
+  }	
+  
+  
+  return(breaks)
+  
+}
+
 # this function bins a specific variable
 bin_variables_loop = function(i=1, data, break.me, bins, labels, breaks) {
-  
+
   # indexing fails if i > the number of slots in the list
   if (length(labels)>= i) labs = labels[[i]] else labs = NULL
   
@@ -21,41 +78,6 @@ bin_variables = function(data, bins, labels, break.me, breaks) {
   return(data)
 }
 
-choose_bins = function(labels, breaks) {
-  #### if they provide labels or breaks, choose the number of bins
-  if (!is.null(labels)) return(length(labels))
-  if (!is.null(breaks)) return(length(breaks)+1)
-  return(3)
-}
-
-bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE, return.breaks=FALSE){
-  
-  
-  ### if they come as a list, unlist them
-  if (is.list(breaks)) breaks = unlist(breaks)
-  if (is.list(labels)) labels = unlist(labels)
-
-  bins = choose_bins(labels, breaks)
-
-  #### if they supply breaks, make sure there's a good min/max value	
-  if (!is.null(breaks) & check.breaks) breaks = prep.breaks(variable, data, breaks)
-  
-  ### if we don't have breaks at this point, make some
-  if (is.null(breaks)) breaks = quantile(as.numeric(data[[variable]]), seq(from=0, to=1, length.out=bins+1), na.rm=T)
-  
-  ### if they don't provide labels, make them easier to read (than R's native bin labels)
-  
- 
-  
-  
-  if (return.breaks){
-    return(breaks)
-  } else {
-    binned.variable = cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
-    binned.variable
-  }
-  
-}
 
 
 
@@ -85,10 +107,8 @@ label_bins = function(labels, breaks) {
   # otherwise, loop through all the breaks and create labels
   labels = 1:(length(breaks)-1)		
   return(labels %>% purrr::map_chr(label_bins_loop, breaks))
-                 
+  
 }
-
-
 
 # expect_equal(label_negatives(-3.4, 1), "(-3.4)")
 # expect_equal(label_negatives(3.4, 1), "3.4")
@@ -96,6 +116,12 @@ label_negatives = function(breaks, digits) {
   if (breaks<0) return(paste0("(", round(breaks, digits=digits), ")"))
   return(paste0(round(breaks, digits=digits)))
 }
+
+
+
+
+
+
 
 
 
