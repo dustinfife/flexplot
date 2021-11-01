@@ -75,7 +75,8 @@ label_bins_loop = function(i, breaks) {
 
 
 # breaks = seq(from = -10.3, to = 3, length.out = 3)
-# labels = NULL
+# expect_equal(label_bins(NULL, breaks)[2], "(-3.7)-3" )
+# expect_equal(label_bins(c("a", "b"), breaks)[2], "b")
 label_bins = function(labels, breaks) {
   
   # if they give labels, return them
@@ -83,7 +84,7 @@ label_bins = function(labels, breaks) {
   
   # otherwise, loop through all the breaks and create labels
   labels = 1:(length(breaks)-1)		
-  labels %>% purrr::map(label_bins_loop, breaks)
+  return(labels %>% purrr::map_chr(label_bins_loop, breaks))
                  
 }
 
