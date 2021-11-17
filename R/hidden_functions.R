@@ -238,39 +238,6 @@ test_same_class = function(model1, model2) {
   if (re_one != re_two) stop("Whoa there, tiger. You can't have different random effects for the two models.")
 }
 
-prep.breaks = function(variable, data, breaks=NULL, bins=3){
-  
-		breaks = unlist(breaks)	
-		if (is.null(bins)){bins=3}
-
-		if (is.null(breaks)){
-			quants = quantile(data[[variable]], seq(from=0, to=1, length.out=bins+1), na.rm=T)
-			breaks = quants[!duplicated(quants)]
-		} else {			
-			#### give min as breaks, if the user doesn't
-			if (min(breaks)>min(data[[variable]], na.rm=T)){
-				breaks = c(min(data[[variable]], na.rm=T), breaks)
-			}
-			if (max(breaks,na.rm=T)<max(data[[variable]], na.rm=T)){
-				breaks = c(breaks, max(data[[variable]], na.rm=T))
-			}	
-		}
-		
-		return(breaks)
-		
-}
-
-
-
-
-round_digits = function(breaks) {
-  if (abs(breaks)<.0001) return(6)
-  if (abs(breaks)<.001) return(5)
-  if (abs(breaks)<.01) return(4)
-  if (abs(breaks)<.1) return(3)
-  if (abs(breaks)<1) return(2)
-  return(1)
-}
 
 
 	### create custom function to sample data
