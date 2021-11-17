@@ -6,34 +6,12 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 			
-			#### if they have both predictor and outcome
-			if (length(self$options$out)>0 & length(self$options$preds)>0){
-				
-		        	#### write formula for flexplot
-		            formula <- jmvcore::constructFormula(self$options$out, self$options$preds)
-		        
-		            if (length(self$options$given)>0){
-			            formula <- paste0(self$options$out, "~", paste0(self$options$preds, collapse="+"), "|", paste0(self$options$given, collapse="+"))		            	
-		            }
-		            formula <- as.formula(formula)
-	
-					output = list(formula=formula, data=self$data)
-					image <- self$results$plot
-					image$setState(output)
-		
-			#### run if they do univariate stuff		
-			} else if (length(self$options$out)>0 & length(self$options$preds)==0 & length(self$options$given)==0){
-		        	#### write formula for flexplot
-		            formula <- paste0(self$options$out, "~1")
-		            formula <- as.formula(formula)
-	
-					output = list(formula=formula, data=self$data)
-					image <- self$results$plot
-					image$setState(output)
-			} #else if (length(self$options$out)>0 & length(self$options$preds)>1 & length(self$options$given)>0 & self$options$ghost==TRUE){
-				#	jmvcore::reject("Sorry! You can't do ghost lines when you have two variables in the 'Predictor variables' box. Try putting one in the 'Paneled variables' box.")
-			#}
-			return(formula)
+			# specify conditions as booleans
+      outcome_exists = length(self$options$out)>0
+      formula = jamovi_formula(self$options$out, self$options$preds, self$options$given)
+      output = list(formula=formula, data=self$data)
+      image <- self$results$plot
+      image$setState(output)
 		}
 		, 
 			
