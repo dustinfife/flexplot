@@ -38,4 +38,14 @@ escape_spaces_in_formulas = function(out=NULL) {
   
   return(unlist(escaped_items))
 }
-#jmvcore::constructFormula
+
+get_fitted_line = function(line) {
+  if (line=="Loess") return("loess")
+  if (line=="Regression") return("lm")
+  if (line=="Logistic") return("logistic")
+  if (line=="Polynomial") return("polynomial")
+  if (line=="Cubic") return("cubic")	
+  if (line=="Robust") return("rlm")
+  if (line=="Time Series") return("loess")
+}
+

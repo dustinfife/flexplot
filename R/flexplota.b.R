@@ -2,7 +2,8 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "flexplotaClass",
     inherit = flexplotaBase,
     private = list(
-        .run = function() {
+  
+  .run = function() {
 
 
 			
@@ -16,31 +17,27 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 		, 
 			
 		.plot = function(image, ...){
-       		#### change case so line type can be read in
-		  linemethod = "histogram"
-			if (self$options$line=="Loess"){line="loess"}
-			if (self$options$line=="Regression"){line ="lm"}
-			if (self$options$line=="Logistic"){line ="logistic"}
-			if (self$options$line=="Polynomial"){line ="polynomial"}
-			if (self$options$line=="Cubic"){line ="cubic"}	
-			if (self$options$line=="Robust"){line ="rlm"}
-		  if (self$options$line=="Time Series"){line ="loess"; linemethod="line"}
-			if (self$options$sample==100){samp = Inf} else { samp = self$options$sample*.01*nrow(image$state$data)}					
-			
-		  #### record related = T if the conditions are met
-			related = FALSE
-			if (self$options$diff==TRUE & length(self$options$preds)==1){
-				if (length(unique(image$state$data[,self$options$preds]))==2 & 
-						table(image$state$data[,self$options$preds])[1]==table(image$state$data[,self$options$preds])[2]){
-							related = TRUE
-				}	
-			}
-								
-      if (is.null(image$state)) return(FALSE)
-
+		  
+		  # return no plot					
+		  if (is.null(image$state)) return(FALSE)		  
+      
+		  #### specify all the options
+		  linemethod= ifelse(self$options$line=="Time Series", "line", linemethod = "histogram")
+		  line = get_fitted_line(self$options$line)
+			samp = ifelse(self$options$sample==100, Inf, self$options$sample*.01*nrow(image$state$data))
 			se.type = unlist(strsplit(self$options$center," + ", fixed=T))[2]			
 			formula = image$state$formula
 			data = image$state$data
+			
+		  #### record related = T if the conditions are met
+			diff_selected      = self$options$diff
+			only_one_predictor = length(self$options$preds)==1 
+			only_two_levels    = length(unique(image$state$data[,self$options$preds]))==2 
+			groups_are_equal   = table(image$state$data[,self$options$preds])[1]==table(image$state$data[,self$options$preds])[2]
+			related = ifelse(diff_selected & only_one_predictor & only_two_levels & groups_are_equal,
+			                 TRUE, FALSE)
+
+
 
 				### ADDED VARIABLE PLOT
 				### if they choose to residualize it
