@@ -135,7 +135,7 @@ flexplot = function(formula, data=NULL, related=F,
   ### make modifications to the data
 	data = with(varprep, 
 	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
-	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
+	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method))
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
                         ### (error came at ghost.reference when it couldn't find the binned version)
 
@@ -236,20 +236,14 @@ flexplot = function(formula, data=NULL, related=F,
 	if (is.finite(sample) & is.numeric(data[,outcome])){
 		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
 	}
-	
-	
-	#### if they have a logistic, modify the p to reflect the data
-	if (method=="logistic" & !is.numeric(data[,outcome])){
-		p = gsub("data=[[:alnum:]]+,", "data=factor.to.logistic(data,outcome),", p)
-		points = gsub("data\\)", "factor.to.logistic(data,outcome))", points)		
-		
-		#### change the y axis labels
-		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	
-	}
 
 	### put objects in this environment
 	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
 	
+	# convert labels for Y axis for logistic
+	if (method=="logistic" & !is.numeric(data[,outcome])){
+	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T, method='logistic'))")
+	}
 	### if second axis is numeric, replace axis[2] with variable that is binned
   if (length(axis)>1){
     if (is.numeric(data[,axis[2]])){

@@ -317,12 +317,16 @@ points.func = function(axis.var, data, jitter){
 
 
 	#### this function converts a binary variable to a 1/0 for logistic regression
-factor.to.logistic = function(data, outcome, labels=F){
+factor.to.logistic = function(data, outcome, labels=F, method = NULL){
+  
+  if (is.null(method)) return(data)
+  if (method != "logistic") return(data)
   
   #### check if they have 2 unique values
   if (length(unique(data[,outcome]))!=2){
     stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
   }	
+  if (is.numeric(data[,outcome])) return(data)
   
   ### now do the converstion
   if (labels){
