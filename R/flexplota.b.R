@@ -4,99 +4,45 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
   
   .run = function() {
-
-
-			
-			# specify conditions as booleans
-      outcome_exists = length(self$options$out)>0
       formula = jamovi_formula(self$options$out, self$options$preds, self$options$given)
       output = list(formula=formula, data=self$data)
       image <- self$results$plot
       image$setState(output)
-		}
-		, 
+		}, 
 			
-		.plot = function(image, ...){
-		  
-		  # return no plot					
-		  if (is.null(image$state)) return(FALSE)		  
-      
-		  #### specify all the options
-		  linemethod= ifelse(self$options$line=="Time Series", "line", linemethod = "histogram")
-		  line = get_fitted_line(self$options$line)
-			samp = ifelse(self$options$sample==100, Inf, self$options$sample*.01*nrow(image$state$data))
-			se.type = unlist(strsplit(self$options$center," + ", fixed=T))[2]			
-			formula = image$state$formula
-			data = image$state$data
+	.plot = function(image, ...){
+	  
+	  # return no plot					
+	  if (is.null(image$state)) return(FALSE)		  
+	  
+	  # return the jamovi plot
+    p = jamovi_plots(image$state$formula, image$state$data, self$options)
+
+		#### modify geoms (if they choose to)
+    geoms = sapply(p$layers, function(x) class(x$geom)[1])
+    if (self$options$plmethod != "Jittered-density plot" & "GeomErrorbar" %in% geoms){
+      		
+ 				#### delete old summary
+			p$layers[[2]] = NULL
+			p$layers[[2]] = NULL
+			p$layers[[2]] = NULL
 			
-		  #### record related = T if the conditions are met
-			diff_selected      = self$options$diff
-			only_one_predictor = length(self$options$preds)==1 
-			only_two_levels    = length(unique(image$state$data[,self$options$preds]))==2 
-			groups_are_equal   = table(image$state$data[,self$options$preds])[1]==table(image$state$data[,self$options$preds])[2]
-			related = ifelse(diff_selected & only_one_predictor & only_two_levels & groups_are_equal,
-			                 TRUE, FALSE)
-
-
-
-				### ADDED VARIABLE PLOT
-				### if they choose to residualize it
-			if ((length(self$options$given) + length(self$options$preds))>0 & self$options$resid==TRUE) {
-			  
-			  ## modify formula to use FIRST, rather than last variable
-			  f <- paste0(self$options$out, "~",paste0(self$options$given, collapse="+"), "+", paste0(rev(self$options$preds), collapse="+"))		            	
-			  f <- as.formula(f)
-        p = added.plot(f, data=data, se=self$options$se,spread=se.type, 
-                       method=line, alpha = self$options$alpha*.01, 
-                       sample = samp, jitter=c(self$options$jittx, self$options$jitty), 
-                       bins=self$options$bins, suppress_smooth=self$options$suppr, related=related)	
-
-				#### GHOST LINES
-      } else if (length(self$options$given)>0 & self$options$ghost==TRUE){
-            p = flexplot(formula, data=data, se=self$options$se,spread=se.type, 
-                         method=line, alpha = self$options$alpha*.01, ghost.line="black", 
-                         sample = samp, jitter=c(self$options$jittx, self$options$jitty), 
-                         bins=self$options$bins,suppress_smooth=self$options$suppr, related=related,
-                         plot.type=linemethod)
-            
-        ### EVERYTHING ELSE            
-      } else {        	
-        	p = flexplot(formula, data=data, se=self$options$se, spread=se.type, 
-        	             method=line,  alpha = self$options$alpha*.01, sample = samp, 
-        	             jitter=c(self$options$jittx, self$options$jitty),
-        	             suppress_smooth=self$options$suppr, bins=self$options$bins, related=related,
-        	             plot.type=linemethod) #+ 
-        	#	theme_bw(base_size = 16) +
-        	#	theme(plot.background = element_rect(fill = "transparent",colour = NA), panel.background = element_rect(fill = "transparent",colour = NA))
-      }		
-
-			#
+			##### figure out the correct geom
+			if (self$options$plmethod == "Boxplot"){
+				g = geom_boxplot()
+			} else if (self$options$plmethod=="Violin plot"){
+				g = geom_violin()
+			}
 			
-			#### modify geoms (if they choose to)
-      geoms = sapply(p$layers, function(x) class(x$geom)[1])
-      if (self$options$plmethod != "Jittered-density plot" & "GeomErrorbar" %in% geoms){
-        		
-   				#### delete old summary
-				p$layers[[2]] = NULL
-				p$layers[[2]] = NULL
-				p$layers[[2]] = NULL
-				
-				##### figure out the correct geom
-				if (self$options$plmethod == "Boxplot"){
-					g = geom_boxplot()
-				} else if (self$options$plmethod=="Violin plot"){
-					g = geom_violin()
-				}
-				
-				#### add new layer
-				p$layers = c(g, p$layers)
-				
-            }
-            ### choose plot type
-            #if (!is.numeric(data[,self$options$preds[1]]) & )
-			print(p)
-			TRUE
-	}
+			#### add new layer
+			p$layers = c(g, p$layers)
+			
+          }
+          ### choose plot type
+          #if (!is.numeric(data[,self$options$preds[1]]) & )
+		print(p)
+		TRUE
+}
 		
 				
 ))
