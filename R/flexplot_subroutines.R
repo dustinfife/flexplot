@@ -178,7 +178,7 @@ modify_related_data = function(data, related, axis, outcome, variables) {
 # expect_error(flexplot_modify_data(formula = weight.loss~gender, data=exercise_data, related=T))
 # expect_true(all(c("motivation_binned", "income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + motivation | income, data=exercise_data))))
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
-flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
+flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, method = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
   
   if (is.null(data)) return(data) 
@@ -213,6 +213,9 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   
   ### convert variables with < 5 categories to ordered factors
   data = flexplot_convert_to_categorical(data, axis)
+  
+  # convert data for logistic regression
+  data = factor.to.logistic(data,outcome,method=method)
   
 
   #### reorder axis 1 it's not already ordered
