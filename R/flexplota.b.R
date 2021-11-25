@@ -4,14 +4,16 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
   
   .run = function() {
+    if (length(self$options$out)>0){
       formula = jamovi_formula(self$options$out, self$options$preds, self$options$given)
       output = list(formula=formula, data=self$data)
       image <- self$results$plot
       image$setState(output)
-		}, 
+    }
+	}, 
 			
 	.plot = function(image, ...){
-	  
+
 	  # return no plot					
 	  if (is.null(image$state)) return(FALSE)		  
 	  

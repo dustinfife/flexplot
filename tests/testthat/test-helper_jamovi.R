@@ -4,9 +4,9 @@ context("helper_jamovi functions")
 
 test_that("jamovi_formula works", {
   expect_equal(jamovi_formula("a", c("b", "c"), c("d", "e")), as.formula(a~b+c|d+e))
-  expect_equal(jamovi_formula("a", c("b", "c"))             , as.formula(a~b+c))
-  expect_equal(jamovi_formula("a")             , as.formula(a~1))
-  expect_equal(jamovi_formula("a ")             , as.formula(`a `~1))
+  expect_equal(jamovi_formula("a", c("b", "c")), as.formula(a~b+c))
+  expect_equal(jamovi_formula("a"), as.formula(a~1))
+  expect_equal(jamovi_formula("a"), as.formula(`a `~1))
 })
 
 test_that("escape_spaces_in_formulas works", {
@@ -29,6 +29,7 @@ test_that("ifelse_null works", {
 test_that("jamovi_plots works", {
   jamovi_plots(speed~agility + superpower, data=avengers, options = list(resid=TRUE))  
   jamovi_plots(speed~agility | superpower, data=avengers, options = list(ghost=TRUE)) 
-  jamovi_plots(speed~agility | superpower, data=avengers) 
+  jamovi_plots(speed~agility | superpower, data=avengers, options = list(line="Loess")) 
+  jamovi_plots(speed~1, data=avengers) 
 })
 

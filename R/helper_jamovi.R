@@ -47,6 +47,7 @@ get_fitted_line = function(line) {
   if (line=="Cubic") return("cubic")	
   if (line=="Robust") return("rlm")
   if (line=="Time Series") return("loess")
+  return("loess")
 }
 
 
@@ -56,11 +57,20 @@ get_fitted_line = function(line) {
 # preds/out can be found from the formula
 jamovi_plots = function(formula, data, options=NULL) {
 
-  # nullify the options that need to be nullified
-  #options = lapply(options, ifelse_null, statement=1==1)
+  # get the predictors/outcome
+  variables = all.vars(formula, unique=FALSE)
+  outcome = variables[1]
+  predictors = variables[-1]
+  
+  ### produce a histo⁄€‹€⁄gram early (so I don't run into errors when I'm asking for
+  ### length of pred™ictors and such)
+  
+  if (length(outcome)==1 & length(predictors) == 0) {
+    return(flexplot(formula, data))
+  }
     
   # go through all the ways I've modified it
-  linemethod = ifelse(is.null(options$line), "histogram", options$line)
+  linemethod = ifelse_null(options$line, options$line=="Time Series", "line", "histogram")
   line       = get_fitted_line(options$line)
   samp       = ifelse(is.null(options$sample), Inf, options$sample*.01*nrow(data))
   se.type    = ifelse_null(options$center,1==1, unlist(strsplit(options$center," + ", fixed=T))[2])
@@ -72,12 +82,7 @@ jamovi_plots = function(formula, data, options=NULL) {
   ghost      = ifelse(is.null(options$ghost), F, options$ghost)
   resid      = ifelse(is.null(options$resid), F, options$resid)
   bins       = ifelse(is.null(options$bins),  3, options$bins)
-  
-  # get the predictors/outcome
-  variables = all.vars(formula, unique=FALSE)
-  outcome = variables[1]
-  predictors = variables[-1]
-  
+
   ### extract given and axis variables
   given.axis = flexplot_axis_given(formula)
   given = given.axis$given
