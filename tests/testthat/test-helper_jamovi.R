@@ -18,6 +18,25 @@ test_that("escape_spaces_in_formulas works", {
   expect_equal(escape_spaces_in_formulas("a b"), "`a b`")
 })  
 
+test_that("get_fitted_line works", {
+  expect_equal(get_fitted_line(NULL),"loess")
+  expect_equal(get_fitted_line("Loess"),"loess")
+  expect_equal(get_fitted_line("Regression"),"lm")
+  expect_equal(get_fitted_line("Logistic"),"logistic")
+  expect_equal(get_fitted_line("Polynomial"),"polynomial")
+  expect_equal(get_fitted_line("Cubic"),"cubic")
+  expect_equal(get_fitted_line("Robust"),"rlm")
+  expect_equal(get_fitted_line("Time Series"),"loess")
+  expect_equal(get_fitted_line("asdfasdf"),"loess")
+})
+
+test_that("jamovi_plots works", {
+  jamovi_plots(y~x+z, data=small, options = list(resid=TRUE))  
+  jamovi_plots(y~x|z, data=small, options = list(ghost=TRUE)) 
+  jamovi_plots(y~x | b , data=small, options = list(line="Regression")) 
+  jamovi_plots(y~1, data=small) 
+})
+
 test_that("ifelse_null works", {
   expect_null(ifelse_null(aasd, a == 1, a, NULL))
   expect_equal(ifelse_null(NULL, a==1, a, 4), 4)
@@ -25,11 +44,3 @@ test_that("ifelse_null works", {
   expect_equal(ifelse_null(a, a == 1, a, NULL), 1)
   expect_equal(ifelse_null(a, a == 2, a, 4), 4)  
 })
-
-test_that("jamovi_plots works", {
-  jamovi_plots(speed~agility + superpower, data=avengers, options = list(resid=TRUE))  
-  jamovi_plots(speed~agility | superpower, data=avengers, options = list(ghost=TRUE)) 
-  jamovi_plots(speed~agility | superpower, data=avengers, options = list(line="Loess")) 
-  jamovi_plots(speed~1, data=avengers) 
-})
-

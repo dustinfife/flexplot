@@ -24,7 +24,6 @@ jamovi_formula = function(out, preds=NULL, given=NULL) {
   return(as.formula(formula))
 }
 
-
 escape_spaces_in_formulas = function(out=NULL) {
   if (is.null(out)) return(NULL)
   escaped_items = lapply(out, function(x) {
@@ -50,11 +49,6 @@ get_fitted_line = function(line) {
   return("loess")
 }
 
-
-# what I want to happen: I just give it a list of options (some empty) and have it return a plot
-# problem: I have options and image state
-#options are: line, sample, center, diff, 
-# preds/out can be found from the formula
 jamovi_plots = function(formula, data, options=NULL) {
 
   # get the predictors/outcome
@@ -133,25 +127,3 @@ ifelse_null = function(object, statement, true_option=object, false_option=NULL)
   if (statement) return(true_option)
   return(false_option)
 }
-
-plot_avp_jamovi = function(options) {
-  ## modify formula to use FIRST, rather than last variable
-  f <- paste0(options$out, "~",paste0(options$given, collapse="+"), "+", paste0(rev(options$preds), collapse="+"))		            	
-  f <- as.formula(f)
-  added.plot(f, data=data, se=options$se,spread=options$se.type, 
-                 method=line, alpha = alpha*.01, 
-                 sample = samp, jitter=c(jittx, jitty), 
-                 bins=bins, suppress_smooth=suppr, related=related)	
-  
-}
-
-reformula_options = function(options) {
-  #### specify all the options
-  linemethod= ifelse(options$line=="Time Series", "line", linemethod = "histogram")
-  line = get_fitted_line(options$line)
-  samp = ifelse(options$sample==100, Inf, options$sample*.01*nrow(image$state$data))
-  se.type = unlist(strsplit(options$center," + ", fixed=T))[2]			
-  formula = image$state$formula
-  data = image$state$data
-}
-
