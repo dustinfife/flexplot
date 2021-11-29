@@ -39,22 +39,11 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			#### add new layer
 			p$layers = c(g, p$layers)
 			
-          }
-          ### choose plot type
-          #if (!is.numeric(data[,self$options$preds[1]]) & )
+    }
+
 		print(p)
 		TRUE
 }
 		
 				
 ))
-
-#fifer2::clear()
-#load("/Users/fife/Dropbox/checkme.Rdat")
-#ls()
-#se.type
-#head(data)
-#self$options$center
-#formula = weight.loss~therapy.type
-
-#p$layers
