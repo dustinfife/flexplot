@@ -37,42 +37,15 @@ anchor.predictions = function(model, reference, shutup=F){
 	included = terms[which(terms %in% reference)]
 	not.included = terms[which(!(terms %in% reference))]	
 
-		##### figure out which are categorical
-	if (length(terms)>1){	
-		factors = names(which(unlist(lapply(d[,terms], is.factor)))); factors.included = factors[factors%in%included]
-	} else {
-		factors = ifelse(is.factor(d[,terms]), terms, NA); factors.included = factors[factors%in%included]
-	}
-	numeric = terms[!(terms %in% factors)]; numeric.included = numeric[numeric%in%included]
+		##### figure out which are categorical/numeric
+  factors = return_factors_names(model)
+  factors.included = factors[factors%in%included]
+  numeric = terms[!(terms %in% factors)]; numeric.included = numeric[numeric%in%included]
 
-		#### average the ones that need to be averaged
-	temp.func = function(x, factors=factors, d=d) { 
-		if (x %in% factors){
-			return(levels(d[,x])[1])
-		} else {
-			return(mean(d[,x], na.rm=T))
-		}
-	}
-	
-	if (length(not.included)>0){
-		averages = lapply(not.included, temp.func, factors=factors, d=d)
-		average.predictions = setNames(as.list(averages), not.included)
-		if (!shutup){
-			message(paste0("\nNote: You didn't specify predictions for:\n      ", paste0(not.included, collapse=","), "\nI'm going to predict the average for quantitative variables and take the first level of categorical predictors.\n\n"))
-		}	
-	} else {
-		average.predictions = NA
-	}
+  average.predictions = return_averages(model, not.included, shutup)
 
 		##### predict the ones that need to be predicted
-	if (length(factors.included)>1){		
-		factor.levs = lapply(d[, factors.included], unique)	
-	} else if (length(factors.included)==1) {
-		factor.levs = list(levels(d[, factors.included[1]]))
-		names(factor.levs)[[1]] = factors.included[1]
-	} else {
-		factor.levs =NULL
-	}
+  factor.levs = return_factor_levels(factors.included, d)
 
 
 	### create function to return +/- 1 standard deviation
@@ -88,6 +61,7 @@ anchor.predictions = function(model, reference, shutup=F){
 	}
 	
 	##### generate final prediction
+	
 	if (length(numeric.preds)>0 & length(factor.levs)>0){
 		if (is.na(average.predictions[1])){
 			final.prediction = expand.grid(c(numeric.preds, factor.levs))

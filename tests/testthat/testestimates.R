@@ -88,3 +88,4 @@ test_that("removing interactions works", {
   mod = lm(kills~agility*speed, data=avengers)
   expect_true(length(remove_interaction_terms(mod))==2)
 })
+
