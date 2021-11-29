@@ -8,47 +8,49 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       
         .run = function() {
         	if (length(self$options$out)>0 & length(self$options$preds)>0){
+        	  
         	  #### write formula for glinmod
-	            formula <- make.formula(self$options$out, self$options$preds)
-	            model = lm(formula, data=self$data)
-              results <- estimates.lm(model, mc=FALSE)
-        	#### s*ve formula/dataset to a file (to be used for plotting)
-        	if (length(self$options$preds)>0){
-			    	output = list(formula=formula, data=self$data)
-			    	image <- self$results$plot
-			    	image$setState(output)
-				
-			    	image2 <- self$results$assumpplot
-			    	image2$setState(output)			
-		  	}
-
-			#### prepare r square output
-			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p, correlation=results$correlation)
-			private$.rsq(rsq_out, preds = self$options$preds)	
-									
-
-			#### prepopulate table
-      table = self$results$glmcat			
+            formula = make.formula(self$options$out, self$options$preds)
+            model = lm(formula, data=self$data)
+            results = estimates.lm(model, mc=FALSE)
             
-            #### format factor summary to look nice
-			f = function(x){ x[is.na(x)] = "-"; x}
-    
-			#### if there are factors, report those results....           
-			if (!is.na(results$factor.summary)){        
-				
-			#### prepare difference scores output
-			diff.out = list(diff = results$difference.matrix)
-			private$.diff(results$difference.matrix)						   
-				
-				#### prepoulate first row with label
-				table$addRow(rowKey=1, values=list(
-					var = "Factors (Estimates reported are means)",
-					levels="",
-					means="",
-					lower="",
-					upper=""
-				))
-					
+          	#### s*ve formula/dataset to a file (to be used for plotting)
+          	if (length(self$options$preds)>0){
+  			    	output = list(formula=formula, data=self$data)
+  			    	image <- self$results$plot
+  			    	image$setState(output)
+  				
+  			    	image2 <- self$results$assumpplot
+  			    	image2$setState(output)			
+  		  	  }
+
+  			#### prepare r square output
+  			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p, correlation=results$correlation)
+  			private$.rsq(rsq_out, preds = self$options$preds)	
+  									
+  
+  			#### prepopulate table
+        table = self$results$glmcat			
+              
+              #### format factor summary to look nice
+  			f = function(x){ x[is.na(x)] = "-"; x}
+      
+  			#### if there are factors, report those results....           
+  			if (!is.na(results$factor.summary)){        
+  				
+  			#### prepare difference scores output
+  			diff.out = list(diff = results$difference.matrix)
+  			private$.diff(results$difference.matrix)						   
+  				
+  				#### prepoulate first row with label
+  				table$addRow(rowKey=1, values=list(
+  					var = "Factors (Estimates reported are means)",
+  					levels="",
+  					means="",
+  					lower="",
+  					upper=""
+  				))
+  					
 
     		#### make output for categorical predictors
 
