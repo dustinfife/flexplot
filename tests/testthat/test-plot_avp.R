@@ -6,34 +6,11 @@ nrow(d)
 
 test_that("added.plot works", {
   set.seed(1212)
-  vdiffr::expect_doppelganger("avp based on formula",
-                              added.plot(weight.loss ~ motivation+therapy.type, data=d))
-  vdiffr::expect_doppelganger("avp for motivation",
-                              added.plot(weight.loss ~ therapy.type + motivation, data=d))
-  vdiffr::expect_doppelganger("multivariate avp",
-                              added.plot(weight.loss ~ therapy.type + motivation, 
-                                         lm_formula = weight.loss~rewards*gender, data=d))
-  vdiffr::expect_doppelganger("multivariate avp 2",
-                              added.plot(weight.loss ~ motivation | therapy.type, 
-                                         lm_formula = weight.loss~rewards*gender, data=d))
-})
-
-test_that("avp plots work with x specified", {
-  set.seed(1212)
-  vdiffr::expect_doppelganger("avp for x=1",
-                              added.plot(weight.loss ~ motivation+therapy.type, data=d, x=1))
-  vdiffr::expect_doppelganger("avp for x='motivation'",
-                              added.plot(weight.loss ~ therapy.type + motivation, data=d, x="therapy.type"))
-})
-
-test_that("avp plots work for glms", {
-  set.seed(1212)
-  #### COMPARE.FITS FUNCTIONS -- linear models
-  data("tablesaw.injury")
-  model.glm = glm(injury~safety + gender, data=tablesaw.injury, family=binomial)
-  vdiffr::expect_doppelganger("avp with glm",
-                              added.plot(injury~attention + safety, data=tablesaw.injury, method="logistic"))
-  
+  vdiffr::expect_doppelganger("avp based on formula"          , avp(y ~ x + a, data=small))
+  vdiffr::expect_doppelganger("avp with lm formula"           , avp(y ~ x + a, lm_formula = y~z, data=small))
+  vdiffr::expect_doppelganger("avp with x specified"          , avp(y ~ x + a, x=1, data=small))
+  vdiffr::expect_doppelganger("avp with x specified as string", avp(y ~ x + a, x="a", data=small))
+  vdiffr::expect_doppelganger("avp with logistic"             , avp(y_bin ~ x, lm_formula = y_bin ~ z, data=small, method="logistic"))
 })
 
 

@@ -41,6 +41,8 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   return(d)
 }
 
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
 ## function to generate predicted differences, standardized
 standardized_differences = function(model1, model2, sigma=TRUE){
   
