@@ -1,8 +1,4 @@
-context("added.plots")
-
-data(exercise_data)
-d = exercise_data
-nrow(d)
+context("avps")
 
 test_that("added.plot works", {
   set.seed(1212)
@@ -12,15 +8,3 @@ test_that("added.plot works", {
   vdiffr::expect_doppelganger("avp with x specified as string", avp(y ~ x + a, x="a", data=small))
   vdiffr::expect_doppelganger("avp with logistic"             , avp(y_bin ~ x, lm_formula = y_bin ~ z, data=small, method="logistic"))
 })
-
-
-
-test_that("mediate_plot works", {
-  #p = mediate_plot(weight.loss~motivation + therapy.type, data=exercise_data)
-  vdiffr::expect_doppelganger("mediate_plot with numeric",
-                              mediate_plot(weight.loss~motivation + health, data=exercise_data))
-  vdiffr::expect_doppelganger("mediate_plot with categorical",
-                              mediate_plot(weight.loss~motivation + therapy.type, data=exercise_data))
-  
-})
-options(warn=0)

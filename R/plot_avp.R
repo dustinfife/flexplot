@@ -63,36 +63,3 @@ added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method=
 	class(plot) <- c("flexplot", class(plot))
 	return(plot)
 }
-
-
-
-# I started working on this to make it super general, but I'm quitting here. 
-
-# p = added.plot(formula, data, lm_formula, method, x, ...)
-# 
-# # identify the last predictor
-# vars = all.vars(formula)
-# interest = vars[length(vars)]
-# 
-# # make dv
-# newf1 = make_avp_formula(formula, lm_formula, x)
-# newf = update(newf1[[2]], as.formula(paste0(all.vars(formula)[1], "~.")))
-# 
-# # fit model
-# mod = lm(fnew, data=data)
-# new_data = data
-# newf1
-# if (check.non.number(data[,all.vars(newf1[[2]])[2]])) {
-#   new_data = data 
-#   new_data[,"residuals"] = predict(mod)
-#   return(p + geom_point(data=new_data, col="blue") +
-#            geom_line(data=new_data, aes(group=1)))
-#   
-# }
-# return(p + geom_abline(data=new_dataslope=coef(mod)[2], intercept=coef(mod)[1]))
-# 
-# 
-# }
-
-
-
