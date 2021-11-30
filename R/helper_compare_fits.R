@@ -37,7 +37,6 @@ get_cforest_variables = function(model, return.type=c("all", "predictors", "resp
   
   response = unlist(strsplit(as.character(vars$response)[2], " + ", fixed=T))
   return(response)
-  
 }
 
 get_terms = function(model) {
@@ -57,7 +56,7 @@ get_terms = function(model) {
   return(list(predictors = predictors, response=response))
 }
 
-check_missing = function(model1, model2, data, variables) {
+check_missing = function(model1, model2=NULL, data, variables) {
 
   ### if they haven't supplied model 2, no need to check
   if (is.null(model2)) return(data)
@@ -65,14 +64,11 @@ check_missing = function(model1, model2, data, variables) {
   n1 = get_model_n(model1)
   n2 = get_model_n(model2)
   
-  
-  
   if (n1<nrow(data) | n2<nrow(data)){
     data = na.omit(data[,variables])
   }
   
   return(data)
-  
 }
 
 get_model_n = function(model) {
