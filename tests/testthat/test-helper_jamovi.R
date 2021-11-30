@@ -31,16 +31,16 @@ test_that("get_fitted_line works", {
 })
 
 test_that("jamovi_plots works", {
-  jamovi_plots(y~x+z, data=small, options = list(resid=TRUE))  
-  jamovi_plots(y~x|z, data=small, options = list(ghost=TRUE)) 
-  jamovi_plots(y~x | b , data=small, options = list(line="Regression")) 
-  jamovi_plots(y~1, data=small) 
+  vdiffr::expect_doppelganger("jamovi_plots avp",   jamovi_plots(y~x+z,   data=small, options = list(resid=TRUE)))
+  vdiffr::expect_doppelganger("jamovi_plots ghost", jamovi_plots(y~x|z,   data=small, options = list(ghost=TRUE)))
+  vdiffr::expect_doppelganger("jamovi_plots line",  jamovi_plots(y~x | b, data=small, options = list(line="Regression")))
+  vdiffr::expect_doppelganger("jamovi_plots histogram", jamovi_plots(y~1, data=small)) 
 })
 
 test_that("ifelse_null works", {
   expect_null(ifelse_null(aasd, a == 1, a, NULL))
-  expect_equal(ifelse_null(NULL, a==1, a, 4), 4)
   a = 1
+  expect_equal(ifelse_null(NULL, a==1, a, 4), 4)
   expect_equal(ifelse_null(a, a == 1, a, NULL), 1)
   expect_equal(ifelse_null(a, a == 2, a, 4), 4)  
 })
