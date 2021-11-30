@@ -30,13 +30,6 @@ test_that("get_fitted_line works", {
   expect_equal(get_fitted_line("asdfasdf"),"loess")
 })
 
-test_that("jamovi_plots works", {
-  vdiffr::expect_doppelganger("jamovi_plots avp",   jamovi_plots(y~x+z,   data=small, options = list(resid=TRUE)))
-  vdiffr::expect_doppelganger("jamovi_plots ghost", jamovi_plots(y~x|z,   data=small, options = list(ghost=TRUE)))
-  vdiffr::expect_doppelganger("jamovi_plots line",  jamovi_plots(y~x | b, data=small, options = list(line="Regression")))
-  vdiffr::expect_doppelganger("jamovi_plots histogram", jamovi_plots(y~1, data=small)) 
-})
-
 test_that("ifelse_null works", {
   expect_null(ifelse_null(aasd, a == 1, a, NULL))
   a = 1
