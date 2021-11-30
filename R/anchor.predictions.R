@@ -49,41 +49,10 @@ anchor.predictions = function(model, reference, shutup=F){
 
 
 	### create function to return +/- 1 standard deviation
-	f = function(x){return(c(mean(x, na.rm=T) + sd(x, na.rm=T), mean(x, na.rm=T)-sd(x, na.rm=T)))}
-			
-	if (length(numeric.included)>1){
-		numeric.preds = lapply(d[,numeric.included], f)
-	} else if (length(numeric.included) ==1 & length(unique(d[,numeric.included]))>5){
-		numeric.preds = list(f(d[,numeric.included]))
-		names(numeric.preds)[[1]] = numeric.included
-	} else {
-		numeric.preds=NULL
-	}
+	numeric.preds = generate_numeric_predictions(numeric, d)
 	
-	##### generate final prediction
-	
-	if (length(numeric.preds)>0 & length(factor.levs)>0){
-		if (is.na(average.predictions[1])){
-			final.prediction = expand.grid(c(numeric.preds, factor.levs))
-		} else {
-			final.prediction = expand.grid(c(numeric.preds, factor.levs, average.predictions))
-		}
-	} else if (length(numeric.preds)>0){
-		if (is.na(average.predictions[1])){
-			final.prediction = expand.grid(c(numeric.preds))
-		} else {
-			final.prediction = expand.grid(c(numeric.preds, average.predictions))
-		}
-	} else if (length(factor.levs)>0){
-		if (is.na(average.predictions[1])){
-			final.prediction = expand.grid(c(factor.levs))
-		} else {
-			final.prediction = expand.grid(c(factor.levs, average.predictions))
-		}
-		
-	} else {
-	  final.prediction = NULL
-	}
+	##### generate predictors for final prediction
+	final.prediction = generate_grid_predictions(numeric.preds, factor.levs, average.predictions)
 	
 	##### now predict
 	final.prediction$prediction = predict(model, final.prediction, type="response")
