@@ -22,7 +22,6 @@ test_that("choose_bins works", {
   expect_equal(choose_bins(1:3, 1:3), 3)
 })
 
-
 test_that("prep.breaks works", {
   expect_output(print(prep.breaks(variable = "satisfaction", data = relationship_satisfaction, breaks=NULL, bins=3)), "46.66667")
   expect_output(print(prep.breaks(variable = "satisfaction", data = relationship_satisfaction, breaks=c(20, 60))), "-7  20  60 117")
@@ -46,10 +45,6 @@ test_that("bin_variables_loop works", {
               expect_equal("0-1")
   expect_equal(levels(bin_variables_loop(1, d, "a", 3, labels = NULL, breaks = c(1,5,8)))[2], "5")
 })
-
-# test_that("bin_variables works", {
-#   bin_variables()
-# })
 
 test_that("label_bins_loop works", {
   expect_equal(label_bins_loop(1, c(-3.684, -1, 0, 1)), "(-3.7)-(-1)")
@@ -75,3 +70,4 @@ test_that("round_digits works", {
   expect_true(round_digits(.34)==2)  
   expect_true(round_digits(3.4)==1)  
 })
+
