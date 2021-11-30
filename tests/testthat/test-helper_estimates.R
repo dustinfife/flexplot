@@ -31,3 +31,8 @@ test_that("anchor.predictions works for categorical predictors", {
   expect_equal(anchor.predictions(linear.model, c("therapy.type", "gender"))$prediction[1],
                4.3475, tolerance = .002)
 })
+
+test_that("bf.bif works", {
+  expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small)), 3.0453, tol = .01)
+  expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small), invert=T), 1/3.0453, tol = .01)
+})
