@@ -10,7 +10,7 @@ test_that("return_averages works", {
   expect_equal(return_averages(model, "a", TRUE), list(a="a"))
   expect_equal(return_averages(model, "z", TRUE)$z, -.2065, tol=.01)
   expect_message(return_averages(model, "a", FALSE))
-  expect_true(is.na(return_averages(model, character(0))))
+  expect_null(return_averages(model, character(0)))
 })
 
 test_that("return_factor_levels works", {
@@ -23,3 +23,12 @@ test_that("return_plus_minus_one_sd works", {
   expect_equal(return_plus_minus_one_sd(1:10)[1], 8.52765, tol=.01)
   expect_equal(length(return_plus_minus_one_sd(1:10)), 2)
 })
+
+test_that("anchor.predictions works for categorical predictors", {
+  linear.model = lm(weight.loss~health + gender, data= exercise_data)
+  expect_message(anchor.predictions(linear.model, "gender")$prediction[1])
+  linear.model = lm(weight.loss~therapy.type + gender, data= exercise_data)
+  expect_equal(anchor.predictions(linear.model, c("therapy.type", "gender"))$prediction[1],
+               4.3475, tolerance = .002)
+})
+
