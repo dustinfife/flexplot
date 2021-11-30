@@ -31,4 +31,3 @@ test_that("anchor.predictions works for categorical predictors", {
   expect_equal(anchor.predictions(linear.model, c("therapy.type", "gender"))$prediction[1],
                4.3475, tolerance = .002)
 })
-
