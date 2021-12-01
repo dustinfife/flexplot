@@ -83,91 +83,100 @@ get_model_n = function(model) {
   
 }
 
-### function to generate prediction matrix spanning the range of the data
-generate_predictors = function(data, predictors, model_terms, num_points, mod_class) {
-
-  #### create random column just to make the applies work (yeah, it's hacky, but it works)
-  data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)
-  predictors = c(predictors, "reject", "reject2")
+get_variable_types = function(predictors, data) {
   
   #### get variable types
-  numb = names(which(unlist(lapply(data[,predictors], is.numeric))))
-  cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))
-  make_cat = names(which(unlist(lapply(data[,predictors], function(x) length(unique(x))<21))))
-    #### make_cat was there to tell the computer to generate prediction for UNIQUE variables, rather than a range
-    #### but it also converts it to categorical variables, which makes predict fail. The fix falls right before "return"
-  # remove a numb variable if it was found through make_cat
-  if (length(numb)>2 & sum(numb[1:(length(numb)-2)] %in% make_cat)>0) {
-    byby = which(numb[1:(length(numb)-2)] %in% make_cat)
-    number_me_back = numb[byby]
-    numb = numb[-byby] 
-  }
-  make_cat = unique(c(cat, make_cat))
+  cat      = names(which(unlist(lapply(data[,predictors], function(x) (!is.numeric(x)) | length(unique(x))<21)) ))
+  numb     = predictors[predictors %!in% cat]
+  list(cat=cat, numb=numb)
+}
+
+# return_quadriture_points = function(variables, model, num_points) {
+#   ### make quadriture points smaller if they're doing RF
+#   is_random_forest = class(model)[1] == "RandomForest"
+#   quad_points_first = ifelse(is_random_forest & num_points == 50, 10, 8)
+#   quad_points_rest  = ifelse(is_random_forest & num_points == 50, 8, 8)
+#   
+#   min.max$size = c(10, rep(8, nrow(min.max)-1))
+# } else {
+#   min.max = data.frame(var.mins, var.max); 
+#   min.max$size = c(num_points, rep(, nrow(min.max)-1))
+# }  
+# }
+
+# model = lm(y~a + x + z + w_a, data=small)
+# model_terms = NULL
+# predictors = c("a", "w_a")
+# data = NULL
+# return.preds = F
+### function to generate prediction matrix spanning the range of the data
+generate_predictors = function(model, data = NULL, predictors=NULL, model_terms=NULL, num_points = 50, return.preds=F,...) {
+  
+  if (is.null(predictors))  predictors = all.vars(formula(model))[-1]
+  if (is.null(model_terms)) model_terms = all.vars(formula(model))[-1]
+  if (is.null(data))        data = extract_data_from_fitted_object(model)
+
+  variable_types = get_variable_types(predictors, data)
+  cat  = variable_types$cat
+  numb = c(variable_types$numb)
+  
+  # create matrix of min/max for each numeric variable
+  var.mins = apply(data[, numb, drop = FALSE], 2, min, na.rm=T)
+  var.max =  apply(data[, numb, drop = FALSE], 2, max, na.rm=T)  
+  min.max = data.frame(var.mins, var.max) 
+  
+  # set quadriture points to size of bins
+  if ("bins" %in% names(list(...))) bin_size = list(...)[['bins']] else bin_size = 3
   
   ##### make "quadriture" points for quant variables
-  var.mins = apply(data[, numb], 2, min, na.rm=T)
-  var.max = apply(data[, numb], 2, max, na.rm=T)  
-  
-  ### make quadriture points smaller if they're doing RF
-  
-  if (mod_class == "RandomForest" & num_points == 50){
-    min.max = data.frame(var.mins, var.max); min.max$size = c(10, rep(8, nrow(min.max)-1))
-  } else {
-    min.max = data.frame(var.mins, var.max); min.max$size = c(num_points, rep(max(3,round(num_points/4)), nrow(min.max)-1))
-  }  
-  f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}
-  min.max = as.list(apply(min.max, 1, f))
+  # if they're asking to return the predictions, don't limit quadriture points for the non-x-axis variables
+  # otherwise, limit it to the number of bins
+  min.max$size = numb %>% 
+    purrr::map_dbl(function(x) {
+                    ifelse(return.preds, min(num_points, length(unique(x))), bin_size)
+                  })
+  if (length(numb)>0) min.max$size[1] = min(length(unique(data[,numb[1]])), num_points)
+
+  # now convert that list to a list of quadriture points
+  f = function(x, d){seq(from=d[x,1], to=d[x,2], length.out=d[x,3])}
+  min.max = 1:nrow(min.max) %>% 
+    purrr::map(function(x) f(x, min.max))
+  names(min.max) = numb
   
   #### get unique values for categorical vars
-  if (length(make_cat)==1){
-    un.vars = lapply(data[make_cat], unique)    	
-  } else {
-    ## if the number of unique values is < 50, just use the unique values
-    un.vars =lapply(data[,make_cat], unique); names(un.vars) = make_cat
-  }
-  
+  un.vars = lapply(data[,cat, drop=FALSE], unique)    	
   
   #### combine into one dataset
   all.vars = c(min.max, un.vars)    
-  #### get rid of extra variables
-  tot.vars = length(predictors)
-  rejects = grep("reject", names(all.vars))
-  all.vars = all.vars[-rejects]
   all.vars = lapply(all.vars, function(x) x[!is.na(x)])
   pred.values = expand.grid(all.vars)
 
-  #### if it's not in model 1:
-  #### input the mean (if numeric) or a value (if categorical)
-  # but first check whether its a RE model
-  if (length(which(!(model_terms %in% predictors)))>0 ){
-    not.in.there = model_terms[which(!(model_terms %in% predictors))]
-    for (i in 1:length(not.in.there)){
-      if (is.numeric(data[,not.in.there[i]])){
-        message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))
-        pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)
-      } else {
-        # this had issues when a random effect (as factor) was
-        val = unique(as.character(data[[not.in.there[i]]]))[1]
-        #only display the message if it's not a glmer mod
-        if (!(mod_class %in% c("lmerMod", "glmerMod"))) {
-          message(paste0("Note: You didn't choose to plot ", 
-                       not.in.there[i], " so I am inputting '", val, "'\n"))
-        }  
-        pred.values[,not.in.there[i]] = val
-      }
-    }
-  }
-
-  if (exists("number_me_back")) {
-    for (i in 1:length(number_me_back)) {
-      pred.values[,number_me_back[i]] = as.numeric(as.character(pred.values[,number_me_back[i]]))
-      attr(pred.values[,number_me_back[i]], "out.attrs") <- NULL
-    }
-  }
-
+  
+  # if all variables in model are in the formula, we're done
+  if (all(model_terms %in% predictors)) return(pred.values)
+  
+  # otherwise, we need to set some values to the mean (or a random category level)
+  not.in.there = model_terms[which(!(model_terms %in% predictors))]
+  predicted_values = not.in.there %>% purrr::map(return_predicted_value_for_missing_variables, data=data, model=model)
+  pred.values[,not.in.there] = predicted_values
   return(pred.values)
 }
 
+return_predicted_value_for_missing_variables = function(variable, data, model) {
+  if (is.numeric(variable)) {
+    message(paste0("Note: You didn't choose to plot ", variable, " so I am inputting the median"))
+    return(median(data[,variable], na.rm=T))
+  }
+  
+  val = unique(as.character(data[[variable]]))[1]
+  #only display the message if it's not a glmer mod
+  if (!(class(model)[1] %in% c("lmerMod", "glmerMod"))) {
+    message(paste0("Note: You didn't choose to plot ", 
+                   variable, " so I am inputting '", val, "'"))
+  }  
+  return(val)
+  
+}
 
 generate_predictions = function(model, re, pred.values, pred.type, report.se) {
 

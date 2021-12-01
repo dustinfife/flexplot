@@ -63,16 +63,11 @@ compare.fits = function(formula, data, model1, model2=NULL,
     stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
   }
   
-  
-
   ##### extract variable names from FORMULA
   variables = all.vars(formula)
   outcome = variables[1]
   predictors = variables[-1]
   
-
-  
-
   ##### make sure they're putting the same variables from formula in terms
   if (!(all(predictors %in% testme))){
     stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%testme)], collapse=",")))
@@ -82,15 +77,15 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (!(all(predictors %in% names(data)))){
     stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
   }	
-  
-  pred.values = generate_predictors(data, predictors, testme, num_points, class(model1)[1])
+
+  pred.values = generate_predictors(model1, data=data, predictors = predictors, model_terms = testme, num_points=num_points, return.preds)
   # for intercept only models
   if (nrow(pred.values)==0) {
     pred.values = data.frame("(Intercept)" = 1)
   }
 
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
-  
+  head(pred.mod1)
   ### there's no fixed effect if we don't have these lines
   model1.type = class(model1)[1]
   if (model1.type == "lmerMod" | model1.type == "glmerMod"){
@@ -137,7 +132,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     prediction.model = pred.mod1
     prediction.model = cbind(pred.values, prediction.model)
   }
-  
+  head(prediction.model)
   
   #### eliminate those predictions that are higher than the range of the data
   if (!is.factor(data[,outcome])){
@@ -169,6 +164,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     final_geom = return_lims_geom(outcome, data, model1)
     #when we have an intercept only model
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
+    head(prediction.model)
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
   }	
