@@ -103,9 +103,10 @@ test_that("points.func works",{
 })
 
 test_that("factor.to.logistic works", {
-  expect_error(factor.to.logistic(exercise_data, "therapy.type", method="logistic"))
-  expect_equal(length(levels(factor.to.logistic(exercise_data, "gender", T, method="logistic"))), 2)
-  expect_equal(levels(factor.to.logistic(exercise_data, "gender", method="logistic")$gender), NULL)  
+  expect_equal(levels(factor.to.logistic(exercise_data, "therapy.type")$therapy.type), c("control", "cog", "beh"))
+  expect_equal(length(levels(factor.to.logistic(exercise_data, "gender", T))), 2)
+  expect_equal(unique(factor.to.logistic(exercise_data, "gender")$gender), c(0,1))  
+  expect_equal(unique(factor.to.logistic(small, "y_bin")$y_bin), c(1,0))  
 })
 
 test_that("fit.function works for numeric predictors", {
