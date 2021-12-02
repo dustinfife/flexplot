@@ -215,7 +215,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   data = flexplot_convert_to_categorical(data, axis)
   
   # convert data for logistic regression
-  data = factor.to.logistic(data,outcome,method=method)
+  data = factor.to.logistic(data,outcome)
   
 
   #### reorder axis 1 it's not already ordered

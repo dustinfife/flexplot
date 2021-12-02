@@ -112,7 +112,7 @@ flexplot = function(formula, data=NULL, related=F,
 	#d = exercise_data
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
 	#ghost.reference = list(income=90000)
-
+  
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
   data = ff$data; formula =ff$formula
@@ -131,6 +131,11 @@ flexplot = function(formula, data=NULL, related=F,
                                     related=related,  
                                     jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
                                     alpha=alpha, prediction=prediction)
+  
+  # extract original names of dv (for logistic, prior to making it continuous)
+  outcome = varprep$outcome
+  data = varprep$data
+  if (length(unique(data[,outcome]))==2) logistic_labels = unique(data[,outcome])
 
   ### make modifications to the data
 	data = with(varprep, 
@@ -241,9 +246,11 @@ flexplot = function(formula, data=NULL, related=F,
 	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
 	
 	# convert labels for Y axis for logistic
-	if (method=="logistic" & !is.numeric(data[,outcome])){
-	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T, method='logistic'))")
+	browser()
+	if (length(unique(data[,outcome])) == 2){
+	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", logistic_labels[1], "', '", logistic_labels[2], "')", ")")
 	}
+	
 	### if second axis is numeric, replace axis[2] with variable that is binned
   if (length(axis)>1){
     if (is.numeric(data[,axis[2]])){

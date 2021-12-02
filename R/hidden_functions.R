@@ -319,27 +319,19 @@ points.func = function(axis.var, data, jitter){
 
 
 	#### this function converts a binary variable to a 1/0 for logistic regression
-factor.to.logistic = function(data, outcome, labels=F, method = NULL){
+factor.to.logistic = function(data, outcome, labels=F){
   
-  if (is.null(method)) return(data)
-  if (method != "logistic") return(data)
+  levels_dv = length(unique(data[,outcome]))
   
-  #### check if they have 2 unique values
-  if (length(unique(data[,outcome]))!=2){
-    stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
-  }	
+  # return if it's not logistic
+  if (levels_dv != 2) return(data)
+  if (labels) return(unique(data[,outcome]))
   if (is.numeric(data[,outcome])) return(data)
-  
-  ### now do the converstion
-  if (labels){
-    unique(data[,outcome])
-  } else {
-    
-    data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=unique(data[,outcome]), labels=c(0,1))))
-    #data %>% dplyr::mutate(!!outcome := as.numeric(as.character(factor(!!as.name(outcome), levels=levels(!!as.name(outcome)), labels=c(0,1))))) 
-    return(data)
-  }
-  
+  # at this point it's categorical, has two levels, but doesn't necessarily have "logistic" as a method  
+  ### now do the conversion
+  data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=unique(data[,outcome]), labels=c(0,1))))
+  return(data)
+
 }
 
 ##' @importFrom MASS rlm	
