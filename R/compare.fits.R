@@ -138,7 +138,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
     prediction.model = cbind(pred.values, prediction.model)
   }
   
-  
   #### eliminate those predictions that are higher than the range of the data
   if (!is.factor(data[,outcome])){
     min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)
@@ -159,12 +158,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (return.preds){
     prediction.model
   } else {
-    ### for logistic, add one to the predictions
-    if (model1.type == "glm" ) {
-      if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
-        prediction.model$prediction = prediction.model$prediction + 1
-      }
-    } 
+    # at one time, I was adding one to the predictions. WHY??????
+    # ### for logistic, add one to the predictions
+    # if (model1.type == "glm" ) {
+    #   if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
+    #     prediction.model$prediction = prediction.model$prediction + 1
+    #   }
+    # } 
 
     final_geom = return_lims_geom(outcome, data, model1)
     #when we have an intercept only model

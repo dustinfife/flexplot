@@ -246,7 +246,6 @@ flexplot = function(formula, data=NULL, related=F,
 	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
 	
 	# convert labels for Y axis for logistic
-	browser()
 	if (length(unique(data[,outcome])) == 2){
 	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", logistic_labels[1], "', '", logistic_labels[2], "')", ")")
 	}
