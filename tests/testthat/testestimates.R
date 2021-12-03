@@ -94,3 +94,4 @@ test_that("generate_grid_predictions", {
   expect_equal(nrow(generate_grid_predictions(list(a=1:3, b=4:5), list(c = c('a', 'b')), NULL)), 12)
    expect_null(generate_grid_predictions(NULL, NULL, NULL))
 })
+

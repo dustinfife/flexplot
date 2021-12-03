@@ -84,7 +84,9 @@ get_model_n = function(model) {
 }
 
 get_variable_types = function(predictors, data) {
-  
+  # with related t, formula becomes difference~1, (no predictors). 
+  # need to recognize that and return something different
+  if (length(predictors)==0) return(list(cat=character(0), numb=character(0)))
   #### get variable types
   cat      = names(which(unlist(lapply(data[,predictors, drop=FALSE], function(x) (!is.numeric(x)) | length(unique(x))<21)) ))
   numb     = predictors[predictors %!in% cat]
@@ -137,7 +139,12 @@ generate_predictors = function(model, data = NULL, predictors=NULL, model_terms=
   
   # otherwise, we need to set some values to the mean (or a random category level)
   not.in.there = model_terms[which(!(model_terms %in% predictors))]
-  predicted_values = not.in.there %>% purrr::map(return_predicted_value_for_missing_variables, data=data, model=model)
+  predicted_values = not.in.there %>% purrr::map(return_predicted_value_for_missing_variables, 
+                                                 data=data, model=model)
+  # map converts all numbers to characters, for some reason.
+  # convert them back to numbers
+  which_are_numeric = sapply(data[,not.in.there], is.numeric)
+  predicted_values[which_are_numeric] = as.numeric(predicted_values[which_are_numeric])
   pred.values[,not.in.there] = predicted_values
   return(pred.values)
 }
