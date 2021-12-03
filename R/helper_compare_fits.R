@@ -168,7 +168,7 @@ create_ranges_numberic_variables = function(data, numb, num_points, return.preds
   min.max = data.frame(var.mins, var.max) 
   
   # set quadriture points to size of bins
-  if ("bins" %in% names(list(...))) bin_size = list(...)[['bins']] else bin_size = 3
+  if ("bins" %in% names(list(...))) bin_size = list(...)[['bins']] else bin_size = 10
   
   ##### make "quadriture" points for quant variables
   # if they're asking to return the predictions, don't limit quadriture points for the non-x-axis variables
