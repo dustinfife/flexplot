@@ -143,7 +143,7 @@ generate_predictors = function(model, data = NULL, predictors=NULL, model_terms=
                                                  data=data, model=model)
   # map converts all numbers to characters, for some reason.
   # convert them back to numbers
-  which_are_numeric = sapply(data[,not.in.there], is.numeric)
+  which_are_numeric = sapply(data[,not.in.there, drop=FALSE], is.numeric)
   predicted_values[which_are_numeric] = as.numeric(predicted_values[which_are_numeric])
   pred.values[,not.in.there] = predicted_values
   return(pred.values)
