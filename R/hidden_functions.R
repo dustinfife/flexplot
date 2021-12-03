@@ -1,5 +1,6 @@
 #' @importFrom rlang ":="
 add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
+  
   # variable isn't binned/summarized!
   are_any_binned = grep("_binned", names(plot$data))
   if (length(are_any_binned)==0) return(d)
@@ -10,10 +11,23 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   gg_dataset = plot$data
   
   # extract breakpoints from plot data, then break the new one
-  regex_cmd = gsub("(-?[0-9]*.?[0-9]*)-(-?[0-9]*.?[0-9]*)", "\\2", gg_dataset[[binned_var]])
+  regex_cmd_one = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\1", gg_dataset[[binned_var]])
+  regex_cmd_two = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\2", gg_dataset[[binned_var]])
+  regex_cmd = c(regex_cmd_one, regex_cmd_two)
+  regex_cmd = gsub("[)]", "", gsub("[(]", "", regex_cmd))
+  break_vals = sort(as.numeric(unique(regex_cmd)))
+  rep = gg_dataset[,variable_to_be_binned]>max(break_vals)
+  gg_dataset[rep,variable_to_be_binned] = max(break_vals)-.0001
+  rep = gg_dataset[,variable_to_be_binned]<min(break_vals)
   
-  break_vals = as.numeric(sort(unique(regex_cmd)))
+  gg_dataset[rep,variable_to_be_binned] = min(break_vals)+.0001  
   breaks = prep.breaks(variable_to_be_binned, gg_dataset, breaks=break_vals)
+  
+  # replace observations > max with the max
+  rep = d[,variable_to_be_binned]>max(break_vals)
+  d[rep,variable_to_be_binned] = max(break_vals)-.0001
+  rep = d[,variable_to_be_binned]<min(break_vals)
+  d[rep,variable_to_be_binned] = min(break_vals)+.0001  
   d[[binned_var]] = bin.me(variable_to_be_binned, d, breaks=breaks)
   
   # create a new string of terms that needs to be summarized by
@@ -26,6 +40,8 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
     summarize(!!rlang::sym(outcomevar) := mean(!!(rlang::sym(outcomevar))))
   return(d)
 }
+
+'%!in%' <- function(x,y)!('%in%'(x,y))
 
 ## function to generate predicted differences, standardized
 standardized_differences = function(model1, model2, sigma=TRUE){
@@ -62,17 +78,15 @@ custom.labeler = function(x){
 
 #### make sure all variables are in data
 check_all_variables_exist_in_data = function(variables, data) {
-  if (is.null(variables)) {
-    return(NULL)
-  }
+  
+  if (is.null(variables)) return(NULL)
+  
   missing.preds = variables[which(!(variables %in% names(data)))]
   if (length(missing.preds)>0){
     stop(paste0("One or more of your predictor variables: ", paste0(missing.preds, collapse=","), " are missing. Did you specify the right dataset and spell the variables correctly?"))
   }
   return(NULL)
 }  
-
-
 
 extract_data_from_fitted_object = function(object) {
   if (class(object)[1]=="lm" | class(object)[1]=="glm" | class(object)[1] == "rlm") return(object$model)
@@ -87,11 +101,14 @@ extract_data_from_fitted_object = function(object) {
     data = eval(getCall(object)$data)
     return(data[,vars])
   }
+  
+  if (class(object)[1] == "lmerMod") {
+    data = model.frame(object)
+    return(data)
+  }
   # this should work for the rest?? But it won't be in the right order!
   return(eval(getCall(object)$data))
 }
-
-
 
 check_nested = function(model1, model2) {
   #### collect terms
@@ -124,7 +141,6 @@ get_predictors = function(model) {
   }
 }
 
-
 ## function that does nested model comparisons on a single fitted model
 nested_model_comparisons = function(object){
   
@@ -150,8 +166,6 @@ check.non.number = function(x){
   return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
   return.bool
 }
-
-
 
 variable_types = function(variables, data, return.names=F){
   if (length(variables)>0){
@@ -208,17 +222,10 @@ make_flexplot_formula = function(predictors, outcome, data){
   
 }
 
-
-# tested
-extract_random_term = function(object) {
-  #### extract formula
-  form = as.character(formula(object))[3]
-  
-  #### identify random effects
-  term.re = trimws(substr(form, regexpr("\\|", form)[1]+1, regexpr("\\)", form)[1]-1))		
-  return(term.re)
+remove_nonlinear_terms = function(terms) {
+  return(grep("[/^:]", terms, value=T, invert=T))
 }
-
+# tested
 # tested
 test_same_class = function(model1, model2) {
   # if neither are lme4
@@ -234,120 +241,14 @@ test_same_class = function(model1, model2) {
 }
 
 
-### return dataset containing factorized random effects (tested)
-subset_random_model = function(object, d, samp.size = 3) {
-  
-  if (class(object)[1] == "lmerMod") {
-    
-    ## get random term
-    term.re = extract_random_term(object)
-    
-    #### randomly sample the re terms and convert to numeric
-    unique.terms = unique(d[[term.re]])
-    samp = sample(unique.terms, size=min(samp.size, length(unique.terms)))
-    k = d[d[[term.re]]%in%samp,]; k[[term.re]] = as.factor(k[[term.re]])
-    return(k)
-  }
-  
-  return(d)
-}
-
-
-prep.breaks = function(variable, data, breaks=NULL, bins=3){
-
-		breaks = unlist(breaks)	
-		if (is.null(bins)){bins=3}
-
-		if (is.null(breaks)){
-			quants = quantile(data[[variable]], seq(from=0, to=1, length.out=bins+1), na.rm=T)
-			breaks = quants[!duplicated(quants)]
-		} else {			
-			#### give min as breaks, if the user doesn't
-			if (min(breaks)>min(data[[variable]], na.rm=T)){
-				breaks = c(min(data[[variable]], na.rm=T), breaks)
-			}
-			if (max(breaks,na.rm=T)<max(data[[variable]], na.rm=T)){
-				breaks = c(breaks, max(data[[variable]], na.rm=T))
-			}	
-		}
-		
-		return(breaks)
-		
-}
-
-
-bin.me = function(variable, data, bins=NULL, labels=NULL, breaks=NULL, check.breaks=TRUE, return.breaks=FALSE){
-
-
-	### if they come as a list, unlist them
-	if (is.list(breaks)){
-		breaks = unlist(breaks)
-	}
-	if (is.list(labels)){
-		labels = unlist(labels)
-	}
-	
-	#### if they provide labels or breaks, choose the number of bins
-	if (!is.null(labels)){
-		bins = length(labels)
-	} else if (!is.null(breaks)){
-		bins = length(breaks)+1
-	#### otherwise, set bins to 3
-	} else {
-		bins = 3
-	}
-
-
-	#### if they supply breaks, make sure there's a good min/max value	
-	if (!is.null(breaks) & check.breaks){
-		breaks = prep.breaks(variable, data, breaks)
-	} 
-
-  ### if we don't have breaks at this point, make some
-  if (is.null(breaks)){
-    breaks = quantile(as.numeric(data[[variable]]), seq(from=0, to=1, length.out=bins+1), na.rm=T)
-  }
-  
-	### if they don't provide labels, make them easier to read (than R's native bin labels)\
-	if (is.null(labels)){
-		labels = 1:(length(breaks)-1)		
-		for (i in 1:(length(breaks)-1)){
-		  digs1 = round_digits(breaks[i])
-		  digs2 = round_digits(breaks[i+1])
-			labels[i] = paste0(round(breaks[i], digits=digs1), "-", round(breaks[i+1], digits=digs2))
-		}
-	}
-	
-
-
-	if (return.breaks){
-		return(breaks)
-	} else {
-		binned.variable = cut(as.numeric(data[[variable]]), breaks, labels= labels, include.lowest=T, include.highest=T)
-		binned.variable
-	}
-	
-}
-
-round_digits = function(breaks) {
-  if (abs(breaks<.0001)) return(6)
-  if (abs(breaks<.001)) return(5)
-  if (abs(breaks<.01)) return(4)
-  if (abs(breaks<.1)) return(3)
-  if (abs(breaks<1)) return(2)
-  return(1)
-}
-
 
 	### create custom function to sample data
 sample.subset = function(sample, data){
 	if (sample!=Inf){
-		m = data[sample(1:nrow(data), size=sample),]
-		
-	} else {
-		m = data
-	}
-	return(m)
+		m = data[sample(1:nrow(data), size=min(sample, nrow(data))),]
+		return(m)
+	} 
+	return(data)
 }
 
 	### if they don't want raw data, just make alpha = 0
@@ -418,39 +319,21 @@ points.func = function(axis.var, data, jitter){
 
 
 	#### this function converts a binary variable to a 1/0 for logistic regression
-factor.to.logistic = function(data, outcome, labels=F){
+factor.to.logistic = function(data, outcome, method=NULL, labels=F){
   
-  #### check if they have 2 unique values
-  if (length(unique(data[,outcome]))!=2){
-    stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
-  }	
+  levels_dv = length(unique(data[,outcome]))
   
-  ### now do the converstion
-  if (labels){
-    unique(data[,outcome])
-  } else {
-    
-    data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=unique(data[,outcome]), labels=c(0,1))))
-    #data %>% dplyr::mutate(!!outcome := as.numeric(as.character(factor(!!as.name(outcome), levels=levels(!!as.name(outcome)), labels=c(0,1))))) 
-    return(data)
-  }
-  
+  # return if it's not logistic
+  if (levels_dv != 2) return(data)
+  if (labels) return(unique(data[,outcome]))
+  if (is.numeric(data[,outcome])) return(data)
+  if (method != "logistic") return(data)
+  # at this point it's categorical, has two levels, but doesn't necessarily have "logistic" as a method  
+  ### now do the conversion
+  data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=unique(data[,outcome]), labels=c(0,1))))
+  return(data)
+
 }
-
-
-# factor_to_logistic_x = function(x){
-#   
-#   #### check if they have 2 unique values
-#   if (length(unique(x))!=2){
-#     stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
-#   }	
-#   
-#   ### now do the converstion
-#     
-#   x = as.numeric(as.character(factor(x, levels=levels(x), labels=c(0,1))))
-#   x
-# }
-
 
 ##' @importFrom MASS rlm	
 #### identify the correct "fit"

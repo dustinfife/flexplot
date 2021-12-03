@@ -35,9 +35,6 @@ draft             : no
 
 documentclass     : "apa6"
 classoption       : "man"
-output            : 
-  papaja::apa6_pdf:
-    keep_tex: TRUE
 vignette: >
   %\VignetteEngine{knitr::knitr}
   %\VignetteIndexEntry{Flexplot: Graphically Based Data Analysis}
@@ -50,14 +47,13 @@ knitr::knit_hooks$set(chunk = function(x, options) {
   x <- def.chunk.hook(x, options)
   ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
 })
-#' @import papaja tidyverse
-library("papaja")
+#' @import tidyverse
 ```
 
 ```{r analysis-preferences, message=FALSE, warning=FALSE}
 # Seed for random number generation
 set.seed(42)
-knitr::opts_chunk$set(eval=TRUE, cache=TRUE)
+knitr::opts_chunk$set(eval=TRUE, cache=FALSE)
 require(tidyverse)
 ```
 
@@ -599,14 +595,14 @@ There's little doubt that psychology is undergoing a methodological revolution. 
 
 Traditionally, producing graphs has been a cumbersome and extraneous procedure, quite divorced from the actual analyses. In this paper, I have introduced `flexplot`. `flexplot` aims to automate much of the graphical analysis that accompany data analysis. These graphs, which are based on scientifically-derived principles of visual perception, promise to promote sound data analysis and enhance data decision-making. 
 
-To use `flexplot`, users can download and install the R package through github, at www.github.com/dustinfife/flexplot. Alternatively, a point-and-click version of flexplot can be accessed via JASP (through the visual modeling module) or through Jamovi (through the flexplot module). For additional information on using flexplot, visit the following YouTube playlist: https://bit.ly/2Qn4yoi
+To use `flexplot`, users can download and install the R package through github, at https://github.com/dustinfife/flexplot. Alternatively, a point-and-click version of flexplot can be accessed via JASP (through the visual modeling module) or through Jamovi (through the flexplot module). For additional information on using flexplot, visit the following YouTube playlist: https://www.youtube.com/playlist?list=PL8F480DgtpW8cFY8diRWcNeq6bsleAoe_
 
 
 \newpage
 
 # References
 ```{r create_r-references}
-r_refs(file = "r-references.bib")
+knitr::write_bib(c(.packages(), "bookdown"), "r-references.bib")
 ```
 
 \begingroup

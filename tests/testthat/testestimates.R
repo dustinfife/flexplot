@@ -62,6 +62,7 @@ test_that("estimates from generalized linear models", {
   mod = glm(rape~ses , data=d, family=binomial)
   expect_equal(estimates(mod)$raw.coefficients[1], -6.45)
   
+  
   mod = glm(convictions~ses + empathy + depression, data=d, family=poisson)
   expect_equal(estimates(mod)$raw.coefficients[1], -.798)
   
@@ -87,4 +88,9 @@ test_that("icc works", {
 test_that("removing interactions works", {
   mod = lm(kills~agility*speed, data=avengers)
   expect_true(length(remove_interaction_terms(mod))==2)
+})
+
+test_that("generate_grid_predictions", {
+  expect_equal(nrow(generate_grid_predictions(list(a=1:3, b=4:5), list(c = c('a', 'b')), NULL)), 12)
+   expect_null(generate_grid_predictions(NULL, NULL, NULL))
 })

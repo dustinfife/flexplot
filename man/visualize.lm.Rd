@@ -23,6 +23,9 @@
 
 \item{...}{Other arguments passed to flexplot}
 }
+\value{
+a plot containing a visual of the chosen model
+}
 \description{
 Visualize a fitted model
 }

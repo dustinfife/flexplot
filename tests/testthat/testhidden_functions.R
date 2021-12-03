@@ -74,30 +74,15 @@ test_that("match.jitter works", {
   expect_warning(match_jitter_categorical(c(F, T)))
 })
 
-test_that("prep.breaks works", {
-  expect_output(print(prep.breaks(variable = "satisfaction", data = relationship_satisfaction, breaks=NULL, bins=3)), "46.66667")
-  expect_output(print(prep.breaks(variable = "satisfaction", data = relationship_satisfaction, breaks=c(20, 60))), "-7  20  60 117")
-  expect_output(print(prep.breaks(variable = "satisfaction", data = relationship_satisfaction, breaks=NULL, bins=NULL)), "46.66667")
-})
 
-test_that("bin.me works", {
-  res = levels(bin.me(variable="satisfaction", data=relationship_satisfaction, bins=3))
-  expect_output(print(res), "46.7-58")
-  res = levels(bin.me(variable="satisfaction", data=relationship_satisfaction, breaks = c(20, 60)))
-  expect_output(print(res), "-7-20")
-  res = levels(bin.me(variable="satisfaction", data=relationship_satisfaction, breaks = c(20, 60), check.breaks = F))
-  expect_output(print(res), "20-60")
-  res = levels(bin.me(variable="satisfaction", data=relationship_satisfaction, labels = c("a", "b", "c")))  
-  expect_output(print(res), "b")
-  res = bin.me(variable="satisfaction", data=relationship_satisfaction, breaks = list(c(20, 60, 80)), return.breaks=TRUE)
-  expect_output(print(res), "-7  20  60  80 117")  
-})
 
 test_that("sample.subset returns a dataset the right rows", {
   set.seed(232)
   d = exercise_data
   expect_equal(nrow(sample.subset(10, d)), 10)
   expect_equal(nrow(sample.subset(Inf, d)), nrow(d))
+  # when user asks to sample more than the number of rows
+  expect_equal(nrow(sample.subset(111111111, d)), nrow(d))
 })
 
 test_that("points.func works",{
@@ -118,9 +103,11 @@ test_that("points.func works",{
 })
 
 test_that("factor.to.logistic works", {
-  expect_error(factor.to.logistic(exercise_data, "therapy.type"))
-  expect_equal(length(levels(factor.to.logistic(exercise_data, "gender", T))), 2)
-  expect_equal(levels(factor.to.logistic(exercise_data, "gender")$gender), NULL)  
+  expect_equal(levels(factor.to.logistic(exercise_data, "therapy.type")$therapy.type), c("control", "cog", "beh"))
+  expect_equal(length(levels(factor.to.logistic(exercise_data, "gender", labels=T))), 2)
+  expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="logistic")$gender), c(0,1))  
+  expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="loess")$gender)%>%as.character, c("female", "male"))  
+  expect_equal(unique(factor.to.logistic(small, "y_bin")$y_bin), c(1,0))  
 })
 
 test_that("fit.function works for numeric predictors", {
@@ -168,23 +155,11 @@ test_that("fit.function works for categorical predictors", {
                    "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-sd(z)}, fun.max = function(z) {mean(z)+sd(z)}, fun=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.5), color = \"#bf0303\")")        
 })
 
-test_that("hidden functions for lme4", {
-  require(lme4)
-  data("math")
-  d = math
-  object = lmer(MathAch~SES + (SES|School), data=d)
-  expect_identical(extract_random_term(object), "School")
-  object2 = lm(MathAch~SES, data=d)
-  testthat::expect_true(length(levels(subset_random_model(object, d, samp.size=5)$School))==5)
-  testthat::expect_false(length(levels(subset_random_model(object2, d, samp.size=5)$School))==5)
-  
-  ## make sure the two models in compare.fits for lme4 are both lme4 objects and have the same random terms
-  object3 = lmer(MathAch~SES + (SES|MEANSES), data=d)
-  testthat::expect_null(test_same_class(object, object))
-  testthat::expect_error(test_same_class(object, object2))
-  testthat::expect_error(test_same_class(object, object3))
+test_that("remove_nonlinear_terms works", {
+  formula = y~a*b + I(c^2) + I(d^4)
+  terms = attr(terms(formula), "term.labels")
+  expect_true(all(c("a", "b") %in% remove_nonlinear_terms(terms)))
 })
-
 
 
 test_that("compare.fits_subroutines work", {
@@ -235,14 +210,6 @@ test_that("check_model_rows works", {
   expect_true(nrow(new_mods[[1]]$model) == nrow(new_mods[[2]]$model))
 })
 
-test_that("round_digits works", {
-  expect_true(round_digits(.00000034)==6)
-  expect_true(round_digits(.00034)==5)
-  expect_true(round_digits(.0034)==4)
-  expect_true(round_digits(.034)==3)
-  expect_true(round_digits(.34)==2)  
-  expect_true(round_digits(3.4)==1)  
-})
 
 test_that("check_all_variables_exist_in_data works", {
   expect_null(check_all_variables_exist_in_data(c("weight.loss", "therapy.type"), exercise_data))

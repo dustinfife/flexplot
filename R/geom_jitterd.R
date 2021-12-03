@@ -20,6 +20,7 @@
 #' @export
 #' @importFrom magrittr "%>%" 
 #' @importFrom purrr "%||%"
+#' @return a geom of jittered data
 geom_jitterd <- function(mapping = NULL, data = NULL,
             stat = "identity", position = "jitter",
             ...,
@@ -80,6 +81,7 @@ position <- position_jitterd(width = width, height = height, quad.points=quad.po
 #'  Use `NULL` to use the current random seed and also avoid resetting
 #'  (the behaviour of \pkg{ggplot} 2.2.1 and earlier).
 #' @export
+#' @return a geom of jittered data
 position_jitterd<-function(width=NULL,height=NULL,quad.points=100,seed=NA) {
 if(!is.null(seed) &&is.na(seed)) {
  seed<-sample.int(.Machine$integer.max,1L)
@@ -206,6 +208,7 @@ jitterd=function(x,y,quad.points,amount=NULL, reverse=F){
 #' @param jitter.height degree of jitter in y direction. Defaults to 0.
 #' @param dodge.width The degree of dodging
 #' @param seed Random seed. 
+#' @return a geom of jittered data
 #' 
 #' @export
 position_jitterdodged <- function(jitter.width = .2, jitter.height = 0,
@@ -300,6 +303,7 @@ position_jitterdodged <- function(jitter.width = .2, jitter.height = 0,
 #'
 #' @keywords internal
 #' @name bidirection 
+#' @return a boolean
 #'
 has_flipped_aes <- function(data, params = list(), main_is_orthogonal = NA,
                             range_is_orthogonal = NA, group_has_equal = FALSE,

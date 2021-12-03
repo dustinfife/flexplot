@@ -14,7 +14,7 @@ usethis::use_data(small, overwrite=T, internal = TRUE)
 small_rf = party::cforest(y~., data=small)
 usethis::use_data(small_rf, overwrite = T, internal = T)
 small_randomForest = randomForest::randomForest(y~., data=small)
-usethis::use_data(small_randomForest, overwrite = T, internal = T)
+usethis::use_data(small_randomForest, overwrite = T)
 
 
 require(bluepill)
@@ -30,6 +30,6 @@ vars = list(
   id = paste0("Dr. ", LETTERS[1:5])
 )
 small_mixed = mixed_model(fixed, random, sigma = .3, clusters=5, n_per = c(10,1), vars=vars)
-usethis::use_data(small_mixed, overwrite = T, internal = T)
+usethis::use_data(small_mixed, overwrite = T)
 small_mixed_mod = lme4::lmer(y~x + a + (1 | id), data=small_mixed)
-
+usethis::use_data(small_mixed_mod, overwrite = T)

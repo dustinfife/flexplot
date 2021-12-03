@@ -132,7 +132,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
     prediction.model = pred.mod1
     prediction.model = cbind(pred.values, prediction.model)
   }
-  head(prediction.model)
 
   #### eliminate those predictions that are higher than the range of the data
   if (!is.factor(data[,outcome])){

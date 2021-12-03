@@ -6,6 +6,7 @@
 ##' @param new.mean The desired mean of the dataset
 ##' @param new.sd The desired sd of the dataset
 ##' @author Dustin Fife
+##' @return a vector of rescaled values
 ##' @export
 ##' @examples
 ##' x = rnorm(100, 0, 1)

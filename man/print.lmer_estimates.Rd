@@ -11,6 +11,9 @@
 
 \item{...}{ignored}
 }
+\value{
+A printed list of estimates
+}
 \description{
 Print a lmer_estimates object
 }

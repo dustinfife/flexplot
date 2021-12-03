@@ -31,6 +31,9 @@ this makes sure that two subsequent calls start with a different seed.
 Use `NULL` to use the current random seed and also avoid resetting
 (the behaviour of \pkg{ggplot} 2.2.1 and earlier).}
 }
+\value{
+a geom of jittered data
+}
 \description{
 Counterintuitively adding random noise to a plot can sometimes make it
 easier to read. Jittering is particularly useful for small datasets with

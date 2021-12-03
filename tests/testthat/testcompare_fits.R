@@ -94,7 +94,6 @@ test_that("compare.fits for other models", {
   ### compare.fits with mixed models
   data(alcuse)
   require(lme4)
-  head(alcuse)
   mod1 = lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)  
   mod2 = lmer(ALCUSE~AGE_14 + (AGE_14|ID), data=alcuse)  
   vdiffr::expect_doppelganger("compare.fits with mixed models",

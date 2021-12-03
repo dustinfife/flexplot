@@ -42,6 +42,7 @@
 ##' @author Dustin Fife
 ##' @import tibble ggplot2 R6
 ##' @export
+##' @return a ggplot2 object
 ##' @examples
 #' data(exercise_data)
 #' d = exercise_data
@@ -111,7 +112,7 @@ flexplot = function(formula, data=NULL, related=F,
 	#d = exercise_data
 	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
 	#ghost.reference = list(income=90000)
-
+  
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
   data = ff$data; formula =ff$formula
@@ -130,11 +131,18 @@ flexplot = function(formula, data=NULL, related=F,
                                     related=related,  
                                     jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
                                     alpha=alpha, prediction=prediction)
+  
+  # extract original names of dv (for logistic, prior to making it continuous)
+  
+  outcome = varprep$outcome
+  data = varprep$data
+  method = with(varprep, identify_method(data, outcome, axis, method))
+  if (length(unique(data[,outcome]))==2 & method == "logistic") logistic_labels = unique(data[,outcome])
 
   ### make modifications to the data
-	data = with(varprep, 
+  data = with(varprep, 
 	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
-	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread))
+	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method))
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
                         ### (error came at ghost.reference when it couldn't find the binned version)
 
@@ -235,19 +243,14 @@ flexplot = function(formula, data=NULL, related=F,
 	if (is.finite(sample) & is.numeric(data[,outcome])){
 		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
 	}
-	
-	
-	#### if they have a logistic, modify the p to reflect the data
-	if (method=="logistic" & !is.numeric(data[,outcome])){
-		p = gsub("data=[[:alnum:]]+,", "data=factor.to.logistic(data,outcome),", p)
-		points = gsub("data\\)", "factor.to.logistic(data,outcome))", points)		
-		
-		#### change the y axis labels
-		theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=factor.to.logistic(data,outcome, labels=T))")	
-	}
 
 	### put objects in this environment
 	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
+	
+	# convert labels for Y axis for logistic
+	if (length(unique(data[,outcome])) == 2 & method == "logistic"){
+	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", logistic_labels[1], "', '", logistic_labels[2], "')", ")")
+	}
 	
 	### if second axis is numeric, replace axis[2] with variable that is binned
   if (length(axis)>1){
@@ -283,16 +286,7 @@ flexplot = function(formula, data=NULL, related=F,
 	return(final)
 }	
 
-#' Print flexplot object
-#'
-#' Print flexplot object
-#' @aliases print.flexplots
-#' @param x a flexplot object
-#' @param ... ignored
-#' @export
-# print.flexplot <- function(x,...) {
-  # suppressMessages(print.ggplot(x))
-# }
+
 
 
 # ### I am including the code below because CRAN does not permit :::
