@@ -93,24 +93,6 @@ get_variable_types = function(predictors, data) {
   list(cat=cat, numb=numb)
 }
 
-# return_quadriture_points = function(variables, model, num_points) {
-#   ### make quadriture points smaller if they're doing RF
-#   is_random_forest = class(model)[1] == "RandomForest"
-#   quad_points_first = ifelse(is_random_forest & num_points == 50, 10, 8)
-#   quad_points_rest  = ifelse(is_random_forest & num_points == 50, 8, 8)
-#   
-#   min.max$size = c(10, rep(8, nrow(min.max)-1))
-# } else {
-#   min.max = data.frame(var.mins, var.max); 
-#   min.max$size = c(num_points, rep(, nrow(min.max)-1))
-# }  
-# }
-
-# model = lm(y~a + x + z + w_a, data=small)
-# model_terms = NULL
-# predictors = c("a", "w_a")
-# data = NULL
-# return.preds = F
 ### function to generate prediction matrix spanning the range of the data
 generate_predictors = function(model, data = NULL, predictors=NULL, model_terms=NULL, num_points = 50, return.preds=F,...) {
   
@@ -150,7 +132,8 @@ generate_predictors = function(model, data = NULL, predictors=NULL, model_terms=
 }
 
 return_predicted_value_for_missing_variables = function(variable, data, model) {
-  if (is.numeric(variable)) {
+  
+  if (is.numeric(data[,variable])) {
     message(paste0("Note: You didn't choose to plot ", variable, " so I am inputting the median"))
     return(median(data[,variable], na.rm=T))
   }
@@ -182,7 +165,7 @@ create_ranges_numberic_variables = function(data, numb, num_points, return.preds
   # otherwise, limit it to the number of bins
   min.max$size = numb %>% 
     purrr::map_dbl(function(x) {
-      ifelse(return.preds, min(num_points, length(unique(x))), bin_size)
+      ifelse(return.preds, min(num_points, length(unique(data[,x]))), bin_size)
     })
   if (length(numb)>0) min.max$size[1] = min(length(unique(data[,numb[1]])), num_points)
   

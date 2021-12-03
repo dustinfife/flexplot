@@ -51,14 +51,27 @@ test_that("get_model_n works", {
   expect_equal(get_model_n(rpart::rpart(y~a + b, data=small)), nrow(small))
 })
 
-# 
-# test_that("generator_predictors works", {
-#   generate_predictors(lm(y~a + b, data=small))
-# })
+test_that("get_variable_types works", {
+  expect_equal(get_variable_types(character(0), small)$cat, character(0))
+  expect_equal(get_variable_types(c("y", "a", "b"), small)$cat, c("a", "b"))
+  expect_equal(get_variable_types(c("y", "a", "b"), small)$numb, c("y"))
+})
 
+test_that("generator_predictors works", {
+  expect_equal(nrow(generate_predictors(lm(y~a + b, data=small))), 6)
+  expect_equal(nrow(generate_predictors(lm(y~a + b, data=small), data=small)), 6)
+  expect_equal(nrow(generate_predictors(lm(y~a + b, data=small), predictors=c("a", "b"))), 6)
+  expect_equal(nrow(generate_predictors(lm(y~a + b, data=small), predictors ="a", model.terms=c("b"))), 2)
+  expect_equal(nrow(generate_predictors(lm(y~x+z, data=small), num_points=20)), 20*10)
+  expect_equal(nrow(generate_predictors(lm(y~x+z, data=small), num_points=20, return.preds=T)), 20*20)
+})
 
-
-
+test_that("return_predicted_value_for_missing_variables works", {
+  expect_equal(return_predicted_value_for_missing_variables("a", small, lm(y~a + b, data=small)), "a")
+  expect_equal(return_predicted_value_for_missing_variables("z", small, lm(y~a + z, data=small)), 0.2820952, tol = .001)
+  expect_equal(return_predicted_value_for_missing_variables("b", small_mixed, 
+      lme4::lmer(y~z + (1|b), data=small_mixed)), "no")
+})
 
 
 
