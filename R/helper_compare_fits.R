@@ -49,7 +49,7 @@ get_terms = function(model) {
     response = get_cforest_variables(model, "response");
     return(list(predictors = predictors, response=response))
   } 
-    
+  
   form = formula(model) 
   predictors=all.vars(form)[-1]  
   response = all.vars(form)[1]
@@ -57,7 +57,7 @@ get_terms = function(model) {
 }
 
 check_missing = function(model1, model2=NULL, data, variables) {
-
+  
   ### if they haven't supplied model 2, no need to check
   if (is.null(model2)) return(data)
   
@@ -72,7 +72,7 @@ check_missing = function(model1, model2=NULL, data, variables) {
 }
 
 get_model_n = function(model) {
-
+  
   mod_class = class(model)[1]
   if (mod_class == "RandomForest") return(attr(model, "responses")@nobs)
   if (mod_class == "randomForest.formula") return(length(model$predicted))
@@ -86,7 +86,7 @@ get_model_n = function(model) {
 get_variable_types = function(predictors, data) {
   
   #### get variable types
-  cat      = names(which(unlist(lapply(data[,predictors], function(x) (!is.numeric(x)) | length(unique(x))<21)) ))
+  cat      = names(which(unlist(lapply(data[,predictors, drop=FALSE], function(x) (!is.numeric(x)) | length(unique(x))<21)) ))
   numb     = predictors[predictors %!in% cat]
   list(cat=cat, numb=numb)
 }
@@ -115,33 +115,13 @@ generate_predictors = function(model, data = NULL, predictors=NULL, model_terms=
   if (is.null(predictors))  predictors = all.vars(formula(model))[-1]
   if (is.null(model_terms)) model_terms = all.vars(formula(model))[-1]
   if (is.null(data))        data = extract_data_from_fitted_object(model)
-
+  
   variable_types = get_variable_types(predictors, data)
   cat  = variable_types$cat
   numb = c(variable_types$numb)
   
-  # create matrix of min/max for each numeric variable
-  var.mins = apply(data[, numb, drop = FALSE], 2, min, na.rm=T)
-  var.max =  apply(data[, numb, drop = FALSE], 2, max, na.rm=T)  
-  min.max = data.frame(var.mins, var.max) 
-  
-  # set quadriture points to size of bins
-  if ("bins" %in% names(list(...))) bin_size = list(...)[['bins']] else bin_size = 3
-  
-  ##### make "quadriture" points for quant variables
-  # if they're asking to return the predictions, don't limit quadriture points for the non-x-axis variables
-  # otherwise, limit it to the number of bins
-  min.max$size = numb %>% 
-    purrr::map_dbl(function(x) {
-                    ifelse(return.preds, min(num_points, length(unique(x))), bin_size)
-                  })
-  if (length(numb)>0) min.max$size[1] = min(length(unique(data[,numb[1]])), num_points)
-
-  # now convert that list to a list of quadriture points
-  f = function(x, d){seq(from=d[x,1], to=d[x,2], length.out=d[x,3])}
-  min.max = 1:nrow(min.max) %>% 
-    purrr::map(function(x) f(x, min.max))
-  names(min.max) = numb
+  # get the ranges of numeric variables (or return NULL)
+  min.max = create_ranges_numberic_variables(data, numb, num_points, return.preds, ...)
   
   #### get unique values for categorical vars
   un.vars = lapply(data[,cat, drop=FALSE], unique)    	
@@ -150,7 +130,7 @@ generate_predictors = function(model, data = NULL, predictors=NULL, model_terms=
   all.vars = c(min.max, un.vars)    
   all.vars = lapply(all.vars, function(x) x[!is.na(x)])
   pred.values = expand.grid(all.vars)
-
+  
   
   # if all variables in model are in the formula, we're done
   if (all(model_terms %in% predictors)) return(pred.values)
@@ -178,26 +158,55 @@ return_predicted_value_for_missing_variables = function(variable, data, model) {
   
 }
 
-generate_predictions = function(model, re, pred.values, pred.type, report.se) {
+create_ranges_numberic_variables = function(data, numb, num_points, return.preds=F, ...) {
+  
+  if (length(numb)==0) return(NULL)
+  
+  # create matrix of min/max for each numeric variable
+  var.mins = apply(data[, numb, drop = FALSE], 2, min, na.rm=T)
+  var.max =  apply(data[, numb, drop = FALSE], 2, max, na.rm=T)  
+  min.max = data.frame(var.mins, var.max) 
+  
+  # set quadriture points to size of bins
+  if ("bins" %in% names(list(...))) bin_size = list(...)[['bins']] else bin_size = 3
+  
+  ##### make "quadriture" points for quant variables
+  # if they're asking to return the predictions, don't limit quadriture points for the non-x-axis variables
+  # otherwise, limit it to the number of bins
+  min.max$size = numb %>% 
+    purrr::map_dbl(function(x) {
+      ifelse(return.preds, min(num_points, length(unique(x))), bin_size)
+    })
+  if (length(numb)>0) min.max$size[1] = min(length(unique(data[,numb[1]])), num_points)
+  
+  # now convert that list to a list of quadriture points
+  f = function(x, d){seq(from=d[x,1], to=d[x,2], length.out=d[x,3])}
+  min.max = 1:nrow(min.max) %>% 
+    purrr::map(function(x) f(x, min.max))
+  names(min.max) = numb
+  return(min.max)
+}
 
+generate_predictions = function(model, re, pred.values, pred.type, report.se) {
+  
   model.type = class(model)[1]
   if ((model.type == "lmerMod" | model.type == "glmerMod") & !re){
     return(data.frame(prediction = 
-                 predict(model, pred.values, type="response"), model="fixed effects"))
+                        predict(model, pred.values, type="response"), model="fixed effects"))
   }  
   
   if ((model.type == "lmerMod" | model.type == "glmerMod") & re){
     return(data.frame(
       prediction = 
-                  predict(model, pred.values, type="response", re.form=NA), model="random effects"))
+        predict(model, pred.values, type="response", re.form=NA), model="random effects"))
   }  
-    
+  
   if (model.type == "polr"){
-      return(
-        data.frame(prediction = predict(model, pred.values, type="class", re.form=NA), model= model.type)		
-      )
+    return(
+      data.frame(prediction = predict(model, pred.values, type="class", re.form=NA), model= model.type)		
+    )
   }
-
+  
   if (model.type=="RandomForest") {
     
     ## get dataset to test that classes are all the same

@@ -50,3 +50,17 @@ test_that("get_model_n works", {
   expect_equal(get_model_n(lm(y~x, data=small)), nrow(small))
   expect_equal(get_model_n(rpart::rpart(y~a + b, data=small)), nrow(small))
 })
+
+
+test_that("generator_predictors works", {
+  generate_predictors(lm(y~a + b, data=small))
+})
+
+
+
+
+
+
+
+
+#
