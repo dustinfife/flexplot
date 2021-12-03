@@ -107,7 +107,7 @@ test_that("factor.to.logistic works", {
   expect_equal(length(levels(factor.to.logistic(exercise_data, "gender", labels=T))), 2)
   expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="logistic")$gender), c(0,1))  
   expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="loess")$gender)%>%as.character, c("female", "male"))  
-  expect_equal(unique(factor.to.logistic(small, "y_bin")$y_bin), c(1,0))  
+  expect_equal(unique(factor.to.logistic(small, "y_bin")$y_bin), c(0,1))  
 })
 
 test_that("fit.function works for numeric predictors", {

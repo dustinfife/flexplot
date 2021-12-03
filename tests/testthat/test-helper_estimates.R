@@ -33,6 +33,6 @@ test_that("anchor.predictions works for categorical predictors", {
 })
 
 test_that("bf.bif works", {
-  expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small)), 3.339977, tol = .01)
-  expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small), invert=T), 1/3.339977, tol = .01)
+  expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small)), 3.426344, tol = .01)
+  expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small), invert=T), 1/3.426344, tol = .01)
 })
