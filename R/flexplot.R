@@ -133,12 +133,14 @@ flexplot = function(formula, data=NULL, related=F,
                                     alpha=alpha, prediction=prediction)
   
   # extract original names of dv (for logistic, prior to making it continuous)
+  
   outcome = varprep$outcome
   data = varprep$data
-  if (length(unique(data[,outcome]))==2) logistic_labels = unique(data[,outcome])
+  method = with(varprep, identify_method(data, outcome, axis, method))
+  if (length(unique(data[,outcome]))==2 & method == "logistic") logistic_labels = unique(data[,outcome])
 
   ### make modifications to the data
-	data = with(varprep, 
+  data = with(varprep, 
 	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method))
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
@@ -246,7 +248,7 @@ flexplot = function(formula, data=NULL, related=F,
 	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
 	
 	# convert labels for Y axis for logistic
-	if (length(unique(data[,outcome])) == 2){
+	if (length(unique(data[,outcome])) == 2 & method == "logistic"){
 	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", logistic_labels[1], "', '", logistic_labels[2], "')", ")")
 	}
 	

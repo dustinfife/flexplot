@@ -114,6 +114,7 @@ flexplot_alpha_default = function(data, axis, alpha){
 
 ### prep data for association plot
 modify_association_plot_data = function(data, outcome, axis) {
+  
   if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1 & axis[1] != "1"){
     m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
     chi = chisq.test(data[,axis], data[,outcome])
@@ -200,6 +201,9 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   ### remove missing values
   data = flexplot_delete_na(data, variables)
 
+  ### convert variables with < 5 categories to ordered factors
+  data = flexplot_convert_to_categorical(data, axis)
+
   ### prevent univariates from binning numeric variables with <5 levels
   data = modify_univariate_data_numeric(data=data, axis=axis, outcome=outcome)
   
@@ -211,11 +215,11 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   
   data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
   
-  ### convert variables with < 5 categories to ordered factors
-  data = flexplot_convert_to_categorical(data, axis)
-  
+  # make sure method = 'logistic' under the right circumstances
+  method = identify_method(data, outcome, axis, method)
+
   # convert data for logistic regression
-  data = factor.to.logistic(data,outcome)
+  data = factor.to.logistic(data,outcome, method)
   
 
   #### reorder axis 1 it's not already ordered
@@ -401,7 +405,6 @@ flexplot_delete_na = function(data, variables){
 #expect_true(is.ordered(flexplot_convert_to_categorical(data %>% mutate(gender = as.numeric(gender)), c("therapy.type", "gender"))$gender))
 #expect_false(is.ordered(flexplot_convert_to_categorical(data, axis=NULL)$gender))
 flexplot_convert_to_categorical = function(data, axis){
-  
 
   #### if they only have a few levels on the x axis, convert it to categorical
   if (length(axis)>0 & axis[1] != "1"){
@@ -478,7 +481,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     
   ### BIVARIATE PLOTS
   } else if (length(outcome)==1 & length(axis)==1 & !related){
-    
+
     #### if both are categorical, do chi square
     if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
       
