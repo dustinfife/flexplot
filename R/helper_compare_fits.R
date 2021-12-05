@@ -17,7 +17,6 @@ whats_model2 = function(model1,model2=NULL) {
 
 # function that extracts variables from cforest model
 get_cforest_variables = function(model, return.type=c("all", "predictors", "response")) {
-  
   return.type = match.arg(return.type)
   
   ## get all variables 
@@ -40,7 +39,6 @@ get_cforest_variables = function(model, return.type=c("all", "predictors", "resp
 }
 
 get_terms = function(model) {
-  
   model.type = class(model)[1]
   
   #### extract the terms from each MODEL
@@ -57,7 +55,6 @@ get_terms = function(model) {
 }
 
 check_missing = function(model1, model2=NULL, data, variables) {
-  
   ### if they haven't supplied model 2, no need to check
   if (is.null(model2)) return(data)
   
@@ -72,7 +69,6 @@ check_missing = function(model1, model2=NULL, data, variables) {
 }
 
 get_model_n = function(model) {
-  
   mod_class = class(model)[1]
   if (mod_class == "RandomForest") return(attr(model, "responses")@nobs)
   if (mod_class == "randomForest.formula") return(length(model$predicted))
@@ -229,9 +225,38 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
   }
   
   int = ifelse(report.se, "confidence", "none")
-  return(
-    data.frame(prediction = predict(model, pred.values, interval=int, type=pred.type), model=model.type)
-  )
+  return(data.frame(prediction = predict(model, pred.values, interval=int, type=pred.type), 
+                    model=model.type)
+        )
 }
 
 
+return_model_labels = function(model1, model2, model_column=NULL) {
+  
+  model1.type = class(model1)[1]
+  model2.type = class(model2)[2]
+  
+  model1_name = deparse(substitute(model1, env = -1))
+  model2_name = deparse(substitute(model2, env = -1))
+  return(model1_name)
+  
+  
+  # #### if they have the same name, just call them model1 and model2
+  # if (!re){
+  #   pred.mod1$model = paste0(deparse(substitute(model1)), " (", model1.type, ")", collapse="")
+  #   if (pred.mod1$model[1] == pred.mod2$model[1]){
+  #     pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, " 2)", collapse="")
+  #   } else {
+  #     pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, ")", collapse="")
+  #   }
+  # }
+}
+
+
+
+
+
+
+
+
+#

@@ -31,11 +31,8 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (is.null(model2)) runme = "yes"
 
   #### if mod2 is null..
-  if (is.null(model2)){
-    model2 = model1
-  }
-
-
+  if (is.null(model2)) model2 = model1
+  
   #### get type of model
   model1.type = class(model1)[1]
   model2.type = class(model2)[1]
@@ -46,10 +43,8 @@ compare.fits = function(formula, data, model1, model2=NULL,
   testme = unique(c(variables_mod1$predictors, variables_mod2$predictors))
   all_variables = unique(c(variables_mod1$predictors, variables_mod2$predictors, variables_mod1$response, variables_mod2$response))
 
-  if (tibble::is_tibble(data)){
-    data = as.data.frame(data)
-  }
-
+  if (tibble::is_tibble(data)) data = as.data.frame(data)
+  
   #### for the rare occasion where deleting missing data changes the levels...
   data = check_missing(model1, model2, data, all_variables)
 
@@ -60,10 +55,8 @@ compare.fits = function(formula, data, model1, model2=NULL,
   data = subset_random_model(model1, formula, d=data, samp.size = clusters)
 
   ### make sure they have the same outcome
-  if (variables_mod1$response != variables_mod2$response) {
-    stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
-  }
-
+  if (variables_mod1$response != variables_mod2$response) stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
+  
   ##### extract variable names from FORMULA
   variables = all.vars(formula)
   outcome = variables[1]
@@ -80,17 +73,17 @@ compare.fits = function(formula, data, model1, model2=NULL,
   }
 
   pred.values = generate_predictors(model1, data=data, predictors = predictors, model_terms = testme, num_points=num_points, return.preds)
+  
   # for intercept only models
-  if (nrow(pred.values)==0) {
-    pred.values = data.frame("(Intercept)" = 1)
-  }
-
+  if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
+  
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
-  head(pred.mod1)
+  
   ### there's no fixed effect if we don't have these lines
   model1.type = class(model1)[1]
   if (model1.type == "lmerMod" | model1.type == "glmerMod"){
-    pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")
+    pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), 
+                           model= "fixed effects")
   }
 
 
@@ -99,6 +92,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   } else {
     pred.mod2 = pred.mod1
   }
+  
   if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){
     pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")
     old.mod=0
@@ -111,16 +105,8 @@ compare.fits = function(formula, data, model1, model2=NULL,
     pred.mod2$prediction = as.numeric(as.character(pred.mod2$prediction))
   }
 
-  #### if they have the same name, just call them model1 and model2
+  # set the names of the models
 
-  if (!re){
-    pred.mod1$model = paste0(deparse(substitute(model1)), " (", model1.type, ")", collapse="")
-    if (pred.mod1$model[1] == pred.mod2$model[1]){
-      pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, " 2)", collapse="")
-    } else {
-      pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, ")", collapse="")
-    }
-  }
 
 
 
@@ -150,25 +136,14 @@ compare.fits = function(formula, data, model1, model2=NULL,
   }
 
   #### create flexplot
-  if (return.preds){
-    prediction.model
-  } else {
-    # at one time, I was adding one to the predictions. WHY??????
-    # ### for logistic, add one to the predictions
-    # if (model1.type == "glm" ) {
-    #   if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
-    #     prediction.model$prediction = prediction.model$prediction + 1
-    #   }
-    # }
+  if (return.preds) return(prediction.model)
 
-    final_geom = return_lims_geom(outcome, data, model1)
-    #when we have an intercept only model
-    if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
-    head(prediction.model)
-    flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
-      final_geom
-  }
-
+  final_geom = return_lims_geom(outcome, data, model1)
+  #when we have an intercept only model
+  if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
+  head(prediction.model)
+  flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
+    final_geom
 }
 
 return_lims_geom = function(outcome, data, model1) {
