@@ -89,7 +89,6 @@ test_that("change_model_names_if_same works", {
 })
 
 test_that("limit_range_of_predictions works", {
-  suppressWarnings(expect_equal(limit_range_of_predictions(1:10, 0:12), 1:10))
   expect_warning(limit_range_of_predictions(1:10, 0:12))
   expect_equal(limit_range_of_predictions(1:10, 2:8), 2:8)
   expect_equal(limit_range_of_predictions(factor(letters[1:4]), 1:4), 1:4)  

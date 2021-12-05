@@ -88,7 +88,7 @@ check_all_variables_exist_in_data = function(variables, data) {
   return(NULL)
 }  
 
-extract_data_from_fitted_object = function(object) {
+extract_data_from_fitted_object = get_data_from_fitted_object = function(object) {
   if (class(object)[1]=="lm" | class(object)[1]=="glm" | class(object)[1] == "rlm") return(object$model)
   if (class(object)[1]=="RandomForest") {
     outcome = object@responses@variables

@@ -23,15 +23,18 @@
 ##' mod1 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
 ##' mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
 ##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
-compare.fits = compare_fits = function(formula, data, model1, model2=NULL,
+compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=NULL,
                         return.preds=F, report.se=F, re=F,
                         pred.type="response", num_points = 50,
                         clusters=3,...){
-
+  
   if (is.null(model2)) runme = "yes"
 
   #### if mod2 is null..
   if (is.null(model2)) model2 = model1
+  
+  #### make sure, if they have lme4, both models are lme4 objects
+  test_same_class(model1, model2)
   
   #### get type of model
   model1.type = class(model1)[1]
@@ -42,18 +45,16 @@ compare.fits = compare_fits = function(formula, data, model1, model2=NULL,
   variables_mod2 = get_terms(model2)
   testme = unique(c(variables_mod1$predictors, variables_mod2$predictors))
   all_variables = unique(c(variables_mod1$predictors, variables_mod2$predictors, variables_mod1$response, variables_mod2$response))
-
-  if (tibble::is_tibble(data)) data = as.data.frame(data)
   
-  #### for the rare occasion where deleting missing data changes the levels...
-  data = check_missing(model1, model2, data, all_variables)
-
-  #### make sure, if they have lme4, both models are lme4 objects
-  test_same_class(model1, model2)
+  # do all the checks/manipulations for the data
+  data = prepare_data_for_compare.fits(data, model1, model2, all_variables)
+  
+  # if they don't provide a formula
+  if (is.null(formula)) formula = make_flexplot_formula(variables_mod1$predictors, variables_mod1$response, data)
 
   #### convert random effects to factors for mixed models
   data = subset_random_model(model1, formula, d=data, samp.size = clusters)
-
+  
   ### make sure they have the same outcome
   if (variables_mod1$response != variables_mod2$response) stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
   
@@ -85,7 +86,6 @@ compare.fits = compare_fits = function(formula, data, model1, model2=NULL,
     pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), 
                            model= "fixed effects")
   }
-
 
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)

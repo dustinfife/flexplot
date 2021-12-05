@@ -264,15 +264,25 @@ limit_range_of_predictions = function(data_outcome, prediction_outcome) {
   predictions_are_higher = any(prediction_outcome>max.dat)
   predictions_are_lower  = any(prediction_outcome<min.dat)
   if (!(predictions_are_lower | predictions_are_higher)) return(prediction_outcome)
-  
-  prediction_outcome = prediction_outcome[prediction_outcome<=max.dat & prediction_outcome>=min.dat]
+  # I'm commenting this out because, otherwise, we get an error because the number
+  # of rows isn't the same as the rest of the matrix for prediction_outcome.
+  # Instead, we limit the range with a geom.
+  #prediction_outcome = prediction_outcome[prediction_outcome<=max.dat & prediction_outcome>=min.dat]
   warning("Some of the model's predicted values are beyond the range of the original y-values.
             I'm truncating the y-axis to preserve the original scale.")
   return(prediction_outcome)
 }
 # separate function to see if they're the same, rename the second
 
-
+prepare_data_for_compare.fits = function(data=NULL, model1, model2=NULL, all_variables,
+                                         formula) {
+  if (is.null(data))    data = extract_data_from_fitted_object(model1)
+  if (tibble::is_tibble(data)) data = as.data.frame(data)
+  #### for the rare occasion where deleting missing data changes the levels...
+  data = check_missing(model1, model2, data, all_variables)
+  return(data)
+  
+}
 
 
 
