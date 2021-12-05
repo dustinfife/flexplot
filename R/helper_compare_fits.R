@@ -251,6 +251,25 @@ change_model_names_if_same = function(model1_column, model2_column=NULL) {
   new_labels = gsub("\\(([a-z]+[.]?[_]?[0-9]?)\\)", "(\\1 2)", label)
   return(new_labels)
 }
+
+limit_range_of_predictions = function(data_outcome, prediction_outcome) {
+  
+  # convert factors to numbers
+  if (is.factor(data_outcome)) {
+    return(round(as.numeric(as.character(prediction_outcome)), digits=3))
+  }
+  
+  #### eliminate those predictions that are higher than the range of the data
+  min.dat = min(data_outcome, na.rm=T); max.dat = max(data_outcome, na.rm=T)
+  predictions_are_higher = any(prediction_outcome>max.dat)
+  predictions_are_lower  = any(prediction_outcome<min.dat)
+  if (!(predictions_are_lower | predictions_are_higher)) return(prediction_outcome)
+  
+  prediction_outcome = prediction_outcome[prediction_outcome<=max.dat & prediction_outcome>=min.dat]
+  warning("Some of the model's predicted values are beyond the range of the original y-values.
+            I'm truncating the y-axis to preserve the original scale.")
+  return(prediction_outcome)
+}
 # separate function to see if they're the same, rename the second
 
 

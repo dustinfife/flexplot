@@ -23,7 +23,7 @@
 ##' mod1 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
 ##' mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
 ##' compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
-compare.fits = function(formula, data, model1, model2=NULL,
+compare.fits = compare_fits = function(formula, data, model1, model2=NULL,
                         return.preds=F, report.se=F, re=F,
                         pred.type="response", num_points = 50,
                         clusters=3,...){
@@ -108,7 +108,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   # set the names of the models
   pred.mod1$model = return_model_labels(model1, deparse(substitute(model1)), pred.mod1$model, re=re)
   pred.mod2$model = return_model_labels(model2, deparse(substitute(model2)), pred.mod2$model, re=re)
-  pred.mod2$model = change_model_names_if_same(pred.mod1$model, pred.mod)
+  pred.mod2$model = change_model_names_if_same(pred.mod1$model, pred.mod2$model)
 
 
   #### report one or two coefficients, depending on if they supplied it
@@ -120,21 +120,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     prediction.model = cbind(pred.values, prediction.model)
   }
 
-  #### eliminate those predictions that are higher than the range of the data
-  if (!is.factor(data[,outcome])){
-    min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)
-    if (length(which(
-        prediction.model$prediction>(max.dat))>0 |
-          length(which(prediction.model$prediction<(min.dat))))){
-      #prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]
-      warning("Some of the model's predicted values are beyond the range of the original y-values.
-              I'm truncating the y-axis to preserve the original scale.")
-
-    }
-  } else {
-    #### if they supply a factor, convert it to a number!!!!!
-    prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
-  }
+  prediction.model$prediction = limit_range_of_predictions(data[,outcome], prediction.model$prediction)
 
   #### create flexplot
   if (return.preds) return(prediction.model)
@@ -142,7 +128,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
   final_geom = return_lims_geom(outcome, data, model1)
   #when we have an intercept only model
   if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
-  head(prediction.model)
   flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
     final_geom
 }
