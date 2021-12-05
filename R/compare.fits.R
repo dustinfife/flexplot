@@ -106,8 +106,9 @@ compare.fits = function(formula, data, model1, model2=NULL,
   }
 
   # set the names of the models
-
-
+  pred.mod1$model = return_model_labels(model1, deparse(substitute(model1)), pred.mod1$model, re=re)
+  pred.mod2$model = return_model_labels(model2, deparse(substitute(model2)), pred.mod2$model, re=re)
+  pred.mod2$model = change_model_names_if_same(pred.mod1$model, pred.mod)
 
 
   #### report one or two coefficients, depending on if they supplied it

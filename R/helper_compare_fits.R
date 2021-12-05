@@ -231,27 +231,27 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
 }
 
 
-return_model_labels = function(model1, model2, model_column=NULL) {
+return_model_labels = function(model, model_name, model_column,
+                               re = FALSE) {
   
-  model1.type = class(model1)[1]
-  model2.type = class(model2)[2]
-  
-  model1_name = deparse(substitute(model1, env = -1))
-  model2_name = deparse(substitute(model2, env = -1))
-  return(model1_name)
-  
-  
-  # #### if they have the same name, just call them model1 and model2
-  # if (!re){
-  #   pred.mod1$model = paste0(deparse(substitute(model1)), " (", model1.type, ")", collapse="")
-  #   if (pred.mod1$model[1] == pred.mod2$model[1]){
-  #     pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, " 2)", collapse="")
-  #   } else {
-  #     pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, ")", collapse="")
-  #   }
-  # }
+  if (re) return(model_column)
+  model.type = class(model)[1]
+
+  #### if they have the same name, just call them model and model2
+  model_column = paste0(model_name, " (", model.type, ")", collapse="")
+  return(model_column)
 }
 
+change_model_names_if_same = function(model1_column, model2_column=NULL) {
+  if (is.null(model2_column)) return(NULL)
+  if (model1_column[1] != model2_column[1]) return(model2_column)
+  
+  label = model2_column[1]
+  # replace (model (lmer.mod) with model (lmer.mod 2))
+  new_labels = gsub("\\(([a-z]+[.]?[_]?[0-9]?)\\)", "(\\1 2)", label)
+  return(new_labels)
+}
+# separate function to see if they're the same, rename the second
 
 
 

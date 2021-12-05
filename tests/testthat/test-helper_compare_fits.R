@@ -73,6 +73,20 @@ test_that("return_predicted_value_for_missing_variables works", {
       lme4::lmer(y~z + (1|b), data=small_mixed)), "no")
 })
 
+test_that("return_model_labels works", {
+  m1 = lm(y~a*b, data=small)
+  m2 = update(m1, .~-a:b)
+  expect_equal(return_model_labels(m1, "m1", 1:10, T), 1:10)
+  expect_equal(return_model_labels(m1, "m1", 1:10), "m1 (lm)")
+})
+
+test_that("change_model_names_if_same works", {
+  m1 = rep("mod1 (lm)", times=10)
+  m2 = rep("mod1 (lm)", times=10)
+  expect_equal(change_model_names_if_same("mod1 (lm)", "mod1 (lm)"), "mod1 (lm 2)")
+  expect_equal(change_model_names_if_same("mod1 (lm)", "mod2 (lm)"), "mod2 (lm)")
+  expect_equal(change_model_names_if_same("mod1 (lm.1)", "mod2 (lm.1)"), "mod2 (lm.1)")  
+})
 
 
 
