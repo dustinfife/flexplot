@@ -274,10 +274,11 @@ limit_range_of_predictions = function(data_outcome, prediction_outcome) {
 }
 # separate function to see if they're the same, rename the second
 
-prepare_data_for_compare.fits = function(data=NULL, model1, model2=NULL, all_variables,
-                                         formula) {
+prepare_data_for_compare.fits = function(data=NULL, model1, model2=NULL, all_variables=NULL) {
+  
   if (is.null(data))    data = extract_data_from_fitted_object(model1)
   if (tibble::is_tibble(data)) data = as.data.frame(data)
+  if (is.null(all_variables)) all_variables = all.vars(formula(model1))
   #### for the rare occasion where deleting missing data changes the levels...
   data = check_missing(model1, model2, data, all_variables)
   return(data)

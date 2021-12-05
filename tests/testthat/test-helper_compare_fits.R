@@ -93,4 +93,13 @@ test_that("limit_range_of_predictions works", {
   expect_equal(limit_range_of_predictions(1:10, 2:8), 2:8)
   expect_equal(limit_range_of_predictions(factor(letters[1:4]), 1:4), 1:4)  
 })
+
+test_that("prepare_data_for_compare.fits works", {
+  model = lm(y~a, data=small)
+  expect_equal(prepare_data_for_compare.fits(model1=model)$y,small$y)
+  expect_equal(prepare_data_for_compare.fits(model1=model, data=tibble(small)),data.frame(tibble(small)))
+})
+
+
+
 #
