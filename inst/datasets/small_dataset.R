@@ -3,11 +3,14 @@ n = 27
 a = sample(c("a", "b"), size=n, T)
 b = sample(c("x", "y", "z"), size=n, T)
 x = rnorm(n)
+x_miss = x; x_miss[c(1,5,8)] = NA
 z = .4*x + rnorm(n, 0, sqrt(1-.4^2))
 w_a = .4*x + rnorm(n, 0, sqrt(1-.4^2))
 y = model.matrix(~a + b + x + z + x:a + w_a) %*% c(0, .3, .1, .3, .4, .2, -.2, .3) + rnorm(n, 0, .5)
+y_poly = model.matrix(~a + b + x + z + x:a + w_a + I(x^2)) %*% c(0, .3, .1, .3, .4, .2, -.2, .3, -.3) + rnorm(n, 0, .15)
 y_bin = as.numeric(as.character(cut(y, breaks = c(-Inf,.3, Inf), labels=c(0,1))))
-small = data.frame(y=y, a=factor(a), b=factor(b), z=z, x=x, y_bin=y_bin, w_a = round(rescale(w_a, 10, 3)))
+small = data.frame(y=y, a=factor(a), b=factor(b), 
+                   z=z, x=x, x_miss = x_miss, y_bin=y_bin, w_a = round(rescale(w_a, 10, 3)), y_poly)
 usethis::use_data(small, overwrite=T)
 
 # create random forest model

@@ -184,7 +184,7 @@ variable_types = function(variables, data, return.names=F){
 # predictors = c("Grad.School", "Years", "GPA", "Profession")
 # data = graduate_income
 # outcome = "Income"
-make_flexplot_formula = function(predictors, outcome, data){
+make_flexplot_formula = function(predictors, outcome, data, drop_second_slot=FALSE){
   
   # omit those variables not in the dataset
   nothere = which (!(predictors %in% names(data)))
@@ -210,9 +210,12 @@ make_flexplot_formula = function(predictors, outcome, data){
   custom.sort = sort(custom.sort, decreasing=T)
   slots = names(custom.sort)[favored.slots]
   
-  
   #### now create formula
-  x = c(outcome, "~",slots[1], slots[2], "|", slots[3], slots[4])
+  if (drop_second_slot) {
+    x = c(outcome, "~",slots[1], "|", slots[3], slots[4])
+  } else {
+    x = c(outcome, "~",slots[1], slots[2], "|", slots[3], slots[4])
+  }
   if (any(is.na(x)))  x = x[-which(is.na(x))]
   x = paste0(x, collapse="+")
   x = gsub("+|+", "|", x, fixed=T);x = gsub("+~+", "~", x, fixed=T)

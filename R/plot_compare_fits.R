@@ -47,9 +47,9 @@ compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=N
 
   # do all the checks/manipulations for the data
   data = prepare_data_for_compare.fits(data, model1, model2, all_variables)
-  
+  # put in a check to take data from the larger of the two models
   # if they don't provide a formula
-  if (is.null(formula)) formula = make_flexplot_formula(variables_mod1$predictors, variables_mod1$response, data)
+  if (is.null(formula)) formula = make_flexplot_formula(variables_mod1$predictors, variables_mod1$response, data, drop_second_slot=T)
 
   ##### extract variable names from FORMULA
   variables = all.vars(formula)

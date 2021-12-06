@@ -129,6 +129,8 @@ generate_predictors = function(model, data = NULL, predictors=NULL, model_terms=
 
 return_predicted_value_for_missing_variables = function(variable, data, model) {
   
+  browser()
+  
   if (is.numeric(data[,variable])) {
     message(paste0("Note: You didn't choose to plot ", variable, " so I am inputting the median"))
     return(median(data[,variable], na.rm=T))
