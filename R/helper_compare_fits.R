@@ -129,8 +129,6 @@ generate_predictors = function(model, data = NULL, predictors=NULL, model_terms=
 
 return_predicted_value_for_missing_variables = function(variable, data, model) {
   
-  browser()
-  
   if (is.numeric(data[,variable])) {
     message(paste0("Note: You didn't choose to plot ", variable, " so I am inputting the median"))
     return(median(data[,variable], na.rm=T))
@@ -278,13 +276,22 @@ limit_range_of_predictions = function(data_outcome, prediction_outcome) {
 
 prepare_data_for_compare.fits = function(data=NULL, model1, model2=NULL, all_variables=NULL) {
   
-  if (is.null(data))    data = extract_data_from_fitted_object(model1)
+  # identify which is the bigger model
+
+  if (is.null(data))    data = extract_data_compare_fits(model1, model2)
   if (tibble::is_tibble(data)) data = as.data.frame(data)
   if (is.null(all_variables)) all_variables = all.vars(formula(model1))
   #### for the rare occasion where deleting missing data changes the levels...
   data = check_missing(model1, model2, data, all_variables)
   return(data)
   
+}
+
+extract_data_compare_fits = function(model1, model2) {
+  model_1_terms = all.vars(formula(model1)) 
+  model_2_terms = all.vars(formula(model2))
+  if (length(model_1_terms)>=length(model_2_terms)) return(extract_data_from_fitted_object(model1))
+  extract_data_from_fitted_object(model2)
 }
 
 check_errors_compare_fits = function(model1, model2, data, formula=NULL) {
