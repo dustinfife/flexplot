@@ -170,3 +170,21 @@ get_factor_numeric_names = function(data, predictors) {
   numb     = predictors[predictors %!in% cat]
   list(cat=cat, numb=numb)
 }
+
+delta_rsquare = function(object) {
+  
+  ssr = drop1(aov(object))[-1,"Sum of Sq"]
+  ssr2 = aov(object)$effects
+  if (length(ssr)<(nrow(anova(object))-1)){
+    message("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. To obtain main effect sizes, drop the interaction from your model. \n\n")
+  }
+  
+  sst = sum(anova(object)[,"Sum Sq"])
+  sse = anova(object)[,"Sum Sq"]
+  semi.p = (sse[1:(length(sse)-1)]/sst)
+  max = nrow(anova(object))-1
+  min = max-length(semi.p)+1
+  nms = row.names(anova(object))[min:max]	
+  names(semi.p) = nms
+  return(semi.p)
+}

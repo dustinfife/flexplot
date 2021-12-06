@@ -36,3 +36,19 @@ test_that("bf.bif works", {
   expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small)), 3.426344, tol = .01)
   expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small), invert=T), 1/3.426344, tol = .01)
 })
+
+test_that("return_mean_for_intercept_models works", {
+  expect_equal(return_mean_for_intercept_models(lm(y~1, data=small))$Mean, .2988, tol=.01)
+  expect_equal(return_mean_for_intercept_models(lm(y~1, data=small), outcome="y", data=small)$Mean, .2988, tol=.01)
+})
+
+test_that("get_factor_numeric_names works", {
+  expect_equal(get_factor_numeric_names(small, c("x", "y", "a", "b"))$cat, c("a", "b"))
+  expect_equal(get_factor_numeric_names(small, character(0))$cat, character(0))
+})
+
+test_that("delta_rsquare works", {
+  a = 1:10; b = 1:10; c = c(1,2,3,4,5,5,4,3,2,1)
+  suppressWarnings(expect_equal(delta_rsquare(lm(a~b))%>%as.numeric, 1))
+  suppressWarnings(expect_equal(delta_rsquare(lm(a~c))%>%as.numeric, 0, tol=.01))
+})

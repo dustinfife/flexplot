@@ -88,7 +88,6 @@ estimates.lm = function(object, mc=TRUE){
 	d = extract_data_from_fitted_object(object)
 	
 	# for intercept only models, return the mean
-	
 	if (length(predictors) == 0 ) return(return_mean_for_intercept_models(object, outcome, d))
 	    
   #### remove interaction terms
@@ -101,20 +100,7 @@ estimates.lm = function(object, mc=TRUE){
 	
 
 	#### compute change in r squared
-	ssr = drop1(aov(object))[-1,"Sum of Sq"]
-	ssr2 = aov(object)$effects
-	if (length(ssr)<(nrow(anova(object))-1)){
-		message("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. To obtain main effect sizes, drop the interaction from your model. \n\n")
-	}
-	
-	sst = sum(anova(object)[,"Sum Sq"])
-	sse = anova(object)[,"Sum Sq"]
-	semi.p = (sse[1:(length(sse)-1)]/sst)
-	max = nrow(anova(object))-1
-	min = max-length(semi.p)+1
-	nms = row.names(anova(object))[min:max]	
-	names(semi.p) = nms
-	
+  semi.p = delta_rsquare(object)
 	n = nrow(model.frame(object)) 
 	
 	
