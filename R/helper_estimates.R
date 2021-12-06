@@ -149,3 +149,24 @@ bf.bic = bf_bic = function(model1, model2, invert=F){
     bf
   }
 }
+
+return_mean_for_intercept_models = function(model, outcome=NULL, data=NULL) {
+  if (is.null(outcome)) outcome    = get_terms(model)$response
+  if (is.null(data))    data = extract_data_from_fitted_object(model)
+  
+  f = as.formula(paste0(outcome, "~1"))
+  est = compare.fits(formula = f, data=data, model1=model, model2=NULL, return.preds=T, report.se=T)
+  return = est[2:4]
+  names(return) = c("Mean", "Lower", "Upper")
+  return$d = coef(model)/summary(model)$sigma
+  return(return)
+}
+
+get_factor_numeric_names = function(data, predictors) {
+  
+  if (length(predictors)==0) return(list(cat=character(0), numb=character(0)))
+  #### get variable types
+  cat      = names(which(unlist(lapply(data[,predictors, drop=FALSE], function(x) (!is.numeric(x))))))
+  numb     = predictors[predictors %!in% cat]
+  list(cat=cat, numb=numb)
+}

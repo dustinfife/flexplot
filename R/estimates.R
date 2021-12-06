@@ -69,18 +69,6 @@ print.lmer_estimates = function(x,...){
     print(x$r.squared)    
 }	
 
-
-
-fit_baseline_model = function(object) {
-  dv = get_terms(object)$response
-  re = get_re(object)
-  form = as.formula(
-                paste0(dv, "~1+(1|", re, ")")
-              )
-  return(update(object, formula=form))
-}
-
-
 #' Report lm object Estimates (effect sizes and parameters)
 #'
 #' Report lm object Estimates
@@ -89,50 +77,28 @@ fit_baseline_model = function(object) {
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.lm = function(object, mc=TRUE){
-	n = nrow(model.frame(object)) 
 	
+
 	#### generate list of coefficients
-	terms = attr(terms(object), "term.labels")
+  terms = get_terms(object, nonlinear_terms = T)
+	outcome = terms$response
+	predictors = terms$predictors
 	
-	variables = as.character(attr(terms(object), "variables")); variables = variables[-1]
-	outcome = variables[1]
-	predictors = variables[-1]
+	#### get dataset
+	d = extract_data_from_fitted_object(object)
 	
 	# for intercept only models, return the mean
-
-	if (length(predictors) == 0 ) {
-	  f = as.formula(paste0(outcome, "~1"))
-	  est = compare.fits(formula = f, data=object$model, model1=object, model2=NULL, return.preds=T, report.se=T)
-	  return = est[2:4]
-	  names(return) = c("Mean", "Lower", "Upper")
-	  return$d = coef(object)/summary(object)$sigma
-	  return(return)
-	}
+	
+	if (length(predictors) == 0 ) return(return_mean_for_intercept_models(object, outcome, d))
 	    
-    #### look for interaction terms
+  #### remove interaction terms
 	terms = remove_interaction_terms(object)
-	#### get dataset
-	d = object$model
-  #}dataset=NULL
-	#### identify factors
-	if (length(terms)>1){
-		### convert characters to factors
-		chars = unlist(lapply(d[,terms], is.character))
-		chars = names(chars)[chars]
-		if (length(chars)==1) d[,chars] = as.factor(d[,chars]) else d[,chars] = lapply(d[,chars], as.factor)
-		factors = names(which(unlist(lapply(d[,terms], is.factor))));
-		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));
-	} else {
-
-		### convert characters to factors
-	  attr(terms(object), "factors")
-		chars = terms[which(is.character(d[,terms]))]
-		if (length(chars)>0){
-			d[,chars] = as.factor(d[,chars])
-		}
-		factors = terms[which(is.factor(d[,terms]) | is.character(d[,terms]))]
-		numbers = terms[which(is.numeric(d[,terms]))]
-	}
+	
+	#### identify factors/numeric
+	variable_types = get_factor_numeric_names(d, predictors)
+	factors = variable_types$cat
+	numbers = variable_types$numb
+	
 
 	#### compute change in r squared
 	ssr = drop1(aov(object))[-1,"Sum of Sq"]
@@ -140,7 +106,7 @@ estimates.lm = function(object, mc=TRUE){
 	if (length(ssr)<(nrow(anova(object))-1)){
 		message("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. To obtain main effect sizes, drop the interaction from your model. \n\n")
 	}
-	summary(object)
+	
 	sst = sum(anova(object)[,"Sum Sq"])
 	sse = anova(object)[,"Sum Sq"]
 	semi.p = (sse[1:(length(sse)-1)]/sst)
@@ -148,6 +114,9 @@ estimates.lm = function(object, mc=TRUE){
 	min = max-length(semi.p)+1
 	nms = row.names(anova(object))[min:max]	
 	names(semi.p) = nms
+	
+	n = nrow(model.frame(object)) 
+	
 	
 	if (length(factors)>0){
 		#### generate table with names
@@ -270,7 +239,7 @@ estimates.lm = function(object, mc=TRUE){
 	}
 
 
-
+n
 	#### report R squared
 	r.squared = summary(object)$r.squared
 	t.crit = qt(.975, df=n-2)	
@@ -280,7 +249,7 @@ estimates.lm = function(object, mc=TRUE){
 	
 	#### report correlation
 	if (length(numbers)==1 & length(factors)==0){
-		correlation = cor(d)[1,2]
+		correlation = cor(d[,c(numbers, outcome)])[1,2]
 	} else {
 		correlation = NA
 	}

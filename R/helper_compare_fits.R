@@ -38,7 +38,7 @@ get_cforest_variables = function(model, return.type=c("all", "predictors", "resp
   return(response)
 }
 
-get_terms = function(model) {
+get_terms = function(model, nonlinear_terms = FALSE) {
   model.type = class(model)[1]
   
   #### extract the terms from each MODEL
@@ -49,7 +49,11 @@ get_terms = function(model) {
   } 
   
   form = formula(model) 
-  predictors=all.vars(form)[-1]  
+  if (nonlinear_terms) {
+    predictors = as.character(attr(terms(model), "variables"))[-(1:2)]
+  } else {  
+    predictors=all.vars(form)[-1]  
+  }
   response = all.vars(form)[1]
   return(list(predictors = predictors, response=response))
 }
