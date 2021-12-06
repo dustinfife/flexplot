@@ -178,7 +178,7 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
   model.type = class(model)[1]
   if ((model.type == "lmerMod" | model.type == "glmerMod") & !re){
     return(data.frame(prediction = 
-                        predict(model, pred.values, type="response"), model="fixed effects"))
+        predict(model, pred.values, type="response"), model="fixed effects"))
   }  
   
   if ((model.type == "lmerMod" | model.type == "glmerMod") & re){
@@ -288,8 +288,9 @@ prepare_data_for_compare.fits = function(data=NULL, model1, model2=NULL, all_var
 }
 
 extract_data_compare_fits = function(model1, model2) {
-  model_1_terms = all.vars(formula(model1)) 
-  model_2_terms = all.vars(formula(model2))
+  
+  model_1_terms = get_terms(model1)$predictors
+  model_2_terms = get_terms(model2)$predictors
   if (length(model_1_terms)>=length(model_2_terms)) return(extract_data_from_fitted_object(model1))
   extract_data_from_fitted_object(model2)
 }

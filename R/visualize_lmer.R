@@ -95,7 +95,10 @@ mixed_model_plot = function(formula, object, random_plot, sample=3, return_objec
   if (!random_plot) return(compare.fits(formula, data=data, model1=object, re=F, clusters=sample,...))
 
   #### otherwise...
-  prediction = compare.fits(formula, data=data, model1=object, re=T, return.preds=T, clusters=sample)	
+  
+  prediction = rbind(
+    compare.fits(formula, data=data, model1=object, re=T, return.preds=T, clusters=sample),
+    compare.fits(formula, data=data, model1=object, re=F, return.preds=T, clusters=sample))
 
   #### subset data so it's the same as that sampled in prediction
   re = extract_random_term(object)

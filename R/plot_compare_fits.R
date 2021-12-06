@@ -68,6 +68,12 @@ compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=N
   
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
+  # visualize doesn't work without this line...not sure why....
+  if (model1.type == "lmerMod" | model1.type == "glmerMod"){
+    pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), 
+                           model= "fixed effects")
+  }
+  
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
   } else {
@@ -78,7 +84,7 @@ compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=N
     pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")
     old.mod=0
   }
-
+  
   #### convert polyr back to numeric (if applicable)
   if (model1.type == "polr" | model2.type == "polr"){
     data[,outcome]       = as.numeric(as.character(data[,outcome]))
@@ -101,10 +107,10 @@ compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=N
   }
 
   prediction.model$prediction = limit_range_of_predictions(data[,outcome], prediction.model$prediction)
-
+  
   #### return the dataset
   if (return.preds) return(prediction.model)
-
+  
   final_geom = return_lims_geom(outcome, data, model1)
   #when we have an intercept only model
   if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
