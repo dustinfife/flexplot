@@ -188,3 +188,91 @@ delta_rsquare = function(object) {
   names(semi.p) = nms
   return(semi.p)
 }
+
+create_empty_estimates_matrices = function(d, factors) {
+  factor_levels    =     unlist(lapply(d[,factors, drop=FALSE], levels))
+  estimates_rows   = sum(unlist( apply(d[,factors, drop=FALSE], 2, function(x) { length(unique(x))})))			
+  differences_rows = sum(apply(d[,factors, drop=FALSE], 2, function(x){ a = length(unique(x)); (a*(a-1))/2}))
+  
+  #### create empty matrix with variable names
+  coef.matrix = data.frame(variables = rep("", estimates_rows), levels=NA, estimate=NA, lower=NA, upper=NA)
+  coef.matrix$variables = factor(coef.matrix$variables, levels=c("", factors))		
+  
+  #### difference.matrix
+  difference.matrix = data.frame(variables = NA, comparison = 1:differences_rows, difference=NA, 
+                                 lower=NA, upper=NA, cohens.d=NA)
+  return(list(coef.matrix=coef.matrix, difference.matrix=difference.matrix))
+}
+
+populate_estimates_matrix = function(object, 
+                                     d=NULL, factors=NULL,outcome=NULL){
+
+  # get null object (for easy testing)
+  if (is.null(d))       d = extract_data_from_fitted_object(object)
+  if (is.null(factors)) factors = get_factor_numeric_names(d,
+                                                           get_terms(object, nonlinear_terms = T)$predictors)$cat
+  if (is.null(outcome)) outcome = get_terms(object, nonlinear_terms = T)$response
+  coef.matrix=create_empty_estimates_matrices(d, factors)$coef.matrix
+  difference.matrix=create_empty_estimates_matrices(d, factors)$difference.matrix
+  
+  
+  p = 1; p2=1; i=1
+  for (i in 1:length(factors)){
+    
+    #### populate df based on levels
+    levs = length(levels(d[,factors[i]]))
+    levs2 = (levs*(levs-1))/2
+    current.rows = p:(p+levs-1)
+    current.rows2 = p2:(p2 + levs2-1)
+
+    #### populate variable names
+    coef.matrix$variables[p] = factors[i]
+    
+    #### populate the estimates/lower/upper
+    f = as.formula(paste0(outcome, "~", factors[i]))
+    est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T)
+    
+    
+    coef.matrix$levels[current.rows] = as.character(est[,1])
+    coef.matrix$estimate[current.rows] = est$prediction.fit
+    coef.matrix$lower[current.rows] = est$prediction.lwr
+    coef.matrix$upper[current.rows] = est$prediction.upr
+    
+    
+    #### fill in the difference matrix
+    difference.matrix$variables[p2] = factors[i]
+    center = outer(est$prediction.fit, est$prediction.fit, "-")
+    keep <- lower.tri(center)
+    center <- center[keep]
+    nn = table(d[,factors[i]])
+    df = nrow(d) - length(coef(object))
+    width = qtukey(.95, levs, df) *
+      summary(object)$sigma * 
+      sqrt(outer(1/nn, 1/nn, "+"))[keep]
+    difference.names = outer(as.character(est[,1]), 
+                             as.character(est[,1]), 
+                             paste, sep = "-")[keep]
+    difference.matrix$comparison[current.rows2] = difference.names
+    difference.matrix[current.rows2,c("difference", "lower", "upper")] = 
+      c(center, center-width, center+width)				
+    difference.matrix$cohens.d[current.rows2] = difference.matrix$difference[current.rows2]/summary(object)$sigma
+    
+    #### increment the counter
+    p = p + levs
+    p2 = p2+levs2
+    
+    
+  }
+  
+  return(list(difference.matrix = difference.matrix, coef.matrix = coef.matrix))
+  
+}
+  
+
+
+
+
+
+
+#
+

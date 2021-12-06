@@ -52,3 +52,12 @@ test_that("delta_rsquare works", {
   suppressWarnings(expect_equal(delta_rsquare(lm(a~b))%>%as.numeric, 1))
   suppressWarnings(expect_equal(delta_rsquare(lm(a~c))%>%as.numeric, 0, tol=.01))
 })
+
+test_that("create_empty_estimates_matrices works", {
+  expect_equal(dim(create_empty_estimates_matrices(small, c("b", "a"))$coef.matrix), c(5,5))
+  expect_equal(dim(create_empty_estimates_matrices(small, c("b", "a"))$difference.matrix), c(4,6))
+})
+
+test_that("populate_estimates_matrix works", {
+  populate_estimates_matrix(lm(y~a + b, data=small))
+})
