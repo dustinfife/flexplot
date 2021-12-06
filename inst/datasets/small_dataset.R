@@ -10,13 +10,16 @@ y = model.matrix(~a + b + x + z + x:a + w_a) %*% c(0, .3, .1, .3, .4, .2, -.2, .
 y_poly = model.matrix(~a + b + x + z + x:a + w_a + I(x^2)) %*% c(0, .3, .1, .3, .4, .2, -.2, .3, -.3) + rnorm(n, 0, .15)
 y_bin = as.numeric(as.character(cut(y, breaks = c(-Inf,.3, Inf), labels=c(0,1))))
 small = data.frame(y=y, a=factor(a), b=factor(b), 
-                   z=z, x=x, x_miss = x_miss, y_bin=y_bin, w_a = round(rescale(w_a, 10, 3)), y_poly)
+                   z=z, x=x, x_miss = x_miss, y_bin=y_bin, 
+                   w_a = round(rescale(w_a, 10, 3)), 
+                   y_poly=y_poly)
 usethis::use_data(small, overwrite=T)
-
+head(small)
 # create random forest model
-small_rf = party::cforest(y~., data=small)
-usethis::use_data(small_rf, overwrite = T)
-small_randomForest = randomForest::randomForest(y~., data=small)
+small_raf = party::cforest(y~., data=small)
+usethis::use_data(small_raf, overwrite = T)
+
+small_randomForest = randomForest::randomForest(y~., data=small %>% select(-(x_miss)))
 usethis::use_data(small_randomForest, overwrite = T)
 
 

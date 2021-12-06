@@ -21,14 +21,14 @@ test_that("get_model_n works", {
 })
 
 test_that("get_cforest_variables works", {
-  expect_equal(get_cforest_variables(small_rf)              , names(small))
-  expect_equal(get_cforest_variables(small_rf, "predictors"), names(small)[-1])
-  expect_equal(get_cforest_variables(small_rf, "response")  , names(small)[1])
+  expect_equal(get_cforest_variables(small_raf)              , names(small))
+  expect_equal(get_cforest_variables(small_raf, "predictors"), names(small)[-1])
+  expect_equal(get_cforest_variables(small_raf, "response")  , names(small)[1])
 })
 
 test_that("get_terms works", {
   expect_equal(get_terms(lm(y~a+b, data=small))$predictors, c("a", "b"))
-  expect_equal(get_terms(small_rf)$predictors, names(small)[-1])
+  expect_equal(get_terms(small_raf)$predictors, names(small)[-1])
 })
 
 test_that("check_missing works", {
@@ -45,7 +45,7 @@ test_that("check_missing works", {
   
 test_that("get_model_n works", {
   expect_equal(get_model_n(small_randomForest), nrow(small))
-  expect_equal(get_model_n(small_rf), nrow(small))
+  expect_equal(get_model_n(small_raf), nrow(small))
   expect_equal(get_model_n(small_mixed_mod), nrow(small_mixed))
   expect_equal(get_model_n(lm(y~x, data=small)), nrow(small))
   expect_equal(get_model_n(rpart::rpart(y~a + b, data=small)), nrow(small))
@@ -70,7 +70,7 @@ test_that("return_predicted_value_for_missing_variables works", {
   expect_equal(return_predicted_value_for_missing_variables("a", small, lm(y~a + b, data=small)), "a")
   expect_equal(return_predicted_value_for_missing_variables("z", small, lm(y~a + z, data=small)), 0.2820952, tol = .001)
   expect_equal(return_predicted_value_for_missing_variables("b", small_mixed, 
-      lme4::lmer(y~z + (1|b), data=small_mixed)), "no")
+      lme4::lmer(y~z + (1|b), data=small_mixed)), "severe")
 })
 
 test_that("return_model_labels works", {
@@ -101,9 +101,10 @@ test_that("prepare_data_for_compare.fits works", {
 })
 
 test_that("check_errors_compare_fits works", {
-  check_errors_compare_fits(lm(y~a, data=small), lm(x~a, data=small), data=small)
-  check_errors_compare_fits(lm(y~a, data=small), lm(y~a+b, data=small), data=small, formula = y~a + b + x)
-  check_errors_compare_fits(lm(y~a, data=small), lm(y~a+b, data=small), data=avengers)  
+  expect_error(check_errors_compare_fits(lm(y~a, data=small), lm(x~a, data=small), data=small))
+  expect_error(check_errors_compare_fits(lm(y~a, data=small), lm(y~a+b, data=small), data=small, formula = y~a + b + x))
+  expect_error(check_errors_compare_fits(lm(y~a, data=small), lm(y~a+b, data=small), data=avengers))
 })
 
 #
+
