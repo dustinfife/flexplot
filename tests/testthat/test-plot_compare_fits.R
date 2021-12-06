@@ -33,4 +33,11 @@ test_that("compare_fits works with other models", {
   vdiffr::expect_doppelganger("compare_fits with mixed and RE", compare.fits(model1=mixed_full, model2 = mixed_red, re=TRUE))
   vdiffr::expect_doppelganger("compare_fits with mixed and not RE", compare.fits(model1=mixed_full, re=FALSE))
 })
+
+test_that("return_lims_geom works", {
+  expect_equal(class(return_lims_geom("y", small, party::cforest(y~a, data=small)))[2], "gg")
+  expect_equal(class(return_lims_geom("a", small, glm(a~z, data=small, family=binomial)))[2], "gg")
+  expect_equal(class(return_lims_geom("b", small, MASS::polr(b~z, data=small)))[2], "gg")
+  expect_equal(class(return_lims_geom("y", small, lm(y~z, data=small)))[2], "Coord")
+})
 options(warn = 0)
