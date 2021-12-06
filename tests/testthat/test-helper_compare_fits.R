@@ -100,6 +100,10 @@ test_that("prepare_data_for_compare.fits works", {
   expect_equal(prepare_data_for_compare.fits(model1=model, data=tibble(small)),data.frame(tibble(small)))
 })
 
-
+test_that("check_errors_compare_fits works", {
+  check_errors_compare_fits(lm(y~a, data=small), lm(x~a, data=small), data=small)
+  check_errors_compare_fits(lm(y~a, data=small), lm(y~a+b, data=small), data=small, formula = y~a + b + x)
+  check_errors_compare_fits(lm(y~a, data=small), lm(y~a+b, data=small), data=avengers)  
+})
 
 #

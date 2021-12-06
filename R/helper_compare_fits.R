@@ -285,7 +285,38 @@ prepare_data_for_compare.fits = function(data=NULL, model1, model2=NULL, all_var
   
 }
 
+check_errors_compare_fits = function(model1, model2, data, formula=NULL) {
+  
+  if (is.null(formula)) formula = formula(model1)
+  variables_mod1 = get_terms(model1)
+  variables_mod2 = get_terms(model2)
+  model_terms   = unique(c(variables_mod1$predictors, variables_mod2$predictors))
+  variables = all.vars(formula)
+  outcome = variables[1]
+  predictors = variables[-1]
+  
+  ### make sure they have the same outcome
+  if (variables_mod1$response != variables_mod2$response) {
+    stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
+  }
+  
+  ##### make sure they're putting the same variables from formula in terms
+  if (!(all(predictors %in% model_terms))){
+    stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", 
+                paste0(predictors[!(predictors%in%model_terms)], collapse=",")))
+  }
+  
+  ##### make sure they're using the right dataset
+  if (!(all(predictors %in% names(data)))){
+    stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", 
+                paste0(variables[!(variables%in%data)], collapse=","), ".\nDid you input the wrong dataset?\n\nMaybe you should take a nap."))
+  }
+}
 
+
+
+
+#
 
 
 

@@ -28,9 +28,8 @@ compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=N
                         pred.type="response", num_points = 50,
                         clusters=3,...){
   
-  if (is.null(model2)) runme = "yes"
-
   #### if mod2 is null..
+  if (is.null(model2)) runme = "yes"
   if (is.null(model2)) model2 = model1
   
   #### make sure, if they have lme4, both models are lme4 objects
@@ -43,50 +42,32 @@ compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=N
   #### get all variables
   variables_mod1 = get_terms(model1)
   variables_mod2 = get_terms(model2)
-  testme = unique(c(variables_mod1$predictors, variables_mod2$predictors))
+  model_terms   = unique(c(variables_mod1$predictors, variables_mod2$predictors))
   all_variables = unique(c(variables_mod1$predictors, variables_mod2$predictors, variables_mod1$response, variables_mod2$response))
-  
+
   # do all the checks/manipulations for the data
   data = prepare_data_for_compare.fits(data, model1, model2, all_variables)
   
   # if they don't provide a formula
   if (is.null(formula)) formula = make_flexplot_formula(variables_mod1$predictors, variables_mod1$response, data)
 
-  #### convert random effects to factors for mixed models
-  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
-  
-  ### make sure they have the same outcome
-  if (variables_mod1$response != variables_mod2$response) stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
-  
   ##### extract variable names from FORMULA
   variables = all.vars(formula)
   outcome = variables[1]
   predictors = variables[-1]
 
-  ##### make sure they're putting the same variables from formula in terms
-  if (!(all(predictors %in% testme))){
-    stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%testme)], collapse=",")))
-  }
-
-  ##### make sure they're using the right dataset
-  if (!(all(predictors %in% names(data)))){
-    stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
-  }
-
-  pred.values = generate_predictors(model1, data=data, predictors = predictors, model_terms = testme, num_points=num_points, return.preds)
+  #### convert random effects to factors for mixed models
+  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
   
-  # for intercept only models
-  if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
+  check_errors_compare_fits(model1, model2, data, formula)
+
+  # generate design matrix
+  pred.values = generate_predictors(model1, data=data, predictors = predictors, model_terms = model_terms, num_points=num_points, return.preds)
+    # for intercept only models
+    if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
   
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
-  ### there's no fixed effect if we don't have these lines
-  model1.type = class(model1)[1]
-  if (model1.type == "lmerMod" | model1.type == "glmerMod"){
-    pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), 
-                           model= "fixed effects")
-  }
-
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
   } else {
@@ -100,7 +81,7 @@ compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=N
 
   #### convert polyr back to numeric (if applicable)
   if (model1.type == "polr" | model2.type == "polr"){
-    data[,outcome] = as.numeric(as.character(data[,outcome]))
+    data[,outcome]       = as.numeric(as.character(data[,outcome]))
     pred.mod1$prediction = as.numeric(as.character(pred.mod1$prediction))
     pred.mod2$prediction = as.numeric(as.character(pred.mod2$prediction))
   }
@@ -109,7 +90,6 @@ compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=N
   pred.mod1$model = return_model_labels(model1, deparse(substitute(model1)), pred.mod1$model, re=re)
   pred.mod2$model = return_model_labels(model2, deparse(substitute(model2)), pred.mod2$model, re=re)
   pred.mod2$model = change_model_names_if_same(pred.mod1$model, pred.mod2$model)
-
 
   #### report one or two coefficients, depending on if they supplied it
   if (!exists("runme") | exists("old.mod")){
@@ -122,7 +102,7 @@ compare.fits = compare_fits = function(formula=NULL, data=NULL, model1, model2=N
 
   prediction.model$prediction = limit_range_of_predictions(data[,outcome], prediction.model$prediction)
 
-  #### create flexplot
+  #### return the dataset
   if (return.preds) return(prediction.model)
 
   final_geom = return_lims_geom(outcome, data, model1)
