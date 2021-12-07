@@ -66,7 +66,7 @@ test_that("populate_estimates_matrix works", {
 })
 
 test_that("populate_estimates_numeric works", {
-  populate_estimates_numeric(lm(y~a+z + I(z^2), data=small))
+  expect_equal(populate_estimates_numeric(lm(y~a+z + I(z^2), data=small))$estimate[2], .548, tol=.01)
 })
 
 test_that("standardized.beta returns the correct value", {
@@ -83,5 +83,19 @@ test_that("report_r_squared works", {
 test_that("report_correlation works", {
   expect_equal(report_correlation(lm(y~x, data=small)), .6061, tol=.01)
   expect_equal(report_correlation(lm(y~x+a, data=small)), NA)
+})
+
+mod_full    = lm(y~a + b + z, data=small)
+mod_reduced = lm(y~b + z, data=small)
+test_that("model_comparison_for_one_term works", {
+  expect_equal(model_comparison_for_one_term(1, object = mod_full)$rsq, summary(mod_full)$r.squared -summary(mod_reduced)$r.squared)
+})
+
+test_that("model_comparison_all_terms works", {
+  expect_null(model_comparison_all_terms(object=mod_full, mc=FALSE))
+  expect_null(model_comparison_all_terms(object=lm(y~a, data=small), mc=FALSE))
+  mc_mod = model_comparison_all_terms(lm(y~a + b, data=small))
+  expect_equal(mc_mod$rsq[2], .0214, tol=.01)
+  expect_equal(mc_mod$bayes.factor[2], .2688, tol=.01)
 })
 

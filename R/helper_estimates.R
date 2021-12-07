@@ -342,9 +342,9 @@ report_r_squared = function(object) {
   return(r.squared)
 }
 
-report_correlation = function(object, numbers=NULL, factors=NULL, outcome=NULL) {
+report_correlation = function(object, d = NULL, numbers=NULL, factors=NULL, outcome=NULL) {
   
-  if (is.null(numbers) | is.null(factors) | is.null(outcome)) {
+  if (is.null(numbers) | is.null(factors) | is.null(outcome) | is.null(d)) {
     d = extract_data_from_fitted_object(object)
     terms = get_terms(object, nonlinear_terms = T)
     predictors = terms$predictors
@@ -358,6 +358,43 @@ report_correlation = function(object, numbers=NULL, factors=NULL, outcome=NULL) 
   if (length(numbers)==1 & length(factors)==0) return(cor(d[,c(numbers, outcome)])[1,2])
   
   return(NA)
+}
+
+model_comparison_for_one_term = function(i, terms = NULL, object){
+  
+  if (is.null(terms)) terms = get_terms(object, nonlinear_terms = T)$predictors
+  
+  new.f = as.formula(paste0(". ~ . -", terms[i]))
+  new.object = update(object, new.f)
+  
+  list(
+    rsq = summary(object)$r.squared - summary(new.object)$r.squared,
+    bayes.factor = bf.bic(object, new.object, invert=FALSE)
+  )
+  
+}
+
+model_comparison_all_terms = function(object, terms = NULL, mc = TRUE) {
+  
+  if (is.null(terms)) terms = get_terms(object, nonlinear_terms = T)
+  
+  if (length(terms)>1 & mc){
+    
+    ### this requires superassignment to work with JASP
+    #dataset<<-object$model
+    dataset = object$model
+    all.terms = attr(terms(object), "term.labels")
+    mc = t(sapply(1:length(all.terms), model_comparison_for_one_term, terms=all.terms, object=object))
+    mod.comps = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
+    mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
+    mod.comps$rsq = as.numeric(mod.comps$rsq) 
+    mod.comps$bayes.factor = as.numeric(unlist(mod.comps$bayes.factor))
+    return(mod.comps)
+    
+  }
+  
+  return(NULL)
+  
 }
 
 

@@ -98,27 +98,19 @@ estimates.lm = function(object, mc=TRUE){
 	numbers = variable_types$numb
 	
   if (length(factors)>0){
-		
 		matrices = populate_estimates_matrix(object, d, factors, outcome)
     coef.matrix        = matrices$coef.matrix
     difference.matrix  = matrices$difference.matrix
-		
 	} else {
-	  
-		coef.matrix = NA
+  	coef.matrix = NA
 		difference.matrix=NA
-		
 	}	
 	
 	### NUMERIC VARIABLES
 	if (length(numbers)>0){
-		
 	  coef.matrix.numb = populate_estimates_numeric(object, numbers)
-		
 	} else {
-		
 	  coef.matrix.numb = NA
-	
 	}
 	
 	#### compute change in r squared
@@ -128,30 +120,10 @@ estimates.lm = function(object, mc=TRUE){
 	r.squared = report_r_squared(object)
 	
 	# compute correlation
-  correlation = report_correlation(object, numbers, factors, outcome)
+  correlation = report_correlation(object, d, numbers, factors, outcome)
 	
 	### do nested model comparisons
-	if (length(terms)>1 & mc){
-	  removed.one.at.a.time = function(i, terms, object){
-	    new.f = as.formula(paste0(". ~ . -", terms[i]))
-	    new.object = update(object, new.f)
-	    list(
-	      rsq = summary(object)$r.squared - summary(new.object)$r.squared,
-	      bayes.factor = bf.bic(object, new.object, invert=FALSE)
-	    )
-	  }
-	  ### this requires superassignment to work with JASP
-	  #dataset<<-object$model
-	  dataset = object$model
-	  all.terms = attr(terms(object), "term.labels")
-	  mc = t(sapply(1:length(all.terms), removed.one.at.a.time, terms=all.terms, object=object))
-	  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
-	  mod.comps = mc
-  	mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
-  	mod.comps$rsq = as.numeric(mod.comps$rsq); mod.comps$bayes.factor = as.numeric(unlist(mod.comps$bayes.factor))
-	} else {
-	  mod.comps = NULL
-	}
+  mod.comps = model_comparison_all_terms(object, terms, mc=TRUE)
 	
 	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, 
 	           difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, 
