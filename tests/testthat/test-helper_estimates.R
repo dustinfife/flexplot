@@ -35,7 +35,10 @@ test_that("anchor.predictions works for categorical predictors", {
 test_that("bf.bif works", {
   expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small)), 3.426344, tol = .01)
   expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small), invert=T), 1/3.426344, tol = .01)
-})
+  model1 = lm(weight.loss~motivation + therapy.type, data=exercise_data)
+  model2 = lm(weight.loss~motivation * therapy.type, data=exercise_data)
+  expect_equal(bf.bic(model1, model2), 95.29443) 
+})  
 
 test_that("return_mean_for_intercept_models works", {
   expect_equal(return_mean_for_intercept_models(lm(y~1, data=small))$Mean, .2988, tol=.01)
@@ -61,3 +64,24 @@ test_that("create_empty_estimates_matrices works", {
 test_that("populate_estimates_matrix works", {
   populate_estimates_matrix(lm(y~a + b, data=small))
 })
+
+test_that("populate_estimates_numeric works", {
+  populate_estimates_numeric(lm(y~a+z + I(z^2), data=small))
+})
+
+test_that("standardized.beta returns the correct value", {
+  model1 = lm(weight.loss~motivation + therapy.type, data=exercise_data)
+  results = standardized.beta(model1)
+  names(results) = NULL
+  expect_equal(results[2], 0.3708347) 
+})
+
+test_that("report_r_squared works", {
+  expect_equal(report_r_squared(lm(y~x, data=small))[3], .6346)
+})
+
+test_that("report_correlation works", {
+  expect_equal(report_correlation(lm(y~x, data=small)), .6061, tol=.01)
+  expect_equal(report_correlation(lm(y~x+a, data=small)), NA)
+})
+

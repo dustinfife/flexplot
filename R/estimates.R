@@ -78,7 +78,6 @@ print.lmer_estimates = function(x,...){
 #' @export
 estimates.lm = function(object, mc=TRUE){
 	
-
 	#### generate list of coefficients
   terms = get_terms(object, nonlinear_terms = T)
 	outcome = terms$response
@@ -98,64 +97,38 @@ estimates.lm = function(object, mc=TRUE){
 	factors = variable_types$cat
 	numbers = variable_types$numb
 	
-
-	#### compute change in r squared
-  semi.p = delta_rsquare(object)
-	n = nrow(model.frame(object)) 
-	
-	
-	if (length(factors)>0){
+  if (length(factors)>0){
 		
 		matrices = populate_estimates_matrix(object, d, factors, outcome)
     coef.matrix        = matrices$coef.matrix
     difference.matrix  = matrices$difference.matrix
 		
 	} else {
+	  
 		coef.matrix = NA
 		difference.matrix=NA
+		
 	}	
-	#### NUMERIC VARIABLES
-	if (length(numbers)>0){
-		vars = c("(Intercept)", numbers)
-		coef.matrix.numb = data.frame(variables=vars, estimate=NA, lower=NA, upper=NA, std.estimate=NA, std.lower=NA, std.upper=NA)#, df.spent=1, df.remaining=object$df)
-		coef.matrix.numb$estimate = coef(object)[vars]
-		
-		#### get upper and lower using matrix multiplication
-		upper.lower = t(matrix(coef(object)[vars], ncol=2, nrow=length(vars), byrow=F) + t(t(t(c(1.96,-1.96)))%*%t(summary(object)$coef[vars,2])))
-
-		coef.matrix.numb$lower = (upper.lower)[2,]
-		coef.matrix.numb$upper = (upper.lower)[1,]
-
-		
-		##### standardized estimates
-		coef.std = standardized.beta(object, se=T)
-			#### remove those that are numeric
-		num = which(names(coef.std$beta) %in% numbers)	
-		coef.std$beta = coef.std$beta[num]
-		coef.std$se = coef.std$se[num]					
-		coef.matrix.numb$std.estimate = c(0, coef.std$beta)
-		upper.lower = t(matrix(c(0, coef.std$beta), ncol=2, nrow=length(vars), byrow=F) + t(t(t(c(1.96,-1.96)))%*%t(c(0, coef.std$beta))))
-		coef.matrix.numb[,c("std.upper", "std.lower")] = t(upper.lower)	
-		
-	} else {
-		coef.matrix.numb = NA
-	}
-
-
-n
-	#### report R squared
-	r.squared = summary(object)$r.squared
-	t.crit = qt(.975, df=n-2)	
-	se.r = sqrt((4*r.squared*(1-r.squared)^2*(n-1-1)^2)/((n^2-1)*(n+3)))		### from cohen, cohen, west, aiken, page 88
-	r.squared = c(r.squared, r.squared-t.crit*se.r, r.squared+t.crit*se.r)
-	r.squared = round(r.squared, digits=4)
 	
-	#### report correlation
-	if (length(numbers)==1 & length(factors)==0){
-		correlation = cor(d[,c(numbers, outcome)])[1,2]
+	### NUMERIC VARIABLES
+	if (length(numbers)>0){
+		
+	  coef.matrix.numb = populate_estimates_numeric(object, numbers)
+		
 	} else {
-		correlation = NA
+		
+	  coef.matrix.numb = NA
+	
 	}
+	
+	#### compute change in r squared
+	semi.p = delta_rsquare(object)
+
+  # compute r squared
+	r.squared = report_r_squared(object)
+	
+	# compute correlation
+  correlation = report_correlation(object, numbers, factors, outcome)
 	
 	### do nested model comparisons
 	if (length(terms)>1 & mc){
@@ -179,19 +152,6 @@ n
 	} else {
 	  mod.comps = NULL
 	}
-  
-	# #### print summary
-	# message(paste("Model R squared:\n", round(r.squared[1], digits=3), " (", round(r.squared[2], digits=2),", ", round(r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
-	# print(semi.p)
-	# if (length(factors)>0){
-		# message(paste("\nEstimates for Factors:\n"))
-		# print(coef.matrix)
-	# }
-	# if (length(numbers)>0){
-		# message(paste("\n\nEstimates for Numeric Variables = \n"))
-		# print(coef.matrix.numb)		
-	# }
-	# message(paste("\nsigma = ", round(summary(object)$sigma, digits=4), "\n\n"))
 	
 	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, 
 	           difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, 

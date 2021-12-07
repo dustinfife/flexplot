@@ -2,18 +2,7 @@ context("miscellaneous functions")
 
 data("exercise_data")
 
-test_that("standardized.beta returns the correct value", {
-  model1 = lm(weight.loss~motivation + therapy.type, data=exercise_data)
-  results = standardized.beta(model1)
-  names(results) = NULL
-  expect_equal(results[2], 0.3708347) 
-})
 
-test_that("bic inverts", {
-  model1 = lm(weight.loss~motivation + therapy.type, data=exercise_data)
-  model2 = lm(weight.loss~motivation * therapy.type, data=exercise_data)
-  expect_equal(bf.bic(model1, model2), 95.29443) 
-})
 
 test_that("subsetString returns correct values", {
   stringthing = ("I - am - a - string")

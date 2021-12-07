@@ -228,11 +228,11 @@ populate_estimates_matrix = function(object,
     #### populate variable names
     coef.matrix$variables[p] = factors[i]
     
-    #### populate the estimates/lower/upper
+    # compute the estimates
     f = as.formula(paste0(outcome, "~", factors[i]))
     est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T)
     
-    
+    #### populate the estimates/lower/upper
     coef.matrix$levels[current.rows] = as.character(est[,1])
     coef.matrix$estimate[current.rows] = est$prediction.fit
     coef.matrix$lower[current.rows] = est$prediction.lwr
@@ -269,7 +269,96 @@ populate_estimates_matrix = function(object,
 }
   
 
+populate_estimates_numeric = function(object, numbers=NULL) {
+  
+  if (is.null(numbers)) {
+    predictors = get_terms(object, nonlinear_terms = T)$predictors 
+    data = extract_data_from_fitted_object(object)
+    numbers = get_factor_numeric_names(data, predictors)$numb
+  }  
+  
+  vars = c("(Intercept)", numbers)
+  coef.matrix.numb = data.frame(variables=vars, estimate=NA, lower=NA, upper=NA, 
+                                std.estimate=NA, std.lower=NA, std.upper=NA)
+  coef.matrix.numb$estimate = coef(object)[vars]
+  
+  #### get upper and lower using matrix multiplication
+  upper.lower = t(matrix(coef(object)[vars], ncol=2, nrow=length(vars), byrow=F) + 
+                    t(t(t(c(1.96,-1.96)))%*%t(summary(object)$coef[vars,2])))
+  
+  coef.matrix.numb$lower = (upper.lower)[2,]
+  coef.matrix.numb$upper = (upper.lower)[1,]
+  
+  ##### standardized estimates
+  coef.std = standardized.beta(object, se=T)
 
+    #### remove those that are numeric
+  num = which(names(coef.std$beta) %in% numbers)	
+  coef.std$beta = coef.std$beta[num]
+  coef.std$se = coef.std$se[num]					
+  coef.matrix.numb$std.estimate = c(0, coef.std$beta)
+  upper.lower = t(matrix(c(0, coef.std$beta), ncol=2, nrow=length(vars), byrow=F) + t(t(t(c(1.96,-1.96)))%*%t(c(0, coef.std$beta))))
+  coef.matrix.numb[,c("std.upper", "std.lower")] = t(upper.lower)	
+  coef.matrix.numb
+}
+
+##' Compute standardized betas on a linear model object
+##'
+##' Compute standardized betas on a linear model object
+##'	
+##' Compute standardized betas on a linear model object
+##' @param object a lm object
+##' @param sd.y Should we scale based on standard deviation of Y as well as the predictors?
+##' @param se Should standard errors be reported?
+##' @return the standardized betas
+##' @author Dustin Fife
+##' @export
+standardized.beta = function(object, sd.y=T, se=F){
+  b <- summary(object)$coef[, 1]
+  sx <- apply(model.matrix(object), 2, sd)
+  sy <- apply(object$model[1], 2, sd)
+  if (sd.y){
+    beta <- b * sx/sy
+  } else {
+    beta = b*sx
+  }
+  if (!se){
+    return(beta)
+  } else {
+    sterr = summary(object)$coef[,2]
+    beta.se = sterr*sx/sy
+    list(beta=beta, se= beta.se)
+  }
+}
+
+report_r_squared = function(object) {
+  #### report R squared
+  r.squared = summary(object)$r.squared
+  n = nrow(model.frame(object)) 
+  t.crit = qt(.975, df=n-2)	
+  se.r = sqrt((4*r.squared*(1-r.squared)^2*(n-1-1)^2)/((n^2-1)*(n+3)))		### from cohen, cohen, west, aiken, page 88
+  r.squared = c(r.squared, r.squared-t.crit*se.r, r.squared+t.crit*se.r)
+  r.squared = round(r.squared, digits=4)
+  return(r.squared)
+}
+
+report_correlation = function(object, numbers=NULL, factors=NULL, outcome=NULL) {
+  
+  if (is.null(numbers) | is.null(factors) | is.null(outcome)) {
+    d = extract_data_from_fitted_object(object)
+    terms = get_terms(object, nonlinear_terms = T)
+    predictors = terms$predictors
+    outcome = terms$response
+    variable_types = get_factor_numeric_names(d, predictors)
+    factors = variable_types$cat
+    numbers = variable_types$numb
+  }
+  
+  #### report correlation
+  if (length(numbers)==1 & length(factors)==0) return(cor(d[,c(numbers, outcome)])[1,2])
+  
+  return(NA)
+}
 
 
 
