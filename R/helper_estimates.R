@@ -297,7 +297,7 @@ populate_estimates_numeric = function(object, numbers=NULL) {
   coef.std$beta = coef.std$beta[num]
   coef.std$se = coef.std$se[num]					
   coef.matrix.numb$std.estimate = c(0, coef.std$beta)
-  upper.lower = t(matrix(c(0, coef.std$beta), ncol=2, nrow=length(vars), byrow=F) + t(t(t(c(1.96,-1.96)))%*%t(c(0, coef.std$beta))))
+  upper.lower = t(matrix(c(0, coef.std$beta), ncol=2, nrow=length(vars), byrow=F) + t(t(t(c(1.96,-1.96)))%*%t(c(0, coef.std$se))))
   coef.matrix.numb[,c("std.upper", "std.lower")] = t(upper.lower)	
   coef.matrix.numb
 }
