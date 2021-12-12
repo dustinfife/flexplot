@@ -1,16 +1,10 @@
-context("use estimates to report effect sizes")
+context("compute_estimates works")
 
-data(exercise_data)
-d = exercise_data
-d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)
 set.seed(1212)
 test_that("estimates from linear models", {
 
-  cat1 = lm(weight.loss~therapy.type, data=d)	
-  expect_equal(estimates(cat1)$difference.matrix$cohens.d[1], .6305667, tolerance = 0.002)
-  
-  ##### two categoricals
-  mod = lm(weight.loss~therapy.type + gender, data=d)	
+  expect_equal(estimates(lm(y~b,   data=small))$difference.matrix$cohens.d[1], -.4692, tolerance = 0.002)
+  expect_equal(estimates(lm(y~a+b, data=small))$difference.matrix$cohens.d[1]
   #expect_equal(estimates(mod)$difference.matrix$cohens.d[4], -.1024, tolerance = 0.002)
   
   ##### interaction

@@ -230,7 +230,7 @@ populate_estimates_matrix = function(object,
     
     # compute the estimates
     f = as.formula(paste0(outcome, "~", factors[i]))
-    est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T)
+    est = suppressMessages(compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T))
     
     #### populate the estimates/lower/upper
     coef.matrix$levels[current.rows] = as.character(est[,1])
