@@ -317,15 +317,6 @@ estimates.zeroinfl = function(object, mc=FALSE){
 }
 
 
-remove_interaction_terms = function(object) {
-  #### generate list of coefficients
-  terms = attr(terms(object), "term.labels")
-  interaction = length(grep(":", terms))>0
-  if (interaction){
-    terms = terms[-grep(":", terms)]
-  }
-  return(terms)
-}
 
 
 #' Print estimates Summary

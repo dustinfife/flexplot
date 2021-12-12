@@ -175,10 +175,6 @@ delta_rsquare = function(object) {
   
   ssr = drop1(aov(object))[-1,"Sum of Sq"]
   ssr2 = aov(object)$effects
-  if (length(ssr)<(nrow(anova(object))-1)){
-    message("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. To obtain main effect sizes, drop the interaction from your model. \n\n")
-  }
-  
   sst = sum(anova(object)[,"Sum Sq"])
   sse = anova(object)[,"Sum Sq"]
   semi.p = (sse[1:(length(sse)-1)]/sst)
@@ -398,6 +394,15 @@ model_comparison_all_terms = function(object, terms = NULL, mc = TRUE) {
 }
 
 
+remove_interaction_terms = function(object) {
+  #### generate list of coefficients
+  terms = attr(terms(object), "term.labels")
+  interaction = length(grep(":", terms))>0
+  if (interaction){
+    terms = terms[-grep(":", terms)]
+  }
+  return(terms)
+}
 
 
 #

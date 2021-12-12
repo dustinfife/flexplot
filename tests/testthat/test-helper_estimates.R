@@ -24,6 +24,18 @@ test_that("return_plus_minus_one_sd works", {
   expect_equal(length(return_plus_minus_one_sd(1:10)), 2)
 })
 
+test_that("generate_numeric_predictions works", {
+  expect_null(generate_numeric_predictions(character(0), small))
+  expect_equal(length(generate_numeric_predictions(c("x", "y"), small)), 2) 
+  expect_equal(length(generate_numeric_predictions(c("x"), small)), 1) 
+})
+
+test_that("generate_grid_predictions", {
+  expect_equal(nrow(generate_grid_predictions(list(a=1:3, b=4:5), list(c = c('a', 'b')), NULL)), 12)
+  expect_null(generate_grid_predictions(NULL, NULL, NULL))
+})
+
+
 test_that("anchor.predictions works for categorical predictors", {
   linear.model = lm(weight.loss~health + gender, data= exercise_data)
   expect_message(anchor.predictions(linear.model, "gender")$prediction[1])
@@ -99,3 +111,7 @@ test_that("model_comparison_all_terms works", {
   expect_equal(mc_mod$bayes.factor[2], .2688, tol=.01)
 })
 
+test_that("removing interactions works", {
+  mod = lm(kills~agility*speed, data=avengers)
+  expect_true(length(remove_interaction_terms(mod))==2)
+})
