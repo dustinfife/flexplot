@@ -1,5 +1,6 @@
 # this function tests for functions within an R formula and returns those results
 formula_functions = function(formula, data) {
+  #browser()
   term_labels = attr(terms(formula), "term.labels")
   
   # return original data if there's no functions
