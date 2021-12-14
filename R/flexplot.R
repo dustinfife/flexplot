@@ -104,45 +104,35 @@ flexplot = function(formula, data=NULL, related=F,
 		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), 
 		return_data = F, ...){
 			
-	#data = exercise_data
-	##### use the following to debug flexplot
-	#formula = formula(weight.loss~therapy.type + rewards | motivation); data=exercise_data; 
-	#bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
-	#data(exercise_data)
-	#d = exercise_data
-	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
-	#ghost.reference = list(income=90000)
+
   
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
   data = ff$data; formula =ff$formula
   
-  spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
+  spread    = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   plot.type = match.arg(plot.type, c("histogram", "qq", "density", "boxplot", "violin", "line"))
   
   ### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
-  if (tibble::is_tibble(data)){
-    data = as.data.frame(data)
-  }
+  if (tibble::is_tibble(data)) data = as.data.frame(data)
   
   ### prepare the variables
-  varprep = flexplot_prep_variables(formula, data, 
-                                    breaks = breaks, labels=labels, bins=bins,
-                                    related=related,  
-                                    jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
-                                    alpha=alpha, prediction=prediction)
+  varprep = flexplot_prep_variables(formula, data, method=method,
+                                    breaks = breaks, bins=bins)
   
-  # extract original names of dv (for logistic, prior to making it continuous)
-  
-  outcome = varprep$outcome
-  data = varprep$data
-  method = with(varprep, identify_method(data, outcome, axis, method))
-  if (length(unique(data[,outcome]))==2 & method == "logistic") logistic_labels = unique(data[,outcome])
+  #output these variables from previous function
+  variables=varprep$variables; outcome = varprep$outcome; predictors=varprep$predictors; given=varprep$given; axis=varprep$axis; bins=varprep$bins
+  numbers=varprep$numbers; levels = varprep$levels; break.me = varprep$break.me; breaks = varprep$breaks
+
+  #prepare labels for logistic plots
+  method = identify_method(data, outcome, axis, method)
+  outcome_levels = length(unique(data[,outcome]))
+  if (outcome_levels == 2 & method == "logistic") logistic_labels = unique(data[,outcome])
 
   ### make modifications to the data
-  data = with(varprep, 
-	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
-	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method))
+  data = flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
+	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method)
+  
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
                         ### (error came at ghost.reference when it couldn't find the binned version)
 
@@ -162,13 +152,12 @@ flexplot = function(formula, data=NULL, related=F,
 		varprep$prediction = prediction
 	}
 	
-	
-	
+
   ### report errors when necessary
-  with(varprep, flexplot_errors(variables = variables, data = data, method=method, axis=axis))
+  flexplot_errors(variables = variables, data = data, method=method, axis=axis)
   
   ### change alpha, depending on plot type
-  alpha = with(varprep, flexplot_alpha_default(data=data, axis = axis, alpha = alpha))
+  alpha = flexplot_alpha_default(data=data, axis = axis, alpha = alpha)
   
 
   ### change se based on how many variables they have
@@ -183,9 +172,9 @@ flexplot = function(formula, data=NULL, related=F,
   
 
 	### PLOT UNIVARIATE PLOTS
-  bivariate = with(varprep, flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
+  bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread, plot.type=plot.type))
+                                                    method=method, spread=spread, plot.type=plot.type)
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted

@@ -1,6 +1,6 @@
 # this function tests for functions within an R formula and returns those results
 formula_functions = function(formula, data) {
-  #browser()
+  
   term_labels = attr(terms(formula), "term.labels")
   
   # return original data if there's no functions
@@ -38,22 +38,25 @@ get_var_names_within_function = function(string, return.var=TRUE) {
   fun
 }
 
+identify_method = function(data, outcome, axis, method) {
+  # histograms/barcharts
+  if (axis[1] == "1") return("loess")
+  # association plot
+  if (check.non.number(data[,axis[1]])) return("loess")
+  # logistic
+  if (length(unique(data[,outcome]))==2) return("logistic")
+  if (!is.null(method)) return(method)  
+  return("loess")
+}
 
-
-# expect_true(length(names(flexplot_prep_variables(weight.loss~therapy.type, data=exercise_data)))==23)
-# expect_true(length(flexplot_prep_variables(weight.loss~therapy.type + motivation, data=exercise_data)$variables)==3)
 # this function takes all the arguments needed for the rest of the --------
 # function and stores them as a list --------------------------------------
-flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels=NULL, bins=3, 
-                                   jitter=NULL, suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
-                                   alpha=.99977, prediction=NULL){
-
-  spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
+flexplot_prep_variables = function(formula, data, method, breaks=NULL, bins=3){
   
   variables = all.vars(formula, unique=FALSE)
   outcome = variables[1]
   predictors = variables[-1]
-  
+
   ### extract given and axis variables
   given.axis = flexplot_axis_given(formula)
   given = given.axis$given
@@ -74,9 +77,8 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   
   list(variables=variables, outcome=outcome, predictors=predictors, 
        given=given, axis=axis, numbers=numbers, categories=categories, 
-       levels=levels, data=data, break.me=break.me, breaks=breaks, formula = formula, data = data,
-       related = related, labels=labels, bins=bins, breaks=breaks, jitter=jitter, suppress_smooth=suppress_smooth,
-       method = method, spread = spread, alpha = alpha, prediction = prediction)
+       levels=levels, break.me=break.me, breaks=breaks,
+       bins=bins, breaks=breaks)
 }
 
 #flexplot_random_names(10, data.names = c("h", "b"))
@@ -127,10 +129,6 @@ modify_association_plot_data = function(data, outcome, axis) {
   return(data)
 }
 
-
-# expect_true(is.factor(modify_univariate_data_numeric(data=data.frame(a=1:4), "1", "a")$a))
-# expect_false(is.factor(modify_univariate_data_numeric(data=data.frame(a=1:5), "1", "a")$a))
-# expect_false(is.factor(modify_univariate_data_numeric(data=data.frame(a=rnorm(111)), "1", "a")$a))
 modify_univariate_data_numeric = function(data, axis, outcome) {
   if (axis[1] == "1" & is.numeric(data[,outcome]) & length(unique(data[,outcome]))<5){
     data[,outcome] = factor(data[,outcome], ordered=TRUE)
@@ -139,16 +137,6 @@ modify_univariate_data_numeric = function(data, axis, outcome) {
   return(data)
 }
 
-
-# d = data.frame(group = rep(c(1,2), times=5), outcome = rnorm(10))
-# modify_related_data(d, T, "group", "outcome", variables = c("group", "outcome"))
-# modify_related_data(d, F, "group", "outcome", variables = c("group", "outcome"))
-# d = data.frame(group = rep(c(1,2,3), times=5), outcome = rnorm(15))
-# expect_error(modify_related_data(d, T, "group", "outcome", variables = c("group", "outcome")))
-# d = data.frame(group = rep(c(1,2), times=5), outcome = rnorm(10), predictor = rnorm(10))
-# expect_error(modify_related_data(d, T, "group", "outcome", variables = c("group", "outcome", "predictor")))
-# d = data.frame(group = sample(c(1,2), size=18, replace=T, prob=c(.8, .3)), outcome = rnorm(18))
-# expect_error(modify_related_data(d, T, "group", "outcome", variables = c("group", "outcome")))
 modify_related_data = function(data, related, axis, outcome, variables) {
   
   if (!related) return(data)
@@ -172,16 +160,9 @@ modify_related_data = function(data, related, axis, outcome, variables) {
   return(data)
 }
 
-
-# expect_error(flexplot_modify_data(data=exercise_data, variables = "weight.loss"))  ### missing all variables
-# expect_true(!is.tibble(flexplot_modify_data(formula = weight.loss~therapy.type, data=exercise_data %>% select(weight.loss, therapy.type))))### data as tibble
-# expect_equal(flexplot_modify_data(therapy.type~gender, data=exercise_data)$Proportion[1], .12745098)  ### association plot data
-# expect_error(flexplot_modify_data(weight.loss~gender + motivation, data=exercise_data, related=T))
-# expect_error(flexplot_modify_data(formula = weight.loss~gender, data=exercise_data, related=T))
-# expect_true(all(c("motivation_binned", "income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + motivation | income, data=exercise_data))))
-# expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
-flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, method = NULL, 
-                                axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
+flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
+                                axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, 
+                                spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE, method="quartiles"){
   
   if (is.null(data)) return(data) 
 
@@ -190,7 +171,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   if (!is.null(formula)) {
     prep_vars = flexplot_prep_variables(formula, data=data)
     variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; given = prep_vars$given
-    break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors; spread = prep_vars$spread
+    break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors; 
   }
   
   if (pred.data) {
@@ -214,6 +195,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   # prepare data for related test
   data = modify_related_data(data=data, related=related, axis=axis, outcome=outcome, variables=variables)
   
+  # create a binned
   data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
   
   # make sure method = 'logistic' under the right circumstances
@@ -221,22 +203,9 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
 
   # convert data for logistic regression
   data = factor.to.logistic(data,outcome, method)
-  
 
-  #### reorder axis 1 it's not already ordered
-  if(axis[1] != "1"){
-    #### order by medians for numeric outcomes
-    if (!is.numeric(data[,axis[1]]) & is.numeric(data[,outcome]) & !is.ordered(data[, axis[1]]) & !related){
-      if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
-      ord = aggregate(data[,outcome]~data[, axis[1]], FUN=fn, na.rm=T)
-      ord = ord[order(ord[,2], decreasing=T),]
-      data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
-    }
-    #### order by frequency for categorical outcomes
-  } else if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){
-    sizes = table(data[,outcome])
-    ord = order(sizes, decreasing = T)
-    data[,outcome] = factor(data[, outcome], levels=names(sizes)[ord])
+  if (axis[1] != "1") {
+    data = modify_data_for_bivariate_plots(data, axis=axis, outcome=outcome, related=related, spread=spread)
   }
   
   ### reorder levels of given 2
@@ -247,6 +216,47 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   return(data)
   
   
+}
+
+modify_data_for_bivariate_plots = function(data, formula = NULL, axis=NULL, outcome=NULL,related=F, 
+                                            spread = "quartiles") {
+
+  if (is.null(axis)) axis = flexplot_axis_given(formula)$axis
+  if (is.null(outcome)) outcome = all.vars(formula)[1]
+  
+  #specify conditionals
+  x_is_categorical = !is.numeric(data[,axis[1]])
+  y_is_numeric     = is.numeric(data[,outcome])
+  x_is_ordered     = is.ordered(data[, axis[1]])
+  
+  #### order by medians for numeric outcomes
+  if (x_is_categorical & y_is_numeric & !x_is_ordered & !related){
+    return(reorder_x_by_center(data=data, outcome=outcome, axis=axis, spread=spread))
+  }
+  #### order by frequency for categorical outcomes
+  if (x_is_categorical & !x_is_ordered){
+    return(reorder_x_by_n(data, outcome))
+  }
+  return(data)
+}
+
+reorder_x_by_center = function(data, outcome=NULL, axis=NULL, formula=NULL, spread = "quartiles") {
+  
+  if (is.null(axis)) axis = flexplot_axis_given(formula)$axis
+  if (is.null(outcome)) outcome = all.vars(formula)[1]
+  
+  if (spread=="quartiles") fn = "median" else fn = "mean"
+  ord = aggregate(data[,outcome]~data[, axis[1]], FUN=fn, na.rm=T)
+  ord = ord[order(ord[,2], decreasing=T),]
+  data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
+  return(data)
+}
+
+reorder_x_by_n = function(data, outcome) {
+  sizes = table(data[,outcome])
+  ord = order(sizes, decreasing = T)
+  data[,outcome] = factor(data[, outcome], levels=names(sizes)[ord])
+  return(data)
 }
 
 
