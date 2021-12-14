@@ -1,3 +1,16 @@
+factorize_predictions = function(prediction, data, axis) {
+  if (is.null(prediction)) return(prediction)
+  
+  prediction$model = factor(prediction$model)
+  
+  ### make the levels consistent between prediction/data for axis 1
+  x_is_categorical = !is.numeric(data[[axis[1]]])
+  if (x_is_categorical){
+    prediction[[axis[1]]] = factor(prediction[[axis[1]]], levels=levels(data[[axis[1]]]))
+  }
+  return(prediction)
+}
+
 # this function tests for functions within an R formula and returns those results
 formula_functions = function(formula, data) {
   

@@ -121,8 +121,9 @@ flexplot = function(formula, data=NULL, related=F,
                                     breaks = breaks, bins=bins)
   
   #output these variables from previous function
-  variables=varprep$variables; outcome = varprep$outcome; predictors=varprep$predictors; given=varprep$given; axis=varprep$axis; bins=varprep$bins
-  numbers=varprep$numbers; levels = varprep$levels; break.me = varprep$break.me; breaks = varprep$breaks
+  variables=varprep$variables; outcome = varprep$outcome; predictors=varprep$predictors; given=varprep$given; 
+  axis=varprep$axis; bins=varprep$bins; numbers=varprep$numbers; levels = varprep$levels; break.me = varprep$break.me; 
+  breaks = varprep$breaks
 
   #prepare labels for logistic plots
   method = identify_method(data, outcome, axis, method)
@@ -130,28 +131,13 @@ flexplot = function(formula, data=NULL, related=F,
   if (outcome_levels == 2 & method == "logistic") logistic_labels = unique(data[,outcome])
 
   ### make modifications to the data
-  data = flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
+  data       = flexplot_modify_data(data=data,       variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method)
-  
-  varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
-                        ### (error came at ghost.reference when it couldn't find the binned version)
-
-  prediction = with(varprep, 
-              flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
-	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE))
+  prediction = flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
+	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE)
 
   ##### make models into a factor if they supply predictions
-	if (!is.null(prediction)){
-		prediction$model = factor(prediction$model)
-		
-		### make the levels consistent between prediction/data for axis 1
-		if (!is.numeric(data[[varprep$axis[1]]])){
-		  prediction[[varprep$axis[1]]] = factor(prediction[[varprep$axis[1]]], levels=levels(data[[varprep$axis[1]]]))
-		}
-		
-		varprep$prediction = prediction
-	}
-	
+  prediction = factorize_predictions(prediction=prediction, data=data, axis=axis)
 
   ### report errors when necessary
   flexplot_errors(variables = variables, data = data, method=method, axis=axis)
