@@ -112,7 +112,7 @@ stratified_sample_re = function(formula, data, re, samp.size=6) {
   selected_IDs = binned_data %>% 
     dplyr::group_by(dplyr::across(dplyr::all_of(c(grouped_variables)))) %>%
     dplyr::sample_n(max(sample_size_within_group, 1)) %>%
-    dplyr::ungroup %>%
+    ungroup %>%
     dplyr::select(re) %>%
     purrr::pluck(re) %>%
     unique
