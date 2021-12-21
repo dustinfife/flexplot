@@ -110,10 +110,10 @@ stratified_sample_re = function(formula, data, re, samp.size=6) {
   # this will ensure all panels are sampled. 
   # then we'll have to add to that to meet our minimum sample size
   selected_IDs = binned_data %>% 
-    group_by(across(all_of(c(grouped_variables)))) %>%
-    sample_n(max(sample_size_within_group, 1)) %>%
-    ungroup %>%
-    select(re) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(c(grouped_variables)))) %>%
+    dplyr::sample_n(max(sample_size_within_group, 1)) %>%
+    dplyr::ungroup %>%
+    dplyr::select(re) %>%
     purrr::pluck(re) %>%
     unique
 
