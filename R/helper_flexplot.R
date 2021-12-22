@@ -1,3 +1,5 @@
+choose_flexplot_type = function()
+
 factorize_predictions = function(prediction, data, axis) {
   if (is.null(prediction)) return(prediction)
   
@@ -51,16 +53,6 @@ get_var_names_within_function = function(string, return.var=TRUE) {
   fun
 }
 
-identify_method = function(data, outcome, axis, method) {
-  # histograms/barcharts
-  if (axis[1] == "1") return("loess")
-  # association plot
-  if (check.non.number(data[,axis[1]])) return("loess")
-  # logistic
-  if (length(unique(data[,outcome]))==2) return("logistic")
-  if (!is.null(method)) return(method)  
-  return("loess")
-}
 
 # this function takes all the arguments needed for the rest of the --------
 # function and stores them as a list --------------------------------------
@@ -128,50 +120,11 @@ flexplot_alpha_default = function(data, axis, alpha){
 }
 
 
-### prep data for association plot
-modify_association_plot_data = function(data, outcome, axis) {
-  
-  if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1 & axis[1] != "1"){
-    m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
-    chi = chisq.test(data[,axis], data[,outcome])
-    obs.exp = (chi$observed - chi$expected)/chi$expected
-    m$Freq = as.vector(obs.exp)
-    names(m)[names(m)=="Freq"] = "Proportion"
-    return(m)
-  }
-  return(data)
-}
 
-modify_univariate_data_numeric = function(data, axis, outcome) {
-  if (axis[1] == "1" & is.numeric(data[,outcome]) & length(unique(data[,outcome]))<5){
-    data[,outcome] = factor(data[,outcome], ordered=TRUE)
-    return(data)
-  }
-  return(data)
-}
 
-modify_related_data = function(data, related, axis, outcome, variables) {
-  
-  if (!related) return(data)
-  
-  #### extract levels of the predictors
-  levs = unique(data[,axis[1]])
-  
-  #### create difference scores
-  g1 = data[data[, axis[1]]==levs[1], outcome]
-  g2 = data[data[, axis[1]]==levs[2], outcome]		
-  
-  ### error checking
-  if (length(variables)!=2) stop("Currently, the 'related' option is only available when there's a single predictor.")
-  if (length(levs)!=2) stop("Sorry, I can only accept two levels of the grouping variable when related=T.")
-  if (length(g1) != length(g2)) stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")
-  
-  lab = paste0("Difference (",levs[2], "-", levs[1], ')')
-  data = data.frame(Difference=g2-g1)
-  attr(data, "levels") = levs
-  data[,variables] = NA
-  return(data)
-}
+
+
+
 
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, 
@@ -198,15 +151,9 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
 
   ### convert variables with < 5 categories to ordered factors
   data = flexplot_convert_to_categorical(data, axis)
-
-  ### prevent univariates from binning numeric variables with <5 levels
-  data = modify_univariate_data_numeric(data=data, axis=axis, outcome=outcome)
   
   # prepare data for association plot
   data = modify_association_plot_data(data=data, outcome=outcome, axis=axis)
-  
-  # prepare data for related test
-  data = modify_related_data(data=data, related=related, axis=axis, outcome=outcome, variables=variables)
   
   # create a binned
   data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
@@ -528,21 +475,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
       }
     }	
     
-    ### RELATED T-TEST
-  } else if (related){		
-      levs = attr(data, "levels")
-      p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
-               levs[2], "-", levs[1], ")') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())")
-      points = points.func(axis.var="Difference", data=data, jitter=jitter*.5)
-      if (plot.type == "boxplot"){
-        fitted = 'geom_boxplot(alpha=.1)'
-      } else if (plot.type == "violin"){
-        fitted = 'geom_violin(alpha=.1)'
-      } else {
-        fitted = paste0(fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
-      }
-    ##### if they have two axis variables
-  } else if (length(axis)>1){
+   } else if (length(axis)>1){
 
     ### if they supply predictions, do not vary color
     if (!is.null(prediction)){

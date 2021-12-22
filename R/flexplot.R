@@ -117,18 +117,57 @@ flexplot = function(formula, data=NULL, related=F,
   if (tibble::is_tibble(data)) data = as.data.frame(data)
   
   ### prepare the variables
-  varprep = flexplot_prep_variables(formula, data, method=method,
-                                    breaks = breaks, bins=bins)
+  variables = all.vars(formula, unique=FALSE)
+  outcome = variables[1]
+  predictors = variables[-1]
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  vtypes = variable_types(predictors, data, return.names=T)
+  numbers = vtypes$numbers
+  categories = vtypes$characters
+  if (outcome %in% categories){
+    levels = length(unique(data[,outcome]))	### necessary for univariate plots
+  }
   
-  #output these variables from previous function
-  variables=varprep$variables; outcome = varprep$outcome; predictors=varprep$predictors; given=varprep$given; 
-  axis=varprep$axis; bins=varprep$bins; numbers=varprep$numbers; levels = varprep$levels; break.me = varprep$break.me; 
-  breaks = varprep$breaks
-
-  #prepare labels for logistic plots
-  method = identify_method(data, outcome, axis, method)
-  outcome_levels = length(unique(data[,outcome]))
-  if (outcome_levels == 2 & method == "logistic") logistic_labels = unique(data[,outcome])
+  jitter = match_jitter_categorical(jitter)
+  
+  ## set up conditions
+  y_is_categorical = !is.numeric(data[[outcome]])
+  levels_in_y = length(unique(data[[outcome]]))
+  x_is_categorical = !is.numeric(data[[axis[1]]])
+  
+  #### univariate plots
+  if (length(axis)==1 & axis[1] == "1") {
+    ### prevent univariates from binning numeric variables with <5 levels
+    data = modify_univariate_data_numeric(data=data, axis=axis, outcome=outcome)
+    plot_string = create_univariate_plot(data, outcome, plot.type)
+  }
+  
+  ### related plot
+  if (related) {
+    data = modify_related_data(data=data, related=related, axis=axis, 
+                               outcome=outcome, variables=variables)
+    plot_string = create_related_plot(data, outcome, plot.type,
+                                      suppress_smooth, spread)
+  }
+  
+  ### association plot
+  if (y_is_categorical & x_is_categorical){
+    data = modify_association_plot_data(data, outcome, axis)
+    plot_string = create_association_plot()
+  }
+  
+  ### logistic plot
+  if (y_is_categorical & levels_in_y == 2) {
+    method = identify_method(data, outcome, axis, method)
+    data = factor.to.logistic(data,outcome, method)
+    plot_string = create_logistic_plot(data, axis, jitter)
+    logistic_labels = unique(data[,outcome])
+  }
+  
+  ### beeswarm plot
+  
 
   ### make modifications to the data
   data       = flexplot_modify_data(data=data,       variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
