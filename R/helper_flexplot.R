@@ -175,7 +175,7 @@ modify_related_data = function(data, related, axis, outcome, variables) {
   lab = paste0("Difference (",levs[2], "-", levs[1], ')')
   data = data.frame(Difference=g2-g1)
   attr(data, "levels") = levs
-  #data[,variables] = NA
+  data[,variables] = NA
   return(data)
 }
 
@@ -472,26 +472,25 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
   
   # specify conditions
   x_is_categorical = !is.numeric(data[[outcome]])
-  y_is_categorical = !is.numeric(data[[axis[1]]])
+  y_is_categorical = !is.numeric(data[[axis]])
+  
   
   #### histograms
-  if (length(outcome)==1 & length(predictors)==0 | axis[1] == "1") 
-    return(flexplot_histogram(data, outcome, plot.type=plot.type))
+  if (length(outcome)==1 & length(predictors)==0 | axis[1] == "1") return(flexplot_histogram(data, outcome))
     
   ### association plot
   if (length(outcome)==1 & length(axis)==1 & x_is_categorical & y_is_categorical) return(flexplot_association())
       
   ### bivariate plots
-  if (length(outcome)==1 & length(axis)==1) return(flexplot_bivariate(data, outcome, axis, jitter, plot.type, 
-                                                                      suppress_smooth=suppress_smooth, method=method, spread=spread))
+  if (length(outcome)==1 & length(axis)==1) return(flexplot_bivariate(data, axis, jitter, plot.type))
+      
+  if (related) return(related)
     
-    ### RELATED T-TESTbrowser()
-  if (related) {
-    return(flexplot_related(data, outcome, jitter, suppress_smooth, plot.type, method, spread))
-  }
+    ### RELATED T-TEST
+  } else if (related){		
       
     ##### if they have two axis variables
-  if (length(axis)>1){
+  } else if (length(axis)>1){
 
     ### if they supply predictions, do not vary color
     if (!is.null(prediction)){
@@ -546,7 +545,7 @@ flexplot_related = function(data, outcome, jitter=c(.1,0), suppress_smooth=FALSE
   return(list(p=p, points=points, fitted=fitted))
 }
 
-flexplot_bivariate   = function(data, outcome, axis, jitter, plot.type, suppress_smooth=F, method="loess", spread="quartile") {
+flexplot_bivariate   = function(data, axis, jitter, plot.type) {
   p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
   points = points.func(axis.var=axis, data=data, jitter=jitter)
   
@@ -557,11 +556,10 @@ flexplot_bivariate   = function(data, outcome, axis, jitter, plot.type, suppress
   } else if (plot.type == "line") {
     fitted = 'geom_line()'
   } else {
-    fitted = fit.function(outcome, axis, data=data, 
-                          suppress_smooth=suppress_smooth, method=method, spread=spread)		
+    fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
   }
   
-  return(list(p=p, points=points, fitted=fitted))
+  return(p=p, points=points, fitted=fitted)
 }
 
 flexplot_association = function() {
@@ -571,7 +569,7 @@ flexplot_association = function() {
   return(list(p=p, points=points, fitted=fitted))
 }
 
-flexplot_histogram = function(data, outcome, plot.type) {
+flexplot_histogram = function(data, outcome) {
 
   points = "xxxx"
   fitted = "xxxx"	
