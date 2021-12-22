@@ -139,17 +139,28 @@ flexplot = function(formula, data=NULL, related=F,
   ##### make models into a factor if they supply predictions
   prediction = factorize_predictions(prediction=prediction, data=data, axis=axis)
 
+  ### report errors when necessary
+  flexplot_errors(variables = variables, data = data, method=method, axis=axis)
+  
   ### change alpha, depending on plot type
   alpha = flexplot_alpha_default(data=data, axis = axis, alpha = alpha)
+  
 
   ### change se based on how many variables they have
-  se = default_se(se, axis)
+  if (is.null(se)){
+    if (length(varprep$axis)>1){
+      se=F
+    } else {
+      se = T
+    }
+  }
+
+  
 
 	### PLOT UNIVARIATE PLOTS
-  bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, 
-                            predictors=predictors, axis=axis,
-                            related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                            method=method, spread=spread, plot.type=plot.type)
+  bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
+                                                    related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
+                                                    method=method, spread=spread, plot.type=plot.type)
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted

@@ -1,9 +1,3 @@
-default_se = function(se, axis) {
-  if (!is.null(se)) return(se)
-  if (length(axis)>1) return(F)
-  return(T)
-}
-
 factorize_predictions = function(prediction, data, axis) {
   if (is.null(prediction)) return(prediction)
   
@@ -452,6 +446,24 @@ flexplot_convert_to_categorical = function(data, axis){
   return(data)
 }
 
+
+
+# uni = flexplot_bivariate_plot(weight.loss~1, data=exercise_data)$p
+# expect_identical(uni, "ggplot(data=data, aes_string(outcome)) + geom_histogram(fill=\"lightgray\", col=\"black\", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)")
+# uni2 = flexplot_bivariate_plot(therapy.type~1, data=exercise_data)$p
+# expect_identical(uni2, "ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)")
+# uni3 = flexplot_bivariate_plot(therapy.type~1, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T)))$p
+# expect_identical(uni3, "ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)")
+# chi = flexplot_bivariate_plot(therapy.type~gender, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T)))$p
+# tst = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+# expect_identical(chi, tst)
+# chi = flexplot_bivariate_plot(therapy.type~gender, data=exercise_data)$p
+# tst = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+# expect_identical(chi, tst)
+# bv = flexplot_bivariate_plot(weight.loss~gender, data=exercise_data)$p
+# expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
+# bv = flexplot_bivariate_plot(weight.loss~motivation, data=exercise_data)$p
+# expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
                                     related, alpha, jitter, suppress_smooth, method, spread, plot.type  # arguments passed from flexplot
                                    ){
@@ -470,25 +482,65 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     suppress_smooth= prep_vars$suppress_smooth; method= prep_vars$method; spread= prep_vars$spread
   }
   
-  # specify conditions
-  x_is_categorical = !is.numeric(data[[outcome]])
-  y_is_categorical = !is.numeric(data[[axis]])
-  
-  
   #### histograms
-  if (length(outcome)==1 & length(predictors)==0 | axis[1] == "1") return(flexplot_histogram(data, outcome))
+  if (length(outcome)==1 & length(predictors)==0 | axis[1] == "1"){
     
-  ### association plot
-  if (length(outcome)==1 & length(axis)==1 & x_is_categorical & y_is_categorical) return(flexplot_association())
+    ### figure out how many levels for the variable
+    levels = length(unique(data[,outcome]))	
+    
+    #### if numeric, do a histogram
+    if (is.numeric(data[,outcome])){
+      if (plot.type=="qq"){
+        p = 'ggplot(data=data, aes_string(sample = outcome)) + stat_qq() + stat_qq_line() + theme_bw() + labs(x=outcome)'
+      } else if (plot.type == "density") {
+        p = 'ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)'
+      } else {
+        p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
+      }
+    } else {
+      p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
+    } 
+    points = "xxxx"
+    fitted = "xxxx"		
+    
+  ### BIVARIATE PLOTS
+  } else if (length(outcome)==1 & length(axis)==1 & !related){
+
+    #### if both are categorical, do chi square
+    if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
       
-  ### bivariate plots
-  if (length(outcome)==1 & length(axis)==1) return(flexplot_bivariate(data, axis, jitter, plot.type))
+      p = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+      points = "xxxx"
+      fitted = "xxxx"
       
-  if (related) return(related)
+    } else {
+      
+      p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
+      points = points.func(axis.var=axis, data=data, jitter=jitter)
+      if (plot.type == "boxplot"){
+        fitted = 'geom_boxplot(alpha=.1)'
+      } else if (plot.type == "violin"){
+        fitted = 'geom_violin(alpha=.1)'
+      } else if (plot.type == "line") {
+        fitted = 'geom_line()'
+      } else {
+        fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
+      }
+    }	
     
     ### RELATED T-TEST
   } else if (related){		
-      
+      levs = attr(data, "levels")
+      p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
+               levs[2], "-", levs[1], ")') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())")
+      points = points.func(axis.var="Difference", data=data, jitter=jitter*.5)
+      if (plot.type == "boxplot"){
+        fitted = 'geom_boxplot(alpha=.1)'
+      } else if (plot.type == "violin"){
+        fitted = 'geom_violin(alpha=.1)'
+      } else {
+        fitted = paste0(fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
+      }
     ##### if they have two axis variables
   } else if (length(axis)>1){
 
@@ -524,75 +576,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     }	
   }
   
-  return(list(p=p, points=points, fitted=fitted))
-}
-
-flexplot_related = function(data, outcome, jitter=c(.1,0), suppress_smooth=FALSE, plot.type="beeswarm",
-                            method="lm", spread="sterr") {
-  levs = attr(data, "levels")
-  p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
-             levs[2], "-", levs[1], ")') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())")
-  points = points.func(axis.var="Difference", data=data, jitter=jitter*.5)
-  if (plot.type == "boxplot"){
-    fitted = 'geom_boxplot(alpha=.1)'
-  } else if (plot.type == "violin"){
-    fitted = 'geom_violin(alpha=.1)'
-  } else {
-    fitted = paste0(fit.function(outcome, "Difference", data=data, 
-                                 suppress_smooth=suppress_smooth, method=method, spread=spread, 
-                                 categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
-  }
-  return(list(p=p, points=points, fitted=fitted))
-}
-
-flexplot_bivariate   = function(data, axis, jitter, plot.type) {
-  p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
-  points = points.func(axis.var=axis, data=data, jitter=jitter)
-  
-  if (plot.type == "boxplot"){
-    fitted = 'geom_boxplot(alpha=.1)'
-  } else if (plot.type == "violin"){
-    fitted = 'geom_violin(alpha=.1)'
-  } else if (plot.type == "line") {
-    fitted = 'geom_line()'
-  } else {
-    fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
-  }
-  
-  return(p=p, points=points, fitted=fitted)
-}
-
-flexplot_association = function() {
-  p = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
-  points = "xxxx"
-  fitted = "xxxx"
-  return(list(p=p, points=points, fitted=fitted))
-}
-
-flexplot_histogram = function(data, outcome) {
-
-  points = "xxxx"
-  fitted = "xxxx"	
-  
-  ### if categorical, return barchart
-  if (!is.numeric(data[,outcome])) {
-    p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
-    return(list(p=p, points=points, fitted=fitted))
-  }
-  
-  #### if numeric, do a histogram
-  if (plot.type=="qq"){
-    p = 'ggplot(data=data, aes_string(sample = outcome)) + stat_qq() + stat_qq_line() + theme_bw() + labs(x=outcome)'
-    return(list(p=p, points=points, fitted=fitted))
-  } 
-  
-  if (plot.type == "density") {
-    p = 'ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)'
-    return(list(p=p, points=points, fitted=fitted))
-  } 
-  
-  p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
-  return(list(p=p, points=points, fitted=fitted))
+  list(p=p, points=points, fitted=fitted)
 }
 
 
