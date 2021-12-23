@@ -52,20 +52,38 @@ choose_flexplot_type = function(data, formula = NULL,
     return(list(plot_string=plot_string, data=data))    
   }
   
+  ### scatterplot
+  return(create_scatter_plot(data, axis, jitter, suppress_smooth, method))
+  
 }
 
-factorize_predictions = function(prediction, data, axis) {
-  if (is.null(prediction)) return(prediction)
+add_second_axis = function(data, axis, plot) {
   
-  prediction$model = factor(prediction$model)
+  if (length(axis)==1) return(plot)
   
-  ### make the levels consistent between prediction/data for axis 1
-  x_is_categorical = !is.numeric(data[[axis[1]]])
-  if (x_is_categorical){
-    prediction[[axis[1]]] = factor(prediction[[axis[1]]], levels=levels(data[[axis[1]]]))
+  if (is.numeric(data[,axis[2]])){
+    axis2_binned = paste0(axis[2], "_binned")
+    
+    plot$p = paste0('ggplot(data=data, aes_string(y=outcome, x=axis, 
+                              color=', axis2_binned, ', linetype = ', axis2_binned, ', shape=', axis2_binned, ')) 
+                         + labs(color= "', axis2_binned, '", linetype= "', axis2_binned, '", shape= "', axis2_binned, '")')
+    return(plot)
   }
-  return(prediction)
+  
+  # if they're trying to plot more than 10 symbols...
+  unique_values_in_axis_2 = length(unique(data[,axis[2]]))
+  if (unique_values_in_axis_2>6) {
+    message("It looks like you're trying to plot more than 6 colors/lines/symbols.\nI gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.\n I hope we can still be friends.")
+    plot$p = 'ggplot(data=data, aes_string(x=axis[1], y=outcome, color=axis[2]))'
+    return(plot)
+  } 
+  
+  plot$p = 'ggplot(data=data, aes_string(x=axis[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + 
+            labs(color= axis[2], linetype= axis[2], shape= axis[2])'
+  return(plot$p)
 }
+
+
 
 # this function tests for functions within an R formula and returns those results
 formula_functions = function(formula, data) {
@@ -568,97 +586,27 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
 
 
 #### flexplot function for paneling
-flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=3, breaks=NULL, 
-                                    suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
-                                    prediction=NULL){
-
-  ## prep data
-  vars = flexplot_vars
-    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
-    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
-    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
-    formula = vars$formula; data = vars$data; break.me = vars$break.me
+flexplot_panel_variables = function(given, break.me){
   
-  if (!is.na(given[1])){
-    #### prep the given variables to be stringed together
-    given2 = given
-    if (length(break.me)>0){
-      given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")
-    }	
+  if (is.na(given[1])) return("xxxx")
+  
+  #### prep the given variables to be stringed together
+  given_binned = given
+  
+  if (length(break.me)>0){
+    given_binned[given_binned%in%break.me] = paste0(given_binned[given_binned%in%break.me], "_binned")
+  }	
 
-    if (given[1]=="") {
-      given.as.string = paste0(given2[2], "~.")
-    } else {
-      given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
-    }
-
-    facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			
+  if (given[1]=="") {
+    given.as.string = paste0(given_binned[2], "~.")
   } else {
-    facets = "xxxx"
+    given.as.string = ifelse(length(given)>1 & !is.na(given_binned[1]),paste0(rev(given_binned), collapse="~"), paste0("~",given_binned))
   }
-  
+
+  facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			
   return(facets)
 }
 
-flexplot_modify_prediction = function(flexplot_vars, prediction=NULL, 
-                                      num.models, labels=NULL, bins=3, breaks=NULL){
 
-  ## prep data
-  vars = flexplot_vars
-    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
-    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
-    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
-    formula = vars$formula; data = vars$data; break.me = vars$break.me
-    
-  if (!is.na(axis[2]) & length(num.models)>1){
-    stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z), or choose to display only one model")
-  }
-  
-  
-  #### bin the predictions, where needed
-
-  if (length(break.me)>0){
-    for (i in 1:length(break.me)){
-      ### find that variable in the model and bin it
-      prediction[[break.me[i]]] = bin.me(break.me[i], prediction, bins, labels[i], breaks[[break.me[i]]])
-      
-    }
-    ### now average fit within bin
-    groups = c("model", paste0(break.me, "_binned"), predictors[-which(predictors%in%break.me)])
-    prediction = prediction %>% group_by_at(groups) %>% summarize(prediction = mean(prediction)) %>% as.data.frame
-  }
-
-  
-  return(prediction)
-}
-
-flexplot_generate_prediction_lines = function(prediction, axis, break.me, data,num.models, labels, bins, breaks){
-
-    #### check if first variable is a continuous predictor
-    if (is.numeric(data[[axis[1]]])){
-      
-      ##### if they specify an axis[2], modify the "fitted" string
-      if (!is.na(axis[2])){
-        pred.line = 'geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)' 				
-        fitted = "xxxx"
-      } else {
-        
-        
-        #### if they supply more than two models to compare...
-        if (length(levels(prediction$model))>2){
-          pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)' 									
-        } else {
-          pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				
-        }
-      }
-      
-    } else {
-      
-      pred.line = 'geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))'
-      
-    }
-
-  return(pred.line) 
-}
 
 #

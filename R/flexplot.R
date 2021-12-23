@@ -104,8 +104,6 @@ flexplot = function(formula, data=NULL, related=F,
 		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), 
 		return_data = F, ...){
 			
-
-  
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
   data = ff$data; formula =ff$formula
@@ -142,14 +140,26 @@ flexplot = function(formula, data=NULL, related=F,
                               axis, outcome, plot.type, variables, 
                               suppress_smooth, spread, jitter, mean.line)
 
+# add bins/breaks ---------------------------------------------------------
+  
+  ### create the lists that contain the breaks
+  break.me = flexplot_break_me(data, predictors, given, axis, bins)
+  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)  
+  data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
+  
+# layer colors/lines/symbols ----------------------------------------------
+
+  plot = add_second_axis(data, axis, plot)
+  
 # layer panels to existing plots ------------------------------------------
   
-
-
+  facets = flexplot_panel_variables(given, break.me)
 
 # layer predictions -------------------------------------------------------
 
-
+  prediction = factorize_predictions(prediction, data, axis)
+  prediction = flexplot_modify_prediction(prediction, formula=NULL, break.me, bins, labels, breaks, predictors)
+  plot = modify_ggplot_string_for_predictions(plot, axis)
 
 # layer ghost lines -------------------------------------------------------
 
