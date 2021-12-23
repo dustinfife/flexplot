@@ -1,4 +1,58 @@
-choose_flexplot_type = function()
+choose_flexplot_type = function(data, formula = NULL, 
+                                axis=NULL, outcome=NULL, plot.type=NULL, variables=NULL, 
+                                suppress_smooth=F, spread="quartile", jitter=c(.1,0), mean.line=F) {
+  
+  ## set up conditions
+  y_is_categorical = !is.numeric(data[[outcome]])
+  levels_in_y = length(unique(data[[outcome]]))
+  x_is_categorical = !is.numeric(data[[axis[1]]])
+  
+  
+  if (is.null(axis)) {
+    variables = all.vars(formula, unique=FALSE)
+    outcome = variables[1]
+    axis = flexplot_axis_given(formula)$axis
+  }  
+  
+  #### univariate plots
+  if (length(axis)==1 & axis[1] == "1") {
+    ### prevent univariates from binning numeric variables with <5 levels
+    data = modify_univariate_data_numeric(data=data, axis=axis, outcome=outcome)
+    plot_string = create_univariate_plot(data, outcome, plot.type)
+    return(list(plot_string=plot_string, data=data))
+  }
+  
+  ### related plot
+  if (related) {
+    data = modify_related_data(data=data, related=related, axis=axis, 
+                               outcome=outcome, variables=variables)
+    plot_string = create_related_plot(data, outcome, plot.type,
+                                      suppress_smooth, spread)
+    return(list(plot_string=plot_string, data=data))
+  }
+  
+  ### association plot
+  if (y_is_categorical & x_is_categorical){
+    data = modify_association_plot_data(data, outcome, axis)
+    plot_string = create_association_plot()
+    return(list(plot_string=plot_string, data=data))
+  }
+  
+  ### logistic plot
+  if (y_is_categorical & levels_in_y == 2) {
+    data = factor.to.logistic(data,outcome, method)
+    plot_string = create_logistic_plot(data, axis, jitter)
+    return(list(plot_string=plot_string, data=data))
+  }
+  
+  ### beeswarm plot
+  if (x_is_categorical) {
+    data = flexplot_convert_to_categorical(data, axis)
+    plot_string = create_beeswarm_plot(data, axis, jitter, suppress_smooth, spread, mean.line)
+    return(list(plot_string=plot_string, data=data))    
+  }
+  
+}
 
 factorize_predictions = function(prediction, data, axis) {
   if (is.null(prediction)) return(prediction)

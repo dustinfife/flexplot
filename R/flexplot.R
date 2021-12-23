@@ -130,44 +130,30 @@ flexplot = function(formula, data=NULL, related=F,
     levels = length(unique(data[,outcome]))	### necessary for univariate plots
   }
   
+  
+  # modify default arguments
   jitter = match_jitter_categorical(jitter)
+  method = identify_method(data, outcome, axis, method)
+  logistic_labels = unique(data[,outcome])
+
+# choose the base plot ----------------------------------------------------
   
-  ## set up conditions
-  y_is_categorical = !is.numeric(data[[outcome]])
-  levels_in_y = length(unique(data[[outcome]]))
-  x_is_categorical = !is.numeric(data[[axis[1]]])
+  plot = choose_flexplot_type(data, formula, 
+                              axis, outcome, plot.type, variables, 
+                              suppress_smooth, spread, jitter, mean.line)
+
+# layer panels to existing plots ------------------------------------------
   
-  #### univariate plots
-  if (length(axis)==1 & axis[1] == "1") {
-    ### prevent univariates from binning numeric variables with <5 levels
-    data = modify_univariate_data_numeric(data=data, axis=axis, outcome=outcome)
-    plot_string = create_univariate_plot(data, outcome, plot.type)
-  }
-  
-  ### related plot
-  if (related) {
-    data = modify_related_data(data=data, related=related, axis=axis, 
-                               outcome=outcome, variables=variables)
-    plot_string = create_related_plot(data, outcome, plot.type,
-                                      suppress_smooth, spread)
-  }
-  
-  ### association plot
-  if (y_is_categorical & x_is_categorical){
-    data = modify_association_plot_data(data, outcome, axis)
-    plot_string = create_association_plot()
-  }
-  
-  ### logistic plot
-  if (y_is_categorical & levels_in_y == 2) {
-    method = identify_method(data, outcome, axis, method)
-    data = factor.to.logistic(data,outcome, method)
-    plot_string = create_logistic_plot(data, axis, jitter)
-    logistic_labels = unique(data[,outcome])
-  }
-  
-  ### beeswarm plot
-  
+
+
+
+# layer predictions -------------------------------------------------------
+
+
+
+# layer ghost lines -------------------------------------------------------
+
+      
 
   ### make modifications to the data
   data       = flexplot_modify_data(data=data,       variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
