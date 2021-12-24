@@ -1,6 +1,7 @@
 choose_flexplot_type = function(data, formula = NULL, 
                                 axis=NULL, outcome=NULL, plot.type=NULL, variables=NULL, 
-                                suppress_smooth=F, spread="quartile", jitter=c(.1,0), mean.line=F) {
+                                suppress_smooth=F, spread="quartile", jitter=c(.1,0), mean.line=F,
+                                related) {
   
   ## set up conditions
   y_is_categorical = !is.numeric(data[[outcome]])
@@ -27,7 +28,7 @@ choose_flexplot_type = function(data, formula = NULL,
     data = modify_related_data(data=data, related=related, axis=axis, 
                                outcome=outcome, variables=variables)
     plot_string = create_related_plot(data, outcome, plot.type,
-                                      suppress_smooth, spread)
+                                      suppress_smooth, spread, jitter)
     return(list(plot_string=plot_string, data=data))
   }
   

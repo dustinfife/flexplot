@@ -325,7 +325,7 @@ points.func = function(axis.var, data, jitter){
 ##' @importFrom MASS rlm	
 #### identify the correct "fit"
 fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method="loess", spread="sterr", mean.line=F, categorical=FALSE){
-	
+	browser()
 	if (is.numeric(data[,predictors]) & !categorical){
 		if (suppress_smooth){
 			fit.string = "xxxx"
@@ -356,7 +356,7 @@ fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method
 		
 	} else {
 		
-		
+	  fit.string = "xxxx"
 		
 	}
 

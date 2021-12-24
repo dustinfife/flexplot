@@ -130,7 +130,6 @@ flexplot = function(formula, data=NULL, related=F,
   ### report errors when necessary
   flexplot_errors(variables = variables, data = data, method=method, axis=axis)
     
-  
   # modify default arguments
   jitter = match_jitter_categorical(jitter)
   method = identify_method(data, outcome, axis, method)
@@ -142,8 +141,10 @@ flexplot = function(formula, data=NULL, related=F,
 
   plot = choose_flexplot_type(data, formula, 
                               axis, outcome, plot.type, variables, 
-                              suppress_smooth, spread, jitter, mean.line)
+                              suppress_smooth, spread, jitter, mean.line, 
+                              related)
   data = plot$data
+  
 # add bins/breaks ---------------------------------------------------------
   
   ### create the lists that contain the breaks

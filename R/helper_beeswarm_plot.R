@@ -31,7 +31,7 @@ create_summary_beeswarm = function(suppress_smooth, spread, mean.line) {
     
   } 
   
-  if (spread == "quartiles"){	
+  if (spread == "quartiles" | spread == "quartile"){	
     summary1 = "stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')" 
     summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')"
     return(paste0(summary1, "+",summary2, "+", sum.line))
