@@ -116,14 +116,14 @@ flexplot = function(formula, data=NULL, related=F,
   
   ### prepare the variables
   variables = all.vars(formula, unique=FALSE)
-  outcome = variables[1]
-  predictors = variables[-1]
+    outcome = variables[1]
+    predictors = variables[-1]
   given.axis = flexplot_axis_given(formula)
-  given = given.axis$given
-  axis = given.axis$axis
+    given = given.axis$given
+    axis = given.axis$axis
   vtypes = variable_types(predictors, data, return.names=T)
-  numbers = vtypes$numbers
-  categories = vtypes$characters
+    numbers = vtypes$numbers
+    categories = vtypes$characters
   if (outcome %in% categories){
     levels = length(unique(data[,outcome]))	### necessary for univariate plots
   }
