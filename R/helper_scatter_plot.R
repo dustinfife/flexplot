@@ -13,7 +13,7 @@ create_scatter_plot = function(data, axis, jitter=c(.2,0), suppress_smooth=F, me
   p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
   points = points.func(axis.var=axis, data=data, jitter=jitter)
   fitted = smoothing_function_string(method, suppress_smooth)
-  return(p=p, points=points, fitted=fitted)
+  return(list(p=p, points=points, fitted=fitted))
 }
 
 

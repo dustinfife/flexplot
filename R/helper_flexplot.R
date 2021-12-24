@@ -1,7 +1,7 @@
 choose_flexplot_type = function(data, formula = NULL, 
                                 axis=NULL, outcome=NULL, plot.type=NULL, variables=NULL, 
                                 suppress_smooth=F, spread="quartile", jitter=c(.1,0), mean.line=F,
-                                related) {
+                                related, method="loess") {
   
   ## set up conditions
   y_is_categorical = !is.numeric(data[[outcome]])
@@ -33,15 +33,15 @@ choose_flexplot_type = function(data, formula = NULL,
   }
   
   ### association plot
-  if (y_is_categorical & x_is_categorical){
+  if ((y_is_categorical | levels_in_y == 2) & x_is_categorical){
     data = modify_association_plot_data(data, outcome, axis)
     plot_string = create_association_plot()
     return(list(plot_string=plot_string, data=data))
   }
   
   ### logistic plot
-  if (y_is_categorical & levels_in_y == 2) {
-    data = factor.to.logistic(data,outcome, method)
+  if (levels_in_y == 2) {
+    data = factor.to.logistic(data, outcome, "logistic")
     plot_string = create_logistic_plot(data, axis, jitter)
     return(list(plot_string=plot_string, data=data))
   }
@@ -86,7 +86,6 @@ add_second_axis = function(data, axis, plot) {
 
 ### change se based on how many variables they have
 modify_se = function(se, axis) {
-  if (is.null(se)) return(NULL)
   if (length(axis)>1) return(F)
   return(T)
 }

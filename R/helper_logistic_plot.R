@@ -1,8 +1,8 @@
 create_logistic_plot = function(data, axis, jitter) {
   p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
   points = points.func(axis.var=axis, data=data, jitter=jitter)
-  fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se, formula = y~x)'
-  list(p=p, points=points, fit.string=fit.string)
+  fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), formula = y~x)'
+  list(p=p, points=points, fitted=fit.string)
 }
 
 # make sure method = 'logistic' under the right circumstances
