@@ -29,7 +29,7 @@ univariate_string = function(data, outcome, plot.type) {
 create_univariate_plot = function(data, outcome, plot.type="histogram") {
   
   #### if numeric, do a histogram
-  p = univariate(string(data, outcome, plot.type))
+  p = univariate_string(data, outcome, plot.type)
   points = "xxxx"
   fitted = "xxxx"		
   return(list(p=p, points=points, fitted=fitted))

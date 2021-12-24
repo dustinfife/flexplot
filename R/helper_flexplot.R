@@ -83,6 +83,12 @@ add_second_axis = function(data, axis, plot) {
   return(plot$p)
 }
 
+### change se based on how many variables they have
+modify_se = function(se, axis) {
+  if (is.null(se)) return(NULL)
+  if (length(axis)>1) return(F)
+  return(T)
+}
 
 
 # this function tests for functions within an R formula and returns those results

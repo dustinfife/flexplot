@@ -1,5 +1,7 @@
-flexplot_modify_prediction = function(prediction, formula=NULL,
+flexplot_modify_prediction = function(prediction=NULL, formula=NULL,
                                       break.me = NULL, bins=3, labels=NULL, breaks=NULL, predictors=NULL){
+  
+  if (is.null(prediction)) return(NULL)
   
   ## prep data (for testing)
   if (is.null(predictors)) predictors = all.vars(formula)[-1]

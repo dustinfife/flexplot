@@ -124,15 +124,23 @@ flexplot = function(formula, data=NULL, related=F,
   vtypes = variable_types(predictors, data, return.names=T)
     numbers = vtypes$numbers
     categories = vtypes$characters
+    
   if (outcome %in% categories){
     levels = length(unique(data[,outcome]))	### necessary for univariate plots
+  } else {
+    levels = length(unique(data[,outcome]))	
   }
   
+  ### report errors when necessary
+  flexplot_errors(variables = variables, data = data, method=method, axis=axis)
+    
   
   # modify default arguments
   jitter = match_jitter_categorical(jitter)
   method = identify_method(data, outcome, axis, method)
   logistic_labels = unique(data[,outcome])
+  alpha = flexplot_alpha_default(data=data, axis = axis, alpha = alpha)
+  se    = modify_se(se, axis)
 
 # choose the base plot ----------------------------------------------------
   
@@ -162,100 +170,57 @@ flexplot = function(formula, data=NULL, related=F,
   plot = modify_ggplot_string_for_predictions(plot, axis)
 
 # layer ghost lines -------------------------------------------------------
-
-      
-
-  ### make modifications to the data
-  data       = flexplot_modify_data(data=data,       variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
-	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method)
-  prediction = flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
-	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE)
-
-  ##### make models into a factor if they supply predictions
-  prediction = factorize_predictions(prediction=prediction, data=data, axis=axis)
-
-  ### report errors when necessary
-  flexplot_errors(variables = variables, data = data, method=method, axis=axis)
-  
-  ### change alpha, depending on plot type
-  alpha = flexplot_alpha_default(data=data, axis = axis, alpha = alpha)
   
 
-  ### change se based on how many variables they have
-  if (is.null(se)){
-    if (length(varprep$axis)>1){
-      se=F
-    } else {
-      se = T
-    }
-  }
-
-  
-
-	### PLOT UNIVARIATE PLOTS
-  bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
-                                                    related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread, plot.type=plot.type)
-    p = bivariate$p
-    points = bivariate$points
-    fitted = bivariate$fitted
-    
-	#### all the above should take care of ALL possible plots, but now we add paneling
-
-  facets = flexplot_panel_variables(varprep, 
-                                    related=related, labels=labels, bins=bins, 
-                                    suppress_smooth=suppress_smooth, method=method, 
-                                    spread=spread, prediction=prediction)
-  
-	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
-	 
-				### bin the ghost reference if it's not null
-	  
-    ghost.reference = with(varprep, create_ghost_reference(ghost.reference=ghost.reference, data=data,
-                                             bins=bins, breaks=breaks, given=given, axis=axis, labels=labels))
-   
-        ### extract the ggplot dataset that contains the fitted information
-    varprep$fitted = fitted
-    d_smooth = with(varprep, create_ghost_dataset(data=data, axis=axis, prediction=prediction, given=given, 
-                                                  ghost.reference=ghost.reference, predictors=predictors, p=p, fitted=fitted, method=method, outcome=outcome, se=se))
-
-    
-  
-        ### create the text for the ghost line
-    
-    ghosttext = with(varprep, create_ghost_text(d_smooth=d_smooth, axis=axis, outcome=outcome, prediction=prediction, ghost.line=ghost.line, ghost.reference=ghost.reference, data=data))
-      ghost = ghosttext$ghost
-      d_smooth = ghosttext$d_smooth
-      
-
-	} else {
+# 	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
+# 	 
+# 				### bin the ghost reference if it's not null
+# 	  
+#     ghost.reference = with(varprep, create_ghost_reference(ghost.reference=ghost.reference, data=data,
+#                                              bins=bins, breaks=breaks, given=given, axis=axis, labels=labels))
+#    
+#         ### extract the ggplot dataset that contains the fitted information
+#     varprep$fitted = fitted
+#     d_smooth = with(varprep, create_ghost_dataset(data=data, axis=axis, prediction=prediction, given=given, 
+#                                                   ghost.reference=ghost.reference, predictors=predictors, p=p, fitted=fitted, method=method, outcome=outcome, se=se))
+# 
+#     
+#   
+#         ### create the text for the ghost line
+#     
+#     ghosttext = with(varprep, create_ghost_text(d_smooth=d_smooth, axis=axis, outcome=outcome, prediction=prediction, ghost.line=ghost.line, ghost.reference=ghost.reference, data=data))
+#       ghost = ghosttext$ghost
+#       d_smooth = ghosttext$d_smooth
+#       
+# 
+# 	} else {
 		ghost = "xxxx"
-	}	
+	# }	
                                                         
 	### add prediction lines
-	if (!is.null(prediction)){
-		### see how many models are being compared
-		num.models = levels(prediction$model)
-		
-		prediction = flexplot_modify_prediction(varprep, prediction=prediction, 
-		                                        num.models=num.models, labels=labels, bins=bins, 
-		                                        breaks=breaks)
-		pred.line = with(varprep, flexplot_generate_prediction_lines(prediction=prediction, axis=axis, break.me=break.me, 
-		                                               data=data, num.models=num.models, breaks=breaks,labels=labels, bins=bins))
-	} else {
+	# if (!is.null(prediction)){
+	# 	### see how many models are being compared
+	# 	num.models = levels(prediction$model)
+	# 	
+	# 	prediction = flexplot_modify_prediction(varprep, prediction=prediction, 
+	# 	                                        num.models=num.models, labels=labels, bins=bins, 
+	# 	                                        breaks=breaks)
+	# 	pred.line = with(varprep, flexplot_generate_prediction_lines(prediction=prediction, axis=axis, break.me=break.me, 
+	# 	                                               data=data, num.models=num.models, breaks=breaks,labels=labels, bins=bins))
+	# } else {
 	  pred.line = "xxxx"
-	}
+	# }
 
 	theme = "theme_bw() + theme(text=element_text(size=14))"
   
-	outcome = varprep$outcome
+	# outcome = varprep$outcome
 	### without this, the scale of the y axis changes if the user samples
 	if (is.finite(sample) & is.numeric(data[,outcome])){
 		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
 	}
 
 	### put objects in this environment
-	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
+	# axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
 	
 	# convert labels for Y axis for logistic
 	if (length(unique(data[,outcome])) == 2 & method == "logistic"){
@@ -270,7 +235,7 @@ flexplot = function(formula, data=NULL, related=F,
   }
 	
 	#### evaluate the plot
-	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
+	total.call = with(plot$plot_string, paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme))
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
 	
