@@ -124,12 +124,8 @@ flexplot = function(formula, data=NULL, related=F,
   vtypes = variable_types(predictors, data, return.names=T)
     numbers = vtypes$numbers
     categories = vtypes$characters
-    
-  if (outcome %in% categories){
-    levels = length(unique(data[,outcome]))	### necessary for univariate plots
-  } else {
-    levels = length(unique(data[,outcome]))	
-  }
+  levels = length(unique(data[[outcome]]))
+
   
   ### report errors when necessary
   flexplot_errors(variables = variables, data = data, method=method, axis=axis)
@@ -143,11 +139,11 @@ flexplot = function(formula, data=NULL, related=F,
   se    = modify_se(se, axis)
 
 # choose the base plot ----------------------------------------------------
-  
+
   plot = choose_flexplot_type(data, formula, 
                               axis, outcome, plot.type, variables, 
                               suppress_smooth, spread, jitter, mean.line)
-
+  data = plot$data
 # add bins/breaks ---------------------------------------------------------
   
   ### create the lists that contain the breaks

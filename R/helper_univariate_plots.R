@@ -1,6 +1,20 @@
 modify_univariate_data_numeric = function(data, axis, outcome) {
-  if (axis[1] == "1" & is.numeric(data[,outcome]) & length(unique(data[,outcome]))<5){
+  
+  # write conditions
+  outcome_is_numeric = is.numeric(data[[outcome]])
+  levels_outcome = length(unique(data[[outcome]]))
+  outcome_is_ordered = is.ordered(data[[outcome]])
+  
+  if (outcome_is_numeric & levels_outcome<5){
     data[,outcome] = factor(data[,outcome], ordered=TRUE)
+    return(data)
+  }
+  
+  # order outcome by sample size
+  if (!outcome_is_numeric & !outcome_is_ordered) {
+    order = names(sort(table(data[[outcome]]), decreasing = T))
+    data[[outcome]] = factor(data[[outcome]], levels = order, ordered=T)
+    data[[outcome]]
     return(data)
   }
   return(data)
