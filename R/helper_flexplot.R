@@ -1,5 +1,5 @@
 choose_flexplot_type = function(data, formula = NULL, 
-                                axis=NULL, outcome=NULL, plot.type=NULL, variables=NULL, 
+                                axis=NULL, outcome=NULL, plot.type=NULL, variables=NULL, given=NULL,
                                 suppress_smooth=F, spread="quartile", jitter=c(.1,0), mean.line=F,
                                 related, method="loess") {
   
@@ -13,6 +13,7 @@ choose_flexplot_type = function(data, formula = NULL,
     variables = all.vars(formula, unique=FALSE)
     outcome = variables[1]
     axis = flexplot_axis_given(formula)$axis
+    given = flexplot_axis_given(formula)$given
   }  
   
   #### univariate plots
@@ -34,7 +35,7 @@ choose_flexplot_type = function(data, formula = NULL,
   
   ### association plot
   if ((y_is_categorical | levels_in_y == 2) & x_is_categorical){
-    data = modify_association_plot_data(data, outcome, axis)
+    data = modify_association_plot_data(data, outcome, axis, given)
     plot_string = create_association_plot()
     return(list(plot_string=plot_string, data=data))
   }
@@ -49,12 +50,13 @@ choose_flexplot_type = function(data, formula = NULL,
   ### beeswarm plot
   if (x_is_categorical) {
     data = flexplot_convert_to_categorical(data, axis)
-    plot_string = create_beeswarm_plot(data, axis, jitter, suppress_smooth, spread, mean.line)
+    plot_string = create_beeswarm_plot(data, axis, jitter, suppress_smooth, spread, mean.line=F, plot.type)
     return(list(plot_string=plot_string, data=data))    
   }
   
   ### scatterplot
-  return(create_scatter_plot(data, axis, jitter, suppress_smooth, method))
+  return(list(plot_string = create_scatter_plot(data, axis, jitter, suppress_smooth, method),
+              data=data))
   
 }
 
@@ -353,12 +355,13 @@ flexplot_break_me = function(data, predictors, given, axis, bins){
     break.me = non.axis.one[is.numeric(data[,non.axis.one] ) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
   
+  if (length(break.me)==0) return(NULL)
   # drop those break.me's that have the same number of levels as bins
   num_unique = apply(data[,break.me, drop=FALSE], 2, function(x) length(unique(x)))
   remove_these = which(num_unique<=bins)
   if (length(remove_these)>0) break.me = break.me[-remove_these]
 
-  #if (length(break.me)==0) break.me = NA
+  
   return(break.me)
 }
 

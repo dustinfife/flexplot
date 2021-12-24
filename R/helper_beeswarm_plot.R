@@ -50,7 +50,7 @@ modify_fit_string_for_ggplot2 = function(fit.string) {
 }
 
 create_beeswarm_plot = function(data, axis, jitter=c(.2,0), suppress_smooth=F, 
-                                spread="quartile", mean.line=F) {
+                                spread="quartile", mean.line=F, plot.type) {
   p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
   points = points.func(axis.var=axis, data=data, jitter=jitter)
   if (plot.type == "boxplot"){
@@ -64,7 +64,7 @@ create_beeswarm_plot = function(data, axis, jitter=c(.2,0), suppress_smooth=F,
   }
   
   fitted = modify_fit_string_for_ggplot2(fitted)
-  return(p=p, points=points, fitted=fitted)
+  return(list(p=p, points=points, fitted=fitted))
 }
   
   ### check package version of ggplot2

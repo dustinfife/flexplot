@@ -140,7 +140,7 @@ flexplot = function(formula, data=NULL, related=F,
 # choose the base plot ----------------------------------------------------
 
   plot = choose_flexplot_type(data, formula, 
-                              axis, outcome, plot.type, variables, 
+                              axis, outcome, plot.type, variables, given,
                               suppress_smooth, spread, jitter, mean.line, 
                               related)
   data = plot$data
