@@ -30,3 +30,11 @@ flexplot(y~a | b, data=small)
 flexplot(a~x | b, data=small)
 flexplot(a~b | y_bin, data=small)
 flexplot(y~1 | b, data=small)
+flexplot(y~x | z, data=small)
+
+
+# add prediction layer
+mod = lm(y~x*z, data=small)
+compare.fits(y~x, data=small, mod)
+mod = lm(y_poly~x + I(x^2), data=small)
+compare.fits(y_poly~x, data=small, mod)

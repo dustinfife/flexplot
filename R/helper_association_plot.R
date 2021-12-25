@@ -1,6 +1,12 @@
 ### prep data for association plot
 modify_association_plot_data = function(data, outcome, axis, given) {
-  m = as.data.frame(table(data[,axis], data[,given], data[,outcome])); names(m)[1:(ncol(m)-1)] = c(axis, given, outcome)
+  
+  # determine whether they have a facets for association plot
+  if (!is.na(given)) {
+    m = as.data.frame(table(data[,axis], data[,given], data[,outcome])); names(m)[1:(ncol(m)-1)] = c(axis, given, outcome)
+  } else {
+    m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:(ncol(m)-1)] = c(axis, outcome)
+  }
   chi = suppressWarnings(chisq.test(data[,axis], data[,outcome]))
   obs.exp = (chi$observed - chi$expected)/chi$expected
   m$Freq = as.vector(obs.exp)

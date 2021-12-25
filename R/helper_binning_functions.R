@@ -65,7 +65,7 @@ bin_variables_loop = function(i=1, data, break.me, bins, labels, breaks) {
 
 ## this function loops through all variables that need binning, then renames the columns
 bin_variables = function(data, bins, labels, break.me, breaks) {
-  
+  if (is.null(data)) return(data)
   if (length(break.me)==0) return(data)
   
   new_cols = lapply(1:length(break.me), bin_variables_loop, data, break.me, bins, labels, breaks)

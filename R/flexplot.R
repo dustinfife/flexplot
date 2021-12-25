@@ -158,12 +158,14 @@ flexplot = function(formula, data=NULL, related=F,
   
 # layer panels to existing plots ------------------------------------------
   
-  facets = flexplot_panel_variables(given, break.me)
+  plot$plot_string$facets = flexplot_panel_variables(given, break.me)
 
 # layer predictions -------------------------------------------------------
 
   prediction = factorize_predictions(prediction, data, axis)
-  prediction = flexplot_modify_prediction(prediction, formula=NULL, break.me, bins, labels, breaks, predictors)
+  prediction = bin_variables(data=prediction, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
+  plot = flexplot_generate_prediction_lines(prediction, plot, axis)
+  prediction = flexplot_modify_prediction(prediction, formula=NULL, break.me, bins, labels, breaks, predictors, axis, given)
   plot = modify_ggplot_string_for_predictions(plot, axis)
 
 # layer ghost lines -------------------------------------------------------
@@ -191,7 +193,7 @@ flexplot = function(formula, data=NULL, related=F,
 #       
 # 
 # 	} else {
-		ghost = "xxxx"
+  plot$plot_string$ghost = "xxxx"
 	# }	
                                                         
 	### add prediction lines
@@ -205,23 +207,23 @@ flexplot = function(formula, data=NULL, related=F,
 	# 	pred.line = with(varprep, flexplot_generate_prediction_lines(prediction=prediction, axis=axis, break.me=break.me, 
 	# 	                                               data=data, num.models=num.models, breaks=breaks,labels=labels, bins=bins))
 	# } else {
-	  pred.line = "xxxx"
+	#  pred.line = "xxxx"
 	# }
 
-	theme = "theme_bw() + theme(text=element_text(size=14))"
+  plot$plot_string$theme = "theme_bw() + theme(text=element_text(size=14))"
   
 	# outcome = varprep$outcome
 	### without this, the scale of the y axis changes if the user samples
 	if (is.finite(sample) & is.numeric(data[,outcome])){
-		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
+	  plot$plot_string$theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
 	}
 
 	### put objects in this environment
 	# axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
-	
+
 	# convert labels for Y axis for logistic
 	if (length(unique(data[,outcome])) == 2 & method == "logistic"){
-	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", logistic_labels[1], "', '", logistic_labels[2], "')", ")")
+	  plot$plot_string$theme = paste0(plot$plot_string$theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", logistic_labels[1], "', '", logistic_labels[2], "')", ")")
 	}
 	
 	### if second axis is numeric, replace axis[2] with variable that is binned
@@ -230,6 +232,7 @@ flexplot = function(formula, data=NULL, related=F,
       axis[2] = paste0(axis[2], "_binned")
     }
   }
+	
 	
 	#### evaluate the plot
 	total.call = with(plot$plot_string, paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme))
