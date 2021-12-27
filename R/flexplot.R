@@ -169,14 +169,11 @@ flexplot = function(formula, data=NULL, related=F,
   plot = modify_ggplot_string_for_predictions(plot, axis)
 
 # layer ghost lines -------------------------------------------------------
-  
+  ghost.reference = create_ghost_reference(data=data, ghost.line=ghost.line, ghost.reference=ghost.reference,
+                                           axis=axis, bins=bins, labels=labels, breaks=breaks)
 
 # 	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
 # 	 
-# 				### bin the ghost reference if it's not null
-# 	  
-#     ghost.reference = with(varprep, create_ghost_reference(ghost.reference=ghost.reference, data=data,
-#                                              bins=bins, breaks=breaks, given=given, axis=axis, labels=labels))
 #    
 #         ### extract the ggplot dataset that contains the fitted information
 #     varprep$fitted = fitted
