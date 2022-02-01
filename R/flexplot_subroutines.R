@@ -68,7 +68,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   }
   
   ### create the lists that contain the breaks
-  break.me = flexplot_break_me(data, predictors, given, axis)
+  break.me = flexplot_break_me(data, predictors, given, axis, bins)
   breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
   list(variables=variables, outcome=outcome, predictors=predictors, 
@@ -110,6 +110,68 @@ flexplot_alpha_default = function(data, axis, alpha){
   
   return(alpha)
 }
+
+
+### prep data for association plot
+modify_association_plot_data = function(data, outcome, axis) {
+  
+  if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1 & axis[1] != "1"){
+    m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
+    chi = chisq.test(data[,axis], data[,outcome])
+    obs.exp = (chi$observed - chi$expected)/chi$expected
+    m$Freq = as.vector(obs.exp)
+    names(m)[names(m)=="Freq"] = "Proportion"
+    return(m)
+  }
+  return(data)
+}
+
+
+# expect_true(is.factor(modify_univariate_data_numeric(data=data.frame(a=1:4), "1", "a")$a))
+# expect_false(is.factor(modify_univariate_data_numeric(data=data.frame(a=1:5), "1", "a")$a))
+# expect_false(is.factor(modify_univariate_data_numeric(data=data.frame(a=rnorm(111)), "1", "a")$a))
+modify_univariate_data_numeric = function(data, axis, outcome) {
+  if (axis[1] == "1" & is.numeric(data[,outcome]) & length(unique(data[,outcome]))<5){
+    data[,outcome] = factor(data[,outcome], ordered=TRUE)
+    return(data)
+  }
+  return(data)
+}
+
+
+# d = data.frame(group = rep(c(1,2), times=5), outcome = rnorm(10))
+# modify_related_data(d, T, "group", "outcome", variables = c("group", "outcome"))
+# modify_related_data(d, F, "group", "outcome", variables = c("group", "outcome"))
+# d = data.frame(group = rep(c(1,2,3), times=5), outcome = rnorm(15))
+# expect_error(modify_related_data(d, T, "group", "outcome", variables = c("group", "outcome")))
+# d = data.frame(group = rep(c(1,2), times=5), outcome = rnorm(10), predictor = rnorm(10))
+# expect_error(modify_related_data(d, T, "group", "outcome", variables = c("group", "outcome", "predictor")))
+# d = data.frame(group = sample(c(1,2), size=18, replace=T, prob=c(.8, .3)), outcome = rnorm(18))
+# expect_error(modify_related_data(d, T, "group", "outcome", variables = c("group", "outcome")))
+modify_related_data = function(data, related, axis, outcome, variables) {
+  
+  if (!related) return(data)
+  
+  #### extract levels of the predictors
+  levs = unique(data[,axis[1]])
+  
+  #### create difference scores
+  g1 = data[data[, axis[1]]==levs[1], outcome]
+  g2 = data[data[, axis[1]]==levs[2], outcome]		
+  
+  ### error checking
+  if (length(variables)!=2) stop("Currently, the 'related' option is only available when there's a single predictor.")
+  if (length(levs)!=2) stop("Sorry, I can only accept two levels of the grouping variable when related=T.")
+  if (length(g1) != length(g2)) stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")
+  
+  lab = paste0("Difference (",levs[2], "-", levs[1], ')')
+  data = data.frame(Difference=g2-g1)
+  attr(data, "levels") = levs
+  data[,variables] = NA
+  return(data)
+}
+
+
 # expect_error(flexplot_modify_data(data=exercise_data, variables = "weight.loss"))  ### missing all variables
 # expect_true(!is.tibble(flexplot_modify_data(formula = weight.loss~therapy.type, data=exercise_data %>% select(weight.loss, therapy.type))))### data as tibble
 # expect_equal(flexplot_modify_data(therapy.type~gender, data=exercise_data)$Proportion[1], .12745098)  ### association plot data
@@ -117,135 +179,72 @@ flexplot_alpha_default = function(data, axis, alpha){
 # expect_error(flexplot_modify_data(formula = weight.loss~gender, data=exercise_data, related=T))
 # expect_true(all(c("motivation_binned", "income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + motivation | income, data=exercise_data))))
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
-flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, 
+flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, method = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
   
-  if (is.null(data)) {
-    return(data) 
-  } else {
-    if (is.null(formula)){
-      list.na = list(related, variables, outcome, axis, given, labels, bins, breaks, break.me, spread)
-      isnull =  names(which(unlist(lapply(list.na, is.null))))
-      if (length(isnull)>0){
-        stop(paste0("You must either provide a formula OR all variables requested. It looks like you're missing the variable ", isnull))
-      }
-    }
-    
+  if (is.null(data)) return(data) 
 
-    if (!is.null(formula)){
-      prep_vars = flexplot_prep_variables(formula, data=data)
-      variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; given = prep_vars$given
-      break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors; spread = prep_vars$spread
-    }
-    
-    if (pred.data) {
-      outcome = "prediction"
-      variables[1] = "prediction"
-      data[,"model"] = factor(data[,"model"])
-    }
-    
-    ### remove missing values
-    
-    data = flexplot_delete_na(data, variables)
-    
-    
-    ### prep data for association plot
-    if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1 & axis[1] != "1"){
-      m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
-      chi = chisq.test(data[,axis], data[,outcome])
-      obs.exp = (chi$observed - chi$expected)/chi$expected
-      m$Freq = as.vector(obs.exp)
-      names(m)[names(m)=="Freq"] = "Proportion"
-      data = m
-    }
-    
-    ### prevent univariates from binning numeric variables with few levels
-    if (axis[1] == "1" & is.numeric(data[,outcome]) & length(unique(data[,outcome]))<5){
-      data[,outcome] = factor(data[,outcome], ordered=TRUE)
-    }
-    
-    
-    ### prep data for related plot
-    if (related){
+  # make all variables into objects from the formula
+  # (I believe this is only to make it easier to test, so I don't have to provide so many objects)
+  if (!is.null(formula)) {
+    prep_vars = flexplot_prep_variables(formula, data=data)
+    variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; given = prep_vars$given
+    break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors; spread = prep_vars$spread
+  }
+  
+  if (pred.data) {
+    outcome = "prediction"
+    variables[1] = "prediction"
+    data[,"model"] = factor(data[,"model"])
+  }
+  
+  ### remove missing values
+  data = flexplot_delete_na(data, variables)
 
-      #### extract levels of the predictors
-      levs = unique(data[,axis[1]])
-      
-      #### create difference scores
-      g1 = data[data[, axis[1]]==levs[1], outcome]
-      g2 = data[data[, axis[1]]==levs[2], outcome]				
-      
-      
-      ### error checking
-      if (length(variables)!=2){
-        stop("Currently, the 'related' option is only available when there's a single predictor.")
-      } 
-      
-      if (length(levs)!=2){
-        stop("Sorry, I can only accept two levels of the grouping variable when related=T.")
-      }
-      
-      if (length(g1) != length(g2)){
-        stop("Sorry, the length of the two groups are not the same. I can only create difference scores when the group sizes are identical.")
-      }
-      
-      lab = paste0("Difference (",levs[2], "-", levs[1], ')')
-      data = data.frame(Difference=g2-g1)
-      attr(data, "levels") = levs
-      data[,variables] = NA
-    }
-    
-    ## bin things
-    if (length(break.me)>0){
-      #### bin the variables that need to be binned
-      tempfunc = function(i=1, break.me, bins, labels, breaks, data){
-        
-        # indexing fails if i > the number of slots in the list
-        if (length(labels)>= i){
-          labs = labels[[i]]
-        } else {
-          labs = NULL
-        }
-        
-        b = bin.me(break.me[i], data, bins[i], labs, breaks[[i]])
-        #### if there's only one category after we've binned things, fix that succa!
-        if (length(levels(b))==1 & length(unique(data[[break.me[i]]]))>1){
-          b = factor(data[,break.me[i]])
-        }
-        return(b)
-      }
-      
-      new_cols = lapply(1:length(break.me), tempfunc, break.me, bins, labels, breaks, data)
-      data[,paste0(break.me, "_binned")] = new_cols
-    }
-    
-    ### convert variables with < 5 categories to ordered factors
-    data = flexplot_convert_to_categorical(data, axis)
-    
+  ### convert variables with < 5 categories to ordered factors
+  data = flexplot_convert_to_categorical(data, axis)
 
-    #### reorder axis 1 it's not already ordered
-    if(axis[1] != "1"){
-      #### order by medians for numeric outcomes
-      if (!is.numeric(data[,axis[1]]) & is.numeric(data[,outcome]) & !is.ordered(data[, axis[1]]) & !related){
-        if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
-        ord = aggregate(data[,outcome]~data[, axis[1]], FUN=fn, na.rm=T)
-        ord = ord[order(ord[,2], decreasing=T),]
-        data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
-      }
-      #### order by frequency for categorical outcomes
-    } else if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){
-      sizes = table(data[,outcome])
-      ord = order(sizes, decreasing = T)
-      data[,outcome] = factor(data[, outcome], levels=names(sizes)[ord])
+  ### prevent univariates from binning numeric variables with <5 levels
+  data = modify_univariate_data_numeric(data=data, axis=axis, outcome=outcome)
+  
+  # prepare data for association plot
+  data = modify_association_plot_data(data=data, outcome=outcome, axis=axis)
+  
+  # prepare data for related test
+  data = modify_related_data(data=data, related=related, axis=axis, outcome=outcome, variables=variables)
+  
+  data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
+  
+  # make sure method = 'logistic' under the right circumstances
+  method = identify_method(data, outcome, axis, method)
+
+  # convert data for logistic regression
+  data = factor.to.logistic(data,outcome, method)
+  
+
+  #### reorder axis 1 it's not already ordered
+  if(axis[1] != "1"){
+    #### order by medians for numeric outcomes
+    if (!is.numeric(data[,axis[1]]) & is.numeric(data[,outcome]) & !is.ordered(data[, axis[1]]) & !related){
+      if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
+      ord = aggregate(data[,outcome]~data[, axis[1]], FUN=fn, na.rm=T)
+      ord = ord[order(ord[,2], decreasing=T),]
+      data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
     }
-    
-    ### reorder levels of given 2
-    if (length(given)>1){ 
-        ### for categorical variables, they're not binned, so we have to include the option where they're not
-        if (is.numeric(data[,given[2]])) data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
-    }
-    return(data)
-  }  
+    #### order by frequency for categorical outcomes
+  } else if (!is.numeric(data[,outcome]) & !is.ordered(data[,outcome])){
+    sizes = table(data[,outcome])
+    ord = order(sizes, decreasing = T)
+    data[,outcome] = factor(data[, outcome], levels=names(sizes)[ord])
+  }
+  
+  ### reorder levels of given 2
+  if (length(given)>1){ 
+      ### for categorical variables, they're not binned, so we have to include the option where they're not
+      if (is.numeric(data[,given[2]])) data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
+  }
+  return(data)
+  
   
 }
 
@@ -285,7 +284,7 @@ flexplot_errors = function(variables, data, method=method, axis){
 #expect_identical(flexplot_break_me(exercise_data, c("weight.loss", "income"), given="income"), "income")
 #expect_equal(length(flexplot_break_me(exercise_data, c("weight.loss", "income"), given=NULL)), 0)
 #expect_equal(length(flexplot_break_me(exercise_data, c("weight.loss", "income", "weight.loss", "motivation", "therapy.type"), given=c("weight.loss", "motivation"))), 2)
-flexplot_break_me = function(data, predictors, given, axis){
+flexplot_break_me = function(data, predictors, given, axis, bins){
 
   ### without this line of code, there's an error for those situations where there is no second axis
   if (length(axis)<2){
@@ -298,12 +297,17 @@ flexplot_break_me = function(data, predictors, given, axis){
   if (axis[1] != "1") non.axis.one = predictors[-1] else non.axis.one = predictors
   #### get the breaks for the needed variables (remove axis 1 because it's the axis and thus will never be binned)
   #### also, lapply fails when there's just one additional predictor, hence the if statement
-
+  
   if (length(predictors)>2){
     break.me = non.axis.one[unlist(lapply(data[,non.axis.one], FUN=is.numeric)) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   } else {
     break.me = non.axis.one[is.numeric(data[,non.axis.one] ) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
+  
+  # drop those break.me's that have the same number of levels as bins
+  num_unique = apply(data[,break.me, drop=FALSE], 2, function(x) length(unique(x)))
+  remove_these = which(num_unique<=bins)
+  if (length(remove_these)>0) break.me = break.me[-remove_these]
 
   #if (length(break.me)==0) break.me = NA
   return(break.me)
@@ -386,16 +390,14 @@ flexplot_axis_given = function(formula){
 #expect_true(nrow(flexplot_delete_na(exercise_data, "muscle.gain"))==200)
 #expect_true(nrow(flexplot_delete_na(exercise_data, NULL))==200)
 flexplot_delete_na = function(data, variables){
-  
-  
+
   if (length(variables)>=0){
       keepers = complete.cases(data[,variables,drop=FALSE])
       data = data[keepers,, drop=FALSE]
       return(data)
-    } else {
-      return(data)
-    }
-  
+    } 
+
+  return(data)
 }
 
 
@@ -403,7 +405,6 @@ flexplot_delete_na = function(data, variables){
 #expect_true(is.ordered(flexplot_convert_to_categorical(data %>% mutate(gender = as.numeric(gender)), c("therapy.type", "gender"))$gender))
 #expect_false(is.ordered(flexplot_convert_to_categorical(data, axis=NULL)$gender))
 flexplot_convert_to_categorical = function(data, axis){
-  
 
   #### if they only have a few levels on the x axis, convert it to categorical
   if (length(axis)>0 & axis[1] != "1"){
@@ -480,7 +481,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     
   ### BIVARIATE PLOTS
   } else if (length(outcome)==1 & length(axis)==1 & !related){
-    
+
     #### if both are categorical, do chi square
     if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
       
@@ -530,7 +531,13 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
                    ', color=', axis2_binned, ', linetype = ', axis2_binned, 
                    ', shape=', axis2_binned, ')) + labs(color= "', axis2_binned, '", linetype= "', axis2_binned, '", shape= "', axis2_binned, '")')
       } else {
-        p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
+        # if they're trying to plot more than 10 symbols...
+        if (length(unique(data[,axis[2]]))>6) {
+          message("It looks like you're trying to plot more than 6 colors/lines/symbols.\nI gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.\n I hope we can still be friends.")
+          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2]))'
+        } else {
+          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
+        }
       }
       ### remove the default color if they have categorical variables		
     }

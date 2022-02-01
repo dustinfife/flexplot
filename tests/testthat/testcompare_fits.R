@@ -94,7 +94,6 @@ test_that("compare.fits for other models", {
   ### compare.fits with mixed models
   data(alcuse)
   require(lme4)
-  head(alcuse)
   mod1 = lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)  
   mod2 = lmer(ALCUSE~AGE_14 + (AGE_14|ID), data=alcuse)  
   vdiffr::expect_doppelganger("compare.fits with mixed models",
@@ -122,20 +121,6 @@ test_that("compare.fits for other models", {
                               compare.fits(therapy.type~motivation + rewards, data=exercise_data, fit2))  
 })
 
-test_that("get_re works", {
-  expect_true(get_re(lmer(MathAch~SES + (SES | School), data=math))=="School")
-  expect_true(get_re(lmer(MathAch~SES + (SES |School), data=math))=="School")
-  expect_true(get_re(lmer(MathAch~1 + (1 | School), data=math))=="School")
-  expect_null(get_re(lm(MathAch~1 + (1 | School), data=math)))
-})  
 
-test_that("get_model_n works", {
-  expect_equal(get_model_n(lm(weight.loss~therapy.type, data=exercise_data)), 200)
-  expect_equal(get_model_n(rlm(weight.loss~therapy.type, data=exercise_data)), 200)
-  suppressWarnings(expect_equal(get_model_n(party::cforest(weight.loss~therapy.type, data=exercise_data)), 200))
-  expect_equal(get_model_n(randomForest::randomForest(weight.loss~therapy.type, data=exercise_data)), 200)
-  expect_equal(get_model_n(rpart::rpart(weight.loss~motivation, data=exercise_data)), 200)
-    
-})
 
 options(warn=0)

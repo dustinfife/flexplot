@@ -27,6 +27,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
                         return.preds=F, report.se=F, re=F, 
                         pred.type="response", num_points = 50,
                         clusters=3,...){
+  
   if (is.null(model2)) runme = "yes"
   
   #### if mod2 is null..
@@ -56,7 +57,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   test_same_class(model1, model2)
   
   #### convert random effects to factors for mixed models
-  data = subset_random_model(model1, d=data, clusters)
+  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
   
   ### make sure they have the same outcome
   if (variables_mod1$response != variables_mod2$response) {
@@ -97,8 +98,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		
   }
   
-  
-  
+
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
   } else {
@@ -138,7 +138,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
     prediction.model = cbind(pred.values, prediction.model)
   }
   
-  
   #### eliminate those predictions that are higher than the range of the data
   if (!is.factor(data[,outcome])){
     min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)
@@ -159,12 +158,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (return.preds){
     prediction.model
   } else {
-    ### for logistic, add one to the predictions
-    if (model1.type == "glm" ) {
-      if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
-        prediction.model$prediction = prediction.model$prediction + 1
-      }
-    } 
+    # at one time, I was adding one to the predictions. WHY??????
+    # ### for logistic, add one to the predictions
+    # if (model1.type == "glm" ) {
+    #   if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
+    #     prediction.model$prediction = prediction.model$prediction + 1
+    #   }
+    # } 
 
     final_geom = return_lims_geom(outcome, data, model1)
     #when we have an intercept only model

@@ -11,6 +11,9 @@
 
 \item{mc}{Should model comparisons be performed? Currently not used}
 }
+\value{
+Estimates for a zero inflated model
+}
 \description{
 Report zeroinfl object Estimates
 }

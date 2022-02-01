@@ -12,7 +12,6 @@ data/income.jasp
 .travis.yml
 flexplot.svg
 Flexplot.svg
-^build$
 ^icon.svg$
 ^flexplot.jmo$
 ^.*\.Rproj$
@@ -21,7 +20,6 @@ tests/figs/
 README_files/
 tests/
 ^doc$
-^Meta$
 codecov.yml
 jasp_documentation/
 paranormal.csv

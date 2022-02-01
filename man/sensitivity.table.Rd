@@ -9,6 +9,9 @@ sensitivity.table(object)
 \arguments{
 \item{object}{an object that can be predicted (e.g., glm). Note the thing to be predicted must have only two outcomes}
 }
+\value{
+A table containing sensitivity/specificity/etc.
+}
 \description{
 Compute sensitivity/specificity/etc.
 }

@@ -85,6 +85,9 @@ rather than combining with them. This is most useful for helper functions
 that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 }
+\value{
+a geom of jittered data
+}
 \description{
 The jitterd geom adds a small amount of random
 variation to the location of each point, but that amount

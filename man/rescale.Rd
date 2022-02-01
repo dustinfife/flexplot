@@ -13,6 +13,9 @@ rescale(x, new.mean, new.sd)
 
 \item{new.sd}{The desired sd of the dataset}
 }
+\value{
+a vector of rescaled values
+}
 \description{
 This function will take a variable and transform it such that it has a particular mean and variance
 }
