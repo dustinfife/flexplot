@@ -426,14 +426,14 @@ residual.plots = function(data, object,...){
     factors = names(which(unlist(lapply(data[,terms], is.factor))));
     numbers = names(which(unlist(lapply(data[,terms], is.numeric))));
   } else {
-    factors = terms[which(is.factor(data[,terms]))]
+    factors = terms[which(is.factor(data[,terms]) | is.character(data[,terms]))]
     numbers = terms[which(is.numeric(data[,terms]))]
   }
-  
+  #
   #### figure out what is numeric
   levels = apply(data, 2, FUN=function(x) length(unique(x)))
   #### if there's too few levels and it's not categorical
-  factors = !sapply(data, is.factor)
+  factors = !sapply(data, function(x) is.factor(x) | is.character(x))
   if (any(levels<5 & factors)){
     message("Note: one or more of your variables has less than 5 values, yet they're treated as numeric.\n\n")
   }
@@ -468,10 +468,14 @@ residual.plots = function(data, object,...){
   }
   
   if (length(unique(data$fitted))<7){
-    sl = flexplot(abs.res~fitted, data=data, method="lm",...) + labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
+    
+    sl = flexplot(abs.res~fitted, data=data, method="lm",...) + 
+      labs(x="fitted", y="Absolute Value of Residuals", title="S-L Plot")	
     nd = aggregate(abs.res~fitted, data=data, FUN=median)
-    nd[,1] = 1:nrow(nd)
-    sl = sl + geom_line(data=nd, col="#bf0303", size=1.5)
+    # this is necessary bc ggplot converts to ordered factor when there's few levels
+    if (is.ordered(sl$data$fitted)) nd[,1] = factor(nd[,1], ordered=T)
+    
+    sl = sl + geom_line(data=nd, col="#bf0303", size=1.5, group=1)
     #class(sl) = c("flexplot", class(sl))		
   } else {
     sl = flexplot(abs.res~fitted, data=data, method="lm",...)+ labs(x="fitted", y="Absolute Value\nof Residuals", title="S-L Plot")			
