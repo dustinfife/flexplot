@@ -237,11 +237,11 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     ord = order(sizes, decreasing = T)
     data[,outcome] = factor(data[, outcome], levels=names(sizes)[ord])
   }
-  
+
   ### reorder levels of given 2
   if (length(given)>1){ 
       ### for categorical variables, they're not binned, so we have to include the option where they're not
-      if (is.numeric(data[,given[2]])) data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
+      if (is.numeric(data[,given[2]]) & length(unique(data[,given[2]]))>bins) data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
   }
   return(data)
   
@@ -299,9 +299,12 @@ flexplot_break_me = function(data, predictors, given, axis, bins){
   #### also, lapply fails when there's just one additional predictor, hence the if statement
   
   if (length(predictors)>2){
-    break.me = non.axis.one[unlist(lapply(data[,non.axis.one], FUN=is.numeric)) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
+    # for when there's a numeric variable less than the number of bins, do NOT bin it!
+    is_numeric = unlist(lapply(data[,non.axis.one], function(x) {is.numeric(x) & length(unique(x))>bins}))
+    is.given   = (non.axis.one %in% given) | (second.axis %in% non.axis.one)
+    break.me = non.axis.one[is_numeric & is.given]	
   } else {
-    break.me = non.axis.one[is.numeric(data[,non.axis.one] ) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
+    break.me = non.axis.one[is.numeric(data[,non.axis.one]) & length(unique(data[,non.axis.one]))>bins & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
   
   # drop those break.me's that have the same number of levels as bins
