@@ -444,7 +444,7 @@ flexplot_convert_to_categorical = function(data, axis){
 # bv = flexplot_bivariate_plot(weight.loss~motivation, data=exercise_data)$p
 # expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
-                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type  # arguments passed from flexplot
+                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins  # arguments passed from flexplot
                                    ){
   
   jitter = match_jitter_categorical(jitter)
@@ -474,7 +474,8 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
       } else if (plot.type == "density") {
         p = 'ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)'
       } else {
-        p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
+        bins = calculate_bins_for_histograms(bins, levels)
+        p = paste0('ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=', bins, ') + theme_bw() + labs(x=outcome)')
       }
     } else {
       p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
@@ -558,6 +559,11 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
   list(p=p, points=points, fitted=fitted)
 }
 
+
+calculate_bins_for_histograms = function(bins, levels) {
+  if (bins != 3) return(bins)
+  return(min(30, round(levels/2)))
+}
 
 #### flexplot function for paneling
 flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=3, breaks=NULL, 

@@ -185,7 +185,7 @@ flexplot = function(formula, data=NULL, related=F,
 	### PLOT UNIVARIATE PLOTS
   bivariate = with(varprep, flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread, plot.type=plot.type))
+                                                    method=method, spread=spread, plot.type=plot.type, bins=bins))
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
