@@ -10,13 +10,17 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   variable_to_be_binned = gsub("_binned", "", binned_var)
   gg_dataset = plot$data
   
+  
+  extract_numbers_from_binned_var(x_bin=gg_dataset[,binned_var[1]], 
+                                  x_original = d[,variable_to_be_binned[1]])
   # extract breakpoints from plot data, then break the new one
     d_to_binned = 1:length(variable_to_be_binned) %>% 
     purrr::map(function(x) extract_numbers_from_binned_var(gg_dataset[,binned_var[x]], d[,variable_to_be_binned[x]])) %>%
     data.frame 
   names(d_to_binned) = binned_var
-  d[,binned_var] = d_to_binned[,binned_var]
   
+  if (nrow(d_to_binned)==0) return(d)
+  d[,binned_var] = d_to_binned[,binned_var]
   # create a new string of terms that needs to be summarized by
   nt = c(terms[-which(terms %in% variable_to_be_binned)], binned_var)
   
@@ -42,10 +46,9 @@ extract_numbers_from_binned_var = function(x_bin, x_original) {
   which_too_low = x_original<min(break_vals)
   x_original[which_too_low] = min(break_vals)+.0001  
   x_original = data.frame(x_original)
-  
+  names(x_original)[1] = "x_original"
   # replace observations > max with the max
   x_original = bin.me("x_original", x_original, breaks=break_vals)
-  
   return(x_original)
 }
 
