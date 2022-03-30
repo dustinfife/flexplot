@@ -35,7 +35,8 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
     newd = convert_numeric_to_ordinal(newd, terms[1])
     
     # convert to ordered factor if original was an ordered factor
-    if (class(step3$data[,terms[1]])[1]=="ordered") {
+    if (class(step3$data[,terms[1]])[1]=="ordered" &
+        class(newd[[terms[1]]])[1]     !="ordered") {
       newd[[terms[1]]] = factor(newd[[terms[1]]],levels=c(unique(newd[[terms[1]]])),
                                                                              ordered=T)
       m[[terms[1]]] = factor(m[[terms[1]]],levels=c(unique(m[[terms[1]]])),

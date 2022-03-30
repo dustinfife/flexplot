@@ -1,5 +1,5 @@
 context("ghost line plots")
-
+options(warn=-1)
 data(exercise_data)
 data("relationship_satisfaction")
 d = exercise_data
@@ -34,3 +34,4 @@ test_that("ghost line plots work", {
   j = flexplot(y~x + a | b + y_bin, data=small, ghost.reference=list(a="a", b="z", y_bin=1))
   vdiffr::expect_doppelganger("ghost with previous bug binning", j)
 })
+options(warn=0)
