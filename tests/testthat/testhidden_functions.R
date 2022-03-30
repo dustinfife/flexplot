@@ -234,6 +234,10 @@ test_that("get_var_names_within_function works", {
   expect_true(get_var_names_within_function("sqrt(a)", return.var = F)(4)==2)
 })
 
+test_that("extract_numbers_from_binned_var works", {
+  expect_equal(extract_numbers_from_binned_var(c("-3-8", "8-11", "-3-8", "8-11")), c(-3, 8, 11))
+})
+
 
 
 options(warn=0)
