@@ -73,9 +73,9 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
   
   means = means[means$model=="random effects",]
   names(means)[ncol(means)] = names(fixed.means)[ncol(fixed.means)] = outcome
-  names(fixed.means)[names(fixed.means)==unbinned.var] = binned.var
-  names(means)[names(means)==unbinned.var] = binned.var	
-  fixed.means$SES_binned
+  names(fixed.means)[names(fixed.means)%in%unbinned.var] = binned.var
+  names(means)[names(means)%in%unbinned.var] = binned.var	
+  
   random_geom = 
       ### random effects
       list(
