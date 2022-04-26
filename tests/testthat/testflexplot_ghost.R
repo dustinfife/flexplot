@@ -33,5 +33,7 @@ test_that("ghost line plots work", {
   vdiffr::expect_doppelganger("ghost with previous bug", i)
   j = flexplot(y~x + a | b + y_bin, data=small, ghost.reference=list(a="a", b="z", y_bin=1))
   vdiffr::expect_doppelganger("ghost with previous bug binning", j)
+  vdiffr::expect_doppelganger("ghost with numeric of two levels (previous bug)", 
+                              flexplot(z~x | y_bin, data=small, ghost.line="red"))
 })
 options(warn=0)

@@ -62,6 +62,9 @@ create_ghost_dataset = function(data, axis, prediction, given, ghost.reference, 
       binned.name = given[s]
     }
     
+    #when there's a numeric variable with unique<bins, there's an error unless I do this
+    if (!(binned.name %in% names(k))) binned.name = given[s]
+    
     ### specify k based on whether they supply a prediction
     if (is.null(prediction)){
       k = k[(k[,binned.name])==unlist(ghost.reference[[given[s]]]),]				
@@ -183,6 +186,10 @@ create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.referen
       } else {
         given.bin = paste0(gsub("_binned", "", to.bin[b]), "_binned")
       }
+      
+      # when there's a numeric variable with unique<bins, there's an error unless I do this
+      if (!(given.bin %in% names(data))) given.bin = to.bin[b]
+      
       ### format given as a binned variable
       l = factor(data[,given.bin])
       middle = levels(l); middle = middle[round((length(middle))/2)]

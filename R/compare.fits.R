@@ -83,7 +83,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (!(all(predictors %in% names(data)))){
     stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
   }	
-  
+
   pred.values = generate_predictors(data, predictors, testme, num_points, class(model1)[1])
   # for intercept only models
   if (nrow(pred.values)==0) {
@@ -153,7 +153,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     #### if they supply a factor, convert it to a number!!!!!
     prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
   }
-
+  
   #### create flexplot
   if (return.preds){
     prediction.model
