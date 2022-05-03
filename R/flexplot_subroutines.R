@@ -113,16 +113,32 @@ flexplot_alpha_default = function(data, axis, alpha){
 
 
 ### prep data for association plot
-modify_association_plot_data = function(data, outcome, axis) {
+modify_association_plot_data = function(data, formula, outcome) {
+
+  variables = all.vars(formula, unique=FALSE)
+  predictors = variables[-1]
   
-  if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1 & axis[1] != "1"){
-    m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
-    chi = chisq.test(data[,axis], data[,outcome])
-    obs.exp = (chi$observed - chi$expected)/chi$expected
-    m$Freq = as.vector(obs.exp)
-    names(m)[names(m)=="Freq"] = "Proportion"
+  ### extract given and axis variables
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  
+  # this needs to be here when using visualize (since formula is null and it will
+  # say outcome and axis are not numeric (because they're null))
+  if (is.na(axis[1]) | axis[1] == "1") return(data)
+  if (all(is.na(data[,outcome])) | all(is.na(data[,axis]))) return(data)
+  
+  #maybe best to do log linear model (poisson?)
+  if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]])) {
+    m = as.data.frame(table(data[,c(predictors, outcome)])); names(m)[1:(ncol(m)-1)] = c(predictors, outcome)
+    loglin = glm(make.formula("Freq", c(predictors, outcome)), data=m, family=poisson)
+    predicted = predict(loglin, type="response")
+    final.pred = (m$Freq - predicted)
+    m$Freq = final.pred
+    names(m)[names(m)=="Freq"] = "Frequency"
     return(m)
   }
+  
   return(data)
 }
 
@@ -186,7 +202,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
 
   # make all variables into objects from the formula
   # (I believe this is only to make it easier to test, so I don't have to provide so many objects)
-  if (!is.null(formula)) {
+  if (!is.null(formula) & is.null(variables)) {
     prep_vars = flexplot_prep_variables(formula, data=data)
     variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; given = prep_vars$given
     break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors; spread = prep_vars$spread
@@ -207,13 +223,13 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   ### prevent univariates from binning numeric variables with <5 levels
   data = modify_univariate_data_numeric(data=data, axis=axis, outcome=outcome)
   
-  # prepare data for association plot
-  data = modify_association_plot_data(data=data, outcome=outcome, axis=axis)
-  
   # prepare data for related test
   data = modify_related_data(data=data, related=related, axis=axis, outcome=outcome, variables=variables)
   
   data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
+  
+  # prepare data for association plot
+  data = modify_association_plot_data(data=data, formula = formula, outcome = outcome)
   
   # make sure method = 'logistic' under the right circumstances
   method = identify_method(data, outcome, axis, method)
@@ -489,7 +505,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     #### if both are categorical, do chi square
     if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
       
-      p = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+      p = "ggplot(data=data, aes_string(x=axis, y='Frequency', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
       points = "xxxx"
       fitted = "xxxx"
       

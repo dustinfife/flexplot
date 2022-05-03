@@ -141,8 +141,9 @@ flexplot = function(formula, data=NULL, related=F,
 
   ### make modifications to the data
   data = with(varprep, 
-	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
+	            flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method))
+
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
                         ### (error came at ghost.reference when it couldn't find the binned version)
 
