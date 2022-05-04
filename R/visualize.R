@@ -108,6 +108,14 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
   outcome = variables[1]
   predictors = variables[-1]
   
+  ## see if all predictors are categorical
+  dv_is_factor = check.non.number(data[,outcome])
+  all_ivs_factors = all(variable_types(predictors, data)$characters)
+  if (dv_is_factor & all_ivs_factors) {
+    stop("Well, darn. You've found a limitation of flexplot. Flexplot cannot use visualize when
+         all your variables are categorical. Sorry!")
+  }
+  
   #### use flexplot to visualize a model
   if ((plot=="all" | plot == "model" ) & is.null(formula)){
     

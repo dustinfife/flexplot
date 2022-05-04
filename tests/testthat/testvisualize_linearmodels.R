@@ -44,8 +44,9 @@ test_that("visualize function plots", {
   diet$difference = diet$weight6weeks - diet$pre.weight
   related_t_as_glm = lm(difference~1, data=diet)
   vdiffr::expect_doppelganger("related t test", visualize(related_t_as_glm))
-
-
+  
+  ### visualize when there's no numeric predictors (error)
+  expect_error(visualize(glm(a~b, data=small, family=binomial)))
 })
 
 test_that("added.plot function", {
