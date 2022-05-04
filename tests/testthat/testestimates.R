@@ -60,7 +60,7 @@ test_that("estimates from generalized linear models", {
   data("criminal_data")
   d = criminal_data
   mod = glm(rape~ses , data=d, family=binomial)
-  expect_equal(estimates(mod)$raw.coefficients[1], -6.45)
+  expect_equal(estimates(mod)$raw.coefficients[1], -6.45, tolerance = .001)
   
   
   mod = glm(convictions~ses + empathy + depression, data=d, family=poisson)

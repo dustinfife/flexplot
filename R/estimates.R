@@ -397,7 +397,7 @@ print.rf_estimates = function(x,...){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
-
+  
 	#### generate list of coefficients
 	terms = remove_interaction_terms(object)
 	
@@ -406,13 +406,15 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 	
 	#### identify factors
 	if (length(terms)>1){
-		factors = names(which(unlist(lapply(d[,terms], is.factor))));
+		factors = names(which(unlist(lapply(d[,terms], function(x) is.factor(x) | is.character(x)))));
+		#d[,factors] = apply(d[,factors, drop=FALSE], 2, as.factor)
 		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));
 	} else {
-		factors = terms[which(is.factor(d[,terms]))]
+		factors = terms[which(is.factor(d[,terms]) | is.numeric(d[,terms]))]
+		#d[,factors] = as.factor(d[,factors])
 		numbers = terms[which(is.numeric(d[,terms]))]
 	}
-
+	
 	#### output predictions
 	if (class(object)[1]=="glmerMod") {
 	  preds = NA
@@ -432,7 +434,11 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 	                           inverse.OR = 1/exp(lme4::fixef(object)) 
 	                           )
 	} else if (family(object)$link=="logit"){
-		coef.matrix = data.frame(raw.coefficients = coef(object), OR = exp(coef(object)), inverse.OR = 1/exp(coef(object)), standardized.OR = exp(standardized.beta(object, sd.y=F)), inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))
+		coef.matrix = data.frame(raw.coefficients = coef(object), 
+		                         OR = exp(coef(object)), 
+		                         inverse.OR = 1/exp(coef(object)), 
+		                         standardized.OR = exp(standardized.beta(object, sd.y=F)), 
+		                         inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))
 		
 	} else if (family(object)$link=="log"){
 		coef.matrix = data.frame(raw.coefficients = coef(object), 
@@ -444,10 +450,10 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 				std.mult.coef = 1/(standardized.beta(object, sd.y=F)))
 	}
 	
-	
 	#options(warn=0)
-	if (!is.na(preds)[1]){
-	  coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
+	if (!is.na(preds)[1] & length(numbers)>0){
+	  coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = 
+	    sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
 	  nms = row.names(coef.matrix); nms2 = names(coef.matrix)
   	coef.matrix = data.frame(lapply(coef.matrix, function(y) if(is.numeric(y)) round(y, 3) else y), row.names=nms); names(coef.matrix) = nms2
 	}
@@ -458,12 +464,19 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 		return.val
 	}
 
-
+	
 	if (length(factors)>0){
 	for (i in 1:length(factors)){
 		current.pre = preds[factors[i]]
-		levs = levels(d[,factors[i]]); levs = paste0(factors[i], levs)
-		coef.matrix[levs[-1],"Prediction Difference (+/- 1 SD)"] = paste0(string.round(unlist(current.pre)[-1] - unlist(current.pre)[1], digits=2), " (relative to ", levs[1], ")")
+		levs = unique(d[,factors[i]]); levs = paste0(factors[i], levs)
+		# find that level in the coef.matrix
+		im.here = (levs %in% row.names(coef.matrix))
+		
+		if (length(which(im.here))>0) {
+  		coef.matrix[levs[im.here],"Prediction Difference (+/- 1 SD)"] = 
+	  	  paste0(string.round(unlist(current.pre)[which(im.here)] - 
+	  	                      unlist(current.pre)[which(!im.here)], digits=2), " (relative to ", levs[!im.here], ")")
+		}
 		
 		if (length(factors)==1){
 			coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(string.round(unlist(current.pre)[1], digits=2), " (", levs[1], " prediction)")

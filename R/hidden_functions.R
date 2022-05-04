@@ -127,8 +127,8 @@ check_nested = function(model1, model2) {
   mod2 = get_predictors(model2)
   
   #### check for nested models
-  if (all(length(mod1)> length(mod2) & (mod2 %in% mod1) & (class(model1) == class(model2)))) return(T)
-  if (all(length(mod2)>=length(mod1) & (mod1 %in% mod2) & (class(model1) == class(model2)))) return(T)
+  if (all(length(mod1)> length(mod2) & (mod2 %in% mod1) & (class(model1)[1] == class(model2)[1]))) return(T)
+  if (all(length(mod2)>=length(mod1) & (mod1 %in% mod2) & (class(model1)[1] == class(model2)[1]))) return(T)
   return(F)
 }
 
