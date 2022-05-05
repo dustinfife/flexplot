@@ -69,26 +69,12 @@ compare.fits = function(formula, data, model1, model2=NULL,
   outcome = variables[1]
   predictors = variables[-1]
   
-  ## see if all predictors are categorical
-  dv_is_factor = length(unique(data[,outcome]))<3
-  axis_is_factor = ifelse(length(predictors)>0,check.non.number(data[,predictors[1]]), FALSE)
-  if (dv_is_factor & axis_is_factor) {
-    stop("Well, darn. You've found a limitation of flexplot. Flexplot cannot use visualize when
-         both your outcome variable and your x-axis variable are categorical. Maybe try putting a 
-         numeric variable on the x-axis. ")
-  }
-  
-  ##### make sure they're putting the same variables from formula in terms
-  if (!(all(predictors %in% testme))){
-    stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%testme)], collapse=",")))
-  }
-  
-  ##### make sure they're using the right dataset
-  if (!(all(predictors %in% names(data)))){
-    stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
-  }	
+  # check for errors
+  compare_fits_errors(data, outcome, predictors, testme)
 
+  # generate predictor values
   pred.values = generate_predictors(data, predictors, testme, num_points, class(model1)[1])
+  
   # for intercept only models
   if (nrow(pred.values)==0) {
     pred.values = data.frame("(Intercept)" = 1)

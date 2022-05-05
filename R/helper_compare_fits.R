@@ -15,6 +15,27 @@ whats_model2 = function(model1,model2=NULL) {
   return(model2)
 }
 
+compare_fits_errors = function(data, outcome, predictors, testme=NULL) {
+  ## see if all predictors are categorical
+  dv_is_factor = length(unique(data[,outcome]))<3
+  axis_is_factor = check.non.number(data[,predictors[1]])
+  if (dv_is_factor & axis_is_factor) {
+    stop("Well, darn. You've found a limitation of flexplot. Flexplot cannot use the compare.fits function when
+         both your outcome variable and your x-axis variable are categorical. Maybe try putting a numeric variable on the x-axis. ")
+  }
+  
+  ##### make sure they're putting the same variables from formula in terms
+  if (!(all(predictors %in% testme))){
+    stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%testme)], collapse=",")))
+  }
+  
+  ##### make sure they're using the right dataset
+  if (!(all(predictors %in% names(data)))){
+    stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
+  }	
+  return(NULL)
+}
+
 # function that extracts variables from cforest model
 get_cforest_variables = function(model, return.type=c("all", "predictors", "response")) {
   
