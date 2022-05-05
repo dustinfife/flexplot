@@ -16,9 +16,12 @@ whats_model2 = function(model1,model2=NULL) {
 }
 
 compare_fits_errors = function(data, outcome, predictors, testme=NULL) {
+  
   ## see if all predictors are categorical
   dv_is_factor = length(unique(data[,outcome]))<3
-  axis_is_factor = check.non.number(data[,predictors[1]])
+  axis_is_factor = ifelse(length(predictors)>0,
+                          check.non.number(data[,predictors[1]]),
+                          FALSE)
   if (dv_is_factor & axis_is_factor) {
     stop("Well, darn. You've found a limitation of flexplot. Flexplot cannot use the compare.fits function when
          both your outcome variable and your x-axis variable are categorical. Maybe try putting a numeric variable on the x-axis. ")
