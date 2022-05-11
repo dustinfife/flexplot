@@ -35,7 +35,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
     model2 = model1
   } 
   
-  
   #### get type of model
   model1.type = class(model1)[1]
   model2.type = class(model2)[1]	
@@ -73,7 +72,11 @@ compare.fits = function(formula, data, model1, model2=NULL,
   compare_fits_errors(data, outcome, predictors, testme)
 
   # generate predictor values
-  pred.values = generate_predictors(data, predictors, testme, num_points, class(model1)[1])
+  pred.values = generate_predictors(data, formula, model1, ...)
+  
+  # ensure pred.values have same class as original data
+  a = predictors %>% purrr::map(make_data_types_the_same, pred.values, extract_data_from_fitted_object(model1))
+  pred.values[,predictors] = a
   
   # for intercept only models
   if (nrow(pred.values)==0) {
@@ -117,15 +120,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
     }
   }
   
-
-  
   #### report one or two coefficients, depending on if they supplied it
   if (!exists("runme") | exists("old.mod")){
     prediction.model = rbind(pred.mod1, pred.mod2)
-    prediction.model = cbind(pred.values, prediction.model)
+    prediction.model = suppressWarnings(cbind(pred.values, prediction.model))
   } else {
     prediction.model = pred.mod1
-    prediction.model = cbind(pred.values, prediction.model)
+    prediction.model = suppressWarnings(cbind(pred.values, prediction.model))
   }
   
   #### eliminate those predictions that are higher than the range of the data
@@ -159,6 +160,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     final_geom = return_lims_geom(outcome, data, model1)
     #when we have an intercept only model
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
+    head(prediction.model)
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
   }	
