@@ -109,10 +109,10 @@ get_model_n = function(model) {
 
 make_data_types_the_same = function(variable, predicted_data, model_data) {
   
-  
   class_model = class(model_data[,variable])
   class_prediction = class(predicted_data[,variable])
   if (identical(class_model, class_prediction)) return(predicted_data[,variable])
+  
   # if it's an ordered factor
   if (class_model[1] == "ordered") {
     old_levels = levels(model_data[,variable])

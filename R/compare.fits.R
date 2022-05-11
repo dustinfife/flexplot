@@ -56,8 +56,9 @@ compare.fits = function(formula, data, model1, model2=NULL,
   test_same_class(model1, model2)
   
   #### convert random effects to factors for mixed models
-  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
   
+  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
+
   ### make sure they have the same outcome
   if (variables_mod1$response != variables_mod2$response) {
     stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
@@ -73,10 +74,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
 
   # generate predictor values
   pred.values = generate_predictors(data, formula, model1, ...)
-  
+
   # ensure pred.values have same class as original data
-  a = predictors %>% purrr::map(make_data_types_the_same, pred.values, extract_data_from_fitted_object(model1))
-  pred.values[,predictors] = a
+  # but don't change RE; because prior to this there's been sampling of the data and this would revert that
+  randef = extract_random_term(model1)
+  all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
+  a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values, extract_data_from_fitted_object(model1))
+  pred.values[,all_predictors_minus_re] = a
   
   # for intercept only models
   if (nrow(pred.values)==0) {
@@ -160,7 +164,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
     final_geom = return_lims_geom(outcome, data, model1)
     #when we have an intercept only model
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
-    head(prediction.model)
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
   }	
