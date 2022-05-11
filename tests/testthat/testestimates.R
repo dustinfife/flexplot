@@ -38,6 +38,7 @@ test_that("estimates from linear models", {
   expect_equal(estimates(mod)$numbers.summary$std.upper[3], .68279, tolerance = 0.002)
   
   mod = lm(weight.loss~1, data=exercise_data)
+  mean(exercise_data$weight.loss)
   expect_equal(estimates(mod)$Mean, 6.56, tolerance = 0.002)
 })
 

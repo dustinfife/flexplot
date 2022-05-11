@@ -78,9 +78,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
   # ensure pred.values have same class as original data
   # but don't change RE; because prior to this there's been sampling of the data and this would revert that
   randef = extract_random_term(model1)
+  
   all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
-  a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values, extract_data_from_fitted_object(model1))
-  pred.values[,all_predictors_minus_re] = a
+  # when we have a mean model, this fails without the if statement
+  if (!is.na(all_predictors_minus_re)) {
+    a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values, extract_data_from_fitted_object(model1))
+    pred.values[,all_predictors_minus_re] = a
+  }
   
   # for intercept only models
   if (nrow(pred.values)==0) {

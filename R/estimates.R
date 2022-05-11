@@ -102,8 +102,8 @@ estimates.lm = function(object, mc=TRUE){
 
 	if (length(predictors) == 0 ) {
 	  f = as.formula(paste0(outcome, "~1"))
-	  est = compare.fits(formula = f, data=object$model, model1=object, model2=NULL, return.preds=T, report.se=T)
-	  return = est[2:4]
+	  est = compare.fits(formula = f, data=object$model, model1=object, model2=NULL, return.preds=T, report.se=T)[1,]
+	  return = est[1:3]
 	  names(return) = c("Mean", "Lower", "Upper")
 	  return$d = coef(object)/summary(object)$sigma
 	  return(return)
@@ -148,6 +148,7 @@ estimates.lm = function(object, mc=TRUE){
 	min = max-length(semi.p)+1
 	nms = row.names(anova(object))[min:max]	
 	names(semi.p) = nms
+
 	
 	if (length(factors)>0){
 		#### generate table with names
@@ -184,6 +185,7 @@ estimates.lm = function(object, mc=TRUE){
 				# coef.std$se = coef.std$se[-which(names(coef.std$se) %in% numbers)]			
 			# }
 			p = 1; p2=1; i=1
+			
 			for (i in 1:length(factors)){
 				
 				#### populate df based on levels
@@ -199,10 +201,11 @@ estimates.lm = function(object, mc=TRUE){
 
 				#### populate the estimates/lower/upper
 				f = as.formula(paste0(outcome, "~", factors[i]))
-				est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T)
-
-				
-				coef.matrix$levels[current.rows] = as.character(est[,1])
+				est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T) %>% 
+				  group_by_at(factors[i]) %>%
+				  summarize(across(prediction.fit:prediction.upr, ~mean(.x)))
+        
+				coef.matrix$levels[current.rows] = unique(as.character(est[,1]))
 				coef.matrix$estimate[current.rows] = est$prediction.fit
 				coef.matrix$lower[current.rows] = est$prediction.lwr
 				coef.matrix$upper[current.rows] = est$prediction.upr
@@ -223,9 +226,10 @@ estimates.lm = function(object, mc=TRUE){
 				width = qtukey(.95, levs, df) *
 					 summary(object)$sigma * 
 					 sqrt(outer(1/nn, 1/nn, "+"))[keep]
-				difference.names = outer(as.character(est[,1]), 
-										as.character(est[,1]), 
-										paste, sep = "-")[keep]
+				difference.names = outer(as.character(est[[factors[i]]]), 
+				                         as.character(est[[factors[i]]]), 
+										                paste, sep = "-")[keep]
+				
 				difference.matrix$comparison[current.rows2] = difference.names
 				difference.matrix[current.rows2,c("difference", "lower", "upper")] = 
 						c(center, center-width, center+width)				
