@@ -90,7 +90,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (nrow(pred.values)==0) {
     pred.values = data.frame("(Intercept)" = 1)
   }
-
+  
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
   ### there's no fixed effect if we don't have these lines
@@ -166,10 +166,10 @@ compare.fits = function(formula, data, model1, model2=NULL,
     # } 
 
     final_geom = return_lims_geom(outcome, data, model1)
-    #when we have an intercept only model
-    if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
     # remove duplicate rows
     prediction.model = prediction.model[!duplicated(prediction.model),]
+    #when we have an intercept only model
+    if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
   }	
