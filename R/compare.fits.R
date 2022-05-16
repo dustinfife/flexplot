@@ -168,6 +168,8 @@ compare.fits = function(formula, data, model1, model2=NULL,
     final_geom = return_lims_geom(outcome, data, model1)
     #when we have an intercept only model
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
+    # remove duplicate rows
+    prediction.model = prediction.model[!duplicated(prediction.model),]
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
   }	
