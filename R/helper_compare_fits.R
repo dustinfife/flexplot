@@ -243,7 +243,6 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
 
   model.type = class(model)[1]
   if ((model.type == "lmerMod" | model.type == "glmerMod") & !re){
-    pred.values$AGE_14 = as.numeric(as.character(pred.values$AGE_14))
     return(data.frame(prediction = 
                  predict(model, pred.values, type="response"), model="fixed effects"))
   }  
