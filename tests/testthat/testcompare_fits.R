@@ -55,24 +55,28 @@ test_that("compare.fits for other models", {
   set.seed(1212)
   #### COMPARE.FITS FUNCTIONS -- linear models
   mod = lm(weight.loss~rewards, data=d)
-  require(MASS)
-  set.seed(1212)
   mod2 = rlm(weight.loss~rewards, data=d)
   vdiffr::expect_doppelganger("compare.fits with rlm",compare.fits(formula=weight.loss~rewards, data=d, model1=mod, model2=mod2))
   
-  k = exercise_data; k$weight.loss = factor(k$weight.loss, ordered=T)
-  polyn = MASS::polr(weight.loss~rewards, data=k)
-  polyn2 = MASS::polr(weight.loss~rewards+therapy.type, data=k)
+  polyn = MASS::polr(weight.loss~rewards,               data=exercise_data %>% mutate(weight.loss = factor(weight.loss, ordered=T)))
+  polyn2 = MASS::polr(weight.loss~rewards+therapy.type, data=exercise_data %>% mutate(weight.loss = factor(weight.loss, ordered=T)))
   vdiffr::expect_doppelganger("compare.fits with polr",
-                              compare.fits(weight.loss~rewards|therapy.type, data=k, polyn, polyn2))
+                  compare.fits(weight.loss~rewards|therapy.type, 
+                                                        data=exercise_data %>% mutate(weight.loss = factor(weight.loss, ordered=T)), 
+                               polyn, polyn2))
   
   
   ##### compare predictions with random forest
   d = exercise_data
   d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)
-  model1 = randomForest::randomForest(wl~motivation + gender + rewards, data=d)
-  model2 = lm(wl~motivation * gender * rewards, data=d)		### use the same predictors in both models
-  vdiffr::expect_doppelganger("compare.fits with rf",compare.fits(wl~motivation | gender + rewards, data=d, model1, model2))
+  model1 = randomForest::randomForest(wl~motivation + gender + rewards, 
+                                      data=exercise_data %>% mutate(wl = weight.loss + .8*motivation*as.numeric(rewards)))
+  model2 = lm(wl~motivation * gender * rewards, 
+                                      data=exercise_data %>% mutate(wl = weight.loss + .8*motivation*as.numeric(rewards)))
+  ### use the same predictors in both models
+  vdiffr::expect_doppelganger("compare.fits with rf",compare.fits(wl~motivation | gender + rewards, 
+                                     data=exercise_data %>% mutate(wl = weight.loss + .8*motivation*as.numeric(rewards)), 
+                              model1, model2))
   
   ##### predictions with generalize lidnear model
   d$weight.loss = d$weight.loss + 1 + abs(min(d$weight.loss, na.rm=T))
