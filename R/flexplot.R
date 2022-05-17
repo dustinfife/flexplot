@@ -154,16 +154,13 @@ flexplot = function(formula, data=NULL, related=F,
   ##### make models into a factor if they supply predictions
 	if (!is.null(prediction)){
 		prediction$model = factor(prediction$model)
-		
 		### make the levels consistent between prediction/data for axis 1
-		if (!is.numeric(data[[varprep$axis[1]]])){
+		if (!is.numeric(data[[varprep$axis[1]]]) & varprep$axis[1] != "1"){
 		  prediction[[varprep$axis[1]]] = factor(prediction[[varprep$axis[1]]], levels=levels(data[[varprep$axis[1]]]))
 		}
 		
 		varprep$prediction = prediction
 	}
-	
-	
 	
   ### report errors when necessary
   with(varprep, flexplot_errors(variables = variables, data = data, method=method, axis=axis))
@@ -236,6 +233,7 @@ flexplot = function(formula, data=NULL, related=F,
 	} else {
 	  pred.line = "xxxx"
 	}
+  
 
 	theme = "theme_bw() + theme(text=element_text(size=14))"
   

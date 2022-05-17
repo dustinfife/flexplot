@@ -35,7 +35,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
     model2 = model1
   } 
   
-  
   #### get type of model
   model1.type = class(model1)[1]
   model2.type = class(model2)[1]	
@@ -57,8 +56,9 @@ compare.fits = function(formula, data, model1, model2=NULL,
   test_same_class(model1, model2)
   
   #### convert random effects to factors for mixed models
-  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
   
+  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
+
   ### make sure they have the same outcome
   if (variables_mod1$response != variables_mod2$response) {
     stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
@@ -73,13 +73,24 @@ compare.fits = function(formula, data, model1, model2=NULL,
   compare_fits_errors(data, outcome, predictors, testme)
 
   # generate predictor values
-  pred.values = generate_predictors(data, predictors, testme, num_points, class(model1)[1])
+  pred.values = generate_predictors(data, formula, model1, ...)
+
+  # ensure pred.values have same class as original data
+  # but don't change RE; because prior to this there's been sampling of the data and this would revert that
+  randef = extract_random_term(model1)
+  
+  all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
+  # when we have a mean model, this fails without the if statement
+  if (!is.na(all_predictors_minus_re)) {
+    a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values, extract_data_from_fitted_object(model1))
+    pred.values[,all_predictors_minus_re] = a
+  }
   
   # for intercept only models
   if (nrow(pred.values)==0) {
     pred.values = data.frame("(Intercept)" = 1)
   }
-
+  
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
   ### there's no fixed effect if we don't have these lines
@@ -117,15 +128,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
     }
   }
   
-
-  
   #### report one or two coefficients, depending on if they supplied it
   if (!exists("runme") | exists("old.mod")){
     prediction.model = rbind(pred.mod1, pred.mod2)
-    prediction.model = cbind(pred.values, prediction.model)
+    prediction.model = suppressWarnings(cbind(pred.values, prediction.model))
   } else {
     prediction.model = pred.mod1
-    prediction.model = cbind(pred.values, prediction.model)
+    prediction.model = suppressWarnings(cbind(pred.values, prediction.model))
   }
   
   #### eliminate those predictions that are higher than the range of the data
@@ -157,6 +166,8 @@ compare.fits = function(formula, data, model1, model2=NULL,
     # } 
 
     final_geom = return_lims_geom(outcome, data, model1)
+    # remove duplicate rows
+    prediction.model = prediction.model[!duplicated(prediction.model),]
     #when we have an intercept only model
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +

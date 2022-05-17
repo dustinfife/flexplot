@@ -237,12 +237,11 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   # convert data for logistic regression
   data = factor.to.logistic(data,outcome, method)
   
-
   #### reorder axis 1 it's not already ordered
   if(axis[1] != "1"){
     #### order by medians for numeric outcomes
     if (!is.numeric(data[,axis[1]]) & is.numeric(data[,outcome]) & !is.ordered(data[, axis[1]]) & !related){
-      if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
+      if (spread[1]=="quartiles"){ fn = "median"} else {fn = "mean"}
       ord = aggregate(data[,outcome]~data[, axis[1]], FUN=fn, na.rm=T)
       ord = ord[order(ord[,2], decreasing=T),]
       data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
