@@ -221,8 +221,8 @@ reproduce_breaks = function(data, formula, list_values) {
   
   # find bins/breaks/labels
   bins  =  if("bins"  %in% names(list_values))  unlist(list_values["bins"]) else 3
-  breaks = if("breaks" %in% names(list_values)) unlist(list_values["breaks"]) else NULL
-  labels = if("labels" %in% names(list_values)) unlist(list_values["labels"]) else NULL
+  breaks = if("breaks" %in% names(list_values)) (list_values["breaks"]$breaks) else NULL
+  labels = if("labels" %in% names(list_values)) (list_values["labels"]$labels) else NULL
   
   
   break.me = flexplot_break_me(data, predictors, given, axis, bins)

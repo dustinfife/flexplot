@@ -126,6 +126,14 @@ test_that("compare.fits for other models", {
   fit2 = rpart::rpart(therapy.type~motivation + rewards, data=exercise_data, method="anova")
   vdiffr::expect_doppelganger("compare.fits with rpart categorical",
                               compare.fits(therapy.type~motivation + rewards, data=exercise_data, fit2))  
+  
+  ## compare.fits with labels/breaks (used to throw an error prior to may 2022)
+  mod = lm(y~a + x, data=small)
+  vdiffr::expect_doppelganger("compare.fits with labels/breaks", 
+    compare.fits(y~a |  x, data=small, 
+               model1=mod,
+               breaks = list(x=c(-2, 0, Inf)), 
+               labels = list(x=c("small", "large"))))
 })
 
 
