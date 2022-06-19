@@ -64,12 +64,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
 
   # generate predictor values
   pred.values = generate_predictors(data, formula, model1, ...)
-
-  
-  
-  
-  
-  
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
   ### there's no fixed effect if we don't have these lines
@@ -78,7 +72,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
     pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		
   }
   
-
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
   } else {
@@ -96,62 +89,31 @@ compare.fits = function(formula, data, model1, model2=NULL,
     pred.mod2$prediction = as.numeric(as.character(pred.mod2$prediction))		
   }
   
-  #### if they have the same name, just call them model1 and model2
-  
-  if (!re){
-    pred.mod1$model = paste0(deparse(substitute(model1)), " (", model1.type, ")", collapse="")
-    if (pred.mod1$model[1] == pred.mod2$model[1]){
-      pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, " 2)", collapse="")
-    } else {
-      pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, ")", collapse="")
-    }
-  }
+  # set the names of the models
+  pred.mod1$model = return_model_labels(model1, deparse(substitute(model1)), pred.mod1$model, re=re)
+  pred.mod2$model = return_model_labels(model2, deparse(substitute(model2)), pred.mod2$model, re=re)
+  pred.mod2$model = change_model_names_if_same(pred.mod1$model, pred.mod2$model)
   
   #### report one or two coefficients, depending on if they supplied it
   if (!exists("runme") | exists("old.mod")){
     prediction.model = rbind(pred.mod1, pred.mod2)
-    prediction.model = suppressWarnings(cbind(pred.values, prediction.model))
+    prediction.model = cbind(pred.values, prediction.model)
   } else {
     prediction.model = pred.mod1
-    prediction.model = suppressWarnings(cbind(pred.values, prediction.model))
+    prediction.model = cbind(pred.values, prediction.model)
   }
   
-  #### eliminate those predictions that are higher than the range of the data
-  if (!is.factor(data[,outcome])){
-    min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)
-    if (length(which(
-        prediction.model$prediction>(max.dat))>0 |
-          length(which(prediction.model$prediction<(min.dat))))){
-      #prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]
-      warning("Some of the model's predicted values are beyond the range of the original y-values. 
-              I'm truncating the y-axis to preserve the original scale.")
-      
-    }
-  } else {
-    #### if they supply a factor, convert it to a number!!!!!
-    prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
-  }
+  #### return the dataset
+  if (return.preds) return(prediction.model)
   
-  #### create flexplot
-  if (return.preds){
-    prediction.model
-  } else {
-    # at one time, I was adding one to the predictions. WHY??????
-    # ### for logistic, add one to the predictions
-    # if (model1.type == "glm" ) {
-    #   if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
-    #     prediction.model$prediction = prediction.model$prediction + 1
-    #   }
-    # } 
-
-    final_geom = return_lims_geom(outcome, data, model1)
-    # remove duplicate rows
-    prediction.model = prediction.model[!duplicated(prediction.model),]
-    #when we have an intercept only model
-    if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
-    flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
-      final_geom
-  }	
+  #when we have an intercept only model
+  final_geom = return_lims_geom(outcome, data, model1)
+  # remove duplicate rows
+  prediction.model = prediction.model[!duplicated(prediction.model),]
+  #when we have an intercept only model
+  if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
+  flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
+    final_geom
   
 }	
 

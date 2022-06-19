@@ -358,3 +358,44 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
 }
 
 
+return_model_labels = function(model, model_name, model_column,
+                               re = FALSE) {
+  
+  if (re) return(model_column)
+  model.type = class(model)[1]
+  
+  #### if they have the same name, just call them model and model2
+  model_column = paste0(model_name, " (", model.type, ")", collapse="")
+  return(model_column)
+}
+
+change_model_names_if_same = function(model1_column, model2_column=NULL) {
+  if (is.null(model2_column)) return(NULL)
+  if (model1_column[1] != model2_column[1]) return(model2_column)
+  
+  label = model2_column[1]
+  # replace (model (lmer.mod) with model (lmer.mod 2))
+  new_labels = gsub("\\(([a-z]+[.]?[_]?[0-9]?)\\)", "(\\1 2)", label)
+  return(new_labels)
+}
+
+limit_range_of_predictions = function(data_outcome, prediction_outcome) {
+  
+  # convert factors to numbers
+  if (is.factor(data_outcome)) {
+    return(round(as.numeric(as.character(prediction_outcome)), digits=3))
+  }
+  
+  #### eliminate those predictions that are higher than the range of the data
+  min.dat = min(data_outcome, na.rm=T); max.dat = max(data_outcome, na.rm=T)
+  predictions_are_higher = any(prediction_outcome>max.dat)
+  predictions_are_lower  = any(prediction_outcome<min.dat)
+  if (!(predictions_are_lower | predictions_are_higher)) return(prediction_outcome)
+  # I'm commenting this out because, otherwise, we get an error because the number
+  # of rows isn't the same as the rest of the matrix for prediction_outcome.
+  # Instead, we limit the range with a geom.
+  #prediction_outcome = prediction_outcome[prediction_outcome<=max.dat & prediction_outcome>=min.dat]
+  warning("Some of the model's predicted values are beyond the range of the original y-values.
+            I'm truncating the y-axis to preserve the original scale.")
+  return(prediction_outcome)
+}
