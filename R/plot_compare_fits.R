@@ -42,54 +42,33 @@ compare.fits = function(formula, data, model1, model2=NULL,
   #### get all variables
   variables_mod1 = get_terms(model1)
   variables_mod2 = get_terms(model2)
-  testme = unique(c(variables_mod1$predictors, variables_mod2$predictors))
+  model_terms   = unique(c(variables_mod1$predictors, variables_mod2$predictors))
   all_variables = unique(c(variables_mod1$predictors, variables_mod2$predictors, variables_mod1$response, variables_mod2$response))
   
-  if (tibble::is_tibble(data)){
-    data = as.data.frame(data)
-  }
-  
-  #### for the rare occasion where deleting missing data changes the levels...
-  data = check_missing(model1, model2, data, all_variables)
-  
-  #### make sure, if they have lme4, both models are lme4 objects
-  test_same_class(model1, model2)
-  
-  #### convert random effects to factors for mixed models
-  
-  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
-
-  ### make sure they have the same outcome
-  if (variables_mod1$response != variables_mod2$response) {
-    stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
-  }
+  # do all the checks/manipulations for the data
+  data = prepare_data_for_compare.fits(data, model1, model2, all_variables)
+  # put in a check to take data from the larger of the two models
+  # if they don't provide a formula
+  if (is.null(formula)) formula = make_flexplot_formula(variables_mod1$predictors, variables_mod1$response, data, drop_second_slot=T)
   
   ##### extract variable names from FORMULA
   variables = all.vars(formula)
   outcome = variables[1]
   predictors = variables[-1]
   
-  # check for errors
-  compare_fits_errors(data, outcome, predictors, testme)
+  #### convert random effects to factors for mixed models
+  data = subset_random_model(model1, formula, d=data, samp.size = clusters)
+  
+  check_errors_compare_fits(model1, model2, data, formula)
+  
 
   # generate predictor values
   pred.values = generate_predictors(data, formula, model1, ...)
 
-  # ensure pred.values have same class as original data
-  # but don't change RE; because prior to this there's been sampling of the data and this would revert that
-  randef = extract_random_term(model1)
   
-  all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
-  # when we have a mean model, this fails without the if statement
-  if (!is.na(all_predictors_minus_re)) {
-    a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values, extract_data_from_fitted_object(model1))
-    pred.values[,all_predictors_minus_re] = a
-  }
   
-  # for intercept only models
-  if (nrow(pred.values)==0) {
-    pred.values = data.frame("(Intercept)" = 1)
-  }
+  
+  
   
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   

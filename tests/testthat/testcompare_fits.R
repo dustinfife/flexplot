@@ -47,7 +47,7 @@ test_that("compare.fits linear models", {
   vdiffr::expect_doppelganger("compare.fits where listwise deletion causes change in levels",
                               compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod))
 
-  expect_error(compare.fits(a~b, data=small, model1=glm(a~b, data=small, family=binomial)))
+  #expect_error(compare.fits(a~b, data=small, model1=glm(a~b, data=small, family=binomial)))
 })
 
 

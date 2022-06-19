@@ -107,6 +107,67 @@ get_model_n = function(model) {
   
 }
 
+check_errors_compare_fits = function(model1, model2, data, formula=NULL) {
+  
+  if (is.null(formula)) formula = formula(model1)
+  variables_mod1 = get_terms(model1)
+  variables_mod2 = get_terms(model2)
+  model_terms   = unique(c(variables_mod1$predictors, variables_mod2$predictors))
+  variables = all.vars(formula)
+  outcome = variables[1]
+  predictors = variables[-1]
+  
+  ### make sure they have the same outcome
+  if (variables_mod1$response != variables_mod2$response) {
+    stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
+  }
+  
+  ##### make sure they're putting the same variables from formula in terms
+  if (!(all(predictors %in% model_terms))){
+    stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", 
+                paste0(predictors[!(predictors%in%model_terms)], collapse=",")))
+  }
+  
+  ##### make sure they're using the right dataset
+  if (!(all(predictors %in% names(data)))){
+    stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", 
+                paste0(variables[!(variables%in%data)], collapse=","), ".\nDid you input the wrong dataset?\n\nMaybe you should take a nap."))
+  }
+}
+
+modify_for_mean_model = function(model1, predictors) {
+  # ensure pred.values have same class as original data
+  # but don't change RE; because prior to this there's been sampling of the data and this would revert that
+  randef = extract_random_term(model1)
+  
+  all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
+  
+  # when we have a mean model, this fails without this if statement
+  if (!is.na(all_predictors_minus_re)) {
+    a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values, extract_data_from_fitted_object(model1))
+    pred.values[,all_predictors_minus_re] = a
+  }
+  
+  # for intercept only models
+  if (nrow(pred.values)==0) {
+    pred.values = data.frame("(Intercept)" = 1)
+  }
+  
+}
+
+prepare_data_for_compare.fits = function(data=NULL, model1, model2=NULL, all_variables=NULL) {
+  
+  # identify which is the bigger model
+  
+  if (is.null(data))    data = extract_data_compare_fits(model1, model2)
+  if (tibble::is_tibble(data)) data = as.data.frame(data)
+  if (is.null(all_variables)) all_variables = all.vars(formula(model1))
+  #### for the rare occasion where deleting missing data changes the levels...
+  data = check_missing(model1, model2, data, all_variables)
+  return(data)
+  
+}
+
 make_data_types_the_same = function(variable, predicted_data, model_data) {
   
   class_model = class(model_data[,variable])
