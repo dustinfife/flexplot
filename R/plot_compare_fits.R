@@ -102,14 +102,15 @@ compare.fits = function(formula, data, model1, model2=NULL,
     prediction.model = pred.mod1
     prediction.model = cbind(pred.values, prediction.model)
   }
-  
+
+  # remove duplicate rows
+  prediction.model = prediction.model[!duplicated(prediction.model),]  
   #### return the dataset
   if (return.preds) return(prediction.model)
   
   #when we have an intercept only model
   final_geom = return_lims_geom(outcome, data, model1)
-  # remove duplicate rows
-  prediction.model = prediction.model[!duplicated(prediction.model),]
+
   #when we have an intercept only model
   if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
   flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +

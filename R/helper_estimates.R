@@ -183,3 +183,230 @@ bf.bic = bf_bic = function(model1, model2, invert=F){
     bf
   }
 }
+
+return_mean_for_intercept_models = function(model, outcome=NULL, data=NULL) {
+  if (is.null(outcome)) outcome    = get_terms(model)$response
+  if (is.null(data))    data = extract_data_from_fitted_object(model)
+  
+  f = as.formula(paste0(outcome, "~1"))
+  est = compare.fits(formula = f, data=data, model1=model, model2=NULL, return.preds=T, report.se=T)
+  return = est[1:3]
+  names(return) = c("Mean", "Lower", "Upper")
+  return$d = coef(model)/summary(model)$sigma
+  return(return)
+}
+
+
+report_r_squared = function(object) {
+  #### report R squared
+  r.squared = summary(object)$r.squared
+  n = nrow(model.frame(object)) 
+  t.crit = qt(.975, df=n-2)	
+  se.r = sqrt((4*r.squared*(1-r.squared)^2*(n-1-1)^2)/((n^2-1)*(n+3)))		### from cohen, cohen, west, aiken, page 88
+  r.squared = c(r.squared, r.squared-t.crit*se.r, r.squared+t.crit*se.r)
+  r.squared = round(r.squared, digits=4)
+  return(r.squared)
+}
+
+report_correlation = function(object, d = NULL, numbers=NULL, factors=NULL, outcome=NULL) {
+  
+  if (is.null(numbers) | is.null(factors) | is.null(outcome) | is.null(d)) {
+    d = extract_data_from_fitted_object(object)
+    terms = get_terms(object, nonlinear_terms = T)
+    predictors = terms$predictors
+    outcome = terms$response
+    variable_types = get_factor_numeric_names(d, predictors)
+    factors = variable_types$cat
+    numbers = variable_types$numb
+  }
+  
+  #### report correlation
+  if (length(numbers)==1 & length(factors)==0) return(cor(d[,c(numbers, outcome)])[1,2])
+  
+  return(NA)
+}
+
+model_comparison_for_one_term = function(i, terms = NULL, object){
+  
+  if (is.null(terms)) terms = get_terms(object, nonlinear_terms = T)$predictors
+  
+  new.f = as.formula(paste0(". ~ . -", terms[i]))
+  new.object = update(object, new.f)
+  
+  list(
+    rsq = summary(object)$r.squared - summary(new.object)$r.squared,
+    bayes.factor = bf.bic(object, new.object, invert=FALSE)
+  )
+  
+}
+
+model_comparison_all_terms = function(object, terms = NULL, mc = TRUE) {
+  
+  if (is.null(terms)) terms = get_terms(object, nonlinear_terms = T)
+  
+  if (length(terms)>1 & mc){
+    
+    ### this requires superassignment to work with JASP
+    #dataset<<-object$model
+    dataset = object$model
+    all.terms = attr(terms(object), "term.labels")
+    mc = t(sapply(1:length(all.terms), model_comparison_for_one_term, terms=all.terms, object=object))
+    mod.comps = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
+    mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
+    mod.comps$rsq = as.numeric(mod.comps$rsq) 
+    mod.comps$bayes.factor = as.numeric(unlist(mod.comps$bayes.factor))
+    return(mod.comps)
+    
+  }
+  
+  return(NULL)
+  
+}
+
+
+remove_interaction_terms = function(object) {
+  #### generate list of coefficients
+  terms = attr(terms(object), "term.labels")
+  interaction = length(grep(":", terms))>0
+  if (interaction){
+    terms = terms[-grep(":", terms)]
+  }
+  return(terms)
+}
+
+
+delta_rsquare = function(object) {
+  
+  ssr = drop1(aov(object))[-1,"Sum of Sq"]
+  ssr2 = aov(object)$effects
+  sst = sum(anova(object)[,"Sum Sq"])
+  sse = anova(object)[,"Sum Sq"]
+  semi.p = (sse[1:(length(sse)-1)]/sst)
+  max = nrow(anova(object))-1
+  min = max-length(semi.p)+1
+  nms = row.names(anova(object))[min:max]	
+  names(semi.p) = nms
+  return(semi.p)
+}
+
+create_empty_estimates_matrices = function(d, factors) {
+  factor_levels    =     unlist(lapply(d[,factors, drop=FALSE], levels))
+  estimates_rows   = sum(unlist( apply(d[,factors, drop=FALSE], 2, function(x) { length(unique(x))})))			
+  differences_rows = sum(apply(d[,factors, drop=FALSE], 2, function(x){ a = length(unique(x)); (a*(a-1))/2}))
+  
+  #### create empty matrix with variable names
+  coef.matrix = data.frame(variables = rep("", estimates_rows), levels=NA, estimate=NA, lower=NA, upper=NA)
+  coef.matrix$variables = factor(coef.matrix$variables, levels=c("", factors))		
+  
+  #### difference.matrix
+  difference.matrix = data.frame(variables = NA, comparison = 1:differences_rows, difference=NA, 
+                                 lower=NA, upper=NA, cohens.d=NA)
+  return(list(coef.matrix=coef.matrix, difference.matrix=difference.matrix))
+}
+
+populate_estimates_matrix = function(object, 
+                                     d=NULL, factors=NULL,outcome=NULL){
+  
+  # get null object (for easy testing)
+  if (is.null(d))       d = extract_data_from_fitted_object(object)
+  if (is.null(factors)) factors = get_factor_numeric_names(d,
+                                                           get_terms(object, nonlinear_terms = T)$predictors)$cat
+  if (is.null(outcome)) outcome = get_terms(object, nonlinear_terms = T)$response
+  coef.matrix=create_empty_estimates_matrices(d, factors)$coef.matrix
+  difference.matrix=create_empty_estimates_matrices(d, factors)$difference.matrix
+  
+  
+  p = 1; p2=1; i=1
+  for (i in 1:length(factors)){
+    
+    #### populate df based on levels
+    levs = length(levels(d[,factors[i]]))
+    levs2 = (levs*(levs-1))/2
+    current.rows = p:(p+levs-1)
+    current.rows2 = p2:(p2 + levs2-1)
+    
+    #### populate variable names
+    coef.matrix$variables[p] = factors[i]
+    
+    # compute the estimates
+    f = as.formula(paste0(outcome, "~", factors[i]))
+    est = suppressMessages(compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T))
+    
+    #### populate the estimates/lower/upper
+    coef.matrix$levels[current.rows] = as.character(est[,1])
+    coef.matrix$estimate[current.rows] = est$prediction.fit
+    coef.matrix$lower[current.rows] = est$prediction.lwr
+    coef.matrix$upper[current.rows] = est$prediction.upr
+    
+    
+    #### fill in the difference matrix
+    difference.matrix$variables[p2] = factors[i]
+    center = outer(est$prediction.fit, est$prediction.fit, "-")
+    keep <- lower.tri(center)
+    center <- center[keep]
+    nn = table(d[,factors[i]])
+    df = nrow(d) - length(coef(object))
+    width = qtukey(.95, levs, df) *
+      summary(object)$sigma * 
+      sqrt(outer(1/nn, 1/nn, "+"))[keep]
+    difference.names = outer(as.character(est[,1]), 
+                             as.character(est[,1]), 
+                             paste, sep = "-")[keep]
+    difference.matrix$comparison[current.rows2] = difference.names
+    difference.matrix[current.rows2,c("difference", "lower", "upper")] = 
+      c(center, center-width, center+width)				
+    difference.matrix$cohens.d[current.rows2] = difference.matrix$difference[current.rows2]/summary(object)$sigma
+    
+    #### increment the counter
+    p = p + levs
+    p2 = p2+levs2
+    
+    
+  }
+  
+  return(list(difference.matrix = difference.matrix, coef.matrix = coef.matrix))
+  
+}
+
+
+populate_estimates_numeric = function(object, numbers=NULL) {
+  
+  if (is.null(numbers)) {
+    predictors = get_terms(object, nonlinear_terms = T)$predictors 
+    data = extract_data_from_fitted_object(object)
+    numbers = get_factor_numeric_names(data, predictors)$numb
+  }  
+  
+  vars = c("(Intercept)", numbers)
+  coef.matrix.numb = data.frame(variables=vars, estimate=NA, lower=NA, upper=NA, 
+                                std.estimate=NA, std.lower=NA, std.upper=NA)
+  coef.matrix.numb$estimate = coef(object)[vars]
+  
+  #### get upper and lower using matrix multiplication
+  upper.lower = t(matrix(coef(object)[vars], ncol=2, nrow=length(vars), byrow=F) + 
+                    t(t(t(c(1.96,-1.96)))%*%t(summary(object)$coef[vars,2])))
+  
+  coef.matrix.numb$lower = (upper.lower)[2,]
+  coef.matrix.numb$upper = (upper.lower)[1,]
+  
+  ##### standardized estimates
+  coef.std = standardized.beta(object, se=T)
+  
+  #### remove those that are numeric
+  num = which(names(coef.std$beta) %in% numbers)	
+  coef.std$beta = coef.std$beta[num]
+  coef.std$se = coef.std$se[num]					
+  coef.matrix.numb$std.estimate = c(0, coef.std$beta)
+  upper.lower = t(matrix(c(0, coef.std$beta), ncol=2, nrow=length(vars), byrow=F) + t(t(t(c(1.96,-1.96)))%*%t(c(0, coef.std$se))))
+  coef.matrix.numb[,c("std.upper", "std.lower")] = t(upper.lower)	
+  coef.matrix.numb
+}
+
+get_factor_numeric_names = function(data, predictors) {
+  
+  if (length(predictors)==0) return(list(cat=character(0), numb=character(0)))
+  #### get variable types
+  cat      = names(which(unlist(lapply(data[,predictors, drop=FALSE], function(x) (!is.numeric(x))))))
+  numb     = predictors[predictors %!in% cat]
+  list(cat=cat, numb=numb)
+}

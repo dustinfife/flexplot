@@ -7,37 +7,38 @@ set.seed(1212)
 test_that("estimates from linear models", {
 
   cat1 = lm(weight.loss~therapy.type, data=d)	
-  expect_equal(estimates(cat1)$difference.matrix$cohens.d[2], .6305667, tolerance = 0.002)
+  expect_equal(estimates(cat1)$difference.matrix$cohens.d[1]%>%abs, .6305667, tolerance = 0.002)
   
   ##### two categoricals
-  mod = lm(weight.loss~therapy.type + gender, data=d)	
-  expect_equal(estimates(mod)$difference.matrix$cohens.d[4], .1024, tolerance = 0.002)
+  mod = lm(weight.loss~therapy.type + gender, data=exercise_data)	
+  expect_equal(estimates(mod)$difference.matrix$cohens.d[4]%>%abs, .1024, tolerance = 0.002)
   
   ##### interaction
-  mod = lm(weight.loss~therapy.type * gender, data=d)	
+  mod = lm(weight.loss~therapy.type * gender, data=exercise_data)	
   expect_true(estimates(mod)$semi.p[3]<0.01 & estimates(mod)$semi.p[3]>0.009)
   
   #### numeric variables
-  cat1 = lm(weight.loss~motivation, data=d)	
+  cat1 = lm(weight.loss~motivation, data=exercise_data)	
   expect_equal(estimates(cat1)$numbers.summary$estimate[2], .1856, tolerance = 0.002)
   
   ##### categorical + numeric
-  mod = lm(weight.loss~motivation + income, data=d)	
+  mod = lm(weight.loss~motivation + income, data=exercise_data)	
   expect_equal(estimates(mod)$numbers.summary$std.upper[3], 0.06670681, tolerance = 0.002)
   
   ##### two categorical and one numeric
-  mod = lm(weight.loss~motivation + therapy.type + gender, data=d)	
-  expect_equal(estimates(mod)$difference.matrix$difference[4], .93229, tolerance = 0.002)
+  mod = lm(weight.loss~motivation + therapy.type + gender, data=exercise_data)	
+  expect_equal(estimates(mod)$difference.matrix$difference[4]%>%abs, .93229, tolerance = 0.002)
   
   ##### two numeric and one categorical
-  mod = lm(weight.loss~motivation + income + gender, data=d)
+  mod = lm(weight.loss~motivation + income + gender, data=exercise_data)
   expect_true(estimates(mod)$semi.p[3]<0.01 & estimates(mod)$semi.p[3]>0.007)	
   
   ##### polynomial
-  mod = lm(weight.loss~motivation + I(motivation^2), data=d)	
+  mod = lm(weight.loss~motivation + I(motivation^2), data=exercise_data)	
   expect_equal(estimates(mod)$numbers.summary$std.upper[3], .68279, tolerance = 0.002)
   
   mod = lm(weight.loss~1, data=exercise_data)
+  mean(exercise_data$weight.loss)
   expect_equal(estimates(mod)$Mean, 6.56, tolerance = 0.002)
 })
 
