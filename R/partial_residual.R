@@ -6,6 +6,8 @@
 #' @param data The dataset
 #' @param added_term a formula, which specifies which terms should be de-residualized. By default,
 #' it will use the residuals from `model`. 
+#' @param original_y_scale A boolean. If T, it will display the Y axis on the original scale of the data. 
+#' If F, it will display the residuals on the Y axis. 
 #' @param suppress_model A boolean. Should the model be suppressed? Defaults to T. 
 #' @param ... Other arguments passed to flexplot
 #'
@@ -17,7 +19,7 @@
 #'    lm_formula = weight.loss~therapy.type + motivation, 
 #'    data=exercise_data)
 partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data, 
-                                 added_term = NULL, suppress_model=F, ...) {
+                                 added_term = NULL, suppress_model=F, original_y_scale=T,...) {
 
   # error messages and data checking
   if (is.null(lm_formula) & is.null(model)) stop("You must provide either a lm formula or a model")
@@ -35,6 +37,10 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
 
   # compute the partial residuals
   residual = partial_residual(model, added_term) 
+  
+  # add mean back to y
+  if (original_y_scale) residual = residual + mean(data[,all.vars(lm_formula)[1]])
+  
   # replace original dv with residual
   data[,all.vars(lm_formula)[1]] = residual
   
