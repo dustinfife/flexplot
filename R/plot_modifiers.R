@@ -8,6 +8,8 @@
 #' @return A new plot with the modifications
 #' @export
 #' @importFrom graphics plot
+#' @example 
+#' flexplot(weight.loss~motivation, data=d) %>% modify_points(shape = 12, colour="green", size=2")
 modify_points = function(p, shape=19, colour="black", size=1.5) {
   c = ggplot2::ggplot_build(p)
   
@@ -22,6 +24,21 @@ modify_points = function(p, shape=19, colour="black", size=1.5) {
   # return(c)
 }
 
+#' Modify the labels in a flexplot (or ggplot) graphic
+#'
+#' @param p The flexplot (or ggplot) object
+#' @param x The label for the x axis
+#' @param y The label for the y axis
+#' @param colors The label for the variable encoded as a color
+#' @param panel_rows The label for the variable encoded in row panels
+#' @param panel_cols The label for the variable encoded in column panels
+#' @return A new plot with the modifications
+#' @export
+#' @importFrom graphics plot
+#' @example 
+#' flexplot(weight.loss~motivation + therapy.type | gender + muscle.gain, data=d) %>%
+#'    modify_labels(x="Motivation", y="Weight Loss", 
+#'        color = "Therapy Type", panel_rows = "Gender", panel_cols = "Muscle Gain")
 modify_labels = function(p, x=NULL, y=NULL, colors=NULL, panel_rows=NULL, panel_cols=NULL) {
 
   p$labels$x = ifelse(is.null(x), p$labels$x, x)
@@ -39,6 +56,22 @@ modify_labels = function(p, x=NULL, y=NULL, colors=NULL, panel_rows=NULL, panel_
   return(p)
 }
 
+
+#' Modify the fitted line in a flexplot (or ggplot) graphic
+#'
+#' @param p The flexplot (or ggplot) object
+#' @param color The color of the line
+#' @param size The size (thickness) of the line
+#' @param linetype The type of line as a string (e.g., "dotted")
+#' @param method The type of smoothing function applied. Can be lm, quadratic, cubic, rlm, logistic,
+#' poisson, or loess
+#' @param se Standard errors. If TRUE, a band will be displayed showing the standard errors
+#' @return A new plot with the modifications
+#' @export
+#' @importFrom graphics plot
+#' @example 
+#' flexplot(weight.loss~motivation, data=d) %>%
+#'    modify_smooth(color="green", size=2, linetype="dashed", method="lm", se=F)
 modify_smooth = function(p, color=NULL, size=NULL, linetype=NULL, method=NULL, se=NULL) {
   ## check if there's a smoothing parameter
   geoms = sapply(p$layers, function(x) class(x$geom)[1])
