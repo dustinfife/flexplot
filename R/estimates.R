@@ -346,16 +346,17 @@ estimates.RandomForest = function(object, mc=TRUE) {
   
   y = unlist(attr(object, "data")@get("response"))
   ### compute OOB
+  
   oob = predict(object, OOB=T, type="response")
   if (!is.numeric(y)){
     numeric=F
     oob = round(length(which(oob==y))/length(y), digits=3)
-    rsq = cor(oob, y)[1,1]^2
+    rsq = NA
   } else {
     ### quantile of differences
     numeric = T
+    rsq = cor(oob, y)[1,1]^2
     oob = round(quantile(abs(oob-y)), digits=3)
-    rsq = NA
   }
   
   #### compute variable importance
@@ -368,7 +369,7 @@ estimates.RandomForest = function(object, mc=TRUE) {
     importance = round(sqrt(vals), digits=3)
   }
   
-  estimates = list(oob=oob, rwq = rsq, importance=importance)
+  estimates = list(oob=oob, rsq = rsq, importance=importance)
   attr(estimates, "class") = "rf_estimates"
   attr(estimates, "numeric") = numeric
   return(estimates)
@@ -387,6 +388,8 @@ print.rf_estimates = function(x,...){
   if (attr(x, "numeric")) {
     cat(paste("\n\nQuantiles of absolute value of OOB performance (i.e., abs(predicted - actual)):\n\n", sep=""))
     print(x$oob)
+    cat(paste("\n\nModel R Squared:\n\n", sep=""))
+    print(x$rsq)
     cat(paste("\n\nVariable importance (root MSE of predicted versus permuted):\n\n", sep=""))
     print(x$importance)
   } else {
