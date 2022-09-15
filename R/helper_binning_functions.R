@@ -41,6 +41,9 @@ prep.breaks = function(variable, data, breaks=NULL, bins=3){
   }
   
   #### give min as breaks, if the user doesn't
+  
+  # return variable if it isn't numeric
+  if (!is.numeric(data[[variable]])) return(breaks)
   if (min(breaks)>min(data[[variable]], na.rm=T)){
     breaks = c(min(data[[variable]], na.rm=T), breaks)
   }
