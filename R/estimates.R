@@ -343,16 +343,19 @@ estimates.lm = function(object, mc=TRUE){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.RandomForest = function(object, mc=TRUE) {
+  
   y = unlist(attr(object, "data")@get("response"))
   ### compute OOB
   oob = predict(object, OOB=T, type="response")
   if (!is.numeric(y)){
     numeric=F
     oob = round(length(which(oob==y))/length(y), digits=3)
+    rsq = cor(oob, y)[1,1]^2
   } else {
     ### quantile of differences
     numeric = T
     oob = round(quantile(abs(oob-y)), digits=3)
+    rsq = NA
   }
   
   #### compute variable importance
@@ -360,10 +363,12 @@ estimates.RandomForest = function(object, mc=TRUE) {
   if (!numeric){
     importance = round(sort(importance, decreasing=T), digits=4)
   } else {
-    importance = round(sqrt(sort(importance, decreasing=T)), digits=3)
+    vals = sort(importance, decreasing=T)
+    vals[vals<0] = 0
+    importance = round(sqrt(vals), digits=3)
   }
   
-  estimates = list(oob=oob, importance=importance)
+  estimates = list(oob=oob, rwq = rsq, importance=importance)
   attr(estimates, "class") = "rf_estimates"
   attr(estimates, "numeric") = numeric
   return(estimates)
