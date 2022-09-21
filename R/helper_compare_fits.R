@@ -171,7 +171,7 @@ bin_if_theres_a_flexplot_formula = function(formula, data, ...) {
   # see if they didn't give a flexplot formula
   given_length = length(given)
   axis_length  = length(axis)
-  if (axis_length>2 & is.na(given)) return(data) 
+  if (axis_length>2 & is.na(given[1])) return(data) 
     
   # if they have a flexplot formula, bin things
   binned_data = reproduce_breaks(data, formula, list_values)
