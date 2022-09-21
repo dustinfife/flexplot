@@ -50,3 +50,10 @@ test_that("get_model_n works", {
   expect_equal(get_model_n(lm(y~x, data=small)), nrow(small))
   expect_equal(get_model_n(rpart::rpart(y~a + b, data=small)), nrow(small))
 })
+
+test_that("bin_if_theres_a_flexplot_formula works", {
+  is.null(bin_if_theres_a_flexplot_formula(y~z+b+x, data=small)$x_binned)
+  !is.null(bin_if_theres_a_flexplot_formula(y~a+b|x, data=small)$x_binned)
+  str(bin_if_theres_a_flexplot_formula(y~a+b, data=small))
+})
+    

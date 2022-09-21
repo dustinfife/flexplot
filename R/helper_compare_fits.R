@@ -138,21 +138,8 @@ generate_predictors = function(data, formula, model, ...) {
   variables = all.vars(formula, unique=FALSE)
   outcome = variables[1]
   predictors = variables[-1]
-  given.axis = flexplot_axis_given(formula)
-  given = given.axis$given
-  axis = given.axis$axis
-
-  # reproduce breaks from flexplot in the dataset
-  list_values = list(...)
   
-  binned_data = reproduce_breaks(data, formula, list_values)
-  k=binned_data$binned_data
-  breaks=binned_data$breaks
-  
-  # for all binned variables, average within bins 
-  a = names(breaks) %>% purrr::map(replace_numeric_with_average, data=k, breaks=breaks)
-  k[,names(breaks)] = a
-
+  k = bin_if_theres_a_flexplot_formula(formula, data, ...)
   # identify those variables in the model that are not plotted
   # (If I don't do this, we'll get a jagged line in the visuals)
   vars_in_model = get_predictors(model)
@@ -170,6 +157,33 @@ generate_predictors = function(data, formula, model, ...) {
   all_variables_in_either = remove_nonlinear_terms(unique(c(predictors, vars_in_model)))
   return(k[,all_variables_in_either, drop=FALSE])
 }
+
+bin_if_theres_a_flexplot_formula = function(formula, data, ...) {
+  
+  # extract given/axis
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  
+  # reproduce breaks from flexplot in the dataset (if they supply them)
+  list_values = list(...)
+  
+  # see if they didn't give a flexplot formula
+  given_length = length(given)
+  axis_length  = length(axis)
+  if (axis_length>2 & is.na(given)) return(data) 
+    
+  # if they have a flexplot formula, bin things
+  binned_data = reproduce_breaks(data, formula, list_values)
+  k=binned_data$binned_data
+  breaks=binned_data$breaks
+  
+  # # for all binned variables, average within bins
+  a = names(breaks) %>% purrr::map(replace_numeric_with_average, data=k, breaks=breaks)
+  k[,names(breaks)] = a
+  return(k)
+}
+
 
 return_constant_for_predicted_data = function(missing_variable, data, model) {
   
@@ -220,7 +234,7 @@ reproduce_breaks = function(data, formula, list_values) {
   axis = given.axis$axis
   
   # find bins/breaks/labels
-  bins  =  if("bins"  %in% names(list_values))  unlist(list_values["bins"]) else 3
+  bins  =  if("bins"   %in% names(list_values))  unlist(list_values["bins"]) else 3
   breaks = if("breaks" %in% names(list_values)) (list_values["breaks"]$breaks) else NULL
   labels = if("labels" %in% names(list_values)) (list_values["labels"]$labels) else NULL
   
