@@ -42,13 +42,20 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
       m[[terms[1]]] = factor(m[[terms[1]]],levels=c(unique(m[[terms[1]]])),
                                 ordered=T)
     }
-    step3 + geom_line(data=newd, 
-                      aes_string(terms[1], outcome, group=term.re, color=term.re), alpha = .5)
+    
+    # step3 + geom_line(data=newd, 
+    #                   aes_string(terms[1], outcome, group=term.re, color=term.re), alpha = .5)
     # generate the geoms
     random_geom = geom_line(data=newd, 
                 aes_string(terms[1], outcome, group=term.re, color=term.re), alpha = .5)
-    fixed_geom  = geom_line(data=m, 
+    
+    # if there are no random effects, we shouldn't do these. 
+    if (nrow(m)>0) {
+      fixed_geom  = geom_line(data=m, 
                 aes_string(terms[1], "prediction", color=NA, group=1), linetype=1, lwd=2, col="black") 
+    } else {
+      fixed_geom = NULL
+    }
     return(list(random_geom = random_geom, fixed_geom = fixed_geom))
   }  
   
@@ -99,7 +106,7 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
 mixed_model_plot = function(formula, object, random_plot, sample=3, return_objects = F,...){
   
   data = object@frame
-  
+
   # if they're plotting without random effects...
   if (!random_plot) return(compare.fits(formula, data=data, model1=object, re=F, clusters=sample,...))
 
@@ -112,12 +119,12 @@ mixed_model_plot = function(formula, object, random_plot, sample=3, return_objec
   selected_REs = prediction[,re]
   data_sampled = data[data[,re] %in% selected_REs,]
   data_sampled[,re] = factor(data_sampled[,re])
-  # return the flexplot as the base
   
-  step3 = flexplot(formula, data=data_sampled, suppress_smooth=T, ...)
+  # return the flexplot as the base
+    step3 = flexplot(formula, data=data_sampled, suppress_smooth=T, ...)
   step3 = step3 +
     add_geoms_to_mixed_plot(prediction, step3, object)
-
+  
     #### remove legend if n>10
   if (sample>10){
     step3 = step3 + theme(legend.position="none")
@@ -126,7 +133,6 @@ mixed_model_plot = function(formula, object, random_plot, sample=3, return_objec
   return(step3)
     
 }
-
 
 
 
@@ -164,7 +170,8 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   outcome = names(d)[1]
   
   # convert re to factor (otherwise flexplot will try to bin it)
-  d[,term.re] = factor(term.re, ordered=T)
+  d[,term.re] = factor(d[,term.re], ordered=T)
+  
   # get a new dataset that samples the clusters
   k = d#randomly_sample_clusters(d, term.re, sample)
 

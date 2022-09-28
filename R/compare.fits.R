@@ -56,7 +56,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   test_same_class(model1, model2)
   
   #### convert random effects to factors for mixed models
-  
+
   data = subset_random_model(model1, formula, d=data, samp.size = clusters)
 
   ### make sure they have the same outcome
@@ -92,24 +92,15 @@ compare.fits = function(formula, data, model1, model2=NULL,
   }
   
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
-  
+  # when RE = T, we should return BOTH
   ### there's no fixed effect if we don't have these lines
   model1.type = class(model1)[1]
-  if (model1.type == "lmerMod" | model1.type == "glmerMod"){
-    pred.mod1 = data.frame(prediction = predict(model1, pred.values, type="response", re.form=NA), model= "fixed effects")		
-  }
-  
-
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
   } else {
     pred.mod2 = pred.mod1
   }
-  if ((model2.type == "lmerMod" | model2.type == "glmerMod") & re){
-    pred.mod2 = data.frame(prediction = predict(model2, pred.values, type="response"), model= "random effects")	
-    old.mod=0	
-  }
-  
+
   #### convert polyr back to numeric (if applicable)
   if (model1.type == "polr" | model2.type == "polr"){
     data[,outcome] = as.numeric(as.character(data[,outcome]))		

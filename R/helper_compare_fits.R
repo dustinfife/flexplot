@@ -258,13 +258,16 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
   model.type = class(model)[1]
   if ((model.type == "lmerMod" | model.type == "glmerMod") & !re){
     return(data.frame(prediction = 
-                 predict(model, pred.values, type="response"), model="fixed effects"))
+                 predict(model, pred.values, type="response", re.form=NA), model="fixed effects"))
   }  
   
   if ((model.type == "lmerMod" | model.type == "glmerMod") & re){
-    return(data.frame(
-      prediction = 
-                  predict(model, pred.values, type="response", re.form=NA), model="random effects"))
+    # get both random and fixed effects
+    random_effects = data.frame(prediction = predict(model, pred.values, type="response", re.form=NULL), 
+                                model="random effects")
+    fixed_effects = data.frame(prediction = predict(model, pred.values, type="response", re.form=NA), 
+                                model="fixed effects")
+    return(prediction = rbind(random_effects, fixed_effects))
   }  
   
   if (model.type == "polr"){
