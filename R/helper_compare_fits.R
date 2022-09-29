@@ -29,7 +29,8 @@ compare_fits_errors = function(data, outcome, predictors, testme=NULL) {
   
   ##### make sure they're putting the same variables from formula in terms
   if (!(all(predictors %in% testme))){
-    stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically: ", paste0(variables[!(variables%in%testme)], collapse=",")))
+    missing_vars = paste0(predictors[!(predictors%in%testme)], collapse=", ")
+    stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically, these variables are your in your formula, but not in the model:\n    ", missing_vars))
   }
   
   ##### make sure they're using the right dataset
