@@ -287,21 +287,15 @@ flexplot_errors = function(variables, data, axis){
 }
 
 check_error_for_logistic = function(variables, data, method=method, axis) {
+  
   #### give an error if they try to visualize logistic with a categorical x axis
-  if (method != "logistic" | length(variables)<1 | is.numeric(data[,axis[1]])) return(NULL)
+  if (method != "logistic" | length(variables)<1) return(NULL)
+  if (is.numeric(data[,axis[1]])) return(NULL)
   stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n
 				Best of luck on your statistical journeys."))
 }
 
-check_same_variables_in_prediction = function(formula, prediction=NULL) {
-  if (is.null(prediction)) return(NULL)
-  variables_in_formula = all.vars(formula, unique=FALSE)[-1]
-  variables_in_dataset = names(prediction)
-  not_there = which(!(variables_in_formula %in% variables_in_dataset))
-  if (length(not_there)<1) return(NULL)
-  missing_vars = paste0(variables_in_formula[not_there], collapse=",")
-  stop(paste0("The variable(s) '", missing_vars, "' are not in your prediction dataset."))
-}
+
 
   #### this function figures out which variables need to be binned
 #expect_identical(flexplot_break_me(exercise_data, c("muscle.gain", "income"), given="income"), "income")
@@ -683,4 +677,14 @@ flexplot_generate_prediction_lines = function(prediction, axis, break.me, data,n
   return(pred.line) 
 }
 
+
+check_same_variables_in_prediction = function(formula, prediction=NULL) {
+  if (is.null(prediction)) return(NULL)
+  variables_in_formula = all.vars(formula, unique=FALSE)[-1]
+  variables_in_dataset = names(prediction)
+  not_there = which(!(variables_in_formula %in% variables_in_dataset))
+  if (length(not_there)<1) return(NULL)
+  missing_vars = paste0(variables_in_formula[not_there], collapse=",")
+  stop(paste0("The variable(s) '", missing_vars, "' are not in your prediction dataset."))
+}
 #

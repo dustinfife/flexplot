@@ -133,7 +133,7 @@ flexplot = function(formula, data=NULL, related=F,
                                     alpha=alpha, prediction=prediction)
   
   
-  with(varprep, flexplot_errors(variables = variables, data = data, axis=axis))
+  flexplot_errors(varprep$variables, varprep$data, varprep$axis)
   check_same_variables_in_prediction(formula, prediction)
   
   # extract original names of dv (for logistic, prior to making it continuous)
