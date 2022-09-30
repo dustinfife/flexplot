@@ -455,11 +455,11 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     linmod_table_slopes$addColumnInfo(name = "upr",      title = "Upper",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
   }
   
-  linmod_table_slopes$addColumnInfo(name = "std",    title = "Standardized Slope (β)",       type = "number", format = "dp:2", combine = TRUE)	
+  linmod_table_slopes$addColumnInfo(name = "std",    title = "Standardized Slope (\u03B2)",       type = "number", format = "dp:2", combine = TRUE)	
   
   if (options$ci){
-    linmod_table_slopes$addColumnInfo(name = "slwr",      title = "Lower β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
-    linmod_table_slopes$addColumnInfo(name = "supr",      title = "Upper β",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_slopes$addColumnInfo(name = "slwr",      title = "Lower \u03B2",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
+    linmod_table_slopes$addColumnInfo(name = "supr",      title = "Upper \u03B2",       type = "number", format = "dp:2", combine = TRUE, overtitle = "95% Confidence Interval")
   }
   
   ### add message about what type of interval was used
