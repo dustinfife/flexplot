@@ -9,8 +9,10 @@ inst/datasets/health_depression.csv
 vignettes/psychmethods/
 vignettes/flexplot_psychmeth_cache
 vignettes/flexplot_psychmeth_files
+vignettes/flexplot_psychmeth_v2.pdf
 vignettes/submission
 vignettes/archive
 R/scratch
 ..Rcheck/
 *.svg
+*.jmo
