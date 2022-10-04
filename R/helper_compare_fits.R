@@ -160,7 +160,7 @@ generate_predictors = function(data, formula, model, ...) {
   
   # replace the missing variables with mean (numeric) or a level
   new_values = which_are_missing %>% purrr::map(return_constant_for_predicted_data, data=k, model=model)
-  if (length(new_values)>0) k[,which_are_missing] = new_values
+  if (length(which_are_missing)>0) k[,which_are_missing] = new_values
   
   # remove the outcome variable (because it's replaced with "prediction" now)
   k[,outcome] = NULL
@@ -292,7 +292,8 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
   
   int = ifelse(report.se, "confidence", "none")
   return(
-    data.frame(prediction = predict(model, pred.values, interval=int, type=pred.type), model=model.type)
+    data.frame(prediction = predict(model, pred.values, interval=int, type=pred.type),
+               model=model.type)
   )
 }
 
