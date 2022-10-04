@@ -132,8 +132,11 @@ flexplot = function(formula, data=NULL, related=F,
                                     jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
                                     alpha=alpha, prediction=prediction)
   
-  # extract original names of dv (for logistic, prior to making it continuous)
   
+  flexplot_errors(varprep$variables, varprep$data, varprep$axis)
+  check_same_variables_in_prediction(formula, prediction)
+  
+  # extract original names of dv (for logistic, prior to making it continuous)
   outcome = varprep$outcome
   data = varprep$data
   method = with(varprep, identify_method(data, outcome, axis, method))
@@ -163,7 +166,8 @@ flexplot = function(formula, data=NULL, related=F,
 	}
 	
   ### report errors when necessary
-  with(varprep, flexplot_errors(variables = variables, data = data, method=method, axis=axis))
+  #### give an error if they try to visualize logistic with a categorical x axis
+  with(varprep, check_error_for_logistic(variables = variables, data = data, method=method, axis=axis))
   
   ### change alpha, depending on plot type
   alpha = with(varprep, flexplot_alpha_default(data=data, axis = axis, alpha = alpha))

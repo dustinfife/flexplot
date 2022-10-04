@@ -57,7 +57,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   given.axis = flexplot_axis_given(formula)
   given = given.axis$given
   axis = given.axis$axis
-  flexplot_errors(variables = variables, data = data, method=method, axis=axis)
+  flexplot_errors(variables = variables, data = data, axis=axis)
   
   #### identify which variables are numeric and which are factors
   vtypes = variable_types(predictors, data, return.names=T)
@@ -268,7 +268,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
 # expect_error(flexplot_errors(c("weight.loss", "therapy.type"), exercise_data, method="logistic", axis="hello"))
 # expect_error(flexplot_errors(c("gender", "therapy.type"), exercise_data, method="logistic", axis="therapy.type"))
 # expect_error(flexplot_errors(c("weight.loss", "therapy.type"), NULL, method="logistic", axis="hello"))
-flexplot_errors = function(variables, data, method=method, axis){
+flexplot_errors = function(variables, data, axis){
   
   if (is.null(data)){
     stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
@@ -284,15 +284,18 @@ flexplot_errors = function(variables, data, method=method, axis){
     stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))
   }
 
-  #### give an error if they try to visualize logistic with a categorical x axis
-  if (method=="logistic" & length(variables)>0){
-    if (!is.numeric(data[,axis[1]])){
-      stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n
-				Best of luck on your statistical journeys."))
-    }	
-  } 
-  
 }
+
+check_error_for_logistic = function(variables, data, method=method, axis) {
+  
+  #### give an error if they try to visualize logistic with a categorical x axis
+  if (method != "logistic" | length(variables)<1) return(NULL)
+  if (is.numeric(data[,axis[1]])) return(NULL)
+  stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n
+				Best of luck on your statistical journeys."))
+}
+
+
 
   #### this function figures out which variables need to be binned
 #expect_identical(flexplot_break_me(exercise_data, c("muscle.gain", "income"), given="income"), "income")
@@ -674,4 +677,14 @@ flexplot_generate_prediction_lines = function(prediction, axis, break.me, data,n
   return(pred.line) 
 }
 
+
+check_same_variables_in_prediction = function(formula, prediction=NULL) {
+  if (is.null(prediction)) return(NULL)
+  variables_in_formula = all.vars(formula, unique=FALSE)[-1]
+  variables_in_dataset = names(prediction)
+  not_there = which(!(variables_in_formula %in% variables_in_dataset))
+  if (length(not_there)<1) return(NULL)
+  missing_vars = paste0(variables_in_formula[not_there], collapse=",")
+  stop(paste0("The variable(s) '", missing_vars, "' are not in your prediction dataset."))
+}
 #

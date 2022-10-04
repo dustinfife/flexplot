@@ -17,14 +17,7 @@ test_that("compare.fits linear models", {
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=relationship_satisfaction, model.me, model.int))
   expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
                data = exercise_data, model.me, model.int2, return.preds = T)[1,3], 6.615958, tolerance = .001)
-  #expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
-  #                          data = exercise_data, model.int2, model.me, return.preds = T)[1,1], 21) 
-  #expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
-  #                          data = exercise_data, model.me, model.int2, return.preds = T)[1,1], 21)
-  #expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
-  #                          data = exercise_data, model.int2, model.poly, return.preds = T)[1,3], -1.933519)   
-  #expect_equal(round(compare.fits(weight.loss ~ motivation | therapy.type, 
-  #                          data = exercise_data, model.poly, model.int2, return.preds = T)[1,3], digits=3), -2.293)
+  
 
   ### compare interaction and non-interaction models
   mod = lm(wl ~motivation+rewards, data=d)
