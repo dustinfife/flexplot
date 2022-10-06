@@ -10,26 +10,17 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
   variable_to_be_binned = gsub("_binned", "", binned_var)
   gg_dataset = plot$data
   
+  
+  extract_numbers_from_binned_var(x_bin=gg_dataset[,binned_var[1]], 
+                                  x_original = d[,variable_to_be_binned[1]])
   # extract breakpoints from plot data, then break the new one
-  regex_cmd_one = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\1", gg_dataset[[binned_var]])
-  regex_cmd_two = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\2", gg_dataset[[binned_var]])
-  regex_cmd = c(regex_cmd_one, regex_cmd_two)
-  regex_cmd = gsub("[)]", "", gsub("[(]", "", regex_cmd))
-  break_vals = sort(as.numeric(unique(regex_cmd)))
-  rep = gg_dataset[,variable_to_be_binned]>max(break_vals)
-  gg_dataset[rep,variable_to_be_binned] = max(break_vals)-.0001
-  rep = gg_dataset[,variable_to_be_binned]<min(break_vals)
+    d_to_binned = 1:length(variable_to_be_binned) %>% 
+    purrr::map(function(x) extract_numbers_from_binned_var(gg_dataset[,binned_var[x]], d[,variable_to_be_binned[x]])) %>%
+    data.frame 
+  names(d_to_binned) = binned_var
   
-  gg_dataset[rep,variable_to_be_binned] = min(break_vals)+.0001  
-  breaks = prep.breaks(variable_to_be_binned, gg_dataset, breaks=break_vals)
-  
-  # replace observations > max with the max
-  rep = d[,variable_to_be_binned]>max(break_vals)
-  d[rep,variable_to_be_binned] = max(break_vals)-.0001
-  rep = d[,variable_to_be_binned]<min(break_vals)
-  d[rep,variable_to_be_binned] = min(break_vals)+.0001  
-  d[[binned_var]] = bin.me(variable_to_be_binned, d, breaks=breaks)
-  
+  if (nrow(d_to_binned)==0) return(d)
+  d[,binned_var] = d_to_binned[,binned_var]
   # create a new string of terms that needs to be summarized by
   nt = c(terms[-which(terms %in% variable_to_be_binned)], binned_var)
   
@@ -39,6 +30,26 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
     group_by_at(nt) %>% 
     summarize(!!rlang::sym(outcomevar) := mean(!!(rlang::sym(outcomevar))))
   return(d)
+}
+
+extract_numbers_from_binned_var = function(x_bin, x_original) {
+  
+  # regex to extract the breaks
+  regex_cmd_one = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\1", x_bin)
+  regex_cmd_two = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\2", x_bin)
+  regex_cmd = c(regex_cmd_one, regex_cmd_two)
+  regex_cmd = gsub("[)]", "", gsub("[(]", "", regex_cmd))
+  break_vals = sort(as.numeric(unique(regex_cmd)))
+  
+  which_too_high = x_original>max(break_vals)
+  x_original[which_too_high] = max(break_vals)-.0001
+  which_too_low = x_original<min(break_vals)
+  x_original[which_too_low] = min(break_vals)+.0001  
+  x_original = data.frame(x_original)
+  names(x_original)[1] = "x_original"
+  # replace observations > max with the max
+  x_original = bin.me("x_original", x_original, breaks=break_vals)
+  return(x_original)
 }
 
 '%!in%' <- function(x,y)!('%in%'(x,y))
@@ -116,8 +127,8 @@ check_nested = function(model1, model2) {
   mod2 = get_predictors(model2)
   
   #### check for nested models
-  if (all(length(mod1)> length(mod2) & (mod2 %in% mod1) & (class(model1) == class(model2)))) return(T)
-  if (all(length(mod2)>=length(mod1) & (mod1 %in% mod2) & (class(model1) == class(model2)))) return(T)
+  if (all(length(mod1)> length(mod2) & (mod2 %in% mod1) & (class(model1)[1] == class(model2)[1]))) return(T)
+  if (all(length(mod2)>=length(mod1) & (mod1 %in% mod2) & (class(model1)[1] == class(model2)[1]))) return(T)
   return(F)
 }
 

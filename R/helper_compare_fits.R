@@ -15,6 +15,31 @@ whats_model2 = function(model1,model2=NULL) {
   return(model2)
 }
 
+compare_fits_errors = function(data, outcome, predictors, testme=NULL) {
+  
+  ## see if all predictors are categorical
+  dv_is_factor = length(unique(data[,outcome]))<3
+  axis_is_factor = ifelse(length(predictors)>0,
+                          check.non.number(data[,predictors[1]]),
+                          FALSE)
+  if (dv_is_factor & axis_is_factor) {
+    stop("Well, darn. You've found a limitation of flexplot. Flexplot cannot use the compare.fits function when
+         both your outcome variable and your x-axis variable are categorical. Maybe try putting a numeric variable on the x-axis. ")
+  }
+  
+  ##### make sure they're putting the same variables from formula in terms
+  if (!(all(predictors %in% testme))){
+    missing_vars = paste0(predictors[!(predictors%in%testme)], collapse=", ")
+    stop(paste0("Sorry, but some variables in formula don't match what's in the model. Specifically, these variables are your in your formula, but not in the model:\n    ", missing_vars))
+  }
+  
+  ##### make sure they're using the right dataset
+  if (!(all(predictors %in% names(data)))){
+    stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
+  }	
+  return(NULL)
+}
+
 # function that extracts variables from cforest model
 get_cforest_variables = function(model, return.type=c("all", "predictors", "response")) {
   
@@ -83,106 +108,169 @@ get_model_n = function(model) {
   
 }
 
-### function to generate prediction matrix spanning the range of the data
-generate_predictors = function(data, predictors, model_terms, num_points, mod_class) {
-
-  #### create random column just to make the applies work (yeah, it's hacky, but it works)
-  data$reject = 1:nrow(data); data$reject2 = 1:nrow(data)
-  predictors = c(predictors, "reject", "reject2")
+make_data_types_the_same = function(variable, predicted_data, model_data) {
   
-  #### get variable types
-  numb = names(which(unlist(lapply(data[,predictors], is.numeric))))
-  cat = names(which(!(unlist(lapply(data[,predictors], is.numeric)))))
-  make_cat = names(which(unlist(lapply(data[,predictors], function(x) length(unique(x))<21))))
-    #### make_cat was there to tell the computer to generate prediction for UNIQUE variables, rather than a range
-    #### but it also converts it to categorical variables, which makes predict fail. The fix falls right before "return"
-  # remove a numb variable if it was found through make_cat
-  if (length(numb)>2 & sum(numb[1:(length(numb)-2)] %in% make_cat)>0) {
-    byby = which(numb[1:(length(numb)-2)] %in% make_cat)
-    number_me_back = numb[byby]
-    numb = numb[-byby] 
-  }
-  make_cat = unique(c(cat, make_cat))
+  class_model = class(model_data[,variable])
+  class_prediction = class(predicted_data[,variable])
+  if (identical(class_model, class_prediction)) return(predicted_data[,variable])
   
-  ##### make "quadriture" points for quant variables
-  var.mins = apply(data[, numb], 2, min, na.rm=T)
-  var.max = apply(data[, numb], 2, max, na.rm=T)  
-  
-  ### make quadriture points smaller if they're doing RF
-  
-  if (mod_class == "RandomForest" & num_points == 50){
-    min.max = data.frame(var.mins, var.max); min.max$size = c(10, rep(8, nrow(min.max)-1))
-  } else {
-    min.max = data.frame(var.mins, var.max); min.max$size = c(num_points, rep(max(3,round(num_points/4)), nrow(min.max)-1))
-  }  
-  f = function(d){seq(from=d[1], to=d[2], length.out=d[3])}
-  min.max = as.list(apply(min.max, 1, f))
-  
-  #### get unique values for categorical vars
-  if (length(make_cat)==1){
-    un.vars = lapply(data[make_cat], unique)    	
-  } else {
-    ## if the number of unique values is < 50, just use the unique values
-    un.vars =lapply(data[,make_cat], unique); names(un.vars) = make_cat
+  # if it's an ordered factor
+  if (class_model[1] == "ordered") {
+    old_levels = levels(model_data[,variable])
+    new_x = factor(predicted_data[,variable], levels=old_levels, ordered=T)
+    return(new_x)
+  } 
+  # if it's a regular factor
+  if (class_model[1] == "factor") {
+    old_levels = levels(model_data[,variable])
+    new_x = factor(predicted_data[,variable], levels=old_levels)
+    return(new_x)
   }
   
+  if (class(model_data[,variable])[1] == "numeric") return(as.numeric(as.character(predicted_data[,variable])))
+  if (class(model_data[,variable])[1] == "integer") return(as.integer(predicted_data[,variable]))
   
-  #### combine into one dataset
-  all.vars = c(min.max, un.vars)    
-  #### get rid of extra variables
-  tot.vars = length(predictors)
-  rejects = grep("reject", names(all.vars))
-  all.vars = all.vars[-rejects]
-  all.vars = lapply(all.vars, function(x) x[!is.na(x)])
-  pred.values = expand.grid(all.vars)
-
-  #### if it's not in model 1:
-  #### input the mean (if numeric) or a value (if categorical)
-  # but first check whether its a RE model
-  if (length(which(!(model_terms %in% predictors)))>0 ){
-    not.in.there = model_terms[which(!(model_terms %in% predictors))]
-    for (i in 1:length(not.in.there)){
-      if (is.numeric(data[,not.in.there[i]])){
-        message(paste0("Note: You didn't choose to plot ", not.in.there[i], " so I am inputting the median\n"))
-        pred.values[,not.in.there[i]] = median(data[,not.in.there[i]], na.rm=T)
-      } else {
-        # this had issues when a random effect (as factor) was
-        val = unique(as.character(data[[not.in.there[i]]]))[1]
-        #only display the message if it's not a glmer mod
-        if (!(mod_class %in% c("lmerMod", "glmerMod"))) {
-          message(paste0("Note: You didn't choose to plot ", 
-                       not.in.there[i], " so I am inputting '", val, "'\n"))
-        }  
-        pred.values[,not.in.there[i]] = val
-      }
-    }
-  }
-
-  if (exists("number_me_back")) {
-    for (i in 1:length(number_me_back)) {
-      pred.values[,number_me_back[i]] = as.numeric(as.character(pred.values[,number_me_back[i]]))
-      attr(pred.values[,number_me_back[i]], "out.attrs") <- NULL
-    }
-  }
-
-  return(pred.values)
 }
 
+### function to generate prediction matrix spanning the range of the data
+generate_predictors = function(data, formula, model, ...) {
+  
+  ## extract variable slots
+  variables = all.vars(formula, unique=FALSE)
+  outcome = variables[1]
+  predictors = variables[-1]
+  
+  k = bin_if_theres_a_flexplot_formula(formula, data, ...)
+  # identify those variables in the model that are not plotted
+  # (If I don't do this, we'll get a jagged line in the visuals)
+  vars_in_model = get_predictors(model)
+  which_are_missing = remove_nonlinear_terms(vars_in_model[!(vars_in_model %in% variables)])
+  
+  # replace the missing variables with mean (numeric) or a level
+  new_values = which_are_missing %>% purrr::map(return_constant_for_predicted_data, data=k, model=model)
+  if (length(which_are_missing)>0) k[,which_are_missing] = new_values
+  
+  # remove the outcome variable (because it's replaced with "prediction" now)
+  k[,outcome] = NULL
+  # remove variables not in there
+  #find all variables in either formula or model
+  
+  all_variables_in_either = remove_nonlinear_terms(unique(c(predictors, vars_in_model)))
+  return(k[,all_variables_in_either, drop=FALSE])
+}
+
+bin_if_theres_a_flexplot_formula = function(formula, data, ...) {
+  
+  # extract given/axis
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  
+  # reproduce breaks from flexplot in the dataset (if they supply them)
+  list_values = list(...)
+  
+  # see if they didn't give a flexplot formula
+  given_length = length(given)
+  axis_length  = length(axis)
+  if (axis_length>2 & is.na(given[1])) return(data) 
+    
+  # if they have a flexplot formula, bin things
+  binned_data = reproduce_breaks(data, formula, list_values)
+  k=binned_data$binned_data
+  breaks=binned_data$breaks
+  
+  # # for all binned variables, average within bins
+  a = names(breaks) %>% purrr::map(replace_numeric_with_average, data=k, breaks=breaks)
+  k[,names(breaks)] = a
+  return(k)
+}
+
+
+return_constant_for_predicted_data = function(missing_variable, data, model) {
+  
+  if (length(missing_variable)==0) return(NA)
+  if (is.numeric(data[,missing_variable])) {
+    message(paste0("Note: You didn't choose to plot ", missing_variable, " so I am inputting the median\n"))
+    data[,missing_variable] = median(data[,missing_variable], na.rm=T)
+    return(data[,missing_variable])
+  }
+  
+  # this had issues when a random effect (as factor)
+  val = unique(as.character(data[[missing_variable]]))[1]
+  #only display the message if it's not a glmer mod
+  if (!(class(model) %in% c("lmerMod", "glmerMod"))) {
+    message(paste0("Note: You didn't choose to plot ",
+                   missing_variable, " so I am inputting '", val, "'\n"))
+  }
+  data[,missing_variable] = val
+  return(data[,missing_variable])
+  
+}
+
+replace_numeric_with_average = function(variable, breaks, data) {
+  
+  binned_name = paste0(variable, "_binned")
+  f = make.formula(variable, binned_name)
+  means_by_bin = aggregate(f, FUN=mean, data=data)
+  
+  data[,variable] = round(as.numeric(as.character(
+                        cut(data[,variable],
+                             breaks[[variable]],
+                             labels = means_by_bin[,2]))), digits=3)
+  return(data[,variable])
+}
+
+reproduce_breaks = function(data, formula, list_values) {
+  # check if they supplied bins, breaks, or labels arguments in ....
+  # arguments = c("bins", "breaks", "labels")
+  # are_arguments_in_dotdotdot = any(arguments %in% names(list_values))
+  # if (!(are_arguments_in_dotdotdot)) return(list(binned_data=data, breaks=NULL))
+  
+  ## extract variable slots
+  variables = all.vars(formula, unique=FALSE)
+  outcome = variables[1]
+  predictors = variables[-1]
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  
+  # find bins/breaks/labels
+  bins  =  if("bins"   %in% names(list_values))  unlist(list_values["bins"]) else 3
+  breaks = if("breaks" %in% names(list_values)) (list_values["breaks"]$breaks) else NULL
+  labels = if("labels" %in% names(list_values)) (list_values["labels"]$labels) else NULL
+  
+  
+  break.me = flexplot_break_me(data, predictors, given, axis, bins)
+  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
+
+  # now make the binned columns in the dataset
+  binned_data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
+  
+  return(list(binned_data=binned_data, breaks=breaks))
+ 
+}
+
+generate_quadriture = function(x, number_points = 15) {
+  seq(from=min(x), to=max(x), length.out=15)
+}
 
 generate_predictions = function(model, re, pred.values, pred.type, report.se) {
 
   model.type = class(model)[1]
   if ((model.type == "lmerMod" | model.type == "glmerMod") & !re){
     return(data.frame(prediction = 
-                 predict(model, pred.values, type="response"), model="fixed effects"))
+                 predict(model, pred.values, type="response", re.form=NA), model="fixed effects"))
   }  
   
   if ((model.type == "lmerMod" | model.type == "glmerMod") & re){
-    return(data.frame(
-      prediction = 
-                  predict(model, pred.values, type="response", re.form=NA), model="random effects"))
+    # get both random and fixed effects
+    random_effects = data.frame(prediction = predict(model, pred.values, type="response", re.form=NULL), 
+                                model="random effects")
+    fixed_effects = data.frame(prediction = predict(model, pred.values, type="response", re.form=NA), 
+                                model="fixed effects")
+    return(prediction = rbind(random_effects, fixed_effects))
   }  
-    
+  
   if (model.type == "polr"){
       return(
         data.frame(prediction = predict(model, pred.values, type="class", re.form=NA), model= model.type)		
@@ -222,7 +310,8 @@ generate_predictions = function(model, re, pred.values, pred.type, report.se) {
   
   int = ifelse(report.se, "confidence", "none")
   return(
-    data.frame(prediction = predict(model, pred.values, interval=int, type=pred.type), model=model.type)
+    data.frame(prediction = predict(model, pred.values, interval=int, type=pred.type),
+               model=model.type)
   )
 }
 

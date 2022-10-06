@@ -16,15 +16,8 @@ test_that("compare.fits linear models", {
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=exercise_data, model.me, model.int))
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=relationship_satisfaction, model.me, model.int))
   expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
-               data = exercise_data, model.me, model.int2, return.preds = T)[1,1], 21)
-  expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
-                            data = exercise_data, model.int2, model.me, return.preds = T)[1,1], 21) 
-  expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
-                            data = exercise_data, model.me, model.int2, return.preds = T)[1,1], 21)
-  expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
-                            data = exercise_data, model.int2, model.poly, return.preds = T)[1,3], -1.933519)   
-  expect_equal(round(compare.fits(weight.loss ~ motivation | therapy.type, 
-                            data = exercise_data, model.poly, model.int2, return.preds = T)[1,3], digits=3), -2.293)
+               data = exercise_data, model.me, model.int2, return.preds = T)[1,3], 6.615958, tolerance = .001)
+  
 
   ### compare interaction and non-interaction models
   mod = lm(wl ~motivation+rewards, data=d)
@@ -47,6 +40,7 @@ test_that("compare.fits linear models", {
   vdiffr::expect_doppelganger("compare.fits where listwise deletion causes change in levels",
                               compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod))
 
+  expect_error(compare.fits(a~b, data=small, model1=glm(a~b, data=small, family=binomial)))
 })
 
 
@@ -54,22 +48,28 @@ test_that("compare.fits for other models", {
   set.seed(1212)
   #### COMPARE.FITS FUNCTIONS -- linear models
   mod = lm(weight.loss~rewards, data=d)
-  require(MASS)
-  set.seed(1212)
   mod2 = rlm(weight.loss~rewards, data=d)
   vdiffr::expect_doppelganger("compare.fits with rlm",compare.fits(formula=weight.loss~rewards, data=d, model1=mod, model2=mod2))
   
-  k = d; k$weight.loss = factor(k$weight.loss, ordered=T)
-  polyn = MASS::polr(weight.loss~rewards, data=k)
-  polyn2 = MASS::polr(weight.loss~rewards+therapy.type, data=k)
+  polyn = MASS::polr(weight.loss~rewards,               data=exercise_data %>% mutate(weight.loss = factor(weight.loss, ordered=T)))
+  polyn2 = MASS::polr(weight.loss~rewards+therapy.type, data=exercise_data %>% mutate(weight.loss = factor(weight.loss, ordered=T)))
   vdiffr::expect_doppelganger("compare.fits with polr",
-                              compare.fits(weight.loss~rewards|therapy.type, data=k, polyn, polyn2))
+                  compare.fits(weight.loss~rewards|therapy.type, 
+                                                        data=exercise_data %>% mutate(weight.loss = factor(weight.loss, ordered=T)), 
+                               polyn, polyn2))
   
   
   ##### compare predictions with random forest
-  model1 = randomForest::randomForest(wl~motivation + gender + rewards, data=d)
-  model2 = lm(wl~motivation * gender * rewards, data=d)		### use the same predictors in both models
-  vdiffr::expect_doppelganger("compare.fits with rf",compare.fits(wl~motivation | gender + rewards, data=d, model1, model2))
+  d = exercise_data
+  d$wl = d$weight.loss + .8*d$motivation*as.numeric(d$rewards)
+  model1 = randomForest::randomForest(wl~motivation + gender + rewards, 
+                                      data=exercise_data %>% mutate(wl = weight.loss + .8*motivation*as.numeric(rewards)))
+  model2 = lm(wl~motivation * gender * rewards, 
+                                      data=exercise_data %>% mutate(wl = weight.loss + .8*motivation*as.numeric(rewards)))
+  ### use the same predictors in both models
+  vdiffr::expect_doppelganger("compare.fits with rf",compare.fits(wl~motivation | gender + rewards, 
+                                     data=exercise_data %>% mutate(wl = weight.loss + .8*motivation*as.numeric(rewards)), 
+                              model1, model2))
   
   ##### predictions with generalize lidnear model
   d$weight.loss = d$weight.loss + 1 + abs(min(d$weight.loss, na.rm=T))
@@ -119,6 +119,14 @@ test_that("compare.fits for other models", {
   fit2 = rpart::rpart(therapy.type~motivation + rewards, data=exercise_data, method="anova")
   vdiffr::expect_doppelganger("compare.fits with rpart categorical",
                               compare.fits(therapy.type~motivation + rewards, data=exercise_data, fit2))  
+  
+  ## compare.fits with labels/breaks (used to throw an error prior to may 2022)
+  mod = lm(y~a + x, data=small)
+  vdiffr::expect_doppelganger("compare.fits with labels/breaks", 
+    compare.fits(y~a |  x, data=small, 
+               model1=mod,
+               breaks = list(x=c(-2, 0, Inf)), 
+               labels = list(x=c("small", "large"))))
 })
 
 

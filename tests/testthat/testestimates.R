@@ -7,11 +7,11 @@ set.seed(1212)
 test_that("estimates from linear models", {
 
   cat1 = lm(weight.loss~therapy.type, data=d)	
-  expect_equal(estimates(cat1)$difference.matrix$cohens.d[1], .6305667, tolerance = 0.002)
+  expect_equal(estimates(cat1)$difference.matrix$cohens.d[2], .6305667, tolerance = 0.002)
   
   ##### two categoricals
   mod = lm(weight.loss~therapy.type + gender, data=d)	
-  expect_equal(estimates(mod)$difference.matrix$cohens.d[4], -.1024, tolerance = 0.002)
+  expect_equal(estimates(mod)$difference.matrix$cohens.d[4], .1024, tolerance = 0.002)
   
   ##### interaction
   mod = lm(weight.loss~therapy.type * gender, data=d)	
@@ -27,7 +27,7 @@ test_that("estimates from linear models", {
   
   ##### two categorical and one numeric
   mod = lm(weight.loss~motivation + therapy.type + gender, data=d)	
-  expect_equal(estimates(mod)$difference.matrix$difference[4], -.93229, tolerance = 0.002)
+  expect_equal(estimates(mod)$difference.matrix$difference[4], .93229, tolerance = 0.002)
   
   ##### two numeric and one categorical
   mod = lm(weight.loss~motivation + income + gender, data=d)
@@ -60,7 +60,7 @@ test_that("estimates from generalized linear models", {
   data("criminal_data")
   d = criminal_data
   mod = glm(rape~ses , data=d, family=binomial)
-  expect_equal(estimates(mod)$raw.coefficients[1], -6.45)
+  expect_equal(estimates(mod)$raw.coefficients[1], -6.45, tolerance = .001)
   
   
   mod = glm(convictions~ses + empathy + depression, data=d, family=poisson)
@@ -94,3 +94,4 @@ test_that("generate_grid_predictions", {
   expect_equal(nrow(generate_grid_predictions(list(a=1:3, b=4:5), list(c = c('a', 'b')), NULL)), 12)
    expect_null(generate_grid_predictions(NULL, NULL, NULL))
 })
+

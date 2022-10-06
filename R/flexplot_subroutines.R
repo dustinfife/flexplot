@@ -57,7 +57,7 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
   given.axis = flexplot_axis_given(formula)
   given = given.axis$given
   axis = given.axis$axis
-  flexplot_errors(variables = variables, data = data, method=method, axis=axis)
+  flexplot_errors(variables = variables, data = data, axis=axis)
   
   #### identify which variables are numeric and which are factors
   vtypes = variable_types(predictors, data, return.names=T)
@@ -113,16 +113,32 @@ flexplot_alpha_default = function(data, axis, alpha){
 
 
 ### prep data for association plot
-modify_association_plot_data = function(data, outcome, axis) {
+modify_association_plot_data = function(data, formula, outcome) {
+
+  variables = all.vars(formula, unique=FALSE)
+  predictors = variables[-1]
   
-  if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]]) & length(axis)==1 & axis[1] != "1"){
-    m = as.data.frame(table(data[,axis], data[,outcome])); names(m)[1:2] = c(axis, outcome)
-    chi = chisq.test(data[,axis], data[,outcome])
-    obs.exp = (chi$observed - chi$expected)/chi$expected
-    m$Freq = as.vector(obs.exp)
-    names(m)[names(m)=="Freq"] = "Proportion"
+  ### extract given and axis variables
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  
+  # this needs to be here when using visualize (since formula is null and it will
+  # say outcome and axis are not numeric (because they're null))
+  if (is.na(axis[1]) | axis[1] == "1") return(data)
+  if (all(is.na(data[,outcome])) | all(is.na(data[,axis]))) return(data)
+  
+  #maybe best to do log linear model (poisson?)
+  if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]])) {
+    m = as.data.frame(table(data[,c(predictors, outcome)])); names(m)[1:(ncol(m)-1)] = c(predictors, outcome)
+    loglin = glm(make.formula("Freq", c(predictors, outcome)), data=m, family=poisson)
+    predicted = predict(loglin, type="response")
+    final.pred = (m$Freq - predicted)
+    m$Freq = final.pred
+    names(m)[names(m)=="Freq"] = "Frequency"
     return(m)
   }
+  
   return(data)
 }
 
@@ -186,7 +202,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
 
   # make all variables into objects from the formula
   # (I believe this is only to make it easier to test, so I don't have to provide so many objects)
-  if (!is.null(formula)) {
+  if (!is.null(formula) & is.null(variables)) {
     prep_vars = flexplot_prep_variables(formula, data=data)
     variables = prep_vars$variables; outcome = prep_vars$outcome; axis = prep_vars$axis; given = prep_vars$given
     break.me = prep_vars$break.me; breaks = prep_vars$breaks; predictors = prep_vars$predictors; spread = prep_vars$spread
@@ -207,13 +223,13 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   ### prevent univariates from binning numeric variables with <5 levels
   data = modify_univariate_data_numeric(data=data, axis=axis, outcome=outcome)
   
-  # prepare data for association plot
-  data = modify_association_plot_data(data=data, outcome=outcome, axis=axis)
-  
   # prepare data for related test
   data = modify_related_data(data=data, related=related, axis=axis, outcome=outcome, variables=variables)
   
   data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
+  
+  # prepare data for association plot
+  data = modify_association_plot_data(data=data, formula = formula, outcome = outcome)
   
   # make sure method = 'logistic' under the right circumstances
   method = identify_method(data, outcome, axis, method)
@@ -221,12 +237,11 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   # convert data for logistic regression
   data = factor.to.logistic(data,outcome, method)
   
-
   #### reorder axis 1 it's not already ordered
   if(axis[1] != "1"){
     #### order by medians for numeric outcomes
     if (!is.numeric(data[,axis[1]]) & is.numeric(data[,outcome]) & !is.ordered(data[, axis[1]]) & !related){
-      if (spread=="quartiles"){ fn = "median"} else {fn = "mean"}
+      if (spread[1]=="quartiles"){ fn = "median"} else {fn = "mean"}
       ord = aggregate(data[,outcome]~data[, axis[1]], FUN=fn, na.rm=T)
       ord = ord[order(ord[,2], decreasing=T),]
       data[,axis[1]] = factor(data[, axis[1]], levels=ord[,1])
@@ -237,11 +252,11 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
     ord = order(sizes, decreasing = T)
     data[,outcome] = factor(data[, outcome], levels=names(sizes)[ord])
   }
-  
+
   ### reorder levels of given 2
   if (length(given)>1){ 
       ### for categorical variables, they're not binned, so we have to include the option where they're not
-      if (is.numeric(data[,given[2]])) data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
+      if (is.numeric(data[,given[2]]) & length(unique(data[,given[2]]))>bins) data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
   }
   return(data)
   
@@ -253,7 +268,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
 # expect_error(flexplot_errors(c("weight.loss", "therapy.type"), exercise_data, method="logistic", axis="hello"))
 # expect_error(flexplot_errors(c("gender", "therapy.type"), exercise_data, method="logistic", axis="therapy.type"))
 # expect_error(flexplot_errors(c("weight.loss", "therapy.type"), NULL, method="logistic", axis="hello"))
-flexplot_errors = function(variables, data, method=method, axis){
+flexplot_errors = function(variables, data, axis){
   
   if (is.null(data)){
     stop("Howdy! Looks like you forgot to include a dataset! Kinda hard to plot something with no data. Or so I've heard. What do I know? I'm just a computer. ")
@@ -269,15 +284,18 @@ flexplot_errors = function(variables, data, method=method, axis){
     stop(paste0("Ru oh! Somebody done made a mistake! Looks like you either spelled something wrong, or included a variable not in your dataset! Have you considered spellcheck? (Oh, btw, it was the variable(s) ", paste0(not.there, collapse=","), " that caused a problem"))
   }
 
-  #### give an error if they try to visualize logistic with a categorical x axis
-  if (method=="logistic" & length(variables)>0){
-    if (!is.numeric(data[,axis[1]])){
-      stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n
-				Best of luck on your statistical journeys."))
-    }	
-  } 
-  
 }
+
+check_error_for_logistic = function(variables, data, method=method, axis) {
+  
+  #### give an error if they try to visualize logistic with a categorical x axis
+  if (method != "logistic" | length(variables)<1) return(NULL)
+  if (is.numeric(data[,axis[1]])) return(NULL)
+  stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n
+				Best of luck on your statistical journeys."))
+}
+
+
 
   #### this function figures out which variables need to be binned
 #expect_identical(flexplot_break_me(exercise_data, c("muscle.gain", "income"), given="income"), "income")
@@ -299,9 +317,12 @@ flexplot_break_me = function(data, predictors, given, axis, bins){
   #### also, lapply fails when there's just one additional predictor, hence the if statement
   
   if (length(predictors)>2){
-    break.me = non.axis.one[unlist(lapply(data[,non.axis.one], FUN=is.numeric)) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
+    # for when there's a numeric variable less than the number of bins, do NOT bin it!
+    is_numeric = unlist(lapply(data[,non.axis.one], function(x) {is.numeric(x) & length(unique(x))>bins}))
+    is.given   = (non.axis.one %in% given) | (second.axis %in% non.axis.one)
+    break.me = non.axis.one[is_numeric & is.given]	
   } else {
-    break.me = non.axis.one[is.numeric(data[,non.axis.one] ) & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
+    break.me = non.axis.one[is.numeric(data[,non.axis.one]) & length(unique(data[,non.axis.one]))>bins & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
   
   # drop those break.me's that have the same number of levels as bins
@@ -441,7 +462,7 @@ flexplot_convert_to_categorical = function(data, axis){
 # bv = flexplot_bivariate_plot(weight.loss~motivation, data=exercise_data)$p
 # expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
-                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type  # arguments passed from flexplot
+                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins  # arguments passed from flexplot
                                    ){
   
   jitter = match_jitter_categorical(jitter)
@@ -471,7 +492,8 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
       } else if (plot.type == "density") {
         p = 'ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)'
       } else {
-        p = 'ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)'
+        bins = calculate_bins_for_histograms(bins, levels)
+        p = paste0('ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=', bins, ') + theme_bw() + labs(x=outcome)')
       }
     } else {
       p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
@@ -485,7 +507,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     #### if both are categorical, do chi square
     if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
       
-      p = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+      p = "ggplot(data=data, aes_string(x=axis, y='Frequency', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
       points = "xxxx"
       fitted = "xxxx"
       
@@ -555,6 +577,11 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
   list(p=p, points=points, fitted=fitted)
 }
 
+
+calculate_bins_for_histograms = function(bins, levels) {
+  if (bins != 3) return(bins)
+  return(min(30, round(levels/2)))
+}
 
 #### flexplot function for paneling
 flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=3, breaks=NULL, 
@@ -650,4 +677,14 @@ flexplot_generate_prediction_lines = function(prediction, axis, break.me, data,n
   return(pred.line) 
 }
 
+
+check_same_variables_in_prediction = function(formula, prediction=NULL) {
+  if (is.null(prediction)) return(NULL)
+  variables_in_formula = all.vars(formula, unique=FALSE)[-1]
+  variables_in_dataset = names(prediction)
+  not_there = which(!(variables_in_formula %in% variables_in_dataset))
+  if (length(not_there)<1) return(NULL)
+  missing_vars = paste0(variables_in_formula[not_there], collapse=",")
+  stop(paste0("The variable(s) '", missing_vars, "' are not in your prediction dataset."))
+}
 #

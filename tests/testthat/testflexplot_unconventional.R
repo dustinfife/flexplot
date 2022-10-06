@@ -8,6 +8,7 @@ deleteme = which(k$rewards == "no rewards")
 k = k[-(deleteme[1:2]), ]
 options(warn=-1)
 test_that("unconventional plots", {
+  
   vdiffr::expect_doppelganger("related T",
                               flexplot(weight.loss ~ rewards, data = k, related = T))
   m = k; m$rewards = as.character(m$rewards)
@@ -15,6 +16,8 @@ test_that("unconventional plots", {
                               flexplot(weight.loss ~ rewards, data = k, related = T))  
   vdiffr::expect_doppelganger("association plot",
                               flexplot(gender ~ rewards, data = d, jitter = c(.05, 0)))
+  vdiffr::expect_doppelganger("paneled association plot",
+                              flexplot(gender ~ rewards | therapy.type, data = d, jitter = c(.05, 0)))  
   vdiffr::expect_doppelganger("interaction plot",
                               flexplot(
                                 weight.loss ~ therapy.type + gender,

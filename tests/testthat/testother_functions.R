@@ -29,3 +29,9 @@ test_that("make.formula works", {
   expect_output(print(make.formula("a", letters[2:5])), "e")
   expect_output(print(make.formula("a", letters[2:5], random = "(1|School)")), "|")
 })
+
+test_that("calculate_bins_for_histograms works", {
+  expect_equal(calculate_bins_for_histograms(3, levels=10), 5)
+  expect_equal(calculate_bins_for_histograms(4, levels=10), 4)
+  expect_equal(calculate_bins_for_histograms(3, levels=33), 16)
+})

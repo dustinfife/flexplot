@@ -132,8 +132,11 @@ flexplot = function(formula, data=NULL, related=F,
                                     jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
                                     alpha=alpha, prediction=prediction)
   
-  # extract original names of dv (for logistic, prior to making it continuous)
   
+  flexplot_errors(varprep$variables, varprep$data, varprep$axis)
+  check_same_variables_in_prediction(formula, prediction)
+  
+  # extract original names of dv (for logistic, prior to making it continuous)
   outcome = varprep$outcome
   data = varprep$data
   method = with(varprep, identify_method(data, outcome, axis, method))
@@ -141,8 +144,9 @@ flexplot = function(formula, data=NULL, related=F,
 
   ### make modifications to the data
   data = with(varprep, 
-	            flexplot_modify_data(data=data, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
+	            flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
 	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method))
+
   varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
                         ### (error came at ghost.reference when it couldn't find the binned version)
 
@@ -153,19 +157,17 @@ flexplot = function(formula, data=NULL, related=F,
   ##### make models into a factor if they supply predictions
 	if (!is.null(prediction)){
 		prediction$model = factor(prediction$model)
-		
 		### make the levels consistent between prediction/data for axis 1
-		if (!is.numeric(data[[varprep$axis[1]]])){
+		if (!is.numeric(data[[varprep$axis[1]]]) & varprep$axis[1] != "1"){
 		  prediction[[varprep$axis[1]]] = factor(prediction[[varprep$axis[1]]], levels=levels(data[[varprep$axis[1]]]))
 		}
 		
 		varprep$prediction = prediction
 	}
 	
-	
-	
   ### report errors when necessary
-  with(varprep, flexplot_errors(variables = variables, data = data, method=method, axis=axis))
+  #### give an error if they try to visualize logistic with a categorical x axis
+  with(varprep, check_error_for_logistic(variables = variables, data = data, method=method, axis=axis))
   
   ### change alpha, depending on plot type
   alpha = with(varprep, flexplot_alpha_default(data=data, axis = axis, alpha = alpha))
@@ -185,7 +187,7 @@ flexplot = function(formula, data=NULL, related=F,
 	### PLOT UNIVARIATE PLOTS
   bivariate = with(varprep, flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread, plot.type=plot.type))
+                                                    method=method, spread=spread, plot.type=plot.type, bins=bins))
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
@@ -235,6 +237,7 @@ flexplot = function(formula, data=NULL, related=F,
 	} else {
 	  pred.line = "xxxx"
 	}
+  
 
 	theme = "theme_bw() + theme(text=element_text(size=14))"
   
