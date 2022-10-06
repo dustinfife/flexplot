@@ -81,10 +81,11 @@ compare.fits = function(formula, data, model1, model2=NULL,
   
   all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
   # when we have a mean model, this fails without the if statement
-  if (!is.na(all_predictors_minus_re)) {
-    a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values, extract_data_from_fitted_object(model1))
-    pred.values[,all_predictors_minus_re] = a
-  }
+  # if (!is.na(all_predictors_minus_re)) {
+  #   a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values,
+  #                                              extract_data_from_fitted_object(model1))
+  #   pred.values[,all_predictors_minus_re] = a
+  # }
   
   # for intercept only models
   if (nrow(pred.values)==0) {
