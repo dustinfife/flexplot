@@ -299,7 +299,6 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   
   return()
 }
-
 .linmod_compute = function(jaspResults, dataset, options, ready) {
   
   if (ready){
@@ -308,8 +307,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     jaspResults[["linmod_results"]] <- linmod_results
     linmod_results$dependOn(c("dependent", "variables", "interactions", "linetype"))
     
-    ## interactions are stored in a deeply nested list. de-listify them
     
+    ## interactions are stored in a deeply nested list. de-listify them
     predictors = paste0(
       unlist(
         lapply(options$interactions, FUN=function(x) paste0(encodeColNames(unlist(x$components)), collapse="*"))
@@ -317,8 +316,9 @@ linmod_jasp<- function(jaspResults, dataset, options) {
       collapse=" + ")
     
     # add variables with polynomial terms -------------------------------------
-    vars = unlist(lapply(encodeColNames(options$interactions), FUN=function(x) encodeColNames(unlist(x$components))))
-    polys = unlist(lapply(encodeColNames(options$interactions), FUN=function(x) encodeColNames(unlist(x$polynoms))))
+    vars = unlist(lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$components))))
+    polys = unlist(lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$polynoms))))
+    
     vars.with.poly = vars[polys]
     # specify degree
     if (options$linetype=="Quadratic" & length(vars.with.poly)>0){
@@ -341,10 +341,11 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     f = as.formula(f)
     ### store all the information
     model = lm(f, dataset)
-
     est = estimates(model, mc=TRUE)
     
-    est$model = model
+    # if they're doing a mean-only model, we can't just say est$model = model because it's not a list (but a data frame).
+    # so, we have to convert it to a list if it's mean-only model
+    if (is.null(dim(est))) est$model = model else est = list(est=est, model=model)
     
     linmod_results$object = est
     
@@ -540,13 +541,10 @@ linmod_jasp<- function(jaspResults, dataset, options) {
 
 .fill_linmod_table_means = function(linmod_table_means, linmod_results){
   
-
-  #### fill in table if they just supply one variable
   
-  #if (options)
   factors = linmod_results$factor.summary
-  
-  if (is.na(factors)){
+  # for mean only models
+  if (is.null(factors)){
     mean_ci = predict(linmod_results$model, interval="confidence")[1,]
     tabdat = list(
       var = decodeColNames(names(linmod_results$model$model)),

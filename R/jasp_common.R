@@ -197,7 +197,7 @@ return_tabdata = function(linmod_results) {
     
     ### fill in terms unique to this
     tabdat$terms[2] = y
-    tabdat$rsq[2] = estimates$r.squared[1]
+    tabdat$rsq[2] = NA#estimates$r.squared[1]
     tabdat$bayes[2] = bf
     tabdat$bayesinv[2] = 1/bf
     
