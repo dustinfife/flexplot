@@ -141,6 +141,7 @@ generate_predictors = function(data, formula, model, ...) {
   predictors = variables[-1]
   
   k = bin_if_theres_a_flexplot_formula(formula, data, ...)
+  
   # identify those variables in the model that are not plotted
   # (If I don't do this, we'll get a jagged line in the visuals)
   vars_in_model = get_predictors(model)

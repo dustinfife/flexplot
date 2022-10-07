@@ -99,7 +99,6 @@ estimates.lm = function(object, mc=TRUE){
 	predictors = variables[-1]
 	
 	# for intercept only models, return the mean
-
 	if (length(predictors) == 0 ) {
 	  f = as.formula(paste0(outcome, "~1"))
 	  est = compare.fits(formula = f, data=object$model, model1=object, model2=NULL, return.preds=T, report.se=T)[1,]

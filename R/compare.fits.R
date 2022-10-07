@@ -31,9 +31,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (is.null(model2)) runme = "yes"
   
   #### if mod2 is null..
-  if (is.null(model2)){
-    model2 = model1
-  } 
+  if (is.null(model2)) model2 = model1
   
   #### get type of model
   model1.type = class(model1)[1]
@@ -56,7 +54,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
   test_same_class(model1, model2)
   
   #### convert random effects to factors for mixed models
-
   data = subset_random_model(model1, formula, d=data, samp.size = clusters)
 
   ### make sure they have the same outcome
@@ -80,17 +77,10 @@ compare.fits = function(formula, data, model1, model2=NULL,
   randef = extract_random_term(model1)
   
   all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
-  # when we have a mean model, this fails without the if statement
-  # if (!is.na(all_predictors_minus_re)) {
-  #   a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values,
-  #                                              extract_data_from_fitted_object(model1))
-  #   pred.values[,all_predictors_minus_re] = a
-  # }
+
   
   # for intercept only models
-  if (nrow(pred.values)==0) {
-    pred.values = data.frame("(Intercept)" = 1)
-  }
+  if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
   
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   # when RE = T, we should return BOTH
@@ -110,7 +100,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
   }
   
   #### if they have the same name, just call them model1 and model2
-  
   if (!re){
     pred.mod1$model = paste0(deparse(substitute(model1)), " (", model1.type, ")", collapse="")
     if (pred.mod1$model[1] == pred.mod2$model[1]){
