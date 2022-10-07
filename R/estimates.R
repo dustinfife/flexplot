@@ -110,28 +110,16 @@ estimates.lm = function(object, mc=TRUE){
 	    
     #### look for interaction terms
 	terms = remove_interaction_terms(object)
+	
 	#### get dataset
 	d = object$model
-  #}dataset=NULL
-	#### identify factors
-	if (length(terms)>1){
-		### convert characters to factors
-		chars = unlist(lapply(d[,terms], is.character))
-		chars = names(chars)[chars]
-		if (length(chars)==1) d[,chars] = as.factor(d[,chars]) else d[,chars] = lapply(d[,chars], as.factor)
-		factors = names(which(unlist(lapply(d[,terms], is.factor))));
-		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));
-	} else {
-
-		### convert characters to factors
-	  attr(terms(object), "factors")
-		chars = terms[which(is.character(d[,terms]))]
-		if (length(chars)>0){
-			d[,chars] = as.factor(d[,chars])
-		}
-		factors = terms[which(is.factor(d[,terms]) | is.character(d[,terms]))]
-		numbers = terms[which(is.numeric(d[,terms]))]
-	}
+  
+	
+  #### identify factors
+	variable_types = which_terms_are_factors_or_numbers(d, terms)
+	factors = variable_types$factors
+	numbers = variable_types$numbers
+	
 
 	#### compute change in r squared
 	ssr = drop1(aov(object))[-1,"Sum of Sq"]
@@ -139,7 +127,6 @@ estimates.lm = function(object, mc=TRUE){
 	if (length(ssr)<(nrow(anova(object))-1)){
 		message("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. To obtain main effect sizes, drop the interaction from your model. \n\n")
 	}
-	summary(object)
 	sst = sum(anova(object)[,"Sum Sq"])
 	sse = anova(object)[,"Sum Sq"]
 	semi.p = (sse[1:(length(sse)-1)]/sst)

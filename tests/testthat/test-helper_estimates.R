@@ -36,3 +36,9 @@ test_that("bf.bif works", {
   expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small)), 3.339977, tol = .01)
   expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small), invert=T), 1/3.339977, tol = .01)
 })
+
+test_that("which_terms_are_factors_or_numbers works", {
+  length(which_terms_are_factors_or_numbers(small, "a")$factors)==1
+  length(which_terms_are_factors_or_numbers(small, "x")$factors) ==0
+  length(which_terms_are_factors_or_numbers(small, c("x", "y", "a", "b"))$factors) == 2
+})

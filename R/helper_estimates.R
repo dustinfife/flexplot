@@ -183,3 +183,13 @@ bf.bic = bf_bic = function(model1, model2, invert=F){
     bf
   }
 }
+
+which_terms_are_factors_or_numbers = function(d, terms) {
+  chars = unlist(lapply(d[,terms, drop=F], is.character))
+  chars = names(chars)[chars]
+  d[,chars] = lapply(d[,chars, drop=F], as.factor)
+  factors = names(which(unlist(lapply(d[,terms, drop=F], is.factor))));
+  numbers = names(which(unlist(lapply(d[,terms, drop=F], is.numeric))));
+  return(list(factors=factors, numbers=numbers))
+}
+
