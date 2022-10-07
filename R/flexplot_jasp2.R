@@ -174,43 +174,25 @@ themeJasp = function(graph,
                      xAxis = TRUE,
                      yAxis = TRUE,
                      sides = "bl",
-                     axis.title.cex = getGraphOption("axis.title.cex"),
-                     bty = getGraphOption("bty"),
-                     fontsize = getGraphOption("fontsize"),
-                     family = getGraphOption("family"),
+                     axis.title.cex = jaspGraphs::getGraphOption("axis.title.cex"),
+                     bty = jaspGraphs::getGraphOption("bty"),
+                     fontsize = jaspGraphs::getGraphOption("fontsize"),
+                     family = jaspGraphs::getGraphOption("family"),
                      horizontal = FALSE,
                      legend.position = "right",
                      legend.justification = "top",
-                     axisTickLength = getGraphOption("axisTickLength"),
-                     axisTickWidth = getGraphOption("axisTickWidth")) {
-
-  # if (!xAxis || !yAxis) {
-  #   warning("Arguments xAxis and yAxis of themeJasp will be deprecated. Please use the argument \"sides\" instead.")
-  #
-  #   if (horizontal) {
-  #     if (!xAxis)
-  #       #sides <- stringr::str_remove(sides, "l")
-  #     if (!yAxis)
-  #       #sides <- stringr::str_remove(sides, "b")
-  #   } else {
-  #     if (!xAxis)
-  #       #sides <- stringr::str_remove(sides, "b")
-  #     if (!yAxis)
-  #       #sides <- stringr::str_remove(sides, "l")
-  #   }
-  #   if (sides == "")
-  #     bty <- NULL
-  # }
+                     axisTickLength = jaspGraphs::getGraphOption("axisTickLength"),
+                     axisTickWidth = jaspGraphs::getGraphOption("axisTickWidth")) {
 
 
   if (is.list(bty) && bty[["type"]] == "n")
-    graph <- graph + geom_rangeframe(sides = sides)
+    graph <- graph + jaspGraphs::geom_rangeframe(sides = sides)
 
   if (horizontal)
     graph <- graph + coord_flip()
 
   graph <- graph +
-                  themeJaspRaw(legend.position = legend.position,
+    jaspGraphs::themeJaspRaw(legend.position = legend.position,
                                 axis.title.cex = axis.title.cex, family = family,
                                 fontsize = fontsize, legend.justification = legend.justification,
                                 axisTickLength = axisTickLength, axisTickWidth = axisTickWidth) +
