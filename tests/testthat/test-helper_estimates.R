@@ -38,7 +38,15 @@ test_that("bf.bif works", {
 })
 
 test_that("which_terms_are_factors_or_numbers works", {
-  length(which_terms_are_factors_or_numbers(small, "a")$factors)==1
-  length(which_terms_are_factors_or_numbers(small, "x")$factors) ==0
-  length(which_terms_are_factors_or_numbers(small, c("x", "y", "a", "b"))$factors) == 2
+  expect_true(length(which_terms_are_factors_or_numbers(small, "a")$factors)==1)
+  expect_true(length(which_terms_are_factors_or_numbers(small, "x")$factors) ==0)
+  expect_true(length(which_terms_are_factors_or_numbers(small, c("x", "y", "a", "b"))$factors) == 2)
+})
+
+test_that("compute_semi_partial works", {
+  mod = lm(y~x, data=small)
+  expect_equal(as.numeric(compute_semi_partial(mod)), summary(mod)$r.squared)
+  expect_equal(names(compute_semi_partial(lm(y~a, data=small))), "a")
+  expect_equal(names(compute_semi_partial(lm(y~a+b+z, data=small))), c("a", "b", "z"))
+  expect_message(compute_semi_partial(lm(y~a*b, data=small)))
 })

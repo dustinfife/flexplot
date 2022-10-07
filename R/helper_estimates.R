@@ -193,3 +193,97 @@ which_terms_are_factors_or_numbers = function(d, terms) {
   return(list(factors=factors, numbers=numbers))
 }
 
+compute_semi_partial = function(object) {
+  #### compute change in r squared
+  ssr = drop1(aov(object))[-1,"Sum of Sq"]
+  ssr2 = aov(object)$effects
+  if (length(ssr)<(nrow(anova(object))-1)){
+    message("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. 
+            To obtain main effect sizes, drop the interaction from your model. \n\n")
+  }
+  sst = sum(anova(object)[,"Sum Sq"])
+  sse = anova(object)[,"Sum Sq"]
+  semi.p = (sse[1:(length(sse)-1)]/sst)
+  max = nrow(anova(object))-1
+  min = max-length(semi.p)+1
+  nms = row.names(anova(object))[min:max]	
+  names(semi.p) = nms
+  return(semi.p)
+}
+
+populate_estimates_factors = function(object, factors) {
+  
+  if (is.null(factors)) factors = which_terms_are_factors_or_numbers(object$model, 
+                                                                     attr(terms(object), "term.labels"))
+  
+  if (length(factors)==0) return(list(coef.matrix=NA, difference.matrix=NA))
+  
+  d = object$model
+  outcome = as.character(attr(terms(object), "variables"))[-1][1]
+  
+  #### generate table with names
+  factor.names = unlist(lapply(d[,factors, drop=F], levels))
+  num.rows     = sum(unlist(apply(d[,factors, drop=F], 2, function(x) { length(unique(x))})))			
+  num.rows2    = sum(apply(d[,factors, drop=F], 2, function(x){ a = length(unique(x)); (a*(a-1))/2}))
+  
+  #### create empty matrix with variable names
+  coef.matrix = data.frame(variables = rep("", num.rows), levels=NA, estimate=NA, lower=NA, upper=NA)
+  coef.matrix$variables = factor(coef.matrix$variables, levels=c("", factors))		
+  
+  #### create empty difference.matrix
+  difference.matrix = data.frame(variables = NA, comparison = 1:num.rows2, difference=NA, 
+                                 lower=NA, upper=NA, cohens.d=NA)
+  
+  p = 1; p2=1; i=1
+  
+  for (i in 1:length(factors)){
+    
+    #### populate df based on levels
+    levs = length(levels(d[,factors[i]]))
+    levs2 = (levs*(levs-1))/2
+    current.rows = p:(p+levs-1)
+    current.rows2 = p2:(p2 + levs2-1)
+    
+    #### populate variable names
+    coef.matrix$variables[p] = factors[i]
+    
+    #### populate the estimates/lower/upper
+    f = as.formula(paste0(outcome, "~", factors[i]))
+    est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T) %>% 
+      group_by_at(factors[i]) %>%
+      summarize(across(prediction.fit:prediction.upr, ~mean(.x)))
+    
+    coef.matrix$levels[current.rows] = unique(as.character(est[,1]))
+    coef.matrix$estimate[current.rows] = est$prediction.fit
+    coef.matrix$lower[current.rows] = est$prediction.lwr
+    coef.matrix$upper[current.rows] = est$prediction.upr
+    
+    #### fill in the difference matrix
+    difference.matrix$variables[p2] = factors[i]
+    center = outer(est$prediction.fit, est$prediction.fit, "-")
+    keep <- lower.tri(center)
+    center <- center[keep]
+    nn = table(d[,factors[i]])
+    df = nrow(d) - length(coef(object))
+    width = qtukey(.95, levs, df) *
+      summary(object)$sigma * 
+      sqrt(outer(1/nn, 1/nn, "+"))[keep]
+    difference.names = outer(as.character(est[[factors[i]]]), 
+                             as.character(est[[factors[i]]]), 
+                             paste, sep = "-")[keep]
+    
+    difference.matrix$comparison[current.rows2] = difference.names
+    difference.matrix[current.rows2,c("difference", "lower", "upper")] = 
+      c(center, center-width, center+width)				
+    difference.matrix$cohens.d[current.rows2] = difference.matrix$difference[current.rows2]/summary(object)$sigma
+    
+    #### increment the counter
+    p = p + levs
+    p2 = p2+levs2
+    
+  }
+  return(list(coef.matrix=coef.matrix,
+              difference.matrix = difference.matrix))
+  
+} 
+
