@@ -89,7 +89,6 @@ fit_baseline_model = function(object) {
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.lm = function(object, mc=TRUE){
-	n = nrow(model.frame(object)) 
 	
 	#### generate list of coefficients
 	terms = attr(terms(object), "term.labels")
@@ -108,12 +107,11 @@ estimates.lm = function(object, mc=TRUE){
 	  return(return)
 	}
 	    
-    #### look for interaction terms
+  #### look for interaction terms
 	terms = remove_interaction_terms(object)
 	
 	#### get dataset
 	d = object$model
-  
 	
   #### identify factors
 	variable_types = which_terms_are_factors_or_numbers(d, terms)
@@ -122,76 +120,24 @@ estimates.lm = function(object, mc=TRUE){
 	
 	# compute semi-partial
   semi.p = compute_semi_partial(object)
+  
+  # get summaries for factors
   factor_summaries = populate_estimates_factors(object, factors)
   coef.matrix = factor_summaries$coef.matrix
   difference.matrix = factor_summaries$difference.matrix
+  
+  # get summaries for numeric
+  coef.matrix.numb = populate_estimates_numeric(object, numbers)
 	
-	#### NUMERIC VARIABLES
-	if (length(numbers)>0){
-		vars = c("(Intercept)", numbers)
-		coef.matrix.numb = data.frame(variables=vars, estimate=NA, lower=NA, upper=NA, std.estimate=NA, std.lower=NA, std.upper=NA)#, df.spent=1, df.remaining=object$df)
-		coef.matrix.numb$estimate = coef(object)[vars]
-		
-		#### get upper and lower using matrix multiplication
-		upper.lower = t(matrix(coef(object)[vars], ncol=2, nrow=length(vars), byrow=F) + t(t(t(c(1.96,-1.96)))%*%t(summary(object)$coef[vars,2])))
-
-		coef.matrix.numb$lower = (upper.lower)[2,]
-		coef.matrix.numb$upper = (upper.lower)[1,]
-
-		
-		##### standardized estimates
-		coef.std = standardized.beta(object, se=T)
-			#### remove those that are numeric
-		num = which(names(coef.std$beta) %in% numbers)	
-		coef.std$beta = coef.std$beta[num]
-		coef.std$se = coef.std$se[num]					
-		coef.matrix.numb$std.estimate = c(0, coef.std$beta)
-		upper.lower = t(matrix(c(0, coef.std$beta), ncol=2, nrow=length(vars), byrow=F) + t(t(t(c(1.96,-1.96)))%*%t(c(0, coef.std$se))))
-		coef.matrix.numb[,c("std.upper", "std.lower")] = t(upper.lower)	
-		
-	} else {
-		coef.matrix.numb = NA
-	}
-
-
-
-	#### report R squared
-	r.squared = summary(object)$r.squared
-	t.crit = qt(.975, df=n-2)	
-	se.r = sqrt((4*r.squared*(1-r.squared)^2*(n-1-1)^2)/((n^2-1)*(n+3)))		### from cohen, cohen, west, aiken, page 88
-	r.squared = c(r.squared, r.squared-t.crit*se.r, r.squared+t.crit*se.r)
-	r.squared = round(r.squared, digits=4)
+  # compute r squared and its CI
+  r.squared = compute_r_squared(object)
 	
 	#### report correlation
-	if (length(numbers)==1 & length(factors)==0){
-		correlation = cor(d)[1,2]
-	} else {
-		correlation = NA
-	}
-	
-	### do nested model comparisons
-	if (length(terms)>1 & mc){
-	  removed.one.at.a.time = function(i, terms, object){
-	    new.f = as.formula(paste0(". ~ . -", terms[i]))
-	    new.object = update(object, new.f)
-	    list(
-	      rsq = summary(object)$r.squared - summary(new.object)$r.squared,
-	      bayes.factor = bf.bic(object, new.object, invert=FALSE)
-	    )
-	  }
-	  ### this requires superassignment to work with JASP
-	  #dataset<<-object$model
-	  dataset = object$model
-	  all.terms = attr(terms(object), "term.labels")
-	  mc = t(sapply(1:length(all.terms), removed.one.at.a.time, terms=all.terms, object=object))
-	  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
-	  mod.comps = mc
-  	mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
-  	mod.comps$rsq = as.numeric(mod.comps$rsq); mod.comps$bayes.factor = as.numeric(unlist(mod.comps$bayes.factor))
-	} else {
-	  mod.comps = NULL
-	}
+  correlation = compute_correlation(object)
   
+  # model comparison (I think this is only for JASP)
+  mod.comps = return_model_comparisons(object, terms, mc)
+
 	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, 
 	           difference.matrix=difference.matrix, factors=factors, numbers.summary=coef.matrix.numb, numbers=numbers, 
 	           sigma=summary(object)$sigma,

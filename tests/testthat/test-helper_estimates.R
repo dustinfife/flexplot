@@ -50,3 +50,24 @@ test_that("compute_semi_partial works", {
   expect_equal(names(compute_semi_partial(lm(y~a+b+z, data=small))), c("a", "b", "z"))
   expect_message(compute_semi_partial(lm(y~a*b, data=small)))
 })
+
+test_that("populate_estimates_factors works", {
+  expect_equal(populate_estimates_factors(lm(y~x, data=small))$coef.matrix, NA)
+  expect_equal(levels(populate_estimates_factors(lm(y~a, data=small))$coef.matrix$variables)[2], "a")
+})
+
+test_that("populate_estimates_numeric works", {
+  expect_equal(dim(populate_estimates_numeric(lm(y~x, data=small))), c(2,7))
+  expect_equal(dim(populate_estimates_numeric(lm(y~a, data=small))), NULL)
+})
+
+test_that("compute_r_squared works", {
+  expect_equal(length(compute_r_squared(lm(y~x, data=small))), 3)
+  expect_true(all(compute_r_squared(lm(y~1, data=small))==0))
+})
+
+test_that("compute_correlation works", {
+  expect_true(is.numeric(compute_correlation(lm(y~x, data=small))))
+  expect_true(is.na(compute_correlation(lm(y~a, data=small))))
+  expect_true(is.na(compute_correlation(lm(y~x + z, data=small))))
+})

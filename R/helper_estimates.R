@@ -185,6 +185,7 @@ bf.bic = bf_bic = function(model1, model2, invert=F){
 }
 
 which_terms_are_factors_or_numbers = function(d, terms) {
+  
   chars = unlist(lapply(d[,terms, drop=F], is.character))
   chars = names(chars)[chars]
   d[,chars] = lapply(d[,chars, drop=F], as.factor)
@@ -211,10 +212,10 @@ compute_semi_partial = function(object) {
   return(semi.p)
 }
 
-populate_estimates_factors = function(object, factors) {
+populate_estimates_factors = function(object, factors=NULL) {
   
   if (is.null(factors)) factors = which_terms_are_factors_or_numbers(object$model, 
-                                                                     attr(terms(object), "term.labels"))
+                                                                     attr(terms(object), "term.labels"))$factors
   
   if (length(factors)==0) return(list(coef.matrix=NA, difference.matrix=NA))
   
@@ -287,3 +288,89 @@ populate_estimates_factors = function(object, factors) {
   
 } 
 
+populate_estimates_numeric = function(object, numbers=NULL) {
+  
+  if (is.null(numbers)) numbers = which_terms_are_factors_or_numbers(object$model, 
+                                                                     attr(terms(object), "term.labels"))$numbers
+  if (length(numbers)==0) return(NA)
+  
+  vars = c("(Intercept)", numbers)
+  coef.matrix.numb = data.frame(variables=vars, estimate=NA, lower=NA, upper=NA, 
+                                std.estimate=NA, std.lower=NA, std.upper=NA)
+  coef.matrix.numb$estimate = coef(object)[vars]
+  
+  #### get upper and lower using matrix multiplication
+  upper.lower = t(matrix(coef(object)[vars], ncol=2, nrow=length(vars), byrow=F) + 
+                    t(t(t(c(1.96,-1.96)))%*%t(summary(object)$coef[vars,2])))
+  coef.matrix.numb$lower = (upper.lower)[2,]
+  coef.matrix.numb$upper = (upper.lower)[1,]
+  
+  
+  ##### standardized estimates
+  coef.std = standardized.beta(object, se=T)
+  
+  #### remove those that are numeric
+  num = which(names(coef.std$beta) %in% numbers)	
+  coef.std$beta = coef.std$beta[num]
+  coef.std$se = coef.std$se[num]					
+  coef.matrix.numb$std.estimate = c(0, coef.std$beta)
+  upper.lower = t(matrix(c(0, coef.std$beta), ncol=2, nrow=length(vars), byrow=F) + t(t(t(c(1.96,-1.96)))%*%t(c(0, coef.std$se))))
+  coef.matrix.numb[,c("std.upper", "std.lower")] = t(upper.lower)	
+  return(coef.matrix.numb)
+  
+}
+
+compute_r_squared = function(object) {
+  #### report R squared
+  r.squared = summary(object)$r.squared
+  n = nrow(object$model)
+  t.crit = qt(.975, df=n-2)	
+  se.r = sqrt((4*r.squared*(1-r.squared)^2*(n-1-1)^2)/((n^2-1)*(n+3)))		### from cohen, cohen, west, aiken, page 88
+  r.squared = c(r.squared, r.squared-t.crit*se.r, r.squared+t.crit*se.r)
+  r.squared = round(r.squared, digits=4)
+  return(r.squared)
+}
+
+compute_correlation = function(object) {
+  
+  #### get dataset
+  d = object$model
+  terms = attr(terms(object), "term.labels")
+  terms = remove_interaction_terms(object)
+  
+  #### identify factors
+  variable_types = which_terms_are_factors_or_numbers(d, terms)
+  factors = variable_types$factors
+  numbers = variable_types$numbers
+  
+  if (length(numbers)==1 & length(factors)==0) return(cor(d)[1,2])
+  return(NA)
+}
+
+removed.one.at.a.time = function(i, terms, object){
+  new.f = as.formula(paste0(". ~ . -", terms[i]))
+  new.object = update(object, new.f)
+  list(
+    rsq = summary(object)$r.squared - summary(new.object)$r.squared,
+    bayes.factor = bf.bic(object, new.object, invert=FALSE)
+  )
+}
+
+return_model_comparisons = function(object, terms, mc) {
+  
+  if (length(terms)<2 | !mc) {
+    return(NULL)
+  }
+
+  ### do nested model comparisons
+  ### this requires superassignment to work with JASP
+  #dataset<<-object$model
+  dataset = object$model
+  all.terms = attr(terms(object), "term.labels")
+  mc = t(sapply(1:length(all.terms), removed.one.at.a.time, terms=all.terms, object=object))
+  mc = data.frame(cbind(all.terms,mc), stringsAsFactors = FALSE)
+  mod.comps = mc
+  mod.comps = rbind(c("Full Model", summary(object)$r.squared, NA), mod.comps)
+  mod.comps$rsq = as.numeric(mod.comps$rsq); mod.comps$bayes.factor = as.numeric(unlist(mod.comps$bayes.factor))
+  return(mod.comps)
+}
