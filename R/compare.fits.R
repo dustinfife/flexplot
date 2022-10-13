@@ -85,6 +85,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   # when RE = T, we should return BOTH
   ### there's no fixed effect if we don't have these lines
+  
   model1.type = class(model1)[1]
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
@@ -92,6 +93,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
     pred.mod2 = pred.mod1
   }
 
+  # if they provide two models AND re=T, return just the random effects
+  if (re & !exists("runme")) {
+    pred.mod1 = pred.mod1[pred.mod1$model == "random effects",]
+    pred.mod2 = pred.mod2[pred.mod2$model == "random effects",]
+    pred.mod1$model = deparse(substitute(model1))
+    pred.mod2$model = deparse(substitute(model2))
+  }
   #### convert polyr back to numeric (if applicable)
   if (model1.type == "polr" | model2.type == "polr"){
     data[,outcome] = as.numeric(as.character(data[,outcome]))		
