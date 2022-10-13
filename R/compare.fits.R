@@ -166,7 +166,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
 }	
 
 return_lims_geom = function(outcome, data, model1) {
-  if (!(class(model1)[1] == "lm" | class(model1)[1] == "glm")) return(theme_bw())
+  if (!(class(model1)[1] == "lm" | class(model1)[1] == "glm" | class(model1)[1] == "lmerMod")) return(theme_bw())
   if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])) return(theme_bw())
   if (is.factor(data[,outcome]) | is.character(data[,outcome])) return(theme_bw())
   return(coord_cartesian(ylim=c(min(data[,outcome]), max(data[,outcome]))))
