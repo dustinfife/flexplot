@@ -71,7 +71,6 @@ test_that("match.jitter works", {
   expect_equal(match_jitter_categorical(T), c(.2, 0))
   expect_equal(match_jitter_categorical(c(.2, .1)), c(.2, .1))
   expect_equal(match_jitter_categorical(F), c(0, 0))
-  expect_warning(match_jitter_categorical(c(F, T)))
 })
 
 

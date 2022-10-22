@@ -57,7 +57,7 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     
     # merge the means with the dataset and replace the original variable with the binned mean
     k = plot_data$data %>% 
-      group_by_at(vars(binned_vars)) %>% 
+      group_by(across(all_of(binned_vars))) %>% 
       summarize_at(unbinned_name, mean) %>% 
       full_join(plot_data$data, by=binned_vars, suffix = c("", ".y")) %>% 
       mutate_at(not_plotted_vars, mean) %>% 
