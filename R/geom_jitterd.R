@@ -165,9 +165,11 @@ code
 }
 
 mp.density=function(y){
-	
-	if (length(y)>3){
-		dens= density(y)
+
+  # get unique values of y (multiply by 100 and round to get rid of rounding errors)
+  unique_y = length(unique(round(y*100)))
+	if (length(y)>3 & unique_y>1){
+	  dens= density(y)
 		#### match densities with values
 		densities= as.numeric(as.character(cut(y,dens$x,labels=dens$y[-1])))
 		densities=densities/max(densities)	
