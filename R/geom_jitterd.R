@@ -96,7 +96,7 @@ if(!is.null(seed) &&is.na(seed)) {
 
 #' @importFrom purrr "%||%"
 #' @import ggplot2
-PositionJitterdodged <- ggproto("PositionJitterdodged", ggplot2::Position,
+PositionJitterdodged <- ggplot2::ggproto("PositionJitterdodged", ggplot2::Position,
                                 jitter.width = .2,
                                 jitter.height = NULL,
                                 dodge.width = NULL,

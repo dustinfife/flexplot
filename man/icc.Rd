@@ -40,6 +40,4 @@ icc(model)
 }
 \author{
 Dustin Fife
-
-Dustin Fife
 }

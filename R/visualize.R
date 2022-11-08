@@ -176,7 +176,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
 }
 
 
-utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation"))
+#utils::globalVariables(c("model", "Value", "y", "dataset", "switch_orientation"))
 
 
 

@@ -197,7 +197,7 @@ test_that("generate_predictions_table works", {
   big = glm(died~willpower + minutes.fighting + superpower + damage.resistance + speed + agility + iq + strength + flexibility, 
              data=avengers, family=binomial)
   small = glm(died~minutes.fighting, data=avengers, family=binomial)
-  expect_true(generate_predictions_table(big)[1,1] == 17)
+  expect_true(generate_predictions_table(big)[1,1] == 16)
   expect_true(generate_predictions_table(small)[1,1] == 0)
   expect_true(length(unique(check_logistic_all_same(big)))==2)
   expect_true(length(levels(check_logistic_all_same(small)))==2)
@@ -209,7 +209,7 @@ test_that("sensitivity.table works", {
   expect_true(sensitivity.table(small)$npv == 0)
   set.seed(232)
   rfmod = party::cforest(died~minutes.fighting, data=avengers, control = party::cforest_unbiased(ntree=10))
-  expect_true(sensitivity.table(rfmod)$acc %>% round(2) ==.88)
+  expect_true(sensitivity.table(rfmod)$acc %>% round(2) ==.87)
 })
 
 test_that("missing data in a variable doesn't screw things up", {

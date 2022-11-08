@@ -36,5 +36,5 @@ Suggests: jmvcore (>= 0.8.5),
 	markdown,
 	papaja,
 	tidyverse
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 VignetteBuilder: knitr
