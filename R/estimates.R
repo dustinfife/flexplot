@@ -96,7 +96,7 @@ estimates.lm = function(object, mc=TRUE){
 	variables = as.character(attr(terms(object), "variables")); variables = variables[-1]
 	outcome = variables[1]
 	predictors = variables[-1]
-	
+
 	# for intercept only models, return the mean
 	if (length(predictors) == 0 ) {
 	  f = as.formula(paste0(outcome, "~1"))
@@ -136,6 +136,7 @@ estimates.lm = function(object, mc=TRUE){
   correlation = compute_correlation(object)
   
   # model comparison (I think this is only for JASP)
+  dataset<<-object$model
   mod.comps = return_model_comparisons(object, terms, mc)
 
 	ret = list(r.squared=r.squared, semi.p=semi.p, correlation = correlation, factor.summary = coef.matrix, 
