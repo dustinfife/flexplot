@@ -216,7 +216,6 @@ populate_estimates_factors = function(object, factors=NULL) {
   
   if (is.null(factors)) factors = which_terms_are_factors_or_numbers(object$model, 
                                                                      attr(terms(object), "term.labels"))$factors
-  
   if (length(factors)==0) return(list(coef.matrix=NA, difference.matrix=NA))
   
   d = object$model
@@ -252,7 +251,8 @@ populate_estimates_factors = function(object, factors=NULL) {
     f = as.formula(paste0(outcome, "~", factors[i]))
     est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T) %>% 
       group_by_at(factors[i]) %>%
-      summarize(across(prediction.fit:prediction.upr, ~mean(.x)))
+      summarize(across(prediction.fit:prediction.upr, ~mean(.x))) %>%
+      data.frame
     
     coef.matrix$levels[current.rows] = unique(as.character(est[,1]))
     coef.matrix$estimate[current.rows] = est$prediction.fit
