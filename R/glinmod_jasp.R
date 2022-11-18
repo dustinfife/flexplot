@@ -232,8 +232,11 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     
     ## interactions are stored in a deeply nested list. de-listify them
     predictors = paste0(
+      
       unlist(
-        lapply(encodeColNames(options$interactions), FUN=function(x) paste0(encodeColNames(unlist(x$components)), collapse="*"))
+        lapply(options$interactions, 
+                FUN=function(x) paste0(encodeColNames(unlist(x$components)), collapse="*")
+               )
       ), 
       collapse=" + ")
     f = paste0(encodeColNames(options$dependent), " ~ ", predictors, collapse = "")
@@ -255,8 +258,6 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     return()
   }
 }
-
-
 
 .check_glinmod_error = function(dataset, options){
   

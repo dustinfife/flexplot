@@ -7,4 +7,4 @@
 # library(jaspTools)
 # setPkgOption("module.dirs", "~/Documents/RPackages/flexplot")
 # options <- analysisOptions("~/Downloads/avengers.jasp")
-# results <- runAnalysis("linmod_jasp", "~/Downloads/avengers.csv", options)
+# results <- runAnalysis("glinmod_jasp", "~/Downloads/avengers.csv", options)

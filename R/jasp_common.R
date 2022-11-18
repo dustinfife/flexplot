@@ -459,7 +459,7 @@ modify_dv = function(dataset, outcome, family){
   if (family!="Logistic") {
     dataset[,outcome] = as.numeric(dataset[,outcome])
   } else {
-    dataset = factor.to.logistic(data = dataset, outcome = outcome)
+    dataset = factor.to.logistic(data = dataset, method="logistic", outcome = outcome)
   }
   return(dataset)
 }
