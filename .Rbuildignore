@@ -17,6 +17,7 @@ Flexplot.svg
 ^.*\.Rproj$
 ^\.Rproj\.user$
 tests/figs/
+build/
 README_files/
 tests/
 ^doc$
