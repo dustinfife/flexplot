@@ -183,15 +183,14 @@ themeJasp = function(graph,
                      axisTickLength = jaspGraphs::getGraphOption("axisTickLength"),
                      axisTickWidth = jaspGraphs::getGraphOption("axisTickWidth")) {
 
-
-  if (is.list(bty) && bty[["type"]] == "n")
+    if (is.list(bty) && bty[["type"]] == "n")
     graph <- graph + jaspGraphs::geom_rangeframe(sides = sides)
 
   if (horizontal)
     graph <- graph + coord_flip()
 
   graph <- graph +
-    jaspGraphs::themeJaspRaw(legend.position = legend.position,
+                  jaspGraphs::themeJaspRaw(legend.position = legend.position,
                                 axis.title.cex = axis.title.cex, family = family,
                                 fontsize = fontsize, legend.justification = legend.justification,
                                 axisTickLength = axisTickLength, axisTickWidth = axisTickWidth) +
