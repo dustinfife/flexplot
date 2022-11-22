@@ -192,6 +192,9 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
                    object,
                    random_plot, sample=sample,...)
   
+  # make sure the limits are the same
+  step3 = step3 + coord_cartesian(ylim=c(min(d[,outcome]), max(d[,outcome])))
+  
   
   if (plot=="model") return(step3)
   p = arrange.plot(res.plots$histo, res.plots$res.dep, res.plots$sl, step3, plot, res.plots$terms, res.plots$numbers)

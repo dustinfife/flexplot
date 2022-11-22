@@ -13,7 +13,6 @@
 flexplot_jasp2 = function(jaspResults, dataset, options) {
 
   ### check if they've entered anything
-
   ready <- (options$dependent != "")
 
   ### read in the dataset
@@ -79,7 +78,7 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
   #tst = data.frame(x=1:10, y=1:10)
 
   #### do a ghost line
-  if	(options$ghost){
+  if	(options$ghost & is.numeric(dataset[,v[1]])){
     ghost=rgb(195/255,0,0,.3)
   } else {
     ghost = NULL
@@ -184,26 +183,7 @@ themeJasp = function(graph,
                      axisTickLength = jaspGraphs::getGraphOption("axisTickLength"),
                      axisTickWidth = jaspGraphs::getGraphOption("axisTickWidth")) {
 
-  # if (!xAxis || !yAxis) {
-  #   warning("Arguments xAxis and yAxis of themeJasp will be deprecated. Please use the argument \"sides\" instead.")
-  #
-  #   if (horizontal) {
-  #     if (!xAxis)
-  #       #sides <- stringr::str_remove(sides, "l")
-  #     if (!yAxis)
-  #       #sides <- stringr::str_remove(sides, "b")
-  #   } else {
-  #     if (!xAxis)
-  #       #sides <- stringr::str_remove(sides, "b")
-  #     if (!yAxis)
-  #       #sides <- stringr::str_remove(sides, "l")
-  #   }
-  #   if (sides == "")
-  #     bty <- NULL
-  # }
-
-
-  if (is.list(bty) && bty[["type"]] == "n")
+    if (is.list(bty) && bty[["type"]] == "n")
     graph <- graph + jaspGraphs::geom_rangeframe(sides = sides)
 
   if (horizontal)

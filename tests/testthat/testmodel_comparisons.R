@@ -217,7 +217,7 @@ test_that("missing data in a variable doesn't screw things up", {
   d$willpower[1:10] = NA
   full = lm(ptsd~superpower + willpower, data=d)
   reduced = lm(ptsd~superpower, data=d)
-  model.comparison(full, reduced)
+  expect_message(model.comparison(full, reduced))
 })
 
 

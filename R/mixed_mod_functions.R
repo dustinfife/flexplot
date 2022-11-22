@@ -6,7 +6,6 @@ subset_random_model = function(object, formula, d, samp.size = 3) {
     ## get random term
     term.re = extract_random_term(object)
     samp = stratified_sample_re(formula, data=d, re=term.re, samp.size)
-    
     #### randomly sample the re terms and convert to numeric
     # unique.terms = unique(d[[term.re]])
     # samp = sample(unique.terms, size=min(samp.size, length(unique.terms)))
@@ -85,7 +84,12 @@ stratified_sample_re = function(formula, data, re, samp.size=6) {
   rhs = labels(terms(formula))
   predictors = strsplit(rhs, "\\|") %>% unlist %>% strsplit("\\+") %>% unlist %>% trimws
   
-  if (is.null(paneled)) return(sample(data[,re], min(samp.size, nrow(data))))
+  if (is.null(paneled)) {
+    # get levels of REs
+    levs = unique(data[,re])
+    randomly_sampled_levels = sample(levs, min(samp.size, length(levs)))
+    return(randomly_sampled_levels)
+  }
   
   # remove id from formula
   formula_sans_re = remove_term_from_formula(formula, re)

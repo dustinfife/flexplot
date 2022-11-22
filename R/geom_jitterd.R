@@ -96,7 +96,7 @@ if(!is.null(seed) &&is.na(seed)) {
 
 #' @importFrom purrr "%||%"
 #' @import ggplot2
-PositionJitterdodged <- ggproto("PositionJitterdodged", ggplot2::Position,
+PositionJitterdodged <- ggplot2::ggproto("PositionJitterdodged", ggplot2::Position,
                                 jitter.width = .2,
                                 jitter.height = NULL,
                                 dodge.width = NULL,
@@ -165,9 +165,11 @@ code
 }
 
 mp.density=function(y){
-	
-	if (length(y)>3){
-		dens= density(y)
+
+  # get unique values of y (multiply by 100 and round to get rid of rounding errors)
+  unique_y = length(unique(round(y*100)))
+	if (length(y)>3 & unique_y>1){
+	  dens= density(y)
 		#### match densities with values
 		densities= as.numeric(as.character(cut(y,dens$x,labels=dens$y[-1])))
 		densities=densities/max(densities)	

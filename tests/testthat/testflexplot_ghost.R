@@ -11,29 +11,29 @@ set.seed(1212)
 
 test_that("ghost line plots work", {
   ### ghost lines
-  a=flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red")	   
+  a=flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red")	 %>%suppressMessages()  
   vdiffr::expect_doppelganger("just ghost line", a)         
   b = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red",
                breaks = list(income = c(95000, 100000, 105000)),
-               labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	
+               labels=list(income = c("<95K", "<100K", "<105K", ">105K")))	%>%suppressMessages()
   vdiffr::expect_doppelganger("ghost with breaks/labels", b)          	
-  c = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	
+  c = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31, "income"=90000))	%>%suppressMessages()
   vdiffr::expect_doppelganger("ghost with choosing panel", c)          	
-  e = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31))
+  e = flexplot(weight.loss~motivation | income + health, data=d, se=FALSE, method="lm", ghost.line="red", ghost.reference=list("health"=31))%>%suppressMessages()
   vdiffr::expect_doppelganger("ghost with choosing ONE panel", e)          	
   
   f = flexplot(weight.loss~motivation + gender | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", 
                ghost.reference=list("health"=31, "income"=90000, gender="female"))	
   vdiffr::expect_doppelganger("ghost with choosing second slot", f)          	
-  g = flexplot(weight.loss~motivation + therapy.type | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000))		
+  g = flexplot(weight.loss~motivation + therapy.type | income + health, data=d, se=FALSE, method="lm", ghost.line="gray", ghost.reference=list("health"=31, "income"=90000))%>%suppressMessages()		
   vdiffr::expect_doppelganger("ghost with using both second slots", g)   
-  h = flexplot(gender~motivation | income + health, data=d, se=FALSE, method="logistic", ghost.line="gray")		
+  h = flexplot(gender~motivation | income + health, data=d, se=FALSE, method="logistic", ghost.line="gray")	%>%suppressMessages()	
   vdiffr::expect_doppelganger("ghost with logistic regression", h)
-  i = flexplot(conscientiousness ~ honesty + separated | gender, data=relationship_satisfaction, ghost.line="green")
+  i = flexplot(conscientiousness ~ honesty + separated | gender, data=relationship_satisfaction, ghost.line="green")%>%suppressMessages()
   vdiffr::expect_doppelganger("ghost with previous bug", i)
   j = flexplot(y~x + a | b + y_bin, data=small, ghost.reference=list(a="a", b="z", y_bin=1))
   vdiffr::expect_doppelganger("ghost with previous bug binning", j)
   vdiffr::expect_doppelganger("ghost with numeric of two levels (previous bug)", 
-                              flexplot(z~x | y_bin, data=small, ghost.line="red"))
+                              flexplot(z~x | y_bin, data=small, ghost.line="red")%>%suppressMessages())
 })
 options(warn=0)

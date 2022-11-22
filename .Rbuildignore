@@ -17,6 +17,7 @@ Flexplot.svg
 ^.*\.Rproj$
 ^\.Rproj\.user$
 tests/figs/
+build/
 README_files/
 tests/
 ^doc$
@@ -27,16 +28,16 @@ FlexplotLogo.svg
 EJ notes.rtf
 R/flexplota.b.R
 # stuff to ignore jasp when doing CMD check
-R/glinmod_jasp.R
-R/linmod_jasp.R
-R/flexplot_jasp2.R
-R/mixedmod_jasp.R
-R/jasp_common.R
-R/flexplota.h.R
-R/glmbasic.b.R
-R/glmbasic.h.R
-R/modelcomp.b.R
-R/modelcomp.h.R
+# R/glinmod_jasp.R
+# R/linmod_jasp.R
+# R/flexplot_jasp2.R
+# R/mixedmod_jasp.R
+# R/jasp_common.R
+# R/flexplota.h.R
+# R/glmbasic.b.R
+# R/glmbasic.h.R
+# R/modelcomp.b.R
+# R/modelcomp.h.R
 data/generate_data.R
 vignettes/regex_syntax.txt
 ^vignettes/psychmethods/$

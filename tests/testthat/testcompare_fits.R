@@ -12,7 +12,7 @@ test_that("compare.fits linear models", {
   model.poly = lm(weight.loss ~ motivation + therapy.type + I(motivation^2), data = exercise_data)
   suppressWarnings(vdiffr::expect_doppelganger("compare interaction vs. me",
             compare.fits(weight.loss ~ motivation | therapy.type, 
-               data = exercise_data, model.me, model.int, ghost.line = "black", num_points=10)))
+               data = exercise_data, model.me, model.int, ghost.line = "black", num_points=10)) %>% suppressMessages())
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=exercise_data, model.me, model.int))
   expect_error(compare.fits(weight.loss ~ mottion+therapy.type, data=relationship_satisfaction, model.me, model.int))
   expect_equal(compare.fits(weight.loss ~ motivation | therapy.type, 
@@ -31,7 +31,7 @@ test_that("compare.fits linear models", {
   mod1 = lm(weight.loss~therapy.type * motivation * health * muscle.gain * I(motivation^2), data=d)
   mod2 = lm(weight.loss~therapy.type + motivation + health + muscle.gain + I(motivation^2), data=d)
   vdiffr::expect_doppelganger("compare.fits with many vars and polynomial",
-                              compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2))
+                              compare.fits(weight.loss ~muscle.gain | motivation + health, data=d, model1=mod1, model2=mod2)%>%suppressMessages())
   vdiffr::expect_doppelganger("compare.fits with many vars and polynomial v2",
                               compare.fits(weight.loss ~muscle.gain +therapy.type | motivation + health, data=d, model1=mod1))
   data("relationship_satisfaction")
@@ -98,6 +98,8 @@ test_that("compare.fits for other models", {
   mod2 = lmer(ALCUSE~AGE_14 + (AGE_14|ID), data=alcuse)  
   vdiffr::expect_doppelganger("compare.fits with mixed models",
                               compare.fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2))
+  vdiffr::expect_doppelganger("compare.fits with mixed models and RE = T",
+                              compare.fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2, re=T))  
   
   # compare.fits with tibbles
   d = as_tibble(alcuse)

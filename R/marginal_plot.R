@@ -143,7 +143,7 @@ extract_plot_method = function(plot) {
 
 create_layout_flex = function (facet = FacetNull, coord = CoordCartesian) 
 {
-  ggproto(NULL, Layout, facet = facet, coord = coord)
+  ggplot2::ggproto(NULL, Layout, facet = facet, coord = coord)
 }
 empty_flex = function (df) 
 {

@@ -275,15 +275,15 @@ raw.alph.func = function(raw.data,alpha=1){
 
 #match_jitter_categorical(.1)
 match_jitter_categorical = function(x){
-  if (is.null(x)){
-    return(c(.2, 0))
-  }else if (length(x)==2 & is.numeric(x))
+  
+  if (is.null(x)) return(c(.2, 0))
+  if (x[1]==TRUE) return(c(.2, 0))
+  
+  if (length(x)==2 & is.numeric(x))
     return(x)
   else if (is.numeric(x) & length(x)==1)
     return(c(x, 0))  
-  else if (is.null(x) | x==TRUE)
-    return(c(.2, 0))
-  else if (!x)
+  else if (!x[1])
     return(c(0,0))
   else
     stop("something's wrong with how you specified jittering.")

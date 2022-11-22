@@ -31,9 +31,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (is.null(model2)) runme = "yes"
   
   #### if mod2 is null..
-  if (is.null(model2)){
-    model2 = model1
-  } 
+  if (is.null(model2)) model2 = model1
   
   #### get type of model
   model1.type = class(model1)[1]
@@ -56,7 +54,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
   test_same_class(model1, model2)
   
   #### convert random effects to factors for mixed models
-
   data = subset_random_model(model1, formula, d=data, samp.size = clusters)
 
   ### make sure they have the same outcome
@@ -80,21 +77,15 @@ compare.fits = function(formula, data, model1, model2=NULL,
   randef = extract_random_term(model1)
   
   all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
-  # when we have a mean model, this fails without the if statement
-  # if (!is.na(all_predictors_minus_re)) {
-  #   a = all_predictors_minus_re %>% purrr::map(make_data_types_the_same, pred.values,
-  #                                              extract_data_from_fitted_object(model1))
-  #   pred.values[,all_predictors_minus_re] = a
-  # }
+
   
   # for intercept only models
-  if (nrow(pred.values)==0) {
-    pred.values = data.frame("(Intercept)" = 1)
-  }
+  if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
   
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   # when RE = T, we should return BOTH
   ### there's no fixed effect if we don't have these lines
+  
   model1.type = class(model1)[1]
   if (!exists("runme")) {
     pred.mod2 = generate_predictions(model2, re, pred.values, pred.type, report.se)
@@ -102,6 +93,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
     pred.mod2 = pred.mod1
   }
 
+  # if they provide two models AND re=T, return just the random effects
+  if (re & !exists("runme")) {
+    pred.mod1 = pred.mod1[pred.mod1$model == "random effects",]
+    pred.mod2 = pred.mod2[pred.mod2$model == "random effects",]
+    pred.mod1$model = deparse(substitute(model1))
+    pred.mod2$model = deparse(substitute(model2))
+  }
   #### convert polyr back to numeric (if applicable)
   if (model1.type == "polr" | model2.type == "polr"){
     data[,outcome] = as.numeric(as.character(data[,outcome]))		
@@ -110,7 +108,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
   }
   
   #### if they have the same name, just call them model1 and model2
-  
   if (!re){
     pred.mod1$model = paste0(deparse(substitute(model1)), " (", model1.type, ")", collapse="")
     if (pred.mod1$model[1] == pred.mod2$model[1]){
@@ -169,7 +166,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
 }	
 
 return_lims_geom = function(outcome, data, model1) {
-  if (!(class(model1)[1] == "lm" | class(model1)[1] == "glm")) return(theme_bw())
+  if (!(class(model1)[1] == "lm" | class(model1)[1] == "glm" | class(model1)[1] == "lmerMod")) return(theme_bw())
   if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])) return(theme_bw())
   if (is.factor(data[,outcome]) | is.character(data[,outcome])) return(theme_bw())
   return(coord_cartesian(ylim=c(min(data[,outcome]), max(data[,outcome]))))

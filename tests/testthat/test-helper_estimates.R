@@ -36,3 +36,38 @@ test_that("bf.bif works", {
   expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small)), 3.339977, tol = .01)
   expect_equal(bf_bic(lm(y~x + a, data=small), lm(y~x * a, data=small), invert=T), 1/3.339977, tol = .01)
 })
+
+test_that("which_terms_are_factors_or_numbers works", {
+  expect_true(length(which_terms_are_factors_or_numbers(small, "a")$factors)==1)
+  expect_true(length(which_terms_are_factors_or_numbers(small, "x")$factors) ==0)
+  expect_true(length(which_terms_are_factors_or_numbers(small, c("x", "y", "a", "b"))$factors) == 2)
+})
+
+test_that("compute_semi_partial works", {
+  mod = lm(y~x, data=small)
+  expect_equal(as.numeric(compute_semi_partial(mod)), summary(mod)$r.squared)
+  expect_equal(names(compute_semi_partial(lm(y~a, data=small))), "a")
+  expect_equal(names(compute_semi_partial(lm(y~a+b+z, data=small))), c("a", "b", "z"))
+  expect_message(compute_semi_partial(lm(y~a*b, data=small)))
+})
+
+test_that("populate_estimates_factors works", {
+  expect_equal(populate_estimates_factors(lm(y~x, data=small))$coef.matrix, NA)
+  expect_equal(levels(populate_estimates_factors(lm(y~a, data=small))$coef.matrix$variables)[2], "a")
+})
+
+test_that("populate_estimates_numeric works", {
+  expect_equal(dim(populate_estimates_numeric(lm(y~x, data=small))), c(2,7))
+  expect_equal(dim(populate_estimates_numeric(lm(y~a, data=small))), NULL)
+})
+
+test_that("compute_r_squared works", {
+  expect_equal(length(compute_r_squared(lm(y~x, data=small))), 3)
+  expect_true(all(compute_r_squared(lm(y~1, data=small))==0))
+})
+
+test_that("compute_correlation works", {
+  expect_true(is.numeric(compute_correlation(lm(y~x, data=small))))
+  expect_true(is.na(compute_correlation(lm(y~a, data=small))))
+  expect_true(is.na(compute_correlation(lm(y~x + z, data=small))))
+})
