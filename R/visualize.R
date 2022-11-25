@@ -376,6 +376,11 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
 
 arrange.plot  = function(histo, res.dep, sl, step3, plot, terms, numbers){
   
+  # change default size of plots
+  histo = histo +  theme(plot.title = element_text(size = 14))
+  res.dep = res.dep +  theme(plot.title = element_text(size = 14))
+  sl = sl +  theme(plot.title = element_text(size = 14))
+  
   #### return the plots
   if (plot=="model"){
     plot = step3
