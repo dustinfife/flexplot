@@ -55,6 +55,19 @@ mixed_logistic = lme4::glmer(y_binary~x + a + (x | id), data=small_mixed, family
   usethis::use_data(mixed_logistic, overwrite=T)  
 
 
+x = rnorm(100)
+y = .5*x + rnorm(length(x), 0, sqrt(1-.5^2))
+y_char = cut(y, breaks = c(-Inf, 0, Inf), labels=c("1-no", "0-yes")) %>% 
+  as.character
+y_numb = cut(y, breaks = c(-Inf, 0, Inf), labels=c(0, 1)) %>% 
+  as.character %>%
+  as.numeric
+y_ord = cut(y, breaks = c(-Inf, 0, Inf), labels=c("no", "yes")) %>% 
+  factor(levels=c("no", "yes"), ordered=T)
+y_ord_rev = cut(y, breaks = c(-Inf, 0, Inf), labels=c("no", "yes")) %>% 
+  factor(levels=c("yes", "no"), ordered=T)
+small_logistic = data.frame(x=x, y=y, y_char=y_char, y_numb=y_numb, y_ord=y_ord, y_ord_rev)
+usethis::use_data(small_logistic, overwrite=T)  
 
 
 
