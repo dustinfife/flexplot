@@ -1,3 +1,5 @@
+
+
 # this function tests for functions within an R formula and returns those results
 formula_functions = function(formula, data) {
   term_labels = attr(terms(formula), "term.labels")
