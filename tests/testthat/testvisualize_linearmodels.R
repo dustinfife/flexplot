@@ -1,4 +1,4 @@
-context("visualize function on linear models")
+#context("visualize function on linear models")
 set.seed(1212)
 d = exercise_data
 

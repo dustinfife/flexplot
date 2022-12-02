@@ -1,4 +1,5 @@
 context("partial_residual_plots")
+set.seed(2323)
 
 test_that("partial_residual_plot works", {
   mod = lm(health~motivation + weight.loss , data=exercise_data)

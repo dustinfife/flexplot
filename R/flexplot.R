@@ -103,15 +103,7 @@ flexplot = function(formula, data=NULL, related=F,
 		third.eye=NULL,
 		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), 
 		return_data = F, ...){
-			
-	#data = exercise_data
-	##### use the following to debug flexplot
-	#formula = formula(weight.loss~therapy.type + rewards | motivation); data=exercise_data; 
-	#bins = 3; labels=NULL; breaks=NULL; method="loess"; se=T; spread=c('stdev'); jitter=NULL; raw.data=T; ghost.line=NULL; ghost.reference=NULL; sample=Inf; prediction = NULL; suppress_smooth=F; alpha=.2; related=F; silent=F; third.eye=NULL
-	#data(exercise_data)
-	#d = exercise_data
-	#formula = formula(weight.loss~rewards+gender|income+motivation); data=d; 
-	#ghost.reference = list(income=90000)
+
   
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
@@ -137,10 +129,14 @@ flexplot = function(formula, data=NULL, related=F,
   check_same_variables_in_prediction(formula, prediction)
   
   # extract original names of dv (for logistic, prior to making it continuous)
-  outcome = varprep$outcome
-  data = varprep$data
-  method = with(varprep, identify_method(data, outcome, axis, method))
-  if (length(unique(data[,outcome]))==2 & method == "logistic") logistic_labels = unique(data[,outcome])
+  outcome                           = varprep$outcome
+  data                              = varprep$data
+  method                            = with(varprep, identify_method(data, outcome, axis, method))
+  
+  # for logistic, it automatically makes the first alphabetical as the 1
+  # if they provide an ordered factor, make the second the referent level
+  logistic_labels = return_labels_for_logistic_regression(data, outcome, method)
+  
 
   ### make modifications to the data
   data = with(varprep, 
@@ -249,9 +245,9 @@ flexplot = function(formula, data=NULL, related=F,
 
 	### put objects in this environment
 	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
-	
+
 	# convert labels for Y axis for logistic
-	if (length(unique(data[,outcome])) == 2 & method == "logistic"){
+	if (!is.null(logistic_labels)){
 	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", logistic_labels[1], "', '", logistic_labels[2], "')", ")")
 	}
 	
