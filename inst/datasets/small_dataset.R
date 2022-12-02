@@ -6,14 +6,32 @@ x = rnorm(n)
 z = .4*x + rnorm(n, 0, sqrt(1-.4^2))
 y = model.matrix(~a + b + x + z + x:a) %*% c(0, .3, .1, .3, .4, .2, -.2) + rnorm(n, 0, .5)
 y_bin = as.numeric(as.character(cut(y, breaks = c(-Inf,.3, Inf), labels=c(0,1))))
-small = data.frame(y=y, a=factor(a), b=factor(b), z=z, x=x, y_bin=y_bin)
+y_pois = round(y^2); y_pois
+y_gam = (y^(2))
+small = data.frame(y=y, a=factor(a), b=factor(b), z=z, x=x, y_bin=y_bin, y_pois = y_pois, y_gam = y_gam)
 usethis::use_data(small, overwrite=T)
 
 # create random forest model
 small_rf = party::cforest(y~., data=small)
-usethis::use_data(small_rf, overwrite = T, internal = T)
+usethis::use_data(small_rf, overwrite = T)
 small_randomForest = randomForest::randomForest(y~., data=small)
 usethis::use_data(small_randomForest, overwrite = T)
+
+# create other fitted objects
+logistic_fit = glm(y_bin~x + z, data=small, family="binomial")
+  usethis::use_data(logistic_fit, overwrite=T)
+logistic_fit_interaction = glm(y_bin~x*z, data=small, family="binomial")
+  usethis::use_data(logistic_fit_interaction, overwrite=T)  
+poisson_fit = glm(y_pois~x + z, data=small, family="poisson")
+  usethis::use_data(poisson_fit, overwrite=T)
+gamma_fit = glm(y_gam~x + z, data=small, family=Gamma)
+  usethis::use_data(gamma_fit, overwrite=T)
+gaussian_fit = glm(y_bin~x + z, data=small)
+  usethis::use_data(gaussian_fit, overwrite=T)  
+  
+  
+  predict(full, newdata=list(gender=c("female", "male"), safety = rep(mean(tablesaw.injury$safety), times=2)), 
+          type="response")
 
 
 require(bluepill)
@@ -28,7 +46,15 @@ vars = list(
   z = c(0, 1, 3),
   id = paste0("Dr. ", LETTERS[1:5])
 )
-small_mixed = mixed_model(fixed, random, sigma = .3, clusters=5, n_per = c(10,1), vars=vars)
+small_mixed = bluepill::mixed_model(fixed, random, sigma = .3, clusters=5, n_per = c(10,1), vars=vars)
 usethis::use_data(small_mixed, overwrite = T)
 small_mixed_mod = lme4::lmer(y~x + a + (1 | id), data=small_mixed)
 usethis::use_data(small_mixed_mod, overwrite = T)
+small_mixed$y_binary = cut(small_mixed$y, breaks = c(-Inf, 0, Inf))
+mixed_logistic = lme4::glmer(y_binary~x + a + (x | id), data=small_mixed, family="binomial")
+  usethis::use_data(mixed_logistic, overwrite=T)  
+
+
+
+
+

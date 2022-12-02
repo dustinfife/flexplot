@@ -1,7 +1,5 @@
 context("miscellaneous functions")
 
-data("exercise_data")
-
 test_that("standardized.beta returns the correct value", {
   model1 = lm(weight.loss~motivation + therapy.type, data=exercise_data)
   results = standardized.beta(model1)

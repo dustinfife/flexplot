@@ -1,10 +1,7 @@
 context("visualize function on linear models")
 set.seed(1212)
-data(exercise_data)
 d = exercise_data
-data(birthweight)
 
- 
 test_that("visualize function plots", {
   
   #### VISUALIZE FUNCTIONS -- Linear Models
