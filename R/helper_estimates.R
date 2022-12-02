@@ -145,7 +145,7 @@ anchor.predictions = function(model, reference, shutup=F){
   factor.levs = return_factor_levels(factors.included, d)
 
   # create function to return +/- 1 standard deviation
-  numeric.preds = generate_numeric_predictions(numeric, d)
+  numeric.preds = generate_numeric_predictions(numeric.included, d)
 
   # generate predictors for final prediction
   final.prediction = generate_grid_predictions(numeric.preds, factor.levs, average.predictions)
@@ -186,11 +186,11 @@ bf.bic = bf_bic = function(model1, model2, invert=F){
 
 which_terms_are_factors_or_numbers = function(d, terms) {
   
-  chars = unlist(lapply(d[,terms, drop=F], is.character))
-  chars = names(chars)[chars]
-  d[,chars] = lapply(d[,chars, drop=F], as.factor)
-  factors = names(which(unlist(lapply(d[,terms, drop=F], is.factor))));
-  numbers = names(which(unlist(lapply(d[,terms, drop=F], is.numeric))));
+  chars              = unlist(lapply(d[,terms, drop=F], is.character))
+  chars              = names(chars)[chars]
+  d[,chars]          = lapply(d[,chars, drop=F], as.factor)
+  factors            = names(which(unlist(lapply(d[,terms, drop=F], is.factor))));
+  numbers            = names(which(unlist(lapply(d[,terms, drop=F], is.numeric))));
   return(list(factors=factors, numbers=numbers))
 }
 
