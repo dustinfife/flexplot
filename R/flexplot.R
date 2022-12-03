@@ -228,8 +228,9 @@ flexplot = function(formula, data=NULL, related=F,
 		prediction = flexplot_modify_prediction(varprep, prediction=prediction, 
 		                                        num.models=num.models, labels=labels, bins=bins, 
 		                                        breaks=breaks)
-		pred.line = with(varprep, flexplot_generate_prediction_lines(prediction=prediction, axis=axis, break.me=break.me, 
-		                                               data=data, num.models=num.models, breaks=breaks,labels=labels, bins=bins))
+		pred.line = flexplot_generate_prediction_lines(prediction, 
+		                                               varprep$axis,
+		                                               varprep$data)
 	} else {
 	  pred.line = "xxxx"
 	}

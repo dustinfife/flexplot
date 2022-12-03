@@ -81,37 +81,19 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
 }
 
 #flexplot_random_names(10, data.names = c("h", "b"))
-flexplot_random_names = function(data.names=NULL, n=10) {
-  if (!is.null(data.names[1])){
-    nm = data.names[1]
-    while (nm %in% data.names) {
-      nm = paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
-    }
-    return (nm)
-  }
-  
-  paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+# flexplot_random_names = function(data.names=NULL, n=10) {
+#   if (!is.null(data.names[1])){
+#     nm = data.names[1]
+#     while (nm %in% data.names) {
+#       nm = paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+#     }
+#     return (nm)
+#   }
+#   
+#   paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+# 
+# }  
 
-}  
-
-
-flexplot_alpha_default = function(data, axis, alpha){
-  if (axis[1] != "1"){
-    ### reorder axis and alter default alpha if categorical
-    if (!is.numeric(data[,axis[1]])){
-      #### set default alpha
-      if(alpha==.99977){
-        alpha = .2
-      }		
-    } else {
-      if(alpha==.99977){
-        alpha = .5
-      }	
-    }
-  }
-  
-  return(alpha)
-}
 
 
 ### prep data for association plot
@@ -650,34 +632,7 @@ flexplot_modify_prediction = function(flexplot_vars, prediction=NULL,
   return(prediction)
 }
 
-flexplot_generate_prediction_lines = function(prediction, axis, break.me, data,num.models, labels, bins, breaks){
 
-    #### check if first variable is a continuous predictor
-    if (is.numeric(data[[axis[1]]])){
-      
-      ##### if they specify an axis[2], modify the "fitted" string
-      if (!is.na(axis[2])){
-        pred.line = 'geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)' 				
-        fitted = "xxxx"
-      } else {
-        
-        
-        #### if they supply more than two models to compare...
-        if (length(levels(prediction$model))>2){
-          pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)' 									
-        } else {
-          pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				
-        }
-      }
-      
-    } else {
-      
-      pred.line = 'geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))'
-      
-    }
-
-  return(pred.line) 
-}
 
 
 check_same_variables_in_prediction = function(formula, prediction=NULL) {
