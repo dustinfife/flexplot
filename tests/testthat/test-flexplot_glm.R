@@ -1,7 +1,7 @@
-set.seed(2323)
+
 
 test_that("flexplot with logistic regression works", {
-  
+  set.seed(2323)
   
   # logistic with a character
   vdiffr::expect_doppelganger(

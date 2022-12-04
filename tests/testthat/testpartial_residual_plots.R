@@ -20,7 +20,7 @@ test_that("partial_residual_plot works", {
                                                     model=mod,
                                                     added_term = ~motivation*therapy.type, 
                                                     data=exercise_data))
-  
+  load(file=system.file("datasets", "ideation.rda", package="flexplot"))
   right_model = lm(ideation~depression_c*friend_ideation_c + stress_c + I(stress_c^2) + health, data=ideation)
   p = partial_residual_plot(ideation~friend_ideation_c | depression_c,
                             model=right_model,

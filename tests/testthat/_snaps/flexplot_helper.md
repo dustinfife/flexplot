@@ -20,3 +20,17 @@
     Output
       geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)
 
+# flexplot_panel_variables works
+
+    Code
+      cat(flexplot_panel_variables("a", c("b", "c")))
+    Output
+      facet_grid(as.formula(~a),labeller = custom.labeler)
+
+---
+
+    Code
+      cat(flexplot_panel_variables("a", c("")))
+    Output
+      facet_grid(as.formula(~a),labeller = custom.labeler)
+

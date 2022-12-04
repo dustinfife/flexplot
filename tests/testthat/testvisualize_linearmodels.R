@@ -33,13 +33,13 @@ test_that("visualize function plots", {
   
   ### visualize with a formula provided
   suppressWarnings(vdiffr::expect_doppelganger("visualize with formula",visualize(mod, formula = weight.loss~motivation + rewards | gender)))
-  
-  mod = lm(Birthweight~mheight + fheight + motherage, data=birthweight)
+  load(file=system.file("datasets", "small.rda", package="flexplot"))
+  mod = lm(y~a + b + x + z, data=small)
   suppressWarnings(vdiffr::expect_doppelganger("four variables",visualize(mod)))
   
   # visualize related t
-  diet$difference = diet$weight6weeks - diet$pre.weight
-  related_t_as_glm = lm(difference~1, data=diet)
+  m = data.frame(difference = rnorm(100, 2))
+  related_t_as_glm = lm(difference~1, data=m)
   vdiffr::expect_doppelganger("related t test", visualize(related_t_as_glm))
   
   ### visualize when there's no numeric predictors (error)
@@ -47,11 +47,13 @@ test_that("visualize function plots", {
 })
 
 test_that("added.plot function", {
-  suppressWarnings(vdiffr::expect_doppelganger("avp",added.plot(Birthweight~mheight + fheight + motherage + smoker, data=birthweight, method="lm")))
-  expect_error(added.plot(Birthweight~mhight + smoker, data=birthweight, method="lm"))
-  tib = tibble::as_tibble(birthweight)
-  tibble.test = added.plot(Birthweight~mheight + smoker, data=tib, method="lm")
+  load(file=system.file("datasets", "small.rda", package="flexplot"))
+  suppressWarnings(vdiffr::expect_doppelganger("avp",
+    added.plot(y~x + b + a, data=small, method="lm")))
+  expect_error(added.plot(y~xx+b, method="lm"))
+  tib = tibble::as_tibble(small)
+  tibble.test = added.plot(y~x+a, data=tib, method="lm")
   suppressWarnings(vdiffr::expect_doppelganger("testing tibbles",tibble.test))
   suppressWarnings(vdiffr::expect_doppelganger("testing missing values on added.plot",
-                                               added.plot(weight.loss~therapy.type + muscle.gain.missing, data=exercise_data)))
+    added.plot(weight.loss~therapy.type + muscle.gain.missing, data=exercise_data)))
 })

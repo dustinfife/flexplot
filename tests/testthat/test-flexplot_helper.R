@@ -27,10 +27,25 @@ test_that("flexplot_generate_prediction_lines works", {
   mod2 = lm(y~a*x, data=small)
   mod3 = lm(y~a, data=small)
   preds = compare.fits(y~a|x, data=small, mod1, return.preds=T)
-  local_edition(3)
+  testthat::local_edition(3)
   expect_snapshot(cat(flexplot_generate_prediction_lines(preds, "a", small)))
   expect_snapshot(cat(flexplot_generate_prediction_lines(preds, c("x"), small)))
   expect_snapshot(cat(flexplot_generate_prediction_lines(preds, c("x", "a"), small)))
+})
 
+test_that("flexplot_panel_variables works", {
+  testthat::local_edition(3)
+  expect_equal(flexplot_panel_variables(given = c(NA, NA)), "xxxx")
+  expect_snapshot(cat(flexplot_panel_variables("a", c("b", "c"))))
+  expect_snapshot(cat(flexplot_panel_variables("a", c(""))))
 })
   
+test_that("make_levels_same_for_prediction_dataset", {
+  expect_equal(make_levels_same_for_prediction_dataset(small, small, "1"), small)
+  expect_equal(make_levels_same_for_prediction_dataset(small, small, "x"), small)
+  a = expand.grid(a=1:5, b=c("a", "b"))
+  pred = a %>% mutate(b = as.character(b))
+  expect_false(isTRUE(all.equal(a, pred)))
+  expect_equal(levels(make_levels_same_for_prediction_dataset(a, pred, "b")$b), 
+               levels(a$b)) 
+})
