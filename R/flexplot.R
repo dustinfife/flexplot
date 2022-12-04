@@ -104,34 +104,48 @@ flexplot = function(formula, data=NULL, related=F,
 		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), 
 		return_data = F, ...){
 
-  
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
   data = ff$data; formula =ff$formula
   
-  spread = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
+  spread    = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   plot.type = match.arg(plot.type, c("histogram", "qq", "density", "boxplot", "violin", "line"))
   
   ### if they supply tibble, change to a data frame (otherwise the referencing screws things up)
-  if (tibble::is_tibble(data)){
-    data = as.data.frame(data)
+  if (tibble::is_tibble(data)) data = as.data.frame(data)
+  
+  # prepare variables
+  variables = all.vars(formula, unique=FALSE)
+  outcome = variables[1]
+  predictors = variables[-1]
+  
+  ### extract given and axis variables
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  
+  # report errors
+  flexplot_errors(variables = variables, data = data, axis=axis)
+  
+  #### identify which variables are numeric and which are factors
+  vtypes = variable_types(predictors, data, return.names=T)
+  numbers = vtypes$numbers
+  categories = vtypes$characters
+  if (outcome %in% categories){
+    levels = length(unique(data[,outcome]))	### necessary for univariate plots
   }
   
-  ### prepare the variables
-  varprep = flexplot_prep_variables(formula, data, 
-                                    breaks = breaks, labels=labels, bins=bins,
-                                    related=related,  
-                                    jitter=jitter, suppress_smooth=suppress_smooth, method=method, spread=spread, 
-                                    alpha=alpha, prediction=prediction)
+  ### create the lists that contain the breaks
+  break.me = flexplot_break_me(data, predictors, given, axis, bins)
+  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
+
   
-  flexplot_errors(varprep$variables, varprep$data, varprep$axis)
+  flexplot_errors(variables, data, axis)
   check_same_variables_in_prediction(formula, prediction)
   
   # extract original names of dv (for logistic, prior to making it continuous)
-  outcome                           = varprep$outcome
-  data                              = varprep$data
-  method                            = with(varprep, identify_method(data, outcome, axis, method))
+  method = identify_method(data, outcome, axis, method)
   
   # for logistic, it automatically makes the first alphabetical as the 1
   # if they provide an ordered factor, make the second the referent level
@@ -139,39 +153,30 @@ flexplot = function(formula, data=NULL, related=F,
   
 
   ### make modifications to the data
-  data = with(varprep, 
-	            flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
-	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method))
-
-  varprep$data = data  ### modifications to data (e.g., "income_binned") need to be reflected in varprep when I use with
-                        ### (error came at ghost.reference when it couldn't find the binned version)
-
-  prediction = with(varprep, 
-              flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
-	                                 break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE))
+  data = flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
+          break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method)
+  prediction = flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
+          break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE)
 
   ##### make models into a factor if they supply predictions
 	if (!is.null(prediction)){
 		prediction$model = factor(prediction$model)
 		### make the levels consistent between prediction/data for axis 1
-		if (!is.numeric(data[[varprep$axis[1]]]) & varprep$axis[1] != "1"){
-		  prediction[[varprep$axis[1]]] = factor(prediction[[varprep$axis[1]]], levels=levels(data[[varprep$axis[1]]]))
-		}
-		
-		varprep$prediction = prediction
+		prediction = make_levels_same_for_prediction_dataset(data, prediction, axis)
 	}
 	
   ### report errors when necessary
   #### give an error if they try to visualize logistic with a categorical x axis
-  with(varprep, check_error_for_logistic(variables = variables, data = data, method=method, axis=axis))
+  
+  check_error_for_logistic(variables = variables, data = data, method=method, axis=axis)
   
   ### change alpha, depending on plot type
-  alpha = with(varprep, flexplot_alpha_default(data=data, axis = axis, alpha = alpha))
+  alpha = flexplot_alpha_default(data=data, axis = axis, alpha = alpha)
   
 
   ### change se based on how many variables they have
   if (is.null(se)){
-    if (length(varprep$axis)>1){
+    if (length(axis)>1){
       se=F
     } else {
       se = T
@@ -181,37 +186,28 @@ flexplot = function(formula, data=NULL, related=F,
   
 
 	### PLOT UNIVARIATE PLOTS
-  bivariate = with(varprep, flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
+  bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread, plot.type=plot.type, bins=bins))
+                                                    method=method, spread=spread, plot.type=plot.type, bins=bins)
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
     
 	#### all the above should take care of ALL possible plots, but now we add paneling
-
-  facets = flexplot_panel_variables(varprep, 
-                                    related=related, labels=labels, bins=bins, 
-                                    suppress_smooth=suppress_smooth, method=method, 
-                                    spread=spread, prediction=prediction)
+  facets = flexplot_panel_variables(given, break.me)
   
-	if (!is.null(ghost.line) & !is.na(varprep$given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
+	if (!is.null(ghost.line) & !is.na(given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
 	 
 				### bin the ghost reference if it's not null
-	  
-    ghost.reference = with(varprep, create_ghost_reference(ghost.reference=ghost.reference, data=data,
-                                             bins=bins, breaks=breaks, given=given, axis=axis, labels=labels))
+    ghost.reference = create_ghost_reference(ghost.reference=ghost.reference, data=data,
+                       bins=bins, breaks=breaks, given=given, axis=axis, labels=labels)
    
         ### extract the ggplot dataset that contains the fitted information
-    varprep$fitted = fitted
-    d_smooth = with(varprep, create_ghost_dataset(data=data, axis=axis, prediction=prediction, given=given, 
-                                                  ghost.reference=ghost.reference, predictors=predictors, p=p, fitted=fitted, method=method, outcome=outcome, se=se))
+    d_smooth = create_ghost_dataset(data=data, axis=axis, prediction=prediction, given=given, 
+                ghost.reference=ghost.reference, predictors=predictors, p=p, fitted=fitted, method=method, outcome=outcome, se=se)
 
-    
-  
         ### create the text for the ghost line
-    
-    ghosttext = with(varprep, create_ghost_text(d_smooth=d_smooth, axis=axis, outcome=outcome, prediction=prediction, ghost.line=ghost.line, ghost.reference=ghost.reference, data=data))
+    ghosttext = create_ghost_text(d_smooth=d_smooth, axis=axis, outcome=outcome, prediction=prediction, ghost.line=ghost.line, ghost.reference=ghost.reference, data=data)
       ghost = ghosttext$ghost
       d_smooth = ghosttext$d_smooth
       
@@ -224,28 +220,19 @@ flexplot = function(formula, data=NULL, related=F,
 	if (!is.null(prediction)){
 		### see how many models are being compared
 		num.models = levels(prediction$model)
-		
-		prediction = flexplot_modify_prediction(varprep, prediction=prediction, 
-		                                        num.models=num.models, labels=labels, bins=bins, 
-		                                        breaks=breaks)
-		pred.line = flexplot_generate_prediction_lines(prediction, 
-		                                               varprep$axis,
-		                                               varprep$data)
+		prediction = flexplot_modify_prediction(prediction, axis, num.models, break.me, bins, labels, breaks, predictors)
+		pred.line = flexplot_generate_prediction_lines(prediction, axis, data)
 	} else {
 	  pred.line = "xxxx"
 	}
   
 
 	theme = "theme_bw() + theme(text=element_text(size=14))"
-  
-	outcome = varprep$outcome
+
 	### without this, the scale of the y axis changes if the user samples
 	if (is.finite(sample) & is.numeric(data[,outcome])){
 		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
 	}
-
-	### put objects in this environment
-	axis = varprep$axis; outcome = varprep$outcome; predictors = varprep$predictors; levels = length(unique(data[,outcome]))	
 
 	# convert labels for Y axis for logistic
 	if (!is.null(logistic_labels)){
@@ -282,7 +269,7 @@ flexplot = function(formula, data=NULL, related=F,
 	if (return_data) {
 	  return(data)
 	}
-
+	
 	return(final)
 }	
 

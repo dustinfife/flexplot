@@ -180,7 +180,8 @@ modify_related_data = function(data, related, axis, outcome, variables) {
 # expect_true(all(c("motivation_binned", "income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + motivation | income, data=exercise_data))))
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, method = NULL, 
-                                axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
+                                axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, 
+                                spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
   
   if (is.null(data)) return(data) 
 
@@ -567,48 +568,10 @@ calculate_bins_for_histograms = function(bins, levels) {
   return(min(30, round(levels/2)))
 }
 
-#### flexplot function for paneling
-flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=3, breaks=NULL, 
-                                    suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
-                                    prediction=NULL){
 
-  ## prep data
-  vars = flexplot_vars
-    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
-    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
-    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
-    formula = vars$formula; data = vars$data; break.me = vars$break.me
-  
-  if (!is.na(given[1])){
-    #### prep the given variables to be stringed together
-    given2 = given
-    if (length(break.me)>0){
-      given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")
-    }	
 
-    if (given[1]=="") {
-      given.as.string = paste0(given2[2], "~.")
-    } else {
-      given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
-    }
+flexplot_modify_prediction = function(prediction, axis, num.models, break.me, bins, labels, breaks, predictors){
 
-    facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			
-  } else {
-    facets = "xxxx"
-  }
-  
-  return(facets)
-}
-
-flexplot_modify_prediction = function(flexplot_vars, prediction=NULL, 
-                                      num.models, labels=NULL, bins=3, breaks=NULL){
-
-  ## prep data
-  vars = flexplot_vars
-    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
-    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
-    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
-    formula = vars$formula; data = vars$data; break.me = vars$break.me
     
   if (!is.na(axis[2]) & length(num.models)>1){
     stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z), or choose to display only one model")
