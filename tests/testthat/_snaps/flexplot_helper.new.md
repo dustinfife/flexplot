@@ -107,16 +107,16 @@
 # flexplot_bivariate_string works
 
     Code
-      cat(test_plot$p)
+      cat(testplot$p)
     Output
-      ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (-)') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
+      ggplot(data=data, aes_string(x=axis, y=outcome))
 
 ---
 
     Code
-      cat(test_plot$points)
+      cat(testplot$points)
     Output
-      geom_jitterd(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=0.05, height=0)
+      geom_jitterd(data=sample.subset(sample, data), alpha=raw.alph.func(raw.data, alpha=alpha), width=0.1, height=0)
 
 ---
 

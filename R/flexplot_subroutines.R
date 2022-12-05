@@ -449,7 +449,7 @@ flexplot_convert_to_categorical = function(data, axis){
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
                                     related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins  # arguments passed from flexplot
                                    ){
-  
+
   jitter = match_jitter_categorical(jitter)
   if (is.null(formula)){
     list.na = list(outcome, predictors, axis, related, alpha, jitter, suppress_smooth, method, spread)
@@ -464,100 +464,44 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     suppress_smooth= prep_vars$suppress_smooth; method= prep_vars$method; spread= prep_vars$spread
   }
   
+  # fail if they try to model more than one DV (or less than one)
+  if (length(outcome)!=1) stop("Sorry, friend, but you must have one and only one outcome variable.")
+  
   #### histograms
-  if (length(outcome)==1 & length(predictors)==0 | axis[1] == "1"){
-    
-    ### figure out how many levels for the variable
-    levels = length(unique(data[,outcome]))	
-    
-    #### if numeric, do a histogram
-    if (is.numeric(data[,outcome])){
-      if (plot.type=="qq"){
-        p = 'ggplot(data=data, aes_string(sample = outcome)) + stat_qq() + stat_qq_line() + theme_bw() + labs(x=outcome)'
-      } else if (plot.type == "density") {
-        p = 'ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)'
-      } else {
-        bins = calculate_bins_for_histograms(bins, levels)
-        p = paste0('ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=', bins, ') + theme_bw() + labs(x=outcome)')
-      }
-    } else {
-      p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
-    } 
+  if (length(predictors)==0 | axis[1] == "1"){
+    p = flexplot_histogram(data, outcome, plot.type, bins)
     points = "xxxx"
-    fitted = "xxxx"		
-    
+    fitted = "xxxx"
+    return(list(p=p, points=points, fitted=fitted))
+  } 
+  
+  ### RELATED T-TEST
+  if (related){		
+    if (length(axis)>1) stop("Sorry, my friend, you can't do a related plot when you have more than one predictor variable.")
+    return(flexplot_related(data, jitter, plot.type, spread))
+  } 
+  
   ### BIVARIATE PLOTS
-  } else if (length(outcome)==1 & length(axis)==1 & !related){
+  
+  if (length(axis)==1){
+    return(flexplot_bivariate_string(data, outcome, axis, jitter, plot.type, suppress_smooth, spread, method))
 
-    #### if both are categorical, do chi square
-    if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
-      
-      p = "ggplot(data=data, aes_string(x=axis, y='Frequency', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
-      points = "xxxx"
-      fitted = "xxxx"
-      
-    } else {
-      
-      p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
-      points = points.func(axis.var=axis, data=data, jitter=jitter)
-      if (plot.type == "boxplot"){
-        fitted = 'geom_boxplot(alpha=.1)'
-      } else if (plot.type == "violin"){
-        fitted = 'geom_violin(alpha=.1)'
-      } else if (plot.type == "line") {
-        fitted = 'geom_line()'
-      } else {
-        fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
-      }
-    }	
-    
-    ### RELATED T-TEST
-  } else if (related){		
-      levs = attr(data, "levels")
-      p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
-               levs[2], "-", levs[1], ")') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())")
-      points = points.func(axis.var="Difference", data=data, jitter=jitter*.5)
-      if (plot.type == "boxplot"){
-        fitted = 'geom_boxplot(alpha=.1)'
-      } else if (plot.type == "violin"){
-        fitted = 'geom_violin(alpha=.1)'
-      } else {
-        fitted = paste0(fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
-      }
-    ##### if they have two axis variables
-  } else if (length(axis)>1){
 
-    ### if they supply predictions, do not vary color
-    if (!is.null(prediction)){
-      p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'
-      
-    } else {
-      if (is.numeric(data[,axis[2]])){
-        axis[2] = paste0(axis[2], "_binned"); axis2_binned = axis[2]
-        p = paste0('ggplot(data=data, aes(x=', predictors[1], ', ', y=outcome, 
-                   ', color=', axis2_binned, ', linetype = ', axis2_binned, 
-                   ', shape=', axis2_binned, ')) + labs(color= "', axis2_binned, '", linetype= "', axis2_binned, '", shape= "', axis2_binned, '")')
-      } else {
-        # if they're trying to plot more than 10 symbols...
-        if (length(unique(data[,axis[2]]))>6) {
-          message("It looks like you're trying to plot more than 6 colors/lines/symbols.\nI gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.\n I hope we can still be friends.")
-          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2]))'
-        } else {
-          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
-        }
-      }
-      ### remove the default color if they have categorical variables		
-    }
-    points = points.func(axis.var=axis, data=data, jitter=jitter)
-    fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)
+  } 
+  
+  ### MULTIVARIATE PLOTS
+  p = flexplot_multivariate_aes(data, outcome, prediction, axis)
+  points = points.func(axis.var=axis, data=data, jitter=jitter)
+  fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, 
+                        method=method, spread=spread, mean.line=TRUE)
     
-    
-    ### remove the default color if they have something in the second axis
-    if (!is.numeric(data[,axis[2]])){
-      fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)
-      fitted = gsub(', color = "#bf0303"', "", fitted, fixed=T)
-    }	
-  }
+  
+  ### remove the default color if they have something in the second axis
+  if (!is.numeric(data[,axis[2]])){
+    fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)
+    fitted = gsub(', color = "#bf0303"', "", fitted, fixed=T)
+  }	
+
   
   list(p=p, points=points, fitted=fitted)
 }

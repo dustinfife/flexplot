@@ -147,7 +147,7 @@ flexplot = function(formula, data=NULL, related=F,
   # extract original names of dv (for logistic, prior to making it continuous)
   method = identify_method(data, outcome, axis, method)
   
-  # for logistic, it automatically makes the first alphabetical as the 1
+  # for logistic, it automatically makes the first alphabetical as the referent level
   # if they provide an ordered factor, make the second the referent level
   logistic_labels = return_labels_for_logistic_regression(data, outcome, method)
   
@@ -167,7 +167,6 @@ flexplot = function(formula, data=NULL, related=F,
 	
   ### report errors when necessary
   #### give an error if they try to visualize logistic with a categorical x axis
-  
   check_error_for_logistic(variables = variables, data = data, method=method, axis=axis)
   
   ### change alpha, depending on plot type
@@ -175,15 +174,8 @@ flexplot = function(formula, data=NULL, related=F,
   
 
   ### change se based on how many variables they have
-  if (is.null(se)){
-    if (length(axis)>1){
-      se=F
-    } else {
-      se = T
-    }
-  }
+  se = check_se(se, axis)
 
-  
 
 	### PLOT UNIVARIATE PLOTS
   bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,

@@ -38,6 +38,7 @@ test_that("flexplot_panel_variables works", {
   expect_equal(flexplot_panel_variables(given = c(NA, NA)), "xxxx")
   expect_snapshot(cat(flexplot_panel_variables("a", c("b", "c"))))
   expect_snapshot(cat(flexplot_panel_variables("a", c(""))))
+  expect_snapshot(cat(flexplot_panel_variables("", c(""))))
 })
   
 test_that("make_levels_same_for_prediction_dataset", {
@@ -48,4 +49,52 @@ test_that("make_levels_same_for_prediction_dataset", {
   expect_false(isTRUE(all.equal(a, pred)))
   expect_equal(levels(make_levels_same_for_prediction_dataset(a, pred, "b")$b), 
                levels(a$b)) 
+})
+
+test_that("check_se works", {
+  expect_true(check_se(se=T))
+  expect_true(!check_se(axis=c("a", "b")))
+  expect_true(check_se(axis=c("a")))
+})
+
+test_that("flexplot_histogram works", {
+  testthat::local_edition(3)
+  expect_snapshot(cat(flexplot_histogram(small, "a")))
+  expect_snapshot(cat(flexplot_histogram(small, "x", "qq")))
+  expect_snapshot(cat(flexplot_histogram(small, "x", "density")))
+  expect_snapshot(cat(flexplot_histogram(small, "x")))
+})
+
+test_that("flexplot_related works", {
+  a = rnorm(10)
+  b = rnorm(10, 2)
+  k = data.frame(a=a, b=b) %>%
+    tidyr::pivot_longer(cols = a:b, values_to="Difference", names_to="group")
+  test_plot = flexplot_related(k, plot.type="boxplot")
+  testthat::local_edition(3)
+  expect_snapshot(cat(test_plot$p))
+  expect_snapshot(cat(test_plot$points))
+  expect_snapshot(cat(flexplot_related(k, plot.type="boxplot")$fitted))
+  expect_snapshot(cat(flexplot_related(k, plot.type="violin")$fitted))
+  expect_snapshot(cat(flexplot_related(k)$fitted))
+})
+
+test_that("flexplot_bivariate_string works", {
+  testplot = flexplot_bivariate_string(small, "y", "x")
+  testthat::local_edition(3)
+  expect_snapshot(cat(testplot$p))
+  expect_snapshot(cat(testplot$points))
+  expect_snapshot(cat(flexplot_bivariate_string(small, "a", "b")$p))
+  expect_snapshot(cat(flexplot_bivariate_string(small, "y", "b", plot.type="boxplot")$fitted))
+  expect_snapshot(cat(flexplot_bivariate_string(small, "y", "b", plot.type="violin")$fitted))
+  expect_snapshot(cat(flexplot_bivariate_string(small, "y", "b", plot.type="line")$fitted))
+  expect_snapshot(cat(flexplot_bivariate_string(small, "y", "b")$fitted))
+})
+  
+test_that("flexplot_multivariate_aes works", {
+  testthat::local_edition(3)
+  expect_snapshot(cat(flexplot_multivariate_aes(small, "y", small, "x")))
+  expect_snapshot(cat(flexplot_multivariate_aes(small, "y", axis=c("a", "x"))))
+  expect_snapshot(cat(flexplot_multivariate_aes(small, "y", axis=c("x", "a"))))
+  expect_snapshot(cat(flexplot_multivariate_aes(small, "y", axis=c("x", "z"))))
 })

@@ -88,3 +88,117 @@ make_levels_same_for_prediction_dataset = function(data, prediction, axis) {
   }
   return(prediction)
 }
+
+check_se = function(se=NULL, axis) {
+  if (!is.null(se)) return (se)
+  if (length(axis)>1) return(F)
+  return(T)
+}
+
+flexplot_histogram = function(data, outcome, plot.type="histogram", bins=3) {
+  
+  ### figure out how many levels for the variable
+  levels = length(unique(data[,outcome]))	
+  
+  # if categorical, do a barchart
+  if (!is.numeric(data[,outcome])) {
+    return('ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)')
+  }
+  
+  #### if numeric, do a histogram
+  if (plot.type=="qq"){
+    return('ggplot(data=data, aes_string(sample = outcome)) + stat_qq() + stat_qq_line() + theme_bw() + labs(x=outcome)')
+  } 
+  
+  if (plot.type == "density") {
+    return('ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)')
+  } 
+  
+  
+  bins = calculate_bins_for_histograms(bins, levels)
+  return(
+    paste0('ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=', bins, ') + theme_bw() + labs(x=outcome)')
+  )
+
+}
+
+flexplot_related = function(data, jitter = .1, plot.type = "errorbar", spread="quartiles", suppress_smooth=F) {
+  
+  levs = attr(data, "levels")
+  p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
+             levs[2], "-", levs[1], ")') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())")
+  
+  points = points.func(axis.var="Difference", data=data, jitter=jitter*.5)
+  
+  if (plot.type == "boxplot"){
+    fitted = 'geom_boxplot(alpha=.1)'
+  } else if (plot.type == "violin"){
+    fitted = 'geom_violin(alpha=.1)'
+  } else {
+    fitted = paste0(
+              fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, 
+                           method="lm", spread=spread, categorical=T), 
+              " + coord_cartesian(xlim=c(.75, 1.25))")
+  }
+  
+  return(list(p=p, points=points, fitted=fitted))
+}
+
+flexplot_bivariate_string = function(data, outcome, axis, 
+                                     jitter=.1, plot.type = "x",
+                                     suppress_smooth = F, spread = "quartiles", method="lm") {
+  
+  # association plot
+  if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])) {
+    p = "ggplot(data=data, aes_string(x=axis, y='Frequency', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+    points = "xxxx"
+    fitted = "xxxx"
+    return(list(p=p, points=points, fitted=fitted))
+  }
+  
+  # bivariate plot (the points.func function will determine whether it's numeric or categorical x axis)
+  p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
+  points = points.func(axis.var=axis, data=data, jitter=jitter)
+  if (plot.type == "boxplot"){
+    fitted = 'geom_boxplot(alpha=.1)'
+  } else if (plot.type == "violin"){
+    fitted = 'geom_violin(alpha=.1)'
+  } else if (plot.type == "line") {
+    fitted = 'geom_line()'
+  } else {
+    fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
+  }
+  
+  return(list(p=p, points=points, fitted=fitted))
+}
+
+flexplot_multivariate_aes = function(data, outcome, prediction=NULL, axis) {
+  ### if they supply predictions, do not vary color
+  if (!is.null(prediction)){
+    return('ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])')
+  } 
+  
+  
+  if (is.numeric(data[,axis[2]])){
+    axis[2] = paste0(axis[2], "_binned"); axis2_binned = axis[2]
+    p = paste0('ggplot(data=data, aes(x=', axis[1], ', ', y=outcome, 
+               ', color=', axis2_binned, ', linetype = ', axis2_binned, 
+               ', shape=', axis2_binned, ')) + labs(color= "', axis2_binned, '", linetype= "', axis2_binned, '", shape= "', axis2_binned, '")')
+    return(p)
+  } 
+  
+    # if they're trying to plot more than 10 symbols...
+  if (length(unique(data[,axis[2]]))>6) {
+    message("It looks like you're trying to plot more than 6 colors/lines/symbols.\nI gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.\n I hope we can still be friends.")
+    return('ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2]))')
+  }
+  
+  return('ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])')
+  
+}
+
+
+
+
+
+#
