@@ -485,8 +485,6 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
   
   if (length(axis)==1){
     return(flexplot_bivariate_string(data, outcome, axis, jitter, plot.type, suppress_smooth, spread, method))
-
-
   } 
   
   ### MULTIVARIATE PLOTS

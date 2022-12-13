@@ -139,8 +139,6 @@ flexplot = function(formula, data=NULL, related=F,
   break.me = flexplot_break_me(data, predictors, given, axis, bins)
   breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
   
-
-  
   flexplot_errors(variables, data, axis)
   check_same_variables_in_prediction(formula, prediction)
   

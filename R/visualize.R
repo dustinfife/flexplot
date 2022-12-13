@@ -278,6 +278,7 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
     step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T, ...)
   } else {
     #### otherwise...
+
     prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	
     
     ### to prevent conflicts with base::filter
