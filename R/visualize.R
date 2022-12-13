@@ -278,6 +278,7 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
     step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T, ...)
   } else {
     #### otherwise...
+
     prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	
     
     ### to prevent conflicts with base::filter
@@ -375,6 +376,11 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
 }
 
 arrange.plot  = function(histo, res.dep, sl, step3, plot, terms, numbers){
+  
+  # change default size of plots
+  histo = histo +  theme(plot.title = element_text(size = 14))
+  res.dep = res.dep +  theme(plot.title = element_text(size = 14))
+  sl = sl +  theme(plot.title = element_text(size = 14))
   
   #### return the plots
   if (plot=="model"){

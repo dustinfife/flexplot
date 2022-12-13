@@ -5,13 +5,14 @@ return_factors_names = function(model) {
   d %>% select(-where(is.numeric)) %>%  names
 }
 
-identify_method = function(data, outcome, axis, method) {
+identify_method = function(data, outcome, axis, method=NULL) {
   # histograms/barcharts
   if (axis[1] == "1") return("loess")
+  if (!is.null(method)) return(method) 
   # association plot
   if (check.non.number(data[,axis[1]])) return("loess")
   # logistic
   if (length(unique(data[,outcome]))==2) return("logistic")
-  if (!is.null(method)) return(method)  
+   
   return("loess")
 }

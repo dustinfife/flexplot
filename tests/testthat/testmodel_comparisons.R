@@ -2,6 +2,7 @@ context("model.comparison works")
 options(warn=-1)
 require(lme4)
 data("exercise_data")
+data("tablesaw.injury")
 
 # fit all sorts of models I'll use
 nlr = lm(weight.loss~motivation, data=exercise_data)

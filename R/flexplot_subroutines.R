@@ -1,3 +1,5 @@
+
+
 # this function tests for functions within an R formula and returns those results
 formula_functions = function(formula, data) {
   term_labels = attr(terms(formula), "term.labels")
@@ -79,37 +81,19 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
 }
 
 #flexplot_random_names(10, data.names = c("h", "b"))
-flexplot_random_names = function(data.names=NULL, n=10) {
-  if (!is.null(data.names[1])){
-    nm = data.names[1]
-    while (nm %in% data.names) {
-      nm = paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
-    }
-    return (nm)
-  }
-  
-  paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+# flexplot_random_names = function(data.names=NULL, n=10) {
+#   if (!is.null(data.names[1])){
+#     nm = data.names[1]
+#     while (nm %in% data.names) {
+#       nm = paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+#     }
+#     return (nm)
+#   }
+#   
+#   paste(sample(LETTERS[1:26], size=n, replace=T), collapse="")    
+# 
+# }  
 
-}  
-
-
-flexplot_alpha_default = function(data, axis, alpha){
-  if (axis[1] != "1"){
-    ### reorder axis and alter default alpha if categorical
-    if (!is.numeric(data[,axis[1]])){
-      #### set default alpha
-      if(alpha==.99977){
-        alpha = .2
-      }		
-    } else {
-      if(alpha==.99977){
-        alpha = .5
-      }	
-    }
-  }
-  
-  return(alpha)
-}
 
 
 ### prep data for association plot
@@ -196,7 +180,8 @@ modify_related_data = function(data, related, axis, outcome, variables) {
 # expect_true(all(c("motivation_binned", "income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + motivation | income, data=exercise_data))))
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, method = NULL, 
-                                axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
+                                axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, 
+                                spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
   
   if (is.null(data)) return(data) 
 
@@ -464,7 +449,7 @@ flexplot_convert_to_categorical = function(data, axis){
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
                                     related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins  # arguments passed from flexplot
                                    ){
-  
+
   jitter = match_jitter_categorical(jitter)
   if (is.null(formula)){
     list.na = list(outcome, predictors, axis, related, alpha, jitter, suppress_smooth, method, spread)
@@ -479,100 +464,42 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     suppress_smooth= prep_vars$suppress_smooth; method= prep_vars$method; spread= prep_vars$spread
   }
   
+  # fail if they try to model more than one DV (or less than one)
+  if (length(outcome)!=1) stop("Sorry, friend, but you must have one and only one outcome variable.")
+  
   #### histograms
-  if (length(outcome)==1 & length(predictors)==0 | axis[1] == "1"){
-    
-    ### figure out how many levels for the variable
-    levels = length(unique(data[,outcome]))	
-    
-    #### if numeric, do a histogram
-    if (is.numeric(data[,outcome])){
-      if (plot.type=="qq"){
-        p = 'ggplot(data=data, aes_string(sample = outcome)) + stat_qq() + stat_qq_line() + theme_bw() + labs(x=outcome)'
-      } else if (plot.type == "density") {
-        p = 'ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)'
-      } else {
-        bins = calculate_bins_for_histograms(bins, levels)
-        p = paste0('ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=', bins, ') + theme_bw() + labs(x=outcome)')
-      }
-    } else {
-      p = 'ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)'		
-    } 
+  if (length(predictors)==0 | axis[1] == "1"){
+    p = flexplot_histogram(data, outcome, plot.type, bins)
     points = "xxxx"
-    fitted = "xxxx"		
-    
+    fitted = "xxxx"
+    return(list(p=p, points=points, fitted=fitted))
+  } 
+  
+  ### RELATED T-TEST
+  if (related){		
+    if (length(axis)>1) stop("Sorry, my friend, you can't do a related plot when you have more than one predictor variable.")
+    return(flexplot_related(data, jitter, plot.type, spread))
+  } 
+  
   ### BIVARIATE PLOTS
-  } else if (length(outcome)==1 & length(axis)==1 & !related){
+  
+  if (length(axis)==1){
+    return(flexplot_bivariate_string(data, outcome, axis, jitter, plot.type, suppress_smooth, spread, method))
+  } 
+  
+  ### MULTIVARIATE PLOTS
+  p = flexplot_multivariate_aes(data, outcome, prediction, axis)
+  points = points.func(axis.var=axis, data=data, jitter=jitter)
+  fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, 
+                        method=method, spread=spread, mean.line=TRUE)
+    
+  
+  ### remove the default color if they have something in the second axis
+  if (!is.numeric(data[,axis[2]])){
+    fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)
+    fitted = gsub(', color = "#bf0303"', "", fitted, fixed=T)
+  }	
 
-    #### if both are categorical, do chi square
-    if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])){
-      
-      p = "ggplot(data=data, aes_string(x=axis, y='Frequency', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
-      points = "xxxx"
-      fitted = "xxxx"
-      
-    } else {
-      
-      p = 'ggplot(data=data, aes_string(x=axis, y=outcome))'
-      points = points.func(axis.var=axis, data=data, jitter=jitter)
-      if (plot.type == "boxplot"){
-        fitted = 'geom_boxplot(alpha=.1)'
-      } else if (plot.type == "violin"){
-        fitted = 'geom_violin(alpha=.1)'
-      } else if (plot.type == "line") {
-        fitted = 'geom_line()'
-      } else {
-        fitted = fit.function(outcome, axis, data=data, suppress_smooth=suppress_smooth, method=method, spread=spread)		
-      }
-    }	
-    
-    ### RELATED T-TEST
-  } else if (related){		
-      levs = attr(data, "levels")
-      p = paste0("ggplot(data, aes(y=Difference, x=1)) + theme_bw()+ geom_hline(yintercept=0, col='lightgray') + labs(x='Difference (", 
-               levs[2], "-", levs[1], ")') + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())")
-      points = points.func(axis.var="Difference", data=data, jitter=jitter*.5)
-      if (plot.type == "boxplot"){
-        fitted = 'geom_boxplot(alpha=.1)'
-      } else if (plot.type == "violin"){
-        fitted = 'geom_violin(alpha=.1)'
-      } else {
-        fitted = paste0(fit.function(outcome, "Difference", data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, categorical=T), " + coord_cartesian(xlim=c(.75, 1.25))")
-      }
-    ##### if they have two axis variables
-  } else if (length(axis)>1){
-
-    ### if they supply predictions, do not vary color
-    if (!is.null(prediction)){
-      p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])'
-      
-    } else {
-      if (is.numeric(data[,axis[2]])){
-        axis[2] = paste0(axis[2], "_binned"); axis2_binned = axis[2]
-        p = paste0('ggplot(data=data, aes(x=', predictors[1], ', ', y=outcome, 
-                   ', color=', axis2_binned, ', linetype = ', axis2_binned, 
-                   ', shape=', axis2_binned, ')) + labs(color= "', axis2_binned, '", linetype= "', axis2_binned, '", shape= "', axis2_binned, '")')
-      } else {
-        # if they're trying to plot more than 10 symbols...
-        if (length(unique(data[,axis[2]]))>6) {
-          message("It looks like you're trying to plot more than 6 colors/lines/symbols.\nI gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.\n I hope we can still be friends.")
-          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2]))'
-        } else {
-          p = 'ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])'
-        }
-      }
-      ### remove the default color if they have categorical variables		
-    }
-    points = points.func(axis.var=axis, data=data, jitter=jitter)
-    fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, method=method, spread=spread, mean.line=TRUE)
-    
-    
-    ### remove the default color if they have something in the second axis
-    if (!is.numeric(data[,axis[2]])){
-      fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)
-      fitted = gsub(', color = "#bf0303"', "", fitted, fixed=T)
-    }	
-  }
   
   list(p=p, points=points, fitted=fitted)
 }
@@ -583,48 +510,10 @@ calculate_bins_for_histograms = function(bins, levels) {
   return(min(30, round(levels/2)))
 }
 
-#### flexplot function for paneling
-flexplot_panel_variables = function(flexplot_vars, related=F, labels=NULL, bins=3, breaks=NULL, 
-                                    suppress_smooth=F, method="loess", spread=c('quartiles', 'stdev', 'sterr'), 
-                                    prediction=NULL){
 
-  ## prep data
-  vars = flexplot_vars
-    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
-    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
-    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
-    formula = vars$formula; data = vars$data; break.me = vars$break.me
-  
-  if (!is.na(given[1])){
-    #### prep the given variables to be stringed together
-    given2 = given
-    if (length(break.me)>0){
-      given2[given2%in%break.me] = paste0(given2[given2%in%break.me], "_binned")
-    }	
 
-    if (given[1]=="") {
-      given.as.string = paste0(given2[2], "~.")
-    } else {
-      given.as.string = ifelse(length(given)>1 & !is.na(given2[1]),paste0(rev(given2), collapse="~"), paste0("~",given2))
-    }
+flexplot_modify_prediction = function(prediction, axis, num.models, break.me, bins, labels, breaks, predictors){
 
-    facets = paste0('facet_grid(as.formula(', given.as.string, '),labeller = custom.labeler)')			
-  } else {
-    facets = "xxxx"
-  }
-  
-  return(facets)
-}
-
-flexplot_modify_prediction = function(flexplot_vars, prediction=NULL, 
-                                      num.models, labels=NULL, bins=3, breaks=NULL){
-
-  ## prep data
-  vars = flexplot_vars
-    variables = vars$variables; outcome = vars$outcome; predictors = vars$predictors;
-    given = vars$given; axis = vars$axis; numbers = vars$numbers; categories = vars$numbers
-    levels = vars$levels; break.me = vars$break.me; breaks = vars$breaks;
-    formula = vars$formula; data = vars$data; break.me = vars$break.me
     
   if (!is.na(axis[2]) & length(num.models)>1){
     stop("Sorry. I can't plot the model(s) lines when there are already lines in the plot. Try putting it in the given area (e.g., y~ x + z | b should become y~ x | b + z), or choose to display only one model")
@@ -648,34 +537,7 @@ flexplot_modify_prediction = function(flexplot_vars, prediction=NULL,
   return(prediction)
 }
 
-flexplot_generate_prediction_lines = function(prediction, axis, break.me, data,num.models, labels, bins, breaks){
 
-    #### check if first variable is a continuous predictor
-    if (is.numeric(data[[axis[1]]])){
-      
-      ##### if they specify an axis[2], modify the "fitted" string
-      if (!is.na(axis[2])){
-        pred.line = 'geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)' 				
-        fitted = "xxxx"
-      } else {
-        
-        
-        #### if they supply more than two models to compare...
-        if (length(levels(prediction$model))>2){
-          pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1)' 									
-        } else {
-          pred.line = 'geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))' 				
-        }
-      }
-      
-    } else {
-      
-      pred.line = 'geom_point(data=prediction, aes(y=prediction, color=model), position=position_dodge(width=.2)) + geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))'
-      
-    }
-
-  return(pred.line) 
-}
 
 
 check_same_variables_in_prediction = function(formula, prediction=NULL) {

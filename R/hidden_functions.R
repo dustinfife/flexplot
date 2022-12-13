@@ -329,27 +329,12 @@ points.func = function(axis.var, data, jitter){
 # points.func(c("gender", "therapy.type"), exercise_data, c(.2, .1))
 
 
-	#### this function converts a binary variable to a 1/0 for logistic regression
-factor.to.logistic = function(data, outcome, method=NULL, labels=F){
-  
-  levels_dv = length(unique(data[,outcome]))
-  
-  # return if it's not logistic
-  if (levels_dv != 2) return(data)
-  if (labels) return(unique(data[,outcome]))
-  if (is.numeric(data[,outcome])) return(data)
-  if (method != "logistic") return(data)
-  # at this point it's categorical, has two levels, but doesn't necessarily have "logistic" as a method  
-  ### now do the conversion
-  data[,outcome] = as.numeric(as.character(factor(data[,outcome], levels=unique(data[,outcome]), labels=c(0,1))))
-  return(data)
 
-}
 
 ##' @importFrom MASS rlm	
 #### identify the correct "fit"
 fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method="loess", spread="sterr", mean.line=F, categorical=FALSE){
-	
+  
 	if (is.numeric(data[,predictors]) & !categorical){
 		if (suppress_smooth){
 			fit.string = "xxxx"

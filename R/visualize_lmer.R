@@ -150,7 +150,7 @@ mixed_model_plot = function(formula, object, random_plot, sample=3, return_objec
 #' @export
 visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formula=NULL, 
                              sample = 3, plots.as.list=FALSE,...){
-  
+
   d = object@frame
   plot = match.arg(plot, c("all", "residuals", "model"))
   

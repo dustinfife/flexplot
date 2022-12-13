@@ -2,10 +2,10 @@ context("test estimates for model comparison functions in JASP")
 
 test_that("filling in model comparison table", {
   
-  set.seed(1212)
-  x = rnorm(111); y = rnorm(111); b = sample(c("a", "b"), 111, T)
-  moda = lm(y~x + b); mod = lm(y~x); mod2 = lm(y~1)
-  testthat::expect_equal(round(return_baseline_rsq(moda)*100, digits=2), 1.87)
+  #set.seed(1212)
+  #x = rnorm(111); y = rnorm(111); b = sample(c("a", "b"), 111, T)
+  moda = lm(y~x + b, data=small); mod = lm(y~x, data=small); mod2 = lm(y~1, data=small)
+  testthat::expect_equal(round(return_baseline_rsq(moda)*100, digits=2), 50.18)
   testthat::expect_equal(return_baseline_rsq(mod), NA)
   testthat::expect_equal(return_baseline_rsq(mod2), 0)
   

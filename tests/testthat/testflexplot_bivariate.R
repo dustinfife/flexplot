@@ -19,6 +19,9 @@ test_that("error messages are correct", {
   expect_error(flexplot(speed~superher, data=avengers),
                "Ru oh! Somebody done made a mistake!"
   )
+  
+  
+  expect_error(flexplot(weight.loss ~ rewards, data = k, related = T))
   expect_error( 
     flexplot(speed~superhero),
     "Howdy! Looks like you forgot to include a dataset!")

@@ -230,85 +230,55 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 	#### get dataset
 	d = extract_data_from_fitted_object(object)
 	
-	#### identify factors
-	if (length(terms)>1){
-		factors = names(which(unlist(lapply(d[,terms], function(x) is.factor(x) | is.character(x)))));
-		#d[,factors] = apply(d[,factors, drop=FALSE], 2, as.factor)
-		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));
-	} else {
-		factors = terms[which(is.factor(d[,terms]) | is.numeric(d[,terms]))]
-		#d[,factors] = as.factor(d[,factors])
-		numbers = terms[which(is.numeric(d[,terms]))]
-	}
+	factor_or_number = which_terms_are_factors_or_numbers(d, terms)
+	numbers = factor_or_number$numbers
+	factors = factor_or_number$factors
 	
-	#### output predictions
-	if (class(object)[1]=="glmerMod") {
-	  preds = NA
-	} else {
-	n.func = function(term){
-	  anchor.predictions(object, term, shutup=T)$prediction
-	  }
-	preds = lapply(terms, n.func); names(preds) = terms
-	}
+  preds = output_glm_predictions(object, terms)
 	
-
 	#### output coefficients
-	
-	if (class(object)[1] == "glmerMod" & family(object)$link == "logit"){
-	  coef.matrix = data.frame(raw.coefficients = lme4::fixef(object), 
-	                           OR = exp(lme4::fixef(object)), 
-	                           inverse.OR = 1/exp(lme4::fixef(object)) 
-	                           )
-	} else if (family(object)$link=="logit"){
-		coef.matrix = data.frame(raw.coefficients = coef(object), 
-		                         OR = exp(coef(object)), 
-		                         inverse.OR = 1/exp(coef(object)), 
-		                         standardized.OR = exp(standardized.beta(object, sd.y=F)), 
-		                         inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))
-		
-	} else if (family(object)$link=="log"){
-		coef.matrix = data.frame(raw.coefficients = coef(object), 
-				multiplicative.coef = exp(coef(object)), 
-				std.mult.coef = exp(standardized.beta(object, sd.y=F)))
-	} else if (family(object)$link=="inverse"){
-		coef.matrix = data.frame(raw.coefficients = coef(object), 
-				inverse.coef = 1/(coef(object)), 
-				std.mult.coef = 1/(standardized.beta(object, sd.y=F)))
-	}
-	
-	#options(warn=0)
-	if (!is.na(preds)[1] & length(numbers)>0){
-	  coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = 
-	    sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
-	  nms = row.names(coef.matrix); nms2 = names(coef.matrix)
-  	coef.matrix = data.frame(lapply(coef.matrix, function(y) if(is.numeric(y)) round(y, 3) else y), row.names=nms); names(coef.matrix) = nms2
-	}
-	
-	#### for those that are factors, put the first prediction in the -1 SD column
-	string.round = function(x, digits){
-		return.val = ifelse(round(x, digits)==0, paste0("<0.", rep(0, times=digits-1), "1"), round(x, digits=digits))
-		return.val
-	}
+  coef.matrix = output_coef_matrix_glm(object, preds, numbers)
+  
+  if (!is.na(preds)[1] & length(numbers)>0){
+    
+    # input +/- 1 SD prediction for all numeric variables
+    predicted_difference_of_one_SD = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
+    coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = predicted_difference_of_one_SD
+    
+    coef.matrix = round_coefficient_matrix(coef.matrix)
+  }
 
+	if (length(factors) == 0) return(coef.matrix)
 	
-	if (length(factors)>0){
+	# loop through all factors and input their predictions
 	for (i in 1:length(factors)){
-		current.pre = preds[factors[i]]
+	  
+		current_factor_predictions = unlist(preds[factors[i]])
 		levs = unique(d[,factors[i]]); levs = paste0(factors[i], levs)
+
 		# find that level in the coef.matrix
-		im.here = (levs %in% row.names(coef.matrix))
+		non_referent_groups = (levs %in% row.names(coef.matrix)); 
+		referent_group = !non_referent_groups
 		
-		if (length(which(im.here))>0) {
-  		coef.matrix[levs[im.here],"Prediction Difference (+/- 1 SD)"] = 
-	  	  paste0(string.round(unlist(current.pre)[which(im.here)] - 
-	  	                      unlist(current.pre)[which(!im.here)], digits=2), " (relative to ", levs[!im.here], ")")
-		}
+		#if (length(which(non_referent_groups))>0) {
+  		
+		  #compute differences between referent group and other levels
+		  predicted_differences = round_string(unlist(current_factor_predictions)[which(non_referent_groups)] - 
+		                                       unlist(current_factor_predictions)[which(referent_group)], digits=2)
+		  labeled_predicted_differences = paste0(predicted_differences, " (relative to ", levs[referent_group], ")")
 		
-		if (length(factors)==1){
-			coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(string.round(unlist(current.pre)[1], digits=2), " (", levs[1], " prediction)")
-			row.names(coef.matrix)[1] = levs[1]
-		}
-	}}
+		    # fill in for non-referent groups
+  		coef.matrix[levs[non_referent_groups], "Prediction Difference (+/- 1 SD)"] = labeled_predicted_differences
+		#}
+	}
+	
+	# give the referent group raw prediction if there's only one factor
+	if (length(factors)==1){
+	  referent_group_prediction = round_string(unlist(current_factor_predictions)[referent_group], digits=2)
+	  referent_group_label = levs[referent_group]
+	  coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(referent_group_prediction, " (", referent_group_label, " prediction)")
+	}
+	
 	coef.matrix
 }
 

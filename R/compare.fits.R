@@ -83,6 +83,9 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
   
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
+  
+
+  
   # when RE = T, we should return BOTH
   ### there's no fixed effect if we don't have these lines
   
@@ -115,6 +118,11 @@ compare.fits = function(formula, data, model1, model2=NULL,
     } else {
       pred.mod2$model = paste0(deparse(substitute(model2)), " (", model2.type, ")", collapse="")
     }
+  }
+  
+  # if pred.mod1 has both fixed and random effects, we need to double the size of pred.values
+  if (nrow(pred.mod1) == 2*nrow(pred.values)) {
+    pred.values = rbind(pred.values, pred.values)
   }
   
   #### report one or two coefficients, depending on if they supplied it
@@ -159,6 +167,8 @@ compare.fits = function(formula, data, model1, model2=NULL,
     prediction.model = prediction.model[!duplicated(prediction.model),]
     #when we have an intercept only model
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
+    
+
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
   }	

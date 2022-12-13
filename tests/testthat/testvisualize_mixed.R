@@ -29,7 +29,6 @@ test_that("visualize mixed models", {
             
 })
 
-
 test_that("visualize mixed models with alcuse", {
   #### mixed models
   data(alcuse)
@@ -41,5 +40,34 @@ test_that("visualize mixed models with alcuse", {
   vdiffr::expect_doppelganger("mixed when x axis has <5 levels", a4)
   #vdiffr::expect_doppelganger("random effects anova", a5)
   
+})
+
+test_that("visualize based on issue 105 with scaled variables", {
+  exercise_data <- exercise_data %>% 
+    mutate(hi_weight_loss_category = case_when(weight.loss > 5 ~ 1,TRUE ~ 0))
+  exercise_data$hi_weight_loss_category <-as.factor(exercise_data$hi_weight_loss_category)
+  
+  exercise_data_scaled <- exercise_data %>% 
+    mutate(hi_weight_loss_category_c = as.character(hi_weight_loss_category)) %>% 
+    mutate_if(is.numeric, function(x) {
+      ## !!! error avoided by using
+      ## as.numeric(scale(x, center = TRUE, scale = TRUE))}) %>%** 
+      scale(x, center = TRUE, scale = TRUE)}) %>% 
+    mutate(hi_weight_loss_category = 
+             as.factor(as.numeric(hi_weight_loss_category_c))) %>% 
+    dplyr::select(-hi_weight_loss_category_c)
+  
+  
+  
+  require(lme4)
+  glm1 <- glmer(
+    formula = hi_weight_loss_category ~ 
+      health + gender + (1|therapy.type),
+    family = binomial,
+    data = exercise_data_scaled
+  )
+  
+  vdiffr::expect_doppelganger("visualize scaled variable with mixed model", 
+                              flexplot::visualize(glm1, plot = "residuals"))
 })
 options(warn=0)
