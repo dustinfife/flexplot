@@ -77,7 +77,11 @@ test_that("estimates from generalized linear models", {
   mod = glm(aggression~ses*depression, data=d, family=Gamma)
   expect_equal(estimates(mod)$raw.coefficients[1], .161)
 })  
-  
+
+test_that("estimates from generalized mixed models", {
+  mod = lme4::glmer(y_gam~a + z + (1 | b), data=small, family="Gamma")
+  estimates(mod)
+}
 test_that("bic works", {
   model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
   model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)

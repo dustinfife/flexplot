@@ -54,7 +54,7 @@ output_coef_matrix_glm = function(object, preds=NULL, numbers=NULL) {
   if (family(object)$link=="inverse"){
     coef.matrix = 
       data.frame(raw.coefficients          = coef(object), 
-                             inverse.coef  = 1/(coef(object)), 
+                             inverse.coef  = 1/(coef(object)$b), 
                              std.mult.coef = 1/(standardized.beta(object, sd.y=F)))
     return(coef.matrix)
   }

@@ -78,63 +78,25 @@ print.lmer_estimates = function(x,...){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.glmerMod = function(object, mc=FALSE){
+  fixed = lme4::fixef(object)
+  rand = lme4::VarCorr(object)
   
-  #### generate list of coefficients
-  terms = remove_interaction_terms(object)
   
-  #### get dataset
-  d = extract_data_from_fitted_object(object)
+  # fit a baseline model
+  baseline = fit_baseline_model(object)
+  icc_stats = unlist(icc(baseline))
   
-  factor_or_number = which_terms_are_factors_or_numbers(d, terms)
-  numbers = factor_or_number$numbers
-  factors = factor_or_number$factors
+  # compute rsq 
+  rsq = model.comparison(object, baseline)$r_squared_change
   
-  preds = output_glm_predictions(object, terms)
-  
-  #### output coefficients
-  coef.matrix = output_coef_matrix_glm(object, preds, numbers)
-  
-  if (!is.na(preds)[1] & length(numbers)>0){
-    
-    # input +/- 1 SD prediction for all numeric variables
-    predicted_difference_of_one_SD = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
-    coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = predicted_difference_of_one_SD
-    
-    coef.matrix = round_coefficient_matrix(coef.matrix)
-  }
-  
-  if (length(factors) == 0) return(coef.matrix)
-  
-  # loop through all factors and input their predictions
-  for (i in 1:length(factors)){
-    
-    current_factor_predictions = unlist(preds[factors[i]])
-    levs = unique(d[,factors[i]]); levs = paste0(factors[i], levs)
-    
-    # find that level in the coef.matrix
-    non_referent_groups = (levs %in% row.names(coef.matrix)); 
-    referent_group = !non_referent_groups
-    
-    #if (length(which(non_referent_groups))>0) {
-    
-    #compute differences between referent group and other levels
-    predicted_differences = round_string(unlist(current_factor_predictions)[which(non_referent_groups)] - 
-                                           unlist(current_factor_predictions)[which(referent_group)], digits=2)
-    labeled_predicted_differences = paste0(predicted_differences, " (relative to ", levs[referent_group], ")")
-    
-    # fill in for non-referent groups
-    coef.matrix[levs[non_referent_groups], "Prediction Difference (+/- 1 SD)"] = labeled_predicted_differences
-    #}
-  }
-  
-  # give the referent group raw prediction if there's only one factor
-  if (length(factors)==1){
-    referent_group_prediction = round_string(unlist(current_factor_predictions)[referent_group], digits=2)
-    referent_group_label = levs[referent_group]
-    coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(referent_group_prediction, " (", referent_group_label, " prediction)")
-  }
-  
-  return(coef.matrix)
+  # return the objects
+  ret = list( fixed = fixed,
+              r.squared=rsq,
+              rand = rand, 
+              icc = icc_stats
+  )
+  attr(ret, "class") = "lmer_estimates"
+  return(ret)
 }
 
 #' Print glmer_estimates Summary
