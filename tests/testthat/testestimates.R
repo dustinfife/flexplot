@@ -54,6 +54,11 @@ test_that("estimates from mixed models", {
   # with missing data in some columns
   mod3 = lme4::lmer(muscle.gain.missing~motivation + (1|health), data=exercise_data)  
   expect_true(all(names(estimates(mod3)) %in% c("fixed", "r.squared", "rand", "icc")))
+  
+  # generalized mixed model
+  head(small)
+  mod3 = lme4::glmer(y_gam~x + a + (1|b), data=small, family="Gamma")  
+  expect_true(all(names(estimates(mod3)) %in% c("fixed", "r.squared", "rand", "icc")))
 })  
 
 test_that("estimates from generalized linear models", {

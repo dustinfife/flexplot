@@ -5,7 +5,7 @@
 #' @param mc Should model comparisons be performed?
 #' @export
 estimates = function(object, mc=TRUE){
-	UseMethod("estimates")
+  UseMethod("estimates")
 }
 
 #' Output APA style statistical significance from an object 
@@ -16,6 +16,7 @@ estimates = function(object, mc=TRUE){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.default = function(object, mc=TRUE){
+  
 	out = summary(object)
 	class(out) = "estimates"
 	out
@@ -59,14 +60,93 @@ estimates.lmerMod = function(object, mc=TRUE){
 #' @return A printed list of estimates
 #' @export
 print.lmer_estimates = function(x,...){
-    cat(paste("Fixed Effects: \n", sep=""))
-    print(x$fixed)
-    cat(paste("\n\nRandom Effects: \n", sep=""))
-    print(x$rand)
-    cat(paste("\n\nICC and Design Effect: \n", sep=""))
-    print(x$icc)
-    cat(paste("\n\nR Squared: \n\n", sep=""))
-    print(x$r.squared)    
+  cat(paste("Fixed Effects: \n", sep=""))
+  print(x$fixed)
+  cat(paste("\n\nRandom Effects: \n", sep=""))
+  print(x$rand)
+  cat(paste("\n\nICC and Design Effect: \n", sep=""))
+  print(x$icc)
+  cat(paste("\n\nR Squared: \n\n", sep=""))
+  print(x$r.squared)    
+}	
+
+#' Report glmerMod object Estimates (effect sizes and parameters)
+#'
+#' Report glmerMod object Estimates
+#' @param object a glmerMod object
+#' @param mc Should model comparisons be performed? Currently not used
+#' @return One or more objects containing parameter estimates and effect sizes
+#' @export
+estimates.glmerMod = function(object, mc=FALSE){
+  
+  #### generate list of coefficients
+  terms = remove_interaction_terms(object)
+  
+  #### get dataset
+  d = extract_data_from_fitted_object(object)
+  
+  factor_or_number = which_terms_are_factors_or_numbers(d, terms)
+  numbers = factor_or_number$numbers
+  factors = factor_or_number$factors
+  
+  preds = output_glm_predictions(object, terms)
+  
+  #### output coefficients
+  coef.matrix = output_coef_matrix_glm(object, preds, numbers)
+  
+  if (!is.na(preds)[1] & length(numbers)>0){
+    
+    # input +/- 1 SD prediction for all numeric variables
+    predicted_difference_of_one_SD = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
+    coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = predicted_difference_of_one_SD
+    
+    coef.matrix = round_coefficient_matrix(coef.matrix)
+  }
+  
+  if (length(factors) == 0) return(coef.matrix)
+  
+  # loop through all factors and input their predictions
+  for (i in 1:length(factors)){
+    
+    current_factor_predictions = unlist(preds[factors[i]])
+    levs = unique(d[,factors[i]]); levs = paste0(factors[i], levs)
+    
+    # find that level in the coef.matrix
+    non_referent_groups = (levs %in% row.names(coef.matrix)); 
+    referent_group = !non_referent_groups
+    
+    #if (length(which(non_referent_groups))>0) {
+    
+    #compute differences between referent group and other levels
+    predicted_differences = round_string(unlist(current_factor_predictions)[which(non_referent_groups)] - 
+                                           unlist(current_factor_predictions)[which(referent_group)], digits=2)
+    labeled_predicted_differences = paste0(predicted_differences, " (relative to ", levs[referent_group], ")")
+    
+    # fill in for non-referent groups
+    coef.matrix[levs[non_referent_groups], "Prediction Difference (+/- 1 SD)"] = labeled_predicted_differences
+    #}
+  }
+  
+  # give the referent group raw prediction if there's only one factor
+  if (length(factors)==1){
+    referent_group_prediction = round_string(unlist(current_factor_predictions)[referent_group], digits=2)
+    referent_group_label = levs[referent_group]
+    coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(referent_group_prediction, " (", referent_group_label, " prediction)")
+  }
+  
+  return(coef.matrix)
+}
+
+#' Print glmer_estimates Summary
+#'
+#' Print a glmer_estimates object
+#' @aliases print.glmer_estimates
+#' @param x an glmer_estimates object
+#' @param ... ignored
+#' @return A printed list of estimates
+#' @export
+print.glmer_estimates = function(x,...){
+  print.default(x)
 }	
 
 
@@ -222,8 +302,8 @@ print.rf_estimates = function(x,...){
 #' @param mc Should model comparisons be performed? Currently not used
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
-estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
-  
+estimates.glm = function(object, mc=FALSE){
+
 	#### generate list of coefficients
 	terms = remove_interaction_terms(object)
 	
@@ -278,9 +358,11 @@ estimates.glm = estimates.glmerMod = function(object, mc=FALSE){
 	  referent_group_label = levs[referent_group]
 	  coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(referent_group_prediction, " (", referent_group_label, " prediction)")
 	}
-	
-	coef.matrix
+  attr(coef.matrix, "class") = "glm.estimates"
+	return(coef.matrix)
 }
+
+
 
 #' Report zeroinfl object Estimates (effect sizes and parameters)
 #'
@@ -342,14 +424,24 @@ remove_interaction_terms = function(object) {
 #' @return A printed list of estimates
 #' @export
 print.estimates = function(x,...){
+
+  if (!is.list(x)) {
+    print(x)
+  }
+  str(x)
 	#### print summary
-	cat(paste("Model R squared:\n", round(x$r.squared[1], digits=3), " (", round(x$r.squared[2], digits=2),", ", round(x$r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
-	print(round(x$semi.p, digits=3))
+  # check for r squared
+  if ("r.squared" %in% names(x)) {
+  	cat(paste("Model R squared:\n", round(x$r.squared[1], digits=3), " (", round(x$r.squared[2], digits=2),", ", round(x$r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
+  	print(round(x$semi.p, digits=3))
+  }
 	
 	#### print correlation
+  if ("correlation" %in% names(x)) {
 	if (!is.na(x$correlation[1])){
-	cat(paste("Correlation:\n", round(x$correlation[1], digits=3), "\n"))
+	  cat(paste("Correlation:\n", round(x$correlation[1], digits=3), "\n"))
 	}
+  }
 	
 	#### replace NA with - 
 	f = function(x){ x[is.na(x)] = "-"; x}
