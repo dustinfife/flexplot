@@ -35,8 +35,8 @@ add_bin_to_new_dataset = function(plot, d, terms, term.re, outcomevar) {
 extract_numbers_from_binned_var = function(x_bin, x_original) {
   
   # regex to extract the breaks
-  regex_cmd_one = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\1", x_bin)
-  regex_cmd_two = gsub("([(]?-?[0-9]*.?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[)]?)", "\\2", x_bin)
+  regex_cmd_one = gsub("([(]?-?[0-9]*.?[0-9]*[e]?-?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[e]?-?[0-9]*[)]?)", "\\1", x_bin)
+  regex_cmd_two = gsub("([(]?-?[0-9]*.?[0-9]*[e]?-?[0-9]*[)]?)-([(]?-?[0-9]*.?[0-9]*[e]?-?[0-9]*[)]?)", "\\2", x_bin)
   regex_cmd = c(regex_cmd_one, regex_cmd_two)
   regex_cmd = gsub("[)]", "", gsub("[(]", "", regex_cmd))
   break_vals = sort(as.numeric(unique(regex_cmd)))

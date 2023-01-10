@@ -12,5 +12,5 @@
 
 library(jaspTools)
 setPkgOption("module.dirs", "~/Documents/RPackages/flexplot")
-options <- analysisOptions("~/Downloads/debug.jasp")
-results <- runAnalysis("linmod_jasp", "~/Downloads/debug.csv", options)
+options <- analysisOptions("~/Downloads/debug3.jasp")
+results <- runAnalysis("mixedmod_jasp", "~/Downloads/debug.csv", options)

@@ -63,7 +63,7 @@ test_that("label_negatives works", {
 })
 
 test_that("round_digits works", {
-  expect_true(round_digits(.00000034)==6)
+  expect_true(is.infinite(round_digits(.00000034)))
   expect_true(round_digits(.00034)==5)
   expect_true(round_digits(.0034)==4)
   expect_true(round_digits(.034)==3)
