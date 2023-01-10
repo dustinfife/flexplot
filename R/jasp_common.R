@@ -61,6 +61,13 @@ fancifyMyLabels_strings = function(plot, options, formula=NULL){
   
   x = ifelse(options$nameX == "", options$variables[1], options$nameX)
   y = ifelse(options$nameY == "", options$dependent, options$nameY)
+  # if they're doing a univariate plot
+  if (length(options$variables) == 0 & options$nameX == "") {
+    x = options$dependent
+  }
+  if (length(options$variables) == 0 & options$nameY == "") {
+    y = "Count"
+  }  
   col = ifelse(options$nameLegend == "", options$variables[2], options$nameLegend)
   lines = col
   shape = col
