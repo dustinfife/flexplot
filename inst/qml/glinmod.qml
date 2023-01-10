@@ -16,7 +16,13 @@ Form
 		{
 			id: family
 			name: "family"
-			values: ["Normal", "Logistic", "Poisson", "Negative binomial", "Gamma"]
+			values: 
+			[
+			  {label: "Normal", value: "Normal"},
+			  {label: "Poisson", value: "Poisson"},
+			  {label: "Negative Binomial", value: "negativebinomial"},
+			  {label: "Gamma", value: "Gamma"}
+			]
 			label: qsTr("Distribution family")
 		}
 	}
