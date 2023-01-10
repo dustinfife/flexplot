@@ -16,3 +16,4 @@ R/scratch
 ..Rcheck/
 *.svg
 *.jmo
+.obsidian/*

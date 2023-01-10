@@ -288,6 +288,27 @@ populate_estimates_factors = function(object, factors=NULL) {
   
 } 
 
+
+fit_baseline_model = function(object) {
+  dv = get_terms(object)$response
+  re = get_re(object)
+  form = as.formula(
+    paste0(dv, "~1+(1|", re, ")")
+  )
+  return(update(object, formula=form))
+}
+
+
+remove_interaction_terms = function(object) {
+  #### generate list of coefficients
+  terms = attr(terms(object), "term.labels")
+  interaction = length(grep(":", terms))>0
+  if (interaction){
+    terms = terms[-grep(":", terms)]
+  }
+  return(terms)
+}
+
 populate_estimates_numeric = function(object, numbers=NULL) {
   
   if (is.null(numbers)) numbers = which_terms_are_factors_or_numbers(object$model, 
@@ -299,9 +320,24 @@ populate_estimates_numeric = function(object, numbers=NULL) {
                                 std.estimate=NA, std.lower=NA, std.upper=NA)
   coef.matrix.numb$estimate = coef(object)[vars]
   
+  # identify non-numeric coefficients
+  # if this is NA (e.g., if all values of a predictor are zero), this will throw an error. 
+  # must get rid of NA values
+  numeric_coefficient = vars[!(is.na(coef(object)[vars]))]
+  coef.matrix.numb = coef.matrix.numb[coef.matrix.numb$variables %in% numeric_coefficient,]
+  
+  # give an error message if they're not the same
+  if (length(vars) != length(numeric_coefficient)) {
+    stop("Hmmm. It looks like one of your coefficients is NA. Did you include a predictor with no variability?")
+  }
+  
   #### get upper and lower using matrix multiplication
-  upper.lower = t(matrix(coef(object)[vars], ncol=2, nrow=length(vars), byrow=F) + 
-                    t(t(t(c(1.96,-1.96)))%*%t(summary(object)$coef[vars,2])))
+  all_coefficients = coef(object)[numeric_coefficient]
+  matrix_of_coefficients = matrix(all_coefficients, ncol=2, nrow=length(numeric_coefficient), byrow=F)
+  multiplier = t(t(c(1.96, -1.96)))
+  standard_errors = t(summary(object)$coef[numeric_coefficient,2])
+  upper.lower = t(matrix_of_coefficients + 
+                    t(multiplier %*% standard_errors))
   coef.matrix.numb$lower = (upper.lower)[2,]
   coef.matrix.numb$upper = (upper.lower)[1,]
   

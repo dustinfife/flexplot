@@ -318,7 +318,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     # add variables with polynomial terms -------------------------------------
     vars = unlist(lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$components))))
     polys = unlist(lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$polynoms))))
-    
+
     vars.with.poly = vars[polys]
     # specify degree
     if (options$linetype=="Quadratic" & length(vars.with.poly)>0){

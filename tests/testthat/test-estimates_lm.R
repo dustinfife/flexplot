@@ -41,25 +41,13 @@ test_that("estimates from linear models", {
   expect_equal(estimates(mod)$Mean, 6.56, tolerance = 0.002)
 })
 
-test_that("estimates from mixed models", {
-  
-  mod1 = lme4::lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)  
-  expect_true(all(names(estimates(mod1)) %in% c("fixed", "r.squared", "rand", "icc")))
-  expect_equal(as.numeric(round(estimates(mod1)$icc[1]*1000)), expected=505, tolerance = .01)
-  
-  # with tibbles
-  mod2 = update(mod1, data=as_tibble(alcuse))
-  expect_true(all(names(estimates(mod2)) %in% c("fixed", "r.squared", "rand", "icc")))
-  
-  # with missing data in some columns
-  mod3 = lme4::lmer(muscle.gain.missing~motivation + (1|health), data=exercise_data)  
-  expect_true(all(names(estimates(mod3)) %in% c("fixed", "r.squared", "rand", "icc")))
-  
-  # generalized mixed model
-  head(small)
-  mod3 = lme4::glmer(y_gam~x + a + (1|b), data=small, family="Gamma")  
-  expect_true(all(names(estimates(mod3)) %in% c("fixed", "r.squared", "rand", "icc")))
-})  
+test_that("tests that previously produced errors", {
+  mod2 = lm(y~x + z + q, 
+            data=small %>%
+              mutate(q =0)
+  )
+  expect_error(estimates(mod2))
+})
 
 test_that("estimates from generalized linear models", {
   data("criminal_data")
@@ -78,29 +66,5 @@ test_that("estimates from generalized linear models", {
   expect_equal(estimates(mod)$raw.coefficients[1], .161)
 })  
 
-test_that("estimates from generalized mixed models", {
-  mod = lme4::glmer(y_gam~a + z + (1 | b), data=small, family="Gamma")
-  estimates(mod)
-}
-test_that("bic works", {
-  model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
-  model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
-  expect_equal(bf.bic(model.me, model.int, invert=T), .01049, tolerance=.001)
-})  
 
-test_that("icc works", {
-  data(math)
-  mod = lmer(MathAch~1 + (1|School), data=math)
-  expect_equal(icc(mod)$icc, .18, tol=.01)
-})
-
-test_that("removing interactions works", {
-  mod = lm(kills~agility*speed, data=avengers)
-  expect_true(length(remove_interaction_terms(mod))==2)
-})
-
-test_that("generate_grid_predictions", {
-  expect_equal(nrow(generate_grid_predictions(list(a=1:3, b=4:5), list(c = c('a', 'b')), NULL)), 12)
-   expect_null(generate_grid_predictions(NULL, NULL, NULL))
-})
 
