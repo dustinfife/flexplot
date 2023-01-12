@@ -341,7 +341,17 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     f = as.formula(f)
     ### store all the information
     model = lm(f, dataset)
-    est = estimates(model, mc=TRUE)
+
+    # rare use case: they have NA as a coefficient
+    est = try(estimates(model, mc=TRUE))
+    
+    if (inherits(est, "try-error")) {
+      errorMessage = as.character(est)
+      jaspBase::.quitAnalysis("It looks like one of your coefficients is NA. Did you include a predictor with no variability?")
+      return()
+    }
+    
+
     
     # if they're doing a mean-only model, we can't just say est$model = model because it's not a list (but a data frame).
     # so, we have to convert it to a list if it's mean-only model
