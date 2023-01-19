@@ -12,7 +12,7 @@
 glinmod_jasp<- function(jaspResults, dataset, options) {
 
   ### check if they have an IV and a DV
-  ready <- (options$dependent != "" && length(options$variables)>0)
+  ready <- (options$dependent != "" && length(options$variables)>0 && length(options$interactions)>0)
   
   ### read in the dataset if it's ready
   if (ready){
@@ -247,7 +247,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
       "Normal" = "gaussian",
       "Logistic" = "binomial",
       "Poisson" = "poisson",
-      "Negative binomial" = "quasipoisson",
+      "negativebinomial" = "quasipoisson",
       "Gamma" = "Gamma"
     )
     

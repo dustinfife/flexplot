@@ -71,3 +71,25 @@ test_that("compute_correlation works", {
   expect_true(is.na(compute_correlation(lm(y~a, data=small))))
   expect_true(is.na(compute_correlation(lm(y~x + z, data=small))))
 })
+
+test_that("bic works", {
+  model.me = lm(weight.loss ~ motivation+therapy.type, data = exercise_data)
+  model.int = lm(weight.loss ~ motivation*therapy.type, data = exercise_data)
+  expect_equal(bf.bic(model.me, model.int, invert=T), .01049, tolerance=.001)
+})  
+
+test_that("icc works", {
+  data(math)
+  mod = lmer(MathAch~1 + (1|School), data=math)
+  expect_equal(icc(mod)$icc, .18, tol=.01)
+})
+
+test_that("removing interactions works", {
+  mod = lm(kills~agility*speed, data=avengers)
+  expect_true(length(remove_interaction_terms(mod))==2)
+})
+
+test_that("generate_grid_predictions", {
+  expect_equal(nrow(generate_grid_predictions(list(a=1:3, b=4:5), list(c = c('a', 'b')), NULL)), 12)
+  expect_null(generate_grid_predictions(NULL, NULL, NULL))
+})

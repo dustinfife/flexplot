@@ -78,6 +78,7 @@ bin_variables = function(data, bins, labels, break.me, breaks) {
 
 #   this receives the breakpoints, labels them all pretty, and returns the labels for a particular i
 label_bins_loop = function(i, breaks) {
+  
   digs1 = round_digits(breaks[i])
   digs2 = round_digits(breaks[i+1])
   
@@ -105,6 +106,8 @@ label_negatives = function(breaks, digits) {
 }
 
 round_digits = function(breaks) {
+  
+  if (abs(breaks)<.00001) return(Inf)
   if (abs(breaks)<.0001) return(6)
   if (abs(breaks)<.001) return(5)
   if (abs(breaks)<.01) return(4)

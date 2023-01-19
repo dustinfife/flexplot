@@ -318,7 +318,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     # add variables with polynomial terms -------------------------------------
     vars = unlist(lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$components))))
     polys = unlist(lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$polynoms))))
-    
+
     vars.with.poly = vars[polys]
     # specify degree
     if (options$linetype=="Quadratic" & length(vars.with.poly)>0){
@@ -341,7 +341,17 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     f = as.formula(f)
     ### store all the information
     model = lm(f, dataset)
-    est = estimates(model, mc=TRUE)
+
+    # rare use case: they have NA as a coefficient
+    est = try(estimates(model, mc=TRUE))
+    
+    if (inherits(est, "try-error")) {
+      errorMessage = as.character(est)
+      jaspBase::.quitAnalysis("It looks like one of your coefficients is NA. Did you include a predictor with no variability?")
+      return()
+    }
+    
+
     
     # if they're doing a mean-only model, we can't just say est$model = model because it's not a list (but a data frame).
     # so, we have to convert it to a list if it's mean-only model
