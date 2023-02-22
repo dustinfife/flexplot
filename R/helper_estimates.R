@@ -222,7 +222,7 @@ populate_estimates_factors = function(object, factors=NULL) {
   outcome = as.character(attr(terms(object), "variables"))[-1][1]
   
   #### generate table with names
-  factor.names = unlist(lapply(d[,factors, drop=F], levels))
+  factor.names = unlist(lapply(d[,factors, drop=F], unique))
   num.rows     = sum(unlist(apply(d[,factors, drop=F], 2, function(x) { length(unique(x))})))			
   num.rows2    = sum(apply(d[,factors, drop=F], 2, function(x){ a = length(unique(x)); (a*(a-1))/2}))
   
@@ -235,11 +235,11 @@ populate_estimates_factors = function(object, factors=NULL) {
                                  lower=NA, upper=NA, cohens.d=NA)
   
   p = 1; p2=1; i=1
-  
+  browser()
   for (i in 1:length(factors)){
     
     #### populate df based on levels
-    levs = length(levels(d[,factors[i]]))
+    levs = length(unique(d[,factors[i]]))
     levs2 = (levs*(levs-1))/2
     current.rows = p:(p+levs-1)
     current.rows2 = p2:(p2 + levs2-1)
