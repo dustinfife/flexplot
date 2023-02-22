@@ -47,6 +47,9 @@ test_that("tests that previously produced errors", {
               mutate(q =0)
   )
   expect_error(estimates(mod2))
+  
+  mod = lm(y~a, data = small %>% mutate(a = as.character(a)))
+  expect_true(estimates(mod)$difference.matrix$lower < estimates(mod)$difference.matrix$upper)
 })
 
 test_that("estimates from generalized linear models", {

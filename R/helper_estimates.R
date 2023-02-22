@@ -235,7 +235,7 @@ populate_estimates_factors = function(object, factors=NULL) {
                                  lower=NA, upper=NA, cohens.d=NA)
   
   p = 1; p2=1; i=1
-  browser()
+  
   for (i in 1:length(factors)){
     
     #### populate df based on levels
