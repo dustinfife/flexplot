@@ -11,7 +11,7 @@ print.estimates = function(x,...){
   if (!is.list(x)) {
     print(x)
   }
-  str(x)
+  
   #### print summary
   # check for r squared
   if ("r.squared" %in% names(x)) {
