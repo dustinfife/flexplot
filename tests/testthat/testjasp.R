@@ -10,7 +10,7 @@
 # results <- runAnalysis("glinmod_jasp", "~/Downloads/avengers.csv", options)
 
 
-library(jaspTools)
-setPkgOption("module.dirs", "~/Documents/RPackages/flexplot")
-options <- analysisOptions("~/Downloads/debug3.jasp")
-results <- runAnalysis("mixedmod_jasp", "~/Downloads/debug.csv", options)
+# library(jaspTools)
+# setPkgOption("module.dirs", "~/Documents/RPackages/flexplot")
+# options <- analysisOptions("~/Downloads/debug3.jasp")
+# results <- runAnalysis("mixedmod_jasp", "~/Downloads/debug.csv", options)

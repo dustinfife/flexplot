@@ -11,14 +11,14 @@
     Code
       cat(flexplot_generate_prediction_lines(preds, c("x"), small))
     Output
-      geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))
+      geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), linewidth=1) + scale_linetype_manual(values=c("solid", "dotdash"))
 
 ---
 
     Code
       cat(flexplot_generate_prediction_lines(preds, c("x", "a"), small))
     Output
-      geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)
+      geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), linewidth=1)
 
 # flexplot_panel_variables works
 
