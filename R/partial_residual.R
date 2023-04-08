@@ -77,7 +77,7 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     k$predict = k$predict - (mean(k$predict) - mean(data[,all.vars(lm_formula)[1]]))
     
     # color line depending on if there's a group aesthetic
-    if (is.null(plot_data$mapping$colour)) fitted_line = geom_line(data=k, aes(y=predict), colour="#8F0000", size=1.5) else fitted_line = geom_line(data=k, aes(y=predict)) 
+    if (is.null(plot_data$mapping$colour)) fitted_line = geom_line(data=k, aes(y=predict), colour="#8F0000", linewidth=1.5) else fitted_line = geom_line(data=k, aes(y=predict)) 
     
   } else {
     fitted_line = geom_blank()

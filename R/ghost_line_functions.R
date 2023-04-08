@@ -6,7 +6,7 @@ create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, gh
   ## add line to existing plot 
   if (!is.null(prediction) & length(levels(prediction$model))>1){  
     d_smooth$model = factor(d_smooth$group, labels=levels(prediction$model))
-    ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group="model", linetype="model"), color=ghost.line, show.legend=F)'			
+    ghost = 'geom_line(data=d_smooth, aes(x=!!sym(axis[1]), y= !!sym(outcome), group=!!sym("model"), linetype=!!sym("model")), color=ghost.line, show.legend=F)'			
   } else if (length(axis)>1){	
     
     #### used to be factoring d_smooth$group, but that gave different groups for each color AND line, so just making it line now
@@ -29,12 +29,12 @@ create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, gh
     axis2_notbinned = gsub("_binned", "",axis[2])
     if (axis2_notbinned %in% names(ghost.reference)){
       d_smooth = d_smooth[d_smooth[,axis[2]]==(ghost.reference[[axis2_notbinned]]),]
-      ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group=axis[2], linetype=axis[2]), color=ghost.line, show.legend=F)'								
+      ghost = 'geom_line(data=d_smooth, aes(x=!!sym(axis[1]), y=!!sym(outcome), group=!!sym(axis[2]), linetype=!!sym(axis[2])), color=ghost.line, show.legend=F)'								
     } else {
-      ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome, group=axis[2], linetype=axis[2]), color=ghost.line, show.legend=F)'				
+      ghost = 'geom_line(data=d_smooth, aes(x=!!sym(axis[1]), y= !!sym(outcome), group=!!sym(axis[2]), linetype=!!sym(axis[2])), color=ghost.line, show.legend=F)'				
     }
   } else {	
-    ghost = 'geom_line(data=d_smooth, aes_string(x=axis[1], y= outcome), color=ghost.line, show.legend=F)'
+    ghost = 'geom_line(data=d_smooth, aes(x=!!sym(axis[1]), y= !!sym(outcome)), color=ghost.line, show.legend=F)'
   }
   
   ### odd condition where if they name the group "group" it will conflict with ggplot
