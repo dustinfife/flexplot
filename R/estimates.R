@@ -16,7 +16,6 @@ estimates = function(object, mc=TRUE){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.default = function(object, mc=TRUE){
-  
 	out = summary(object)
 	class(out) = "estimates"
 	out
