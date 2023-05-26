@@ -68,10 +68,12 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
   binned_vars = grep("_binned", names(step3$data), value=T)
   if (length(binned_vars)>0) {
     unbinned_name = gsub("_binned", "", binned_vars)
-    terms[terms==unbinned_name] = paste0(unbinned_name, "_binned")
+    terms      [terms      ==unbinned_name]  = paste0(unbinned_name, "_binned")
+    terms.fixed[terms.fixed==unbinned_name] = paste0(unbinned_name, "_binned")
   }
+  
   fixed.means = means[means$model=="fixed effects",]
-  fixed.means = fixed.means %>% dplyr::group_by_at(vars(all_of(c(terms)))) %>% 
+  fixed.means = fixed.means %>% dplyr::group_by_at(vars(all_of(c(terms.fixed)))) %>% 
     summarize(Value=mean(Value))
 
   # figure out which ones are binned
@@ -93,8 +95,8 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
       ### fixed effects
       list(
         geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3, color="black", shape=16),
-        geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=2, color="black", linetype=1)) 
-    
+        geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=1), lwd=2, color="black", linetype=1)) 
+
   return(list(random_geom = random_geom, fixed_geom = fixed_geom))
 }
 
@@ -103,6 +105,7 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
 # mixed_model_plot(MathAch~SES + School,
 #                  lme4::lmer(MathAch~SES + (SES | School), math),
 #                  T, sample=3) + coord_cartesian(ylim=c(0, 25), xlim=c(-2, 2))
+
 mixed_model_plot = function(formula, object, random_plot, sample=3, return_objects = F,...){
   
   data = object@frame
