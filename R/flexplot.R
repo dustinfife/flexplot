@@ -153,9 +153,14 @@ flexplot = function(formula, data=NULL, related=F,
   ### make modifications to the data
   data = flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method)
+
   prediction = flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE)
-
+  
+  
+  # make sure data and prediction have the same variable types for axis 1
+  prediction = make_prediction_dataset_same_type_on_x1(data, prediction, axis[1])
+  
   ##### make models into a factor if they supply predictions
 	if (!is.null(prediction)){
 		prediction$model = factor(prediction$model)
