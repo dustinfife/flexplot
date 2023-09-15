@@ -199,6 +199,7 @@ flexplot_multivariate_aes = function(data, outcome, prediction=NULL, axis) {
 
 
 make_prediction_dataset_same_type_on_x1 = function(data, prediction, axis1) {
+  if (is.null(prediction)) return(NULL)
   if (is.numeric(data[,axis1])  & ! is.numeric(prediction[,axis1])) prediction[,axis1] = as.numeric(as.character(prediction[,axis1]))
   if (!is.numeric(data[,axis1]) &   is.numeric(prediction[,axis1])) prediction[,axis1] = (as.character(prediction[,axis1]))
   return(prediction)
