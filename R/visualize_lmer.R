@@ -9,7 +9,7 @@
 #                  T, sample=3, return_objects = T)
 # add_geoms_to_mixed_plot(objects$prediction, objects$step3, objects$object)
 add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
-
+  
   # get necessary objects
   d = object@frame
   term.re = extract_random_term(object)
@@ -85,6 +85,15 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
   names(fixed.means)[names(fixed.means)%in%unbinned.var] = binned.var
   names(means)[names(means)%in%unbinned.var] = binned.var	
   
+  ## add back the RE so I don't get an error
+  # no, I need to duplicate everything in fixed.means, for each level of the RE
+  # find all levels of re term
+  re_df = means[[term.re]] %>% levels() 
+  # create a temporary DF that can be used to merge the re with the fixed dataset
+  pre_join_data = expand.grid(fixed.means[[outcome]], re_df) %>%
+    purrr::set_names(c(outcome, term.re))
+  fixed.means = full_join(fixed.means, pre_join_data)
+  
   random_geom = 
       ### random effects
       list(
@@ -107,7 +116,7 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
 #                  T, sample=3) + coord_cartesian(ylim=c(0, 25), xlim=c(-2, 2))
 
 mixed_model_plot = function(formula, object, random_plot, sample=3, return_objects = F,...){
-  
+
   data = object@frame
 
   # if they're plotting without random effects...
@@ -125,8 +134,8 @@ mixed_model_plot = function(formula, object, random_plot, sample=3, return_objec
   
   # return the flexplot as the base
     step3 = flexplot(formula, data=data_sampled, suppress_smooth=T, ...)
-  step3 = step3 +
-    add_geoms_to_mixed_plot(prediction, step3, object)
+    step3 = step3 +
+      add_geoms_to_mixed_plot(prediction, step3, object)
   
     #### remove legend if n>10
   if (sample>10){

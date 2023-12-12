@@ -26,6 +26,10 @@ test_that("visualize mixed models", {
   vdiffr::expect_doppelganger("mixed anova with no formula",a1)
   vdiffr::expect_doppelganger("mixed no formula one covariate", a2)
   vdiffr::expect_doppelganger("mixed old error", a3)
+  
+  ## error when I have a categorical predictor on x axis, now fixed
+  mod = lmer(MathAch~Sex + SES + (1|School), data=math)
+  vdiffr::expect_doppelganger("mixed old error", visualize(mod))
             
 })
 

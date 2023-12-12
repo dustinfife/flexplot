@@ -1,7 +1,7 @@
-# library(jaspTools)
-# setPkgOption("module.dirs", "~/Documents/RPackages/flexplot")
-# options <- analysisOptions("~/Downloads/avengers.jasp")
-# results <- runAnalysis("flexplot_jasp2", "~/Downloads/avengers.csv", options)
+library(jaspTools)
+setPkgOption("module.dirs", "~/Documents/RPackages/flexplot")
+options <- analysisOptions("~/Downloads/math_debug.jasp")
+results <- runAnalysis("mixedmod_jasp", "~/Downloads/math.csv", options)
 # 
 # 
 # library(jaspTools)

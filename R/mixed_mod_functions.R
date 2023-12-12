@@ -36,12 +36,18 @@ gsub_data_first = function(data, old, new, ...) {
 # expect_equal(remove_term_from_formula(y~a + b | c + d, "c", F), "y~a+b|d")
 # expect_equal(remove_term_from_formula(y~a + b | c + d, "d", F), "y~a+b|c")
 # expect_equal(remove_term_from_formula(y~a + b | c + d, "d", T), y~a+b|c)
+f = as.formula('JaspColumn_5_Encoded ~ JaspColumn_4_Encoded + JaspColumn_1_Encoded | 
+    JaspColumn_3_Encoded')
+
 remove_term_from_formula = function(formula, term, as_formula = T) {
-  
+
   formula_no_ws = gsub(" ", "",  format(formula)) %>%
     gsub_data_first(paste0(term, "+"), "", fixed=T) %>%
     gsub_data_first(paste0("+",term), "", fixed=T) %>%
-    gsub_data_first(paste0("|",term), "|", fixed=T) 
+    gsub_data_first(paste0("|",term), "|", fixed=T) %>%
+    paste0(collapse="") # for some reason, format(formula) is putting one of the variables
+                        # in a cell. This fixes it, and if it's already a single string
+                        # this will do nothing
   
   # check for hanging pipe at the end
   last_char = nchar(formula_no_ws)
@@ -120,7 +126,7 @@ stratified_sample_re = function(formula, data, re, samp.size=6) {
     dplyr::select(re) %>%
     purrr::pluck(re) %>%
     unique
-
+  
   if (length(selected_IDs) >= samp.size) return(selected_IDs[1:samp.size])
   additional_n = samp.size - length(selected_IDs)
   remaining_IDs = data[,re][data[,re] %!in% selected_IDs] %>% 

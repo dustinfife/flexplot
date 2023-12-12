@@ -27,6 +27,11 @@ test_that("remove_term_from_formula works", {
   expect_equal(remove_term_from_formula(y~a + b | c + d, "c", F), "y~a+b|d")
   expect_equal(remove_term_from_formula(y~a + b | c + d, "d", F), "y~a+b|c")
   expect_equal(remove_term_from_formula(y~a + b | c + d, "d", T), y~a+b|c)
+  
+  # previous jasp error
+  f = as.formula('JaspColumn_5_Encoded ~ JaspColumn_4_Encoded + JaspColumn_1_Encoded | 
+    JaspColumn_3_Encoded')
+  expect_equal(remove_term_from_formula(f, "JaspColumn_1_Encoded", F), "JaspColumn_5_Encoded~JaspColumn_4_Encoded|JaspColumn_3_Encoded")
 })
 
 test_that("get_row_col works", {
