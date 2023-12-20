@@ -125,10 +125,12 @@ compare.fits = function(formula, data, model1, model2=NULL,
     pred.values = rbind(pred.values, pred.values)
   }
   
+  
   #### report one or two coefficients, depending on if they supplied it
   if (!exists("runme") | exists("old.mod")){
     prediction.model = rbind(pred.mod1, pred.mod2)
-    prediction.model = suppressWarnings(cbind(pred.values, prediction.model))
+    pred.values_doubled = rbind(pred.values, pred.values)
+    prediction.model = suppressWarnings(cbind(pred.values_doubled, prediction.model))
   } else {
     prediction.model = pred.mod1
     prediction.model = suppressWarnings(cbind(pred.values, prediction.model))
