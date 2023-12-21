@@ -56,14 +56,18 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
                           %in% all_variables]        # variables in model, but not plot
     
     # merge the means with the dataset and replace the original variable with the binned mean
+    if (length(binned_vars)>0){
     k = plot_data$data %>% 
       group_by(across(all_of(binned_vars))) %>% 
       summarize_at(unbinned_name, mean) %>% 
       full_join(plot_data$data, by=binned_vars, suffix = c("", ".y")) %>% 
       mutate_at(not_plotted_vars, mean) %>% 
       data.frame 
-    
+    } else {
+      k = data
+    }
 
+    
     # 5. identify which components go into the model
     # just use predict on the plot data
     if (!is.null(added_term)) {
@@ -72,10 +76,13 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     } else {
       k$predict = 0#predict(model, newdata=k)
     }
-    
+ 
     # fix the intercepts by making the means of prediction/residuals the same
     k$predict = k$predict - (mean(k$predict) - mean(data[,all.vars(lm_formula)[1]]))
-    
+
+    # for when ggplot uses ordered factors but the original data does
+    k = convert_ordered_factors(plot_data$data, k)
+      
     # color line depending on if there's a group aesthetic
     if (is.null(plot_data$mapping$colour)) fitted_line = geom_line(data=k, aes(y=predict), colour="#8F0000", size=1.5) else fitted_line = geom_line(data=k, aes(y=predict)) 
     
