@@ -199,7 +199,7 @@ return_constant_for_predicted_data = function(missing_variable, data, model) {
   # this had issues when a random effect (as factor)
   val = unique(as.character(data[[missing_variable]]))[1]
   #only display the message if it's not a glmer mod
-  if (!(class(model) %in% c("lmerMod", "glmerMod"))) {
+  if (!(class(model)[1] %in% c("lmerMod", "glmerMod"))) {
     message(paste0("Note: You didn't choose to plot ",
                    missing_variable, " so I am inputting '", val, "'\n"))
   }
