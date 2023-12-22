@@ -51,22 +51,21 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     # select all variables in the plot
     all_variables = all.vars(plot_formula)                # all variables in flexplot formula
     all_model_variables = all.vars(formula(model))        # all variables in model 
-    not_plotted_vars = 
-      all_model_variables[!all_model_variables 
-                          %in% all_variables]        # variables in model, but not plot
-    
+    vars_not_plotted = !all_model_variables %in% all_variables
+    not_plotted_vars = all_model_variables[vars_not_plotted]        # variables in model, but not plot
+
     # merge the means with the dataset and replace the original variable with the binned mean
     if (length(binned_vars)>0){
     k = plot_data$data %>% 
       group_by(across(all_of(binned_vars))) %>% 
       summarize_at(unbinned_name, mean) %>% 
       full_join(plot_data$data, by=binned_vars, suffix = c("", ".y")) %>% 
-      mutate_at(not_plotted_vars, mean) %>% 
+      mutate_at(not_plotted_vars, summary_function_depending_on_class) %>% 
       data.frame 
     } else {
       k = data
     }
-
+  
     
     # 5. identify which components go into the model
     # just use predict on the plot data
@@ -84,7 +83,7 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
     k = convert_ordered_factors(plot_data$data, k)
       
     # color line depending on if there's a group aesthetic
-    if (is.null(plot_data$mapping$colour)) fitted_line = geom_line(data=k, aes(y=predict), colour="#8F0000", size=1.5) else fitted_line = geom_line(data=k, aes(y=predict)) 
+    if (is.null(plot_data$mapping$colour)) fitted_line = geom_line(data=k, aes(x=ses_alc, y=predict), colour="red", size=1.5) else fitted_line = geom_line(data=k, aes(y=predict)) 
     
   } else {
     fitted_line = geom_blank()

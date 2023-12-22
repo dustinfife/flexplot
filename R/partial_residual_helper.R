@@ -12,4 +12,9 @@ convert_ordered_factors = function(plot_data, data) {
   data[[variables_to_convert]] = factor(data[[variables_to_convert]], ordered=T) %>% as.numeric
   return(data)
 }
-usethis::use_test("partial_residual_helper")
+
+summary_function_depending_on_class = function(x) {
+  if (is.numeric(x)) return(mean(x))
+  return(x[1])
+}
+
