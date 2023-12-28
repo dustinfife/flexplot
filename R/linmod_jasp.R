@@ -250,7 +250,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
                    fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, 
                    fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, 
                    width=.2, size = 1.25, 
-                   position=position_dodge(width=.2), color = '#bf0303') +
+                   position=position_dodge(width=.4), color = '#bf0303') +
       coord_cartesian(xlim=c(.75, 1.25))+
       theme_bw() 
       
