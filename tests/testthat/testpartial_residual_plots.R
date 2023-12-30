@@ -36,6 +36,7 @@ test_that("partial_residual_plot works", {
                                                     method="quadratic"))
   
   # prp with a binary predictor on x axis (previous error)
+  data(small)
   smallmod = lm(x~y_bin + a + z, data=small)
   vdiffr::expect_doppelganger("prp with binary predictor on x axis", 
                     partial_residual_plot(x~y_bin + a, data=small, 
