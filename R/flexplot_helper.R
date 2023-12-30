@@ -44,8 +44,8 @@ flexplot_generate_prediction_lines = function(prediction, axis, data){
   
   # if axis 1 is categorical, connect the means with lines
   if (!is.numeric(data[[axis[1]]])) {
-    return('geom_point(data=prediction, aes(y=prediction, color=model),   position=position_dodge(width=.2)) + 
-             geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))')
+    return('geom_point(data=prediction, aes(y=prediction, color=model),   position=position_dodge(width=.4)) + 
+             geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.4))')
   }
   
   # if they give an axis 2, draw a line for each level of axis 2
