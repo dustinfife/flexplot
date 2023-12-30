@@ -44,8 +44,8 @@ flexplot_generate_prediction_lines = function(prediction, axis, data){
   
   # if axis 1 is categorical, connect the means with lines
   if (!is.numeric(data[[axis[1]]])) {
-    return('geom_point(data=prediction, aes(y=prediction, color=model),   position=position_dodge(width=.2)) + 
-             geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.2))')
+    return('geom_point(data=prediction, aes(y=prediction, color=model),   position=position_dodge(width=.4)) + 
+             geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.4))')
   }
   
   # if they give an axis 2, draw a line for each level of axis 2
@@ -197,6 +197,13 @@ flexplot_multivariate_aes = function(data, outcome, prediction=NULL, axis) {
   
 }
 
+
+make_prediction_dataset_same_type_on_x1 = function(data, prediction, axis1) {
+  if (is.null(prediction)) return(NULL)
+  if (is.numeric(data[,axis1])  & ! is.numeric(prediction[,axis1])) prediction[,axis1] = as.numeric(as.character(prediction[,axis1]))
+  if (!is.numeric(data[,axis1]) &   is.numeric(prediction[,axis1])) prediction[,axis1] = (as.character(prediction[,axis1]))
+  return(prediction)
+}
 
 
 

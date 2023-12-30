@@ -18,10 +18,10 @@ Form
 			name: "family"
 			values: 
 			[
-			  {label: "Normal", value: "Normal"},
-			  {label: "Poisson", value: "Poisson"},
-			  {label: "Negative Binomial", value: "negativebinomial"},
-			  {label: "Gamma", value: "Gamma"}
+			  {label: qsTr("Normal"), value: "Normal"},
+			  {label: qsTr("Poisson"), value: "Poisson"},
+			  {label: qsTr("Negative Binomial"), value: "negativebinomial"},
+			  {label: qsTr("Gamma"), value: "Gamma"}
 			]
 			label: qsTr("Distribution family")
 		}

@@ -98,3 +98,10 @@ test_that("flexplot_multivariate_aes works", {
   expect_snapshot(cat(flexplot_multivariate_aes(small, "y", axis=c("x", "a"))))
   expect_snapshot(cat(flexplot_multivariate_aes(small, "y", axis=c("x", "z"))))
 })
+
+test_that("make_prediction_dataset_same_type_on_x1 works", {
+  small_modified = small %>% mutate(y = round(y) %>% factor)
+  tested_y = make_prediction_dataset_same_type_on_x1(small, small_modified, "y")$y
+  expect_true(class(tested_y)=="numeric")
+  expect_true(class(small_modified$y)!="numeric")
+})

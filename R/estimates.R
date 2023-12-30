@@ -16,7 +16,6 @@ estimates = function(object, mc=TRUE){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.default = function(object, mc=TRUE){
-  
 	out = summary(object)
 	class(out) = "estimates"
 	out
@@ -92,7 +91,7 @@ estimates.glmerMod = function(object, mc=FALSE){
 #' @return One or more objects containing parameter estimates and effect sizes
 #' @export
 estimates.lm = function(object, mc=TRUE){
-	
+
 	#### generate list of coefficients
 	terms = attr(terms(object), "term.labels")
 	
