@@ -371,7 +371,7 @@ fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method
 			sum.line="xxxx"						
 		} else if (spread=="stdev"){
 			summary1 = "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')" 
-			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')"
+			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, linewidth = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')"
 			if (mean.line){
 				sum.line = 'stat_summary(aes_string(group= axis[2]), geom="line", fun.y="mean", position=position_dodge(width=.5), color = "#bf0303")'
 			} else {
@@ -388,7 +388,7 @@ fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method
 
 		} else if (spread == "quartiles"){	
 			summary1 = "stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')" 
-			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){quantile(z, .25)},size = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')"
+			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){quantile(z, .25)},linewidth = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')"
 			if (mean.line){
 				sum.line = 'stat_summary(aes_string(group=axis[2]), geom="line", fun.y="median", position=position_dodge(width=.4), color = "#bf0303")'
 			} else {

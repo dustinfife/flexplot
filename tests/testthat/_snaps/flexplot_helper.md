@@ -11,14 +11,14 @@
     Code
       cat(flexplot_generate_prediction_lines(preds, c("x"), small))
     Output
-      geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), size=1) + scale_linetype_manual(values=c("solid", "dotdash"))
+      geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), linewidth=1) + scale_linetype_manual(values=c("solid", "dotdash"))
 
 ---
 
     Code
       cat(flexplot_generate_prediction_lines(preds, c("x", "a"), small))
     Output
-      geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), size=1)
+      geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), linewidth=1)
 
 # flexplot_panel_variables works
 
@@ -46,28 +46,28 @@
     Code
       cat(flexplot_histogram(small, "a"))
     Output
-      ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)
+      ggplot(data=data, aes(!!sym(outcome))) + geom_bar() + theme_bw() + labs(x= outcome)
 
 ---
 
     Code
       cat(flexplot_histogram(small, "x", "qq"))
     Output
-      ggplot(data=data, aes_string(sample = outcome)) + stat_qq() + stat_qq_line() + theme_bw() + labs(x=outcome)
+      ggplot(data=data, aes(sample = !!sym(outcome))) + stat_qq() + stat_qq_line() + theme_bw() + labs(x=outcome)
 
 ---
 
     Code
       cat(flexplot_histogram(small, "x", "density"))
     Output
-      ggplot(data=data, aes_string(outcome)) + geom_density() + theme_bw() + labs(x=outcome)
+      ggplot(data=data, aes(!!sym(outcome))) + geom_density() + theme_bw() + labs(x=outcome)
 
 ---
 
     Code
       cat(flexplot_histogram(small, "x"))
     Output
-      ggplot(data=data, aes_string(outcome)) + geom_histogram(fill="lightgray", col="black", bins=14) + theme_bw() + labs(x=outcome)
+      ggplot(data=data, aes(!!sym(outcome)))  + geom_histogram(fill="lightgray", col="black", bins=14) + theme_bw() + labs(x=outcome)
 
 # flexplot_related works
 
@@ -102,14 +102,14 @@
     Code
       cat(flexplot_related(k)$fitted)
     Output
-      stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},size = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+xxxx + coord_cartesian(xlim=c(.75, 1.25))
+      stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},linewidth = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+xxxx + coord_cartesian(xlim=c(.75, 1.25))
 
 # flexplot_bivariate_string works
 
     Code
       cat(testplot$p)
     Output
-      ggplot(data=data, aes_string(x=axis, y=outcome))
+      ggplot(data=data, aes(x=!!sym(axis), y=!!sym(outcome)))
 
 ---
 
@@ -123,7 +123,7 @@
     Code
       cat(flexplot_bivariate_string(small, "a", "b")$p)
     Output
-      ggplot(data=data, aes_string(x=axis, y='Frequency', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()
+      ggplot(data=data, aes(x=!!sym(axis), y=!!sym('Frequency'), fill=!!sym(outcome))) + geom_bar(stat='identity', position='dodge') + theme_bw()
 
 ---
 
@@ -151,14 +151,14 @@
     Code
       cat(flexplot_bivariate_string(small, "y", "b")$fitted)
     Output
-      stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},size = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+xxxx
+      stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},linewidth = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+xxxx
 
 # flexplot_multivariate_aes works
 
     Code
       cat(flexplot_multivariate_aes(small, "y", small, "x"))
     Output
-      ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], shape=axis[2])) + labs(color= axis[2], shape= axis[2])
+      ggplot(data=data, aes(x=!! sym(predictors[1]), y=!! sym(outcome), color=!! sym(axis[2]), shape=!! sym(axis[2]))) + labs(color= axis[2], shape= axis[2])
 
 ---
 
@@ -172,7 +172,7 @@
     Code
       cat(flexplot_multivariate_aes(small, "y", axis = c("x", "a")))
     Output
-      ggplot(data=data, aes_string(x=predictors[1], y=outcome, color=axis[2], linetype = axis[2], shape=axis[2])) + labs(color= axis[2], linetype= axis[2], shape= axis[2])
+      ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2]), linetype = !!sym(axis[2]), shape=!!sym(axis[2]))) + labs(color= axis[2], linetype= axis[2], shape= axis[2])
 
 ---
 

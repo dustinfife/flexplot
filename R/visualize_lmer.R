@@ -166,6 +166,12 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   d = object@frame
   plot = match.arg(plot, c("all", "residuals", "model"))
   
+  # I may live to regret my decisions in life....
+  # replace the lmerModLmerTest class with lmerMod
+  if (class(object)[1] == "lmerModLmerTest") {
+    class(object)[1] = "lmerMod"
+  }
+
   #### generate residuals plots
   if (plot != "model") 	res.plots = residual.plots(data=d, object)
   

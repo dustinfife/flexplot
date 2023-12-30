@@ -50,6 +50,7 @@ jamovi_plots = function(formula, data, options=NULL) {
   }
   
   if (given_exists & ghost==TRUE){
+    
     p = flexplot(formula, data=data, se=se,spread=se.type, 
                  method=line, alpha = alpha, ghost.line="black", 
                  sample = samp, jitter=c(options$jittx, options$jitty), 

@@ -18,18 +18,18 @@ test_that("floor_ceiling work", {
 test_that("nested model comparisons returns bf", {
   mod = lm(weight.loss~motivation + therapy.type + gender, data=exercise_data)
   expect_output(print(nested_model_comparisons(mod)), "1212109")
-}) 
+})
 
 
 test_that("add_bin_to_new_dataset works", {
   # make fake mixed model data
-  mod = lmer(weight.loss~motivation + muscle.gain + 
-         (motivation | satisfaction), data=exercise_data %>% 
+  mod = lmer(weight.loss~motivation + muscle.gain +
+         (motivation | satisfaction), data=exercise_data %>%
          mutate(across(c(weight.loss, motivation, muscle.gain), scale)))
   plot = flexplot(weight.loss~motivation | muscle.gain, data=exercise_data)
-  new_bins = add_bin_to_new_dataset(plot, 
-                         d=exercise_data, 
-                         terms=c("weight.loss", "motivation", "muscle.gain", "satisfaction"), 
+  new_bins = add_bin_to_new_dataset(plot,
+                         d=exercise_data,
+                         terms=c("weight.loss", "motivation", "muscle.gain", "satisfaction"),
                          term.re = "satisfaction", outcomevar="weight.loss")$muscle.gain_binned
   old_bins = plot$data$muscle.gain_binned
   # this failed prior to flexplot 0.11.1 because negative numbers weren't accounted for
@@ -55,13 +55,13 @@ test_that("make flexplot formula works", {
   outcome = "Income"
   tst = as.character(make_flexplot_formula(predictors = predictors, outcome, data))[3]
   expect_output(print(tst),'\\[1\\] "Years \\+ Grad\\.School \\| Profession \\+ GPA"')
-  
+
   tst = as.character(make_flexplot_formula(predictors = "Years", outcome, data))[3]
   expect_output(print(tst),'Years')
 
   tst = as.character(make_flexplot_formula(predictors = c("Years", "GPA", "gender:GPA"), outcome, data))[3]
   expect_output(print(tst),'Years \\| GPA')
-  
+
   expect_equal(paste0(make_flexplot_formula(NULL, "therapy.type", exercise_data))[3], "1")
 })
 
@@ -85,7 +85,7 @@ test_that("sample.subset returns a dataset the right rows", {
 })
 
 test_that("points.func works",{
-  expect_output(print(points.func(axis.var="therapy.type", data=exercise_data, jitter=NULL)), 
+  expect_output(print(points.func(axis.var="therapy.type", data=exercise_data, jitter=NULL)),
                 '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0\\.2, height=0\\)"')
   expect_output(print(points.func("therapy.type", exercise_data, T)),
                 '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0\\.2, height=0\\)"')
@@ -94,19 +94,19 @@ test_that("points.func works",{
   expect_output(print(points.func("motivation", exercise_data, NULL)),
                 '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0, height=0\\)"')
   expect_output(print(points.func(c("motivation", "therapy.type"), exercise_data, NULL)),
-                '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0, height=0\\)"')  
+                '\\[1\\] "geom_jitterd\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), width=0, height=0\\)"')
   expect_output(print(points.func(c("gender", "therapy.type"), exercise_data, NULL)),
-                '\\[1\\] "geom_point\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), position=position_jitterdodged\\(jitter\\.width=0\\.2, jitter\\.height=0, dodge\\.width=\\.5\\)\\)"')  
+                '\\[1\\] "geom_point\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), position=position_jitterdodged\\(jitter\\.width=0\\.2, jitter\\.height=0, dodge\\.width=\\.5\\)\\)"')
   expect_output(print(points.func(c("gender", "therapy.type"), exercise_data, c(.2, .1))),
-                '\\[1\\] "geom_point\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), position=position_jitterdodged\\(jitter\\.width=0\\.2, jitter\\.height=0\\.1, dodge\\.width=\\.5\\)\\)"')    
+                '\\[1\\] "geom_point\\(data=sample\\.subset\\(sample, exercise_data\\), alpha=raw\\.alph\\.func\\(raw\\.data, alpha=alpha\\), position=position_jitterdodged\\(jitter\\.width=0\\.2, jitter\\.height=0\\.1, dodge\\.width=\\.5\\)\\)"')
 })
 
 test_that("factor.to.logistic works", {
   expect_equal(levels(factor.to.logistic(exercise_data, "therapy.type")$therapy.type), c("control", "cog", "beh"))
   expect_equal(length(levels(factor.to.logistic(exercise_data, "gender", labels=T))), 2)
-  expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="logistic")$gender), c(0,1))  
-  expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="loess")$gender)%>%as.character, c("female", "male"))  
-  expect_equal(unique(factor.to.logistic(small, "y_bin")$y_bin), c(1,0))  
+  expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="logistic")$gender), c(0,1))
+  expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="loess")$gender)%>%as.character, c("female", "male"))
+  expect_equal(unique(factor.to.logistic(small, "y_bin")$y_bin), c(1,0))
 })
 
 test_that("fit.function works for numeric predictors", {
@@ -117,14 +117,14 @@ test_that("fit.function works for numeric predictors", {
   expect_identical(fit.function("motivation", "weight.loss", method="rlm", data=exercise_data),
                    "geom_smooth(method = \"rlm\", se = se, formula = y~x)")
   expect_identical(fit.function("motivation", "weight.loss", method="lm", data=exercise_data),
-                   "stat_smooth(method=\"lm\", se=se, formula = y~x)")  
+                   "stat_smooth(method=\"lm\", se=se, formula = y~x)")
   expect_identical(fit.function("motivation", "weight.loss", method="cubic", data=exercise_data),
-                   "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 3, raw=TRUE))") 
+                   "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 3, raw=TRUE))")
   expect_identical(fit.function("motivation", "weight.loss", method="quadratic", data=exercise_data),
-                   "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 2, raw=TRUE))")   
+                   "stat_smooth(method=\"lm\", se=se, formula=y ~ poly(x, 2, raw=TRUE))")
   expect_identical(fit.function("motivation", "weight.loss", method="loess", data=exercise_data),
-                   "geom_smooth(method=\"loess\", se=se, formula = y~x)")     
-  
+                   "geom_smooth(method=\"loess\", se=se, formula = y~x)")
+
 })
 
 test_that("there are no 'browser' or 'save' calls", {
@@ -136,22 +136,22 @@ test_that("there are no 'browser' or 'save' calls", {
 test_that("fit.function works for categorical predictors", {
   expect_identical(fit.function("weight.loss", "gender", data=exercise_data, suppress_smooth=T), "xxxx+xxxx+xxxx")
   expect_output(print(fit.function("weight.loss", "gender", data=exercise_data, method="stdev")), "\\+xxxx")
-  expect_identical(fit.function("weight.loss", "gender", data=exercise_data, mean.line=T), 
+  expect_identical(fit.function("weight.loss", "gender", data=exercise_data, mean.line=T),
                    "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.4), color = \"#bf0303\")")
-  expect_identical(fit.function("weight.loss", "gender", data=exercise_data, mean.line=F), 
+  expect_identical(fit.function("weight.loss", "gender", data=exercise_data, mean.line=F),
                    "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.5), color = '#bf0303')+xxxx")
-  expect_identical(fit.function("weight.loss", "gender", spread="sterr", data=exercise_data, mean.line=T), 
+  expect_identical(fit.function("weight.loss", "gender", spread="sterr", data=exercise_data, mean.line=T),
                    "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.4), color = \"#bf0303\")")
-  expect_identical(fit.function("weight.loss", "gender", spread="sterr", data=exercise_data, mean.line=F), 
+  expect_identical(fit.function("weight.loss", "gender", spread="sterr", data=exercise_data, mean.line=F),
                    "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.5), color = '#bf0303')+xxxx")
-  expect_identical(fit.function("weight.loss", "gender", spread = "quartiles", data=exercise_data, mean.line=F), 
-                   "stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},size = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+xxxx")
-  expect_identical(fit.function("weight.loss", "gender", spread = "quartiles", data=exercise_data, mean.line=T), 
-                   "stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},size = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(aes_string(group=axis[2]), geom=\"line\", fun=\"median\", position=position_dodge(width=.4), color = \"#bf0303\")")  
-  expect_identical(fit.function("weight.loss", "gender", spread = "stdev", data=exercise_data, mean.line=F), 
-                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-sd(z)}, fun.max = function(z) {mean(z)+sd(z)}, fun=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+xxxx")      
-  expect_identical(fit.function("weight.loss", "gender", spread = "stdev", data=exercise_data, mean.line=T), 
-                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-sd(z)}, fun.max = function(z) {mean(z)+sd(z)}, fun=median, size = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.5), color = \"#bf0303\")")        
+  expect_identical(fit.function("weight.loss", "gender", spread = "quartiles", data=exercise_data, mean.line=F),
+                   "stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},linewidth = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+xxxx")
+  expect_identical(fit.function("weight.loss", "gender", spread = "quartiles", data=exercise_data, mean.line=T),
+                   "stat_summary(fun='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){quantile(z, .25)},linewidth = 1.25,  fun.max = function(z) {quantile(z, .75)}, fun=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')+stat_summary(aes_string(group=axis[2]), geom=\"line\", fun=\"median\", position=position_dodge(width=.4), color = \"#bf0303\")")
+  expect_identical(fit.function("weight.loss", "gender", spread = "stdev", data=exercise_data, mean.line=F),
+                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-sd(z)}, fun.max = function(z) {mean(z)+sd(z)}, fun=median, linewidth = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+xxxx")
+  expect_identical(fit.function("weight.loss", "gender", spread = "stdev", data=exercise_data, mean.line=T),
+                   "stat_summary(fun='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(geom='errorbar', fun.min = function(z){mean(z)-sd(z)}, fun.max = function(z) {mean(z)+sd(z)}, fun=median, linewidth = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')+stat_summary(aes_string(group= axis[2]), geom=\"line\", fun=\"mean\", position=position_dodge(width=.5), color = \"#bf0303\")")
 })
 
 test_that("remove_nonlinear_terms works", {
