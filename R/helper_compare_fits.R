@@ -258,6 +258,7 @@ generate_quadriture = function(x, number_points = 15) {
 generate_predictions = function(model, re, pred.values, pred.type, report.se) {
 
   model.type = class(model)[1]
+
   if ((model.type == "lmerMod" | model.type == "glmerMod") & !re){
     return(data.frame(prediction = 
                  predict(model, pred.values, type="response", re.form=NA), model="fixed effects"))
