@@ -10,3 +10,18 @@ test_that("summary_function_depending_on_class works", {
   expect_true(summary_function_depending_on_class(letters[1:10]%>%as.factor) %>% is.factor)
   expect_true(summary_function_depending_on_class(letters[1:10]%>%ordered) %>% is.ordered)
 })
+
+test_that("identify_residualized_variables works", {
+  expect_equal(identify_residualized_variables(y~a+b+c, ~a), "y | b + c")
+  expect_equal(identify_residualized_variables(y~a+b+c, ~a+b), "y | c")
+  expect_equal(identify_residualized_variables(y~a+b+c, NULL), "y | a + b + c")
+  expect_equal(identify_residualized_variables(y~a+b+I(b^2), ~b + I(b^2)), "y | a")
+})
+  
+test_that("find_predictors_in_formula works", {
+  expect_equal(find_predictors_in_formula(y~a+b), "a + b")
+  expect_equal(find_predictors_in_formula(~a+b), "a + b")
+  expect_equal(find_predictors_in_formula(y+g~a+b), "a + b")
+  expect_equal(find_predictors_in_formula(y~1), "1")
+})
+

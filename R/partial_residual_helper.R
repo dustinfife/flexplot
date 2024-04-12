@@ -18,3 +18,16 @@ summary_function_depending_on_class = function(x) {
   return(x[1])
 }
 
+identify_residualized_variables = function(lm_formula, added_term) {
+  all_variables_in_model =                  paste0(lm_formula)[3] %>% strsplit("+", fixed=T) %>% unlist %>% trimws
+  added_term_variables   = find_predictors_in_formula(added_term) %>% strsplit("+", fixed=T) %>% unlist %>% trimws
+  residualized_variables = all_variables_in_model[!(all_variables_in_model %in% added_term_variables)]
+  y_label = paste0(paste0(lm_formula)[2], " | ", paste0(residualized_variables, collapse = " + "))
+  return(y_label)
+}
+
+find_predictors_in_formula = function(formula) {
+  string_of_formula = paste0(formula)
+  if (length(string_of_formula)==3) return(string_of_formula[3])
+  return(string_of_formula[2])
+}
