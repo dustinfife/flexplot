@@ -90,7 +90,8 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
   }
 
   # plot it
-  y_label = paste0(paste0(lm_formula)[2], " ~ ", paste0(lm_formula)[3])
+  # vector of conditioned variables
+  y_label = identify_residualized_variables(lm_formula, added_term)
 
   ## suppress smooth if they leave it on defaults
 

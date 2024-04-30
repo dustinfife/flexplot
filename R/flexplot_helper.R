@@ -205,7 +205,48 @@ make_prediction_dataset_same_type_on_x1 = function(data, prediction, axis1) {
   return(prediction)
 }
 
+convert_flexplot_string = function(plot_string, formula = NULL, predictors, outcome, axis){
+  
+}
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# reverse aesthetic params ->  "size = 3"
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+reverse_aes_params <- function(aes_params) {
+  if (length(aes_params) == 0) {
+    NULL
+  } else {
+    paste(names(aes_params), unname(aes_params), sep = "=", collapse = ", ")
+  }
+}
+
+reverse_mapping <- function(mapping) {
+  aes_args <- paste(names(mapping), stringr::str_sub(as.character(mapping), start=2), sep = "=", collapse = ", ")
+  aes_text <- glue::glue("aes({aes_args})")
+  aes_text
+}
+
+reverse_layer <- function(layer) {
+
+  geom_name <- ggplot2:::snakeize(class(layer$geom)[1])
+  
+  aes_text        <- reverse_mapping(layer$mapping)
+  aes_params_text <- reverse_aes_params(layer$aes_params)
+  geom_args <- paste(c(aes_text, aes_params_text), collapse = ", ")
+  
+  
+  glue::glue("{geom_name}({geom_args})")
+}
+
+reverse_ggplot <- function(p) {
+  layers <- p$layers %>% purrr::map_chr(reverse_layer)
+  plot_aes = paste(names(p$mapping), unname(p$mapping), sep="=", collapse=", ")
+  first_call = paste0("ggplot(data, aes(", plot_aes, "))")
+  plot_text <- paste(c(first_call, layers), collapse = "+\n")
+  return(plot_text)
+}
 
 
 #

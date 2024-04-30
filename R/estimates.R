@@ -250,6 +250,12 @@ estimates.glm = function(object, mc=FALSE){
   		coef.matrix[levs[non_referent_groups], "Prediction Difference (+/- 1 SD)"] = labeled_predicted_differences
 		#}
 	}
+  
+  # # return sensitivity/specificity table
+  # if (family(object)$link == "logit") {
+  #   sensitivity_specificity_table = sensitivity.table(object)%>%data.frame
+  # }
+  # 
 	
 	# give the referent group raw prediction if there's only one factor
 	if (length(factors)==1){
@@ -257,7 +263,7 @@ estimates.glm = function(object, mc=FALSE){
 	  referent_group_label = levs[referent_group]
 	  coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(referent_group_prediction, " (", referent_group_label, " prediction)")
 	}
-  attr(coef.matrix, "class") = "glm.estimates"
+  ##attr(coef.matrix, "class") = "glm.estimates"
 	return(coef.matrix)
 }
 

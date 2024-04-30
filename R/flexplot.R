@@ -103,7 +103,7 @@ flexplot = function(formula, data=NULL, related=F,
 		third.eye=NULL,
 		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), 
 		return_data = F, ...){
-
+  data_name = substitute(data)
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
   data = ff$data; formula =ff$formula
@@ -258,7 +258,12 @@ flexplot = function(formula, data=NULL, related=F,
 	final$formula = formula
 
 	if(plot.string){
-		return(total.call)
+	  plot_string = paste0(reverse_ggplot(final))
+	  plot_string = gsub("ggplot(data", paste0("ggplot(", deparse(data_name), ""), plot_string, fixed=T)
+		print(cat(plot_string))
+		
+		datasets = list(data=data, prediction=prediction)
+		return(datasets)
 	} 
 	
 	if (return_data) {
