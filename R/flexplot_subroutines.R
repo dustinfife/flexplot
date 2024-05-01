@@ -117,9 +117,9 @@ modify_association_plot_data = function(data, formula, outcome) {
     m = as.data.frame(table(data[,c(predictors, outcome)])); names(m)[1:(ncol(m)-1)] = c(predictors, outcome)
     loglin = glm(make.formula("Freq", c(predictors, outcome)), data=m, family=poisson)
     predicted = predict(loglin, type="response")
-    final.pred = (m$Freq - predicted)
+    final.pred = (m$Freq - predicted)/predicted
     m$Freq = final.pred
-    names(m)[names(m)=="Freq"] = "Frequency"
+    names(m)[names(m)=="Freq"] = "Proportion"
     return(m)
   }
   

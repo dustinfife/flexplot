@@ -11,14 +11,14 @@
     Code
       cat(flexplot_generate_prediction_lines(preds, c("x"), small))
     Output
-      geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), linewidth=1) + scale_linetype_manual(values=c("solid", "dotdash"))
+      geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model)) + scale_linetype_manual(values=c("solid", "dotdash"))
 
 ---
 
     Code
       cat(flexplot_generate_prediction_lines(preds, c("x", "a"), small))
     Output
-      geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), linewidth=1)
+      geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]))
 
 # flexplot_panel_variables works
 
@@ -123,7 +123,7 @@
     Code
       cat(flexplot_bivariate_string(small, "a", "b")$p)
     Output
-      ggplot(data=data, aes(x=!!sym(axis), y=!!sym('Frequency'), fill=!!sym(outcome))) + geom_bar(stat='identity', position='dodge') + theme_bw()
+      ggplot(data=data, aes(x=!!sym(axis), y=!!sym('Proportion'), fill=!!sym(outcome))) + geom_bar(stat='identity', position='dodge') + theme_bw()
 
 ---
 

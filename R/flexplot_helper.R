@@ -50,10 +50,10 @@ flexplot_generate_prediction_lines = function(prediction, axis, data){
   
   # if they give an axis 2, draw a line for each level of axis 2
   if (!is.na(axis[2])) {
-    return('geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]), linewidth=1)')
+    return('geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]))')
   }
   
-  return('geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model), linewidth=1) + scale_linetype_manual(values=c("solid", "dotdash"))')
+  return('geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model)) + scale_linetype_manual(values=c("solid", "dotdash"))')
 }
 
 #### flexplot function for paneling
@@ -150,7 +150,7 @@ flexplot_bivariate_string = function(data, outcome, axis,
   
   # association plot
   if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])) {
-    p = "ggplot(data=data, aes(x=!!sym(axis), y=!!sym('Frequency'), fill=!!sym(outcome))) + geom_bar(stat='identity', position='dodge') + theme_bw()"
+    p = "ggplot(data=data, aes(x=!!sym(axis), y=!!sym('Proportion'), fill=!!sym(outcome))) + geom_bar(stat='identity', position='dodge') + theme_bw()"
     points = "xxxx"
     fitted = "xxxx"
     return(list(p=p, points=points, fitted=fitted))
