@@ -61,4 +61,11 @@ test_that("flexplot bins when binned variable is very small", {
   vdiffr::expect_doppelganger("small_variable values", 
                               p)
 })
+
+test_that("flexplot with previous errors", {
+  p = flexplot(Sepal.Length~Sepal.Width + Petal.Length | Petal.Width, data=iris, 
+           ghost.line="red")
+  vdiffr::expect_doppelganger("ghost lines previous error", 
+                              p)
+})
 options(warn=0)

@@ -18,7 +18,12 @@ create_ghost_text = function(d_smooth, axis, outcome, prediction, ghost.line, gh
       if (length(grep("_binned", axis[2]))==0 & is.numeric(data[,axis[2]])){
         axis[2] = paste0(axis[2], "_binned")
       }
-      d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(levels(factor(data[,axis[2]]))))
+
+      # sometimes not all axis[2] groups show up in each panel. 
+      # if that's the case, line 25 throws an error. So we need to limit to the number that is available
+      # This is quite hacky because I don't know if there's a correspondence between labels and linetype here
+      total_n_of_lines = length(unique(d_smooth$linetype))
+      d_smooth[,axis[2]] = factor(d_smooth$linetype, labels=sort(unique(factor(data[,axis[2]])))[1:total_n_of_lines])
     }
     
 
