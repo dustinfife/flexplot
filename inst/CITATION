@@ -1,0 +1,16 @@
+citHeader("To cite flexplot in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "Flexplot: Graphically-based data analysis",
+  author   = "Fife, D. A.",
+  journal  = "Psychological Methods",
+  year     = "2022",
+  volume   = "27",
+  number   = "4",
+  pages    = 477-496,
+  url      = "doi.org/10.1037/met0000424",
+  textVersion = paste(
+
+  )
+)

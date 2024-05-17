@@ -34,7 +34,7 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
   #### set up parameters
   flex_Plot <- createJaspPlot(title = "Flexplot",  width = 600, height = 450)
   flex_Plot$dependOn(c("confidence", "dependent", "variables", "paneledVars", "ghostLines", "bw", "nameX", "nameY", "nameLegend", "nameRows", "nameCols"))
-  flex_Plot$addCitation("Fife, Dustin A. (2019). Flexplot (Version 0.9.2) [Computer software].")
+  flex_Plot$addCitation("Fife, D. A. (2022). Flexplot: Graphically-based data analysis. Psychological Methods, 27(4):477-496. doi: 10.1037/met0000424.")
 
   #### pre-populate the jasp object
   jaspResults[["flex_Plot"]] <- flex_Plot

@@ -1,7 +1,7 @@
 # library(jaspTools)
 # setPkgOption("module.dirs", "~/Documents/R Packages/flexplot")
-# options <- analysisOptions("~/Downloads/cat_dance_jasp.jasp")
-# results <- runAnalysis("flexplot_jasp2", "~/Downloads/cat_dance.csv", options)
+# options <- analysisOptions("~/Downloads/ghost.jasp")
+# results <- runAnalysis("flexplot_jasp2", "~/Downloads/data_2024-04-22_n37_num_scored.csv", options)
 # #
 #
 # library(jaspTools)
