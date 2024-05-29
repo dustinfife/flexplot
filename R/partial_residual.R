@@ -16,16 +16,20 @@
 #' partial_residual_plot(weight.loss~therapy.type,
 #'    lm_formula = weight.loss~therapy.type + motivation,
 #'    data=exercise_data)
-partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data,
+partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data=NULL,
                                  added_term = NULL, suppress_model=F, ...) {
 
   # error messages and data checking
   if (is.null(lm_formula) & is.null(model)) stop("You must provide either a lm formula or a model")
   if (is.null(lm_formula)) lm_formula = formula(model)
   if (!is.null(added_term)) check_all_variables_exist_in_data(all.vars(added_term), data)
+  if (is.null(data) & is.null(model)) stop("If you don't provide a dataset, you have to provide a model.")
   check_all_variables_exist_in_data(all.vars(plot_formula), data)
   check_all_variables_exist_in_data(all.vars(lm_formula), data)
   check_variables_in_lm(plot_formula, lm_formula, check_both = TRUE)
+  
+  # add dataset if null
+  if (is.null(data)) data = model$model
 
   # remove missing data
   variables = all.vars(lm_formula)
@@ -35,6 +39,8 @@ partial_residual_plot = function(plot_formula, lm_formula=NULL, model=NULL, data
 
   # compute the partial residuals
   residual = partial_residual(model, added_term)
+  
+  
   # replace original dv with residual
   data[,all.vars(lm_formula)[1]] = residual
 
