@@ -8,7 +8,7 @@
 #                  lme4::lmer(MathAch~Sex + (Sex | School), math),
 #                  T, sample=3, return_objects = T)
 # add_geoms_to_mixed_plot(objects$prediction, objects$step3, objects$object)
-add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
+add_geoms_to_mixed_plot = function(prediction, step3, object, formula, ...) {
   
   # get necessary objects
   d = object@frame
@@ -43,19 +43,12 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, ...) {
                                 ordered=T)
     }
     
-    # step3 + geom_line(data=newd, 
-    #                   aes_string(terms[1], outcome, group=term.re, color=term.re), alpha = .5)
-    # generate the geoms
-    random_geom = geom_line(data=newd, 
-                aes_string(terms[1], outcome, group=term.re, color=term.re), alpha = .5)
     
-    # if there are no random effects, we shouldn't do these. 
-    if (nrow(m)>0) {
-      fixed_geom  = geom_line(data=m, 
-                aes_string(terms[1], "prediction", color=NA, group=1), linetype=1, lwd=2, col="black") 
-    } else {
-      fixed_geom = NULL
-    }
+    # identify where the term.re is located
+    random_geom = add_random_geom(formula, term.re, newd, outcome)
+    
+    fixed_geom = add_fixed_geom(formula, term.re, m)
+    
     return(list(random_geom = random_geom, fixed_geom = fixed_geom))
   }  
   
@@ -135,7 +128,7 @@ mixed_model_plot = function(formula, object, random_plot, sample=3, return_objec
   # return the flexplot as the base
     step3 = flexplot(formula, data=data_sampled, suppress_smooth=T, ...)
     step3 = step3 +
-      add_geoms_to_mixed_plot(prediction, step3, object)
+      add_geoms_to_mixed_plot(prediction, step3, object, formula)
   
     #### remove legend if n>10
   if (sample>10){

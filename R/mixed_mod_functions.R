@@ -194,7 +194,58 @@ are_re_plotted = function (formula, term.re) {
   if (length(grep(term.re, f.char))>0) return(T) else return(F)
 }
 
+add_random_geom = function(formula, term.re, newd, outcome=NULL) {
+  # identify where the term.re is located
+  rhs = as.character(formula)[3]
+  terms = all.vars(formula)[-1]
+  if (is.null(outcome)) outcome = as.character(formula)[2]
+  
+  # when re is in second slot:
+  criteria = paste0("\\+[ ]?", term.re)
+  is_re_colored = grep(criteria, rhs)
+  if (length(is_re_colored)==1) return(geom_line(data=newd, 
+                                                 aes_string(terms[1], outcome, group=term.re, color=term.re), 
+                                                 alpha = .5))
+  
+  # when there's something in the second slot
+  criteria = paste0("\\+[^\\|]+\\|")
+  is_anything_colored = regmatches(rhs, regexpr(criteria, rhs, perl = TRUE)) 
 
+  if (length(is_anything_colored)==1) {
+    variable = sub("\\+", "", sub("\\|", "", is_anything_colored))
+    return(geom_line(data=newd, aes_string(terms[1], outcome, group=variable, color=variable), 
+                                                       alpha = .5))
+  }
+  random_geom = geom_line(data=newd, 
+                        aes_string(terms[1], outcome), alpha = .5)
+  
+}
+
+add_fixed_geom = function(formula, term.re, m) {
+  # if they don't want fixed effects displayed
+  if (nrow(m)==0) return(NULL)
+  
+  rhs = as.character(formula)[3]
+  terms = all.vars(formula)[-1]
+  
+  # when re is in second slot:
+  criteria = paste0("\\+[ ]?", term.re)
+  is_re_colored = grep(criteria, rhs)
+  if (length(is_re_colored)==1) return(geom_line(data=m, aes_string(terms[1], 
+                                                                    "prediction", color=NA, group=1), linetype=1, lwd=2, col="black"))
+    
+  # when another variable is in second slot
+  criteria = paste0("\\+[^\\|]+\\|")
+  is_anything_colored = regmatches(rhs, regexpr(criteria, rhs, perl = TRUE)) 
+  if (length(is_anything_colored)==1) {
+    variable = sub("\\+", "", sub("\\|", "", is_anything_colored)) %>% trimws()
+    return(geom_line(data=m, 
+                     aes_string(terms[1], "prediction", color=variable, group=variable, linetype=variable), lwd=2)) 
+  }
+  
+  return(geom_line(data=m, aes_string(terms[1], "prediction", color=NA, group=1), linetype=1, lwd=2, col="black"))
+
+}
 # converts numeric to ordinal when there's < 5 unique values
 convert_numeric_to_ordinal = function(data, term) {
   if (is.numeric(data[,term]) & length(unique(data[,term]))<5){
