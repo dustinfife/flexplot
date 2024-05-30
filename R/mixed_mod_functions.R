@@ -189,10 +189,9 @@ are_re_plotted = function (formula, term.re) {
   
   ### figure out where random component is
   f.char = as.character(formula)[3]
-  criteria = paste0("\\+.*", term.re)
-  
+
   ### if random component is in slot 2, modify the formula
-  if (length(grep(criteria, f.char))>0) return(T) else return(F)
+  if (length(grep(term.re, f.char))>0) return(T) else return(F)
 }
 
 

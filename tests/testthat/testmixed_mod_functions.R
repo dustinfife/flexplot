@@ -70,6 +70,7 @@ test_that("make_formula_mixed works", {
 })
 
 test_that("are_re_plotted works", {
+  expect_true(are_re_plotted(MathAch ~ SES | School, "School"))
   expect_true(are_re_plotted(y~a + b | c, "c"))
   expect_false(are_re_plotted(y~a + b | c, "d"))
   expect_false(are_re_plotted(y~a + I(b^2) | c, "d"))  

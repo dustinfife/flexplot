@@ -1,6 +1,6 @@
 context("model.comparison helper works")
 options(warn=-1)
-
+require(lme4)
 nlr = lm(weight.loss~motivation, data=exercise_data)
 nlf = lm(weight.loss~motivation + therapy.type, data=exercise_data)
 nnl = lm(weight.loss~health + therapy.type, data=exercise_data)
