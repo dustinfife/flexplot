@@ -30,8 +30,8 @@ gaussian_fit = glm(y_bin~x + z, data=small)
   usethis::use_data(gaussian_fit, overwrite=T)  
   
   
-  predict(full, newdata=list(gender=c("female", "male"), safety = rep(mean(tablesaw.injury$safety), times=2)), 
-          type="response")
+  # predict(full, newdata=list(gender=c("female", "male"), safety = rep(mean(tablesaw.injury$safety), times=2)), 
+  #         type="response")
 
 
 require(bluepill)
@@ -47,12 +47,14 @@ vars = list(
   id = paste0("Dr. ", LETTERS[1:5])
 )
 small_mixed = bluepill::mixed_model(fixed, random, sigma = .3, clusters=5, n_per = c(10,1), vars=vars)
+small_mixed$y_binary = cut(small_mixed$y, breaks = c(-Inf, 0, Inf))
 usethis::use_data(small_mixed, overwrite = T)
 small_mixed_mod = lme4::lmer(y~x + a + (1 | id), data=small_mixed)
 usethis::use_data(small_mixed_mod, overwrite = T)
-small_mixed$y_binary = cut(small_mixed$y, breaks = c(-Inf, 0, Inf))
 mixed_logistic = lme4::glmer(y_binary~x + a + (x | id), data=small_mixed, family="binomial")
+mixed_logistic_2f = lme4::glmer(y_binary~x + a + b + (x | id), data=small_mixed, family="binomial")
   usethis::use_data(mixed_logistic, overwrite=T)  
+  usethis::use_data(mixed_logistic_2f, overwrite=T)  
 
 
 x = rnorm(100)

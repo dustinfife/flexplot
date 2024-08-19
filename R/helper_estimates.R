@@ -151,7 +151,11 @@ anchor.predictions = function(model, reference, shutup=F){
   final.prediction = generate_grid_predictions(numeric.preds, factor.levs, average.predictions)
 
   # now predict
-  final.prediction$prediction = predict(model, final.prediction, type="response")
+  if (class(model)[1]=="glmerMod") {
+    final.prediction$prediction = predict(model, final.prediction, type="response",re.form=NA)  
+  } else {
+    final.prediction$prediction = predict(model, final.prediction, type="response")
+  }
 
   # rename predictions
   final.prediction[,numeric.included] = paste0(

@@ -8,10 +8,9 @@ partial_residual_plot(
   plot_formula,
   lm_formula = NULL,
   model = NULL,
-  data = NULL,
+  data,
   added_term = NULL,
   suppress_model = F,
-  add_mean = TRUE,
   ...
 )
 }
@@ -29,9 +28,9 @@ it will use the residuals from `model`.}
 
 \item{suppress_model}{A boolean. Should the model be suppressed? Defaults to T.}
 
-\item{add_mean}{Should the mean be added back to the residuals? Defaults to T.}
-
 \item{...}{Other arguments passed to flexplot}
+
+\item{add_mean}{Should the mean be added back to the residuals? Defaults to T.}
 }
 \value{
 a partial residual plot
@@ -40,7 +39,7 @@ a partial residual plot
 Partial Residual Plot
 }
 \examples{
-partial_residual_plot(weight.loss~therapy.type, 
-   lm_formula = weight.loss~therapy.type + motivation, 
+partial_residual_plot(weight.loss~therapy.type,
+   lm_formula = weight.loss~therapy.type + motivation,
    data=exercise_data)
 }

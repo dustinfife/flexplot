@@ -2,8 +2,7 @@ test_that("output_glm_predictions works", {
   mod = glm(y_bin~y + z + a, data=small, family="binomial") %>% suppressWarnings()
   expect_true(length(output_glm_predictions(mod, remove_interaction_terms(mod)))>0)
   mod = lme4::glmer(y_bin~y + z +  (z | a), data=small, family="binomial") %>% suppressWarnings()
-  expect_true(output_glm_predictions(mod, remove_interaction_terms(mod)) %>%is.na)
-  logistic_fit_interaction
+  #expect_true(output_glm_predictions(mod, remove_interaction_terms(mod)) %>% is.na)
 })
 
 test_that("n.func works", {
@@ -32,3 +31,4 @@ test_that("round_coefficient_matrix works", {
   expect_true(nchar(test_value)==5)
   expect_false(nchar(coef_matrix[1,1])==5)
 })
+

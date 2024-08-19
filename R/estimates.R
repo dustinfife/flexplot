@@ -52,34 +52,7 @@ estimates.lmerMod = function(object, mc=TRUE){
 
 
 
-#' Report glmerMod object Estimates (effect sizes and parameters)
-#'
-#' Report glmerMod object Estimates
-#' @param object a glmerMod object
-#' @param mc Should model comparisons be performed? Currently not used
-#' @return One or more objects containing parameter estimates and effect sizes
-#' @export
-estimates.glmerMod = function(object, mc=FALSE){
-  fixed = lme4::fixef(object)
-  rand = lme4::VarCorr(object)
-  
-  
-  # fit a baseline model
-  baseline = fit_baseline_model(object)
-  icc_stats = unlist(icc(baseline))
-  
-  # compute rsq 
-  rsq = model.comparison(object, baseline)$r_squared_change
-  
-  # return the objects
-  ret = list( fixed = fixed,
-              r.squared=rsq,
-              rand = rand, 
-              icc = icc_stats
-  )
-  attr(ret, "class") = "lmer_estimates"
-  return(ret)
-}
+
 
 
 

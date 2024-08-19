@@ -15,5 +15,6 @@ test_that("estimates from mixed models", {
   
   # generalized mixed model
   mod3 = lme4::glmer(y_gam~x + a + (1|b), data=small, family="Gamma")  
-  expect_true(all(names(estimates(mod3)) %in% c("fixed", "r.squared", "rand", "icc")))
+  expect_true(all(names(estimates(mod3)) %in% 
+                    c("raw.coefficients", "inverse.coef", "std.mult.coef", "Prediction Difference (+/- 1 SD)")))
 })  

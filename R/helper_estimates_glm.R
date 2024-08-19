@@ -1,13 +1,14 @@
 output_glm_predictions = function(object, terms) {
   #### output predictions
-
-  if (class(object)[1]=="glmerMod") return(NA)
+  if (class(object)[1]=="glmerMod") {
+    anchor.predictions(object, terms[1])
+  }
   preds = lapply(terms, n.func, object=object); names(preds) = terms
   return(preds)
 }
 
 n.func = function(term, object){
-  # this funciton returns predicted values at +/- 1 SD (for numeric)
+  # this function returns predicted values at +/- 1 SD (for numeric)
   anchor.predictions(object, term, shutup=T)$prediction
 }
 
@@ -33,6 +34,15 @@ output_coef_matrix_glm = function(object, preds=NULL, numbers=NULL) {
                             )
     return(coef.matrix)
   } 
+  
+  if (class(object)[1] == "glmerMod" & family(object)$link == "inverse"){
+    
+    coef.matrix = 
+      data.frame(raw.coefficients    = lme4::fixef(object), 
+                 inverse.coef  = 1/(lme4::fixef(object)), 
+                 std.mult.coef = 1/(standardized.beta(object, sd.y=F)))
+    return(coef.matrix)
+  }   
   
   if (family(object)$link=="logit"){
     coef.matrix = data.frame(raw.coefficients        = coef(object), 
