@@ -16,12 +16,14 @@
 #' marginal_plot(p)
 #' marginal_plot(p, rows=FALSE)
 marginal_plot = function(p, columns=TRUE, rows=TRUE, grand_mean=TRUE) {
-
+#browser()
   # return paneled variables
   paneled_variables = return_panel_vars(p$formula)
   
   # extract the dataset
   data = p$data
+  #ggplot_build(p)$data[[2]]
+  
   
   # make new formulae
   variables = all.vars(p$formula)

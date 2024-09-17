@@ -8,9 +8,10 @@ partial_residual_plot(
   plot_formula,
   lm_formula = NULL,
   model = NULL,
-  data,
+  data = NULL,
   added_term = NULL,
   suppress_model = F,
+  add_mean = TRUE,
   ...
 )
 }
