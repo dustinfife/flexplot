@@ -101,7 +101,6 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
   
   plot = match.arg(plot, c("all", "residuals", "model"))
   
-  
   d = object$model
   data = object$model
   variables = all.vars(formula(object))
@@ -134,7 +133,6 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
       
       
       f = make_flexplot_formula(predictors, outcome, data)
-      #step3 = flexplot(f, data=data, ...)+ labs(title="Analysis Plot")
       step3 = compare.fits(f, data=data, model1=object, ...) + labs(title="Analysis Plot")
       
       #class(step3) <- c("flexplot", class(step3))
