@@ -108,7 +108,7 @@ Form
 				DropDown
 				{
 					name: "theme"
-					values: ["JASP", "Black and white", "Minimal", "Classic", "Dark"]
+					values: ["JASP", "Black and white", "Minimal", "Classic", "Tron"]
 					label: qsTr("GGplot theme")
 				}
 				DropDown

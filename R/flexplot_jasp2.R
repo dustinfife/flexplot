@@ -100,11 +100,11 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
                             spread=whiskers[[options$intervals]],
                             jitter = jitter)
   plot <- theme_it(plot, options$theme)
-
+  
   # modify color palette
   if (options$palette!="GGplot Default") {
-    ops = c("Nature", "AAAS", "Lancet", "JCO", "Tron")
-    fun = c(ggsci::scale_color_npg(), ggsci::scale_color_aaas(), ggsci::scale_color_lancet(), ggsci::scale_color_jco(), ggsci::scale_color_tron())
+    ops = c("Nature", "AAAS", "Lancet", "JCO", "Tron", "Dark")
+    fun = c(ggsci::scale_color_npg(), ggsci::scale_color_aaas(), ggsci::scale_color_lancet(), ggsci::scale_color_jco(), ggsci::scale_color_tron(), ggsci::scale_color_tron())
     plot = plot + fun[ops == options$palette]
   }
     
