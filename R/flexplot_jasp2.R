@@ -44,24 +44,24 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
   }
 
   #### prepare the data for flexplot
-  k = data.frame(matrix(nrow=nrow(dataset), ncol=length(options$variables) + length(options$dependent) + length(options$paneledVars)))
-  names(k) = c(options$dependent, options$variables, options$paneledVars)
-  variables <- unlist(options$variables)
-  panels <- unlist(options$paneledVars)
-  if (length(panels)>0){
-    vars = c(variables, panels)
-  } else {
-    vars = variables
-  }
-  k[,1] = dataset[[encodeColNames(options$dependent)]]
-  if (length(vars)>0){		#### this statement is necessary to allow histograms
-    for (i in 2:(length(vars)+1)){
-      k[,i] = dataset[[encodeColNames(vars[i-1])]]
-    }
-  }
-  dv = encodeColNames(unlist(options$dependent));
-  v = encodeColNames(unlist(options$variables));
-  p = encodeColNames(unlist(options$paneledVars))
+  # k = data.frame(matrix(nrow=nrow(dataset), ncol=length(options$variables) + length(options$dependent) + length(options$paneledVars)))
+  # names(k) = c(options$dependent, options$variables, options$paneledVars)
+  # variables <- unlist(options$variables)
+  # panels <- unlist(options$paneledVars)
+  # if (length(panels)>0){
+  #   vars = c(variables, panels)
+  # } else {
+  #   vars = variables
+  # }
+  # k[,1] = dataset[[encodeColNames(options$dependent)]]
+  # if (length(vars)>0){		#### this statement is necessary to allow histograms
+  #   for (i in 2:(length(vars)+1)){
+  #     k[,i] = dataset[[encodeColNames(vars[i-1])]]
+  #   }
+  # }
+  dv = (unlist(options$dependent));
+  v = (unlist(options$variables));
+  p = (unlist(options$paneledVars))
 
   if (length(options$variables)==0){
     formula = as.formula(paste0(dv, "~1"))

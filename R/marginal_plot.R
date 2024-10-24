@@ -5,7 +5,7 @@
 #' @param p A flexplot graphic that has paneled variables. 
 #' @param columns Logical. Should column panels be plotted?
 #' @param rows Logical. Should row panels be plotted? 
-#' @param grand_mean Logical. Stating TRUE will generate a simple bivariate plot between X and Y
+#' @param grand_5mean Logical. Stating TRUE will generate a simple bivariate plot between X and Y
 #'
 #' @return A graphic with marginal plots
 #' @export
