@@ -7,7 +7,6 @@ test_that("flexplot with logistic regression works", {
   vdiffr::expect_doppelganger(
     "logistic: character outcome", 
     flexplot(y_char~x, data=small_logistic, method="logistic"))
-  
   # logistic with 1/0
   vdiffr::expect_doppelganger(
     "logistic: 0/1 outcome", 

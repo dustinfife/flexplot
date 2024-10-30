@@ -17,19 +17,44 @@ factor.to.logistic = function(data, outcome, method=NULL, labels=F){
     return(data)
   }
   
-  # the rest are just regular factors
-  data[,outcome] = factor(data[,outcome], levels=unique(data[,outcome]), labels=c(0,1)) %>%
-    as.character() %>%
-    as.numeric() 
-  return(data)
+  # if they have yes and no, convention is to put yes at the top of the y axis
   
+
+  #(glm will predict the *second* level, so we need to reverse it)
+  #the rest are just regular factors
+  data[,outcome] = factor(data[,outcome], levels=unique(data[,outcome]), labels=rev(c(0,1))) %>%
+    as.character() %>%
+    as.numeric()
+  return(data)
 }
+
+
+
+# reverse_yes_and_no_in_logistic = function(data, outcome) {
+#   current_levels = levels(data[,outcome])
+#   
+#   if (all(c("yes", "no") %in% current_levels) | 
+#       all(c("Yes", "No") %in% current_levels) |
+#       all(c("YES", "NO") %in% current_levels) |
+#       all(c("Y", "N") %in% current_levels)) {
+#     
+#     new_dv = factor(data[,outcome], levels=rev(levels(data[,outcome])), labels=c(0,1)) 
+#     return(new_dv)
+#   } else {
+#     data[,outcome] = factor(data[,outcome], levels=unique(data[,outcome]), labels=rev(c(0,1))) %>%
+#       as.character() %>%
+#       as.numeric() 
+#     return(data[,outcome])
+#   }
+#   
+# }
 
 return_labels_for_logistic_regression = function(data, outcome, method) {
   if (method != "logistic")                  return(NULL)
   if (length(unique(data[,outcome]))!=2)     return(NULL)
   if (class(data[,outcome])[1] == "ordered") return(levels(data[,outcome]))
   if (is.numeric(data[,outcome]))            return(sort(unique(data[,outcome])))
+  # R predicts the second of the factors
   return(sort(unique(data[,outcome]), decreasing = F))
 }  
 

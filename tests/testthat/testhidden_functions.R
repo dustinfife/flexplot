@@ -104,7 +104,7 @@ test_that("points.func works",{
 test_that("factor.to.logistic works", {
   expect_equal(levels(factor.to.logistic(exercise_data, "therapy.type")$therapy.type), c("control", "cog", "beh"))
   expect_equal(length(levels(factor.to.logistic(exercise_data, "gender", labels=T))), 2)
-  expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="logistic")$gender), c(0,1))
+  expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="logistic")$gender), c(1,0))
   expect_equal(unique(factor.to.logistic(exercise_data, "gender", method="loess")$gender)%>%as.character, c("female", "male"))
   expect_equal(unique(factor.to.logistic(small, "y_bin")$y_bin), c(1,0))
 })
