@@ -1,3 +1,4 @@
+
 ##' Compute the ICC from a lmer (package lme4) model
 ##'
 ##' This function will extract the variances from a mixed model and output the value of the ICC

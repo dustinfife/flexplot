@@ -216,53 +216,9 @@ estimates.glm = function(object, mc=FALSE){
   preds = output_glm_predictions(object, terms)
 	
 	#### output coefficients
-  coef.matrix = output_coef_matrix_glm(object, preds, numbers)
+  coef.matrix = compute_factor_differences(object=object)
   
-  if (!is.na(preds)[1] & length(numbers)>0){
-    
-    # input +/- 1 SD prediction for all numeric variables
-    predicted_difference_of_one_SD = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
-    coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = predicted_difference_of_one_SD
-    
-    coef.matrix = round_coefficient_matrix(coef.matrix)
-  }
 
-	if (length(factors) == 0) return(coef.matrix)
-	
-	# loop through all factors and input their predictions
-	for (i in 1:length(factors)){
-	  
-		current_factor_predictions = unlist(preds[factors[i]])
-		levs = unique(d[,factors[i]]); levs = paste0(factors[i], levs)
-
-		# find that level in the coef.matrix
-		non_referent_groups = (levs %in% row.names(coef.matrix)); 
-		referent_group = !non_referent_groups
-		
-		#if (length(which(non_referent_groups))>0) {
-  		
-		  #compute differences between referent group and other levels
-		  predicted_differences = round_string(unlist(current_factor_predictions)[which(non_referent_groups)] - 
-		                                       unlist(current_factor_predictions)[which(referent_group)], digits=2)
-		  labeled_predicted_differences = paste0(predicted_differences, " (relative to ", levs[referent_group], ")")
-		
-		    # fill in for non-referent groups
-  		coef.matrix[levs[non_referent_groups], "Prediction Difference (+/- 1 SD)"] = labeled_predicted_differences
-		#}
-	}
-  
-  # # return sensitivity/specificity table
-  # if (family(object)$link == "logit") {
-  #   sensitivity_specificity_table = sensitivity.table(object)%>%data.frame
-  # }
-  # 
-	
-	# give the referent group raw prediction if there's only one factor
-	if (length(factors)==1){
-	  referent_group_prediction = round_string(unlist(current_factor_predictions)[referent_group], digits=2)
-	  referent_group_label = levs[referent_group]
-	  coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(referent_group_prediction, " (", referent_group_label, " prediction)")
-	}
   ##attr(coef.matrix, "class") = "glm.estimates"
 	return(coef.matrix)
 }
@@ -277,35 +233,27 @@ estimates.glm = function(object, mc=FALSE){
 #' @return Estimates for a zero inflated model
 #' @export
 estimates.zeroinfl = function(object, mc=FALSE){
-	
-	#### get dataset
-	d = object$model
-	
-	#### generate list of coefficients
-	terms = attr(terms(object), "term.labels")
-	
-	#### identify factors
-	if (length(terms)>1){
-		factors = names(which(unlist(lapply(d[,terms], is.factor))));
-		numbers = names(which(unlist(lapply(d[,terms], is.numeric))));
-	} else {
-		factors = terms[which(is.factor(d[,terms]))]
-		numbers = terms[which(is.numeric(d[,terms]))]
-	}	
-	
-	#### output predictions
-	n.func = function(term){anchor.predictions(object, term, shutup=T)$prediction}
-	preds = lapply(terms, n.func); names(preds) = terms
-	
-	#### output coefficients
-	coef.matrix = data.frame(A = coef(object)[1:(length(terms)+1)], 
-							B = coef(object)[(length(terms)+2):length(coef(object))])
-	names(coef.matrix) = c(object$dist, object$link)
-	row.names(coef.matrix) = subsetString(row.names(coef.matrix), "_", 2)
-	coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
-	
-	coef.matrix
-	
+  coef.matrix = compute_factor_differences(object=object)
+  
+  #### generate list of coefficients
+  terms = remove_interaction_terms(object)
+  
+  #### get dataset
+  d = extract_data_from_fitted_object(object)
+  
+  factor_or_number = which_terms_are_factors_or_numbers(d, terms)
+  numbers = factor_or_number$numbers
+  factors = factor_or_number$factors
+  
+  if (length(factors)==0) return(coef.matrix)
+  factors_equation = make.formula(names(d)[1], factors)
+  preds_factors = generate_predictors(d, factors_equation, object) %>%
+    .[!duplicated(.),] %>%
+    `rownames<-`( NULL ) 
+  preds_factors$prediction = predict(object, preds_factors)
+  preds_factors$logit      = predict(object, preds_factors, type="zero")
+  
+  return(list(coef.matrix=coef.matrix, means = preds_factors))
 }
 
 

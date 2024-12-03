@@ -191,8 +191,8 @@ return_constant_for_predicted_data = function(missing_variable, data, model) {
   
   if (length(missing_variable)==0) return(NA)
   if (is.numeric(data[,missing_variable])) {
-    message(paste0("Note: You didn't choose to plot ", missing_variable, " so I am inputting the median\n"))
-    data[,missing_variable] = median(data[,missing_variable], na.rm=T)
+    message(paste0("Note: You didn't choose to plot ", missing_variable, " so I am inputting the mean\n"))
+    data[,missing_variable] = mean(data[,missing_variable], na.rm=T)
     return(data[,missing_variable])
   }
   

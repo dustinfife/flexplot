@@ -14,8 +14,12 @@ marginal_plot(p, columns = TRUE, rows = TRUE, grand_mean = TRUE)
 \item{rows}{Logical. Should row panels be plotted?}
 
 \item{grand_mean}{Logical. Stating TRUE will generate a simple bivariate plot between X and Y}
+
+\item{grand_5mean}{Logical. Stating TRUE will generate a simple bivariate plot between X and Y}
 }
 \value{
+A graphic with marginal plots
+
 A graphic with marginal plots
 }
 \description{
@@ -23,6 +27,13 @@ This function takes as an argument a regular flexplot graphic that has panels, t
 This makes it easier to see the average effect across the rows (or columns).
 }
 \examples{
+p = flexplot(weight.loss~motivation | gender + rewards, data=exercise_data)
+marginal_plot(p)
+marginal_plot(p, rows=FALSE)
+Create "margin plots"
+
+This function takes as an argument a regular flexplot graphic that has panels, then plots the "marginal" relationships for the panels. 
+This makes it easier to see the average effect across the rows (or columns). 
 p = flexplot(weight.loss~motivation | gender + rewards, data=exercise_data)
 marginal_plot(p)
 marginal_plot(p, rows=FALSE)
