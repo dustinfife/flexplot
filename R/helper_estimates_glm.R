@@ -15,10 +15,9 @@ compute_factor_differences = function(preds=NULL, factors=NULL, coef.matrix=NULL
     mutate(`Prediction Difference (+/- 1 SD)` = NA)
   
   if (!is.na(preds)[1] & length(numbers)>0){
-    
     # input +/- 1 SD prediction for all numeric variables
     predicted_difference_of_one_SD = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
-    coef.matrix[row.names(coef.matrix)==numbers,"Prediction Difference (+/- 1 SD)"] = predicted_difference_of_one_SD
+    coef.matrix[row.names(coef.matrix)%in%numbers,"Prediction Difference (+/- 1 SD)"] = predicted_difference_of_one_SD
     
     coef.matrix = round_coefficient_matrix(coef.matrix)
   }
