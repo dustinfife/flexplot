@@ -1,7 +1,7 @@
 compute_factor_differences = function(preds=NULL, factors=NULL, coef.matrix=NULL, d=NULL, object=NULL){
 
   if (is.null(preds)) {
-    d = extract_data_from_fitted_object(object)
+    d = extract_data_from_fitted_object(object) %>% data.frame
     terms = remove_interaction_terms(object)
     preds = output_glm_predictions(object, terms)
     factor_or_number = which_terms_are_factors_or_numbers(d, terms)
@@ -91,6 +91,11 @@ output_coef_matrix_zeroinf = function(object, return.others=FALSE) {
                            B = coefficients_zi[zeroinf_rows]) 
   names(coef.matrix) = c(object$dist, object$link)
   row.names(coef.matrix) = subsetString(row.names(coef.matrix), "_", 2)
+  coef.matrix$multiplicative.coefficient = exp(coef.matrix[,1])
+  coef.matrix$OR = exp(coef.matrix$logit)
+  coef.matrix = coef.matrix %>%
+    select(names(coef.matrix)[1], "multiplicative.coefficient", "logit", "OR") %>%
+    round(digits=3)
   if (length(numbers)>0) {
     coef.matrix[numbers,"Prediction Difference (+/- 1 SD)"] = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
   }
