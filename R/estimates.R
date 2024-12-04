@@ -207,7 +207,7 @@ estimates.glm = function(object, mc=FALSE){
 	terms = remove_interaction_terms(object)
 	
 	#### get dataset
-	d = extract_data_from_fitted_object(object)
+	d = extract_data_from_fitted_object(object) %>% data.frame
 	factor_or_number = which_terms_are_factors_or_numbers(d, terms)
 	numbers = factor_or_number$numbers
 	factors = factor_or_number$factors

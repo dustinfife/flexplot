@@ -47,7 +47,7 @@ return_averages = function(model, not_included, shutup=FALSE) {
   if (length(not_included)==0 | is.null(not_included)) return(NULL)
 
   # get necessary objects
-  d = extract_data_from_fitted_object(model)
+  d = extract_data_from_fitted_object(model) %>% data.frame
   factors = return_factors_names(model)
 
   if (!shutup){
@@ -128,7 +128,7 @@ generate_grid_predictions = function(numeric.preds, factor.levs, average.predict
 anchor.predictions = function(model, reference, shutup=F){
 
   # extract dataset/terms
-  d = extract_data_from_fitted_object(model)
+  d = extract_data_from_fitted_object(model) %>% data.frame
   terms = remove_interaction_terms(model)
 
   # figure out which terms need to be aggregated across
@@ -147,7 +147,7 @@ anchor.predictions = function(model, reference, shutup=F){
 
   # create function to return +/- 1 standard deviation
   numeric.preds = generate_numeric_predictions(numeric.included, d)
-
+  
   # generate predictors for final prediction
   final.prediction = generate_grid_predictions(numeric.preds, factor.levs, average.predictions)
 
