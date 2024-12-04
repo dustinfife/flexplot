@@ -78,7 +78,7 @@ generate_numeric_predictions = function(numeric_variables, d) {
   if (length(numeric_variables)<1) return(NULL)
   if (length(numeric_variables)> 1) return(lapply(d[,numeric_variables], return_plus_minus_one_sd))
   if (length(numeric_variables)==1){
-    numeric.preds = list(return_plus_minus_one_sd(d[,numeric_variables]))
+    numeric.preds = list(return_plus_minus_one_sd(d[[numeric_variables]]))
     names(numeric.preds)[[1]] = numeric_variables
     return(numeric.preds)
   }
