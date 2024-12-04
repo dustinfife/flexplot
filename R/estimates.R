@@ -208,11 +208,9 @@ estimates.glm = function(object, mc=FALSE){
 	
 	#### get dataset
 	d = extract_data_from_fitted_object(object)
-	
 	factor_or_number = which_terms_are_factors_or_numbers(d, terms)
 	numbers = factor_or_number$numbers
 	factors = factor_or_number$factors
-	
   preds = output_glm_predictions(object, terms)
 	
 	#### output coefficients

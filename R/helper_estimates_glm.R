@@ -59,7 +59,7 @@ compute_factor_differences = function(preds=NULL, factors=NULL, coef.matrix=NULL
 
 find_coef_matrix = function(object) {
   if (class(object)[1] == "zeroinfl") return(output_coef_matrix_zeroinf(object))
-  if (class(object)[1] == "glm") return(output_coef_matrix_glm(object))
+  if ("glm" %in% class(object)) return(output_coef_matrix_glm(object))
 }
 
 output_coef_matrix_zeroinf = function(object, return.others=FALSE) {

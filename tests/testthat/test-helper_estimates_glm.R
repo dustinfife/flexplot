@@ -1,3 +1,4 @@
+options(warn=-1)
 test_that("compute_factor_differences works", {
   expect_equal("ab", 
                compute_factor_differences(object = glm(y_bin~z + a, data=small, family="binomial")) %>% 
@@ -15,6 +16,7 @@ test_that("compute_factor_differences works", {
 test_that("find_coef_matrix works", {
   expect_equal("ab", find_coef_matrix(glm(y_bin~a + z, data=small)) %>% row.names %>% .[2])
   expect_equal("poisson", find_coef_matrix(pscl::zeroinfl(y_pois~a + z, data=small)) %>% names %>% .[1])
+  expect_equal("multiplicative.coef", find_coef_matrix(MASS::glm.nb(y_pois~a + z, data=small)) %>% names %>% .[2])
 })
 
 test_that("output_coef_matrix_zeroinf works", {
@@ -57,4 +59,4 @@ test_that("round_coefficient_matrix works", {
   expect_true(nchar(test_value)==5)
   expect_false(nchar(coef_matrix[1,1])==5)
 })
-
+options(warn=0)
