@@ -10,9 +10,11 @@ compute_factor_differences = function(preds=NULL, factors=NULL, coef.matrix=NULL
     coef.matrix = find_coef_matrix(object)
   }
   
-  coef.matrix = coef.matrix %>%
-    data.frame %>%
-    mutate(`Prediction Difference (+/- 1 SD)` = NA)
+  if (!("Prediction Difference (+/- 1 SD)" %in% names(coef.matrix))) {
+    coef.matrix = coef.matrix %>%
+      data.frame %>%
+      mutate(`Prediction Difference (+/- 1 SD)` = NA)
+  }
   
   if (!is.na(preds)[1] & length(numbers)>0){
     # input +/- 1 SD prediction for all numeric variables
