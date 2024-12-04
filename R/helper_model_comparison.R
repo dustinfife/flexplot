@@ -8,6 +8,7 @@ get_p_value = function(model1, model2, nested=TRUE) {
   if (class(model1)[1]=="lm") return(sort(anova(model1, model2)[,"Pr(>F)"]))
   if (class(model1)[1]=="glm") return(sort(anova(model1, model2, test="LRT")[,"Pr(>Chi)"]))
   if (class(model1)[1]=="glmerMod" | class(model1)[1] == "lmerMod") return(sort(anova(model1, model2, test="LRT")[,"Pr(>Chisq)"]))
+  if (class(model1)[1]=="zeroinfl") return(pchisq(logLik(mod1)-logLik(mod2), df=1, lower.tail=F))
 }
 
 get_r_squared = function(model1, model2, nested=TRUE){
