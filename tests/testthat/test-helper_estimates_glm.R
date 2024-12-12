@@ -11,6 +11,10 @@ test_that("compute_factor_differences works", {
     names %>%
     .[1])
   
+  ## for ordinal variables with logistic regression
+  mod = glm(y_bin~a + z, data=small %>% mutate(a = factor(a, ordered=T)))
+  expect_equal("a.L", row.names(compute_factor_differences(object = mod))[2])
+  
 })
 
 test_that("find_coef_matrix works", {
@@ -22,7 +26,7 @@ test_that("find_coef_matrix works", {
 test_that("output_coef_matrix_zeroinf works", {
   expect_equal(output_coef_matrix_zeroinf(pscl::zeroinfl(y_bin~z+b, data=small)) %>% nrow, 4)
   expect_equal(output_coef_matrix_zeroinf(pscl::zeroinfl(y_bin~z, data=small)) %>% nrow, 2)
-  expect_equal(output_coef_matrix_zeroinf(pscl::zeroinfl(y_bin~a+b, data=small)) %>% ncol, 2)
+  expect_equal(output_coef_matrix_zeroinf(pscl::zeroinfl(y_bin~a+b, data=small)) %>% ncol, 4)
 })
 
 test_that("output_glm_predictions works", {
