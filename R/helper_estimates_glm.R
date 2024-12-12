@@ -49,11 +49,14 @@ compute_factor_differences = function(preds=NULL, factors=NULL, coef.matrix=NULL
   }
   
   # give the referent group raw prediction if there's only one factor
-  if (length(factors)==1){
-    referent_group_prediction = round_string(unlist(current_factor_predictions)[referent_group], digits=2)
-    referent_group_label = levs[referent_group]
-    coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(referent_group_prediction, " (", referent_group_label, " prediction)")
-  }
+  if (length(factors)!=1) return(coef.matrix)
+  if (class(d[,factors])[1] == "ordered") return(coef.matrix)
+
+  # if there's one factor
+  referent_group_prediction = round_string(unlist(current_factor_predictions)[referent_group], digits=2)
+  referent_group_label = levs[referent_group]
+  coef.matrix[1,"Prediction Difference (+/- 1 SD)"] = paste0(referent_group_prediction, " (", referent_group_label, " prediction)")
+
   
   return(coef.matrix)
 }
