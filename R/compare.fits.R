@@ -156,13 +156,14 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (return.preds){
     prediction.model
   } else {
-    # at one time, I was adding one to the predictions. WHY??????
-    # ### for logistic, add one to the predictions
-    # if (model1.type == "glm" ) {
-    #   if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
-    #     prediction.model$prediction = prediction.model$prediction + 1
-    #   }
-    # } 
+    
+    ### for logistic and factor outcome variable, add one to the predictions
+    # (otherwise the fitted line falls below the range of y values)
+    if (model1.type == "glm" ) {
+      if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
+        prediction.model$prediction = prediction.model$prediction + 1
+      }
+    }
 
     final_geom = return_lims_geom(outcome, data, model1)
     # remove duplicate rows
@@ -170,6 +171,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     #when we have an intercept only model
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
     
+    # if outcome is a factor, for logistic regresion
 
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
