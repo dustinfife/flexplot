@@ -225,7 +225,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   if (length(terms)!=0)  generated.formula = flexplot:::make_flexplot_formula(terms, encodeColNames(options$dependent), linmod_results$model$model)
 
   if	(options$ghost & length(options$variables)<4){
-    ghost=rgb(1,0,0,.4)
+    ghost="gray"
     if (options$bw) ghost = "gray"
   } else {
     ghost = NULL

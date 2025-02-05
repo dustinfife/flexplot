@@ -134,7 +134,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   generated.formula = make_flexplot_formula(terms, encodeColNames(options$dependent), dataset)
   
   if	(options$ghost & length(options$variables)<4){
-    ghost=rgb(1,0,0,.4)
+    ghost="grey"
   } else {
     ghost = NULL
   }
