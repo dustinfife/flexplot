@@ -416,22 +416,24 @@ flexplot_convert_to_categorical = function(data, axis, pred=FALSE){
   if (length(axis)==0 | axis[1] == "1") return(data)
   
   # if x axis has less than 5 levels, convert to ordered factor
-  numeric_x = is.numeric(data[,axis[1]])
-  x_less_than_five = length(unique(data[,axis[1]]))<5
-  if (numeric_x & x_less_than_five) data[,axis[1]] = factor(data[,axis[1]], ordered=T)
+  data = convert_if_less_than_five(data, axis[1])
     
   # return data if they only have one axis
   if (length(axis) == 1) return(data)
   
   # if axis 2 has less than 5 levels, also convert to ordered factor
-  numeric_x2 = is.numeric(data[,axis[2]])
-  x2_less_than_five = length(unique(data[,axis[2]]))<5
-  if (numeric_x2 & x2_less_than_five  & !pred)  data[,axis[2]] = factor(data[,axis[2]], ordered=T)
+  data = convert_if_less_than_five(data, axis[2], check_pred = TRUE, pred = pred)
       
   return(data)
 }
 
-
+convert_if_less_than_five = function(data, col, check_pred = FALSE, pred = NULL) {
+  # Check if conversion conditions are met.
+  if (is.numeric(data[, col]) && length(unique(data[, col])) < 5 && (!check_pred || !pred)) {
+    data[, col] <- factor(data[, col], ordered = TRUE)
+  }
+  data
+}
 
 # uni = flexplot_bivariate_plot(weight.loss~1, data=exercise_data)$p
 # expect_identical(uni, "ggplot(data=data, aes_string(outcome)) + geom_histogram(fill=\"lightgray\", col=\"black\", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)")
