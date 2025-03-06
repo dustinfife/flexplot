@@ -412,20 +412,22 @@ flexplot_delete_na = function(data, variables){
 #expect_false(is.ordered(flexplot_convert_to_categorical(data, axis=NULL)$gender))
 flexplot_convert_to_categorical = function(data, axis, pred=FALSE){
 
-  #### if they only have a few levels on the x axis, convert it to categorical
-  #if (length(axis)==0 | axis[1] == 0)
-  if (length(axis)>0 & axis[1] != "1"){
-    if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){
-      data[,axis[1]] = factor(data[,axis[1]], ordered=T)
-    }
+  # do nothing if they're doing a histogram
+  if (length(axis)==0 | axis[1] == "1") return(data)
+  
+  # if x axis has less than 5 levels, convert to ordered factor
+  numeric_x = is.numeric(data[,axis[1]])
+  x_less_than_five = length(unique(data[,axis[1]]))<5
+  if (numeric_x & x_less_than_five) data[,axis[1]] = factor(data[,axis[1]], ordered=T)
     
-    ### do the same for the second axis
-    if (length(axis)>1){
-      if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5 & !pred){
-        data[,axis[2]] = factor(data[,axis[2]], ordered=T)
-      }		
-    }
-  }
+  # return data if they only have one axis
+  if (length(axis) == 1) return(data)
+  
+  # if axis 2 has less than 5 levels, also convert to ordered factor
+  numeric_x2 = is.numeric(data[,axis[2]])
+  x2_less_than_five = length(unique(data[,axis[2]]))<5
+  if (numeric_x2 & x2_less_than_five  & !pred)  data[,axis[2]] = factor(data[,axis[2]], ordered=T)
+      
   return(data)
 }
 
