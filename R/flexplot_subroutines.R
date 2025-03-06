@@ -203,7 +203,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   data = flexplot_delete_na(data, variables)
 
   ### convert variables with < 5 categories to ordered factors
-  data = flexplot_convert_to_categorical(data, axis)
+  data = flexplot_convert_to_categorical(data, axis, pred.data)
 
   ### prevent univariates from binning numeric variables with <5 levels
   data = modify_univariate_data_numeric(data=data, axis=axis, outcome=outcome)
@@ -410,9 +410,10 @@ flexplot_delete_na = function(data, variables){
 #expect_true(is.ordered(flexplot_convert_to_categorical(data %>% mutate(gender = as.numeric(gender)), "gender")$gender))
 #expect_true(is.ordered(flexplot_convert_to_categorical(data %>% mutate(gender = as.numeric(gender)), c("therapy.type", "gender"))$gender))
 #expect_false(is.ordered(flexplot_convert_to_categorical(data, axis=NULL)$gender))
-flexplot_convert_to_categorical = function(data, axis){
+flexplot_convert_to_categorical = function(data, axis, pred=FALSE){
 
   #### if they only have a few levels on the x axis, convert it to categorical
+  #if (length(axis)==0 | axis[1] == 0)
   if (length(axis)>0 & axis[1] != "1"){
     if (is.numeric(data[,axis[1]]) & length(unique(data[,axis[1]]))<5){
       data[,axis[1]] = factor(data[,axis[1]], ordered=T)
@@ -420,7 +421,7 @@ flexplot_convert_to_categorical = function(data, axis){
     
     ### do the same for the second axis
     if (length(axis)>1){
-      if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5){
+      if (is.numeric(data[,axis[2]]) & length(unique(data[,axis[2]]))<5 & !pred){
         data[,axis[2]] = factor(data[,axis[2]], ordered=T)
       }		
     }
