@@ -132,9 +132,9 @@ sensitivity.table = function(object){
   }
   
   TP = predmat[2,2]
-  FP = predmat[2,1]
+  FP = predmat[1,2]
   TN = predmat[1,1]
-  FN = predmat[1,2]
+  FN = predmat[2,1]
   sens = TP/(TP+FN)
   spec = TN/(TN + FP)
   ppv = TP/(FP+TP)
