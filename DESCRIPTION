@@ -1,7 +1,7 @@
 Package: flexplot
 Type: Package
 Title: Graphically Based Data Analysis Using 'flexplot'
-Version: 0.23
+Version: 0.23.1
 Author: Dustin Fife
 Maintainer: Dustin Fife <fife.dustin@gmail.com>
 Description: The 'flexplot' suite is a graphically-based set of tools for doing data analysis. 'flexplot' allows users to specify a formula and the software automatically chooses what sort of graphic to present. Analysis can be paired with visuals using the visualize() function, such that the software will choose an appropriate graphic to match an R model object.

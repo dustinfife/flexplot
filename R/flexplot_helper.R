@@ -75,7 +75,7 @@ flexplot_generate_prediction_lines = function(prediction, axis, data){
   
   # if they give an axis 2, draw a line for each level of axis 2
   if (!is.na(axis[2])) {
-    return('geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]))')
+    return('geom_line(data= prediction, aes(linetype=.data[[axis[2]]], y=.data[["prediction"]], colour=.data[[axis[2]]]))')
   }
   
   return('geom_line(data= prediction, aes(linetype=model, y=prediction, colour=model)) + scale_linetype_manual(values=c("solid", "dotdash"))')

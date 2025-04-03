@@ -18,7 +18,7 @@
     Code
       cat(flexplot_generate_prediction_lines(preds, c("x", "a"), small))
     Output
-      geom_line(data= prediction, aes_string(linetype=axis[2], y="prediction", colour=axis[2]))
+      geom_line(data= prediction, aes(linetype=.data[[axis[2]]], y=.data[["prediction"]], colour=.data[[axis[2]]]))
 
 # flexplot_panel_variables works
 

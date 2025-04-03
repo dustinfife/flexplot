@@ -136,7 +136,7 @@ test_that("standardized difference works", {
 
 test_that("sensitivity.table works", {
   small = glm(died~minutes.fighting, data=avengers, family=binomial)
-  expect_true(sensitivity.table(small)$npv == 0)
+  expect_true(sensitivity.table(small)$spec == 0)
   set.seed(232)
   rfmod = party::cforest(died~minutes.fighting, data=avengers, control = party::cforest_unbiased(ntree=10))
   expect_true(sensitivity.table(rfmod)$acc %>% round(2) ==.88)

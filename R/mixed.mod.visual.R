@@ -65,7 +65,7 @@ mixed.mod.visual = function(formula, data, model, n=6, jitter=F){
 	##### plot it
 	### if it's categorical
 	if (is.factor(data[,predictors[1]])){
-		ggplot(data=d_new, aes_string(predictors[1], outcome)) +
+		ggplot(data=d_new, aes(.d_new[[predictors[1]]], .d_new[[outcome]])) +
 			jit +
 			#geom_abline(aes(slope=fixed.slope, intercept=fixed.intercept), col="red", size=2) +
 			geom_point(data=preds, aes_string(predictors, outcome), col="red", size=4) + #### fixed effect line
