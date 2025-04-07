@@ -1,5 +1,83 @@
 context("helper_estimates")
 
+test_that("return_logistic_coefficients works", {
+  expect_true(length(return_logistic_coefficients(lme4::glmer(y_bin~x + (1|a), data=small, family=binomial))) == 2)
+  expect_true(length(return_logistic_coefficients(        glm(y_bin~x + a    , data=small, family=binomial))) == 3)
+  expect_error(return_logistic_coefficients(        glm(y_bin~x + a    , data=small)))
+  coefs = return_logistic_coefficients(lme4::glmer(y_bin ~ x + (1 | a), data = small, family = binomial))
+  expect_type(coefs, "double")
+  expect_named(coefs)
+  expect_true("x" %in% names(coefs))
+  
+  model = glm(y_bin ~ x + a, data = small, family = binomial)
+  coef_table = logistic_coefficients(model)
+  expect_setequal(coef_table$variable, c("x", "a"))
+})
+
+test_that("gather_model_info returns expected components", {
+  model = glm(y_bin ~ x + a, data = small, family = binomial)
+  info = gather_model_info(model)
+  
+  expect_type(info, "list")
+  expect_true(all(c("model", "data", "coefs", "coef_names", "term_names", "term_labels", "mm") %in% names(info)))
+  expect_s3_class(info$model, "glm")
+  expect_true(is.data.frame(info$data))
+  expect_type(info$coefs, "double")
+  expect_named(info$coefs)
+  expect_type(info$coef_names, "character")
+  expect_type(info$term_names, "character")
+  expect_type(info$term_labels, "integer")
+  expect_true(is.matrix(info$mm))
+})
+
+test_model = glm(y_bin ~ x + a, data = small, family = binomial)
+
+test_that("compute_logistic_summary_for_variable returns correct structure", {
+  result = compute_logistic_summary_for_variable("x", model = test_model)
+  
+  expect_s3_class(result, "tbl_df")
+  expect_named(result, c("variable", "instantaneous_slope", "threshold_x_at_p50"))
+  expect_equal(result$variable, "x")
+  expect_type(result$instantaneous_slope, "double")
+  expect_type(result$threshold_x_at_p50, "double")
+})
+
+test_that("threshold value is within reasonable range", {
+  result = compute_logistic_summary_for_variable("x", model = test_model)
+  expect_true(result$threshold_x_at_p50 > -100 && result$threshold_x_at_p50 < 100)
+})
+
+test_that("factors do not break compute_logistic_summary_for_variable", {
+  small$a = as.factor(small$a)
+  model = glm(y_bin ~ x + a, data = small, family = binomial)
+  result = compute_logistic_summary_for_variable("a", model = model)
+  expect_equal(result$variable, "a")
+  expect_type(result$threshold_x_at_p50, "double")
+})
+
+
+test_that("gather_model_info works with glmer models", {
+  model = lme4::glmer(y_bin ~ x + (1 | a), data = small, family = binomial)
+  info = gather_model_info(model)
+  
+  expect_equal(class(info$model)[1], "glmerMod")
+  expect_true("(Intercept)" %in% info$coef_names)
+})
+
+
+test_that("factor terms do not break threshold extraction", {
+  small$a = as.factor(small$a)
+  mod = glm(y_bin ~ x + a, data = small, family = binomial)
+  out = logistic_coefficients(mod)
+  expect_true("a" %in% out$variable)
+})
+
+
+test_that("match_term_names works", {
+  mod = glm(y_bin~x + a, data=small, family=binomial)
+  expect_equal("a", match_term_names(mod, name="ab"))
+  expect_equal("unknown", match_term_names(mod, name="yoyo"))
+})
 test_that("return_levels_or_mean", {
   expect_equal(return_levels_or_mean("a", c("a"), small)%>%as.character, "a")
   expect_equal(return_levels_or_mean("z", "a", small), .3853, tol=.01)

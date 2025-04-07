@@ -1,3 +1,129 @@
+#' Output calculus-based logistic regression coefficients
+#' 
+#' This function takes a logistic regression model and returns more intuitive slope/intercept
+#' parameters. The slope (discrimination) is interpreted as the instantaneous (tangent) slope of the ogive
+#' curve at p =  0.5. The intercept (difficulty) is interpreted as the value of X where
+#' the logistic curve crosses the 50% threshold
+#'
+#' @param model A fitted model (glm or glmerMod)
+#'
+#' @returns Discrimination and difficulty estimates for a regression model
+#' @export
+#'
+#' @examples
+#' logistic_model = glm(y_bin~x + a, data=small, family=binomial)
+#' logistic_coefficients(logistic_model)
+
+logistic_coefficients = function(model) {
+  
+  model_info = gather_model_info(model)
+  coefs = model_info$coefs
+  coef_names = model_info$coef_names
+  
+  coef_terms = sapply(coef_names[-1], match_term_names, model_info = model_info)
+  
+  vars = unique(coef_terms[coef_terms != "unknown"])
+  b0 = coefs[1]
+  
+  default_means = model_info$term_names %>%
+    purrr::set_names() %>%
+    purrr::map(~ if (is.numeric(model_info$data[[.x]]))
+      mean(model_info$data[[.x]], na.rm = TRUE)
+      else NA)
+  
+  result = purrr::map_dfr(vars, compute_logistic_summary_for_variable,
+                          model_info = model_info,
+                          default_means = default_means,
+                          b0 = b0)
+  
+  return(result)
+}
+
+gather_model_info = function(model) {
+  coefs = return_logistic_coefficients(model)
+  model_data = extract_data_from_fitted_object(model)
+  mm = model.matrix(model, data = model_data)
+  term_labels = attr(mm, "assign")
+  term_names = attr(terms(model), "term.labels")
+  coef_names = names(coefs)
+  
+  model_info = list(
+    model = model,
+    data = model_data,
+    coefs = coefs,
+    coef_names = coef_names,
+    term_names = term_names,
+    term_labels = term_labels,
+    mm = mm
+  )
+  
+  return(model_info)
+}
+
+compute_logistic_summary_for_variable = function(var,
+                                                 model, 
+                                                 model_info = NULL,
+                                                 default_means = NULL,
+                                                 b0 = NULL) {
+  # Derive model_info if not supplied
+  if (is.null(model_info)) {
+    model_info = gather_model_info(model)
+    b0 = model_info$coefs[1]
+  }
+  
+  # Compute default means if not supplied
+  if (is.null(default_means)) {
+    default_means = model_info$term_names %>%
+      purrr::set_names() %>%
+      purrr::map(~ if (is.numeric(model_info$data[[.x]]))
+        mean(model_info$data[[.x]], na.rm = TRUE)
+        else NA)
+  }
+  
+  related_coefs = model_info$coef_names[stringr::str_starts(model_info$coef_names, var)]
+  b_j = sum(model_info$coefs[related_coefs], na.rm = TRUE)
+  
+  other_vars = setdiff(model_info$term_names, var)
+  
+  offset = b0 + sum(purrr::map_dbl(other_vars, function(other_var) {
+    val = default_means[[other_var]]
+    if (is.na(val)) return(0)
+    other_related = model_info$coef_names[stringr::str_starts(model_info$coef_names, other_var)]
+    sum(model_info$coefs[other_related], na.rm = TRUE) * val
+  }))
+  
+  dplyr::tibble(
+    variable = var,
+    instantaneous_slope = b_j / 4,
+    threshold_x_at_p50 = -offset / b_j
+  )
+}
+
+
+match_term_names = function(name, model, model_info=NULL) {
+  
+  if (is.null(model_info)) model_info = gather_model_info(model)
+  
+  idx = match(name, colnames(model_info$mm))
+  if (is.na(idx)) return("unknown")
+  
+  term_index = model_info$term_labels[idx]
+  matched_term = model_info$term_names[term_index]
+  
+  if (is.na(matched_term)) return("unknown")
+  return(matched_term)
+}
+
+
+return_logistic_coefficients = function(model) {
+  # Determine if it's a glm or glmer model
+  mod_class = class(model)
+  link      = family(model)$link
+  if (!("logit" %in% link)) stop("Model must be a logistic regression model")
+  if ("glmerMod" %in% mod_class) return (lme4::fixef(model))
+  if ("glm"      %in% mod_class) return (coef(model))
+}
+
 
 ##' Compute the ICC from a lmer (package lme4) model
 ##'
@@ -263,8 +389,8 @@ populate_estimates_factors = function(object, factors=NULL) {
     #### fill in the difference matrix
     difference.matrix$variables[p2] = factors[i]
     center = outer(est$prediction.fit, est$prediction.fit, "-")
-    keep <- lower.tri(center)
-    center <- center[keep]
+    keep = lower.tri(center)
+    center = center[keep]
     nn = table(d[,factors[i]])
     df = nrow(d) - length(coef(object))
     width = qtukey(.95, levs, df) *
