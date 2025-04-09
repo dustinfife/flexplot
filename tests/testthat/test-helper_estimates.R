@@ -36,15 +36,15 @@ test_that("compute_logistic_summary_for_variable returns correct structure", {
   result = compute_logistic_summary_for_variable("x", model = test_model)
   
   expect_s3_class(result, "tbl_df")
-  expect_named(result, c("variable", "instantaneous_slope", "threshold_x_at_p50"))
+  expect_named(result, c("variable", "instantaneous_slope", "intercept_threshold"))
   expect_equal(result$variable, "x")
   expect_type(result$instantaneous_slope, "double")
-  expect_type(result$threshold_x_at_p50, "double")
+  expect_type(result$intercept_threshold, "double")
 })
 
 test_that("threshold value is within reasonable range", {
   result = compute_logistic_summary_for_variable("x", model = test_model)
-  expect_true(result$threshold_x_at_p50 > -100 && result$threshold_x_at_p50 < 100)
+  expect_true(result$intercept_threshold > -100 && result$intercept_threshold < 100)
 })
 
 test_that("factors do not break compute_logistic_summary_for_variable", {
@@ -52,7 +52,7 @@ test_that("factors do not break compute_logistic_summary_for_variable", {
   model = glm(y_bin ~ x + a, data = small, family = binomial)
   result = compute_logistic_summary_for_variable("a", model = model)
   expect_equal(result$variable, "a")
-  expect_type(result$threshold_x_at_p50, "double")
+  expect_type(result$intercept_threshold, "double")
 })
 
 
