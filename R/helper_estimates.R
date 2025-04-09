@@ -13,7 +13,6 @@
 #' @examples
 #' logistic_model = glm(y_bin~x + a, data=small, family=binomial)
 #' logistic_coefficients(logistic_model)
-
 logistic_coefficients = function(model) {
   
   model_info = gather_model_info(model)
@@ -95,7 +94,7 @@ compute_logistic_summary_for_variable = function(var,
   dplyr::tibble(
     variable = var,
     instantaneous_slope = b_j / 4,
-    threshold_x_at_p50 = -offset / b_j
+    intercept_threshold = -offset / b_j
   )
 }
 

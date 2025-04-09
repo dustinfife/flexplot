@@ -181,6 +181,7 @@ flexplot = function(formula, data=NULL, related=F,
 
 
 	### PLOT UNIVARIATE PLOTS
+  
   bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
                                                     method=method, spread=spread, plot.type=plot.type, bins=bins)
@@ -242,7 +243,13 @@ flexplot = function(formula, data=NULL, related=F,
   }
 	
 	#### evaluate the plot
-	total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
+	### check if "theme(....)" is in there
+	if (length(grep("theme\\(", p, fixed=F))==1) {
+	  # if so, don't replace with theme at the end (otherwise it overwrites the theme elements)
+	  total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line)
+	} else {
+	  total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
+	}
 	### remove +xxxx (happens when I've made an element blank)
 	total.call = gsub("+xxxx","",total.call, fixed=T)
 	

@@ -139,6 +139,10 @@ flexplot_histogram = function(data, outcome, plot.type="histogram", bins=3) {
     return('ggplot(data=data, aes(!!sym(outcome))) + geom_density() + theme_bw() + labs(x=outcome)')
   } 
   
+  if (plot.type == "boxplot") {
+    return('ggplot(data=data, aes(!!sym(outcome))) + geom_boxplot() + theme_bw() + coord_flip() + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())')
+  }   
+  
   
   bins = calculate_bins_for_histograms(bins, levels)
   return(
