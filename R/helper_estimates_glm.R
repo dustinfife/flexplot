@@ -1,5 +1,5 @@
 compute_factor_differences = function(preds=NULL, factors=NULL, coef.matrix=NULL, d=NULL, object=NULL){
-
+  
   if (is.null(preds)) {
     d = extract_data_from_fitted_object(object) %>% data.frame
     terms = remove_interaction_terms(object)
@@ -20,7 +20,6 @@ compute_factor_differences = function(preds=NULL, factors=NULL, coef.matrix=NULL
     # input +/- 1 SD prediction for all numeric variables
     predicted_difference_of_one_SD = sapply(preds[numbers], function(x){abs(round(x[2]-x[1], digits=2))})
     coef.matrix[row.names(coef.matrix)%in%numbers,"Prediction Difference (+/- 1 SD)"] = predicted_difference_of_one_SD
-    
     coef.matrix = round_coefficient_matrix(coef.matrix)
   }
   
@@ -67,7 +66,7 @@ find_coef_matrix = function(object) {
 }
 
 output_coef_matrix_zeroinf = function(object, return.others=FALSE) {
-  
+
   #### get dataset
   d = object$model
   
@@ -143,11 +142,19 @@ output_coef_matrix_glm = function(object, preds=NULL, numbers=NULL) {
   } 
   
   if (family(object)$link=="logit"){
+    new_coefficients = rbind(NA, logistic_coefficients(object))
     coef.matrix = data.frame(raw.coefficients        = coef(object), 
                              OR                      = exp(coef(object)), 
                              inverse.OR              = 1/exp(coef(object)), 
                              standardized.OR         = exp(standardized.beta(object, sd.y=F)), 
-                             inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F)))
+                             inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F))) %>%
+      mutate(instantaneous_slope = new_coefficients$instantaneous_slope,
+             intercept_threshold = new_coefficients$intercept_threshold,
+             standardized_slope  = new_coefficients$standardized_slope,
+             standardized_threshold = new_coefficients$standardized_threshold)
+      
+    
+    coef.matrix 
     return(coef.matrix)
   } 
   

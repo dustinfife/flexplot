@@ -36,7 +36,7 @@ test_that("compute_logistic_summary_for_variable returns correct structure", {
   result = compute_logistic_summary_for_variable("x", model = test_model)
   
   expect_s3_class(result, "tbl_df")
-  expect_named(result, c("variable", "instantaneous_slope", "intercept_threshold"))
+  expect_named(result, c("variable", "instantaneous_slope", "intercept_threshold", "standardized_slope", "standardized_threshold"))
   expect_equal(result$variable, "x")
   expect_type(result$instantaneous_slope, "double")
   expect_type(result$intercept_threshold, "double")
@@ -52,7 +52,7 @@ test_that("factors do not break compute_logistic_summary_for_variable", {
   model = glm(y_bin ~ x + a, data = small, family = binomial)
   result = compute_logistic_summary_for_variable("a", model = model)
   expect_equal(result$variable, "a")
-  expect_type(result$intercept_threshold, "double")
+  expect_equal(result$intercept_threshold, NA)
 })
 
 

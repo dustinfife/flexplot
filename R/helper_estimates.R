@@ -14,7 +14,7 @@
 #' logistic_model = glm(y_bin~x + a, data=small, family=binomial)
 #' logistic_coefficients(logistic_model)
 logistic_coefficients = function(model) {
-  
+
   model_info = gather_model_info(model)
   coefs = model_info$coefs
   coef_names = model_info$coef_names
@@ -31,9 +31,7 @@ logistic_coefficients = function(model) {
       else NA)
   
   result = purrr::map_dfr(vars, compute_logistic_summary_for_variable,
-                          model_info = model_info,
-                          default_means = default_means,
-                          b0 = b0)
+                          model_info = model_info)
   
   return(result)
 }
@@ -61,23 +59,18 @@ gather_model_info = function(model) {
 
 compute_logistic_summary_for_variable = function(var,
                                                  model, 
-                                                 model_info = NULL,
-                                                 default_means = NULL,
-                                                 b0 = NULL) {
+                                                 model_info = NULL) {
   # Derive model_info if not supplied
-  if (is.null(model_info)) {
-    model_info = gather_model_info(model)
-    b0 = model_info$coefs[1]
-  }
+  if (is.null(model_info)) model_info = gather_model_info(model)
   
-  # Compute default means if not supplied
-  if (is.null(default_means)) {
-    default_means = model_info$term_names %>%
-      purrr::set_names() %>%
-      purrr::map(~ if (is.numeric(model_info$data[[.x]]))
-        mean(model_info$data[[.x]], na.rm = TRUE)
-        else NA)
-  }
+  b0 = model_info$coefs[1]
+  
+  # Compute default means 
+  default_means = model_info$term_names %>%
+    purrr::set_names() %>%
+    purrr::map(~ if (is.numeric(model_info$data[[.x]]))
+      mean(model_info$data[[.x]], na.rm = TRUE)
+      else NA)
   
   related_coefs = model_info$coef_names[stringr::str_starts(model_info$coef_names, var)]
   b_j = sum(model_info$coefs[related_coefs], na.rm = TRUE)
@@ -91,12 +84,30 @@ compute_logistic_summary_for_variable = function(var,
     sum(model_info$coefs[other_related], na.rm = TRUE) * val
   }))
   
+  # Only compute slope and threshold if the predictor is numeric
+  if (is.numeric(model_info$data[[var]])) {
+    slope = b_j / 4
+    threshold = -offset / b_j
+    sd_x = stats::sd(model_info$data[[var]], na.rm = TRUE)
+    slope_std = (b_j * sd_x) / 4
+    threshold_std = (-offset / (b_j * sd_x))
+  } else {
+    slope = NA
+    threshold = NA
+    slope_std = NA
+    threshold_std = NA
+  }
+  
   dplyr::tibble(
     variable = var,
-    instantaneous_slope = b_j / 4,
-    intercept_threshold = -offset / b_j
+    instantaneous_slope = slope,
+    intercept_threshold = threshold,
+    standardized_slope = slope_std,
+    standardized_threshold = threshold_std
   )
 }
+
+
 
 
 match_term_names = function(name, model, model_info=NULL) {

@@ -101,5 +101,36 @@ print.rf_estimates = function(x,...){
   
 }	
 
+#' Print glm_estimates Summary
+#'
+#' Print a glm_estimates object
+#' @aliases print.glm_estimates
+#' @param x an glm_estimates object
+#' @param ... ignored
+#' @return A printed list of estimates
+#' @export
+print.glm_estimates = function(x, ...) {
+  
+  raw =          with(x, dplyr::tibble(Variables=attr(x, "row.names"), 
+                                       raw.coefficients, OR, inverse.OR, instantaneous_slope, 
+                                       intercept_threshold))
+  standardized = with(x, dplyr::tibble(variables=attr(x, "row.names"), 
+                                       standardized.OR, inverse.standardized.OR, 
+                                       standardized_slope, standardized_threshold, 
+                                       `Prediction Difference (+/- 1 SD)`)) %>%
+                                            purrr::set_names(c("Variables", "OR", "inverse.OR", "instantaneous.slope",
+                                                        "threshold", "Prediction Difference (+/- 1 SD)"))
+  cat("Raw Estimates:\n")
+  print(raw)
+  
+  cat("\n\nStandardized Estimates:\n")
+  print(standardized)
+  
+  cat("\n\n To see the documentation for each of these estimates, type ?estimates.glm")
+}
+
+
+
+
 
 

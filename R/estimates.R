@@ -199,7 +199,21 @@ estimates.RandomForest = function(object, mc=TRUE) {
 #' Report glm object Estimates
 #' @param object a glm object
 #' @param mc Should model comparisons be performed? Currently not used
-#' @return One or more objects containing parameter estimates and effect sizes
+#' @return One or more objects containing parameter estimates and effect sizes. 
+#' 
+#' For logistic regression, it will return the following:
+#' \describe{
+#'   \item{`raw.coefficients`}{The raw log-odds coefficients.}
+#'   \item{`OR`}{Odds ratios (exp(beta)).}
+#'   \item{`inverse.OR`}{Inverse odds ratios (1 / OR).}
+#'   \item{`standardized.OR`}{Standardized odds ratios (exp(beta)).}
+#'   \item{`inverse.standardized.OR`}{Standardized version of the inverse odds ratios (1 / OR).}
+#'   \item{`instantaneous_slope`}{The slope of the probability curve at p = 0.5.}
+#'   \item{`intercept_threshold`}{The value of X where p = 0.5.}
+#'   \item{`standardized_slope`}{Instantaneous slope on standardized X.}
+#'   \item{`standardized_threshold`}{Threshold in standardized X units.}
+#'   \item{`Prediction Difference (+/- 1 SD)`}{Change in predicted probability from -1 to +1 SD.}
+#' }
 #' @export
 estimates.glm = function(object, mc=FALSE){
 
@@ -217,7 +231,7 @@ estimates.glm = function(object, mc=FALSE){
   coef.matrix = compute_factor_differences(object=object)
   
 
-  ##attr(coef.matrix, "class") = "glm.estimates"
+  attr(coef.matrix, "class") = "glm_estimates"
 	return(coef.matrix)
 }
 
