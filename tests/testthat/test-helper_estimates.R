@@ -36,7 +36,7 @@ test_that("compute_logistic_summary_for_variable returns correct structure", {
   result = compute_logistic_summary_for_variable("x", model = test_model)
   
   expect_s3_class(result, "tbl_df")
-  expect_named(result, c("variable", "instantaneous_slope", "intercept_threshold", "standardized_slope", "standardized_threshold"))
+  expect_named(result, c("variable", "instantaneous_slope", "intercept_threshold"))
   expect_equal(result$variable, "x")
   expect_type(result$instantaneous_slope, "double")
   expect_type(result$intercept_threshold, "double")
@@ -171,3 +171,4 @@ test_that("generate_grid_predictions", {
   expect_equal(nrow(generate_grid_predictions(list(a=1:3, b=4:5), list(c = c('a', 'b')), NULL)), 12)
   expect_null(generate_grid_predictions(NULL, NULL, NULL))
 })
+

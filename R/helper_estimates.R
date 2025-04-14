@@ -88,22 +88,15 @@ compute_logistic_summary_for_variable = function(var,
   if (is.numeric(model_info$data[[var]])) {
     slope = b_j / 4
     threshold = -offset / b_j
-    sd_x = stats::sd(model_info$data[[var]], na.rm = TRUE)
-    slope_std = (b_j * sd_x) / 4
-    threshold_std = (-offset / (b_j * sd_x))
   } else {
     slope = NA
     threshold = NA
-    slope_std = NA
-    threshold_std = NA
   }
   
   dplyr::tibble(
     variable = var,
     instantaneous_slope = slope,
-    intercept_threshold = threshold,
-    standardized_slope = slope_std,
-    standardized_threshold = threshold_std
+    intercept_threshold = threshold
   )
 }
 

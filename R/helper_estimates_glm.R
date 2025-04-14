@@ -149,9 +149,7 @@ output_coef_matrix_glm = function(object, preds=NULL, numbers=NULL) {
                              standardized.OR         = exp(standardized.beta(object, sd.y=F)), 
                              inverse.standardized.OR = 1/exp(standardized.beta(object, sd.y=F))) %>%
       mutate(instantaneous_slope = new_coefficients$instantaneous_slope,
-             intercept_threshold = new_coefficients$intercept_threshold,
-             standardized_slope  = new_coefficients$standardized_slope,
-             standardized_threshold = new_coefficients$standardized_threshold)
+             intercept_threshold = new_coefficients$intercept_threshold)
       
     
     coef.matrix 
