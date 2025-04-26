@@ -13,7 +13,7 @@
 #' @examples
 #' logistic_model = glm(y_bin~x + a, data=small, family=binomial)
 #' logistic_coefficients(logistic_model)
-logistic_coefficients = function(model) {
+logistic_coefficients = function(model, location = .5) {
 
   model_info = gather_model_info(model)
   coefs = model_info$coefs
@@ -30,8 +30,10 @@ logistic_coefficients = function(model) {
       mean(model_info$data[[.x]], na.rm = TRUE)
       else NA)
   
-  result = purrr::map_dfr(vars, compute_logistic_summary_for_variable,
-                          model_info = model_info)
+  result = purrr::map_dfr(vars, 
+                          compute_logistic_summary_for_variable,
+                          model_info = model_info,
+                          location = location)
   
   return(result)
 }
@@ -59,7 +61,8 @@ gather_model_info = function(model) {
 
 compute_logistic_summary_for_variable = function(var,
                                                  model, 
-                                                 model_info = NULL) {
+                                                 model_info = NULL, 
+                                                 location = .5) {
   # Derive model_info if not supplied
   if (is.null(model_info)) model_info = gather_model_info(model)
   
@@ -86,7 +89,7 @@ compute_logistic_summary_for_variable = function(var,
   
   # Only compute slope and threshold if the predictor is numeric
   if (is.numeric(model_info$data[[var]])) {
-    slope = b_j / 4
+    slope = b_j * (location*(1-location))
     threshold = -offset / b_j
   } else {
     slope = NA

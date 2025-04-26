@@ -12,6 +12,7 @@ test_that("return_logistic_coefficients works", {
   model = glm(y_bin ~ x + a, data = small, family = binomial)
   coef_table = logistic_coefficients(model)
   expect_setequal(coef_table$variable, c("x", "a"))
+  expect_true(logistic_coefficients(model, location = .7)$instantaneous_slope[1] != coef_table$instantaneous_slope[1])
 })
 
 test_that("gather_model_info returns expected components", {
