@@ -24,10 +24,10 @@ linmod_jasp<- function(jaspResults, dataset, options) {
         return.bool = ifelse(is.character(x) | is.factor(x), TRUE, FALSE)
         return.bool
       }
-      character = sapply(dataset[,encodeColNames(options$variables), drop=F], check.non.number)
+      character = sapply(dataset[,(options$variables), drop=F], check.non.number)
       numeric = !character
     } else {
-      character = sapply(dataset[,encodeColNames(options$dependent), drop=F], check.non.number)
+      character = sapply(dataset[,(options$dependent), drop=F], check.non.number)
       numeric = !character
     }
   }
@@ -149,14 +149,14 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     return()
   
   ### loop through and plot everything
-  all.variables = c(encodeColNames(options$dependent), encodeColNames(options$variables))
+  all.variables = c((options$dependent), (options$variables))
   
-  a = theme_it(flexplot(make.formula(encodeColNames(options$dependent), "1"), dataset), options$theme)
+  a = theme_it(flexplot(make.formula((options$dependent), "1"), dataset), options$theme)
   a = a + labs(y="Count", x=options$dependent)
   plot.list = list(rep(a, times=length(all.variables)))
   plot.list[[1]] = a
   for (i in 2:length(all.variables)){
-    p = theme_it(flexplot(make.formula(encodeColNames(options$variables[i-1]), "1"), dataset), options$theme)
+    p = theme_it(flexplot(make.formula((options$variables[i-1]), "1"), dataset), options$theme)
     p = p + labs(y="Count", x=options$variables[i-1])
     plot.list[[i]] = p
   }
@@ -222,7 +222,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
   terms = all.vars(formula(linmod_results$model))[-1]
   
-  if (length(terms)!=0)  generated.formula = flexplot:::make_flexplot_formula(terms, encodeColNames(options$dependent), linmod_results$model$model)
+  if (length(terms)!=0)  generated.formula = flexplot:::make_flexplot_formula(terms, (options$dependent), linmod_results$model$model)
 
   if	(options$ghost & length(options$variables)<4){
     ghost="gray"
@@ -240,8 +240,8 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   if (model.type == "model" && length(terms) == 0) {
     # trick flexplot into plotting this
     new_data = linmod_results$model$model
-    f = make.formula(encodeColNames(options$dependent), "1")
-    plot = ggplot(data = new_data,aes_string(y = encodeColNames(options$dependent), x=1)) +
+    f = make.formula((options$dependent), "1")
+    plot = ggplot(data = new_data,aes_string(y = (options$dependent), x=1)) +
       labs(x = "", y=decodeColNames(options$dependent)) + 
       geom_hline(yintercept=0, col='lightgray') +
       geom_jitterd(alpha=options$alpha, width=options$jitx, height=options$jity)+
@@ -270,7 +270,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     methods = list("Regression"="lm", 
                    "Quadratic"="quadratic", 
                    "Cubic"="cubic")
-    formla = make.formula(encodeColNames(options$dependent),encodeColNames(options$variables))
+    formla = make.formula((options$dependent),(options$variables))
     
     plot = added.plot(formla, linmod_results$model$model, method=methods[options$linetype], alpha=options$alpha,
                       jitter=c(options$jitx, options$jity))
@@ -311,13 +311,13 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     ## interactions are stored in a deeply nested list. de-listify them
     predictors = paste0(
       unlist(
-        lapply(options$interactions, FUN=function(x) paste0(encodeColNames(unlist(x$components)), collapse="*"))
+        lapply(options$interactions, FUN=function(x) paste0((unlist(x$components)), collapse="*"))
       ), 
       collapse=" + ")
     
     # add variables with polynomial terms -------------------------------------
-    vars = unlist(lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$components))))
-    polys = unlist(lapply(options$interactions, FUN=function(x) encodeColNames(unlist(x$polynoms))))
+    vars = unlist(lapply(options$interactions, FUN=function(x) (unlist(x$components))))
+    polys = unlist(lapply(options$interactions, FUN=function(x) (unlist(x$polynoms))))
 
     vars.with.poly = vars[polys]
     # specify degree
@@ -331,11 +331,11 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     
     # create formula
     if (predictors != ""){
-      f = paste0(encodeColNames(options$dependent), " ~ ", predictors, collapse = "")
+      f = paste0((options$dependent), " ~ ", predictors, collapse = "")
     } else if (is.null(unlist(options$variables))) {
-      f = paste0(encodeColNames(options$dependent), " ~ ", 1)
+      f = paste0((options$dependent), " ~ ", 1)
     } else {
-      f = paste0(encodeColNames(options$dependent), " ~ ", encodeColNames(options$variables))
+      f = paste0((options$dependent), " ~ ", (options$variables))
     }
     
     f = as.formula(f)

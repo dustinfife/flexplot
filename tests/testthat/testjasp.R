@@ -1,8 +1,8 @@
 # library(jaspTools)
 # setPkgOption("module.dirs", "~/Documents/R Packages/flexplot")
-# options <- analysisOptions("~/Downloads/health_depression.jasp")
-# results <- runAnalysis("flexplot_jasp2", "~/Downloads/health_depression.csv", options)
-#
+# options <- analysisOptions("~/Downloads/data_2024-04-22_n37_num_scored.jasp")
+# results <- runAnalysis("linmod_jasp", "~/Downloads/data_2024-04-22_n37_num_scored.csv", options)
+# 
 #
 # library(jaspTools)
 # setPkgOption("module.dirs", "~/Documents/RPackages/flexplot")

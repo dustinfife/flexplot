@@ -268,9 +268,6 @@ flexplot = function(formula, data=NULL, related=F,
 	  plot_string = paste0(reverse_ggplot(final))
 	  plot_string = gsub("ggplot(data", paste0("ggplot(", deparse(data_name), ""), plot_string, fixed=T)
 		print(cat(plot_string))
-		
-		datasets = list(data=data, prediction=prediction)
-		return(datasets)
 	} 
 	
 	if (return_data) {
