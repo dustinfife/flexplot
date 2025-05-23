@@ -232,7 +232,11 @@ flexplot = function(formula, data=NULL, related=F,
 
 	# convert labels for Y axis for logistic
 	if (!is.null(logistic_labels)){
-	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", logistic_labels[1], "', '", logistic_labels[2], "')", ")")
+
+	  ## sort based on the probabilities
+	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", 
+	                 logistic_labels[1], "', '", 
+	                 logistic_labels[2], "')", ")")
 	}
 	
 	### if second axis is numeric, replace axis[2] with variable that is binned
@@ -276,32 +280,3 @@ flexplot = function(formula, data=NULL, related=F,
 	
 	return(final)
 }	
-
-
-
-
-# ### I am including the code below because CRAN does not permit :::
-# print.ggplot = function(x){
-	# function (x, newpage = is.null(vp), vp = NULL, ...) 
-# {
-    # set_last_plot(x)
-    # if (newpage) 
-        # grid::grid.newpage()
-    # grDevices::recordGraphics(requireNamespace("ggplot2", quietly = TRUE), 
-        # list(), getNamespace("ggplot2"))
-    # data <- ggplot_build(x)
-    # gtable <- ggplot_gtable(data)
-    # if (is.null(vp)) {
-        # grid::grid.draw(gtable)
-    # }
-    # else {
-        # if (is.character(vp)) 
-            # grid::seekViewport(vp)
-        # else grid::pushViewport(vp)
-        # grid::grid.draw(gtable)
-        # grid::upViewport()
-    # }
-    # invisible(x)
-# }
-# }
-#source("research/RPackages/flexplot/R/hidden_functions.R")

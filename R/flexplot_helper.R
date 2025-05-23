@@ -1,6 +1,6 @@
 #### this function converts a binary variable to a 1/0 for logistic regression
 factor.to.logistic = function(data, outcome, method=NULL, labels=F){
-  
+
   levels_dv = length(unique(data[,outcome]))
   # return if it's not logistic
   if (levels_dv != 2) return(data)
@@ -18,13 +18,19 @@ factor.to.logistic = function(data, outcome, method=NULL, labels=F){
   }
   
   # if they have yes and no, convention is to put yes at the top of the y axis
-  
-
   #(glm will predict the *second* level, so we need to reverse it)
   #the rest are just regular factors
-  data[,outcome] = factor(data[,outcome], levels=unique(data[,outcome]), labels=rev(c(0,1))) %>%
+  # Get stable, sorted levels (works for factor or character)
+  if (is.factor(data[[outcome]])) {
+    lvls = levels(data[[outcome]])
+  } else {
+    lvls = sort(unique(as.character(data[[outcome]])))  # for character vars
+  }
+
+  data[,outcome] = factor(data[,outcome], levels=lvls, labels=(c(0,1))) %>%
     as.character() %>%
     as.numeric()
+  
   return(data)
 }
 
