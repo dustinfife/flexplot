@@ -159,11 +159,10 @@ compare.fits = function(formula, data, model1, model2=NULL,
     
     ### for logistic and factor outcome variable, add one to the predictions
     # (otherwise the fitted line falls below the range of y values)
-    if (model1.type == "glm" ) {
-      if (family(model1)$link=="logit" & !is.numeric(data[,outcome[1]])){
-        prediction.model$prediction = prediction.model$prediction + 1
-      }
+    if (should_shift_predictions(model1.type, model1, outcome, prediction.model$prediction, data)) {
+      prediction.model$prediction = prediction.model$prediction + 1
     }
+    
 
     final_geom = return_lims_geom(outcome, data, model1)
     # remove duplicate rows

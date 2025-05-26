@@ -1,5 +1,57 @@
 context("test helper_compare_fits")
 
+test_that("is_binary_01 identifies 0/1 vectors correctly", {
+  expect_true(is_binary_01(c(0, 1, 0, 1)))
+  expect_true(is_binary_01(rep(1, 10)))
+  expect_true(is_binary_01(rep(0, 10)))
+  
+  expect_false(is_binary_01(c(1, 2)))
+  expect_false(is_binary_01(c(0, 1, 2)))
+  expect_false(is_binary_01(c(NA, 1, 0)))
+})
+
+library(testthat)
+library(randomForest)
+
+# simulate data
+data <- data.frame(
+  x = rnorm(100),
+  y_factor = factor(sample(c("No", "Yes"), 100, replace = TRUE)),
+  y_numeric = sample(0:1, 100, replace = TRUE)
+)
+
+# glm model with factor outcome
+glm_model <- glm(y_factor ~ x, data = data, family = binomial)
+
+# glm model with numeric outcome (should NOT shift)
+glm_model_numeric <- glm(y_numeric ~ x, data = data, family = binomial)
+
+# random forest model with binary 0/1 output
+rf_model <- suppressWarnings(party::cforest(as.factor(y_numeric) ~ x, data = data, control=party::cforest_unbiased(ntree=10)))
+rf_preds <- as.numeric(predict(rf_model, type = "response")) - 1  # force 0/1
+
+test_that("should_shift_predictions works for glm with non-numeric DV", {
+  expect_true(should_shift_predictions("glm", glm_model, outcome = "y_factor",
+                                       predictions = predict(glm_model, type = "response"), data = data))
+})
+
+test_that("should_shift_predictions skips glm with numeric DV", {
+  expect_false(should_shift_predictions("glm", glm_model_numeric, outcome = "y_numeric",
+                                        predictions = predict(glm_model_numeric, type = "response"), data = data))
+})
+
+test_that("should_shift_predictions works for RandomForest with 0/1 predictions", {
+  expect_true(should_shift_predictions("RandomForest", rf_model, outcome = "y_numeric",
+                                       predictions = rf_preds, data = data))
+})
+
+test_that("should_shift_predictions returns FALSE for unknown model type", {
+  expect_false(should_shift_predictions("nnet", NULL, outcome = "y_numeric",
+                                        predictions = c(0, 1), data = data))
+})
+
+
+
 test_that("get_re works", {
   expect_true(get_re(lmer(MathAch~SES + (SES | School), data=math))=="School")
   expect_true(get_re(lmer(MathAch~SES + (SES |School), data=math))=="School")

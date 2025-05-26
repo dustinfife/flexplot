@@ -15,6 +15,22 @@ whats_model2 = function(model1,model2=NULL) {
   return(model2)
 }
 
+is_binary_01 = function(predictions) {
+  all(unique(predictions) %in% c(0, 1))
+}
+
+should_shift_predictions = function(model_type, model, outcome, predictions, data) {
+  if (model_type == "glm") {
+    return(
+      family(model)$link == "logit" &&
+        !is.numeric(data[[outcome[1]]])
+    )
+  } else if (model_type == "RandomForest") {
+    return(is_binary_01(predictions))
+  }
+  return(FALSE)
+}
+
 compare_fits_errors = function(data, outcome, predictors, testme=NULL) {
   
   ## see if all predictors are categorical
