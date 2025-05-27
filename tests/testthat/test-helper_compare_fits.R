@@ -28,6 +28,7 @@ glm_model_numeric <- glm(y_numeric ~ x, data = data, family = binomial)
 
 # random forest model with binary 0/1 output
 rf_model <- suppressWarnings(party::cforest(as.factor(y_numeric) ~ x, data = data, control=party::cforest_unbiased(ntree=10)))
+
 rf_preds <- as.numeric(predict(rf_model, type = "response")) - 1  # force 0/1
 
 test_that("should_shift_predictions works for glm with non-numeric DV", {

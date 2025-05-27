@@ -4,7 +4,7 @@
 \alias{logistic_coefficients}
 \title{Output calculus-based logistic regression coefficients}
 \usage{
-logistic_coefficients(model)
+logistic_coefficients(model, location = 0.5)
 }
 \arguments{
 \item{model}{A fitted model (glm or glmerMod)}
