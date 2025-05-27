@@ -4,17 +4,32 @@
 \alias{estimates.RandomForest}
 \title{Report RandomForest object Estimates (effect sizes and parameters)}
 \usage{
-\method{estimates}{RandomForest}(object, mc = TRUE)
+\method{estimates}{RandomForest}(object, mc = FALSE)
+
+\method{estimates}{RandomForest}(object, mc = FALSE)
 }
 \arguments{
-\item{object}{a RandomForest object}
+\item{object}{a zeroinfl object}
 
-\item{mc}{Should model comparisons be performed? 
-Currently not implemented for RandomForest objects}
+\item{mc}{Should model comparisons be performed? Currently not used}
 }
 \value{
 One or more objects containing parameter estimates and effect sizes
+
+Estimates for a RandomForest model. For classification, it will return the following:
+\itemize{
+\item{OOB Accuracy in prediction: The total accuracy (correct classifications/incorrect classifications) for the OOB data}
+\item{Variable importance: The difference in accuracy between the unshuffled and shuffled scores for the OOB data. Higher values indicate higher importance}
+}
+For regression, it will return the following:
+\itemize{
+\item{Quantiles of absolute value of OOB performance: This compares the OOB predicted values to the observed values, computing the difference between, and returns the quantiles.}
+\item{Model R Squared: The squared correlation between the OOB predicted and the observed, just like in regular regression.}
+\item{Variable importance: This is essentially the average difference in predictions between the original versus permutated values.}
+}
 }
 \description{
+Report RandomForest object Estimates
+
 Report RandomForest object Estimates
 }

@@ -153,10 +153,19 @@ estimates.lm = function(object, mc=TRUE){
 #' Report RandomForest object Estimates (effect sizes and parameters)
 #'
 #' Report RandomForest object Estimates
-#' @param object a RandomForest object
-#' @param mc Should model comparisons be performed? 
-#' Currently not implemented for RandomForest objects
-#' @return One or more objects containing parameter estimates and effect sizes
+#' @param object a zeroinfl object
+#' @param mc Should model comparisons be performed? Currently not used
+#' @return Estimates for a RandomForest model. For classification, it will return the following:
+#' \itemize{
+#' \item{OOB Accuracy in prediction: The total accuracy (correct classifications/incorrect classifications) for the OOB data}
+#' \item{Variable importance: The difference in accuracy between the unshuffled and shuffled scores for the OOB data. Higher values indicate higher importance}
+#' }
+#' For regression, it will return the following:
+#' \itemize{
+#' \item{Quantiles of absolute value of OOB performance: This compares the OOB predicted values to the observed values, computing the difference between, and returns the quantiles.}
+#' \item{Model R Squared: The squared correlation between the OOB predicted and the observed, just like in regular regression.}
+#' \item{Variable importance: This is essentially the average difference in predictions between the original versus permutated values.}
+#' }
 #' @export
 estimates.RandomForest = function(object, mc=TRUE) {
   
@@ -183,6 +192,8 @@ estimates.RandomForest = function(object, mc=TRUE) {
     vals = sort(importance, decreasing=T)
     vals[vals<0] = 0
     importance = round(sqrt(vals), digits=3)
+    sds = 
+    importance_sd = importance/sd()
   }
   
   estimates = list(oob=oob, rsq = rsq, importance=importance)
@@ -265,6 +276,4 @@ estimates.zeroinfl = function(object, mc=FALSE){
   
   return(list(coef.matrix=coef.matrix, means = preds_factors))
 }
-
-
 
