@@ -89,29 +89,53 @@ logistic_aligned = function(flex_obj, resolution = 100) {
   names(conditions)[names(conditions)==x_var] = "threshold"
     
     # merge conditions and grid before plotting
-  all_grid = dplyr::inner_join(grid, conditions, by=names(binned_ranges_or_unique)) 
-  
-  all_grid = all_grid %>%
+  all_grid = dplyr::inner_join(grid, conditions, by=names(binned_ranges_or_unique)) %>%
     mutate(!!sym(axis_vars[2]) := factor(round(.data[[axis_vars[2]]], digits=2)))
+  
   # predict values
   all_grid$prob = predict(model, newdata = grid, type = "response")
 
   # shift predictions
   all_grid$x_shifted = NA
   all_grid$x_shifted = all_grid[[x_var]] - all_grid$threshold
+
+  # add extensions to lines
+  # For each group of binned values (i.e., each row of `conditions`)
+  extension_grid = purrr::pmap_dfr(conditions, function(...){
+    row = tibble::tibble(...)
+    threshold = row$threshold
+    
+    # create sequence for x_var
+    x_vals = seq(threshold - 200, threshold + 200, length.out = resolution)
+    
+    # replicate other variables
+    extended = row[rep(1, length(x_vals)), ]
+    extended[[x_var]] = x_vals
+    extended$x_shifted = x_vals - threshold
+    
+    return(extended)
+  })
   
-  p = ggplot(all_grid, aes(x = x_shifted, y = prob)) +
-    geom_line(aes(color = !!sym(axis_vars[2])), size = 1.2, na.rm = TRUE) + 
+  extension_grid$prob = predict(model, newdata = extension_grid, type = "response")
+  extension_grid$type = "dotted"
+  all_grid$type = "solid"
+  extension_grid[[axis_vars[2]]] = factor(round(extension_grid[[axis_vars[2]]], digits=2))
+  plot_data = rbind(all_grid, extension_grid)
+
+  
+  p = ggplot(plot_data, aes(x = x_shifted, y = prob)) +
+    geom_line(aes(linetype = type, color = !!sym(axis_vars[2])), size = 1.2, na.rm = TRUE) +
+    scale_linetype_manual(values = c(solid = "solid", dotted = "dotted")) + 
     geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray") +
     labs(
       x = paste0("Shifted ", x_var, " (aligned at p = 0.5)"),
       y = "Predicted Probability",
       title = "Threshold-Aligned Logistic Curves"
     ) +
-    theme_bw()
-  browser()
+    theme_bw()+ guides(linetype = "none")
+
+
   # Add paneling if needed
-  str(all_grid)
   if (length(given_vars) == 1) {
     all_grid[[given_vars[1]]] = factor(all_grid[[given_vars[1]]])
     p = p + facet_wrap(as.formula(paste("~", given_vars[1])))
@@ -120,59 +144,6 @@ logistic_aligned = function(flex_obj, resolution = 100) {
     grid[[given_vars[2]]] = factor(grid[[given_vars[2]]])
     p = p + facet_grid(as.formula(paste(given_vars[2], "~", given_vars[1])))
   }
-  p
-  
-  
-  
-  
-  
-  
-  
-  grid$prob = predict(model, newdata = grid, type = "response")
-  grid$logit= predict(model, newdata = grid, type = "link")
-  
-
-  # Find threshold where p ≈ 0.5 for each group
-  thresholds = find_thresholds(model, grid, flex_obj)
-
-  test_row = data.frame(agility = thresholds["4.2-4.9"], speed = 4.5)
-  predict(model, newdata = test_row, type = "link")  # Should be near 0
-  
-  # Shift x-values so p = 0.5 aligns
-  grid = shift_by_threshold(grid, x_var, thresholds)
-  color_var = if (!is.null(group_var)) group_var else NULL
-  
-  grouping_vars = c("x_shifted", group_var, x_var)
-  if (length(panel_vars) > 0) {
-    panel_binned = paste0(panel_vars, "_binned")
-    grouping_vars = c(grouping_vars, panel_binned, x_var)
-  }
-  
-  # Average prob within group
-  grid = grid %>%
-    group_by(across(all_of(grouping_vars))) %>%
-    summarise(prob = mean(prob, na.rm = TRUE), .groups = "drop")
-  thresholds
-  p = ggplot(grid, aes(x = x_shifted, y = prob)) +
-    geom_line(aes(color = !!sym(group_var)), size = 1.2, na.rm = TRUE) + 
-    geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray") +
-    labs(
-      x = paste0("Shifted ", x_var, " (aligned at p = 0.5)"),
-      y = "Predicted Probability",
-      title = "Threshold-Aligned Logistic Curves"
-    ) +
-    theme_bw()
-  
-  # Add paneling if needed
-  if (length(panel_vars) == 1) {
-    grid[[panel_vars[1]]] = factor(grid[[panel_vars[1]]])
-    p = p + facet_wrap(as.formula(paste("~", panel_vars[1])))
-  } else if (length(panel_vars) == 2) {
-    grid[[panel_vars[1]]] = factor(grid[[panel_vars[1]]])
-    grid[[panel_vars[2]]] = factor(grid[[panel_vars[2]]])
-    p = p + facet_grid(as.formula(paste(panel_vars[2], "~", panel_vars[1])))
-  }
-  
   
   return(p)
 }

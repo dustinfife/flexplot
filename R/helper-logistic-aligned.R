@@ -50,6 +50,7 @@ return_ranges_or_unique = function(var, data, means=NULL, resolution=100) {
 
 }
 
+
 compute_logistic_threshold = function(row, x_var, model) {
   
   coefs = coef(model)
