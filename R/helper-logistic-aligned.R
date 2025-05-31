@@ -56,7 +56,7 @@ compute_logistic_threshold = function(row, x_var, model) {
   coefs = coef(model)
   terms_obj = delete.response(terms(model))
   
-
+model
   row[[x_var]] = 0
   row0 = model.frame(terms_obj, data = row, na.action = na.pass)
   mm0 = model.matrix(terms_obj, row0)

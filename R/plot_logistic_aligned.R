@@ -47,7 +47,7 @@ logistic_aligned = function(flex_obj, resolution = 100) {
   given_vars = axis_given$given[!is.na(axis_given$given)]
   outcome    = all.vars(formula)[1]
   x_var      = axis_vars[1]
-  
+
   # Fit logistic model with full interaction
   rhs = paste(predictors, collapse = "*")
   model_formula = as.formula(paste(outcome, "~", rhs)) # use non-binned version for the model
@@ -79,18 +79,24 @@ logistic_aligned = function(flex_obj, resolution = 100) {
   
   all.ranges = c(unbinned_ranges_or_unique, binned_ranges_or_unique)
   grid = expand.grid(all.ranges, KEEP.OUT.ATTRS=FALSE, stringsAsFactors = FALSE)
-  conditions = expand.grid(binned_ranges_or_unique, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+  condition_variables = predictors[!(predictors %in% x_var)] %>% as.vector
+  conditions = expand.grid(all.ranges[condition_variables], KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
     conditions[[x_var]] = NA
-  
+
   for (i in 1:nrow(conditions)) {
     conditions[[i,x_var]] = compute_logistic_threshold(conditions[i,], x_var, model)
   }
   # rename conditions (for joining)
   names(conditions)[names(conditions)==x_var] = "threshold"
     
+    
     # merge conditions and grid before plotting
-  all_grid = dplyr::inner_join(grid, conditions, by=names(binned_ranges_or_unique)) %>%
-    mutate(!!sym(axis_vars[2]) := factor(round(.data[[axis_vars[2]]], digits=2)))
+  if (!is.factor(data[[axis_vars[2]]])) {
+    all_grid = dplyr::inner_join(grid, conditions, by=condition_variables) %>%
+      mutate(!!sym(axis_vars[2]) := factor(round(.data[[axis_vars[2]]], digits=2)))
+  } else {
+    all_grid = dplyr::inner_join(grid, conditions, by=condition_variables) 
+  }
   
   # predict values
   all_grid$prob = predict(model, newdata = grid, type = "response")
@@ -119,7 +125,10 @@ logistic_aligned = function(flex_obj, resolution = 100) {
   extension_grid$prob = predict(model, newdata = extension_grid, type = "response")
   extension_grid$type = "dotted"
   all_grid$type = "solid"
-  extension_grid[[axis_vars[2]]] = factor(round(extension_grid[[axis_vars[2]]], digits=2))
+  
+  if (!is.factor(data[[axis_vars[2]]])) {
+    extension_grid[[axis_vars[2]]] = factor(round(extension_grid[[axis_vars[2]]], digits=2))
+  }
   plot_data = rbind(all_grid, extension_grid)
 
   
