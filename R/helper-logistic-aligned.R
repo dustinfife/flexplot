@@ -1,4 +1,4 @@
-resolve_binned_var = function(var, data) {
+resolve_binned_var = function(var, data, return.name=FALSE) {
 
   binned_name = paste0(var, "_binned")
   
@@ -6,7 +6,8 @@ resolve_binned_var = function(var, data) {
   if (binned_name %in% names(data)) return(binned_name)
   
   # Return unbinned name if it's in the dataset
-  if (var %in% names(data)) return(NA)
+  if (return.name & var %in% names(data)) return(var)
+  if (!return.name & var %in% names(data)) return(NA)
   
   stop(sprintf("Could not resolve '%s' or '%s' in the dataset.", var, binned_name))
 }
