@@ -6,6 +6,27 @@ create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var =
   if (!is.null(plot)) {
     data = plot$data
     outcome_var = rlang::as_name(plot$mapping$y)
+    ### extract given and axis variables
+    given.axis = flexplot_axis_given(formula)
+    given = given.axis$given
+    axis = given.axis$axis
+    variables_to_group_by = c(axis[2], given)[!is.na(c(axis[2], given))] %>% 
+      na.omit() %>%
+      purrr::map_vec(resolve_binned_var, data=data, return.name=T)
+    
+    
+    # Calculate bin info for the x-axis variable
+    x_vals = data[[axis[1]]]
+    bin_breaks = pretty(x_vals, n = n_bins)
+    bin_width = diff(bin_breaks)[1]
+    bin_centers = (bin_breaks[-1] + bin_breaks[-length(bin_breaks)]) / 2
+    
+    # Add bins to data
+    data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)
+    
+    # Create grouping variables for summarization
+    group_vars = c("bin", variables_to_group_by)
+    group_vars = group_vars[!is.na(group_vars)]
     # Add logic here to extract other needed info from plot if needed
   }
   
