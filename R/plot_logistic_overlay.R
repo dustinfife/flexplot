@@ -1,3 +1,59 @@
+#' Add Logistic Overlay to Plot
+#'
+#' Adds a logistic overlay visualization to an existing flexplot or creates a new
+#' plot with logistic overlay. The overlay shows binned observed proportions 
+#' compared to the fitted logistic regression line, with a reference line at 0.5.
+#'
+#' @param plot A flexplot object to add the overlay to. If NULL, a new plot will 
+#'   be created using the formula and data parameters.
+#' @param formula A formula specifying the relationship between variables 
+#'   (outcome ~ predictor). Required if plot is NULL.
+#' @param data A data frame containing the variables specified in the formula. 
+#'   Required if plot is NULL.
+#' @param n_bins Integer specifying the number of bins to create along the 
+#'   x-axis for summarizing the data. Default is 10.
+#' @param type Character string specifying the type of overlay visualization. 
+#'   Options are "dot" for point overlay or "bar" for rectangle overlay. 
+#'   Default is "dot".
+#' @param ... Additional arguments passed to flexplot() when creating a new plot.
+#'
+#' @return A ggplot object with the logistic overlay added. The overlay includes:
+#'   \itemize{
+#'     \item Binned observed proportions (as points or rectangles)
+#'     \item A dashed horizontal reference line at y = 0.5
+#'     \item The original fitted logistic curve
+#'   }
+#'
+#' @details
+#' This function is designed to work with binary outcome variables in logistic 
+#' regression contexts. It bins the predictor variable and calculates observed 
+#' proportions within each bin, allowing visual comparison with the fitted 
+#' logistic regression line.
+#' 
+#' The function can either:
+#' \itemize{
+#'   \item Add an overlay to an existing flexplot object
+#'   \item Create a new plot from a formula and data
+#' }
+#' 
+#' When using "dot" type, point sizes reflect the relative frequency or 
+#' importance of each bin. When using "bar" type, rectangles show the 
+#' observed proportions as bars.
+#'
+#' @examples
+#' \dontrun{
+#' # Create overlay on existing plot
+#' p <- flexplot(outcome ~ predictor, data = mydata, method = "logistic")
+#' logistic_overlay(plot = p, n_bins = 15, type = "dot")
+#' 
+#' # Create new plot with overlay
+#' logistic_overlay(formula = success ~ score, data = mydata, 
+#'                  n_bins = 8, type = "bar")
+#' }
+#'
+#' @seealso \code{\link{flexplot}} for creating the base plots
+#'
+#' @export
 logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 10, type = "dot", ...) {
   
   if (is.null(plot) && (is.null(formula) || is.null(data))) {
