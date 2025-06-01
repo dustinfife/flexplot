@@ -64,7 +64,7 @@ logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 
     outcome_var = all.vars(formula)[1]
     predictor_var = all.vars(formula)[2]
     x_vals = data[[predictor_var]]
-    plot = flexplot(formula, data, ...)
+    plot = flexplot(formula, data, method="logistic",...)
   } else {
     data = plot$data
     predictor_var = rlang::as_name(plot$mapping$x)

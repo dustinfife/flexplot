@@ -90,7 +90,7 @@ build_inherited_aesthetics = function(plot, summary_data, base_x = "bin_mid", ba
 }
 
 calculate_bins_for_logistic_overlay = function(x_vals, n_bins) {
-  bin_breaks = quantile(x, probs = seq(from=0, to=1, length.out=15))
+  bin_breaks = quantile(x_vals, probs = seq(from=0, to=1, length.out=n_bins+1))
   bin_width = diff(bin_breaks)[1]
   bin_centers = (bin_breaks[-1] + bin_breaks[-length(bin_breaks)]) / 2
   return(list(bin_breaks = bin_breaks, bin_width=bin_width, bin_centers=bin_centers))
