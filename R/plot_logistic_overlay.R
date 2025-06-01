@@ -84,9 +84,8 @@ logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 
   
   # Calculate bin info for the x-axis variable
   x_vals = data[[axis[1]]]
-  bin_breaks = pretty(x_vals, n = n_bins)
-  bin_width = diff(bin_breaks)[1]
-  bin_centers = (bin_breaks[-1] + bin_breaks[-length(bin_breaks)]) / 2
+  bin_info = calculate_bins_for_logistic_overlay(x_vals, n_bins)
+  bin_breaks = bin_info$bin_breaks; bin_width = bin_info$bin_width; bin_centers = bin_info$bin_centers
   
   # Add bins to data
   data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)

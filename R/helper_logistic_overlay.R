@@ -17,9 +17,9 @@ create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var =
     
     # Calculate bin info for the x-axis variable
     x_vals = data[[axis[1]]]
-    bin_breaks = pretty(x_vals, n = n_bins)
-    bin_width = diff(bin_breaks)[1]
-    bin_centers = (bin_breaks[-1] + bin_breaks[-length(bin_breaks)]) / 2
+    bin_info = calculate_bins_for_logistic_overlay(x_vals, n_bins)
+    bin_breaks = bin_info$bin_breaks; bin_width = bin_info$bin_width; bin_centers = bin_info$bin_centers
+    
     
     # Add bins to data
     data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)
@@ -89,3 +89,9 @@ build_inherited_aesthetics = function(plot, summary_data, base_x = "bin_mid", ba
   return(base_aes)
 }
 
+calculate_bins_for_logistic_overlay = function(x_vals, n_bins) {
+  bin_breaks = quantile(x, probs = seq(from=0, to=1, length.out=15))
+  bin_width = diff(bin_breaks)[1]
+  bin_centers = (bin_breaks[-1] + bin_breaks[-length(bin_breaks)]) / 2
+  return(list(bin_breaks = bin_breaks, bin_width=bin_width, bin_centers=bin_center))
+}
