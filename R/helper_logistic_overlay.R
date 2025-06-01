@@ -55,7 +55,7 @@ create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var =
       xmin = bin_mid - bin_width * 0.4,
       xmax = bin_mid + bin_width * 0.4,
       alpha = scales::rescale(count, to = c(0.2, 1)),
-      size = scales::rescale(count, to = c(1, 4))
+      size = 1.5
     )
 }
 

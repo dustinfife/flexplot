@@ -89,6 +89,7 @@ logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 
   
   # Add bins to data
   data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)
+
   
   # Create grouping variables for summarization
   group_vars = c("bin", variables_to_group_by)
