@@ -47,11 +47,11 @@ added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method=
 	# prep data
 	data = prep_data_for_avp(data, variables)
 	formulae = make_avp_formula(formula, lm_formula, x)
-	
+	browser()
   #### if they ask for logistic
 	if (method == "logistic"){
 	    fitted = fitted(glm(formulae[[1]], data=data, family=binomial))
-	    data$residuals = factor.to.logistic(data=data, outcome=variables[[1]])[,variables[1]] - fitted
+	    data$residuals = factor.to.logistic(data=data, outcome=variables[[1]], method="logistic")[,variables[1]] - fitted
 	    method = "loess"
 	 } else {
 	    data$residuals = residuals(lm(formulae[[1]], data=data)) + mean(data[,variables[1]])    
@@ -62,4 +62,146 @@ added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method=
 	plot = flexplot(formulae[[2]], data=data, method=method, ...) + labs(y=formulae[[3]])
 	class(plot) <- c("flexplot", class(plot))
 	return(plot)
+}
+
+
+##' Create an added variable plot with binned residuals for logistic regression
+##'
+##' Create an added variable plot using binned percentage residuals instead of raw residuals.
+##' This function first fits a logistic regression model to residualize the outcome variable 
+##' based on conditioning variables, then bins the remaining predictor variable and calculates
+##' binned percentage residuals (observed proportion - fitted proportion within each bin).
+##' 
+##' The function works similarly to added.plot but uses the binning logic from logistic_residual_plots
+##' to create residuals that are more appropriate for logistic regression diagnostics.
+##' 
+##' @param formula A flexplot formula, specifying how the avp will visualize the variables. 
+##' @param data The dataset used
+##' @param lm_formula Optional. A formula specifying how to condition variables (the logistic model to fit first).  
+##' @param method The smoothing method. Defaults to "loess"
+##' @param x The variable you wish to place on the x axis. Defaults to NULL. 
+##' @param n_bins Number of bins to use for calculating binned residuals. Defaults to 10.
+##' @param ... Other parameters passed to flexplot
+##' @seealso \code{\link{added.plot}}, \code{\link{logistic_residual_plots}}
+##' @author Dustin Fife
+##' @export
+##' @aliases logistic_added_plot
+##' @import tibble
+##' @return An added variable plot with binned residuals
+##' @examples
+##' # Assuming you have a binary outcome
+##' # logistic_added_plot(outcome~predictor1 + predictor2, data=mydata)
+##' # logistic_added_plot(outcome~predictor1 + predictor2, data=mydata, x=2)
+##' # logistic_added_plot(outcome~predictor1 + predictor2, 
+##' #      lm_formula = outcome~confounder1*confounder2, data=mydata)
+logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x=NULL, n_bins=10, ...){
+  
+  #### identify variable types
+  variables = all.vars(formula)
+  # do all the error checks (assuming these functions exist)
+  check_all_variables_exist_in_data(variables, data)
+  check_all_variables_exist_in_data(all.vars(lm_formula), data)
+  check_variables_in_lm(formula, lm_formula)
+  
+  # prep data
+  data = prep_data_for_avp(data, variables)
+  formulae = make_avp_formula(formula, lm_formula, x)
+  
+  #### Fit the conditioning model (logistic regression)
+  conditioning_model = glm(formulae[[1]], data=data, family=binomial)
+  
+  #### Get the remaining predictor variable (the one we'll bin on)
+  # Extract variables from the plotting formula
+  plot_vars = all.vars(formulae[[2]])
+  x_var = plot_vars[length(plot_vars)]  # Last variable should be the x-axis variable
+  outcome_var = variables[1]  # First variable from original formula is outcome
+  
+  # Get values for binning
+  x_vals = data[[x_var]]
+  
+  # Convert outcome to 0/1 if factor
+  observed = as.numeric(data[[outcome_var]])
+  if (is.factor(data[[outcome_var]])) {
+    observed = as.numeric(data[[outcome_var]]) - 1  # Convert factor to 0/1
+  }
+  
+  #### Create bins based on X-axis predictor
+  bin_info = calculate_bins_for_logistic_overlay(x_vals, n_bins)
+  bin_breaks = bin_info$bin_breaks
+  bin_centers = bin_info$bin_centers
+  
+  # Assign observations to bins
+  data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)
+  data$x_vals = x_vals
+  data$observed = observed
+  
+  #### Calculate observed proportions within each X bin
+  binned_data = data %>%
+    group_by(bin) %>%
+    summarise(
+      x_center = mean(x_vals, na.rm = TRUE),
+      observed_prop = mean(observed, na.rm = TRUE),
+      n_obs = n(),
+      .groups = 'drop'
+    )
+  
+  #### Calculate fitted probabilities at bin centers using conditioning model
+  # Create prediction data frame with all necessary variables
+  # We need to get representative values for other predictors in each bin
+  # Get column names excluding the ones we just added
+  original_cols = setdiff(names(data), c("bin", "x_vals", "observed"))
+  
+  pred_data_full = data %>%
+    group_by(bin) %>%
+    summarise(
+      across(all_of(original_cols), ~if(is.numeric(.x)) mean(.x, na.rm=TRUE) else {
+        tbl = table(.x)
+        names(tbl)[which.max(tbl)]  # Most common level for factors
+      }),
+      .groups = 'drop'
+    )
+  
+  # Set the x variable to the bin centers
+  pred_data_full[[x_var]] = binned_data$x_center
+  
+  # Get fitted probabilities from conditioning model
+  fitted_at_x = predict(conditioning_model, newdata = pred_data_full, type = "response")
+  
+  #### Calculate binned residuals
+  binned_data = binned_data %>%
+    mutate(
+      fitted_prop = fitted_at_x,
+      binned_residual = observed_prop - fitted_prop,
+      se = sqrt(fitted_prop * (1 - fitted_prop) / n_obs)
+    )
+  
+  # Remove empty bins
+  binned_data = binned_data[!is.na(binned_data$binned_residual), ]
+  
+  #### Create the plot data
+  # Add mean of original outcome to maintain interpretation (like in original added.plot)
+
+  
+  # Create a modified dataset for plotting
+  plot_data = binned_data
+  names(plot_data)[names(plot_data) == "x_center"] = x_var
+  
+  #### Create the flexplot formula for plotting
+  plot_formula = as.formula(paste("binned_residual ~", x_var))
+  
+  #### Plot it using flexplot (assuming flexplot can handle this)
+  plot = flexplot(plot_formula, data=plot_data, ...) + 
+    labs(
+      y = "Binned Residuals",
+      title = "Added Variable Plot with Binned Residuals"
+    )
+  
+  class(plot) <- c("flexplot", class(plot))
+  
+  # Add some useful attributes
+  attr(plot, "binned_data") = binned_data
+  attr(plot, "conditioning_model") = conditioning_model
+  attr(plot, "n_bins") = n_bins
+  
+  return(plot)
 }
