@@ -10,6 +10,7 @@ logistic_overlay(
   data = NULL,
   n_bins = 10,
   type = "dot",
+  scale = "probability",
   ...
 )
 }
