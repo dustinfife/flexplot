@@ -1,7 +1,7 @@
 # Helper function to create summary data for logistic overlay
 create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var = NULL, 
                                    bin_centers = NULL, bin_width = NULL, plot = NULL) {
-  
+
   # If plot is provided, extract everything from it
   if (!is.null(plot)) {
     data = plot$data
@@ -39,7 +39,7 @@ create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var =
     group_by(across(all_of(group_vars))) %>%
     summarize(
       count = n(),
-      prop_died = {
+      proportion = {
         outcome = .data[[outcome_var]]
         if (is.character(outcome) || is.factor(outcome)) {
           outcome = as.numeric(factor(outcome)) - 1
@@ -51,7 +51,7 @@ create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var =
     mutate(
       bin_mid = bin_centers[as.numeric(bin)],
       ymin = 0.5,
-      ymax = prop_died,
+      ymax = proportion,
       xmin = bin_mid - bin_width * 0.4,
       xmax = bin_mid + bin_width * 0.4,
       alpha = scales::rescale(count, to = c(0.2, 1)),
@@ -61,7 +61,7 @@ create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var =
 
 
 # Helper function to build aesthetic mapping from original plot
-build_inherited_aesthetics = function(plot, summary_data, base_x = "bin_mid", base_y = "prop_died") {
+build_inherited_aesthetics = function(plot, summary_data, base_x = "bin_mid", base_y = "proportion") {
   base_aes = aes(x = !!sym(base_x), y = !!sym(base_y))
   
   # Add color/group aesthetics if they exist in the original plot

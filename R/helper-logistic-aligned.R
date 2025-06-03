@@ -126,7 +126,7 @@ find_thresholds = function(model, grid, flex_obj) {
 }
 
 compute_threshold = function(group_id, bin_map, x_var, model, bin_var_names, data) {
-  browser()
+  
   coefs = coef(model)
   terms_obj = delete.response(terms(model))
   
@@ -163,7 +163,7 @@ compute_threshold = function(group_id, bin_map, x_var, model, bin_var_names, dat
 
 shift_by_threshold = function(grid, x_var, thresholds) {
   # thresholds is a named numeric vector (e.g., c("[4.2,4.9]" = 0.5646, ...))
-  
+
   # Convert thresholds to a data frame for joining
   threshold_df = tibble(
     group_id = names(thresholds),

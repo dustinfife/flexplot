@@ -54,7 +54,7 @@
 #' @seealso \code{\link{flexplot}} for creating the base plots
 #'
 #' @export
-logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 10, type = "dot", ...) {
+logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 10, type = "dot", scale = "probability", ...) {
   
   if (is.null(plot) && (is.null(formula) || is.null(data))) {
     stop("You must provide either a flexplot-style formula + data, or a plot.")
@@ -64,7 +64,9 @@ logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 
     outcome_var = all.vars(formula)[1]
     predictor_var = all.vars(formula)[2]
     x_vals = data[[predictor_var]]
-    plot = flexplot(formula, data, method="logistic",...)
+    # Build a plot (Note: I need this to get the "bins" from the data)
+    plot = flexplot(formula, data, method="logistic", raw.data=FALSE)
+    data = plot$data
   } else {
     data = plot$data
     predictor_var = rlang::as_name(plot$mapping$x)
@@ -90,19 +92,37 @@ logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 
   # Add bins to data
   data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)
 
-  
   # Create grouping variables for summarization
   group_vars = c("bin", variables_to_group_by)
   group_vars = group_vars[!is.na(group_vars)]
   
-  
   # Summarize data with numeric-safe outcome
   summary_data = create_logistic_summary(data, group_vars, outcome_var, bin_centers, bin_width)
-  
   
   # Build base plot if not provided
   if (is.null(plot)) {
     plot = flexplot(formula, data = data, method = "logistic", raw.data = FALSE)
+  }
+  
+  # for logit scale, produce a new plot
+  if (scale == "logit") {
+  
+    # convert probabilities to logit
+    summary_data$p_c = ifelse(summary_data$proportion == 0, 
+                              .5/summary_data$count,
+                              ifelse(summary_data$proportion == 1,
+                                     (summary_data$count - .5)/summary_data$count, 
+                                     summary_data$proportion))
+    summary_data$proportion = log(summary_data$p_c / (1 - summary_data$p_c))
+    
+    # create new flexplot based on logit
+    vars = all.vars(formula)
+    new.form = paste0(vars[1], "~", paste0(vars[-1], collapse="*"))
+    data$predictions = glm(new.form, data=data, family=binomial) %>% predict
+    flex_form = as.formula(gsub(vars[1], "predictions", deparse(formula)))
+    plot = flexplot(flex_form, data=data, method="lm", raw.data = FALSE)
+    
+
   }
   
   # Build aesthetic mapping to match original plot

@@ -77,11 +77,11 @@ test_that("create_logistic_summary calculates proportions correctly", {
   )
   
   expect_true(nrow(result) > 0)
-  expect_true("prop_died" %in% names(result))
+  expect_true("proportion" %in% names(result))
   expect_true("count" %in% names(result))
   
   # Check that proportions are valid
-  expect_true(all(result$prop_died >= 0 & result$prop_died <= 1, na.rm = TRUE))
+  expect_true(all(result$proportion >= 0 & result$proportion <= 1, na.rm = TRUE))
 })
 
 test_that("create_logistic_summary handles character outcomes", {
@@ -99,7 +99,7 @@ test_that("create_logistic_summary handles character outcomes", {
     bin_width = bin_width
   )
   
-  expect_true(all(result$prop_died >= 0 & result$prop_died <= 1, na.rm = TRUE))
+  expect_true(all(result$proportion >= 0 & result$proportion <= 1, na.rm = TRUE))
 })
 
 test_that("create_logistic_summary handles factor outcomes", {
@@ -117,7 +117,7 @@ test_that("create_logistic_summary handles factor outcomes", {
     bin_width = bin_width
   )
   
-  expect_true(all(result$prop_died >= 0 & result$prop_died <= 1, na.rm = TRUE))
+  expect_true(all(result$proportion >= 0 & result$proportion <= 1, na.rm = TRUE))
 })
 
 test_that("create_logistic_summary calculates bin_mid correctly", {

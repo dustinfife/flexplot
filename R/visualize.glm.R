@@ -11,7 +11,7 @@
 #' @return a plot containing a visual of the chosen model
 #' @export
 visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = NULL, plots.as.list=FALSE, n_bins=10, overlay_type="dot", ...){
-  
+
   plot = match.arg(plot, c("all", "residuals", "model"))
   
   d = object$model
@@ -65,15 +65,15 @@ visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = 
       }
       
       ### if they have more than two variables, also include a added variable plot
-      if (length(predictors)>1){
-        if (is_logistic) {
-          # For logistic, added variable plot might need special residual handling
-          step3b = added.plot(f, data=d, ...)+ labs(title="Added Variable Plot")
-        } else {
-          step3b = added.plot(f, data=d, ...)+ labs(title="Added Variable Plot")
-        }
-        step3 = cowplot::plot_grid(step3, step3b, rel_widths=c(.6, .4))
-      }
+      # if (length(predictors)>1){
+      #   if (is_logistic) {
+      #     # For logistic, added variable plot might need special residual handling
+      #     step3b = added.plot(f, data=d, ...)+ labs(title="Added Variable Plot")
+      #   } else {
+      #     step3b = added.plot(f, data=d, ...)+ labs(title="Added Variable Plot")
+      #   }
+      #   step3 = cowplot::plot_grid(step3, step3b, rel_widths=c(.6, .4))
+      # }
     }
     
   } else if (plot=="all" | plot=="model"){
@@ -171,13 +171,27 @@ logistic_residual_plots = function(data, object, n_bins = 10, ...) {
       .groups = 'drop'
     )
   
-  # Calculate fitted probabilities at the X centers using the model
-  # Create prediction data frame
-  pred_data = data.frame(x_center = binned_data$x_center)
-  names(pred_data)[1] = main_predictor  # Use actual predictor name
+  # Create prediction data frame with all necessary variables
+  # Get all predictor names from the model
+  all_predictors = predictors  # This should include all predictors from the model
+  
+  # Create a data frame with representative values for all predictors
+  # For each bin, use mean values for numeric predictors and mode for factors
+  pred_data_full = data %>%
+    group_by(bin) %>%
+    summarise(
+      across(all_of(all_predictors), ~if(is.numeric(.x)) mean(.x, na.rm=TRUE) else {
+        tbl = table(.x)
+        names(tbl)[which.max(tbl)]  # Most common level for factors
+      }),
+      .groups = 'drop'
+    )
+  
+  # Set the main predictor to the bin centers
+  pred_data_full[[main_predictor]] = binned_data$x_center
   
   # Get fitted probabilities at bin centers
-  fitted_at_x = predict(object, newdata = pred_data, type = "response")
+  fitted_at_x = predict(object, newdata = pred_data_full, type = "response")
   
   # Calculate residuals: observed - fitted at each X location
   binned_data = binned_data %>%
