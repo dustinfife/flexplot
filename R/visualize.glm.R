@@ -11,7 +11,7 @@
 #' @return a plot containing a visual of the chosen model
 #' @export
 visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = NULL, plots.as.list=FALSE, n_bins=10, overlay_type="dot", ...){
-  browser()
+  
   plot = match.arg(plot, c("all", "residuals", "model"))
   
   d = object$model
@@ -135,7 +135,7 @@ visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = 
 #'   \item Calculating residuals as observed - fitted proportions
 #' }
 logistic_residual_plots = function(data, object, n_bins = 10, ...) {
-  browser()
+  
   # Extract basic info
   variables = all.vars(formula(object))
   outcome = variables[1]

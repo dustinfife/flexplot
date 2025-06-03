@@ -47,7 +47,7 @@ added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method=
 	# prep data
 	data = prep_data_for_avp(data, variables)
 	formulae = make_avp_formula(formula, lm_formula, x)
-	browser()
+	
   #### if they ask for logistic
 	if (method == "logistic"){
 	    fitted = fitted(glm(formulae[[1]], data=data, family=binomial))
@@ -80,6 +80,7 @@ added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method=
 ##' @param lm_formula Optional. A formula specifying how to condition variables (the logistic model to fit first).  
 ##' @param method The smoothing method. Defaults to "loess"
 ##' @param x The variable you wish to place on the x axis. Defaults to NULL. 
+##' @param scale Either "probability" (default) or "logit" to determine the scale of residuals.
 ##' @param n_bins Number of bins to use for calculating binned residuals. Defaults to 10.
 ##' @param ... Other parameters passed to flexplot
 ##' @seealso \code{\link{added.plot}}, \code{\link{logistic_residual_plots}}
@@ -94,7 +95,8 @@ added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method=
 ##' # logistic_added_plot(outcome~predictor1 + predictor2, data=mydata, x=2)
 ##' # logistic_added_plot(outcome~predictor1 + predictor2, 
 ##' #      lm_formula = outcome~confounder1*confounder2, data=mydata)
-logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x=NULL, n_bins=10, ...){
+##' # logistic_added_plot(outcome~predictor1 + predictor2, data=mydata, scale="logit")
+logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x=NULL, n_bins=10, scale="probability", ...){
   
   #### identify variable types
   variables = all.vars(formula)
@@ -168,32 +170,66 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
   fitted_at_x = predict(conditioning_model, newdata = pred_data_full, type = "response")
   
   #### Calculate binned residuals
-  binned_data = binned_data %>%
-    mutate(
-      fitted_prop = fitted_at_x,
-      binned_residual = observed_prop - fitted_prop,
-      se = sqrt(fitted_prop * (1 - fitted_prop) / n_obs)
-    )
+  if (scale == "logit") {
+    # Convert proportions to log odds, handling edge cases
+    observed_logit = ifelse(binned_data$observed_prop == 0, 
+                            log(0.5/binned_data$n_obs), # Use continuity correction for 0
+                            ifelse(binned_data$observed_prop == 1,
+                                   log((binned_data$n_obs - 0.5)/0.5), # Use continuity correction for 1
+                                   log(binned_data$observed_prop / (1 - binned_data$observed_prop))))
+    
+    fitted_logit = log(fitted_at_x / (1 - fitted_at_x))
+    
+    binned_data = binned_data %>%
+      mutate(
+        fitted_prop = fitted_at_x,
+        observed_logit = observed_logit,
+        fitted_logit = fitted_logit,
+        binned_residual = observed_logit - fitted_logit,
+        se = sqrt(1 / (n_obs * fitted_prop * (1 - fitted_prop))) # SE for log odds
+      )
+  } else {
+    # Probability scale (original)
+    binned_data = binned_data %>%
+      mutate(
+        fitted_prop = fitted_at_x,
+        binned_residual = observed_prop - fitted_prop,
+        se = sqrt(fitted_prop * (1 - fitted_prop) / n_obs)
+      )
+  }
   
   # Remove empty bins
   binned_data = binned_data[!is.na(binned_data$binned_residual), ]
   
   #### Create the plot data
   # Add mean of original outcome to maintain interpretation (like in original added.plot)
-
+  if (scale == "logit") {
+    # For log odds scale, add the overall log odds
+    overall_prop = mean(observed, na.rm = TRUE)
+    original_mean = log(overall_prop / (1 - overall_prop))
+    y_label = paste("Binned Log Odds Residuals +", round(original_mean, 3))
+  } else {
+    # For probability scale, use the proportion of 1s
+    original_mean = mean(observed, na.rm = TRUE)
+    y_label = paste("Binned Residuals +", round(original_mean, 3))
+  }
+  
+  binned_data$residuals = binned_data$binned_residual + original_mean
   
   # Create a modified dataset for plotting
   plot_data = binned_data
   names(plot_data)[names(plot_data) == "x_center"] = x_var
   
   #### Create the flexplot formula for plotting
-  plot_formula = as.formula(paste("binned_residual ~", x_var))
+  plot_formula = as.formula(paste("residuals ~", x_var))
   
   #### Plot it using flexplot (assuming flexplot can handle this)
-  plot = flexplot(plot_formula, data=plot_data, ...) + 
+  plot = flexplot(plot_formula, data=plot_data, method=method, ...) + 
     labs(
-      y = "Binned Residuals",
-      title = "Added Variable Plot with Binned Residuals"
+      y = y_label,
+      title = paste("Added Variable Plot with Binned Residuals (", 
+                    ifelse(scale == "logit", "Log Odds", "Probability"), 
+                    " Scale)", sep="")
     )
   
   class(plot) <- c("flexplot", class(plot))
@@ -202,6 +238,7 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
   attr(plot, "binned_data") = binned_data
   attr(plot, "conditioning_model") = conditioning_model
   attr(plot, "n_bins") = n_bins
+  attr(plot, "scale") = scale
   
   return(plot)
 }
