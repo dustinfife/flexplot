@@ -15,6 +15,8 @@
 #' @param type Character string specifying the type of overlay visualization. 
 #'   Options are "dot" for point overlay or "bar" for rectangle overlay. 
 #'   Default is "dot".
+#' @param scale Character string specifying the scale for the y-axis. Options are 
+#'   "probability" (default) or "logit" for log odds scale.
 #' @param ... Additional arguments passed to flexplot() when creating a new plot.
 #'
 #' @return A ggplot object with the logistic overlay added. The overlay includes:
@@ -35,26 +37,22 @@
 #'   \item Add an overlay to an existing flexplot object
 #'   \item Create a new plot from a formula and data
 #' }
-#' 
-#' When using "dot" type, point sizes reflect the relative frequency or 
-#' importance of each bin. When using "bar" type, rectangles show the 
-#' observed proportions as bars.
 #'
 #' @examples
 #' \dontrun{
 #' # Create overlay on existing plot
-#' p <- flexplot(outcome ~ predictor, data = mydata, method = "logistic")
+#' p <- flexplot(died ~ agility, data = avengers, method = "logistic")
 #' logistic_overlay(plot = p, n_bins = 15, type = "dot")
 #' 
 #' # Create new plot with overlay
-#' logistic_overlay(formula = success ~ score, data = mydata, 
+#' logistic_overlay(formula = died ~ agility, data = avengers, 
 #'                  n_bins = 8, type = "bar")
 #' }
 #'
 #' @seealso \code{\link{flexplot}} for creating the base plots
 #'
 #' @export
-logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 10, type = "dot", scale = "probability", ...) {
+logistic_overlay = function(plot = NULL, data=NULL, formula = NULL, n_bins = 10, type = "dot", scale = "probability", ...) {
   
   if (is.null(plot) && (is.null(formula) || is.null(data))) {
     stop("You must provide either a flexplot-style formula + data, or a plot.")
@@ -99,20 +97,13 @@ logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 
   # Summarize data with numeric-safe outcome
   summary_data = create_logistic_summary(data, group_vars, outcome_var, bin_centers, bin_width)
   
-  # Build base plot if not provided
-  if (is.null(plot)) {
-    plot = flexplot(formula, data = data, method = "logistic", raw.data = FALSE)
-  }
-  
   # for logit scale, produce a new plot
   if (scale == "logit") {
   
     # convert probabilities to logit
-    summary_data$p_c = ifelse(summary_data$proportion == 0, 
-                              .5/summary_data$count,
-                              ifelse(summary_data$proportion == 1,
-                                     (summary_data$count - .5)/summary_data$count, 
-                                     summary_data$proportion))
+    summary_data$p_c = pmax(0.5/summary_data$count, 
+                            pmin((summary_data$count - 0.5)/summary_data$count, 
+                                 summary_data$proportion))
     summary_data$proportion = log(summary_data$p_c / (1 - summary_data$p_c))
     
     # create new flexplot based on logit
@@ -120,7 +111,8 @@ logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 
     new.form = paste0(vars[1], "~", paste0(vars[-1], collapse="*"))
     data$predictions = glm(new.form, data=data, family=binomial) %>% predict
     flex_form = as.formula(gsub(vars[1], "predictions", deparse(formula)))
-    plot = flexplot(flex_form, data=data, method="lm", raw.data = FALSE)
+    plot = flexplot(flex_form, data=data, method="lm", raw.data = FALSE) + 
+      labs(y = "Log Odds")
     
 
   }
@@ -130,9 +122,12 @@ logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 
   
   # Start with bars or dots
   observed_layer = if (type == "dot") {
-    geom_point(
+    geom_jitter(
       data = summary_data,
-      mapping = modifyList(base_aes, aes(size = size)),
+      mapping = base_aes,
+      size = 0.5,
+      width = 0,    # horizontal jitter amount
+      height = 0,  # vertical jitter amount  
       inherit.aes = FALSE,
       show.legend = FALSE
     )
@@ -157,5 +152,5 @@ logistic_overlay = function( plot = NULL, formula = NULL, data = NULL, n_bins = 
   
   plot +
     observed_layer +
-    geom_hline(yintercept = 0.5, linetype = "dashed") 
+    geom_hline(yintercept = ifelse(scale == "logit", 0, 0.5), linetype = "dashed")
 }

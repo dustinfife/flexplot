@@ -55,7 +55,7 @@ create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var =
       xmin = bin_mid - bin_width * 0.4,
       xmax = bin_mid + bin_width * 0.4,
       alpha = scales::rescale(count, to = c(0.2, 1)),
-      size = 1.5
+      size = .5
     )
 }
 
@@ -95,3 +95,4 @@ calculate_bins_for_logistic_overlay = function(x_vals, n_bins) {
   bin_centers = (bin_breaks[-1] + bin_breaks[-length(bin_breaks)]) / 2
   return(list(bin_breaks = bin_breaks, bin_width=bin_width, bin_centers=bin_centers))
 }
+

@@ -100,6 +100,7 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
   
   #### identify variable types
   variables = all.vars(formula)
+  
   # do all the error checks (assuming these functions exist)
   check_all_variables_exist_in_data(variables, data)
   check_all_variables_exist_in_data(all.vars(lm_formula), data)
@@ -151,6 +152,7 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
   # Create prediction data frame with all necessary variables
   # We need to get representative values for other predictors in each bin
   # Get column names excluding the ones we just added
+  
   original_cols = setdiff(names(data), c("bin", "x_vals", "observed"))
   
   pred_data_full = data %>%

@@ -134,6 +134,7 @@ visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = 
 #'   \item Computing observed proportions within each bin
 #'   \item Calculating residuals as observed - fitted proportions
 #' }
+#' @export
 logistic_residual_plots = function(data, object, n_bins = 10, ...) {
   
   # Extract basic info
@@ -143,7 +144,7 @@ logistic_residual_plots = function(data, object, n_bins = 10, ...) {
   
   # Get the predictor variable (first predictor for now)
   main_predictor = predictors[1]
-  x_vals = data[[main_predictor]]
+  x_vals = predict(object)
   
   # Convert outcome to 0/1 if factor
   observed = as.numeric(data[[outcome]]) # Convert to 0/1 if factor
@@ -171,16 +172,12 @@ logistic_residual_plots = function(data, object, n_bins = 10, ...) {
       .groups = 'drop'
     )
   
-  # Create prediction data frame with all necessary variables
-  # Get all predictor names from the model
-  all_predictors = predictors  # This should include all predictors from the model
-  
   # Create a data frame with representative values for all predictors
   # For each bin, use mean values for numeric predictors and mode for factors
   pred_data_full = data %>%
     group_by(bin) %>%
     summarise(
-      across(all_of(all_predictors), ~if(is.numeric(.x)) mean(.x, na.rm=TRUE) else {
+      across(all_of(predictors), ~if(is.numeric(.x)) mean(.x, na.rm=TRUE) else {
         tbl = table(.x)
         names(tbl)[which.max(tbl)]  # Most common level for factors
       }),
@@ -188,17 +185,20 @@ logistic_residual_plots = function(data, object, n_bins = 10, ...) {
     )
   
   # Set the main predictor to the bin centers
+  # oops! that's giving the probabilities (fitted values) NOT the actual x values!!!v
   pred_data_full[[main_predictor]] = binned_data$x_center
   
   # Get fitted probabilities at bin centers
-  fitted_at_x = predict(object, newdata = pred_data_full, type = "response")
+  #fitted_at_x = predict(object, newdata = pred_data_full)
+  binned_data$p_c = pmax(0.5/binned_data$n_obs, 
+                              pmin((binned_data$n_obs - 0.5)/binned_data$n_obs, 
+                                   binned_data$observed_prop))
+  binned_data$observed_logit = log(binned_data$p_c/(1-binned_data$p_c))
   
   # Calculate residuals: observed - fitted at each X location
   binned_data = binned_data %>%
     mutate(
-      fitted_prop = fitted_at_x,
-      residual = observed_prop - fitted_prop,
-      se = sqrt(fitted_prop * (1 - fitted_prop) / n_obs), # Standard error for binomial
+      residual = observed_logit - x_center,
       abs_residual = abs(residual)
     )
   
@@ -209,7 +209,6 @@ logistic_residual_plots = function(data, object, n_bins = 10, ...) {
   histo = ggplot(binned_data, aes(x = residual)) +
     geom_histogram(bins = max(8, min(15, nrow(binned_data)/2)), 
                    alpha = 0.7, fill = "lightblue", color = "black") +
-    geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
     labs(
       title = "Distribution of Binned Residuals",
       x = "Binned Residuals (Observed - Fitted Proportion)",
@@ -220,12 +219,11 @@ logistic_residual_plots = function(data, object, n_bins = 10, ...) {
   # 2. Residual dependence plot (binned residuals vs fitted)
   res.dep = ggplot(binned_data, aes(x = x_center, y = residual)) +
     geom_point(size = 3, alpha = 0.7) +  # Fixed size since bins are equal
-    geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
     geom_smooth(method = "loess", se = TRUE, color = "blue") +
     labs(
       title = "Binned Residuals vs Predictor",
-      x = main_predictor,
-      y = "Binned Residuals"
+      x = "Fitted",
+      y = "Binned Residuals (Logit Scale)"
     ) +
     theme_bw()
   
