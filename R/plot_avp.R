@@ -123,9 +123,10 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
   x_vals = data[[x_var]]
   
   # Convert outcome to 0/1 if factor
-  observed = as.numeric(data[[outcome_var]])
   if (is.factor(data[[outcome_var]])) {
     observed = as.numeric(data[[outcome_var]]) - 1  # Convert factor to 0/1
+  } else {
+    observed = as.numeric(data[[outcome_var]])  
   }
   
   #### Create bins based on X-axis predictor
@@ -138,109 +139,68 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
   data$x_vals = x_vals
   data$observed = observed
   
+  #### Calculate fitted probabilities at bin centers using conditioning model
+  data$fitted_prop = predict(conditioning_model, type = "response")
+  data$fitted_logit = log(data$fitted_prop / (1 - data$fitted_prop))
+  
   #### Calculate observed proportions within each X bin
   binned_data = data %>%
     group_by(bin) %>%
+      # average across other variables in the formula
     summarise(
-      x_center = mean(x_vals, na.rm = TRUE),
-      observed_prop = mean(observed, na.rm = TRUE),
-      n_obs = n(),
-      .groups = 'drop'
-    )
-  
-  #### Calculate fitted probabilities at bin centers using conditioning model
-  # Create prediction data frame with all necessary variables
-  # We need to get representative values for other predictors in each bin
-  # Get column names excluding the ones we just added
-  
-  original_cols = setdiff(names(data), c("bin", "x_vals", "observed"))
-  
-  pred_data_full = data %>%
-    group_by(bin) %>%
-    summarise(
-      across(all_of(original_cols), ~if(is.numeric(.x)) mean(.x, na.rm=TRUE) else {
+      across(all_of(c(variables, "observed", "fitted_prop", "fitted_logit")), ~if(is.numeric(.x)) mean(.x, na.rm=TRUE) else {
         tbl = table(.x)
         names(tbl)[which.max(tbl)]  # Most common level for factors
       }),
+      observed_prop = mean(observed, na.rm = TRUE),
+      n_obs = n(),
       .groups = 'drop'
-    )
-  
-  # Set the x variable to the bin centers
-  pred_data_full[[x_var]] = binned_data$x_center
-  
-  # Get fitted probabilities from conditioning model
-  fitted_at_x = predict(conditioning_model, newdata = pred_data_full, type = "response")
-  
-  #### Calculate binned residuals
-  if (scale == "logit") {
+    ) %>%
     # Convert proportions to log odds, handling edge cases
-    observed_logit = ifelse(binned_data$observed_prop == 0, 
-                            log(0.5/binned_data$n_obs), # Use continuity correction for 0
-                            ifelse(binned_data$observed_prop == 1,
-                                   log((binned_data$n_obs - 0.5)/0.5), # Use continuity correction for 1
-                                   log(binned_data$observed_prop / (1 - binned_data$observed_prop))))
-    
-    fitted_logit = log(fitted_at_x / (1 - fitted_at_x))
-    
-    binned_data = binned_data %>%
-      mutate(
-        fitted_prop = fitted_at_x,
-        observed_logit = observed_logit,
-        fitted_logit = fitted_logit,
-        binned_residual = observed_logit - fitted_logit,
-        se = sqrt(1 / (n_obs * fitted_prop * (1 - fitted_prop))) # SE for log odds
-      )
-  } else {
-    # Probability scale (original)
-    binned_data = binned_data %>%
-      mutate(
-        fitted_prop = fitted_at_x,
-        binned_residual = observed_prop - fitted_prop,
-        se = sqrt(fitted_prop * (1 - fitted_prop) / n_obs)
-      )
-  }
-  
-  # Remove empty bins
-  binned_data = binned_data[!is.na(binned_data$binned_residual), ]
+    mutate(observed_logit = ifelse(observed_prop == 0, 
+                            log(0.5/n_obs),                # Use continuity correction for 0
+                            ifelse(observed_prop == 1,
+                                   log((n_obs - 0.5)/0.5), # Use continuity correction for 1
+                                   log(observed_prop / (1 - observed_prop))))) 
+
+
+
   
   #### Create the plot data
   # Add mean of original outcome to maintain interpretation (like in original added.plot)
   if (scale == "logit") {
+    binned_data$binned_residual = binned_data$observed_logit - binned_data$fitted_logit
+    browser()
     # For log odds scale, add the overall log odds
     overall_prop = mean(observed, na.rm = TRUE)
     original_mean = log(overall_prop / (1 - overall_prop))
     y_label = paste("Binned Log Odds Residuals +", round(original_mean, 3))
   } else {
     # For probability scale, use the proportion of 1s
+    binned_data$binned_residual = binned_data$observed_prop - binned_data$fitted_prop
     original_mean = mean(observed, na.rm = TRUE)
     y_label = paste("Binned Residuals +", round(original_mean, 3))
   }
-  
   binned_data$residuals = binned_data$binned_residual + original_mean
   
+  # Remove empty bins
+  binned_data = binned_data[!is.na(binned_data$binned_residual), ]
+
   # Create a modified dataset for plotting
   plot_data = binned_data
-  names(plot_data)[names(plot_data) == "x_center"] = x_var
+  
   
   #### Create the flexplot formula for plotting
   plot_formula = as.formula(paste("residuals ~", x_var))
   
-  #### Plot it using flexplot (assuming flexplot can handle this)
+  #### Plot it using flexplot
   plot = flexplot(plot_formula, data=plot_data, method=method, ...) + 
     labs(
       y = y_label,
       title = paste("Added Variable Plot with Binned Residuals (", 
                     ifelse(scale == "logit", "Log Odds", "Probability"), 
                     " Scale)", sep="")
-    )
-  
-  class(plot) <- c("flexplot", class(plot))
-  
-  # Add some useful attributes
-  attr(plot, "binned_data") = binned_data
-  attr(plot, "conditioning_model") = conditioning_model
-  attr(plot, "n_bins") = n_bins
-  attr(plot, "scale") = scale
+      )
   
   return(plot)
 }

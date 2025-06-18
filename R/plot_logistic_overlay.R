@@ -63,7 +63,7 @@ logistic_overlay = function(plot = NULL, data=NULL, formula = NULL, n_bins = 10,
     predictor_var = all.vars(formula)[2]
     x_vals = data[[predictor_var]]
     # Build a plot (Note: I need this to get the "bins" from the data)
-    plot = flexplot(formula, data, method="logistic", raw.data=FALSE)
+    plot = flexplot(formula, data, method="logistic", raw.data=FALSE, ...)
     data = plot$data
   } else {
     data = plot$data
@@ -73,29 +73,12 @@ logistic_overlay = function(plot = NULL, data=NULL, formula = NULL, n_bins = 10,
     formula = formula(plot)
   }
   
-  ### extract given and axis variables
-  given.axis = flexplot_axis_given(formula)
-  given = given.axis$given
-  axis = given.axis$axis
-  variables_to_group_by = c(axis[2], given)[!is.na(c(axis[2], given))] %>% 
-                            na.omit() %>%
-                            purrr::map_vec(resolve_binned_var, data=data, return.name=T)
-  
-  
-  # Calculate bin info for the x-axis variable
-  x_vals = data[[axis[1]]]
-  bin_info = calculate_bins_for_logistic_overlay(x_vals, n_bins)
-  bin_breaks = bin_info$bin_breaks; bin_width = bin_info$bin_width; bin_centers = bin_info$bin_centers
-  
-  # Add bins to data
-  data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)
-
-  # Create grouping variables for summarization
-  group_vars = c("bin", variables_to_group_by)
-  group_vars = group_vars[!is.na(group_vars)]
-  
-  # Summarize data with numeric-safe outcome
-  summary_data = create_logistic_summary(data, group_vars, outcome_var, bin_centers, bin_width)
+  datasets_for_plotting = convert_formula_to_logistic_bins(formula=formula, 
+                                                           data = data, 
+                                                           x_vals = x_vals,
+                                                           n_bins = n_bins)
+  summary_data = datasets_for_plotting$summary_data
+  data         = datasets_for_plotting$data
   
   # for logit scale, produce a new plot
   if (scale == "logit") {
@@ -111,7 +94,7 @@ logistic_overlay = function(plot = NULL, data=NULL, formula = NULL, n_bins = 10,
     new.form = paste0(vars[1], "~", paste0(vars[-1], collapse="*"))
     data$predictions = glm(new.form, data=data, family=binomial) %>% predict
     flex_form = as.formula(gsub(vars[1], "predictions", deparse(formula)))
-    plot = flexplot(flex_form, data=data, method="lm", raw.data = FALSE) + 
+    plot = flexplot(flex_form, data=data, method="lm", raw.data = FALSE, ...) + 
       labs(y = "Log Odds")
     
 

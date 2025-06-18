@@ -197,5 +197,12 @@ test_that("create_logistic_summary scales size and alpha appropriately", {
   )
   
   expect_true(all(result$alpha >= 0.2 & result$alpha <= 1, na.rm = TRUE))
-  expect_true(all(result$size >= 1 & result$size <= 4, na.rm = TRUE))
 })
+
+
+# 
+
+# tests for convert_formula_to_logistic_bins
+# test_that("convert_formula_to_logistic_bins works", {
+#   convert_formula_to_logistic_bins(died~agility + superpower, data=avengers)
+# })

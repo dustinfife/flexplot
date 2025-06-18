@@ -4,7 +4,7 @@
 \alias{logistic_residual_plots}
 \title{Create residual plots for logistic regression models}
 \usage{
-logistic_residual_plots(data, object, n_bins = 10, ...)
+logistic_residual_plots(data, object, n_bins = 10, plot_type = NULL, ...)
 }
 \arguments{
 \item{data}{The model data frame}

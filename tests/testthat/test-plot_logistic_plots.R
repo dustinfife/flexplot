@@ -14,4 +14,13 @@ test_that("logistic plots work", {
   expect_doppelganger("compare.fits logistic with factors", compare.fits(a ~ z, data=small, mod_cat))
 })
 
+test_that("logistic_overlay works", {
+  p = flexplot(died ~ agility, data = avengers, method = "logistic")
+  expect_doppelganger("logistic overlay from plot", logistic_overlay(plot = p, n_bins = 15, type = "dot"))
+
+  # Create new plot with overlay
+  expect_doppelganger("logistic overlay with bars", logistic_overlay(formula = died ~ agility, data = avengers,
+                   n_bins = 8, type = "bar"))
+})
+
 options(warn = 0)

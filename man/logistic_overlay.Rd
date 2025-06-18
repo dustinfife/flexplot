@@ -6,8 +6,8 @@
 \usage{
 logistic_overlay(
   plot = NULL,
-  formula = NULL,
   data = NULL,
+  formula = NULL,
   n_bins = 10,
   type = "dot",
   scale = "probability",
@@ -18,11 +18,11 @@ logistic_overlay(
 \item{plot}{A flexplot object to add the overlay to. If NULL, a new plot will 
 be created using the formula and data parameters.}
 
-\item{formula}{A formula specifying the relationship between variables 
-(outcome ~ predictor). Required if plot is NULL.}
-
 \item{data}{A data frame containing the variables specified in the formula. 
 Required if plot is NULL.}
+
+\item{formula}{A formula specifying the relationship between variables 
+(outcome ~ predictor). Required if plot is NULL.}
 
 \item{n_bins}{Integer specifying the number of bins to create along the 
 x-axis for summarizing the data. Default is 10.}
@@ -30,6 +30,9 @@ x-axis for summarizing the data. Default is 10.}
 \item{type}{Character string specifying the type of overlay visualization. 
 Options are "dot" for point overlay or "bar" for rectangle overlay. 
 Default is "dot".}
+
+\item{scale}{Character string specifying the scale for the y-axis. Options are 
+"probability" (default) or "logit" for log odds scale.}
 
 \item{...}{Additional arguments passed to flexplot() when creating a new plot.}
 }
@@ -57,19 +60,15 @@ The function can either:
   \item Add an overlay to an existing flexplot object
   \item Create a new plot from a formula and data
 }
-
-When using "dot" type, point sizes reflect the relative frequency or 
-importance of each bin. When using "bar" type, rectangles show the 
-observed proportions as bars.
 }
 \examples{
 \dontrun{
 # Create overlay on existing plot
-p <- flexplot(outcome ~ predictor, data = mydata, method = "logistic")
+p <- flexplot(died ~ agility, data = avengers, method = "logistic")
 logistic_overlay(plot = p, n_bins = 15, type = "dot")
 
 # Create new plot with overlay
-logistic_overlay(formula = success ~ score, data = mydata, 
+logistic_overlay(formula = died ~ agility, data = avengers, 
                  n_bins = 8, type = "bar")
 }
 
