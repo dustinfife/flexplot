@@ -170,7 +170,6 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
   # Add mean of original outcome to maintain interpretation (like in original added.plot)
   if (scale == "logit") {
     binned_data$binned_residual = binned_data$observed_logit - binned_data$fitted_logit
-    browser()
     # For log odds scale, add the overall log odds
     overall_prop = mean(observed, na.rm = TRUE)
     original_mean = log(overall_prop / (1 - overall_prop))
