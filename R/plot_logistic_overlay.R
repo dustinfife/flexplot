@@ -53,6 +53,13 @@
 #'
 #' @export
 logistic_overlay = function(formula = NULL, data=NULL, plot = NULL, n_bins = 10, type = "dot", scale = "probability", ...) {
+
+
+  # if the user puts a plot without saying "plot = ", convert to a plot
+  if (class(formula)[1] == "gg") {
+    plot = formula
+    formula = NULL
+  }
   
   if (is.null(plot) && (is.null(formula) || is.null(data))) {
     stop("You must provide either a flexplot-style formula + data, or a plot.")
@@ -66,7 +73,6 @@ logistic_overlay = function(formula = NULL, data=NULL, plot = NULL, n_bins = 10,
     plot = flexplot(formula, data, method="logistic", raw.data=FALSE, ...)
     data = plot$data
   } else {
-    plot = flexplot(formula, data, method="logistic", raw.data=FALSE, ...)
     data = plot$data
     predictor_var = rlang::as_name(plot$mapping$x)
     outcome_var = rlang::as_name(plot$mapping$y)

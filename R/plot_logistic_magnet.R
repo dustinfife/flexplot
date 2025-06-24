@@ -55,6 +55,9 @@ magnet_plot = function(formula, data,
     stop("The response variable must be binary and coded as 0/1.")
   }
   
+  # Check that x is categorical
+  if (is.numeric(data[[xvar]])) data[[xvar]] = factor(data[[xvar]])
+  
   
   # Compute proportion within each X group and scaling factor
   df_summary = data %>%
@@ -95,19 +98,28 @@ magnet_plot = function(formula, data,
   # Predicted probabilities
   x_levels = levels(factor(data[[rlang::as_name(xvar_sym)]]))
   
+
+
+  
   df_pred = data.frame(
     X = x_levels,
     pred_prob = predict(model, newdata = setNames(data.frame(x_levels), rlang::as_name(xvar_sym)), type = "response")
-  )
+  ) %>% arrange(desc(pred_prob))
   
   # Base ggplot object
   p = ggplot() +
     geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray50") +
     scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1)) +
-    labs(title = "Proportional Stacked Dot Plot (Scaled by Max Group N) + Logistic Regression Fit",
+    labs(title = "Magnet Plot",
          y = rlang::as_name(yvar_sym),
          x = rlang::as_name(xvar_sym)) +
     theme_bw()
+
+  # order x-axis by predicted probabilities
+  if (class(df_scaled[[xvar]])[1] != "ordered") {
+    df_scaled[[xvar]] = factor(df_scaled[[xvar]], levels = df_pred$X, ordered=T)  
+  }
+  
   
   # Dot style options
   point_shape = 1

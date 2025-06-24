@@ -135,7 +135,8 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
   bin_centers = bin_info$bin_centers
   
   # Assign observations to bins
-  data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)
+  # if the variable is already less than n_bins
+  if (length(unique(x_vals))<n_bins) data$bin = x_vals else data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)
   data$x_vals = x_vals
   data$observed = observed
   
@@ -193,6 +194,15 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
   plot_formula = as.formula(paste("residuals ~", x_var))
   
   #### Plot it using flexplot
+  if (length(unique(x_var))<n_bins) {
+    plot = flexplot(plot_formula, data=data, method=method, ...) + 
+      labs(
+        y = y_label,
+        title = paste("Added Variable Plot (", 
+                      ifelse(scale == "logit", "Log Odds", "Probability"), 
+                      " Scale)", sep="")
+      )
+  } else {
   plot = flexplot(plot_formula, data=plot_data, method=method, ...) + 
     labs(
       y = y_label,
@@ -200,6 +210,6 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
                     ifelse(scale == "logit", "Log Odds", "Probability"), 
                     " Scale)", sep="")
       )
-  
+  }
   return(plot)
 }
