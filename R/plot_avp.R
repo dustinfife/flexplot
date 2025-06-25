@@ -97,7 +97,7 @@ added.plot = added_plot = avp = function(formula, data, lm_formula=NULL, method=
 ##' #      lm_formula = outcome~confounder1*confounder2, data=mydata)
 ##' # logistic_added_plot(outcome~predictor1 + predictor2, data=mydata, scale="logit")
 logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x=NULL, n_bins=10, scale="probability", ...){
-  
+ 
   #### identify variable types
   variables = all.vars(formula)
   
@@ -181,8 +181,9 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
     original_mean = mean(observed, na.rm = TRUE)
     y_label = paste("Binned Residuals +", round(original_mean, 3))
   }
-  binned_data$residuals = binned_data$binned_residual + original_mean
   
+  binned_data$residuals = binned_data$binned_residual + original_mean
+  data$residuals = residuals(conditioning_model)
   # Remove empty bins
   binned_data = binned_data[!is.na(binned_data$binned_residual), ]
 
@@ -203,13 +204,13 @@ logistic_added_plot = function(formula, data, lm_formula=NULL, method="loess", x
                       " Scale)", sep="")
       )
   } else {
-  plot = flexplot(plot_formula, data=plot_data, method=method, ...) + 
-    labs(
-      y = y_label,
-      title = paste("Added Variable Plot with Binned Residuals (", 
-                    ifelse(scale == "logit", "Log Odds", "Probability"), 
-                    " Scale)", sep="")
-      )
+    plot = flexplot(plot_formula, data=plot_data, method=method, ...) + 
+      labs(
+        y = y_label,
+        title = paste("Added Variable Plot with Binned Residuals (", 
+                      ifelse(scale == "logit", "Log Odds", "Probability"), 
+                      " Scale)", sep="")
+        )
   }
   return(plot)
 }
