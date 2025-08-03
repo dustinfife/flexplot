@@ -48,7 +48,7 @@ test_that("compare.fits for other models", {
   set.seed(1212)
   #### COMPARE.FITS FUNCTIONS -- linear models
   mod = lm(weight.loss~rewards, data=d)
-  mod2 = rlm(weight.loss~rewards, data=d)
+  mod2 = MASS::rlm(weight.loss~rewards, data=d)
   vdiffr::expect_doppelganger("compare.fits with rlm",compare.fits(formula=weight.loss~rewards, data=d, model1=mod, model2=mod2))
   
   polyn = MASS::polr(weight.loss~rewards,               data=exercise_data %>% mutate(weight.loss = factor(weight.loss, ordered=T)))
