@@ -193,7 +193,7 @@ estimates.RandomForest = function(object, mc=TRUE) {
     vals[vals<0] = 0
     importance = round(sqrt(vals), digits=3)
     sds = 
-    importance_sd = importance/sd()
+    importance_sd = importance/sd(vals)
   }
   
   estimates = list(oob=oob, rsq = rsq, importance=importance)
