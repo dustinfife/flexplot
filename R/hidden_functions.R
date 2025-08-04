@@ -296,6 +296,7 @@ match_jitter_categorical = function(x){
 #match_jitter_categorical(c(F,T))
 #jitter = c(.2, .4); data=exercise_data; axis.var=c("therapy.type", "gender")
 	#### points = the datapoints
+#' @noRd
 points.func = function(axis.var, data, jitter){
 
   if (is.null(jitter) & !check.non.number(data[,axis.var[1]])){

@@ -373,6 +373,7 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
   
 }
 
+#' @noRd
 arrange.plot  = function(histo, res.dep, sl, step3, plot, terms, numbers){
   
   # change default size of plots

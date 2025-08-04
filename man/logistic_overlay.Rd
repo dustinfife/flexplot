@@ -5,9 +5,9 @@
 \title{Add Logistic Overlay to Plot}
 \usage{
 logistic_overlay(
-  plot = NULL,
-  data = NULL,
   formula = NULL,
+  data = NULL,
+  plot = NULL,
   n_bins = 10,
   type = "dot",
   scale = "probability",
@@ -15,14 +15,14 @@ logistic_overlay(
 )
 }
 \arguments{
-\item{plot}{A flexplot object to add the overlay to. If NULL, a new plot will 
-be created using the formula and data parameters.}
+\item{formula}{A formula specifying the relationship between variables 
+(outcome ~ predictor). Required if plot is NULL.}
 
 \item{data}{A data frame containing the variables specified in the formula. 
 Required if plot is NULL.}
 
-\item{formula}{A formula specifying the relationship between variables 
-(outcome ~ predictor). Required if plot is NULL.}
+\item{plot}{A flexplot object to add the overlay to. If NULL, a new plot will 
+be created using the formula and data parameters.}
 
 \item{n_bins}{Integer specifying the number of bins to create along the 
 x-axis for summarizing the data. Default is 10.}
