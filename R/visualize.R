@@ -10,6 +10,7 @@
 #' @export
 visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){
   UseMethod("visualize")
+
 }
 
 #' Visualize a fitted model 
@@ -22,7 +23,6 @@ visualize = function(object, plot=c("all", "residuals", "model"),formula=NULL,..
 #' @return a plot containing a visual of the chosen model
 #' @export
 visualize.default = function(object, plot=c("all", "residuals", "model"),formula=NULL,...){
-  
   ## get dataset name
   data = eval(getCall(object)$data)
   
@@ -98,7 +98,7 @@ visualize.RandomForest = function(object, plot=c("all", "residuals", "model"),fo
 #' @return a plot containing a visual of the chosen model
 #' @export
 visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = NULL, plots.as.list=FALSE,...){
-  
+
   plot = match.arg(plot, c("all", "residuals", "model"))
   
   d = object$model
@@ -373,6 +373,7 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
   
 }
 
+#' @noRd
 arrange.plot  = function(histo, res.dep, sl, step3, plot, terms, numbers){
   
   # change default size of plots

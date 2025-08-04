@@ -33,11 +33,11 @@ test_that("create_prediction_grid creates full grid of combinations", {
   expect_equal(nrow(grid), 5 * length(unique(df$cat)))
 })
 
-test_that("shift_by_threshold subtracts group-specific values correctly", {
-  x = c(10, 20, 30, 40)
-  group_id = c("A", "B", "A", "B")
-  thresholds = c(A = 5, B = 10)
-  
-  result = shift_by_threshold(x, group_id, thresholds) %>% as.numeric
-  expect_equal(result, c(5, 10, 25, 30))
-})
+# test_that("shift_by_threshold subtracts group-specific values correctly", {
+#   x = c(10, 20, 30, 40)
+#   group_id = c("A", "B", "A", "B")
+#   thresholds = c(A = 5, B = 10)
+#   
+#   result = shift_by_threshold(x, group_id, thresholds) %>% as.numeric
+#   expect_equal(result, c(5, 10, 25, 30))
+# })

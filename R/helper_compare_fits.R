@@ -80,21 +80,72 @@ get_cforest_variables = function(model, return.type=c("all", "predictors", "resp
   return(response)
 }
 
+#' Extract Variable Names from Model Objects
+#'
+#' This function extracts predictor and response variable names from various
+#' types of fitted model objects. It is used internally by flexplot functions
+#' to determine which variables are available in a model.
+#'
+#' @param model A fitted model object (e.g., lm, glm, RandomForest, keras model, etc.)
+#'
+#' @return A list with two elements:
+#'   \item{predictors}{Character vector of predictor variable names}
+#'   \item{response}{Character string of the response variable name}
+#'
+#' @details
+#' This generic function provides a consistent interface for extracting variable
+#' names across different model types. Each model class should have its own method
+#' that handles the specifics of variable extraction for that model type.
+#'
+#' @seealso \code{\link{compare.fits}} for the main function that uses this generic
+#'
+#' @examples
+#' # Linear model example
+#' data(mtcars)
+#' model = lm(mpg ~ hp + wt, data = mtcars)
+#' terms_info = get_terms(model)
+#' terms_info$predictors  # "hp" "wt"
+#' terms_info$response    # "mpg"
+#'
+#' @export
 get_terms = function(model) {
-  
-  model.type = class(model)[1]
-  
-  #### extract the terms from each MODEL
-  if (model.type == "RandomForest") {
-    predictors = get_cforest_variables(model, "predictors");
-    response = get_cforest_variables(model, "response");
-    return(list(predictors = predictors, response=response))
-  } 
-    
+  UseMethod("get_terms")
+}
+
+#' Extract Variable Names from RandomForest Models
+#'
+#' S3 method for extracting variable names from RandomForest objects.
+#'
+#' @param model A fitted RandomForest object from the party package
+#' @return A list with elements "predictors" and "response"
+#'
+#' @method get_terms RandomForest
+#' @export
+get_terms.RandomForest = function(model) {
+  predictors = get_cforest_variables(model, "predictors")
+  response = get_cforest_variables(model, "response")
+  return(list(predictors = predictors, response = response))
+}
+
+
+#' Extract Variable Names from General Model Objects
+#'
+#' Default S3 method for extracting variable names from model objects that
+#' have a formula() method.
+#'
+#' @param model A fitted model object with a formula() method
+#' @return A list with elements "predictors" and "response"
+#'
+#' @details This default method works for most standard R model objects including
+#'   lm, glm, and other models that store their formula and support the formula() function.
+#'
+#' @method get_terms default
+#' @export
+get_terms.default = function(model) {
   form = formula(model) 
-  predictors=all.vars(form)[-1]  
+  predictors = all.vars(form)[-1]  
   response = all.vars(form)[1]
-  return(list(predictors = predictors, response=response))
+  return(list(predictors = predictors, response = response))
 }
 
 check_missing = function(model1, model2=NULL, data, variables) {
@@ -105,15 +156,28 @@ check_missing = function(model1, model2=NULL, data, variables) {
   n1 = get_model_n(model1)
   n2 = get_model_n(model2)
   
-  if (n1<nrow(data) | n2<nrow(data)){
+  # Only check if both are not NULL
+  if (!is.null(n1) && !is.null(n2) && (n1 < nrow(data) | n2 < nrow(data))) {
     data = na.omit(data[,variables])
   }
   
   return(data)
 }
 
+#' Get Number of Observations from Model Objects
+#'
+#' Extract the number of observations used to fit a model object.
+#'
+#' @param model A fitted model object
+#' @return Integer representing the number of observations, or NULL if unknown
+#' @export
 get_model_n = function(model) {
+  UseMethod("get_model_n")
+}
 
+#' @method get_model_n default
+#' @export
+get_model_n.default = function(model) {
   mod_class = class(model)[1]
   if (mod_class == "RandomForest") return(attr(model, "responses")@nobs)
   if (mod_class == "randomForest.formula") return(length(model$predicted))
@@ -121,7 +185,6 @@ get_model_n = function(model) {
   if (mod_class == "rpart") return(length(model$y))
   
   return(nrow(model$model))
-  
 }
 
 make_data_types_the_same = function(variable, predicted_data, model_data) {
@@ -271,71 +334,6 @@ generate_quadriture = function(x, number_points = 15) {
   seq(from=min(x), to=max(x), length.out=15)
 }
 
-generate_predictions = function(model, re, pred.values, pred.type, report.se) {
 
-  model.type = class(model)[1]
-
-  if ((model.type == "lmerMod" | model.type == "glmerMod") & !re){
-    return(data.frame(prediction = 
-                 predict(model, pred.values, type="response", re.form=NA), model="fixed effects"))
-  }  
-  
-  if ((model.type == "lmerMod" | model.type == "glmerMod") & re){
-    # get both random and fixed effects
-    
-    random_effects = data.frame(prediction = predict(model, pred.values, type="response", re.form=NULL), 
-                                model="random effects")
-    fixed_effects = data.frame(prediction = predict(model, pred.values, type="response", re.form=NA), 
-                                model="fixed effects")
-    return(prediction = rbind(random_effects, fixed_effects))
-  }  
-  
-  if (model.type == "polr"){
-      return(
-        data.frame(prediction = predict(model, pred.values, type="class", re.form=NA), model= model.type)		
-      )
-  }
-
-  if (model.type=="RandomForest") {
-    
-    ## get dataset to test that classes are all the same
-    response = attr(model, "data")@get("response")
-    outcome = attr(model, "data")@get("input")
-    data = cbind(response, outcome)
-    # check if classes differ from old to new, and correct if they are
-    class_preds = lapply(pred.values, class)
-    class_data = lapply(data[names(pred.values)], class)
-    if (!identical(class_preds, class_data)) {
-      for (i in 1:length(class_preds)) {
-        
-        if ("factor" %in% (class(data[,names(pred.values[i])]))) {
-          
-          ordered = ifelse("ordered" %in% (class(data[,names(pred.values[i])])), T, F) 
-          pred.values[,i] = factor(pred.values[,i], levels=levels(data[,names(pred.values[i])]), ordered=ordered)
-        } else {
-          class(pred.values[,i]) = class(data[,names(pred.values[i])])
-        }  
-      }
-    }
-    
-    prediction = predict(model, newdata=pred.values, OOB = TRUE)
-    d = data.frame(prediction = prediction, model=model.type)
-    names(d)[1] = "prediction"
-    return(d
-    )    
-  }
-  
-  if (model.type == "rpart") {
-    return(
-      data.frame(prediction = predict(model, pred.values), model= model.type)		
-    )
-  }
-  
-  int = ifelse(report.se, "confidence", "none")
-  return(
-    data.frame(prediction = predict(model, pred.values, interval=int, type=pred.type),
-               model=model.type)
-  )
-}
 
 

@@ -4,9 +4,7 @@
 \alias{estimates.RandomForest}
 \title{Report RandomForest object Estimates (effect sizes and parameters)}
 \usage{
-\method{estimates}{RandomForest}(object, mc = FALSE)
-
-\method{estimates}{RandomForest}(object, mc = FALSE)
+\method{estimates}{RandomForest}(object, mc = TRUE)
 }
 \arguments{
 \item{object}{a zeroinfl object}
@@ -14,8 +12,6 @@
 \item{mc}{Should model comparisons be performed? Currently not used}
 }
 \value{
-One or more objects containing parameter estimates and effect sizes
-
 Estimates for a RandomForest model. For classification, it will return the following:
 \itemize{
 \item{OOB Accuracy in prediction: The total accuracy (correct classifications/incorrect classifications) for the OOB data}
@@ -29,7 +25,5 @@ For regression, it will return the following:
 }
 }
 \description{
-Report RandomForest object Estimates
-
 Report RandomForest object Estimates
 }

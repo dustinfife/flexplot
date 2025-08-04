@@ -383,10 +383,10 @@ flexplot_create_breaks = function(break.me, breaks, data, labels, bins=3){
 # expect_true(length(flexplot_axis_given(formula(y~x+z))$axis) ==2)
 # expect_true(length(flexplot_axis_given(formula(y~x+z|z))$given) ==1)
 flexplot_axis_given = function(formula){
-  given = unlist(subsetString(as.character(formula)[3], sep=" | ", position=2, flexible=F))
+  given = unlist(subsetString(base::as.character(formula)[3], sep=" | ", position=2, flexible=F))
   given = gsub(" ", "", given)		
   given = unlist(strsplit(given, "+", fixed=T))	
-  axis = unlist(subsetString(as.character(formula)[3], sep=" | ", position=1, flexible=F))
+  axis = unlist(subsetString(base::as.character(formula)[3], sep=" | ", position=1, flexible=F))
   axis = gsub(" ", "", axis)			
   axis = unlist(strsplit(axis, "+", fixed=T))	
   list(given=given, axis=axis)
