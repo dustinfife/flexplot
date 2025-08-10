@@ -28,7 +28,7 @@ compare_fits = function(formula, data, model1, model2=NULL,
                         pred.type="response", num_points = 50,
                         clusters=3,...){
   if (is.null(model2)) runme = "yes"
-  browser()
+  
   #### if mod2 is null..
   if (is.null(model2)) model2 = model1
   
@@ -104,8 +104,11 @@ compare_fits = function(formula, data, model1, model2=NULL,
               I'm truncating the y-axis to preserve the original scale.")
     }
   } else {
-    # if they supply a factor, convert it to a number!!!!!
+    # if they supply a factor, convert it to a number
     prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
+    
+    # if the original outcome is an ordered factor, convert it to a number
+    if (class(data[,outcome])[1] == "ordered") data[,outcome] = as.numeric(as.character(data[,outcome]))
   }
   
   #### create flexplot

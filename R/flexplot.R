@@ -103,7 +103,7 @@ flexplot = function(formula, data=NULL, related=F,
 		third.eye=NULL,
 		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), 
 		return_data = F, ...){
-  browser()
+  
   data_name = substitute(data)
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
@@ -155,7 +155,6 @@ flexplot = function(formula, data=NULL, related=F,
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method)
   prediction = flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE)
-  str(prediction)
   
   # make sure data and prediction have the same variable types for axis 1
   prediction = make_prediction_dataset_same_type_on_x1(data, prediction, axis[1])
@@ -263,7 +262,7 @@ flexplot = function(formula, data=NULL, related=F,
 	}
 
 	final = suppressMessages(eval(parse(text=total.call)))
-	browser()
+	
 	# add formula (to make it easier for marginal_plot)
 	final$formula = formula
 
