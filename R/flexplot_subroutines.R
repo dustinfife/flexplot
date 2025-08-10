@@ -196,7 +196,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   if (pred.data) {
     outcome = "prediction"
     variables[1] = "prediction"
-    data[,"model"] = factor(data[,"model"])
+    data[,"model"] = factor(data[["model"]])
   }
   
   ### remove missing values
@@ -214,6 +214,7 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
   
   # prepare data for association plot
+  browser()
   data = modify_association_plot_data(data=data, formula = formula, outcome = outcome)
   
   # make sure method = 'logistic' under the right circumstances
