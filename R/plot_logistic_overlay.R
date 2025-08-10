@@ -115,7 +115,7 @@ logistic_overlay = function(formula = NULL, data=NULL, plot = NULL, n_bins = 10,
     geom_jitter(
       data = summary_data,
       mapping = base_aes,
-      size = 0.5,
+      size = 2,
       width = 0,    # horizontal jitter amount
       height = 0,  # vertical jitter amount  
       inherit.aes = FALSE,
