@@ -28,8 +28,8 @@ compare_fits = function(formula, data, model1, model2=NULL,
                         pred.type="response", num_points = 50,
                         clusters=3,...){
   if (is.null(model2)) runme = "yes"
-  
-  #### if mod2 is null..
+
+#### if mod2 is null..
   if (is.null(model2)) model2 = model1
   
   #### get type of model
@@ -68,31 +68,8 @@ compare_fits = function(formula, data, model1, model2=NULL,
   
   # generate predictions for the entire dataset (before aggregating) 
   predictions = get_fitted(model1, re=re, pred.type=pred.type, report.se=report.se)
-  predictions$model = deparse(substitute(model1))
-  if (!exists("runme")) { 
-    predictions2 = get_fitted(model2, re=re, pred.type=pred.type, report.se=report.se) 
-    predictions2$model = deparse(substitute(model2))
-    predictions = rbind(predictions, predictions2)
-    k = rbind(k, k)
-  }
-  k$prediction = predictions$prediction
-  k$model      = predictions$model
-  
-  # get predicted values
-  pred.values = get_plotted_line(data=k, formula=formula, model=model1, ...)
 
-  # for intercept only models
-  if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
-
-  # if they provide two models AND re=T, return just the random effects
-  if (re & !exists("runme")) {
-    pred.mod1 = pred.mod1[pred.mod1$model == "random effects",]
-    pred.mod2 = pred.mod2[pred.mod2$model == "random effects",]
-    pred.mod1$model = deparse(substitute(model1))
-    pred.mod2$model = deparse(substitute(model2))
-  }
-  
-  prediction.model = pred.values
+  prediction.model = post_prediction_process_cf(model1, model2, predictions, formula, re, k, pred.type)
 
   #### eliminate those predictions that are higher than the range of the data
   if (!is.factor(data[,outcome])){

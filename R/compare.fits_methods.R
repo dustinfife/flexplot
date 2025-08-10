@@ -21,12 +21,12 @@ get_fitted.default = function(model, re=NULL, pred.values, pred.type="response",
 get_fitted.lmerMod = function(model, re=FALSE, pred.values, pred.type="response", report.se=FALSE) {
   if (!re) {
     return(data.frame(prediction = 
-                        predict(model, pred.values, type="response", re.form=NA), 
+                        predict(model, type="response", re.form=NA), 
                       model="fixed effects"))
   } else {
-    random_effects = data.frame(prediction = predict(model, pred.values, type="response", re.form=NULL), 
+    random_effects = data.frame(prediction = predict(model, type="response", re.form=NULL), 
                                 model="random effects")
-    fixed_effects = data.frame(prediction = predict(model, pred.values, type="response", re.form=NA), 
+    fixed_effects = data.frame(prediction = predict(model, type="response", re.form=NA), 
                                model="fixed effects")
     return(rbind(random_effects, fixed_effects))
   }
@@ -143,8 +143,10 @@ get_plotted_line.default = function(model, data, formula,  ...) {
     #convert all *_binned factors like "4.2-4.9" to numeric midpoints
     mutate(across(ends_with("_binned"), ~ {
       x = as.character(.x)
-      low  = as.numeric(sub("^(.*?)-.*$", "\\1", x))
-      high = as.numeric(sub("^.*-(.*)$", "\\1", x))
+      # remove parentheses if present
+      x = gsub("[()]", "", x)
+      low  = as.numeric(sub("^(-?[0-9.]+)-.*$", "\\1", x))
+      high = as.numeric(sub("^.*-(-?[0-9.]+)$", "\\1", x))
       (low + high) / 2
     })) %>%
       # strip the "_binned" suffix from their names
@@ -180,3 +182,89 @@ get_sequence_of_target_variable = function(data, x_label) {
   return(data)
   
 }
+
+# post_prediction_process_cf
+
+
+# post_prediction_process_cf ----------------------------------------------
+
+#' @export
+post_prediction_process_cf        = function(model1, model2=NULL, predictions, formula, re=FALSE, k, pred.type,  ...) {
+  UseMethod("post_prediction_process_cf")
+}
+
+#' @method post_prediction_process_cf default
+#' @export
+post_prediction_process_cf.default = function(model1, model2=NULL, predictions, formula, re=FALSE, k, pred.type, ...) {
+  
+  predictions$model = deparse(substitute(model1))
+  both_models_identical = identical(model1, model2)
+  if (!both_models_identical) { 
+    predictions2 = get_fitted(model2, re=re, pred.type=pred.type, report.se=F) 
+    predictions2$model = deparse(substitute(model2))
+    predictions = rbind(predictions, predictions2)
+    k = rbind(k, k)
+  }
+  k$prediction = predictions$prediction
+  k$model      = predictions$model
+  
+  # get predicted values
+  pred.values = get_plotted_line(data=k, formula=formula, model=model1, ...)
+  
+  # for intercept only models
+  if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
+  
+  # if they provide two models AND re=T, return just the random effects
+  # if (re & !exists("runme")) {
+  #   pred.mod1 = pred.mod1[pred.mod1$model == "random effects",]
+  #   pred.mod2 = pred.mod2[pred.mod2$model == "random effects",]
+  #   pred.mod1$model = deparse(substitute(model1))
+  #   pred.mod2$model = deparse(substitute(model2))
+  # }
+  
+  prediction.model = pred.values
+}
+
+#' @method post_prediction_process_cf lmerMod 
+#' @export
+post_prediction_process_cf.lmerMod  = function(model1, model2=NULL, predictions, formula, re=FALSE, k, pred.type, ...) {
+  
+  # generate predictions for other model
+  both_models_identical = identical(model1, model2)
+  if (!both_models_identical) { 
+    predictions2 = get_fitted(model2, re=re, pred.type=pred.type, report.se=report.se) 
+  } else {
+    predictions2 = predictions
+  }
+  
+  # if they provide two models AND re=T, return just the random effects
+  if (re & !both_models_identical) {
+    predictions  =  predictions[ predictions$model == "random effects",]
+    predictions2 = predictions2[predictions2$model == "random effects",]
+  } 
+  
+  # rename model if they don't have re
+  if (!re | (re & !both_models_identical)) {
+    predictions$model = deparse(substitute(model1))
+    predictions2$model = deparse(substitute(model2))
+  }
+  
+  
+  predictions = rbind(predictions, predictions2)
+  k = rbind(k, k)
+  k$prediction = predictions$prediction
+  k$model      = predictions$model
+  # get rid of duplicates (happens when they don't provide a second model)
+  k = k[!duplicated(k),]
+  # get predicted values
+  pred.values = get_plotted_line(data=k, formula=formula, model=model1, ...)
+  
+  # for intercept only models
+  if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
+  
+  return(pred.values)
+}
+
+
+
+
