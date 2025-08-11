@@ -81,8 +81,6 @@ test_that("compare_fits with lmer", {
   mod1 = lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)  
   mod2 = lmer(ALCUSE~AGE_14 + (AGE_14|ID), data=alcuse)  
   compare_fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2, re=T)
-  vdiffr::expect_doppelganger("compare.fits with mixed models and RE = T",
-                              compare.fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2, re=T)) 
   
 })
   

@@ -3,14 +3,14 @@
 
 
 #' @export
-get_fitted = function(model, re, pred.values, pred.type, report.se) {
+get_fitted = function(model, re, pred.values=NULL, pred.type, report.se) {
   UseMethod("get_fitted")
 }
 
 
 #' @method get_fitted default
 #' @export
-get_fitted.default = function(model, re=NULL, pred.values, pred.type="response", report.se=FALSE) {
+get_fitted.default = function(model, re=NULL, pred.values=NULL, pred.type="response", report.se=FALSE) {
   int = ifelse(report.se, "confidence", "none")
   return(data.frame(prediction = predict(model, pred.values, interval=int, type=pred.type),
                     model = class(model)[1]))
@@ -196,12 +196,13 @@ post_prediction_process_cf        = function(model1, model2=NULL, predictions, f
 #' @method post_prediction_process_cf default
 #' @export
 post_prediction_process_cf.default = function(model1, model2=NULL, predictions, formula, re=FALSE, k, pred.type, ...) {
-  
   predictions$model = deparse(substitute(model1))
   both_models_identical = identical(model1, model2)
   if (!both_models_identical) { 
-    predictions2 = get_fitted(model2, re=re, pred.type=pred.type, report.se=F) 
+    predictions2 = get_fitted(model2, re=re, pred.values=k, pred.type=pred.type, report.se=F) 
     predictions2$model = deparse(substitute(model2))
+    predictions  = setNames(predictions , c("prediction", "model"))
+    predictions2 = setNames(predictions2, c("prediction", "model"))
     predictions = rbind(predictions, predictions2)
     k = rbind(k, k)
   }
