@@ -36,7 +36,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   #### get type of model
   model1.type = class(model1)[1]
   model2.type = class(model2)[1]	
-
+  
   #### get all variables
   variables_mod1 = get_terms(model1)
   variables_mod2 = get_terms(model2)
@@ -55,7 +55,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   
   #### convert random effects to factors for mixed models
   data = subset_random_model(model1, formula, d=data, samp.size = clusters)
-
+  
   ### make sure they have the same outcome
   if (variables_mod1$response != variables_mod2$response) {
     stop("It looks like your two models have different outcome variables. That's not permitted, my friend!")
@@ -68,23 +68,23 @@ compare.fits = function(formula, data, model1, model2=NULL,
   
   # check for errors
   compare_fits_errors(data, outcome, predictors, testme)
-
+  
   # generate predictor values
   pred.values = generate_predictors(data, formula, model1, ...)
-
+  
   # ensure pred.values have same class as original data
   # but don't change RE; because prior to this there's been sampling of the data and this would revert that
   randef = extract_random_term(model1)
   
   all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
-
+  
   
   # for intercept only models
   if (nrow(pred.values)==0) pred.values = data.frame("(Intercept)" = 1)
   
   pred.mod1 = generate_predictions(model1, re, pred.values, pred.type, report.se)
   
-
+  
   
   # when RE = T, we should return BOTH
   ### there's no fixed effect if we don't have these lines
@@ -95,7 +95,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   } else {
     pred.mod2 = pred.mod1
   }
-
+  
   # if they provide two models AND re=T, return just the random effects
   if (re & !exists("runme")) {
     pred.mod1 = pred.mod1[pred.mod1$model == "random effects",]
@@ -140,8 +140,8 @@ compare.fits = function(formula, data, model1, model2=NULL,
   if (!is.factor(data[,outcome])){
     min.dat = min(data[,outcome], na.rm=T); max.dat = max(data[,outcome], na.rm=T)
     if (length(which(
-        prediction.model$prediction>(max.dat))>0 |
-          length(which(prediction.model$prediction<(min.dat))))){
+      prediction.model$prediction>(max.dat))>0 |
+      length(which(prediction.model$prediction<(min.dat))))){
       #prediction.model  = prediction.model[-which(prediction.model$prediction>max.dat | prediction.model$prediction<min.dat), ]
       warning("Some of the model's predicted values are beyond the range of the original y-values. 
               I'm truncating the y-axis to preserve the original scale.")
@@ -163,7 +163,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
       prediction.model$prediction = prediction.model$prediction + 1
     }
     
-
+    
     final_geom = return_lims_geom(outcome, data, model1)
     # remove duplicate rows
     prediction.model = prediction.model[!duplicated(prediction.model),]
@@ -171,7 +171,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
     
     # if outcome is a factor, for logistic regresion
-
+    
     flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
   }	

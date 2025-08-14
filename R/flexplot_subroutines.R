@@ -307,6 +307,7 @@ flexplot_break_me = function(data, predictors, given, axis, bins){
     is.given   = (non.axis.one %in% given) | (second.axis %in% non.axis.one)
     break.me = non.axis.one[is_numeric & is.given]	
   } else {
+    
     break.me = non.axis.one[is.numeric(data[,non.axis.one]) & length(unique(data[,non.axis.one]))>bins & ((non.axis.one %in% given) | (second.axis %in% non.axis.one))]	
   }
   

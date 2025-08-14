@@ -67,8 +67,8 @@ compare_fits = function(formula, data, model1, model2=NULL,
   compare_fits_errors(k, outcome, predictors, testme)
   
   # generate predictions for the entire dataset (before aggregating) 
-  predictions = get_fitted(model1, re=re, pred.values = data, pred.type=pred.type, report.se=report.se)
-
+  predictions = get_fitted(model1, re=re, pred.type=pred.type, report.se=report.se)
+  
   prediction.model = post_prediction_process_cf(model1, model2, predictions, formula, re, k, pred.type)
 
   #### eliminate those predictions that are higher than the range of the data

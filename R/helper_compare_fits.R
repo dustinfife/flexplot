@@ -220,7 +220,7 @@ not_binned_but_plotted = function(plot_variables, binned_variables) {
   c(plot_variables[!actually_binned], fake_bin_names[actually_binned])
 }
 
-bin_if_theres_a_flexplot_formula = function(data, formula,  ...) {
+bin_if_theres_a_flexplot_formula = function(formula, data, ...) {
   
   # extract given/axis
   given.axis = flexplot_axis_given(formula)
@@ -235,6 +235,32 @@ bin_if_theres_a_flexplot_formula = function(data, formula,  ...) {
   axis_length  = length(axis)
   if (axis_length>2 & is.na(given[1])) return(data) 
     
+  # if they have a flexplot formula, bin things
+  binned_data = reproduce_breaks(data, formula, list_values)
+  k=binned_data$binned_data
+  breaks=binned_data$breaks
+  
+  # # for all binned variables, average within bins
+  a = names(breaks) %>% purrr::map(replace_numeric_with_average, data=k, breaks=breaks)
+  k[,names(breaks)] = a
+  return(k)
+}
+
+bin_if_theres_a_flexplot_formula2 = function(data, formula,  ...) {
+  
+  # extract given/axis
+  given.axis = flexplot_axis_given(formula)
+  given = given.axis$given
+  axis = given.axis$axis
+  
+  # reproduce breaks from flexplot in the dataset (if they supply them)
+  list_values = list(...)
+  
+  # see if they didn't give a flexplot formula
+  given_length = length(given)
+  axis_length  = length(axis)
+  if (axis_length>2 & is.na(given[1])) return(data) 
+  
   # if they have a flexplot formula, bin things
   binned_data = reproduce_breaks(data, formula, list_values)
   k=binned_data$binned_data
@@ -309,6 +335,36 @@ reproduce_breaks = function(data, formula, list_values) {
 generate_quadriture = function(x, number_points = 15) {
   seq(from=min(x), to=max(x), length.out=15)
 }
+
+### function to generate prediction matrix spanning the range of the data
+generate_predictors = function(data, formula, model, ...) {
+  
+  ## extract variable slots
+  variables = all.vars(formula, unique=FALSE)
+  outcome = variables[1]
+  predictors = variables[-1]
+  
+  k = bin_if_theres_a_flexplot_formula(formula, data, ...)
+  
+  # identify those variables in the model that are not plotted
+  # (If I don't do this, we'll get a jagged line in the visuals)
+  vars_in_model = get_predictors(model)
+  which_are_missing = remove_nonlinear_terms(vars_in_model[!(vars_in_model %in% variables)])
+  
+  # replace the missing variables with mean (numeric) or a level
+  new_values = which_are_missing %>% purrr::map(return_constant_for_predicted_data, data=k, model=model)
+  if (length(which_are_missing)>0) k[,which_are_missing] = new_values
+  
+  # remove the outcome variable (because it's replaced with "prediction" now)
+  k[,outcome] = NULL
+  # remove variables not in there
+  #find all variables in either formula or model
+  
+  all_variables_in_either = remove_nonlinear_terms(unique(c(predictors, vars_in_model)))
+  return(k[,all_variables_in_either, drop=FALSE])
+}
+
+
 
 
 
