@@ -99,27 +99,56 @@ check_all_variables_exist_in_data = function(variables, data) {
   return(NULL)
 }  
 
+# In flexplot/R/compare.fits_methods.R (or wherever this lives)
 extract_data_from_fitted_object = function(object) {
-  if (class(object)[1]=="lm" | class(object)[1]=="glm" | class(object)[1] == "rlm") return(object$model)
-  if (class(object)[1]=="RandomForest") {
+  
+  # Helper: safest env to evaluate the model's data
+  get_eval_env = function(obj) {
+    f = tryCatch(stats::formula(obj), error = function(e) NULL)
+    if (!is.null(f) && !is.null(environment(f))) return(environment(f))
+    parent.frame()
+  }
+  
+  # 1) Prefer model.frame() whenever available (keeps NA handling, contrasts, etc.)
+  if (inherits(object, c("lm", "glm", "rlm",
+                         "lmerMod", "glmerMod", "lmerModLmerTest"))) {
+    return(stats::model.frame(object))
+  }
+  
+  # 2) party::RandomForest (S4) — keep your current handling
+  if (inherits(object, "RandomForest")) {
     outcome = object@responses@variables
     predictors = object@data@get("input")
     data = cbind(outcome, predictors)
     return(data)
-  }  
-  if (class(object)[1] == "randomForest.formula") {
-    vars = all.vars(formula(object))
-    data = eval(getCall(object)$data)
-    return(data[,vars])
   }
   
-  if (class(object)[1] == "lmerMod") {
-    data = model.frame(object)
-    return(data)
+  # 3) randomForest::randomForest fitted with a formula
+  #    (class often "randomForest", sometimes shows as "randomForest.formula")
+  if (inherits(object, c("randomForest", "randomForest.formula"))) {
+    fml = tryCatch(stats::formula(object), error = function(e) NULL)
+    if (!is.null(fml)) {
+      vars = all.vars(fml)
+      cl = tryCatch(stats::getCall(object), error = function(e) NULL)
+      if (!is.null(cl) && !is.null(cl$data)) {
+        env = get_eval_env(object)
+        data = eval(cl$data, envir = env)
+        return(data[, vars, drop = FALSE])
+      }
+    }
+    # Fall through to the generic path if we couldn't resolve it here
   }
-  # this should work for the rest?? But it won't be in the right order!
-  return(eval(getCall(object)$data))
+  
+  # 4) Generic fallback — evaluate call$data in the model/formula environment
+  cl = tryCatch(stats::getCall(object), error = function(e) NULL)
+  if (!is.null(cl) && !is.null(cl$data)) {
+    env = get_eval_env(object)
+    return(eval(cl$data, envir = env))
+  }
+  
+  stop("extract_data_from_fitted_object: could not recover the original data from this model.")
 }
+
 
 check_nested = function(model1, model2) {
   #### collect terms
