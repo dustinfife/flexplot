@@ -184,7 +184,7 @@ visualize.lmerMod = function(object, plot=c("all", "residuals", "model"), formul
   d[,term.re] = factor(d[,term.re], ordered=T)
   
   # get a new dataset that samples the clusters
-  k = d#randomly_sample_clusters(d, term.re, sample)
+  k = d
 
   # get the formula
   formula = make_formula_mixed(preds, term.re, outcome, formula)
