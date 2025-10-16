@@ -50,6 +50,8 @@ magnet_plot = function(formula, data,
   yvar_sym = rlang::ensym(yvar)
   
   # Check that Y is binary 0/1
+  data = check_magnet_errors(data, yvar, xvar)
+  
   y_values = unique(data[[yvar]])
   if (!all(y_values %in% c(0, 1))) {
     stop("The response variable must be binary and coded as 0/1.")
@@ -146,4 +148,23 @@ magnet_plot = function(formula, data,
   
   # Return plot
   return(p)
+}
+
+check_magnet_errors = function(data, yvar, xvar) {
+  if (length(unique(data[[xvar]])) > 5 & is.numeric(data[[xvar]])) {
+    stop ("Your predictor variable must be categorical. Use the logistic_overlay function instead.")
+  }
+  if (length(unique(data[[yvar]])) != 2) stop ("Your outcome variable must have exactly 2 levels")
+  if (!is.numeric(data[[yvar]])) {
+    new_y = factor(data[[yvar]], 
+                   levels = unique(data[[yvar]]), 
+                   labels = c(0,1)) %>%
+      as.character %>%
+      as.numeric
+    message(paste0("Note: your outcome variable levels (", paste0(unique(data[[yvar]]), collapse=" and "), ") are not 1/0.",
+                   "\n", 
+                   "I have converted them to 1/0, where 1 = ", unique(data[[yvar]])[2], " and 0 = ", unique(data[[yvar]])[1]))
+    data[[yvar]] = new_y
+  }
+  return(data)
 }

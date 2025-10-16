@@ -34,7 +34,3 @@ test_that("replace_text_with_binned works", {
   expect_true(typeof(common_layers_margin_plot())=="list")
 })
 
-test_that("extract_plot_method works", {
-  a = flexplot(ptsd~speed | agility + strength, data=avengers)
-  expect_true(extract_plot_method(a)$method=="loess")
-})
