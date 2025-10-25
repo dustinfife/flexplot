@@ -5,7 +5,6 @@
   if (length(fl) == 0) stop("Model has no random-effects grouping factor.")
   names(fl)[1]  # use the first grouping term (consistent with your helpers)
 }
-usethis::use_test("plot_cas")
 
 compute_cas_from_model = function(m, outcome_name = NULL, adjust = c("all","intercept","none")) {
   
@@ -30,7 +29,7 @@ compute_cas_from_model = function(m, outcome_name = NULL, adjust = c("all","inte
   y_adj = cas_adjustment(d=d, model = m, outcome_name = outcome_name, adjust=adjust,
                               pred_fixed = pred_fixed, pred_cond = pred_cond)
   out = d
-  out$y_adj = y_adj
+  out[[paste0(outcome_name, "_adj")]] = y_adj
   out$pred_fixed = pred_fixed
   out$.re_term = re_term
   out
@@ -78,8 +77,24 @@ cas_adjustment = function(d, model=NULL,
   return(y_adj)
 }
 
-cluster_adjusted_scatter = function(formula, object,
+
+#' Cluster adjusted scatterplot
+#'
+#' @param formula a flexplot-like formula
+#' @param object a fitted lme4 object
+#' @param adjust how the outcome should be adjusted
+#' @param ... any other parameters passed to flexplot
+#'
+#' @returns a cluster-adjusted scatterplot
+#' @export
+#'
+#' @examples
+#' mod1 = lme4::lmer(y~x + (x | id), data=small_mixed)
+#' cluster_adjusted_scatter(y~x, object = mod1)
+cluster_adjusted_scatter = function(formula, object=NULL, data=NULL, 
+                                    random = NULL, 
                                     adjust = c("all","intercept","none"),
+                                    smooth=T,
                                     ...) {
   adjust = match.arg(adjust, c("all","intercept","none"))
   
@@ -88,6 +103,14 @@ cluster_adjusted_scatter = function(formula, object,
   if (length(vars) < 2) stop("Formula must be like y ~ x.")
   outcome = vars[1]
   xvar    = vars[2]
+
+  # fit the model if they don't provide one
+  if (is.null(object)) {
+    if (is.null(random) | is.null(data)) stop("If you don't provide a model, you must provide both a random object and a dataset")
+    rand_str = if (inherits(random, "formula")) sub("^~", "", paste(deparse(random), collapse="")) else random
+    form = update(formula, as.formula(paste("~ . +", rand_str), env = environment(formula)))
+    object = lme4::lmer(form, data=data)
+  }
   
   if (!all(c(outcome, xvar) %in% names(object@frame))) {
     stop("Variables in formula must exist in the model frame.")
@@ -95,10 +118,24 @@ cluster_adjusted_scatter = function(formula, object,
   
   d = compute_cas_from_model(object, outcome_name = outcome, adjust = adjust)
   re_term = d$.re_term
-  form = as.formula(paste("y_adj ~", deparse(formula[[3]])),
+  
+  new_outcome = paste0(outcome, "_adj")
+  form = as.formula(paste(new_outcome, " ~", deparse(formula[[3]])),
                      env = environment(formula))
   
   # get total clusters so it samples everything. 
   clusters = unique(d[[d$.re_term[1]]])
-  compare.fits(form, data=d, model1=object, clusters = length(clusters), ...)
+  
+  smooth_geom = if (isTRUE(smooth)) geom_smooth() else NULL
+  compare.fits(form, data=d, model1=object, clusters = length(clusters), ...) +
+    smooth_geom
+    
+}
+
+add_random = function(form, random_terms) {
+  to_piece = function(x) {
+    if (inherits(x, "formula")) sub("^~", "", paste(deparse(x), collapse="")) else as.character(x)
+  }
+  rhs = paste(vapply(as.list(random_terms), to_piece, character(1)), collapse = " + ")
+  update(form, as.formula(paste("~ . +", rhs), env = environment(form)))
 }

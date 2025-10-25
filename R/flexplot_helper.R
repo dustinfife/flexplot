@@ -208,9 +208,10 @@ flexplot_bivariate_string = function(data, outcome, axis,
 }
 
 flexplot_multivariate_aes = function(data, outcome, prediction=NULL, axis) {
+  
   ### if they supply predictions, do not vary color
   if (!is.null(prediction)){
-    return('ggplot(data=data, aes(x=!! sym(predictors[1]), y=!! sym(outcome), color=!! sym(axis[2]), shape=!! sym(axis[2]))) + labs(color= axis[2], shape= axis[2])')
+    return('ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2]), shape=!!sym(axis[2]))) + labs(color=axis[2], shape=axis[2])')
   } 
   
   
@@ -227,8 +228,7 @@ flexplot_multivariate_aes = function(data, outcome, prediction=NULL, axis) {
     message("It looks like you're trying to plot more than 6 colors/lines/symbols.\nI gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.\n I hope we can still be friends.")
     return('ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2])))')
   }
-  
-  return('ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2]), linetype = !!sym(axis[2]), shape=!!sym(axis[2]))) + labs(color= axis[2], linetype= axis[2], shape= axis[2])')
+  return('ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2]), linetype = !!sym(axis[2]), shape=!!sym(axis[2]))) + labs(color= axis[2], linetype=axis[2], shape=axis[2])')
   
 }
 

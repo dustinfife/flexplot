@@ -1,17 +1,18 @@
 context("test compare_fits across all models")
-
-
+set.seed(2323)
 test_that("get_fitted works with various model types", {
-  get_fitted(model = lm(y~x + a, data=small), pred.values = small)
-  get_fitted(model = glm(y_bin~x + a + I(x^2), data=small), pred.values = small)
-  get_fitted(model = lme4::lmer(y~x +a + (x | id), data=small_mixed), pred.values = small_mixed)
-  get_fitted(model = lme4::glmer(a~x +y + (y | id), data=small_mixed, family=binomial), pred.values = small_mixed) %>% suppressWarnings()
-  get_fitted(model = MASS::polr(weight.loss~rewards,
+  expect_equal(get_fitted(model = lm(y~x + a, data=small), pred.values = small)$model[1], "lm")
+  expect_equal(get_fitted(model = glm(y_bin~x + a + I(x^2), data=small), pred.values = small)$model[1], "glm")
+  expect_equal(get_fitted(model = lme4::lmer(y~x +a + (x | id), data=small_mixed), pred.values = small_mixed)$model[1], "fixed effects") %>% suppressMessages()
+  expect_equal(
+    get_fitted(model = lme4::glmer(a~x +y + (y | id), data=small_mixed, family=binomial), pred.values = small_mixed)$model[1], "fixed effects") %>% 
+    suppressWarnings()
+  expect_equal(get_fitted(model = MASS::polr(weight.loss~rewards,
                                 data=exercise_data %>% mutate(weight.loss = factor(weight.loss, ordered=T))), 
-                                pred.values = exercise_data)
+                                pred.values = exercise_data)$model[1], "polr")
   model1 = randomForest::randomForest(wl~motivation + gender + rewards, 
                                       data=exercise_data %>% mutate(wl = weight.loss + .8*motivation*as.numeric(rewards)))
-  get_fitted(model = model1, pred.values = exercise_data)
+  expect_equal(get_fitted(model = model1, pred.values = exercise_data)$model[1], "randomForest.formula")
 })
 
 test_that("compare_fits works", {
@@ -20,7 +21,8 @@ test_that("compare_fits works", {
   model.int2 = lm(weight.loss ~ motivation + therapy.type + motivation:therapy.type, data = exercise_data)
   model.poly = lm(weight.loss ~ motivation + therapy.type + I(motivation^2), data = exercise_data)
   
-  compare_fits(weight.loss~motivation | therapy.type, data=exercise_data, model.me)
+  vdiffr::expect_doppelganger("compare_fits", 
+                              compare_fits(weight.loss~motivation | therapy.type, data=exercise_data, model.me))
   compare_fits(weight.loss~motivation | therapy.type, data=exercise_data, model.int)
   compare_fits(weight.loss~motivation | therapy.type, data=exercise_data, model.int2)
   compare_fits(weight.loss~motivation | therapy.type, data=exercise_data, model.poly)

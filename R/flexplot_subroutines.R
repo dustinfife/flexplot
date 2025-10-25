@@ -436,22 +436,7 @@ convert_if_less_than_five = function(data, col, check_pred = FALSE, pred = NULL)
   data
 }
 
-# uni = flexplot_bivariate_plot(weight.loss~1, data=exercise_data)$p
-# expect_identical(uni, "ggplot(data=data, aes_string(outcome)) + geom_histogram(fill=\"lightgray\", col=\"black\", bins=min(30, round(levels/2))) + theme_bw() + labs(x=outcome)")
-# uni2 = flexplot_bivariate_plot(therapy.type~1, data=exercise_data)$p
-# expect_identical(uni2, "ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)")
-# uni3 = flexplot_bivariate_plot(therapy.type~1, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T)))$p
-# expect_identical(uni3, "ggplot(data=data, aes_string(outcome)) + geom_bar() + theme_bw() + labs(x= outcome)")
-# chi = flexplot_bivariate_plot(therapy.type~gender, data=exercise_data %>% mutate(therapy.type = factor(therapy.type, ordered=T)))$p
-# tst = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
-# expect_identical(chi, tst)
-# chi = flexplot_bivariate_plot(therapy.type~gender, data=exercise_data)$p
-# tst = "ggplot(data=data, aes_string(x=axis, y='Proportion', fill=outcome)) + geom_bar(stat='identity', position='dodge') + theme_bw()"
-# expect_identical(chi, tst)
-# bv = flexplot_bivariate_plot(weight.loss~gender, data=exercise_data)$p
-# expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
-# bv = flexplot_bivariate_plot(weight.loss~motivation, data=exercise_data)$p
-# expect_identical(bv, "ggplot(data=data, aes_string(x=axis, y=outcome))")
+
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
                                     related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins  # arguments passed from flexplot
                                    ){

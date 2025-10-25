@@ -49,7 +49,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
   
   #### for the rare occasion where deleting missing data changes the levels...
   data = check_missing(model1, model2, data, all_variables)
-  
+
   #### make sure, if they have lme4, both models are lme4 objects
   test_same_class(model1, model2)
   

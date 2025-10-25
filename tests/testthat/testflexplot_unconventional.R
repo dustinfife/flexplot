@@ -17,22 +17,24 @@ test_that("unconventional plots", {
   vdiffr::expect_doppelganger("association plot",
                               flexplot(gender ~ rewards, data = d, jitter = c(.05, 0)))
   vdiffr::expect_doppelganger("paneled association plot",
-                              flexplot(gender ~ rewards | therapy.type, data = d, jitter = c(.05, 0)))  
+                                    flexplot(gender ~ rewards | therapy.type, data = d, jitter = c(.05, 0)))  
   vdiffr::expect_doppelganger("interaction plot",
                               flexplot(
                                 weight.loss ~ therapy.type + gender,
                                 data = d,
                                 alpha = .4
+                                      
                               ))
-  
+    
   vdiffr::expect_doppelganger(
-    "interaction plot panel",
+      "interaction plot panel",
     flexplot(
-      weight.loss ~ therapy.type | gender,
-      data = d,
+        weight.loss ~ therapy.type | gender,
+        data = d,
       sample = 50
     )
   )
+  
   
 
 })

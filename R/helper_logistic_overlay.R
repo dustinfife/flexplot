@@ -90,7 +90,6 @@ simulate_data = function(betas, cor, n=500, method = "logistic", nonlinear="inte
 #                                    n_bins = 50,
 #                                    min_bin_n = 5,
 #                                    k_neighbors = 50) {
-#   browser()
 #   
 #   # Step 1: identify places where count < min_bin_n
 #   small_bin_size = data$count<min_bin_n

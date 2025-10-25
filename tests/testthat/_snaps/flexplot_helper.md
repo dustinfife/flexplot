@@ -158,7 +158,7 @@
     Code
       cat(flexplot_multivariate_aes(small, "y", small, "x"))
     Output
-      ggplot(data=data, aes(x=!! sym(predictors[1]), y=!! sym(outcome), color=!! sym(axis[2]), shape=!! sym(axis[2]))) + labs(color= axis[2], shape= axis[2])
+      ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2]), shape=!!sym(axis[2]))) + labs(color=axis[2], shape=axis[2])
 
 ---
 
@@ -172,7 +172,7 @@
     Code
       cat(flexplot_multivariate_aes(small, "y", axis = c("x", "a")))
     Output
-      ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2]), linetype = !!sym(axis[2]), shape=!!sym(axis[2]))) + labs(color= axis[2], linetype= axis[2], shape= axis[2])
+      ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2]), linetype = !!sym(axis[2]), shape=!!sym(axis[2]))) + labs(color= axis[2], linetype=axis[2], shape=axis[2])
 
 ---
 

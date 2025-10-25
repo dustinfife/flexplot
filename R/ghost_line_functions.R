@@ -94,14 +94,14 @@ create_ghost_dataset = function(data, axis, prediction, given, ghost.reference, 
     
     #### ghost line needs a FITTED LINE, otherwise it generates weird zigzags. When you do a prediction line with no fitted line, that's a problem.
     #### each given variable still has multiple entries, so average across those entires
-    
+    #geom_line(data=d_smooth, aes(x=!!sym(axis[1]),
     #### average within the binned values
     grouped.vars = c("model", predictors[(!(predictors %in% given))])
     k = k %>% group_by_at(vars(one_of(grouped.vars))) %>% summarize_at(.vars = outcome, .funs=mean)
-    g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome, linetype="model", group="model"))+', fitted)							
+    g0 = paste0('ggplot(data=k, aes(x=!!sym(axis[1]), y=!!sym(outcome), 
+                linetype=!!sym("model"), group=!!sym("model")))+', fitted)							
   } else {
     g0 = paste0(gsub("data=[[:alnum:]]+,", "data=k,", p), "+",fitted)
-    #g0 = paste0('ggplot(data=k, aes_string(x=axis[1], y=outcome))+', fitted)
     
   }
   g0 = gsub("+xxxx", "", g0, fixed=T)
