@@ -6,13 +6,12 @@
   names(fl)[1]  # use the first grouping term (consistent with your helpers)
 }
 
-compute_cas_from_model = function(m, outcome_name = NULL, adjust = c("all","intercept","none")) {
+compute_cas_from_model = function(m, outcome_name = NULL, adjust_re = NULL) {
   
   if (is.null(outcome_name)) {
     all_variables = all.vars(formula(m))
     outcome_name = all_variables[1]
   }
-  adjust = match.arg(adjust, c("all","intercept","none"))
   d = m@frame
   re_term = .get_re_term(m)
   
@@ -20,14 +19,22 @@ compute_cas_from_model = function(m, outcome_name = NULL, adjust = c("all","inte
   pred_fixed = predict(m, re.form = NA)
   pred_cond  = predict(m, re.form = NULL)
   
-  # intercept-only prediction (random intercepts, no slopes)
-  pred_int = tryCatch(
-    predict(m, re.form = as.formula(paste0("~(1|", re_term, ")"))),
-    error = function(e) NULL
-  )
-
-  y_adj = cas_adjustment(d=d, model = m, outcome_name = outcome_name, adjust=adjust,
-                              pred_fixed = pred_fixed, pred_cond = pred_cond)
+  # if user didn't specify adjust_re, default to intercept-only
+  if (is.null(adjust_re) | adjust_re == "intercept") {
+    adjust_re = as.formula(paste0("~(1|", re_term, ")"))
+  }
+  
+  # prediction for the component to remove
+  if (identical(adjust_re, "all")) {
+    pred_adj = d[[outcome_name]] - (pred_cond - pred_fixed)
+  } else {
+    pred_adj = predict(m, re.form = adjust_re, allow.new.levels = TRUE)
+  }
+  
+  # adjusted outcome
+  y = d[[all.vars(formula(m))[1]]]
+  y_adj = y - (pred_adj - pred_fixed)
+  
   out = d
   out[[paste0(outcome_name, "_adj")]] = y_adj
   out$pred_fixed = pred_fixed
@@ -72,7 +79,7 @@ cas_adjustment = function(d, model=NULL,
   
   if (is.null(pred_int)) {
     pred_int = tryCatch(
-      predict(model, re.form = as.formula(paste0("~(1|", re_term, ")"))),
+      predict(model, re.form = as.formula(paste0("~(1|", re_term, ")")), allow.new.levels = TRUE),
       error = function(e) NULL
     )
   }   
@@ -111,11 +118,10 @@ cas_adjustment = function(d, model=NULL,
 #' cluster_adjusted_scatter(y~x, object = mod1)
 cluster_adjusted_scatter = function(formula, object=NULL, data=NULL, 
                                     random = NULL, 
-                                    adjust = c("all","intercept","none"),
-                                    smooth=T,
+                                    adjust_re = "all",
+                                    smooth=F,
                                     ...) {
-  adjust = match.arg(adjust, c("all","intercept","none"))
-  
+  #adjust = match.arg(adjust, c("all","intercept","none"))
   # parse formula (flexplot-style y ~ x)
   vars = all.vars(formula)
   if (length(vars) < 2) stop("Formula must be like y ~ x.")
@@ -124,17 +130,35 @@ cluster_adjusted_scatter = function(formula, object=NULL, data=NULL,
 
   # fit the model if they don't provide one
   if (is.null(object)) {
-    if (is.null(random) | is.null(data)) stop("If you don't provide a model, you must provide both a random object and a dataset")
+    if (is.null(random) | is.null(data)) {
+      stop("If you don't provide a model, you must provide both a random object and a dataset")
+    }
+    # remove faceting part (anything after a '|') from the formula
+    base_formula_str = deparse(formula)
+    base_formula_str = gsub("|", "+", base_formula_str, fixed = T)
+    base_formula_str = gsub("+", "*", base_formula_str, fixed = T)
+    base_formula = as.formula(trimws(base_formula_str))
+    
+    # build the random term string
     rand_str = if (inherits(random, "formula")) sub("^~", "", paste(deparse(random), collapse="")) else random
-    form = update(formula, as.formula(paste("~ . +", rand_str), env = environment(formula)))
+    
+    # now combine properly
+    # Build formula manually to preserve order
+    lhs = all.vars(base_formula)[1]
+    rhs = as.character(base_formula)[3]
+    rhs_full = paste(rhs, "+", rand_str)
+    form_str = paste(lhs, "~", rhs_full)
+    form = as.formula(form_str, env = environment(formula))
+    
     object = lme4::lmer(form, data=data)
   }
+  
   
   if (!all(c(outcome, xvar) %in% names(object@frame))) {
     stop("Variables in formula must exist in the model frame.")
   }
   
-  d = compute_cas_from_model(object, outcome_name = outcome, adjust = adjust)
+  d = compute_cas_from_model(object, outcome_name = outcome, adjust_re = adjust_re)
   re_term = d$.re_term
   
   new_outcome = paste0(outcome, "_adj")
@@ -143,7 +167,6 @@ cluster_adjusted_scatter = function(formula, object=NULL, data=NULL,
   
   # get total clusters so it samples everything. 
   clusters = unique(d[[d$.re_term[1]]])
-  
   smooth_geom = if (isTRUE(smooth)) geom_smooth() else NULL
   compare.fits(form, data=d, model1=object, clusters = length(clusters), ...) +
     smooth_geom
