@@ -271,13 +271,63 @@ flexplot_errors = function(variables, data, axis){
 
 }
 
-check_error_for_logistic = function(variables, data, method=method, axis) {
+check_error_for_logistic = function(variables, data, method, axis,
+                                    use_magnet=FALSE) {
   
-  #### give an error if they try to visualize logistic with a categorical x axis
-  if (method != "logistic" | length(variables)<1) return(NULL)
-  if (is.numeric(data[,axis[1]])) return(NULL)
-  stop(paste0("\nOh wise user of flexplot, you have encountered one of the FEW limitations of flexplot. Sorry, but you cannot plot a logistic curve when a categorical variable is on the x-axis. Sorry! Either remove the logistic request or put a numeric variable on the x axis. \n
-				Best of luck on your statistical journeys."))
+  if (method != "logistic" || length(variables) < 2) {
+    return(NULL)
+  }
+  
+  if (use_magnet) return(NULL)
+  
+  if (is.numeric(data[[axis[1]]])) return(NULL)
+  
+  stop(
+    "Logistic regression with a categorical predictor requires ",
+    "a magnet plot."
+  )
+}
+
+prepare_magnet_data = function(data, outcome, axis, given = NA) {
+  
+  xvar = axis[1]
+  
+  # Group by x, optional second axis, and facet variables
+  groups = unique(c(axis, given))
+  groups = groups[!is.na(groups) & nzchar(groups)]
+  
+  # Use existing 0/1 outcome coding
+  if (!all(stats::na.omit(data[[outcome]]) %in% c(0, 1))) {
+    stop("Magnet plots require an outcome coded 0/1.")
+  }
+  
+  data = data |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(groups))) |>
+    dplyr::mutate(
+      n_total = dplyr::n(),
+      n_0 = sum(.data[[outcome]] == 0),
+      n_1 = sum(.data[[outcome]] == 1)
+    ) |>
+    dplyr::ungroup()
+  
+  # Scale relative to the largest group
+  max_n = max(data$n_total)
+  
+  data = data |>
+    dplyr::group_by(
+      dplyr::across(dplyr::all_of(c(groups, outcome)))
+    ) |>
+    dplyr::mutate(stack_pos = dplyr::row_number()) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      y_scaled = dplyr::if_else(
+        .data[[outcome]] == 0,
+        (stack_pos - 0.5) / (2 * max_n),
+        1 - (stack_pos - 0.5) / (2 * max_n)
+      )
+    )
+  
+  return(data)
 }
 
 
@@ -438,7 +488,7 @@ convert_if_less_than_five = function(data, col, check_pred = FALSE, pred = NULL)
 
 
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
-                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins  # arguments passed from flexplot
+                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins, use_magnet=FALSE  # arguments passed from flexplot
                                    ){
 
   jitter = match_jitter_categorical(jitter)
@@ -471,6 +521,49 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     if (length(axis)>1) stop("Sorry, my friend, you can't do a related plot when you have more than one predictor variable.")
     return(flexplot_related(data, jitter, plot.type, spread))
   } 
+  
+  if (use_magnet) {
+    
+    p = paste0(
+      'ggplot(data=data, aes(x=.data[[axis[1]]], ',
+      'y=y_scaled)) + ',
+      'geom_hline(yintercept=.5, linetype="dashed", ',
+      'color="gray50")'
+    )
+    
+    if (length(axis) > 1) {
+      
+      p = paste0(
+        'ggplot(data=data, aes(x=.data[[axis[1]]], ',
+        'y=y_scaled, color=.data[[axis[2]]])) + ',
+        'geom_hline(yintercept=.5, linetype="dashed", ',
+        'color="gray50")'
+      )
+    }
+    
+    points = paste0(
+      'geom_point(alpha=alpha, ',
+      'position=position_jitter(width=.05, height=0), ',
+      'shape=1, size=2)'
+    )
+    
+    fitted = paste0(
+      'stat_summary(
+    aes(x=.data[[axis[1]]], y=.data[[outcome]]),
+    fun=mean,
+    geom="point",
+    size=4,
+    color="blue",
+    inherit.aes=FALSE
+  )'
+    )
+    
+    return(list(
+      p = p,
+      points = points,
+      fitted = fitted
+    ))
+  }
   
   ### BIVARIATE PLOTS
   
