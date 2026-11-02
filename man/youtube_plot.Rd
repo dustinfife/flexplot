@@ -4,7 +4,7 @@
 \alias{youtube_plot}
 \title{Create a 1080p plot for YouTube}
 \usage{
-youtube_plot(p, name = "plot", path = "")
+youtube_plot(p, name = "plot", path = "", font = "Moon Flower Bold")
 }
 \arguments{
 \item{p}{the ggplot object}
