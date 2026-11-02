@@ -71,7 +71,21 @@ flexplot_alpha_default = function(data, axis, alpha){
   return(alpha)
 }
 
-flexplot_generate_prediction_lines = function(prediction, axis, data){
+flexplot_generate_prediction_lines = function(prediction, axis, data, use_magnet = FALSE){
+  
+  if (use_magnet) {
+    
+    return(
+      'geom_point(
+        data=prediction,
+        aes(x=.data[[axis[1]]],
+            y=.data[["prediction"]],
+            color=model),
+        size=3,
+        inherit.aes=FALSE
+      )'
+    )
+  }
   
   # if axis 1 is categorical, connect the means with lines
   if (!is.numeric(data[[axis[1]]])) {

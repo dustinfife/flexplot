@@ -125,6 +125,21 @@ flexplot = function(formula, data=NULL, related=F,
   given = given.axis$given
   axis = given.axis$axis
   
+  # Determine whether a magnet plot is appropriate
+  is_binary = function(x) {
+    length(unique(stats::na.omit(x))) == 2
+  }
+  
+  is_categorical = function(x) {
+    is.factor(x) || is.character(x) ||
+      (is.numeric(x) &&
+         length(unique(stats::na.omit(x))) <= 5)
+  }
+  
+  use_magnet = length(axis) >= 1 &&
+    is_binary(data[[outcome]]) &&
+    is_categorical(data[[axis[1]]])
+  
   # report errors
   flexplot_errors(variables = variables, data = data, axis=axis)
   
@@ -156,6 +171,16 @@ flexplot = function(formula, data=NULL, related=F,
   prediction = flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE)
   
+  ### more data modifications if there's a magnet plot
+  if (use_magnet) {
+    data = prepare_magnet_data(
+      data = data,
+      outcome = outcome,
+      axis = axis,
+      given = given
+    )
+  }
+  
   # make sure data and prediction have the same variable types for axis 1
   prediction = make_prediction_dataset_same_type_on_x1(data, prediction, axis[1])
   
@@ -168,7 +193,7 @@ flexplot = function(formula, data=NULL, related=F,
 	
   ### report errors when necessary
   #### give an error if they try to visualize logistic with a categorical x axis
-  check_error_for_logistic(variables = variables, data = data, method=method, axis=axis)
+  check_error_for_logistic(variables = variables, data = data, method=method, axis=axis, use_magnet=use_magnet)
   
   ### change alpha, depending on plot type
   alpha = flexplot_alpha_default(data=data, axis = axis, alpha = alpha)
@@ -181,7 +206,7 @@ flexplot = function(formula, data=NULL, related=F,
 	### PLOT UNIVARIATE PLOTS
   bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread, plot.type=plot.type, bins=bins)
+                                                    method=method, spread=spread, plot.type=plot.type, bins=bins, use_magnet = use_magnet)
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
@@ -214,7 +239,7 @@ flexplot = function(formula, data=NULL, related=F,
 		### see how many models are being compared
 		num.models = levels(prediction$model)
 		prediction = flexplot_modify_prediction(prediction, axis, num.models, break.me, bins, labels, breaks, predictors)
-		pred.line = flexplot_generate_prediction_lines(prediction, axis, data)
+		pred.line = flexplot_generate_prediction_lines(prediction, axis, data, use_magnet=use_magnet)
 	} else {
 	  pred.line = "xxxx"
 	}
@@ -264,7 +289,7 @@ flexplot = function(formula, data=NULL, related=F,
 	
 	# add formula (to make it easier for marginal_plot)
 	final$formula = formula
-
+save(final, axis, data, prediction, file="~/Downloads/rfiles.rdat")
 	if(plot.string){
 	  plot_string = paste0(reverse_ggplot(final))
 	  plot_string = gsub("ggplot(data", paste0("ggplot(", deparse(data_name), ""), plot_string, fixed=T)
@@ -274,6 +299,6 @@ flexplot = function(formula, data=NULL, related=F,
 	if (return_data) {
 	  return(data)
 	}
-	
+
 	return(final)
 }	
