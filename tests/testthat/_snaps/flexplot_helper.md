@@ -3,8 +3,8 @@
     Code
       cat(flexplot_generate_prediction_lines(preds, "a", small))
     Output
-      geom_point(data=prediction, aes(y=prediction, color=model),   position=position_dodge(width=.4)) + 
-                   geom_line(data=prediction, aes(y=prediction, linetype=model, group=model, color=model), position=position_dodge(width=.4))
+      geom_point(data=prediction, aes(y=prediction, x=.data[[axis[1]]], color=model),   position=position_dodge(width=.4), inherit.aes=FALSE) + 
+                   geom_line(data=prediction, aes(y=prediction, x=.data[[axis[1]]], linetype=model, group=model, color=model), position=position_dodge(width=.4),  inherit.aes=FALSE)
 
 ---
 

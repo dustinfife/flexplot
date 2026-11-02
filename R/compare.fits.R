@@ -27,11 +27,12 @@ compare.fits = function(formula, data, model1, model2=NULL,
                         return.preds=F, report.se=F, re=F, 
                         pred.type="response", num_points = 50,
                         clusters=3,...){
-  
+
   if (is.null(model2)) runme = "yes"
   
   #### if mod2 is null..
-  if (is.null(model2)) model2 = model1
+  single_model = is.null(model2)
+  if (single_model) model2 = model1
   
   #### get type of model
   model1.type = class(model1)[1]
@@ -52,8 +53,8 @@ compare.fits = function(formula, data, model1, model2=NULL,
 
   #### make sure, if they have lme4, both models are lme4 objects
   test_same_class(model1, model2)
-  
   #### convert random effects to factors for mixed models
+  
   data = subset_random_model(model1, formula, d=data, samp.size = clusters)
   
   ### make sure they have the same outcome
@@ -74,9 +75,15 @@ compare.fits = function(formula, data, model1, model2=NULL,
   
   # ensure pred.values have same class as original data
   # but don't change RE; because prior to this there's been sampling of the data and this would revert that
+
   randef = extract_random_term(model1)
   
-  all_predictors_minus_re = ifelse(length(randef)>0, predictors[!(predictors==randef)], predictors)
+  all_predictors_minus_re = if (!is.null(randef) && length(randef) > 0) {
+    setdiff(predictors, randef)
+  } else {
+    predictors
+  }
+  
   
   
   # for intercept only models
@@ -171,9 +178,13 @@ compare.fits = function(formula, data, model1, model2=NULL,
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
     
     # if outcome is a factor, for logistic regresion
-    
-    flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
+    p = flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
       final_geom
+    
+    # identify if we can remove the legend
+    slot_two_filled = !is.na(flexplot_axis_given(y~x|z)$axis[2])
+    if (single_model & slot_two_filled) p = p + ggplot2::theme(legend.position = "none")
+    p
   }	
   
 }	
