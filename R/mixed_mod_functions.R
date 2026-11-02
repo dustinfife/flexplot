@@ -42,9 +42,10 @@ f = as.formula('JaspColumn_5_Encoded ~ JaspColumn_4_Encoded + JaspColumn_1_Encod
 remove_term_from_formula = function(formula, term, as_formula = T) {
 
   formula_no_ws = gsub(" ", "",  format(formula)) %>%
-    gsub_data_first(paste0(term, "+"), "", fixed=T) %>%
+    gsub_data_first(paste0("\\b", term, "\\b"), "", fixed = FALSE) %>% 
     gsub_data_first(paste0("+",term), "", fixed=T) %>%
-    gsub_data_first(paste0("|",term), "|", fixed=T) %>%
+    gsub_data_first(paste0("|",term), "|", fixed=T) %>% 
+    gsub_data_first("+|", "|", fixed=T) %>% 
     paste0(collapse="") # for some reason, format(formula) is putting one of the variables
                         # in a cell. This fixes it, and if it's already a single string
                         # this will do nothing
@@ -101,7 +102,7 @@ stratified_sample_re = function(formula, data, re, samp.size=6) {
   formula_sans_re = remove_term_from_formula(formula, re)
   
   # make preliminary flexplot (without ID)
-  flexplot_data = flexplot(formula_sans_re, data=data) 
+  flexplot_data = flexplot(formula_sans_re, data=data, suppress_smooth=T) 
   
   # identify/remove those variables binned
   minus = !(paste0(predictors, "_binned") %in% names(flexplot_data$data))

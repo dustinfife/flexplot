@@ -9,8 +9,8 @@ cluster_adjusted_scatter(
   object = NULL,
   data = NULL,
   random = NULL,
-  adjust = c("all", "intercept", "none"),
-  smooth = T,
+  adjust_re = "all",
+  smooth = F,
   ...
 )
 }
@@ -19,9 +19,9 @@ cluster_adjusted_scatter(
 
 \item{object}{a fitted lme4 object}
 
-\item{adjust}{how the outcome should be adjusted}
-
 \item{...}{any other parameters passed to flexplot}
+
+\item{adjust}{how the outcome should be adjusted}
 }
 \value{
 a cluster-adjusted scatterplot
