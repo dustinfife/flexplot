@@ -110,27 +110,34 @@ print.rf_estimates = function(x,...){
 #' @return A printed list of estimates
 #' @export
 print.glm_estimates = function(x, ...) {
-  
-  raw =          with(x, dplyr::tibble(Variables=attr(x, "row.names"), 
-                                       raw.coefficients, OR, inverse.OR))
-  irt =          with(x, dplyr::tibble(Variables=attr(x, "row.names"), 
-                                      instantaneous_slope, 
-                                      intercept_threshold)) #%>%
-  irt = irt[-which(irt$Variables=="(Intercept)"),]
-  standardized = with(x, dplyr::tibble(variables=attr(x, "row.names"), 
-                                       standardized.OR, inverse.standardized.OR, 
-                                       `Prediction Difference (+/- 1 SD)`)) %>%
-                                            purrr::set_names(c("Variables", "OR", "inverse.OR", "Prediction Difference (+/- 1 SD)"))
-  cat("Raw Estimates:\n")
-  print(raw)
-  
-  cat("\n\nIRT Estimates:\n")
-  print(irt)
-  
-  cat("\n\nStandardized Estimates:\n")
-  print(standardized)
-  
-  cat("\n\n To see the documentation for each of these estimates, type ?estimates.glm")
+
+  if ("OR" %in% names(x)) {
+    raw =          with(x, dplyr::tibble(Variables=attr(x, "row.names"), 
+                                         raw.coefficients, OR, inverse.OR))
+    irt =          with(x, dplyr::tibble(Variables=attr(x, "row.names"), 
+                                        instantaneous_slope, 
+                                        intercept_threshold)) #%>%
+    irt = irt[-which(irt$Variables=="(Intercept)"),]
+    standardized = with(x, dplyr::tibble(variables=attr(x, "row.names"), 
+                                         standardized.OR, inverse.standardized.OR, 
+                                         `Prediction Difference (+/- 1 SD)`)) %>%
+                                              purrr::set_names(c("Variables", "OR", "inverse.OR", "Prediction Difference (+/- 1 SD)"))
+    cat("Raw Estimates:\n")
+    print(raw)
+    
+    cat("\n\nIRT Estimates:\n")
+    print(irt)
+    
+    cat("\n\nStandardized Estimates:\n")
+    print(standardized)
+    
+    cat("\n\n To see the documentation for each of these estimates, type ?estimates.glm")
+    } else {
+      results = x
+      attr(results, "class") = NULL
+      r = data.frame(results, check.names = FALSE)
+      print(r)
+    }
 }
 
 
