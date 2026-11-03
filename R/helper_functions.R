@@ -108,15 +108,16 @@ return_factors_names = function(model) {
   d %>% select(-where(is.numeric)) %>%  names
 }
 
-identify_method = function(data, outcome, axis, method=NULL) {
+identify_method = function(data, outcome, axis, method=NULL,
+                           use_magnet=FALSE) {
   
   if (axis[1] == "1") return("loess")
+  
+  if (use_magnet) return("logistic")
+  
   if (!is.null(method)) return(method)
   
-  # Binary outcome
-  if (length(unique(stats::na.omit(data[[outcome]]))) == 2) {
-    return("logistic")
-  }
+  if (is_binary(data[[outcome]])) return("logistic")
   
   return("loess")
 }

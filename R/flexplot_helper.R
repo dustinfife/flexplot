@@ -71,10 +71,30 @@ flexplot_alpha_default = function(data, axis, alpha){
   return(alpha)
 }
 
+is_binary = function(x) {
+  x = stats::na.omit(x)
+  
+  if (is.factor(x) || is.character(x)) {
+    return(length(unique(x)) == 2)
+  }
+  
+  if (is.numeric(x)) {
+    return(length(unique(x)) == 2 && all(x %in% c(0, 1)))
+  }
+  
+  return(FALSE)
+}
+
+is_categorical = function(x) {
+  is.factor(x) || is.character(x) ||
+    (is.numeric(x) &&
+       length(unique(stats::na.omit(x))) <= 5)
+}
+
 flexplot_generate_prediction_lines = function(prediction, axis, data, use_magnet = FALSE){
   
   if (use_magnet) {
-    
+    browser()
     return(
       'geom_point(
         data=prediction,
@@ -196,7 +216,6 @@ flexplot_related = function(data, jitter = .1, plot.type = "errorbar", spread="q
 flexplot_bivariate_string = function(data, outcome, axis, 
                                      jitter=.1, plot.type = "x",
                                      suppress_smooth = F, spread = "quartiles", method="lm") {
-  
   # association plot
   if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis]])) {
     p = "ggplot(data=data, aes(x=!!sym(axis), y=!!sym('Proportion'), fill=!!sym(outcome))) + geom_bar(stat='identity', position='dodge') + theme_bw()"

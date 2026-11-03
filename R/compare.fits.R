@@ -54,7 +54,6 @@ compare.fits = function(formula, data, model1, model2=NULL,
   #### make sure, if they have lme4, both models are lme4 objects
   test_same_class(model1, model2)
   #### convert random effects to factors for mixed models
-  
   data = subset_random_model(model1, formula, d=data, samp.size = clusters)
   
   ### make sure they have the same outcome
@@ -158,7 +157,7 @@ compare.fits = function(formula, data, model1, model2=NULL,
     #### if they supply a factor, convert it to a number!!!!!
     prediction.model$prediction = round(as.numeric(as.character(prediction.model$prediction)), digits=3)
   }
-  
+
   #### create flexplot
   if (return.preds){
     prediction.model
@@ -177,13 +176,22 @@ compare.fits = function(formula, data, model1, model2=NULL,
     #when we have an intercept only model
     if (nrow(prediction.model)==1) { prediction.model = NULL; final_geom = theme_bw() }
     
-    # if outcome is a factor, for logistic regresion
-    p = flexplot(formula, data=data, prediction=prediction.model, suppress_smooth=T, se=F, ...) +
-      final_geom
+    # for the rare case where sampling from lmerMod yields binary outcomes
+    #plot_method = if (inherits(model1, "lmerMod")) "loess" else NULL
+    
+    p = flexplot(
+      formula,
+      data=data,
+      prediction=prediction.model,
+      suppress_smooth=T,
+      se=F,
+      #method=plot_method,
+      ...
+    ) + final_geom
     
     # identify if we can remove the legend
-    slot_two_filled = !is.na(flexplot_axis_given(y~x|z)$axis[2])
-    if (single_model & slot_two_filled) p = p + ggplot2::theme(legend.position = "none")
+    slot_two_filled = !is.na(flexplot_axis_given(formula)$axis[2])
+    if (single_model & !slot_two_filled) p = p + ggplot2::theme(legend.position = "none")
     p
   }	
   

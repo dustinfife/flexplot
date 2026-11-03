@@ -181,7 +181,7 @@ modify_related_data = function(data, related, axis, outcome, variables) {
 # expect_true(all(c("income_binned") %in% names(flexplot_modify_data(weight.loss~therapy.type + gender | income, data=exercise_data))))
 flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables = NULL, outcome = NULL, method = NULL, 
                                 axis = NULL, given=NULL, labels = NULL, bins = NULL, breaks=NULL, break.me=NULL, 
-                                spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE){
+                                spread=c('quartiles', 'stdev', 'sterr'), pred.data=FALSE, use_magnet = FALSE){
   
   if (is.null(data)) return(data) 
 
@@ -213,14 +213,32 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   
   data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
   
-  # prepare data for association plot
-  data = modify_association_plot_data(data=data, formula = formula, outcome = outcome)
+  # Identify the appropriate method
+  method = identify_method(data, outcome, axis, method, use_magnet = use_magnet)
   
-  # make sure method = 'logistic' under the right circumstances
-  method = identify_method(data, outcome, axis, method)
-
-  # convert data for logistic regression
-  data = factor.to.logistic(data,outcome, method)
+  if (use_magnet) {
+    # Convert binary outcome to 0/1
+    data = factor.to.logistic(
+      data,
+      outcome,
+      method = "logistic"
+    )
+    
+  } else {
+    
+    # Preserve existing association-plot processing
+    data = modify_association_plot_data(
+      data = data,
+      formula = formula,
+      outcome = outcome
+    )
+    
+    data = factor.to.logistic(
+      data,
+      outcome,
+      method = method
+    )
+  }
   
   #### reorder axis 1 it's not already ordered
   if(axis[1] != "1"){
@@ -556,6 +574,14 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     color="blue",
     inherit.aes=FALSE
   )'
+    )
+    
+    p = paste0(
+      p,
+      ' + scale_y_continuous(
+    breaks=c(0, .25, .5, .75, 1),
+    limits=c(0, 1)
+  ) + labs(y=outcome)'
     )
     
     return(list(

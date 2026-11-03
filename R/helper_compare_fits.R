@@ -21,10 +21,7 @@ is_binary_01 = function(predictions) {
 
 should_shift_predictions = function(model_type, model, outcome, predictions, data) {
   if (model_type == "glm") {
-    return(
-      family(model)$link == "logit" &&
-        !is.numeric(data[[outcome[1]]])
-    )
+    return(FALSE)
   } else if (model_type == "RandomForest") {
     return(is_binary_01(predictions))
   }

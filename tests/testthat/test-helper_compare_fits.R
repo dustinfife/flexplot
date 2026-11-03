@@ -31,11 +31,6 @@ rf_model <- suppressWarnings(party::cforest(as.factor(y_numeric) ~ x, data = dat
 
 rf_preds <- as.numeric(predict(rf_model, type = "response")) - 1  # force 0/1
 
-test_that("should_shift_predictions works for glm with non-numeric DV", {
-  expect_true(should_shift_predictions("glm", glm_model, outcome = "y_factor",
-                                       predictions = predict(glm_model, type = "response"), data = data))
-})
-
 test_that("should_shift_predictions skips glm with numeric DV", {
   expect_false(should_shift_predictions("glm", glm_model_numeric, outcome = "y_numeric",
                                         predictions = predict(glm_model_numeric, type = "response"), data = data))

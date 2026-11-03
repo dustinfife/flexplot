@@ -95,7 +95,7 @@
 ##' 	ghost.line="red", ghost.reference=list("health"=31, "income"=90000, "motivation"=10))}	
 flexplot = function(formula, data=NULL, related=F,
 		bins = 3, labels=NULL, breaks=NULL,
-		method="loess", se=NULL, 
+		method=NULL, se=NULL, 
 		ghost.line=NULL, ghost.reference=NULL,
 		spread=c('quartiles', 'stdev', 'sterr'), jitter=NULL, raw.data=T,
 		sample=Inf, 
@@ -103,7 +103,7 @@ flexplot = function(formula, data=NULL, related=F,
 		third.eye=NULL,
 		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), 
 		return_data = F, ...){
-  
+
   data_name = substitute(data)
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
@@ -126,19 +126,9 @@ flexplot = function(formula, data=NULL, related=F,
   axis = given.axis$axis
   
   # Determine whether a magnet plot is appropriate
-  is_binary = function(x) {
-    length(unique(stats::na.omit(x))) == 2
-  }
-  
-  is_categorical = function(x) {
-    is.factor(x) || is.character(x) ||
-      (is.numeric(x) &&
-         length(unique(stats::na.omit(x))) <= 5)
-  }
-  
-  use_magnet = length(axis) >= 1 &&
-    is_binary(data[[outcome]]) &&
-    is_categorical(data[[axis[1]]])
+  use_magnet = is_binary(data[[outcome]]) &&
+    check.non.number(data[[axis[1]]]) &&
+    (is.null(method) || method == "logistic")
   
   # report errors
   flexplot_errors(variables = variables, data = data, axis=axis)
@@ -167,7 +157,7 @@ flexplot = function(formula, data=NULL, related=F,
   
   ### make modifications to the data
   data = flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
-          break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method)
+          break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method, use_magnet = use_magnet)
   prediction = flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE)
   
@@ -201,7 +191,6 @@ flexplot = function(formula, data=NULL, related=F,
 
   ### change se based on how many variables they have
   se = check_se(se, axis)
-
 
 	### PLOT UNIVARIATE PLOTS
   bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
@@ -253,7 +242,8 @@ flexplot = function(formula, data=NULL, related=F,
 	}
 
 	# convert labels for Y axis for logistic
-	if (!is.null(logistic_labels)){
+	if (!is.null(logistic_labels) &&
+	    !is.numeric(logistic_labels)) {
 
 	  ## sort based on the probabilities
 	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", 
@@ -289,7 +279,7 @@ flexplot = function(formula, data=NULL, related=F,
 	
 	# add formula (to make it easier for marginal_plot)
 	final$formula = formula
-save(final, axis, data, prediction, file="~/Downloads/rfiles.rdat")
+
 	if(plot.string){
 	  plot_string = paste0(reverse_ggplot(final))
 	  plot_string = gsub("ggplot(data", paste0("ggplot(", deparse(data_name), ""), plot_string, fixed=T)

@@ -25,12 +25,7 @@ test_that("error messages are correct", {
   expect_error( 
     flexplot(speed~superhero),
     "Howdy! Looks like you forgot to include a dataset!")
-  
-  expect_error(
-    flexplot(gender~therapy.type, data=exercise_data, method="logistic"),
-    "Oh wise user of flexplot"
-  )
-  
+
   expect_error(
     flexplot(gender~therapy.type + therapy.type, data=exercise_data))
 })
@@ -128,7 +123,6 @@ test_that("jittered density plots and options work", {
                                 data = d,
                                 jitter = c(.3, .5)
                               ))
-  expect_error(flexplot(gender~therapy.type, data=d, jitter=c(.3, .5), method="logistic"))
   
   vdiffr::expect_doppelganger("boxplot",
                               flexplot(speed~superpower, data=avengers, plot.type="boxplot")) 
