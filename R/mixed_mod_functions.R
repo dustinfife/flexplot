@@ -41,12 +41,16 @@ f = as.formula('JaspColumn_5_Encoded ~ JaspColumn_4_Encoded + JaspColumn_1_Encod
 
 remove_term_from_formula = function(formula, term, as_formula = T) {
 
-  formula_no_ws = gsub(" ", "",  format(formula)) %>%
-    gsub_data_first(paste0("\\b", term, "\\b"), "", fixed = FALSE) %>% 
-    gsub_data_first(paste0("+",term), "", fixed=T) %>%
-    gsub_data_first(paste0("|",term), "|", fixed=T) %>% 
-    gsub_data_first("+|", "|", fixed=T) %>% 
-    paste0(collapse="") # for some reason, format(formula) is putting one of the variables
+  formula_no_ws = gsub(" ", "", format(formula)) %>%
+    paste0(collapse="") %>%
+    gsub_data_first(paste0("\\b", term, "\\b"), "", fixed=FALSE) %>%
+    gsub_data_first("+|", "|", fixed=TRUE) %>%
+    gsub_data_first("|+", "|", fixed=TRUE) %>%
+    gsub_data_first("++", "+", fixed=TRUE) %>%
+    gsub_data_first("~+", "~", fixed=TRUE) %>%
+    gsub_data_first("+~", "~", fixed=TRUE) %>%
+    gsub("\\+$", "", ., perl=TRUE)
+  # for some reason, format(formula) is putting one of the variables
                         # in a cell. This fixes it, and if it's already a single string
                         # this will do nothing
   
@@ -97,7 +101,7 @@ stratified_sample_re = function(formula, data, re, samp.size=6) {
     randomly_sampled_levels = sample(levs, min(samp.size, length(levs)))
     return(randomly_sampled_levels)
   }
-  
+
   # remove id from formula
   formula_sans_re = remove_term_from_formula(formula, re)
   
