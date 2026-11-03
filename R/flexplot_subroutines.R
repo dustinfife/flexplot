@@ -298,7 +298,7 @@ check_error_for_logistic = function(variables, data, method, axis,
   
   if (use_magnet) return(NULL)
   
-  if (is.numeric(data[[axis[1]]])) return(NULL)
+  if (is.numeric(data[[axis[1]]]) || is.ordered(data[[axis[1]]])) return(NULL)
   
   stop(
     "Logistic regression with a categorical predictor requires ",
