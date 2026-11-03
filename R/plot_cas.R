@@ -7,7 +7,7 @@
 }
 
 compute_cas_from_model = function(m, outcome_name = NULL, adjust_re = NULL) {
-  
+
   if (is.null(outcome_name)) {
     all_variables = all.vars(formula(m))
     outcome_name = all_variables[1]
@@ -20,7 +20,7 @@ compute_cas_from_model = function(m, outcome_name = NULL, adjust_re = NULL) {
   pred_cond  = predict(m, re.form = NULL)
   
   # if user didn't specify adjust_re, default to intercept-only
-  if (is.null(adjust_re) | adjust_re == "intercept") {
+  if (is.null(adjust_re) || adjust_re == "intercept") {
     adjust_re = as.formula(paste0("~(1|", re_term, ")"))
   }
   
@@ -28,6 +28,7 @@ compute_cas_from_model = function(m, outcome_name = NULL, adjust_re = NULL) {
   if (identical(adjust_re, "all")) {
     pred_adj = d[[outcome_name]] - (pred_cond - pred_fixed)
   } else {
+    if (identical(adjust_re, "none")) adjust_re = NA
     pred_adj = predict(m, re.form = adjust_re, allow.new.levels = TRUE)
   }
   
@@ -157,7 +158,7 @@ cluster_adjusted_scatter = function(formula, object=NULL, data=NULL,
   if (!all(c(outcome, xvar) %in% names(object@frame))) {
     stop("Variables in formula must exist in the model frame.")
   }
-  
+
   d = compute_cas_from_model(object, outcome_name = outcome, adjust_re = adjust_re)
   re_term = d$.re_term
   
