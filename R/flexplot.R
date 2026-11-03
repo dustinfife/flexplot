@@ -192,6 +192,40 @@ flexplot = function(formula, data=NULL, related=F,
   ### change se based on how many variables they have
   se = check_se(se, axis)
 
+  # Incremental object-renderer path. Unsupported plot families continue
+  # through the existing renderer; no new public argument is required.
+  object_candidate = isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
+    length(predictors) == 1 && length(axis) == 1 &&
+    identical(axis[1], predictors[1]) &&
+    is.numeric(data[[outcome]]) && is.numeric(data[[axis[1]]]) &&
+    !related && !use_magnet && is.null(prediction) &&
+    is.null(ghost.line) && is.null(third.eye) &&
+    !plot.string && !identical(plot.type, "line") &&
+    !identical(plot.type, "boxplot") && !identical(plot.type, "violin")
+
+  if (object_candidate) {
+    final = flexplot_bivariate_object(
+      data=data, outcome=outcome, axis=axis[1], method=method,
+      se=se, suppress_smooth=suppress_smooth, alpha=alpha,
+      jitter=jitter, sample=sample, raw.data=raw.data
+    )
+    facet = flexplot_panel_variables_object(given, break.me)
+    if (!is.null(facet)) final = final + facet
+    if (is.finite(sample)) {
+      final = final + ggplot2::coord_cartesian(
+        ylim=range(data[[outcome]], na.rm=TRUE)
+      )
+    }
+    if (!is.null(logistic_labels) && !is.numeric(logistic_labels)) {
+      final = final + ggplot2::scale_y_continuous(
+        breaks=c(0, 1), labels=logistic_labels
+      )
+    }
+    final$formula = formula
+    if (return_data) return(data)
+    return(final)
+  }
+
 	### PLOT UNIVARIATE PLOTS
   bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
