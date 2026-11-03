@@ -154,7 +154,11 @@ flexplot = function(formula, data=NULL, related=F,
   
   # for logistic, it automatically makes the first alphabetical as the referent level
   # if they provide an ordered factor, make the second the referent level
-  logistic_labels = return_labels_for_logistic_regression(data, outcome, method)
+  logistic_labels = NULL
+  
+  if (identical(method, "logistic") && is.factor(data[[outcome]])) {
+    logistic_labels = levels(data[[outcome]])
+  }
   
   ### make modifications to the data
   data = flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
@@ -193,81 +197,36 @@ flexplot = function(formula, data=NULL, related=F,
   ### change se based on how many variables they have
   se = check_se(se, axis)
   
-  distribution_candidate = isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
-    (length(predictors) == 0 || identical(axis[1], "1")) &&
-    !related && is.null(prediction) &&
-    is.null(ghost.line) && is.null(third.eye) &&
-    !plot.string
-  
-  if (distribution_candidate) {
-    
-    final = flexplot_distribution_object(
+  if (isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
+      !related && is.null(prediction) &&
+      is.null(ghost.line) && is.null(third.eye) &&
+      !plot.string) {
+
+    final = flexplot_render_object(
       data=data,
       outcome=outcome,
+      axis=axis,
+      given=given,
+      method=method,
+      se=se,
+      suppress_smooth=suppress_smooth,
       plot.type=plot.type,
-      bins=bins
+      bins=bins,
+      spread=spread
     )
     
-    facet = flexplot_panel_variables_object(given, break.me)
-    if (!is.null(facet)) final = final + facet
-    
-    final$formula = formula
-    
-    if (return_data) return(data)
-    return(final)
-  }
-
-  # Incremental object-renderer path. Unsupported plot families continue
-  # through the existing renderer; no new public argument is required.
-  object_candidate = isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
-    length(predictors) == 1 && length(axis) == 1 &&
-    identical(axis[1], predictors[1]) &&
-    is.numeric(data[[outcome]]) && is.numeric(data[[axis[1]]]) &&
-    !related && !use_magnet && is.null(prediction) &&
-    is.null(ghost.line) && is.null(third.eye) &&
-    !plot.string && !identical(plot.type, "line") &&
-    !identical(plot.type, "boxplot") && !identical(plot.type, "violin")
-
-  categorical_candidate = isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
-    length(predictors) == 1 && length(axis) == 1 &&
-    identical(axis[1], predictors[1]) &&
-    is.numeric(data[[outcome]]) && !is.numeric(data[[axis[1]]]) &&
-    !related && !use_magnet && is.null(prediction) &&
-    is.null(ghost.line) && is.null(third.eye) && !plot.string &&
-    plot.type %in% c("histogram", "boxplot", "violin", "line")
-
-  if (categorical_candidate) {
-    final = flexplot_categorical_object(
-      data=data, outcome=outcome, axis=axis[1], plot.type=plot.type,
-      spread=spread, suppress_smooth=suppress_smooth, alpha=alpha,
-      jitter=jitter, sample=sample, raw.data=raw.data
-    )
-    facet = flexplot_panel_variables_object(given, break.me)
-    if (!is.null(facet)) final = final + facet
-    final$formula = formula
-    if (return_data) return(data)
-    return(final)
-  }
-
-  if (object_candidate) {
-    final = flexplot_bivariate_object(
-      data=data, outcome=outcome, axis=axis[1], method=method,
-      se=se, suppress_smooth=suppress_smooth, alpha=alpha,
-      jitter=jitter, sample=sample, raw.data=raw.data
-    )
-    facet = flexplot_panel_variables_object(given, break.me)
-    if (!is.null(facet)) final = final + facet
-    if (is.finite(sample)) {
-      final = final + ggplot2::coord_cartesian(
-        ylim=range(data[[outcome]], na.rm=TRUE)
-      )
-    }
-    if (!is.null(logistic_labels) && !is.numeric(logistic_labels)) {
+    if (!is.null(logistic_labels)) {
       final = final + ggplot2::scale_y_continuous(
-        breaks=c(0, 1), labels=logistic_labels
+        breaks=c(0, 1),
+        labels=logistic_labels
       )
     }
+    
+    facet = flexplot_panel_variables_object(given, break.me)
+    if (!is.null(facet)) final = final + facet
+    
     final$formula = formula
+    
     if (return_data) return(data)
     return(final)
   }

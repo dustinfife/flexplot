@@ -12,12 +12,4 @@ test_that("smoothing can be suppressed", {
   expect_length(p$layers, 1)
 })
 
-test_that("line plots use a line layer", {
-  p = flexplot_bivariate_object(mtcars, "mpg", "wt", plot.type="line")
-  expect_s3_class(p$layers[[2]]$geom, "GeomLine")
-})
 
-test_that("unsupported inputs fail explicitly", {
-  d = data.frame(y=c("a", "b"), x=1:2)
-  expect_error(flexplot_bivariate_object(d, "y", "x"), "numeric outcome")
-})

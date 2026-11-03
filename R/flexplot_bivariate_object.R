@@ -18,6 +18,20 @@ flexplot_bivariate_object = function(data, outcome, axis, method="loess",
   p + ggplot2::theme_bw() + ggplot2::theme(text=ggplot2::element_text(size=14))
 }
 
+flexplot_logistic_layer = function(data, outcome, se) {
+  
+  if (length(unique(stats::na.omit(data[[outcome]]))) != 2) {
+    stop("To fit a logistic curve, the outcome must have exactly two levels.")
+  }
+  
+  return(ggplot2::geom_smooth(
+    method="glm",
+    method.args=list(family=stats::binomial()),
+    formula=y~x,
+    se=se
+  ))
+}
+
 flexplot_smooth_layer = function(data, outcome, method, se) {
   
   if (identical(method, "logistic")) {
@@ -25,10 +39,7 @@ flexplot_smooth_layer = function(data, outcome, method, se) {
       stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
     }
     
-    return(ggplot2::geom_smooth(
-      method="glm", method.args=list(family="binomial"),
-      se=se, formula=y~x
-    ))
+    return(return(flexplot_logistic_layer(data, outcome, se)))
   }
   
   if (method %in% c("poisson", "Gamma")) {
