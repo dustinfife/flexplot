@@ -333,7 +333,7 @@ check_error_for_logistic = function(variables, data, method, axis,
 prepare_magnet_data = function(data, outcome, axis, given = NA) {
   
   xvar = axis[1]
-  
+  data = data[!is.na(data[[outcome]]), , drop=FALSE]
   # Group by x, optional second axis, and facet variables
   groups = unique(c(axis, given))
   groups = groups[!is.na(groups) & nzchar(groups)]
@@ -353,7 +353,7 @@ prepare_magnet_data = function(data, outcome, axis, given = NA) {
     dplyr::ungroup()
   
   # Scale relative to the largest group
-  max_n = max(data$n_total)
+  max_n = max(data$n_total, na.rm=TRUE)
   
   data = data |>
     dplyr::group_by(

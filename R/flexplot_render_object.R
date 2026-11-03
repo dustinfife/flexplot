@@ -1,6 +1,7 @@
 flexplot_render_object = function(data, outcome, axis, given,
                                   method, se, suppress_smooth,
-                                  plot.type, bins, spread, ...) {
+                                  plot.type, bins, spread,
+                                  use_magnet=FALSE, ...) {
   
   # Univariate plots
   if (identical(axis[1], "1")) {
@@ -35,6 +36,16 @@ flexplot_render_object = function(data, outcome, axis, given,
     suppress_smooth=suppress_smooth,
     ...
   ))
+  
+  # magnet plot
+  if (use_magnet) {
+    return(flexplot_magnet_object(
+      data=data,
+      outcome=outcome,
+      axis=axis,
+      given=given
+    ))
+  }
   
 
 }

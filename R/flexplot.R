@@ -198,7 +198,7 @@ flexplot = function(formula, data=NULL, related=F,
   se = check_se(se, axis)
   
   if (isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
-      !related && is.null(prediction) &&
+      !related &&
       is.null(ghost.line) && is.null(third.eye) &&
       !plot.string) {
 
@@ -212,8 +212,19 @@ flexplot = function(formula, data=NULL, related=F,
       suppress_smooth=suppress_smooth,
       plot.type=plot.type,
       bins=bins,
-      spread=spread
+      spread=spread, 
+      use_magnet = use_magnet
     )
+    
+    # add prediction overlay lines
+    if (!is.null(prediction)) {
+      final = final + flexplot_prediction_layer(
+        prediction=prediction,
+        axis=axis,
+        data=data,
+        use_magnet=use_magnet
+      )
+    }
     
     if (!is.null(logistic_labels)) {
       final = final + ggplot2::scale_y_continuous(
