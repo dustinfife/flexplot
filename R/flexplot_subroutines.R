@@ -1,29 +1,53 @@
 
 
-# this function tests for functions within an R formula and returns those results
 formula_functions = function(formula, data) {
-  term_labels = attr(terms(formula), "term.labels")
   
-  # return original data if there's no functions
-  which_are_functions = grep("(", term_labels, fixed=T)
-  if (length(which_are_functions)==0) return(list(data=data, formula=formula))
+  if (is.null(data)) return(list(data=data, formula=formula))
   
-  # extract names of variables
-  vars = unlist(lapply(term_labels[which_are_functions], 
-                       get_var_names_within_function, return.var=T))
-  # apply function to the variables
-  new_vars = term_labels[which_are_functions] %>% 
-        purrr::map(perform_function, data=data) %>% 
-        purrr::set_names(vars) %>% 
-        data.frame
-  data[,vars] = new_vars
+  result = rewrite_formula_function(formula, data, environment(formula))
   
-  # replace formula with unmodified formula
-  string_formula = deparse(formula)
-  new_string_formula = gsub(term_labels[which_are_functions], vars, string_formula, fixed=T)
-  new_formula = as.formula(new_string_formula)
-  list(data=data, formula = new_formula)
+  return(list(data=result$data, formula=result$expr))
 }
+
+rewrite_formula_function = function(expr, data, formula_env) {
+  
+  operators = c("~", "|", "+", "-", "*", "/", ":", "^", "%in%", "(")
+  
+  if (!is.call(expr)) {
+    return(list(expr=expr, data=data))
+  }
+  
+  function_name = as.character(expr[[1]])[1]
+  
+  # Traverse operators without evaluating them
+  if (function_name %in% operators) {
+    for (i in seq.int(2, length(expr))) {
+      result = rewrite_formula_function(expr[[i]], data, formula_env)
+      expr[[i]] = result$expr
+      data = result$data
+    }
+    
+    return(list(expr=expr, data=data))
+  }
+  
+  variable_names = all.vars(expr)
+  
+  if (length(variable_names) != 1 ||
+      !variable_names %in% names(data)) {
+    return(list(expr=expr, data=data))
+  }
+  
+  value = eval(expr, envir=data, enclos=formula_env)
+  
+  if (length(value) != nrow(data)) {
+    stop("Formula transformation must return one value per data row.")
+  }
+  
+  data[[variable_names]] = value
+  
+  return(list(expr=as.name(variable_names), data=data))
+}
+
 
 # this function applied a function passed as string to the data
 perform_function = function(string, data) {

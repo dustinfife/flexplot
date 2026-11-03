@@ -105,6 +105,7 @@ flexplot = function(formula, data=NULL, related=F,
 		return_data = F, ...){
 
   data_name = substitute(data)
+  
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
   data = ff$data; formula =ff$formula
@@ -202,6 +203,27 @@ flexplot = function(formula, data=NULL, related=F,
     is.null(ghost.line) && is.null(third.eye) &&
     !plot.string && !identical(plot.type, "line") &&
     !identical(plot.type, "boxplot") && !identical(plot.type, "violin")
+
+  categorical_candidate = isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
+    length(predictors) == 1 && length(axis) == 1 &&
+    identical(axis[1], predictors[1]) &&
+    is.numeric(data[[outcome]]) && !is.numeric(data[[axis[1]]]) &&
+    !related && !use_magnet && is.null(prediction) &&
+    is.null(ghost.line) && is.null(third.eye) && !plot.string &&
+    plot.type %in% c("histogram", "boxplot", "violin", "line")
+
+  if (categorical_candidate) {
+    final = flexplot_categorical_object(
+      data=data, outcome=outcome, axis=axis[1], plot.type=plot.type,
+      spread=spread, suppress_smooth=suppress_smooth, alpha=alpha,
+      jitter=jitter, sample=sample, raw.data=raw.data
+    )
+    facet = flexplot_panel_variables_object(given, break.me)
+    if (!is.null(facet)) final = final + facet
+    final$formula = formula
+    if (return_data) return(data)
+    return(final)
+  }
 
   if (object_candidate) {
     final = flexplot_bivariate_object(
