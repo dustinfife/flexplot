@@ -192,6 +192,30 @@ flexplot = function(formula, data=NULL, related=F,
 
   ### change se based on how many variables they have
   se = check_se(se, axis)
+  
+  distribution_candidate = isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
+    (length(predictors) == 0 || identical(axis[1], "1")) &&
+    !related && is.null(prediction) &&
+    is.null(ghost.line) && is.null(third.eye) &&
+    !plot.string
+  
+  if (distribution_candidate) {
+    
+    final = flexplot_distribution_object(
+      data=data,
+      outcome=outcome,
+      plot.type=plot.type,
+      bins=bins
+    )
+    
+    facet = flexplot_panel_variables_object(given, break.me)
+    if (!is.null(facet)) final = final + facet
+    
+    final$formula = formula
+    
+    if (return_data) return(data)
+    return(final)
+  }
 
   # Incremental object-renderer path. Unsupported plot families continue
   # through the existing renderer; no new public argument is required.
