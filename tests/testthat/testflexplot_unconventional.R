@@ -14,9 +14,9 @@ test_that("unconventional plots", {
   m = k; m$rewards = as.character(m$rewards)
   vdiffr::expect_doppelganger("related T with character not factor",
                               flexplot(weight.loss ~ rewards, data = k, related = T))  
-  vdiffr::expect_doppelganger("association plot",
+  vdiffr::expect_doppelganger("magnet plot",
                               flexplot(gender ~ rewards, data = d, jitter = c(.05, 0)))
-  vdiffr::expect_doppelganger("paneled association plot",
+  vdiffr::expect_doppelganger("paneled magnet plot",
                                     flexplot(gender ~ rewards | therapy.type, data = d, jitter = c(.05, 0)))  
   vdiffr::expect_doppelganger("interaction plot",
                               flexplot(
