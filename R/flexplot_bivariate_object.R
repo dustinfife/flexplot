@@ -23,6 +23,13 @@ flexplot_bivariate_object = function(data, outcome, axis, method="loess",
       color=.data[[group]],
       group=.data[[group]]
     )
+    original_group = sub("_binned$", "", group)
+    binned_numeric = !identical(original_group, group) && is.numeric(data[[original_group]])
+    n_groups = length(unique(data[[group]]))
+    if (binned_numeric || n_groups <= 6) {
+      mapping$linetype = mapping$colour
+    }
+    if (n_groups <= 6) mapping$shape = mapping$colour
   }
   
   p = ggplot2::ggplot(data, mapping) +
@@ -35,6 +42,23 @@ flexplot_bivariate_object = function(data, outcome, axis, method="loess",
   
   if (!suppress_smooth) {
     p = p + flexplot_smooth_layer(data, outcome, method, se)
+  }
+
+  if (!is.null(mapping$shape)) {
+    # Train all group aesthetics in full-data order, even when points are sampled.
+    group_levels = if (is.factor(data[[group]])) {
+      levels(droplevels(data[[group]]))
+    } else {
+      sort(unique(data[[group]]))
+    }
+    colour_scale = if (is.ordered(data[[group]])) {
+      ggplot2::scale_colour_ordinal(limits=group_levels)
+    } else {
+      ggplot2::scale_colour_discrete(limits=group_levels)
+    }
+    p = p + colour_scale +
+      ggplot2::scale_shape_discrete(limits=group_levels) +
+      ggplot2::scale_linetype_discrete(limits=group_levels)
   }
   
   p + ggplot2::theme_bw() +

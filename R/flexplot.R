@@ -309,9 +309,15 @@ flexplot = function(formula, data=NULL, related=F,
         jitter=jitter
       )
       
+      reference_groups = NULL
+      if (!is.null(final$mapping$linetype)) {
+        group_var = flexplot_object_axis(data, axis)[2]
+        reference_groups = reference_data[[group_var]]
+      }
       final = final + flexplot_ghost_layer(
         d_smooth=ghost_data,
-        ghost.line=ghost.line
+        ghost.line=ghost.line,
+        reference_groups=reference_groups
       )
     }
     

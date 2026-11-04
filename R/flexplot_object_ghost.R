@@ -11,11 +11,26 @@ flexplot_ghost_fit_layer = function(p) {
   which(is_fit)
 }
 
-flexplot_ghost_layer = function(d_smooth, ghost.line) {
-  
+flexplot_ghost_layer = function(d_smooth, ghost.line, reference_groups=NULL) {
+  group_var = setdiff(names(d_smooth), c("x", "y"))
+  mapping = ggplot2::aes(x=.data$x, y=.data$y, group=.data[[group_var]])
+  if (!is.null(reference_groups)) {
+    # Smooth group IDs follow the observed group order in the reference data.
+    # Map back to category values so selected references use the full plot's scale.
+    lookup = if (is.factor(reference_groups)) {
+      factor(levels(droplevels(reference_groups)), levels=levels(reference_groups),
+             ordered=is.ordered(reference_groups))
+    } else {
+      sort(unique(reference_groups))
+    }
+    names(lookup) = seq_along(lookup)
+    mapping$linetype = ggplot2::aes(
+      linetype=(!!lookup)[as.character(.data[[group_var]])]
+    )$linetype
+  }
   ggplot2::geom_line(
     data=d_smooth,
-    mapping=ggplot2::aes(x=.data$x, y=.data$y),
+    mapping=mapping,
     inherit.aes=FALSE,
     color=ghost.line,
     show.legend=FALSE
@@ -96,5 +111,10 @@ flexplot_ghost_smooth_data = function(reference_data,
   
   d_smooth = ggplot2::ggplot_build(p)$data[[fit_layers]]
   
-  return(d_smooth[, c("x", "y"), drop=FALSE])
+  d_smooth = d_smooth[, c("x", "y", "group"), drop=FALSE]
+  # Avoid treating fitted identifiers as facet values when a source column is
+  # named group (or already uses our internal grouping name).
+  group_names = make.unique(c(names(reference_data), ".ghost_group"))
+  names(d_smooth)[3] = group_names[length(group_names)]
+  d_smooth
 }
