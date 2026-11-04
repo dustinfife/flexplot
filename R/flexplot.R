@@ -226,8 +226,10 @@ flexplot = function(formula, data=NULL, related=F,
   ### change se based on how many variables they have
   se = check_se(se, axis)
   
-  # add the prediction layer
-  if (!is.null(prediction)) {
+  # Native magnets retain supplied probabilities and bins already prepared above.
+  # Other renderers use the legacy bin aggregation and model-count restriction.
+  if (!is.null(prediction) &&
+      !(use_magnet && isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string)) {
     num.models = levels(prediction$model)
     
     prediction = flexplot_modify_prediction(
@@ -269,7 +271,8 @@ flexplot = function(formula, data=NULL, related=F,
         prediction=prediction,
         axis=axis,
         data=data,
-        use_magnet=use_magnet
+        use_magnet=use_magnet,
+        given=given
       )
     }
 

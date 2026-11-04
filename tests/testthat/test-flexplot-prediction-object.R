@@ -38,6 +38,7 @@ testthat::test_that("Categorical prediction overlays use points and lines", {
 
 
 testthat::test_that("Magnet prediction overlays use points", {
+  withr::local_options(flexplot.object_renderer=TRUE)
   
   prediction = data.frame(
     a=levels(small$a),
@@ -52,7 +53,7 @@ testthat::test_that("Magnet prediction overlays use points", {
     use_magnet=TRUE
   )
   
-  expect_s3_class(layer$geom, "GeomPoint")
+  expect_s3_class(layer[[1]]$geom, "GeomPoint")
 })
 
 testthat::test_that("Continuous prediction overlays preserve coordinates", {

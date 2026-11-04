@@ -1,19 +1,10 @@
 flexplot_prediction_layer = function(prediction, axis, data,
-                                     use_magnet=FALSE) {
+                                     use_magnet=FALSE, given=NA) {
   
   xvar = axis[1]
   
   if (use_magnet) {
-    return(ggplot2::geom_point(
-      data=prediction,
-      mapping=ggplot2::aes(
-        x=.data[[xvar]],
-        y=.data[["prediction"]],
-        color=.data[["model"]]
-      ),
-      size=3,
-      inherit.aes=FALSE
-    ))
+    return(flexplot_magnet_prediction_layer(prediction, axis, data, given))
   }
   
   axis = flexplot_object_axis(data, axis)
@@ -76,4 +67,35 @@ flexplot_prediction_layer = function(prediction, axis, data,
       values=c("solid", "dotdash")
     )
   ))
+}
+
+flexplot_magnet_prediction_layer = function(prediction, axis, data, given=NA) {
+  axis = flexplot_object_axis(data, axis)
+  xvar = axis[1]
+  group = if (length(axis) > 1 && !is.na(axis[2])) axis[2] else NULL
+  position = ggplot2::position_identity()
+  mapping = ggplot2::aes(x=.data[[xvar]], y=.data$prediction, shape=.data$model)
+
+  if (!is.null(group)) {
+    if (is.factor(data[[group]])) {
+      prediction[[group]] = factor(prediction[[group]], levels=levels(data[[group]]),
+                                    ordered=is.ordered(data[[group]]))
+    }
+    mapping$colour = ggplot2::aes(colour=.data[[group]])$colour
+    mapping$group = mapping$colour
+    # Use the same slots as the internal fits, independently of model shape.
+    position = flexplot_magnet_summary_position(data, group, given)
+  }
+
+  models = levels(factor(prediction$model))
+  list(
+    ggplot2::geom_point(
+      data=prediction, mapping=mapping, position=position,
+      size=3, inherit.aes=FALSE, show.legend=c(colour=FALSE, shape=TRUE)
+    ),
+    ggplot2::scale_shape_manual(
+      name="Model", values=rep(c(17, 15, 18, 3, 7, 8), length.out=length(models))
+    ),
+    ggplot2::guides(shape=ggplot2::guide_legend(override.aes=list(colour="black")))
+  )
 }

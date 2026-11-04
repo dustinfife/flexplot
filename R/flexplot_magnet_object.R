@@ -54,6 +54,15 @@ flexplot_magnet_conditioned_position = function(group, jitter=c(0, 0)) {
   )
 }
 
+flexplot_magnet_summary_position = function(data, group, given) {
+  if (is.null(group)) return(ggplot2::position_identity())
+  facet_vars = given[!is.na(given) & nzchar(given)]
+  if (any(vapply(data[facet_vars], is.numeric, logical(1)))) {
+    return(flexplot_magnet_conditioned_position(data[[group]]))
+  }
+  ggplot2::position_dodge(width=.5)
+}
+
 flexplot_magnet_object = function(data, outcome, axis, given=NA,
                                   jitter=TRUE, alpha=0.6,
                                   dot_size=2, raw.data=TRUE, sample=Inf) {
@@ -177,11 +186,10 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
       dodge.width=.5
     )
     
-    summary_position = ggplot2::position_dodge(width=.5)
+    summary_position = flexplot_magnet_summary_position(data, group, given)
     if (any(vapply(data[facet_vars], is.numeric, logical(1)))) {
       # Reserve the full-data group slots even when sampling omits a group.
       point_position = flexplot_magnet_conditioned_position(data[[group]], jitter)
-      summary_position = flexplot_magnet_conditioned_position(data[[group]])
     }
   }
   
