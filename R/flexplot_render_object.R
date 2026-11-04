@@ -1,3 +1,15 @@
+flexplot_object_axis = function(data, axis) {
+  if (length(axis) < 2 || is.na(axis[2])) return(axis)
+  if (!is.numeric(data[[axis[2]]])) return(axis)
+
+  binned = paste0(axis[2], "_binned")
+  if (!binned %in% names(data)) {
+    stop("Expected binned second-axis variable: ", binned)
+  }
+
+  axis[2] = binned
+  axis
+}
 
 flexplot_render_object = function(data, outcome, axis, given,
                                   method, se, suppress_smooth,
@@ -43,15 +55,7 @@ flexplot_render_object = function(data, outcome, axis, given,
     ))
   }
   
-  if (length(axis) > 1 && is.numeric(data[[axis[2]]])) {
-    binned = paste0(axis[2], "_binned")
-
-    if (!binned %in% names(data)) {
-      stop("Expected binned second-axis variable: ", binned)
-    }
-
-    axis[2] = binned
-  }
+  axis = flexplot_object_axis(data, axis)
 
   # Categorical predictors
   if (!is.numeric(data[[axis[1]]])) {

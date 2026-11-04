@@ -16,6 +16,9 @@ flexplot_prediction_layer = function(prediction, axis, data,
     ))
   }
   
+  axis = flexplot_object_axis(data, axis)
+  group = if (length(axis) >= 2 && !is.na(axis[2])) axis[2] else "model"
+
   if (!is.numeric(data[[xvar]])) {
     return(list(
       ggplot2::geom_point(
@@ -23,7 +26,7 @@ flexplot_prediction_layer = function(prediction, axis, data,
         mapping=ggplot2::aes(
           x=.data[[xvar]],
           y=.data[["prediction"]],
-          color=.data[["model"]]
+          color=.data[[group]]
         ),
         position=ggplot2::position_dodge(width=0.4),
         inherit.aes=FALSE
@@ -33,9 +36,9 @@ flexplot_prediction_layer = function(prediction, axis, data,
         mapping=ggplot2::aes(
           x=.data[[xvar]],
           y=.data[["prediction"]],
-          linetype=.data[["model"]],
-          group=.data[["model"]],
-          color=.data[["model"]]
+          linetype=.data[[group]],
+          group=.data[[group]],
+          color=.data[[group]]
         ),
         position=ggplot2::position_dodge(width=0.4),
         inherit.aes=FALSE
