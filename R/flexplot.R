@@ -193,7 +193,6 @@ flexplot = function(formula, data=NULL, related=F,
   ### change alpha, depending on plot type
   alpha = flexplot_alpha_default(data=data, axis = axis, alpha = alpha)
   
-
   ### change se based on how many variables they have
   se = check_se(se, axis)
   
@@ -210,11 +209,9 @@ flexplot = function(formula, data=NULL, related=F,
   ghost_supported = is.null(ghost.line) ||
     (!is.na(given[1]) &&
        is.null(prediction) &&
-       is.numeric(data[[axis[1]]]) &&
-       length(axis) == 1)
+       is.numeric(data[[axis[1]]]))
   
   if (isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
-      is.null(ghost.line) && is.null(third.eye) &&
       !plot.string) {
 
     final = flexplot_render_object(
@@ -245,14 +242,13 @@ flexplot = function(formula, data=NULL, related=F,
         use_magnet=use_magnet
       )
     }
-    
+
     
     # Add ghost-line overlay
     if (!is.null(ghost.line) &&
         !is.na(given[1]) &&
         is.null(prediction) &&
-        is.numeric(data[[axis[1]]]) &&
-        length(axis) == 1) {
+        is.numeric(data[[axis[1]]])) {
       
       ghost.reference = create_ghost_reference(
         ghost.reference=ghost.reference,
@@ -267,7 +263,8 @@ flexplot = function(formula, data=NULL, related=F,
       reference_data = flexplot_ghost_reference_data(
         data=data,
         given=given,
-        ghost.reference=ghost.reference
+        ghost.reference=ghost.reference,
+        axis=axis
       )
       
       ghost_data = flexplot_ghost_smooth_data(
@@ -276,7 +273,6 @@ flexplot = function(formula, data=NULL, related=F,
         axis=axis,
         given=given,
         method=method,
-        se=se,
         plot.type=plot.type,
         bins=bins,
         spread=spread,
@@ -285,8 +281,6 @@ flexplot = function(formula, data=NULL, related=F,
       
       final = final + flexplot_ghost_layer(
         d_smooth=ghost_data,
-        axis=axis,
-        outcome=outcome,
         ghost.line=ghost.line
       )
     }

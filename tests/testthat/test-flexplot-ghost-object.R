@@ -121,3 +121,106 @@ testthat::test_that(
     }
   }
 )
+
+
+testthat::test_that(
+  "Second-axis ghost lines respect the selected reference", {
+    
+    d = expand.grid(
+      x=1:10,
+      b=factor(c("x", "y", "z")),
+      a=factor(c("a", "b"))
+    )
+    
+    d$y = with(d,
+               2*x +
+                 ifelse(b == "y", 10, 0) +
+                 ifelse(b == "z", 20, 0) +
+                 ifelse(a == "b", 30, 0)
+    )
+    
+    withr::local_options(flexplot.object_renderer=TRUE)
+    
+    p = flexplot(
+      y ~ x + b | a,
+      data=d,
+      ghost.line="grey",
+      ghost.reference=list(a="a", b="x"),
+      method="lm"
+    )
+    
+    built = ggplot2::ggplot_build(p)
+    
+    ghost_idx = which(vapply(
+      p$layers,
+      function(layer) {
+        inherits(layer$geom, "GeomLine") &&
+          identical(layer$aes_params$colour, "grey")
+      },
+      logical(1)
+    ))
+    
+    testthat::expect_length(ghost_idx, 1)
+    
+    ghost_data = built$data[[ghost_idx]]
+
+    
+    testthat::expect_equal(
+      length(unique(ghost_data$PANEL)),
+      2
+    )
+    
+    # Reference curve: a = a, b = x
+    # Therefore y = 2*x in both panels.
+    testthat::expect_equal(
+      ghost_data$y,
+      2 * ghost_data$x,
+      tolerance=1e-6
+    )
+  }
+)
+
+testthat::test_that("Ghost lines support numeric conditioning variables", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  
+  p = flexplot(y ~ x | z, data=small,
+               ghost.line="grey", method="lm")
+  
+  built = ggplot2::ggplot_build(p)
+  
+  ghost_idx = which(vapply(
+    p$layers,
+    function(layer) inherits(layer$geom, "GeomLine") &&
+      identical(layer$aes_params$colour, "grey"),
+    logical(1)
+  ))
+  
+  testthat::expect_length(ghost_idx, 1)
+  testthat::expect_equal(
+    length(unique(built$data[[ghost_idx]]$PANEL)),
+    3
+  )
+})
+
+testthat::test_that("Ghost lines support numeric conditioning and second-axis grouping", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  
+  p = flexplot(y ~ x + b | z, data=small,
+               ghost.line="grey", method="lm")
+  
+  built = ggplot2::ggplot_build(p)
+  
+  ghost_idx = which(vapply(
+    p$layers,
+    function(layer) inherits(layer$geom, "GeomLine") &&
+      identical(layer$aes_params$colour, "grey"),
+    logical(1)
+  ))
+  
+  testthat::expect_length(ghost_idx, 1)
+  testthat::expect_equal(
+    length(unique(built$data[[ghost_idx]]$PANEL)),
+    3
+  )
+})
+

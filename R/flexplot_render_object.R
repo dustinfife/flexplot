@@ -60,11 +60,21 @@ flexplot_render_object = function(data, outcome, axis, given,
     ))
   }
   
+  if (length(axis) > 1 && is.numeric(data[[axis[2]]])) {
+    binned = paste0(axis[2], "_binned")
+    
+    if (!binned %in% names(data)) {
+      stop("Expected binned second-axis variable: ", binned)
+    }
+    
+    axis[2] = binned
+  }
+  
   # Continuous predictors
   flexplot_bivariate_object(
     data=data,
     outcome=outcome,
-    axis=axis[1],
+    axis=axis,
     method=method,
     se=se,
     suppress_smooth=suppress_smooth,

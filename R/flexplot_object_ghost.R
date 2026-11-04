@@ -11,30 +11,11 @@ flexplot_ghost_fit_layer = function(p) {
   which(is_fit)
 }
 
-
-flexplot_ghost_layer = function(d_smooth, axis, outcome,
-                                ghost.line, group=NULL) {
-  
-  names(d_smooth)[names(d_smooth) == "x"] = axis[1]
-  names(d_smooth)[names(d_smooth) == "y"] = outcome
-  
-  mapping = ggplot2::aes(
-    x=.data[[axis[1]]],
-    y=.data[[outcome]]
-  )
-  
-  if (!is.null(group)) {
-    mapping = ggplot2::aes(
-      x=.data[[axis[1]]],
-      y=.data[[outcome]],
-      group=.data[[group]],
-      linetype=.data[[group]]
-    )
-  }
+flexplot_ghost_layer = function(d_smooth, ghost.line) {
   
   ggplot2::geom_line(
     data=d_smooth,
-    mapping=mapping,
+    mapping=ggplot2::aes(x=.data$x, y=.data$y),
     inherit.aes=FALSE,
     color=ghost.line,
     show.legend=FALSE
@@ -42,13 +23,21 @@ flexplot_ghost_layer = function(d_smooth, axis, outcome,
 }
 
 
+
 flexplot_ghost_reference_data = function(data, given,
-                                         ghost.reference) {
+                                         ghost.reference,
+                                         axis=NULL) {
   
   k = data
   
-  for (variable in given) {
-    if (is.na(variable)) next
+  variables = given[!is.na(given)]
+  
+  if (length(axis) > 1 &&
+      axis[2] %in% names(ghost.reference)) {
+    variables = unique(c(variables, axis[2]))
+  }
+  
+  for (variable in variables) {
     
     reference = ghost.reference[[variable]]
     if (is.null(reference)) next
@@ -76,9 +65,10 @@ flexplot_ghost_reference_data = function(data, given,
 }
 
 
+
 flexplot_ghost_smooth_data = function(reference_data,
                                       outcome, axis, given,
-                                      method, se,
+                                      method, 
                                       plot.type, bins, spread,
                                       jitter=NULL) {
   
@@ -88,7 +78,7 @@ flexplot_ghost_smooth_data = function(reference_data,
     axis=axis,
     given=given,
     method=method,
-    se=se,
+    se=F,
     suppress_smooth=FALSE,
     plot.type=plot.type,
     bins=bins,
@@ -104,5 +94,7 @@ flexplot_ghost_smooth_data = function(reference_data,
     )
   }
   
-  ggplot2::ggplot_build(p)$data[[fit_layers]]
+  d_smooth = ggplot2::ggplot_build(p)$data[[fit_layers]]
+  
+  return(d_smooth[, c("x", "y"), drop=FALSE])
 }

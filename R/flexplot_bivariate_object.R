@@ -1,4 +1,3 @@
-# this function returns a ggplot object after determining the sort of plot the user needs
 flexplot_bivariate_object = function(data, outcome, axis, method="loess",
                                      se=FALSE, suppress_smooth=FALSE,
                                      alpha=.5, jitter=NULL, sample=Inf,
@@ -6,16 +5,40 @@ flexplot_bivariate_object = function(data, outcome, axis, method="loess",
   
   jitter = if (is.null(jitter)) c(0, 0) else match_jitter_categorical(jitter)
   points_data = sample.subset(sample, data)
-
-  p = ggplot2::ggplot(data, ggplot2::aes(x=.data[[axis]], y=.data[[outcome]])) +
-        geom_jitterd(data=points_data, alpha=raw.alph.func(raw.data, alpha),
-                 width=jitter[1], height=jitter[2])
-
+  
+  # separate the axes
+  x = axis[1]
+  group = if (length(axis) > 1) axis[2] else NULL
+  
+  # construct the mapping
+  mapping = ggplot2::aes(
+    x=.data[[x]],
+    y=.data[[outcome]]
+  )
+  
+  if (!is.null(group)) {
+    mapping = ggplot2::aes(
+      x=.data[[x]],
+      y=.data[[outcome]],
+      color=.data[[group]],
+      group=.data[[group]]
+    )
+  }
+  
+  p = ggplot2::ggplot(data, mapping) +
+    geom_jitterd(
+      data=points_data,
+      alpha=raw.alph.func(raw.data, alpha),
+      width=jitter[1],
+      height=jitter[2]
+    )
+  
   if (!suppress_smooth) {
     p = p + flexplot_smooth_layer(data, outcome, method, se)
   }
-
-  p + ggplot2::theme_bw() + ggplot2::theme(text=ggplot2::element_text(size=14))
+  
+  p + ggplot2::theme_bw() +
+    ggplot2::theme(text=ggplot2::element_text(size=14))
 }
 
 flexplot_logistic_layer = function(data, outcome, se) {
