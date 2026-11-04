@@ -41,7 +41,11 @@ flexplot_render_object = function(data, outcome, axis, given,
       data=data,
       outcome=outcome,
       axis=axis,
-      given=given
+      given=given,
+      alpha=alpha,
+      raw.data=raw.data,
+      sample=sample,
+      jitter=jitter
     ))
   }
   

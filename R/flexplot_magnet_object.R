@@ -1,6 +1,13 @@
+flexplot_magnet_jitter = function(jitter) {
+  if (is.null(jitter) || isTRUE(jitter)) return(c(.05, 0))
+  if (is.numeric(jitter) && length(jitter) == 2) return(jitter)
+  if (is.numeric(jitter) && length(jitter) == 1) return(c(jitter, 0))
+  match_jitter_categorical(jitter)
+}
+
 flexplot_magnet_object = function(data, outcome, axis, given=NA,
                                   jitter=TRUE, alpha=0.6,
-                                  dot_size=2) {
+                                  dot_size=2, raw.data=TRUE, sample=Inf) {
   
   xvar = axis[1]
   
@@ -68,12 +75,15 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
     .groups="drop"
   )
   
+  # Sample only displayed points, retaining full-data stacks, counts, and fits.
+  points_data = sample.subset(sample, data)
+  jitter = flexplot_magnet_jitter(jitter)
   point_position = ggplot2::position_identity()
-  
-  if (isTRUE(jitter)) {
+
+  if (any(jitter != 0)) {
     point_position = ggplot2::position_jitter(
-      width=0.05,
-      height=0
+      width=jitter[1],
+      height=jitter[2]
     )
   }
   
@@ -84,13 +94,13 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
       color="gray50"
     ) +
     ggplot2::geom_point(
-      data=data,
+      data=points_data,
       mapping=ggplot2::aes(
         x=.data[[xvar]],
         y=.data[["y_scaled"]]
       ),
       color="black",
-      alpha=alpha,
+      alpha=raw.alph.func(raw.data, alpha),
       shape=1,
       size=dot_size,
       position=point_position

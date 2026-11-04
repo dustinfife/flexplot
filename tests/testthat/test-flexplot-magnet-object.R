@@ -99,10 +99,8 @@ testthat::test_that("Magnet renderer supports conditioning", {
 })
 
 
-# Known public native magnet gaps, intentionally excluded from support claims:
-# - alpha, raw.data, sample, and jitter are not forwarded by the dispatcher.
-# - second-axis groups are absent from fitted models and visual mappings.
-# These need production fixes and integration coverage when implemented.
+# Remaining public native magnet gap: second-axis groups are absent from fitted
+# models and visual mappings. Add integration coverage when implemented.
 testthat::test_that("native magnet integration preserves stacks, counts, and fitted probabilities", {
   withr::local_options(flexplot.object_renderer=TRUE)
 
@@ -114,6 +112,7 @@ testthat::test_that("native magnet integration preserves stacks, counts, and fit
   expect_s3_class(p$layers[[3]]$geom, "GeomPoint")
   expect_s3_class(p$layers[[4]]$geom, "GeomText")
   expect_equal(built$data[[1]]$yintercept, .5)
+  expect_true(all(built$data[[2]]$alpha == .2))
 
   raw = p$layers[[2]]$data
   expect_equal(nrow(built$data[[2]]), nrow(small))
@@ -163,6 +162,87 @@ testthat::test_that("native magnet integration preserves ordered x and condition
     expect_equal(length(unique(probabilities$x)), nlevels(d$a))
     expect_equal(sort(labels$label), sort(paste0("N=", counts$n_total)))
     expect_equal(sum(counts$n_total), sum(d$b == panel$b))
+  }
+})
+
+testthat::test_that("native magnet opacity controls affect only raw observations", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+
+  for (show_raw in c(TRUE, FALSE)) {
+    p = flexplot(y_bin ~ a, data=small, alpha=.17, raw.data=show_raw,
+                 jitter=FALSE)
+    built = ggplot2::ggplot_build(p)
+    expected_alpha = if (show_raw) .17 else 0
+    expect_true(all(built$data[[2]]$alpha == expected_alpha))
+    expect_equal(nrow(built$data[[2]]), nrow(small))
+    expect_true(all(is.na(built$data[[3]]$alpha)))
+    expect_true(all(is.na(built$data[[4]]$alpha)))
+    expect_equal(sum(p$layers[[4]]$data$n_total), nrow(small))
+    fit = stats::glm(y_bin ~ a, data=small, family=stats::binomial())
+    expect_equal(built$data[[3]]$y,
+                 unname(stats::predict(fit, newdata=p$layers[[3]]$data, type="response")))
+  }
+})
+
+testthat::test_that("native magnet sampling preserves full-data stacks, counts, and fits", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  withr::local_seed(123)
+
+  d = small
+  d$a = ordered(d$a, levels=rev(levels(d$a)))
+  d$row_id = seq_len(nrow(d))
+  full = flexplot(y_bin ~ a | b, data=d, jitter=FALSE)
+  p = flexplot(y_bin ~ a | b, data=d, sample=8, jitter=FALSE)
+  built = ggplot2::ggplot_build(p)
+  raw = p$layers[[2]]$data
+  all_raw = full$layers[[2]]$data
+  expect_equal(nrow(built$data[[2]]), 8)
+  expect_equal(length(unique(raw$row_id)), 8)
+  expect_true(all(raw$row_id %in% all_raw$row_id))
+  expect_equal(raw$y_scaled, all_raw$y_scaled[match(raw$row_id, all_raw$row_id)])
+  expect_equal(built$data[[2]]$y, raw$y_scaled)
+  expect_identical(levels(raw$a), levels(d$a))
+  expect_equal(p$layers[[3]]$data, full$layers[[3]]$data)
+  expect_equal(p$layers[[4]]$data, full$layers[[4]]$data)
+  expect_equal(sum(p$layers[[4]]$data$n_total), nrow(d))
+  expect_equal(nrow(built$layout$layout), nlevels(d$b))
+  expect_equal(length(unique(built$data[[3]]$PANEL)), nlevels(d$b))
+  expect_equal(length(unique(built$data[[4]]$PANEL)), nlevels(d$b))
+
+  empty = flexplot(y_bin ~ a | b, data=d, sample=0, raw.data=FALSE, jitter=FALSE)
+  expect_equal(nrow(ggplot2::ggplot_build(empty)$data[[2]]), 0)
+  expect_equal(empty$layers[[3]]$data, full$layers[[3]]$data)
+  expect_equal(empty$layers[[4]]$data, full$layers[[4]]$data)
+})
+
+testthat::test_that("native magnet jitter honors defaults, disabling, and numeric amounts", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  withr::local_seed(123)
+
+  settings = list(NULL, TRUE, FALSE, .12, c(.12, .03), c(0, .04), c(0, 0),
+                   1, c(1, .03))
+  amounts = list(c(.05, 0), c(.05, 0), c(0, 0), c(.12, 0),
+                  c(.12, .03), c(0, .04), c(0, 0), c(1, 0), c(1, .03))
+  for (i in seq_along(settings)) {
+    p = flexplot(y_bin ~ a, data=small, jitter=settings[[i]])
+    built = ggplot2::ggplot_build(p)
+    raw = p$layers[[2]]$data
+    dx = as.numeric(built$data[[2]]$x) - as.numeric(raw$a)
+    dy = built$data[[2]]$y - raw$y_scaled
+    width = amounts[[i]][1]
+    height = amounts[[i]][2]
+    expect_true(all(abs(dx) <= width + 1e-10))
+    expect_true(all(abs(dy) <= height + 1e-10))
+    if (width > 0) expect_true(any(abs(dx) > 0))
+    if (height > 0) expect_true(any(abs(dy) > 0))
+    expect_s3_class(p$layers[[2]]$position,
+                    if (width + height == 0) "PositionIdentity" else "PositionJitter")
+    if (width + height > 0) {
+      expect_equal(p$layers[[2]]$position$width, width)
+      expect_equal(p$layers[[2]]$position$height, height)
+    }
+    expect_equal(built$data[[3]]$y, unname(p$layers[[3]]$data$pred_prob))
+    expect_equal(built$data[[4]]$label, paste0("N=", p$layers[[4]]$data$n_total))
   }
 })
 
