@@ -110,6 +110,7 @@ testthat::test_that("native magnet integration preserves stacks, counts, and fit
   expect_s3_class(p$layers[[3]]$geom, "GeomPoint")
   expect_s3_class(p$layers[[4]]$geom, "GeomText")
   expect_equal(built$data[[1]]$yintercept, .5)
+  expect_true(all(built$data[[3]]$colour == "blue"))
   expect_true(all(built$data[[2]]$alpha == .2))
 
   raw = p$layers[[2]]$data
@@ -143,6 +144,7 @@ testthat::test_that("native magnet integration preserves ordered x and condition
   expect_identical(levels(raw$a), levels(d$a))
   expect_equal(nrow(built$layout$layout), nlevels(d$b))
   expect_equal(nrow(fitted), nlevels(d$a) * nlevels(d$b))
+  expect_true(all(built$data[[3]]$colour == "blue"))
 
   fit = stats::glm(y_bin ~ a + b, data=d, family=stats::binomial())
   expect_equal(unname(fitted$pred_prob),

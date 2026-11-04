@@ -130,6 +130,13 @@ flexplot = function(formula, data=NULL, related=F,
   use_magnet = is_binary(data[[outcome]]) &&
     check.non.number(data[[axis[1]]]) &&
     (is.null(method) || method == "logistic")
+
+  # Native categorical dispatch is determined by the observed outcome levels.
+  if (isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string &&
+      !is.numeric(data[[outcome]]) && is_binary(data[[outcome]]) &&
+      check.non.number(data[[axis[1]]])) {
+    use_magnet = TRUE
+  }
   
   # report errors
   flexplot_errors(variables = variables, data = data, axis=axis)

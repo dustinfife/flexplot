@@ -59,6 +59,11 @@ flexplot_render_object = function(data, outcome, axis, given,
     ))
   }
   
+  if (!is.numeric(data[[outcome]]) && !is.numeric(data[[axis[1]]]) &&
+      length(unique(stats::na.omit(data[[outcome]]))) >= 3) {
+    return(flexplot_association_object(data, outcome, axis))
+  }
+
   axis = flexplot_object_axis(data, axis)
 
   # Categorical predictors

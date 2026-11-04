@@ -144,6 +144,11 @@ modify_association_plot_data = function(data, formula, outcome) {
     final.pred = (m$Freq - predicted)/predicted
     m$Freq = final.pred
     names(m)[names(m)=="Freq"] = "Proportion"
+    # Retain metadata for native rendering without changing legacy table classes.
+    association_variables = c(predictors, outcome)
+    attr(m, "association_ordered") = association_variables[
+      vapply(data[association_variables], is.ordered, logical(1))
+    ]
     return(m)
   }
   

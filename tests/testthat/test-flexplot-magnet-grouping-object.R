@@ -38,11 +38,12 @@ test_that("native categorical magnet groups use full-data additive logistic fits
   expect_identical(rlang::as_label(p$layers[[3]]$mapping$group), "b")
   expect_equal(length(unique(built$data[[2]]$colour)), nlevels(small$b))
   expect_equal(length(unique(built$data[[3]]$group)), nlevels(small$b))
-  expect_true(all(built$data[[3]]$colour == "blue"))
+  expect_equal(built$data[[3]]$colour,
+               built$plot$scales$get_scales("colour")$map(fitted$b))
   expect_equal(built$data[[3]]$y, unname(fitted$pred_prob))
   expect_magnet_full_group_counts(p, small, "b")
 
-  # Group-specific blue predictions and count labels align horizontally.
+  # Group-colored predictions and count labels align horizontally.
   counts = p$layers[[4]]$data
   fit_keys = paste(fitted$a, fitted$b)
   count_keys = paste(counts$a, counts$b)
@@ -132,7 +133,8 @@ test_that("native grouped magnet visuals retain legacy colors and categorical st
   expect_equal(native_built$data[[2]]$y, legacy_built$data[[2]]$y)
   expect_equal(native_built$data[[2]]$colour, legacy_built$data[[2]]$colour)
   expect_true(all(legacy_built$data[[3]]$colour == "blue"))
-  expect_true(all(native_built$data[[3]]$colour == "blue"))
+  expect_equal(native_built$data[[3]]$colour,
+               native_built$plot$scales$get_scales("colour")$map(native$layers[[3]]$data$b))
   # Legacy pools second-axis categories; native supplies a logistic marker per group.
   means = aggregate(y_bin ~ a, data=small, FUN=mean)
   expect_equal(sort(legacy_built$data[[3]]$y), sort(means$y_bin))
@@ -149,6 +151,9 @@ test_that("native grouped magnet visuals retain legacy colors and categorical st
   # Native intentionally uses bin colors/stacks and continuous-model bin medians.
   expect_gt(length(unique(legacy_numeric_built$data[[2]]$colour)),
              length(unique(native_numeric_built$data[[2]]$colour)))
-  expect_true(all(native_numeric_built$data[[3]]$colour == "blue"))
+  expect_equal(native_numeric_built$data[[3]]$colour,
+               native_numeric_built$plot$scales$get_scales("colour")$map(
+                 native_numeric$layers[[3]]$data$z_binned
+               ))
   expect_equal(nrow(legacy_numeric_built$data[[3]]), nlevels(small$a))
 })
