@@ -109,6 +109,7 @@ flexplot = function(formula, data=NULL, related=F,
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
   data = ff$data; formula =ff$formula
+  formula = flexplot_reverse_categorical(formula, data, prediction, related)
   
   spread    = match.arg(spread, c('quartiles', 'stdev', 'sterr'))
   plot.type = match.arg(plot.type, c("histogram", "qq", "density", "boxplot", "violin", "line"))

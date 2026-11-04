@@ -27,6 +27,7 @@ compare_fits = function(formula, data, model1, model2=NULL,
                         return.preds=F, report.se=F, re=F, 
                         pred.type="response", num_points = 50,
                         clusters=3,...){
+  flexplot_reverse_categorical(formula, data, allow_reverse=FALSE)
   if (is.null(model2)) runme = "yes"
 
 #### if mod2 is null..
