@@ -152,7 +152,11 @@ flexplot = function(formula, data=NULL, related=F,
   
   ### create the lists that contain the breaks
   break.me = flexplot_break_me(data, predictors, given, axis, bins)
-  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
+  create_breaks = flexplot_create_breaks
+  if (use_magnet && isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string) {
+    create_breaks = flexplot_magnet_breaks
+  }
+  breaks = create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
 
   flexplot_errors(variables, data, axis)
   check_same_variables_in_prediction(formula, prediction)
@@ -169,22 +173,36 @@ flexplot = function(formula, data=NULL, related=F,
   }
   
   ### make modifications to the data
+  magnet_x = NULL
+  if (use_magnet && isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
+      !plot.string && is.factor(data[[axis[1]]])) {
+    magnet_x = data[[axis[1]]]
+  }
   data = flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method, use_magnet = use_magnet)
+  if (!is.null(magnet_x)) {
+    # Shared summary preprocessing may sort x by the outcome; native magnets
+    # retain the caller's factor order before constructing any layer data.
+    data[[axis[1]]] = factor(data[[axis[1]]], levels=levels(magnet_x),
+                             ordered=is.ordered(magnet_x))
+    attr(data[[axis[1]]], "contrasts") = attr(magnet_x, "contrasts")
+  }
   prediction = flexplot_modify_data(data=prediction, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, pred.data = TRUE)
   
   ### more data modifications if there's a magnet plot
   if (use_magnet) {
     magnet_axis = axis
+    magnet_given = given
     if (isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string) {
       magnet_axis = flexplot_object_axis(data, axis)
+      magnet_given = flexplot_magnet_display_given(data, given)
     }
     data = prepare_magnet_data(
       data = data,
       outcome = outcome,
       axis = magnet_axis,
-      given = given
+      given = magnet_given
     )
   }
   

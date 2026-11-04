@@ -5,6 +5,54 @@ flexplot_magnet_jitter = function(jitter) {
   match_jitter_categorical(jitter)
 }
 
+flexplot_magnet_display_given = function(data, given) {
+  display_given = given
+  for (i in seq_along(given)) {
+    variable = given[i]
+    if (is.na(variable) || !nzchar(variable) || !is.numeric(data[[variable]])) next
+    binned = paste0(variable, "_binned")
+    if (binned %in% names(data)) display_given[i] = binned
+  }
+  display_given
+}
+
+flexplot_magnet_breaks = function(break.me, breaks, data, labels, bins=3) {
+  if (length(break.me) < 2 || is.null(breaks)) {
+    return(flexplot_create_breaks(break.me, breaks, data, labels, bins))
+  }
+  if (is.null(names(breaks)) || any(!names(breaks) %in% break.me) ||
+      anyDuplicated(names(breaks))) {
+    stop("Name each custom magnet break once, using a variable to be binned: ",
+         paste(break.me, collapse=", "), call.=FALSE)
+  }
+
+  result = stats::setNames(vector("list", length(break.me)), break.me)
+  for (i in seq_along(break.me)) {
+    variable = break.me[i]
+    variable_breaks = if (variable %in% names(breaks)) breaks[variable] else NULL
+    variable_labels = if (length(labels) >= i) labels[i] else NULL
+    result[[variable]] = flexplot_create_breaks(
+      variable, variable_breaks, data, variable_labels, bins
+    )[[variable]]
+  }
+  result
+}
+
+flexplot_magnet_conditioned_jitter = function(self, data, params, layout) {
+  index = match(as.character(data$colour), self$group_levels)
+  data$x = data$x + .5 * ((index - .5) / length(self$group_levels) - .5)
+  ggplot2::PositionJitter$compute_layer(data, params, layout)
+}
+
+flexplot_magnet_conditioned_position = function(group, jitter=c(0, 0)) {
+  group_levels = if (is.factor(group)) levels(droplevels(group)) else sort(unique(group))
+  ggplot2::ggproto(
+    NULL, ggplot2::PositionJitter,
+    group_levels=group_levels,
+    width=jitter[1] / (length(group_levels) + 2), height=jitter[2],
+    compute_layer=flexplot_magnet_conditioned_jitter
+  )
+}
 
 flexplot_magnet_object = function(data, outcome, axis, given=NA,
                                   jitter=TRUE, alpha=0.6,
@@ -12,24 +60,23 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
   
   xvar = axis[1]
   display_axis = flexplot_object_axis(data, axis)
+  display_given = flexplot_magnet_display_given(data, given)
   group = if (length(display_axis) > 1 && !is.na(display_axis[2])) display_axis[2] else NULL
   
   ## drop missing data
-  groups = unique(c(display_axis, given))
+  groups = unique(c(display_axis, display_given))
   groups = groups[!is.na(groups) & nzchar(groups)]
   
   # Accept either raw data or data already prepared for magnet plots.
   if (!"y_scaled" %in% names(data)) {
-    data = prepare_magnet_data(data, outcome, display_axis, given)
+    data = prepare_magnet_data(data, outcome, display_axis, display_given)
   }
   
   # Exclude missing outcomes from the displayed observations.
   data = data[!is.na(data[[outcome]]) & !is.na(data[[xvar]]), ,
               drop=FALSE]
   
-  # Preserve ordered factors; otherwise order by fitted probability.
-  was_ordered = is.ordered(data[[xvar]])
-  
+  # Preserve incoming factor levels for every frame and position adjustment.
   if (!is.factor(data[[xvar]])) {
     data[[xvar]] = factor(data[[xvar]])
   }
@@ -46,13 +93,13 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
     family=stats::binomial()
   )
   
-  df_pred = unique(data[unique(c(model_vars, group))])
-  if (!is.null(group) && !identical(group, axis[2])) {
-    # Model the continuous predictor, displaying one prediction per bin at its
-    # full-data median, shared across x categories and conditioning variables.
-    medians = stats::aggregate(data[axis[2]], by=data[group], FUN=stats::median)
-    df_pred = unique(data[unique(c(xvar, group, facet_vars))])
-    df_pred[[axis[2]]] = medians[[axis[2]]][match(df_pred[[group]], medians[[group]])]
+  df_pred = unique(data[groups])
+  # Keep all display-bin keys, evaluating each continuous model variable at its
+  # own full-data bin median, independently of x, grouping, or visualization sample.
+  for (variable in setdiff(model_vars, groups)) {
+    binned = paste0(variable, "_binned")
+    medians = stats::aggregate(data[variable], by=data[binned], FUN=stats::median)
+    df_pred[[variable]] = medians[[variable]][match(df_pred[[binned]], medians[[binned]])]
   }
   
   df_pred$pred_prob = stats::predict(
@@ -60,21 +107,6 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
     newdata=df_pred,
     type="response"
   )
-  
-  if (!was_ordered) {
-    probabilities = stats::aggregate(
-      df_pred$pred_prob,
-      by=list(category=df_pred[[xvar]]),
-      FUN=mean
-    )
-    
-    new_levels = as.character(
-      probabilities$category[order(probabilities$x, decreasing=TRUE)]
-    )
-    
-    data[[xvar]] = factor(data[[xvar]], levels=new_levels)
-    df_pred[[xvar]] = factor(df_pred[[xvar]], levels=new_levels)
-  }
   
   # One sample-size label per displayed group.
   df_counts = dplyr::summarise(
@@ -146,6 +178,11 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
     )
     
     summary_position = ggplot2::position_dodge(width=.5)
+    if (any(vapply(data[facet_vars], is.numeric, logical(1)))) {
+      # Reserve the full-data group slots even when sampling omits a group.
+      point_position = flexplot_magnet_conditioned_position(data[[group]], jitter)
+      summary_position = flexplot_magnet_conditioned_position(data[[group]])
+    }
   }
   
   # Keep blue fitted points when no second-axis grouping is present.

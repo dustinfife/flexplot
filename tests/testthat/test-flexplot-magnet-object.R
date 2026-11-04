@@ -271,3 +271,83 @@ testthat::test_that("Missing outcomes do not affect magnet stacking", {
   expect_true(all(prepared$y_scaled >= 0))
   expect_true(all(prepared$y_scaled <= 1))
 })
+
+test_that("native magnet scales and frames retain original factor order", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+
+  for (ordered_x in c(FALSE, TRUE)) {
+    for (x_levels in list(c("a", "b"), c("b", "a"))) {
+      d = small
+      d$a = factor(d$a, levels=x_levels, ordered=ordered_x)
+      # Different medians expose upstream summary-based sorting as well as the
+      # native helper's fitted-probability sorting.
+      a_rows = which(d$a == "a")
+      d$y_bin[a_rows] = rep(c(0L, 0L, 1L), length.out=length(a_rows))
+      for (formula in list(y_bin ~ a, y_bin ~ a | z, y_bin ~ a | b,
+                           y_bin ~ a + b | z, y_bin ~ a + x | z)) {
+        p = flexplot(formula, data=d, jitter=FALSE)
+        built = ggplot2::ggplot_build(p)
+        for (scale in built$layout$panel_scales_x) {
+          expect_identical(scale$get_limits(), x_levels)
+          expect_identical(scale$get_labels(), x_levels)
+        }
+        for (index in 2:4) {
+          expect_identical(levels(p$layers[[index]]$data$a), x_levels)
+          expect_identical(is.ordered(p$layers[[index]]$data$a), ordered_x)
+        }
+        model_formula = stats::reformulate(all.vars(formula)[-1], response="y_bin")
+        fit = stats::glm(model_formula, data=d, family=stats::binomial())
+        fitted = p$layers[[3]]$data
+        expect_equal(unname(fitted$pred_prob),
+                     unname(stats::predict(fit, newdata=fitted, type="response")))
+      }
+      returned = flexplot(y_bin ~ a | z, data=d, jitter=FALSE, return_data=TRUE)
+      expect_identical(levels(returned$a), x_levels)
+      expect_identical(is.ordered(returned$a), ordered_x)
+    }
+  }
+})
+
+test_that("native magnet panel positions use the same factor order for every layer", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+
+  d = small
+  d$a = factor(d$a, levels=c("b", "a"))
+  for (formula in list(y_bin ~ a, y_bin ~ a | z,
+                       y_bin ~ a + b | z, y_bin ~ a + x | z)) {
+    p = flexplot(formula, data=d, jitter=FALSE)
+    built = ggplot2::ggplot_build(p)
+    layout = built$layout$layout
+    expect_identical(built$layout$panel_scales_x[[1]]$get_limits(), c("b", "a"))
+    for (i in seq_len(nrow(layout))) {
+      panel = layout[i, ]
+      for (index in 2:4) {
+        source = p$layers[[index]]$data
+        rows = rep(TRUE, nrow(source))
+        if ("z_binned" %in% names(layout)) rows = source$z_binned == panel$z_binned
+        for (category in levels(d$a)) {
+          selected = rows & source$a == category
+          drawn = built$data[[index]]
+          drawn = drawn[drawn$PANEL == panel$PANEL &
+                          round(drawn$x) == match(category, levels(d$a)), ]
+          expect_equal(nrow(drawn), sum(selected))
+          if (index == 2) expect_equal(sort(drawn$y), sort(source$y_scaled[selected]))
+          if (index == 3) expect_equal(sort(drawn$y), sort(unname(source$pred_prob[selected])))
+          if (index == 4) {
+            labels = if (any(selected)) paste0("N=", source$n_total[selected]) else character()
+            expect_equal(sort(drawn$label), sort(labels))
+          }
+        }
+      }
+    }
+    if (length(p$layers[[3]]$mapping$colour) == 0) next
+    markers = built$data[[3]]
+    labels = built$data[[4]]
+    points = built$data[[2]]
+    label_keys = paste(labels$PANEL, round(labels$x), labels$colour)
+    marker_keys = paste(markers$PANEL, round(markers$x), markers$colour)
+    point_keys = paste(points$PANEL, round(points$x), points$colour)
+    expect_equal(as.numeric(markers$x), as.numeric(labels$x[match(marker_keys, label_keys)]))
+    expect_equal(as.numeric(points$x), as.numeric(labels$x[match(point_keys, label_keys)]))
+  }
+})
