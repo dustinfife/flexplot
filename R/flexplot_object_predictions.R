@@ -90,12 +90,16 @@ flexplot_magnet_prediction_layer = function(prediction, axis, data, given=NA) {
   models = levels(factor(prediction$model))
   list(
     ggplot2::geom_point(
-      data=prediction, mapping=mapping, position=position,
-      size=3, inherit.aes=FALSE, show.legend=c(colour=FALSE, shape=TRUE)
+      data=prediction,
+      mapping=mapping,
+      position=position,
+      size=3,
+      inherit.aes=FALSE,
+      show.legend=FALSE
     ),
     ggplot2::scale_shape_manual(
-      name="Model", values=rep(c(17, 15, 18, 3, 7, 8), length.out=length(models))
-    ),
-    ggplot2::guides(shape=ggplot2::guide_legend(override.aes=list(colour="black")))
+      values=rep(c(17, 15, 18, 3, 7, 8), length.out=length(models)),
+      guide="none"
+    )
   )
 }
