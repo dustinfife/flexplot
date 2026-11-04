@@ -72,6 +72,26 @@ compare.fits = function(formula, data, model1, model2=NULL,
   # generate predictor values
   pred.values = generate_predictors(data, formula, model1, ...)
   
+  # Add predictors required by model2 but absent from the prediction grid.
+  missing_vars = setdiff(
+    remove_nonlinear_terms(get_predictors(model2)),
+    names(pred.values)
+  )
+  
+  if (length(missing_vars) > 0) {
+    new_values = purrr::map(
+      missing_vars,
+      return_constant_for_predicted_data,
+      data=data,
+      model=model2
+    )
+    
+    pred.values[missing_vars] = lapply(
+      new_values,
+      function(value) value[1]
+    )
+  }
+  
   # ensure pred.values have same class as original data
   # but don't change RE; because prior to this there's been sampling of the data and this would revert that
 
@@ -165,8 +185,14 @@ compare.fits = function(formula, data, model1, model2=NULL,
     
     ### for logistic and factor outcome variable, add one to the predictions
     # (otherwise the fitted line falls below the range of y values)
-    if (should_shift_predictions(model1.type, model1, outcome, prediction.model$prediction, data)) {
-      prediction.model$prediction = prediction.model$prediction + 1
+    if (!isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
+        should_shift_predictions(
+          model1.type, model1, outcome,
+          prediction.model$prediction, data
+        )) {
+      
+      prediction.model$prediction =
+        prediction.model$prediction + 1
     }
     
     

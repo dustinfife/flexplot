@@ -197,8 +197,23 @@ flexplot = function(formula, data=NULL, related=F,
   ### change se based on how many variables they have
   se = check_se(se, axis)
   
+  # add the prediction layer
+  if (!is.null(prediction)) {
+    num.models = levels(prediction$model)
+    
+    prediction = flexplot_modify_prediction(
+      prediction, axis, num.models, break.me,
+      bins, labels, breaks, predictors
+    )
+  }
+  
+  ghost_supported = is.null(ghost.line) ||
+    (!is.na(given[1]) &&
+       is.null(prediction) &&
+       is.numeric(data[[axis[1]]]) &&
+       length(axis) == 1)
+  
   if (isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
-      !related &&
       is.null(ghost.line) && is.null(third.eye) &&
       !plot.string) {
 
@@ -212,8 +227,13 @@ flexplot = function(formula, data=NULL, related=F,
       suppress_smooth=suppress_smooth,
       plot.type=plot.type,
       bins=bins,
-      spread=spread, 
-      use_magnet = use_magnet
+      spread=spread,
+      use_magnet=use_magnet,
+      related=related,
+      jitter=jitter, 
+      alpha = alpha, 
+      sample = sample, 
+      raw.data = raw.data
     )
     
     # add prediction overlay lines
@@ -225,6 +245,52 @@ flexplot = function(formula, data=NULL, related=F,
         use_magnet=use_magnet
       )
     }
+    
+    
+    # Add ghost-line overlay
+    if (!is.null(ghost.line) &&
+        !is.na(given[1]) &&
+        is.null(prediction) &&
+        is.numeric(data[[axis[1]]]) &&
+        length(axis) == 1) {
+      
+      ghost.reference = create_ghost_reference(
+        ghost.reference=ghost.reference,
+        data=data,
+        bins=bins,
+        breaks=breaks,
+        given=given,
+        axis=axis,
+        labels=labels
+      )
+      
+      reference_data = flexplot_ghost_reference_data(
+        data=data,
+        given=given,
+        ghost.reference=ghost.reference
+      )
+      
+      ghost_data = flexplot_ghost_smooth_data(
+        reference_data=reference_data,
+        outcome=outcome,
+        axis=axis,
+        given=given,
+        method=method,
+        se=se,
+        plot.type=plot.type,
+        bins=bins,
+        spread=spread,
+        jitter=jitter
+      )
+      
+      final = final + flexplot_ghost_layer(
+        d_smooth=ghost_data,
+        axis=axis,
+        outcome=outcome,
+        ghost.line=ghost.line
+      )
+    }
+    
     
     if (!is.null(logistic_labels)) {
       final = final + ggplot2::scale_y_continuous(
@@ -273,16 +339,13 @@ flexplot = function(formula, data=NULL, related=F,
 		ghost = "xxxx"
 	}	
                                                         
-	### add prediction lines
-	if (!is.null(prediction)){
-		### see how many models are being compared
-		num.models = levels(prediction$model)
-		prediction = flexplot_modify_prediction(prediction, axis, num.models, break.me, bins, labels, breaks, predictors)
-		pred.line = flexplot_generate_prediction_lines(prediction, axis, data, use_magnet=use_magnet)
-	} else {
-	  pred.line = "xxxx"
-	}
-  
+  if (!is.null(prediction)) {
+    pred.line = flexplot_generate_prediction_lines(
+      prediction, axis, data, use_magnet=use_magnet
+    )
+  } else {
+    pred.line = "xxxx"
+  }
 
 	theme = "theme_bw() + theme(text=element_text(size=14))"
 

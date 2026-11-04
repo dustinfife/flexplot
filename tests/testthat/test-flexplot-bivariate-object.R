@@ -12,4 +12,3 @@ test_that("smoothing can be suppressed", {
   expect_length(p$layers, 1)
 })
 
-

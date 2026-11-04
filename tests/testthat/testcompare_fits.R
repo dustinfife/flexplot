@@ -132,5 +132,32 @@ test_that("compare.fits for other models", {
 })
 
 
+testthat::test_that(
+  "compare.fits handles predictors unique to the second model", {
+    
+    m1 = stats::lm(y ~ x, data=small)
+    m2 = stats::lm(y ~ x + z, data=small)
+    
+    preds = compare.fits(
+      y ~ x,
+      data=small,
+      model1=m1,
+      model2=m2,
+      return.preds=TRUE
+    )
+    
+    expect_true("z" %in% names(preds))
+    expect_equal(
+      unique(preds$z),
+      mean(small$z),
+      tolerance=1e-8
+    )
+    
+    expect_false(anyNA(preds$prediction))
+    expect_equal(length(unique(preds$model)), 2)
+  }
+)
+
+
 
 options(warn=0)

@@ -1,7 +1,37 @@
+
 flexplot_render_object = function(data, outcome, axis, given,
                                   method, se, suppress_smooth,
                                   plot.type, bins, spread,
-                                  use_magnet=FALSE, ...) {
+                                  use_magnet=FALSE,
+                                  related=FALSE,
+                                  alpha=.99977,
+                                  raw.data=TRUE,
+                                  sample=Inf,
+                                  jitter=NULL, ...) {
+  
+  # Paired-difference plots
+  if (related) {
+    return(flexplot_related_object(
+      data=data,
+      jitter=jitter,
+      plot.type=plot.type,
+      spread=spread,
+      alpha=alpha,
+      raw.data=raw.data,
+      sample=sample,
+      suppress_smooth=suppress_smooth
+    ))
+  }
+  
+  # Magnet plots
+  if (use_magnet) {
+    return(flexplot_magnet_object(
+      data=data,
+      outcome=outcome,
+      axis=axis,
+      given=given
+    ))
+  }
   
   # Univariate plots
   if (identical(axis[1], "1")) {
@@ -22,30 +52,26 @@ flexplot_render_object = function(data, outcome, axis, given,
       spread=spread,
       plot.type=plot.type,
       suppress_smooth=suppress_smooth,
+      alpha=alpha,
+      raw.data=raw.data,
+      sample=sample,
+      jitter=jitter,
       ...
     ))
   }
   
   # Continuous predictors
-  return(flexplot_bivariate_object(
+  flexplot_bivariate_object(
     data=data,
     outcome=outcome,
     axis=axis[1],
     method=method,
     se=se,
     suppress_smooth=suppress_smooth,
+    alpha=alpha,
+    raw.data=raw.data,
+    sample=sample,
+    jitter=jitter,
     ...
-  ))
-  
-  # magnet plot
-  if (use_magnet) {
-    return(flexplot_magnet_object(
-      data=data,
-      outcome=outcome,
-      axis=axis,
-      given=given
-    ))
-  }
-  
-
+  )
 }

@@ -149,9 +149,16 @@ create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.referen
     }					
     
     #breaks.keep = names(which(!unlist(lapply(to.ghost,is.null))))
-    for (i in 1:length(to.ghost)){
+    for (i in seq_along(to.ghost)) {
       
-      binned.name = paste0(to.ghost[i], "_binned")
+      binned.name = to.ghost[i]
+      
+      if (is.numeric(data[[binned.name]])) {
+        candidate = paste0(binned.name, "_binned")
+        if (candidate %in% names(data)) {
+          binned.name = candidate
+        }
+      }
       
       ### if the ghost reference is null, fill with middle value
       if (is.null(ghost.reference[[to.ghost[i]]])){

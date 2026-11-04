@@ -54,3 +54,52 @@ testthat::test_that("Magnet prediction overlays use points", {
   
   expect_s3_class(layer$geom, "GeomPoint")
 })
+
+testthat::test_that("Continuous prediction overlays preserve coordinates", {
+  
+  prediction = data.frame(
+    x=small$x,
+    prediction=small$y,
+    model="Model 1"
+  )
+  
+  p = ggplot2::ggplot(small, ggplot2::aes(x=x, y=y)) +
+    flexplot_prediction_layer(
+      prediction=prediction,
+      axis=c("x", NA),
+      data=small
+    )
+  
+  built = ggplot2::ggplot_build(p)
+  
+  expect_equal(
+    sort(built$data[[1]]$y),
+    sort(prediction$prediction)
+  )
+})
+
+testthat::test_that("Logistic predictions remain on probability scale", {
+  
+  prediction = data.frame(
+    x=small_logistic$x,
+    prediction=stats::plogis(small_logistic$x),
+    model="Logistic"
+  )
+  
+  p = ggplot2::ggplot() +
+    flexplot_prediction_layer(
+      prediction=prediction,
+      axis=c("x", NA),
+      data=small_logistic
+    )
+  
+  built = ggplot2::ggplot_build(p)
+  
+  expect_equal(
+    sort(built$data[[1]]$y),
+    sort(prediction$prediction)
+  )
+  
+  expect_true(all(built$data[[1]]$y >= 0))
+  expect_true(all(built$data[[1]]$y <= 1))
+})
