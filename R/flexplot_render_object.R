@@ -43,12 +43,22 @@ flexplot_render_object = function(data, outcome, axis, given,
     ))
   }
   
+  if (length(axis) > 1 && is.numeric(data[[axis[2]]])) {
+    binned = paste0(axis[2], "_binned")
+
+    if (!binned %in% names(data)) {
+      stop("Expected binned second-axis variable: ", binned)
+    }
+
+    axis[2] = binned
+  }
+
   # Categorical predictors
   if (!is.numeric(data[[axis[1]]])) {
     return(flexplot_categorical_object(
       data=data,
       outcome=outcome,
-      axis=axis[1],
+      axis=axis,
       spread=spread,
       plot.type=plot.type,
       suppress_smooth=suppress_smooth,
@@ -58,16 +68,6 @@ flexplot_render_object = function(data, outcome, axis, given,
       jitter=jitter,
       ...
     ))
-  }
-  
-  if (length(axis) > 1 && is.numeric(data[[axis[2]]])) {
-    binned = paste0(axis[2], "_binned")
-    
-    if (!binned %in% names(data)) {
-      stop("Expected binned second-axis variable: ", binned)
-    }
-    
-    axis[2] = binned
   }
   
   # Continuous predictors
