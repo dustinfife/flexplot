@@ -99,8 +99,6 @@ testthat::test_that("Magnet renderer supports conditioning", {
 })
 
 
-# Remaining public native magnet gap: second-axis groups are absent from fitted
-# models and visual mappings. Add integration coverage when implemented.
 testthat::test_that("native magnet integration preserves stacks, counts, and fitted probabilities", {
   withr::local_options(flexplot.object_renderer=TRUE)
 

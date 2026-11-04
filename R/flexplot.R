@@ -168,10 +168,14 @@ flexplot = function(formula, data=NULL, related=F,
   
   ### more data modifications if there's a magnet plot
   if (use_magnet) {
+    magnet_axis = axis
+    if (isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string) {
+      magnet_axis = flexplot_object_axis(data, axis)
+    }
     data = prepare_magnet_data(
       data = data,
       outcome = outcome,
-      axis = axis,
+      axis = magnet_axis,
       given = given
     )
   }
