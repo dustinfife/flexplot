@@ -34,8 +34,9 @@
 ##' @param prediction Predicted values for a prediction line. Defaults to NULL. This is generally NOT used when just using flexplot, but it's helpful with the wrapper function \link{compare_fits}
 ##' @param suppress_smooth Should a fitted line be repressed? Defaults to FALSE
 ##' @param alpha The transparency of the datapoints. 
-##' @param plot.string Should the code to generate the plot be outputted? In the background, flexplot is creating a bunch of strings before it evaluates the model. 
-##' Users can export the string, in case they want to modify the ggplot object
+##' @param plot.string Retained for compatibility. String-based plotting has been
+##' retired; setting this to TRUE produces an error. Modify the returned ggplot
+##' object directly instead.
 ##' @param silent Should all messages be suppressed? Defaults to F.
 ##' @param third.eye Should the "third eye" be employed? The third eye will be implemented shortly. 
 ##' @param plot.type This argument allows the user to control the type of plot used. Flexplot defaults to histograms (for univariate variables)
@@ -108,7 +109,10 @@ flexplot = function(formula, data=NULL, related=F,
 		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), 
 		return_data = F, ...){
 
-  data_name = substitute(data)
+  if (isTRUE(plot.string)) {
+    stop("String-based plotting has been retired; plot.string=TRUE is no longer supported. ",
+         "Modify the returned ggplot object directly instead.", call.=FALSE)
+  }
   comparison_predictions = isTRUE(attr(prediction, "flexplot_comparison"))
   
   # modify data if they have an equation in the formula
@@ -138,8 +142,7 @@ flexplot = function(formula, data=NULL, related=F,
     (is.null(method) || method == "logistic")
 
   # Native categorical dispatch is determined by the observed outcome levels.
-  if (isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string &&
-      !is.numeric(data[[outcome]]) && is_binary(data[[outcome]]) &&
+  if (!is.numeric(data[[outcome]]) && is_binary(data[[outcome]]) &&
       check.non.number(data[[axis[1]]])) {
     use_magnet = TRUE
   }
@@ -158,7 +161,7 @@ flexplot = function(formula, data=NULL, related=F,
   ### create the lists that contain the breaks
   break.me = flexplot_break_me(data, predictors, given, axis, bins)
   create_breaks = flexplot_create_breaks
-  if (use_magnet && isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string) {
+  if (use_magnet) {
     create_breaks = flexplot_magnet_breaks
   }
   breaks = create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
@@ -179,9 +182,7 @@ flexplot = function(formula, data=NULL, related=F,
   
   ### make modifications to the data
   magnet_x = NULL
-  if (use_magnet && (comparison_predictions ||
-      (isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string)) &&
-      is.factor(data[[axis[1]]])) {
+  if (use_magnet && is.factor(data[[axis[1]]])) {
     magnet_x = data[[axis[1]]]
   }
   data = flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
@@ -203,12 +204,8 @@ flexplot = function(formula, data=NULL, related=F,
   
   ### more data modifications if there's a magnet plot
   if (use_magnet) {
-    magnet_axis = axis
-    magnet_given = given
-    if (isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string) {
-      magnet_axis = flexplot_object_axis(data, axis)
-      magnet_given = flexplot_magnet_display_given(data, given)
-    }
+    magnet_axis = flexplot_object_axis(data, axis)
+    magnet_given = flexplot_magnet_display_given(data, given)
     data = prepare_magnet_data(
       data = data,
       outcome = outcome,
@@ -238,13 +235,12 @@ flexplot = function(formula, data=NULL, related=F,
   se = check_se(se, axis)
   
   # Native magnets retain supplied probabilities and bins already prepared above.
-  # Other renderers use the legacy bin aggregation and model-count restriction.
+  # Direct non-magnet predictions retain their existing bin aggregation.
   if (comparison_predictions && !use_magnet && length(axis) > 1 &&
       length(unique(prediction$model)) > 1) {
     stop("Two-model comparisons with a second axis are currently supported only for magnet plots.", call.=FALSE)
   }
-  if (!comparison_predictions && !is.null(prediction) &&
-      !(use_magnet && isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string)) {
+  if (!comparison_predictions && !is.null(prediction) && !use_magnet) {
     num.models = levels(prediction$model)
     
     prediction = flexplot_modify_prediction(
@@ -259,248 +255,125 @@ flexplot = function(formula, data=NULL, related=F,
     (!is.na(given[1]) &&
        (is.numeric(data[[axis[1]]]) || !is.null(prediction) || categorical_ghost))
   
-  if (isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
-      !plot.string) {
 
-    if (!is.null(ghost.line) && !is.null(prediction)) {
-      if (length(axis) > 1) {
-        stop("Prediction ghost lines with a second-axis grouping variable are not yet supported. ",
-             "Use one primary predictor without a second axis.", call.=FALSE)
-      }
-      if (is.na(given[1])) {
-        stop("Prediction ghost lines require a conditioning variable to identify reference and destination panels.",
-             call.=FALSE)
-      }
-    }
-    
-    final = flexplot_render_object(
-      data=data,
-      outcome=outcome,
-      axis=axis,
-      given=given,
-      method=method,
-      se=se,
-      suppress_smooth=suppress_smooth,
-      plot.type=plot.type,
-      bins=bins,
-      spread=spread,
-      use_magnet=use_magnet,
-      related=related,
-      jitter=jitter, 
-      alpha = alpha, 
-      sample = sample, 
-      raw.data = raw.data,
-      magnet_summary=!comparison_predictions,
-      magnet_labels=logistic_labels
-    )
-    
-    facet = flexplot_panel_variables_object(given, break.me)
-    if (use_magnet && !is.null(prediction)) {
-      comparison = flexplot_magnet_comparison(prediction, axis, data, given)
-      prediction = comparison$prediction
-      if (!is.null(comparison$facet)) facet = comparison$facet
-    }
-
-    # add prediction overlay lines
-    if (!is.null(prediction)) {
-      final = final + flexplot_prediction_layer(
-        prediction=prediction,
-        axis=axis,
-        data=data,
-        use_magnet=use_magnet,
-        given=given,
-        comparison=comparison_predictions
-      )
-    }
-
-    
-    # Add ghost-line overlay
-    if (!is.null(ghost.line) && ghost_supported) {
-      
-      ghost.reference = create_ghost_reference(
-        ghost.reference=ghost.reference,
-        data=as.data.frame(data),
-        bins=bins,
-        breaks=breaks,
-        given=given,
-        axis=axis,
-        labels=labels
-      )
-      
-      reference_data = flexplot_ghost_reference_data(
-        data=if (is.null(prediction)) data else prediction,
-        given=given,
-        ghost.reference=ghost.reference,
-        axis=if (categorical_ghost) NULL else axis
-      )
-      
-      if (!is.null(prediction)) {
-        ghost_data = flexplot_ghost_prediction_data(reference_data, axis, given, data,
-                                                   use_magnet, comparison_predictions)
-      } else if (categorical_ghost) {
-        ghost_data = flexplot_ghost_categorical_data(
-          reference_data, data, outcome, axis, given, ghost.reference, spread, plot.type
-        )
-      } else {
-        ghost_data = flexplot_ghost_smooth_data(
-          reference_data=reference_data,
-          outcome=outcome,
-          axis=axis,
-          given=given,
-          method=method,
-          plot.type=plot.type,
-          bins=bins,
-          spread=spread,
-          jitter=jitter
-        )
-      }
-      
-      reference_groups = NULL
-      if (!is.null(final$mapping$linetype)) {
-        group_var = flexplot_object_axis(data, axis)[2]
-        reference_groups = reference_data[[group_var]]
-      }
-      final = final + flexplot_ghost_layer(
-        d_smooth=ghost_data,
-        ghost.line=ghost.line,
-        reference_groups=reference_groups
-      )
-    }
-    
-    
-    if (!use_magnet && !is.null(logistic_labels)) {
-      final = final + ggplot2::scale_y_continuous(
-        breaks=c(0, 1),
-        labels=logistic_labels
-      )
-    }
-    
-    if (!is.null(facet)) final = final + facet
-    final = flexplot_sampling_structure(final, data, outcome, axis, sample, related, use_magnet)
-    
-    final$formula = formula
-    
-    if (return_data) return(data)
-    return(final)
-  }
-
-	### PLOT UNIVARIATE PLOTS
-  bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
-                                                    related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread, plot.type=plot.type, bins=bins, use_magnet = use_magnet,
-                                                    magnet_labels=logistic_labels)
-    p = bivariate$p
-    points = bivariate$points
-    fitted = bivariate$fitted
-    if (comparison_predictions && use_magnet) fitted = "xxxx"
-    
-	#### all the above should take care of ALL possible plots, but now we add paneling
-  facets = flexplot_panel_variables(given, break.me)
-  
-	if (!is.null(ghost.line) & !is.na(given[1])){ # with help from https://stackoverflow.com/questions/52682789/how-to-add-a-lowess-or-lm-line-to-an-existing-facet-grid/52683068#52683068
-	 
-				### bin the ghost reference if it's not null
-    ghost.reference = create_ghost_reference(ghost.reference=ghost.reference, data=data,
-                       bins=bins, breaks=breaks, given=given, axis=axis, labels=labels)
-   
-        ### extract the ggplot dataset that contains the fitted information
-    d_smooth = create_ghost_dataset(data=data, axis=axis, prediction=prediction, given=given, 
-                ghost.reference=ghost.reference, predictors=predictors, p=p, fitted=fitted, method=method, outcome=outcome, se=se)
-
-        ### create the text for the ghost line
-    ghosttext = create_ghost_text(d_smooth=d_smooth, axis=axis, outcome=outcome, prediction=prediction, ghost.line=ghost.line, ghost.reference=ghost.reference, data=data)
-      ghost = ghosttext$ghost
-      d_smooth = ghosttext$d_smooth
-      
-
-	} else {
-		ghost = "xxxx"
-	}	
-                                                        
-  if (!is.null(prediction) && !(comparison_predictions && use_magnet)) {
-    pred.line = flexplot_generate_prediction_lines(
-      prediction, axis, data, use_magnet=use_magnet
-    )
-  } else {
-    pred.line = "xxxx"
-  }
-
-	theme = "theme_bw() + theme(text=element_text(size=14))"
-
-  # Ordinary bivariate plots train sampled axes through the shared full-data
-  # structure below. Leave the other legacy plot families' viewport policy alone.
-  if ((related || identical(axis[1], "1")) && is.finite(sample) && is.numeric(data[,outcome])) {
-    theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=TRUE), ", ", max(data[,outcome], na.rm=TRUE), "))")
-  }
-
-	# convert labels for Y axis for logistic
-	if (!use_magnet && !is.null(logistic_labels) &&
-	    !is.numeric(logistic_labels)) {
-
-	  ## sort based on the probabilities
-	  theme = paste0(theme, " + scale_y_continuous(breaks = c(0,1), labels=c('", 
-	                 logistic_labels[1], "', '", 
-	                 logistic_labels[2], "')", ")")
-	}
-	
-	### if second axis is numeric, replace axis[2] with variable that is binned
-  if (length(axis)>1){
-    if (is.numeric(data[,axis[2]])){
-      axis[2] = paste0(axis[2], "_binned")
-    }
-  }
-	
-	#### evaluate the plot
-	### check if "theme(....)" is in there
-	if (length(grep("theme\\(", p, fixed=F))==1) {
-	  # if so, don't replace with theme at the end (otherwise it overwrites the theme elements)
-	  total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line)
-	} else {
-	  total.call = paste0(p, "+",points, "+",fitted, "+", facets, "+", ghost, "+", pred.line, "+", theme)
-	}
-	### remove +xxxx (happens when I've made an element blank)
-	total.call = gsub("+xxxx","",total.call, fixed=T)
-	
-	if (exists("d_smooth")) {
-	  grp_name = grep("group", names(d_smooth))
-	  if (length(grp_name)==1) names(d_smooth)[grp_name[1]] = "GGroup"
-	  if (length(grp_name)>1) names(d_smooth)[grp_name[2]] = "GGroup"  
-	}
-
-	final = suppressMessages(eval(parse(text=total.call)))
-
-  if (comparison_predictions && use_magnet) {
-    display_axis = flexplot_object_axis(data, axis)
-    if (length(display_axis) > 1) {
-      # The legacy base captures the original numeric grouping variable, while
-      # comparison overlays use its display bins. Keep one discrete color scale.
-      final$mapping$colour = ggplot2::aes(colour=.data[[display_axis[2]]])$colour
-    }
-    comparison = flexplot_magnet_comparison(prediction, axis, data, given)
-    layers = flexplot_magnet_prediction_layer(comparison$prediction, axis, data, given,
-                                               comparison=TRUE)
-    # Legacy magnets keep their existing centered raw-data geometry.
+  if (!is.null(ghost.line) && !is.null(prediction)) {
     if (length(axis) > 1) {
-      layers[[1]]$position = ggplot2::position_identity()
-      layers[[3]]$position = ggplot2::position_identity()
+      stop("Prediction ghost lines with a second-axis grouping variable are not yet supported. ",
+           "Use one primary predictor without a second axis.", call.=FALSE)
     }
-    final = final + layers
-    if (!is.null(comparison$facet)) final = final + comparison$facet
+    if (is.na(given[1])) {
+      stop("Prediction ghost lines require a conditioning variable to identify reference and destination panels.",
+           call.=FALSE)
+    }
   }
-	
+
+  final = flexplot_render_object(
+    data=data,
+    outcome=outcome,
+    axis=axis,
+    given=given,
+    method=method,
+    se=se,
+    suppress_smooth=suppress_smooth,
+    plot.type=plot.type,
+    bins=bins,
+    spread=spread,
+    use_magnet=use_magnet,
+    related=related,
+    jitter=jitter,
+    alpha = alpha,
+    sample = sample,
+    raw.data = raw.data,
+    magnet_summary=!comparison_predictions,
+    magnet_labels=logistic_labels
+  )
+
+  facet = flexplot_panel_variables_object(given, break.me)
+  if (use_magnet && !is.null(prediction)) {
+    comparison = flexplot_magnet_comparison(prediction, axis, data, given)
+    prediction = comparison$prediction
+    if (!is.null(comparison$facet)) facet = comparison$facet
+  }
+
+  # add prediction overlay lines
+  if (!is.null(prediction)) {
+    final = final + flexplot_prediction_layer(
+      prediction=prediction,
+      axis=axis,
+      data=data,
+      use_magnet=use_magnet,
+      given=given,
+      comparison=comparison_predictions
+    )
+  }
+
+
+  # Add ghost-line overlay
+  if (!is.null(ghost.line) && ghost_supported) {
+
+    ghost.reference = create_ghost_reference(
+      ghost.reference=ghost.reference,
+      data=as.data.frame(data),
+      bins=bins,
+      breaks=breaks,
+      given=given,
+      axis=axis,
+      labels=labels
+    )
+
+    reference_data = flexplot_ghost_reference_data(
+      data=if (is.null(prediction)) data else prediction,
+      given=given,
+      ghost.reference=ghost.reference,
+      axis=if (categorical_ghost) NULL else axis
+    )
+
+    if (!is.null(prediction)) {
+      ghost_data = flexplot_ghost_prediction_data(reference_data, axis, given, data,
+                                                 use_magnet, comparison_predictions)
+    } else if (categorical_ghost) {
+      ghost_data = flexplot_ghost_categorical_data(
+        reference_data, data, outcome, axis, given, ghost.reference, spread, plot.type
+      )
+    } else {
+      ghost_data = flexplot_ghost_smooth_data(
+        reference_data=reference_data,
+        outcome=outcome,
+        axis=axis,
+        given=given,
+        method=method,
+        plot.type=plot.type,
+        bins=bins,
+        spread=spread,
+        jitter=jitter
+      )
+    }
+
+    reference_groups = NULL
+    if (!is.null(final$mapping$linetype)) {
+      group_var = flexplot_object_axis(data, axis)[2]
+      reference_groups = reference_data[[group_var]]
+    }
+    final = final + flexplot_ghost_layer(
+      d_smooth=ghost_data,
+      ghost.line=ghost.line,
+      reference_groups=reference_groups
+    )
+  }
+
+
+  if (!use_magnet && !is.null(logistic_labels)) {
+    final = final + ggplot2::scale_y_continuous(
+      breaks=c(0, 1),
+      labels=logistic_labels
+    )
+  }
+
+  if (!is.null(facet)) final = final + facet
   final = flexplot_sampling_structure(final, data, outcome, axis, sample, related, use_magnet)
-	# add formula (to make it easier for marginal_plot)
-	final$formula = formula
 
-	if(plot.string){
-	  plot_string = paste0(reverse_ggplot(final))
-	  plot_string = gsub("ggplot(data", paste0("ggplot(", deparse(data_name), ""), plot_string, fixed=T)
-		print(cat(plot_string))
-	} 
-	
-	if (return_data) {
-	  return(data)
-	}
+  final$formula = formula
 
-	return(final)
-}	
+  if (return_data) return(data)
+  return(final)
+}

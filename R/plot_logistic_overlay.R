@@ -74,8 +74,8 @@ logistic_overlay = function(formula = NULL, data=NULL, plot = NULL, n_bins = 10,
     data = plot$data
   } else {
     data = plot$data
-    predictor_var = rlang::as_name(plot$mapping$x)
-    outcome_var = rlang::as_name(plot$mapping$y)
+    predictor_var = logistic_overlay_mapping_variable(plot$mapping$x)
+    outcome_var = logistic_overlay_mapping_variable(plot$mapping$y)
     x_vals = data[[predictor_var]]
     formula = formula(plot)
   }

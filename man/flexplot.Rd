@@ -71,8 +71,9 @@ flexplot possesses superhuman intelligence.}
 
 \item{alpha}{The transparency of the datapoints.}
 
-\item{plot.string}{Should the code to generate the plot be outputted? In the background, flexplot is creating a bunch of strings before it evaluates the model. 
-Users can export the string, in case they want to modify the ggplot object}
+\item{plot.string}{Retained for compatibility. String-based plotting has been
+retired; setting this to TRUE produces an error. Modify the returned ggplot
+object directly instead.}
 
 \item{silent}{Should all messages be suppressed? Defaults to F.}
 

@@ -1,5 +1,5 @@
 test_that("object renderer integrates with flexplot without changing its API", {
-  old = options(flexplot.object_renderer=TRUE)
+  old = options(flexplot.object_renderer=NULL)
   on.exit(options(old), add=TRUE)
 
   p = flexplot(mpg~wt, data=mtcars, method="lm", se=FALSE)
@@ -27,8 +27,26 @@ unexpected_native_renderer = function(...) {
   stop("The native renderer was called.")
 }
 
-test_that("native opt-in selects the object renderer", {
-  withr::local_options(flexplot.object_renderer=TRUE)
+test_that("native rendering is the default without consulting legacy builders", {
+  withr::local_options(flexplot.object_renderer=NULL)
+  testthat::local_mocked_bindings(
+    flexplot_bivariate_plot=unexpected_legacy_renderer,
+    create_ghost_dataset=unexpected_legacy_renderer,
+    create_ghost_text=unexpected_legacy_renderer, .package="flexplot"
+  )
+
+  p = flexplot(y ~ x, data=small, method="lm", se=FALSE, jitter=FALSE)
+  built = ggplot2::ggplot_build(p)
+  expect_s3_class(p$layers[[1]]$geom, "GeomPoint")
+  expect_s3_class(p$layers[[2]]$stat, "StatSmooth")
+  expect_equal(built$data[[1]]$y, small$y)
+  fit = stats::lm(y ~ x, data=small)
+  expect_equal(built$data[[2]]$y,
+               unname(stats::predict(fit, newdata=built$data[[2]])))
+})
+
+test_that("the obsolete opt-out cannot select legacy rendering", {
+  withr::local_options(flexplot.object_renderer=FALSE)
   testthat::local_mocked_bindings(
     flexplot_bivariate_plot=unexpected_legacy_renderer, .package="flexplot"
   )
@@ -43,41 +61,63 @@ test_that("native opt-in selects the object renderer", {
                unname(stats::predict(fit, newdata=built$data[[2]])))
 })
 
-test_that("native opt-out selects the legacy renderer", {
-  withr::local_options(flexplot.object_renderer=FALSE)
-  testthat::local_mocked_bindings(
-    flexplot_render_object=unexpected_native_renderer, .package="flexplot"
-  )
-
-  p = flexplot(y ~ x, data=small, method="lm", se=FALSE, jitter=FALSE)
-  built = ggplot2::ggplot_build(p)
-  expect_s3_class(p$layers[[1]]$geom, "GeomPoint")
-  expect_s3_class(p$layers[[2]]$stat, "StatSmooth")
-  expect_equal(built$data[[1]]$y, small$y)
-  fit = stats::lm(y ~ x, data=small)
-  expect_equal(built$data[[2]]$y,
-               unname(stats::predict(fit, newdata=built$data[[2]])))
-})
-
-test_that("plot.string forces legacy rendering even with native opt-in", {
+test_that("plot.string errors before preprocessing or either renderer can run", {
   withr::local_options(flexplot.object_renderer=TRUE)
   testthat::local_mocked_bindings(
+    formula_functions=unexpected_legacy_renderer,
+    flexplot_bivariate_plot=unexpected_legacy_renderer,
+    create_ghost_dataset=unexpected_legacy_renderer,
     flexplot_render_object=unexpected_native_renderer, .package="flexplot"
   )
 
-  expect_output(
-    {
-      p = flexplot(y ~ x, data=small, method="lm", se=FALSE,
-                   jitter=FALSE, plot.string=TRUE)
-    },
-    "ggplot(small", fixed=TRUE
-  )
-  built = ggplot2::ggplot_build(p)
-  expect_identical(p$formula, y ~ x)
-  expect_equal(built$data[[1]]$x, small$x)
-  expect_equal(built$data[[1]]$y, small$y)
-  expect_s3_class(p$layers[[2]]$stat, "StatSmooth")
-  fit = stats::lm(y ~ x, data=small)
-  expect_equal(built$data[[2]]$y,
-               unname(stats::predict(fit, newdata=built$data[[2]])))
+  for (option in list(NULL, TRUE, FALSE)) {
+    options(flexplot.object_renderer=option)
+    expect_error(flexplot(y ~ x, small, plot.string=TRUE),
+                   "String-based plotting has been retired", fixed=TRUE)
+    expect_error(flexplot(y ~ x, small, plot.string=TRUE, return_data=TRUE),
+                   "String-based plotting has been retired", fixed=TRUE)
+  }
+})
+
+test_that("obsolete options cannot affect native preprocessing or supplied predictions", {
+  withr::local_options(flexplot.object_renderer=NULL)
+  testthat::local_mocked_bindings(flexplot_bivariate_plot=unexpected_legacy_renderer,
+                                  create_ghost_dataset=unexpected_legacy_renderer, .package="flexplot")
+  d = small
+  d$a = ordered(d$a, levels=c("b", "a"))
+  d$y_bin = factor(d$y_bin, levels=c(0, 1))
+  model = glm(y_bin ~ a + z + b, d, family=binomial())
+  predictions = compare_fits(y_bin ~ a + z | b, d, model, return.preds=TRUE)
+  original = flexplot(y_bin ~ a + z | b, d, prediction=predictions, jitter=FALSE)
+  original_data = flexplot(y_bin ~ a + z | b, d, prediction=predictions, return_data=TRUE, jitter=FALSE)
+  expected = ggplot2::ggplot_build(original)
+  for (option in list(NULL, TRUE, FALSE)) {
+    options(flexplot.object_renderer=option)
+    p = flexplot(y_bin ~ a + z | b, d, prediction=predictions, jitter=FALSE)
+    actual_data = flexplot(y_bin ~ a + z | b, d, prediction=predictions, return_data=TRUE, jitter=FALSE)
+    expect_equal(actual_data, original_data)
+    expect_equal(levels(actual_data$a), c("b", "a"))
+    expect_true("z_binned" %in% names(actual_data))
+    expect_equal(ggplot2::ggplot_build(p)$data, expected$data)
+    expect_equal(ggplot2::ggplot_build(p)$layout$layout, expected$layout$layout)
+    expect_equal(p$data, original$data)
+    expect_identical(p$formula, y_bin ~ a + z | b)
+  }
+})
+
+test_that("default native plots retain return_data and metadata for downstream consumers", {
+  withr::local_options(flexplot.object_renderer=NULL)
+  for (formula in list(y ~ x | a, y ~ a | b, y ~ 1 | a)) {
+    p = flexplot(formula, small, jitter=FALSE)
+    prepared = flexplot(formula, small, jitter=FALSE, return_data=TRUE)
+    expect_equal(p$data, prepared)
+    expect_identical(p$formula, formula)
+  }
+  m = lm(y ~ x + a, small)
+  p = compare_fits(y ~ x | a, small, m, ghost.line="gray", ghost.reference=list(a="a"), jitter=FALSE)
+  alias = compare.fits(y ~ x | a, small, m, ghost.line="gray", ghost.reference=list(a="a"), jitter=FALSE)
+  expect_identical(compare.fits, compare_fits)
+  expect_equal(ggplot2::ggplot_build(p)$data, ggplot2::ggplot_build(alias)$data)
+  expect_equal(p$data, flexplot(y ~ x | a, small, return_data=TRUE))
+  expect_identical(p$formula, y ~ x | a)
 })

@@ -3,6 +3,31 @@
 # File: tests/testthat/test-logistic_overlay_helpers.R
 # =============================================================================
 
+test_that("logistic overlays read native data-pronoun mappings without changing summaries", {
+  withr::local_options(flexplot.object_renderer=NULL)
+  p = flexplot(y_bin ~ x + b | a, small, method="logistic", suppress_smooth=TRUE, jitter=FALSE)
+  overlay = logistic_overlay(plot=p, n_bins=1)
+  index = length(p$layers) + 1
+  summaries = overlay$layers[[index]]$data
+  d = small
+  d$bin = cut(d$x, stats::quantile(d$x, c(0, 1)), include.lowest=TRUE)
+  expected = stats::aggregate(d$y_bin, d[c("bin", "a", "b")], mean)
+  rows = match(paste(summaries$bin, summaries$a, summaries$b),
+                 paste(expected$bin, expected$a, expected$b))
+  expect_false(anyNA(rows))
+  expect_equal(summaries$proportion, expected$x[rows])
+  expect_equal(sum(summaries$count), nrow(small))
+  expect_no_warning({ built = ggplot2::ggplot_build(overlay) })
+  panels = built$layout$layout
+  expected_panel = panels$PANEL[match(as.character(summaries$a), as.character(panels$a))]
+  expected_color = built$plot$scales$get_scales("colour")$map(summaries$b)
+  markers = built$data[[index]]
+  expect_setequal(paste(markers$PANEL, round(markers$y, 10), markers$colour),
+                    paste(expected_panel, round(summaries$proportion, 10), expected_color))
+  direct = create_logistic_summary(plot=p, n_bins=1)
+  expect_equal(direct, summaries)
+})
+
 # Test data setup - using flexplot's small datase
 test_data = small
 

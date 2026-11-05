@@ -1,3 +1,11 @@
+logistic_overlay_mapping_variable = function(mapping) {
+  expression = rlang::get_expr(mapping)
+  if (rlang::is_call(expression, "[[") && identical(expression[[2]], quote(.data))) {
+    return(rlang::as_string(expression[[3]]))
+  }
+  rlang::as_name(mapping)
+}
+
 # Helper function to create summary data for logistic overlay
 create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var = NULL, 
                                    bin_centers = NULL, bin_width = NULL, plot = NULL, n_bins) {
@@ -5,7 +13,7 @@ create_logistic_summary = function(data = NULL, group_vars = NULL, outcome_var =
   # If plot is provided, extract everything from it
   if (!is.null(plot)) {
     data = plot$data
-    outcome_var = rlang::as_name(plot$mapping$y)
+    outcome_var = logistic_overlay_mapping_variable(plot$mapping$y)
     formula = formula(plot)
     ### extract given and axis variables
     given.axis = flexplot_axis_given(formula)
@@ -144,21 +152,21 @@ build_inherited_aesthetics = function(plot, summary_data, base_x = "bin_mid", ba
   
   # Add color/group aesthetics if they exist in the original plot
   if (!is.null(plot$mapping$colour)) {
-    color_var = rlang::as_name(plot$mapping$colour)
+    color_var = logistic_overlay_mapping_variable(plot$mapping$colour)
     if (color_var %in% names(summary_data)) {
       base_aes$colour = sym(color_var)
     }
   }
   
   if (!is.null(plot$mapping$fill)) {
-    fill_var = rlang::as_name(plot$mapping$fill)
+    fill_var = logistic_overlay_mapping_variable(plot$mapping$fill)
     if (fill_var %in% names(summary_data)) {
       base_aes$fill = sym(fill_var)
     }
   }
   
   if (!is.null(plot$mapping$shape)) {
-    shape_var = rlang::as_name(plot$mapping$shape)
+    shape_var = logistic_overlay_mapping_variable(plot$mapping$shape)
     if (shape_var %in% names(summary_data)) {
       base_aes$shape = sym(shape_var)
     }

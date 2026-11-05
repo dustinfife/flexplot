@@ -128,41 +128,33 @@ test_that("sampling leaves categorical and numeric magnet groups unchanged", {
   }
 })
 
-test_that("native grouped magnet visuals retain legacy colors and categorical stacks", {
-  withr::local_options(flexplot.object_renderer=TRUE)
-
-  native = flexplot(y_bin ~ a + b, data=small, jitter=FALSE)
-  native_built = ggplot2::ggplot_build(native)
-  native_numeric = flexplot(y_bin ~ a + z, data=small, jitter=FALSE)
-  options(flexplot.object_renderer=FALSE)
-  legacy = flexplot(y_bin ~ a + b, data=small)
-  legacy_built = ggplot2::ggplot_build(legacy)
-  expect_equal(native_built$data[[2]]$y, legacy_built$data[[2]]$y)
-  expect_equal(native_built$data[[2]]$colour, legacy_built$data[[2]]$colour)
-  expect_true(all(legacy_built$data[[3]]$colour == "blue"))
-  expect_equal(native_built$data[[3]]$colour,
-               native_built$plot$scales$get_scales("colour")$map(native$layers[[3]]$data$b))
-  # Legacy pools second-axis categories; native supplies a logistic marker per group.
-  means = aggregate(y_bin ~ a, data=small, FUN=mean)
-  expect_equal(sort(legacy_built$data[[3]]$y), sort(means$y_bin))
-  expect_equal(nrow(legacy_built$data[[3]]), nlevels(small$a))
-  expect_equal(nrow(native_built$data[[3]]), nrow(unique(small[c("a", "b")])))
-
-  legacy_numeric = flexplot(y_bin ~ a + z, data=small)
-  native_numeric_built = ggplot2::ggplot_build(native_numeric)
-  legacy_numeric_built = ggplot2::ggplot_build(legacy_numeric)
-  expect_equal(length(unique(native_numeric_built$data[[2]]$colour)),
-               nlevels(native_numeric$layers[[2]]$data$z_binned))
-  expect_equal(native_numeric$layers[[2]]$data$z_binned, legacy_numeric$data$z_binned)
-  # Legacy currently uses continuous colors and per-value stacks for numeric axis 2.
-  # Native intentionally uses bin colors/stacks and continuous-model bin medians.
-  expect_gt(length(unique(legacy_numeric_built$data[[2]]$colour)),
-             length(unique(native_numeric_built$data[[2]]$colour)))
-  expect_equal(native_numeric_built$data[[3]]$colour,
-               native_numeric_built$plot$scales$get_scales("colour")$map(
-                 native_numeric$layers[[3]]$data$z_binned
-               ))
-  expect_equal(nrow(legacy_numeric_built$data[[3]]), nlevels(small$a))
+test_that("grouped magnet visuals retain native colors, stacks, and logistic fits with opt-out set", {
+  withr::local_options(flexplot.object_renderer=FALSE)
+  for (group in c("b", "z")) {
+    formula = stats::reformulate(c("a", group), response="y_bin")
+    p = flexplot(formula, data=small, jitter=FALSE)
+    built = ggplot2::ggplot_build(p)
+    displayed = if (group == "z") "z_binned" else group
+    raw = p$layers[[2]]$data
+    fitted = p$layers[[3]]$data
+    counts = p$layers[[4]]$data
+    colors = built$plot$scales$get_scales("colour")
+    expect_equal(nrow(raw), nrow(small))
+    expect_equal(raw$y_bin, small$y_bin)
+    expect_equal(built$data[[2]]$colour, colors$map(raw[[displayed]]))
+    expect_equal(built$data[[3]]$colour, colors$map(fitted[[displayed]]))
+    expect_equal(nrow(fitted), nrow(unique(raw[c("a", displayed)])))
+    key = paste(raw$a, raw[[displayed]])
+    totals = table(key)
+    stack = ave(seq_len(nrow(raw)), key, raw$y_bin, FUN=seq_along)
+    expected_y = ifelse(raw$y_bin == 0, (stack - .5) / (2 * max(totals)),
+                         1 - (stack - .5) / (2 * max(totals)))
+    expect_equal(built$data[[2]]$y, expected_y)
+    expect_equal(counts$n_total,
+                   as.integer(totals[paste(counts$a, counts[[displayed]])]))
+    model = stats::glm(formula, data=small, family=stats::binomial())
+    expect_equal(built$data[[3]]$y, unname(stats::predict(model, newdata=fitted, type="response")))
+  }
 })
 
 expect_magnet_numeric_panel_data = function(p, original, variables, facet_variables) {

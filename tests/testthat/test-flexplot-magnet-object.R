@@ -368,7 +368,7 @@ test_that("binary magnets use observed factor levels in their original relative 
         expect_no_warning({ p = suppressMessages(flexplot(y_bin ~ a, data=d, jitter=FALSE)) })
         expect_no_warning({ built = ggplot2::ggplot_build(p) })
         expect_no_warning(ggplot2::ggplotGrob(p))
-        raw = if (native) p$layers[[2]]$data else p$data
+        raw = p$layers[[2]]$data
         expect_equal(raw$y_bin, expected_code)
         expect_equal(nrow(built$data[[2]]), nrow(d))
         expect_true(all(built$data[[2]]$shape == 1))
@@ -385,10 +385,8 @@ test_that("binary magnets use observed factor levels in their original relative 
         expected_y = ifelse(expected_code == 0, (stack - .5) / (2 * max_n),
                              1 - (stack - .5) / (2 * max_n))
         expect_equal(raw$y_scaled, expected_y)
-        if (native) {
-          expect_equal(sum(p$layers[[4]]$data$n_total), nrow(d))
-          expect_equal(nrow(built$data[[4]]), nlevels(d$a))
-        }
+        expect_equal(sum(p$layers[[4]]$data$n_total), nrow(d))
+        expect_equal(nrow(built$data[[4]]), nlevels(d$a))
       }
     }
   }

@@ -30,9 +30,10 @@ test_that("simple magnet plot returns ggplot with scaled dots", {
   d = magnet_plot_fixture()
   p = flexplot(y ~ group, data=d)
   expect_s3_class(p, "ggplot")
-  expect_true("y_scaled" %in% names(p$data))
-  expect_equal(nrow(p$data), nrow(d))
-  expect_true(all(p$data$y_scaled >= 0 & p$data$y_scaled <= 1))
+  raw = p$layers[[2]]$data
+  expect_true("y_scaled" %in% names(raw))
+  expect_equal(nrow(raw), nrow(d))
+  expect_true(all(raw$y_scaled >= 0 & raw$y_scaled <= 1))
   expect_equal(p$labels$y, "y")
   expect_true(any(vapply(p$layers, function(layer) inherits(layer$geom, "GeomPoint"), logical(1))))
 })

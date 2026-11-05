@@ -164,7 +164,7 @@ test_that("both exported comparison names and positional calls are identical", {
                ggplot2::ggplot_build(compare.fits(y ~ a, small, m, jitter=FALSE))$data)
 })
 
-test_that("prediction data and plotted values are independent of renderer choice", {
+test_that("prediction data and plotted values ignore the obsolete renderer option", {
   withr::local_options(flexplot.object_renderer=TRUE)
   m = stats::lm(y ~ x + z, data=small)
   for (method in c("observed", "reference")) {
@@ -180,8 +180,8 @@ test_that("prediction data and plotted values are independent of renderer choice
   }
   options(flexplot.object_renderer=TRUE)
   testthat::local_mocked_bindings(flexplot_render_object=comparison_unexpected_renderer, .package="flexplot")
-  expect_output({ p = compare_fits(y ~ x, small, m, plot.string=TRUE) }, "ggplot(", fixed=TRUE)
-  expect_no_error(ggplot2::ggplot_build(p))
+  expect_error(compare_fits(y ~ x, small, m, plot.string=TRUE),
+                 "String-based plotting has been retired", fixed=TRUE)
 })
 
 test_that("observed group standard errors use covariance of the averaged model gradient", {
@@ -203,7 +203,7 @@ test_that("observed group standard errors use covariance of the averaged model g
   expect_equal(reference$prediction.upr, unname(interval[, "upr"]))
 })
 
-test_that("legacy and native grouped magnets consume the same comparison summaries", {
+test_that("grouped magnet comparison summaries ignore the obsolete renderer option", {
   withr::local_options(flexplot.object_renderer=TRUE)
   m1 = stats::glm(y_bin ~ a + b + z, small, family=stats::binomial())
   m2 = stats::glm(y_bin ~ a + z, small, family=stats::binomial())
@@ -226,9 +226,8 @@ test_that("legacy and native grouped magnets consume the same comparison summari
   }
   options(flexplot.object_renderer=TRUE)
   testthat::local_mocked_bindings(flexplot_render_object=comparison_unexpected_renderer, .package="flexplot")
-  expect_output({ p = compare_fits(y_bin ~ a + b, small, m1, plot.string=TRUE) },
-                  "ggplot(", fixed=TRUE)
-  expect_no_warning(ggplot2::ggplot_build(p))
+  expect_error(compare_fits(y_bin ~ a + b, small, m1, plot.string=TRUE),
+                 "String-based plotting has been retired", fixed=TRUE)
 })
 
 test_that("observed magnet averages preserve groups and model-column conditioning facets", {

@@ -166,7 +166,7 @@ test_that("axis reversal rejects extra axes and unresolved formulas without drop
   }
 })
 
-test_that("reversed plots respect raw controls and legacy plot.string selection", {
+test_that("reversed plots respect raw controls and reject retired string rendering", {
   withr::local_options(flexplot.object_renderer=TRUE)
   withr::local_seed(123)
 
@@ -187,13 +187,6 @@ test_that("reversed plots respect raw controls and legacy plot.string selection"
   testthat::local_mocked_bindings(
     flexplot_render_object=reversal_unexpected_native_renderer, .package="flexplot"
   )
-  expect_message(
-    expect_output(
-      { p = flexplot(b ~ x, data=small, jitter=FALSE, plot.string=TRUE) },
-      "ggplot(small", fixed=TRUE
-    ),
-    "axes were reversed"
-  )
-  expect_identical(p$formula, x ~ b)
-  expect_s3_class(p$layers[[2]]$stat, "StatSummary")
+  expect_error(flexplot(b ~ x, data=small, jitter=FALSE, plot.string=TRUE),
+                 "String-based plotting has been retired", fixed=TRUE)
 })

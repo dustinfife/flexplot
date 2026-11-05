@@ -71,20 +71,16 @@ expect_simplified_magnet = function(p, data, group=NULL, conditioning=character(
       match(do.call(paste, source[panel_vars]), do.call(paste, built$layout$layout[panel_vars]))
     } else rep(1L, nrow(source))
     expected_x = as.numeric(source$a)
-    if (isTRUE(getOption("flexplot.object_renderer"))) {
-      expected_x = expected_x + .5 * ((match(as.character(source[[group]]), levels) - .5) / length(levels) - .5)
-    }
+    expected_x = expected_x + .5 * ((match(as.character(source[[group]]), levels) - .5) / length(levels) - .5)
     expected = paste(built$layout$layout$PANEL[panels], round(expected_x, 12),
                       colors$map(source[[group]]), round(source$prediction, 12))
     actual = paste(markers$PANEL, round(markers$x, 12), markers$colour, round(markers$y, 12))
     expect_setequal(actual, expected)
   }
-  if (isTRUE(getOption("flexplot.object_renderer"))) {
-    count_layer = magnet_comparison_layer(p, "GeomText")
-    expect_equal(sum(p$layers[[count_layer]]$data$n_total), nrow(data))
-    expect_equal(nrow(built$data[[count_layer]]),
-                   nrow(p$layers[[count_layer]]$data) * if (facet_models) models else 1)
-  }
+  count_layer = magnet_comparison_layer(p, "GeomText")
+  expect_equal(sum(p$layers[[count_layer]]$data$n_total), nrow(data))
+  expect_equal(nrow(built$data[[count_layer]]),
+                 nrow(p$layers[[count_layer]]$data) * if (facet_models) models else 1)
   invisible(list(built=built, grob=grob, prediction=source, markers=markers, lines=curves))
 }
 
@@ -195,13 +191,12 @@ test_that("ordinary magnet plots retain their original summaries and opacity", {
     options(flexplot.object_renderer=native)
     p = flexplot(y_bin ~ a + b, data=small, jitter=FALSE, alpha=.13)
     expect_no_warning({ built = ggplot2::ggplot_build(p) })
-    expect_equal(length(p$layers), if (native) 4 else 3)
+    expect_equal(length(p$layers), 4)
     expect_equal(nrow(built$data[[2]]), nrow(small))
     expect_true(all(built$data[[2]]$shape == 1))
     expect_true(all(built$data[[2]]$alpha == .13))
     expect_true(nrow(built$data[[3]]) > 0)
     expect_true(all(built$data[[3]]$shape == 19))
-    if (native) expect_true("pred_prob" %in% names(p$layers[[3]]$data))
-    else expect_true(inherits(p$layers[[3]]$stat, "StatSummary"))
+    expect_true("pred_prob" %in% names(p$layers[[3]]$data))
   }
 })

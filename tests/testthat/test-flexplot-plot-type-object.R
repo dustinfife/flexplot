@@ -11,7 +11,8 @@ test_that("continuous numeric x rejects categorical distribution geometries in b
       }
       expect_error(flexplot(y ~ x + b | a, small, plot.type=type, sample=1,
                              suppress_smooth=TRUE, jitter=FALSE), message, fixed=TRUE)
-      expect_error(flexplot(y ~ x, small, plot.type=type, plot.string=TRUE), message, fixed=TRUE)
+      expect_error(flexplot(y ~ x, small, plot.type=type, plot.string=TRUE),
+                     "String-based plotting has been retired", fixed=TRUE)
     }
   }
 })
