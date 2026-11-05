@@ -593,7 +593,7 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     }
     
     points = paste0(
-      'geom_point(alpha=alpha, ',
+      'geom_point(data=sample.subset(sample, data), alpha=alpha, ',
       'position=position_jitter(width=.05, height=0), ',
       'shape=1, size=2)'
     )

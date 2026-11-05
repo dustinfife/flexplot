@@ -106,7 +106,7 @@ test_that("grouped categorical points respect suppression and sampling", {
   p = flexplot(y ~ a + b, data=small, suppress_smooth=TRUE,
                sample=8, raw.data=FALSE, jitter=FALSE)
   built = ggplot2::ggplot_build(p)
-  expect_length(p$layers, 1)
+  expect_false(any(vapply(p$layers, function(layer) inherits(layer$stat, "StatSummary"), logical(1))))
   expect_equal(nrow(built$data[[1]]), 8)
   expect_true(all(built$data[[1]]$alpha == 0))
   expect_equal(length(unique(built$data[[1]]$colour)), nlevels(small$b))

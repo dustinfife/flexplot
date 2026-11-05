@@ -353,6 +353,7 @@ flexplot = function(formula, data=NULL, related=F,
     }
     
     if (!is.null(facet)) final = final + facet
+    final = flexplot_sampling_structure(final, data, outcome, axis, sample, related, use_magnet)
     
     final$formula = formula
     
@@ -403,10 +404,11 @@ flexplot = function(formula, data=NULL, related=F,
 
 	theme = "theme_bw() + theme(text=element_text(size=14))"
 
-	### without this, the scale of the y axis changes if the user samples
-	if (is.finite(sample) & is.numeric(data[,outcome])){
-		theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=T), ", ", max(data[,outcome], na.rm=T),"))")
-	}
+  # Ordinary bivariate plots train sampled axes through the shared full-data
+  # structure below. Leave the other legacy plot families' viewport policy alone.
+  if ((related || identical(axis[1], "1")) && is.finite(sample) && is.numeric(data[,outcome])) {
+    theme = paste0('theme_bw() + coord_cartesian(ylim=c(', min(data[,outcome], na.rm=TRUE), ", ", max(data[,outcome], na.rm=TRUE), "))")
+  }
 
 	# convert labels for Y axis for logistic
 	if (!use_magnet && !is.null(logistic_labels) &&
@@ -463,6 +465,7 @@ flexplot = function(formula, data=NULL, related=F,
     if (!is.null(comparison$facet)) final = final + comparison$facet
   }
 	
+  final = flexplot_sampling_structure(final, data, outcome, axis, sample, related, use_magnet)
 	# add formula (to make it easier for marginal_plot)
 	final$formula = formula
 
