@@ -1,7 +1,7 @@
 flexplot_bivariate_object = function(data, outcome, axis, method="loess",
                                      se=FALSE, suppress_smooth=FALSE,
                                      alpha=.5, jitter=NULL, sample=Inf,
-                                     raw.data=TRUE) {
+                                     raw.data=TRUE, plot.type="histogram") {
   
   jitter = if (is.null(jitter)) c(0, 0) else match_jitter_categorical(jitter)
   points_data = sample.subset(sample, data)
@@ -40,7 +40,9 @@ flexplot_bivariate_object = function(data, outcome, axis, method="loess",
       height=jitter[2]
     )
   
-  if (!suppress_smooth) {
+  if (identical(plot.type, "line")) {
+    p = p + ggplot2::geom_line(data=points_data)
+  } else if (!suppress_smooth) {
     p = p + flexplot_smooth_layer(data, outcome, method, se)
   }
 

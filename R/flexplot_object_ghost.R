@@ -3,7 +3,8 @@ flexplot_ghost_fit_layer = function(p) {
     p$layers,
     function(layer) {
       inherits(layer$stat, "StatSmooth") ||
-        inherits(layer$stat, "StatSummary")
+        inherits(layer$stat, "StatSummary") ||
+        (inherits(layer$geom, "GeomLine") && inherits(layer$stat, "StatIdentity"))
     },
     logical(1)
   )

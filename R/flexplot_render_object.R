@@ -98,6 +98,7 @@ flexplot_render_object = function(data, outcome, axis, given,
     raw.data=raw.data,
     sample=sample,
     jitter=jitter,
+    plot.type=plot.type,
     ...
   )
 }
