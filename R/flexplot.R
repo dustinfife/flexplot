@@ -249,7 +249,7 @@ flexplot = function(formula, data=NULL, related=F,
   
   if (isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
       !plot.string) {
-
+    
     final = flexplot_render_object(
       data=data,
       outcome=outcome,

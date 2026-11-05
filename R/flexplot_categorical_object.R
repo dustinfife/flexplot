@@ -1,5 +1,6 @@
 # Native ggplot renderer for categorical predictors and a numeric outcome.
-flexplot_categorical_summary = function(z, spread="quartiles") {
+    .5
+      flexplot_categorical_summary = function(z, spread="quartiles") {
   if (identical(spread, "quartiles")) {
     return(data.frame(
       y=stats::median(z),
@@ -52,6 +53,7 @@ flexplot_categorical_object = function(data, outcome, axis, plot.type="histogram
   points_data = sample.subset(sample, data)
   x = axis[1]
   group = if (length(axis) > 1) axis[2] else NULL
+  n_groups = if (is.null(group)) 0L else length(unique(data[[group]]))
 
   if (is.null(group)) {
     mapping = ggplot2::aes(x=.data[[x]], y=.data[[outcome]])
@@ -62,12 +64,13 @@ flexplot_categorical_object = function(data, outcome, axis, plot.type="histogram
       x=.data[[x]], y=.data[[outcome]],
       color=.data[[group]]
     )
-    if (length(unique(data[[group]])) > 6) {
+    if (n_groups > 6) {
       flexplot_high_cardinality_message()
     } else {
       mapping$shape = mapping$colour
       mapping$linetype = mapping$colour
     }
+    
     points = ggplot2::geom_point(
       data=points_data, alpha=raw.alph.func(raw.data, alpha),
       position=position_jitterdodged(
@@ -78,6 +81,8 @@ flexplot_categorical_object = function(data, outcome, axis, plot.type="histogram
 
   p = ggplot2::ggplot(data, mapping) + points + ggplot2::theme_bw() +
     ggplot2::theme(text=ggplot2::element_text(size=14))
+
+  if (n_groups > 6) p = p + ggplot2::guides(colour="none")
 
   if (!is.null(group)) {
     if (suppress_smooth) return(p)

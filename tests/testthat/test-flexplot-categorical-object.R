@@ -112,6 +112,8 @@ test_that("grouped categorical points respect suppression and sampling", {
   expect_equal(length(unique(built$data[[1]]$colour)), nlevels(small$b))
 })
 
+high_cardinality_message_text = "It looks like you're trying to plot more than 6 groups. I gotta give it to you...you're ambitious! Alas, things get a little crowded with that many colors, lines, and symbols. So I'm keeping the colors, ditching the fancy symbols and line types, and hiding the legend. Don't worry, all your data are still there. I hope we can still be friends."
+
 test_that("high-cardinality categorical groups keep raw points and summaries drawable", {
   withr::local_options(flexplot.object_renderer=TRUE)
 
@@ -121,19 +123,23 @@ test_that("high-cardinality categorical groups keep raw points and summaries dra
     formula = stats::reformulate(c("a", variable), response="y")
     expect_message(
       { p = flexplot(formula, data=d, bins=7, jitter=FALSE) },
-      "more than 6 colors/lines/symbols", fixed=TRUE
+      high_cardinality_message_text, fixed=TRUE
     )
     group = if (variable == "g") "g" else "z_binned"
     expect_no_warning({ built = ggplot2::ggplot_build(p) })
     expect_no_warning({ grob = ggplot2::ggplotGrob(p) })
     expect_s3_class(grob, "gtable")
+    guides = grob$grobs[grepl("^guide-box", grob$layout$name)]
+    expect_false(any(vapply(guides, inherits, logical(1), "gtable")))
     expect_null(p$mapping$shape)
     expect_null(p$mapping$linetype)
     expect_identical(rlang::as_label(p$mapping$colour), group)
     expect_length(p$layers, 4)
     expect_equal(nrow(built$data[[1]]), nrow(d))
+    expect_true(all(built$data[[1]]$alpha == .2))
     expect_equal(sort(built$data[[1]]$y), sort(d$y))
     expect_false(anyNA(built$data[[1]][c("x", "y", "shape", "colour")]))
+    expect_length(unique(built$data[[1]]$shape), 1)
 
     expected = stats::aggregate(p$data$y, by=p$data[c("a", group)], FUN=median)
     expected$lower = stats::aggregate(p$data$y, by=p$data[c("a", group)],
@@ -155,6 +161,7 @@ test_that("high-cardinality categorical groups keep raw points and summaries dra
       }
     }
     expect_false(anyNA(built$data[[2]]$shape))
+    expect_length(unique(built$data[[2]]$shape), 1)
     expect_equal(length(unique(built$data[[4]]$group)), 7)
     expect_true(all(built$data[[4]]$linetype == 1))
     expect_equal(as.integer(table(built$data[[1]]$colour)),
@@ -165,9 +172,12 @@ test_that("high-cardinality categorical groups keep raw points and summaries dra
   # Color-only rendering retains the established legacy data and statistics.
   options(flexplot.object_renderer=FALSE)
   expect_message({ legacy = flexplot(y ~ a + g, data=d, jitter=FALSE) },
-                  "more than 6 colors/lines/symbols", fixed=TRUE)
+                  high_cardinality_message_text, fixed=TRUE)
   native_built = ggplot2::ggplot_build(categorical)
   legacy_built = ggplot2::ggplot_build(legacy)
+  expect_no_warning({ legacy_grob = ggplot2::ggplotGrob(legacy) })
+  legacy_guides = legacy_grob$grobs[grepl("^guide-box", legacy_grob$layout$name)]
+  expect_false(any(vapply(legacy_guides, inherits, logical(1), "gtable")))
   for (layer in 1:4) {
     columns = c("x", "y", "colour", "shape", "linetype", "group", "PANEL")
     columns = intersect(columns, names(native_built$data[[layer]]))
@@ -176,7 +186,7 @@ test_that("high-cardinality categorical groups keep raw points and summaries dra
   }
 })
 
-test_that("high-cardinality categorical groups preserve order and caller legend suppression", {
+test_that("high-cardinality categorical groups preserve order and suppress legends", {
   withr::local_options(flexplot.object_renderer=TRUE)
 
   for (ordered_group in c(FALSE, TRUE)) {
@@ -185,7 +195,7 @@ test_that("high-cardinality categorical groups preserve order and caller legend 
     d$g = factor(rep(letters[1:7], length.out=nrow(d)),
                   levels=group_levels, ordered=ordered_group)
     expect_message({ p = flexplot(y ~ a + g, data=d, jitter=FALSE, suppress_smooth=TRUE) },
-                    "more than 6 colors/lines/symbols", fixed=TRUE)
+                    high_cardinality_message_text, fixed=TRUE)
     expect_no_warning({ built = ggplot2::ggplot_build(p) })
     expect_identical(levels(p$data$g), group_levels)
     expect_identical(is.ordered(p$data$g), ordered_group)
@@ -195,7 +205,7 @@ test_that("high-cardinality categorical groups preserve order and caller legend 
     expect_false(anyNA(built$data[[1]]$shape))
     expect_no_warning(ggplot2::ggplotGrob(p))
     legends = cowplot::get_plot_component(p, "guide-box", return_all=TRUE)
-    expect_true(any(vapply(legends, inherits, logical(1), "gtable")))
+    expect_false(any(vapply(legends, inherits, logical(1), "gtable")))
     hidden = p + ggplot2::theme(legend.position="none")
     hidden_legends = cowplot::get_plot_component(hidden, "guide-box", return_all=TRUE)
     expect_false(any(vapply(hidden_legends, inherits, logical(1), "gtable")))
@@ -208,7 +218,9 @@ test_that("three categorical groups retain legacy shapes, line types, and colors
 
   expect_silent({ p = flexplot(y ~ a + b, data=small, jitter=FALSE) })
   expect_no_warning({ built = ggplot2::ggplot_build(p) })
-  expect_no_warning(ggplot2::ggplotGrob(p))
+  expect_no_warning({ grob = ggplot2::ggplotGrob(p) })
+  guides = grob$grobs[grepl("^guide-box", grob$layout$name)]
+  expect_true(any(vapply(guides, inherits, logical(1), "gtable")))
   expect_identical(rlang::as_label(p$mapping$shape), "b")
   expect_identical(rlang::as_label(p$mapping$linetype), "b")
   expect_equal(sort(unique(built$data[[1]]$shape)), c(15, 16, 17))
@@ -225,5 +237,24 @@ test_that("three categorical groups retain legacy shapes, line types, and colors
     columns = intersect(columns, names(built$data[[layer]]))
     if (layer == 3) columns = c(columns, "ymin", "ymax")
     expect_equal(built$data[[layer]][columns], legacy_built$data[[layer]][columns])
+  }
+})
+
+test_that("up to six observed categorical groups retain legends without diagnostics", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+
+  for (n_groups in c(3, 6)) {
+    d = small
+    d$g = factor(rep(letters[seq_len(n_groups)], length.out=nrow(d)),
+                  levels=letters[1:7])
+    expect_silent({ p = flexplot(y ~ a + g, data=d, jitter=FALSE) })
+    expect_no_warning({ built = ggplot2::ggplot_build(p) })
+    expect_no_warning({ grob = ggplot2::ggplotGrob(p) })
+    guides = grob$grobs[grepl("^guide-box", grob$layout$name)]
+    expect_true(any(vapply(guides, inherits, logical(1), "gtable")))
+    expect_equal(nrow(built$data[[1]]), nrow(d))
+    expect_false(anyNA(built$data[[1]]$shape))
+    expect_equal(length(unique(built$data[[1]]$shape)), n_groups)
+    expect_equal(length(unique(built$data[[4]]$linetype)), n_groups)
   }
 })

@@ -66,7 +66,7 @@ return_labels_for_logistic_regression = function(data, outcome, method) {
 
 flexplot_alpha_default = function(data, axis, alpha){
   if (axis[1] == "1") return(alpha)
-  if (!is.numeric(data[,axis[1]]) & alpha == .99977) return(.2)
+  if (!is.numeric(data[,axis[1]]) & alpha == .99977) return(.4)
   if ( is.numeric(data[,axis[1]]) & alpha == .99977) return(.5)
   return(alpha)
 }
@@ -241,7 +241,7 @@ flexplot_bivariate_string = function(data, outcome, axis,
 }
 
 flexplot_high_cardinality_message = function() {
-  message("It looks like you're trying to plot more than 6 colors/lines/symbols.\nI gotta give it to you...you're ambitious. Alas, I can't do that, so I'm removing the colors/lines/symbols.\n I hope we can still be friends.")
+  message("It looks like you're trying to plot more than 6 groups. I gotta give it to you...you're ambitious! Alas, things get a little crowded with that many colors, lines, and symbols. So I'm keeping the colors, ditching the fancy symbols and line types, and hiding the legend. Don't worry, all your data are still there. I hope we can still be friends.")
 }
 
 flexplot_multivariate_aes = function(data, outcome, prediction=NULL, axis) {
@@ -263,7 +263,7 @@ flexplot_multivariate_aes = function(data, outcome, prediction=NULL, axis) {
     # if they're trying to plot more than 10 symbols...
   if (length(unique(data[,axis[2]]))>6) {
     flexplot_high_cardinality_message()
-    return('ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2])))')
+    return('ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2]))) + guides(colour="none")')
   }
   return('ggplot(data=data, aes(x=!!sym(predictors[1]), y=!!sym(outcome), color=!!sym(axis[2]), linetype = !!sym(axis[2]), shape=!!sym(axis[2]))) + labs(color= axis[2], linetype=axis[2], shape=axis[2])')
   
