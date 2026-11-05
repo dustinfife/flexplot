@@ -186,6 +186,11 @@ flexplot = function(formula, data=NULL, related=F,
   }
   data = flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method, use_magnet = use_magnet)
+  if (plot.type %in% c("boxplot", "violin") && !related &&
+      !identical(axis[1], "1") && is.numeric(data[[axis[1]]])) {
+    stop("plot.type='", plot.type, "' requires a categorical x variable; '",
+         axis[1], "' is continuous numeric.", call.=FALSE)
+  }
   if (!is.null(magnet_x)) {
     # Shared summary preprocessing may sort x by the outcome; native magnets
     # and comparisons retain the caller's factor order for every layer.
