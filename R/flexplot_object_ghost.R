@@ -15,9 +15,12 @@ flexplot_ghost_fit_layer = function(p) {
 flexplot_ghost_layer = function(d_smooth, ghost.line, reference_groups=NULL) {
   axes = attr(d_smooth, "ghost_axes")
   if (is.null(axes)) axes = c("x", "y")
-  group_var = setdiff(names(d_smooth), axes)
+  group_var = attr(d_smooth, "ghost_group")
+  if (is.null(group_var)) group_var = setdiff(names(d_smooth), axes)
   mapping = ggplot2::aes(x=.data[[axes[1]]], y=.data[[axes[2]]], group=.data[[group_var]])
-  if (!is.null(reference_groups)) {
+  if (is.factor(d_smooth[[group_var]])) {
+    mapping$linetype = mapping$group
+  } else if (!is.null(reference_groups)) {
     # Smooth group IDs follow the observed group order in the reference data.
     # Map back to category values so selected references use the full plot's scale.
     lookup = if (is.factor(reference_groups)) {
@@ -87,6 +90,38 @@ flexplot_ghost_coordinates = function(fitted, reference_data) {
   group_names = make.unique(c(names(reference_data), ".ghost_group"))
   names(fitted)[3] = group_names[length(group_names)]
   fitted
+}
+
+flexplot_ghost_prediction_data = function(reference_data, axis, given, data) {
+  display_given = flexplot_magnet_display_given(reference_data, given)
+  if (any(vapply(reference_data[display_given], dplyr::n_distinct, integer(1)) != 1)) {
+    stop("Prediction ghost lines require one reference category or bin per conditioning variable.",
+         call.=FALSE)
+  }
+  # Match the legacy ghost's duplicate-x aggregation, using only predictions
+  # already calculated by the comparison's chosen prediction method.
+  grouped = dplyr::group_by(reference_data, .data$model, .data[[axis[1]]])
+  centers = dplyr::summarise(grouped, prediction=mean(.data$prediction), .groups="drop")
+  fitted = data.frame(x=centers[[axis[1]]], y=centers$prediction, group=centers$model)
+  coordinates = flexplot_ghost_coordinates(fitted, reference_data)
+  axes = tail(make.unique(c(names(reference_data), ".ghost_x", ".ghost_y")), 2)
+  names(coordinates)[1:2] = axes
+  group = names(coordinates)[3]
+
+  # Give ghosts explicit destination facets so they cannot cover the ordinary
+  # prediction in the reference panel. Use full data, independently of sampling.
+  panels = expand.grid(lapply(data[display_given], unique), KEEP.OUT.ATTRS=FALSE,
+                       stringsAsFactors=FALSE)
+  is_reference = rep(TRUE, nrow(panels))
+  for (variable in display_given) {
+    is_reference = is_reference &
+      as.character(panels[[variable]]) == as.character(reference_data[[variable]][1])
+  }
+  panels = panels[!is_reference, , drop=FALSE]
+  coordinates = merge(coordinates, panels, by=NULL, sort=FALSE)
+  attr(coordinates, "ghost_axes") = axes
+  attr(coordinates, "ghost_group") = group
+  coordinates
 }
 
 flexplot_ghost_categorical_data = function(reference_data, full_data, outcome, axis,

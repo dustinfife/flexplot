@@ -252,11 +252,16 @@ flexplot = function(formula, data=NULL, related=F,
     !use_magnet && !related && !identical(axis[1], "1")
   ghost_supported = is.null(ghost.line) ||
     (!is.na(given[1]) &&
-       is.null(prediction) &&
-       (is.numeric(data[[axis[1]]]) || categorical_ghost))
+       (is.numeric(data[[axis[1]]]) || (is.null(prediction) && categorical_ghost)))
   
   if (isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
       !plot.string) {
+
+    if (!is.null(ghost.line) && !is.null(prediction) &&
+        is.numeric(data[[axis[1]]]) && length(axis) > 1) {
+      stop("Prediction ghost lines with a second-axis grouping variable are not yet supported. ",
+           "Use a numeric x predictor without a second axis.", call.=FALSE)
+    }
     
     final = flexplot_render_object(
       data=data,
@@ -313,13 +318,15 @@ flexplot = function(formula, data=NULL, related=F,
       )
       
       reference_data = flexplot_ghost_reference_data(
-        data=data,
+        data=if (is.null(prediction)) data else prediction,
         given=given,
         ghost.reference=ghost.reference,
         axis=if (categorical_ghost) NULL else axis
       )
       
-      if (categorical_ghost) {
+      if (!is.null(prediction)) {
+        ghost_data = flexplot_ghost_prediction_data(reference_data, axis, given, data)
+      } else if (categorical_ghost) {
         ghost_data = flexplot_ghost_categorical_data(
           reference_data, data, outcome, axis, given, ghost.reference, spread, plot.type
         )
