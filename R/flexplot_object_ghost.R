@@ -92,7 +92,30 @@ flexplot_ghost_coordinates = function(fitted, reference_data) {
   fitted
 }
 
-flexplot_ghost_prediction_data = function(reference_data, axis, given, data) {
+flexplot_ghost_categorical_prediction = function(reference_data, axis, given, data,
+                                                 use_magnet, comparison) {
+  categories = dplyr::summarise(
+    dplyr::group_by(reference_data, .data$model),
+    n=dplyr::n_distinct(.data[[axis[1]]]), .groups="drop"
+  )
+  if (any(categories$n < 2)) {
+    stop("Categorical prediction ghost lines require at least two x categories for each model in the reference panel.",
+         call.=FALSE)
+  }
+  # Reuse the ordinary markers' dodge/slot calculation without fitting a model
+  # or evaluating predictions again. Explicit model groups retain curve identity.
+  point = flexplot_prediction_layer(reference_data, axis, data, use_magnet, given, comparison)[[1]]
+  point$mapping$group = ggplot2::aes(group=.data$model)$group
+  p = ggplot2::ggplot(data) + point +
+    ggplot2::scale_x_discrete(limits=flexplot_sampling_levels(data[[axis[1]]]))
+  fitted = ggplot2::ggplot_build(p)$data[[1]]
+  models = flexplot_sampling_levels(reference_data$model)
+  fitted$group = factor(models[fitted$group], levels=levels(reference_data$model))
+  fitted
+}
+
+flexplot_ghost_prediction_data = function(reference_data, axis, given, data,
+                                           use_magnet=FALSE, comparison=FALSE) {
   display_given = flexplot_magnet_display_given(reference_data, given)
   if (any(vapply(reference_data[display_given], dplyr::n_distinct, integer(1)) != 1)) {
     stop("Prediction ghost lines require one reference category or bin per conditioning variable.",
@@ -100,9 +123,14 @@ flexplot_ghost_prediction_data = function(reference_data, axis, given, data) {
   }
   # Match the legacy ghost's duplicate-x aggregation, using only predictions
   # already calculated by the comparison's chosen prediction method.
-  grouped = dplyr::group_by(reference_data, .data$model, .data[[axis[1]]])
-  centers = dplyr::summarise(grouped, prediction=mean(.data$prediction), .groups="drop")
-  fitted = data.frame(x=centers[[axis[1]]], y=centers$prediction, group=centers$model)
+  if (is.numeric(data[[axis[1]]])) {
+    grouped = dplyr::group_by(reference_data, .data$model, .data[[axis[1]]])
+    centers = dplyr::summarise(grouped, prediction=mean(.data$prediction), .groups="drop")
+    fitted = data.frame(x=centers[[axis[1]]], y=centers$prediction, group=centers$model)
+  } else {
+    fitted = flexplot_ghost_categorical_prediction(reference_data, axis, given, data,
+                                                   use_magnet, comparison)
+  }
   coordinates = flexplot_ghost_coordinates(fitted, reference_data)
   axes = tail(make.unique(c(names(reference_data), ".ghost_x", ".ghost_y")), 2)
   names(coordinates)[1:2] = axes

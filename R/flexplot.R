@@ -252,15 +252,20 @@ flexplot = function(formula, data=NULL, related=F,
     !use_magnet && !related && !identical(axis[1], "1")
   ghost_supported = is.null(ghost.line) ||
     (!is.na(given[1]) &&
-       (is.numeric(data[[axis[1]]]) || (is.null(prediction) && categorical_ghost)))
+       (is.numeric(data[[axis[1]]]) || !is.null(prediction) || categorical_ghost))
   
   if (isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
       !plot.string) {
 
-    if (!is.null(ghost.line) && !is.null(prediction) &&
-        is.numeric(data[[axis[1]]]) && length(axis) > 1) {
-      stop("Prediction ghost lines with a second-axis grouping variable are not yet supported. ",
-           "Use a numeric x predictor without a second axis.", call.=FALSE)
+    if (!is.null(ghost.line) && !is.null(prediction)) {
+      if (length(axis) > 1) {
+        stop("Prediction ghost lines with a second-axis grouping variable are not yet supported. ",
+             "Use one primary predictor without a second axis.", call.=FALSE)
+      }
+      if (is.na(given[1])) {
+        stop("Prediction ghost lines require a conditioning variable to identify reference and destination panels.",
+             call.=FALSE)
+      }
     }
     
     final = flexplot_render_object(
@@ -309,7 +314,7 @@ flexplot = function(formula, data=NULL, related=F,
       
       ghost.reference = create_ghost_reference(
         ghost.reference=ghost.reference,
-        data=data,
+        data=as.data.frame(data),
         bins=bins,
         breaks=breaks,
         given=given,
@@ -325,7 +330,8 @@ flexplot = function(formula, data=NULL, related=F,
       )
       
       if (!is.null(prediction)) {
-        ghost_data = flexplot_ghost_prediction_data(reference_data, axis, given, data)
+        ghost_data = flexplot_ghost_prediction_data(reference_data, axis, given, data,
+                                                   use_magnet, comparison_predictions)
       } else if (categorical_ghost) {
         ghost_data = flexplot_ghost_categorical_data(
           reference_data, data, outcome, axis, given, ghost.reference, spread, plot.type
