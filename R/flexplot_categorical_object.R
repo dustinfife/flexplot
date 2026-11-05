@@ -60,8 +60,14 @@ flexplot_categorical_object = function(data, outcome, axis, plot.type="histogram
   } else {
     mapping = ggplot2::aes(
       x=.data[[x]], y=.data[[outcome]],
-      color=.data[[group]], shape=.data[[group]], linetype=.data[[group]]
+      color=.data[[group]]
     )
+    if (length(unique(data[[group]])) > 6) {
+      flexplot_high_cardinality_message()
+    } else {
+      mapping$shape = mapping$colour
+      mapping$linetype = mapping$colour
+    }
     points = ggplot2::geom_point(
       data=points_data, alpha=raw.alph.func(raw.data, alpha),
       position=position_jitterdodged(

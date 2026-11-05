@@ -13,7 +13,11 @@
 ##'  available at https://psyarxiv.com/kh9c3/)
 ##' @param formula A formula of the form  y~x + a | b + z
 ##' @param data The dataset
-##' @param related Are variables related? If so, it will show a plot of difference scores, rather than the raw scores (for a related t test). 
+##' @param related Are variables related? If so, it will show a plot of difference scores, rather than the raw scores (for a related t test).
+##'   Observations are paired by their position within each of the two conditions,
+##'   not by a subject identifier. Arrange the data so corresponding observations
+##'   appear in the same order within their respective conditions before using
+##'   \code{related=TRUE}.
 ##' @param bins The preferred number of bins used when putting quantitative variables into categories. A list can be used if different amounts are wanted for different variables. However, sometimes flexplot cannot 
 ##'		have that number of bins, but it will try to make it work. 
 ##' @param labels A list of the same length as bins

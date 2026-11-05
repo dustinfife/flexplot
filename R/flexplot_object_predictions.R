@@ -84,7 +84,7 @@ flexplot_magnet_prediction_layer = function(prediction, axis, data, given=NA) {
     mapping$colour = ggplot2::aes(colour=.data[[group]])$colour
     mapping$group = mapping$colour
     # Use the same slots as the internal fits, independently of model shape.
-    position = flexplot_magnet_summary_position(data, group, given)
+    position = flexplot_magnet_summary_position(data, group)
   }
 
   models = levels(factor(prediction$model))

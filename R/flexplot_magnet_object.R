@@ -54,13 +54,9 @@ flexplot_magnet_conditioned_position = function(group, jitter=c(0, 0)) {
   )
 }
 
-flexplot_magnet_summary_position = function(data, group, given) {
+flexplot_magnet_summary_position = function(data, group) {
   if (is.null(group)) return(ggplot2::position_identity())
-  facet_vars = given[!is.na(given) & nzchar(given)]
-  if (any(vapply(data[facet_vars], is.numeric, logical(1)))) {
-    return(flexplot_magnet_conditioned_position(data[[group]]))
-  }
-  ggplot2::position_dodge(width=.5)
+  flexplot_magnet_conditioned_position(data[[group]])
 }
 
 flexplot_magnet_object = function(data, outcome, axis, given=NA,
@@ -180,17 +176,9 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
       group=.data[[group]]
     )
     
-    point_position = ggplot2::position_jitterdodge(
-      jitter.width=jitter[1],
-      jitter.height=jitter[2],
-      dodge.width=.5
-    )
-    
-    summary_position = flexplot_magnet_summary_position(data, group, given)
-    if (any(vapply(data[facet_vars], is.numeric, logical(1)))) {
-      # Reserve the full-data group slots even when sampling omits a group.
-      point_position = flexplot_magnet_conditioned_position(data[[group]], jitter)
-    }
+    # Reserve full-data group slots in every panel, including after sampling.
+    point_position = flexplot_magnet_conditioned_position(data[[group]], jitter)
+    summary_position = flexplot_magnet_summary_position(data, group)
   }
   
   # Keep blue fitted points when no second-axis grouping is present.
@@ -250,5 +238,15 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
       )
     )
   
+  if (!is.null(group)) {
+    colour_scale = if (is.ordered(data[[group]])) {
+      ggplot2::scale_colour_ordinal(limits=point_position$group_levels)
+    } else {
+      ggplot2::scale_colour_discrete(limits=point_position$group_levels)
+    }
+    p = p + colour_scale +
+      ggplot2::scale_x_discrete(limits=levels(droplevels(data[[xvar]])))
+  }
+
   return(p)
 }

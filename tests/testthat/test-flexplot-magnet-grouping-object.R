@@ -387,9 +387,7 @@ expect_magnet_model_overlay = function(p, models, display_group=NULL, facets=cha
   }
   expect_false(anyNA(match(overlay_keys, fitted_keys)))
   expect_equal(as.numeric(overlay$x), as.numeric(fitted$x[match(overlay_keys, fitted_keys)]))
-  if (nrow(raw) == sum(p$layers[[4]]$data$n_total)) {
-    expect_equal(as.numeric(raw$x), as.numeric(fitted$x[match(raw_keys, fitted_keys)]))
-  }
+  expect_equal(as.numeric(raw$x), as.numeric(fitted$x[match(raw_keys, fitted_keys)]))
   expect_equal(length(unique(overlay$shape)), length(models))
   expect_false(any(overlay$shape %in% c(1, 19)))
   expect_equal(shape_scale$name, "Model")
@@ -467,5 +465,134 @@ test_that("ungrouped magnet model overlays retain supplied probabilities and pan
       if ("b" %in% all.vars(formula)) "b" else character()
     models = stats::setNames(list(m), levels(p$layers[[5]]$data$model))
     expect_magnet_model_overlay(p, models, facets=facets)
+  }
+})
+
+expect_magnet_stable_slots = function(p, group) {
+  built = ggplot2::ggplot_build(p)
+  group_levels = levels(droplevels(p$layers[[4]]$data[[group]]))
+  colors = built$plot$scales$get_scales("colour")
+  expect_identical(colors$get_limits(), group_levels)
+  expect_identical(built$layout$panel_scales_x[[1]]$get_limits(),
+                   levels(droplevels(p$layers[[4]]$data$a)))
+  layout = built$layout$layout
+  facets = intersect(names(layout), names(p$layers[[4]]$data))
+
+  for (layer in 2:length(p$layers)) {
+    source = p$layers[[layer]]$data
+    drawn = built$data[[layer]]
+    expect_equal(nrow(drawn), nrow(source))
+    if (nrow(source) == 0) next
+    index = match(as.character(source[[group]]), group_levels)
+    offsets = .5 * ((index - .5) / length(group_levels) - .5)
+    expected_x = as.numeric(source$a) + offsets
+    panel_rows = match(do.call(paste, source[facets]), do.call(paste, layout[facets]))
+    expected_keys = paste(layout$PANEL[panel_rows], as.numeric(source$a),
+                           colors$map(source[[group]]))
+    drawn_keys = paste(drawn$PANEL, round(drawn$x), drawn$colour)
+    expect_equal(sort(drawn_keys), sort(expected_keys))
+    rows = match(drawn_keys, expected_keys)
+    expect_false(anyNA(rows))
+    expect_equal(as.numeric(drawn$x), expected_x[rows])
+    expect_identical(rlang::as_label(p$layers[[layer]]$mapping$group), group)
+    expect_equal(length(unique(drawn$group)), length(unique(source[[group]])))
+    for (id in unique(drawn$group)) {
+      expect_equal(length(unique(drawn$colour[drawn$group == id])), 1)
+    }
+  }
+  invisible(built)
+}
+
+test_that("sampled conditioned magnet layers retain full-data group slots", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  withr::local_seed(123)
+
+  for (ordered_group in c(FALSE, TRUE)) {
+    d = small
+    d$row_id = seq_len(nrow(d))
+    d$a = factor(d$a, levels=c("b", "a"), ordered=ordered_group)
+    d$b = factor(d$b, levels=c("z", "x", "y"), ordered=ordered_group)
+    d$panel = factor(ifelse(d$z < 0, "low", "high"), levels=c("high", "low"))
+    for (group in c("b", "x")) {
+      formula = stats::as.formula(paste("y_bin ~ a +", group, "| panel"))
+      full = flexplot(formula, data=d, jitter=FALSE)
+      # Fix the sample independently of plot construction and ggplot RNG use.
+      set.seed(123)
+      sampled_ids = sample(seq_len(nrow(d)), 8)
+      set.seed(123)
+      p = flexplot(formula, data=d, sample=8, jitter=FALSE)
+      display_group = if (group == "x") "x_binned" else "b"
+      built = expect_magnet_stable_slots(p, display_group)
+      expect_magnet_stable_slots(full, display_group)
+      raw = p$layers[[2]]$data
+      all_raw = full$layers[[2]]$data
+      expect_identical(raw$row_id, sampled_ids)
+      expect_equal(raw$y_scaled, all_raw$y_scaled[match(raw$row_id, all_raw$row_id)])
+      expect_identical(levels(raw$a), levels(d$a))
+      expect_identical(levels(raw[[display_group]]), levels(all_raw[[display_group]]))
+      present = table(raw$panel, raw[[display_group]])
+      expect_true(any(present == 0))
+      expect_equal(p$layers[[3]]$data, full$layers[[3]]$data)
+      expect_equal(p$layers[[4]]$data, full$layers[[4]]$data)
+      expect_equal(sum(p$layers[[4]]$data$n_total), nrow(d))
+      expect_equal(sort(built$data[[2]]$y), sort(raw$y_scaled))
+
+      model_formula = stats::reformulate(c("a", group, "panel"), response="y_bin")
+      m = stats::glm(model_formula, data=d, family=stats::binomial())
+      set.seed(123)
+      overlay = compare.fits(formula, data=d, model1=m, sample=8, jitter=FALSE)
+      expect_magnet_stable_slots(overlay, display_group)
+      prediction = overlay$layers[[5]]$data
+      expect_equal(prediction$prediction,
+                   unname(stats::predict(m, newdata=prediction, type="response")))
+      expect_identical(overlay$layers[[2]]$data$row_id, sampled_ids)
+      expect_equal(overlay$layers[[3]]$data, full$layers[[3]]$data)
+      expect_equal(overlay$layers[[4]]$data, full$layers[[4]]$data)
+      complete_overlay = compare.fits(formula, data=d, model1=m, jitter=FALSE)
+      expect_equal(overlay$layers[[5]]$data, complete_overlay$layers[[5]]$data)
+    }
+  }
+})
+
+test_that("categorical panels retain numeric magnet slots for sparse categories", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  withr::local_seed(123)
+
+  # This also reproduces the original sample=8, seed=123 offset failure.
+  m = stats::glm(y_bin ~ a + x + b, data=small, family=stats::binomial())
+  p = compare.fits(y_bin ~ a + x | b, data=small, model1=m,
+                   sample=8, jitter=FALSE)
+  built = expect_magnet_stable_slots(p, "x_binned")
+  raw = p$layers[[2]]$data
+  expect_true(any(table(raw$b, raw$x_binned) == 0))
+  full = compare.fits(y_bin ~ a + x | b, data=small, model1=m, jitter=FALSE)
+  fitted = full$layers[[3]]$data
+  expect_true(any(table(fitted$b, fitted$a, fitted$x_binned) == 0))
+  expect_magnet_stable_slots(full, "x_binned")
+  for (layer in 3:5) expect_equal(p$layers[[layer]]$data, full$layers[[layer]]$data)
+  expect_equal(nrow(built$data[[2]]), 8)
+})
+
+test_that("empty and single-point magnet samples preserve full-data slots and colors", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  withr::local_seed(123)
+
+  d = small
+  d$b = factor(d$b, levels=c("z", "x", "y"))
+  d$panel = factor(ifelse(d$z < 0, "low", "high"))
+  for (formula in list(y_bin ~ a + b | panel, y_bin ~ a + x | b)) {
+    group = if ("panel" %in% all.vars(formula)) "b" else "x_binned"
+    full = flexplot(formula, data=d, jitter=FALSE)
+    full_built = ggplot2::ggplot_build(full)
+    for (sample_size in c(0, 1)) {
+      set.seed(123)
+      p = flexplot(formula, data=d, jitter=FALSE, sample=sample_size)
+      built = expect_magnet_stable_slots(p, group)
+      expect_equal(nrow(built$data[[2]]), sample_size)
+      for (layer in 3:4) {
+        expect_equal(p$layers[[layer]]$data, full$layers[[layer]]$data)
+        expect_equal(built$data[[layer]], full_built$data[[layer]])
+      }
+    }
   }
 })

@@ -11,7 +11,7 @@ flexplot(
   bins = 3,
   labels = NULL,
   breaks = NULL,
-  method = "loess",
+  method = NULL,
   se = NULL,
   ghost.line = NULL,
   ghost.reference = NULL,
@@ -35,7 +35,11 @@ flexplot(
 
 \item{data}{The dataset}
 
-\item{related}{Are variables related? If so, it will show a plot of difference scores, rather than the raw scores (for a related t test).}
+\item{related}{Are variables related? If so, it will show a plot of difference scores, rather than the raw scores (for a related t test).
+Observations are paired by their position within each of the two conditions,
+not by a subject identifier. Arrange the data so corresponding observations
+appear in the same order within their respective conditions before using
+\code{related=TRUE}.}
 
 \item{bins}{The preferred number of bins used when putting quantitative variables into categories. A list can be used if different amounts are wanted for different variables. However, sometimes flexplot cannot 
 have that number of bins, but it will try to make it work.}
