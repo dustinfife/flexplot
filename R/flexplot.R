@@ -248,10 +248,12 @@ flexplot = function(formula, data=NULL, related=F,
     )
   }
   
+  categorical_ghost = !is.numeric(data[[axis[1]]]) && is.numeric(data[[outcome]]) &&
+    !use_magnet && !related && !identical(axis[1], "1")
   ghost_supported = is.null(ghost.line) ||
     (!is.na(given[1]) &&
        is.null(prediction) &&
-       is.numeric(data[[axis[1]]]))
+       (is.numeric(data[[axis[1]]]) || categorical_ghost))
   
   if (isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
       !plot.string) {
@@ -298,10 +300,7 @@ flexplot = function(formula, data=NULL, related=F,
 
     
     # Add ghost-line overlay
-    if (!is.null(ghost.line) &&
-        !is.na(given[1]) &&
-        is.null(prediction) &&
-        is.numeric(data[[axis[1]]])) {
+    if (!is.null(ghost.line) && ghost_supported) {
       
       ghost.reference = create_ghost_reference(
         ghost.reference=ghost.reference,
@@ -317,20 +316,26 @@ flexplot = function(formula, data=NULL, related=F,
         data=data,
         given=given,
         ghost.reference=ghost.reference,
-        axis=axis
+        axis=if (categorical_ghost) NULL else axis
       )
       
-      ghost_data = flexplot_ghost_smooth_data(
-        reference_data=reference_data,
-        outcome=outcome,
-        axis=axis,
-        given=given,
-        method=method,
-        plot.type=plot.type,
-        bins=bins,
-        spread=spread,
-        jitter=jitter
-      )
+      if (categorical_ghost) {
+        ghost_data = flexplot_ghost_categorical_data(
+          reference_data, data, outcome, axis, given, ghost.reference, spread, plot.type
+        )
+      } else {
+        ghost_data = flexplot_ghost_smooth_data(
+          reference_data=reference_data,
+          outcome=outcome,
+          axis=axis,
+          given=given,
+          method=method,
+          plot.type=plot.type,
+          bins=bins,
+          spread=spread,
+          jitter=jitter
+        )
+      }
       
       reference_groups = NULL
       if (!is.null(final$mapping$linetype)) {

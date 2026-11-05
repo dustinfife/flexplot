@@ -13,8 +13,10 @@ flexplot_ghost_fit_layer = function(p) {
 }
 
 flexplot_ghost_layer = function(d_smooth, ghost.line, reference_groups=NULL) {
-  group_var = setdiff(names(d_smooth), c("x", "y"))
-  mapping = ggplot2::aes(x=.data$x, y=.data$y, group=.data[[group_var]])
+  axes = attr(d_smooth, "ghost_axes")
+  if (is.null(axes)) axes = c("x", "y")
+  group_var = setdiff(names(d_smooth), axes)
+  mapping = ggplot2::aes(x=.data[[axes[1]]], y=.data[[axes[2]]], group=.data[[group_var]])
   if (!is.null(reference_groups)) {
     # Smooth group IDs follow the observed group order in the reference data.
     # Map back to category values so selected references use the full plot's scale.
@@ -80,7 +82,52 @@ flexplot_ghost_reference_data = function(data, given,
   k
 }
 
+flexplot_ghost_coordinates = function(fitted, reference_data) {
+  fitted = fitted[, c("x", "y", "group"), drop=FALSE]
+  group_names = make.unique(c(names(reference_data), ".ghost_group"))
+  names(fitted)[3] = group_names[length(group_names)]
+  fitted
+}
 
+flexplot_ghost_categorical_data = function(reference_data, full_data, outcome, axis,
+                                            given, ghost.reference, spread, plot.type) {
+  if (plot.type %in% c("boxplot", "violin", "line")) {
+    stop("Categorical ghost summaries require a summary plot, not plot.type='",
+         plot.type, "'.", call.=FALSE)
+  }
+  if (any(lengths(ghost.reference[given]) != 1)) {
+    stop("Categorical ghost summaries require one reference category or bin per conditioning variable.",
+         call.=FALSE)
+  }
+  display_axis = flexplot_object_axis(full_data, axis)
+  x = display_axis[1]
+  group = if (length(display_axis) > 1) display_axis[2] else NULL
+  mapping = ggplot2::aes(x=.data[[x]], y=.data[[outcome]], group=1)
+  if (!is.null(group)) mapping$group = ggplot2::aes(group=.data[[group]])$group
+
+  # Legacy ghosts use the summary-point centers and their dodge positions.
+  # Extract just that layer, reusing the ordinary summary statistic unchanged.
+  p = ggplot2::ggplot(reference_data, mapping) +
+    flexplot_categorical_summary_layers(spread, group)[[1]] +
+    ggplot2::scale_x_discrete(limits=flexplot_sampling_levels(full_data[[x]]))
+  fitted = ggplot2::ggplot_build(p)$data[[1]]
+
+  # Select second-axis references after positioning, so a selected group keeps
+  # its original reference-panel slot and group ID rather than being recentered.
+  if (!is.null(group) && !is.null(ghost.reference[[axis[2]]])) {
+    groups = flexplot_sampling_levels(reference_data[[group]])
+    keep = as.character(groups[fitted$group]) %in% as.character(ghost.reference[[axis[2]]])
+    fitted = fitted[keep, , drop=FALSE]
+    if (!nrow(fitted)) stop("No observations match the ghost reference.", call.=FALSE)
+  }
+  coordinates = flexplot_ghost_coordinates(fitted, reference_data)
+  # A conditioning variable may itself be named x or y. Keep coordinate fields
+  # distinct so ggplot repeats the reference instead of treating it as facet data.
+  axes = tail(make.unique(c(names(reference_data), ".ghost_x", ".ghost_y")), 2)
+  names(coordinates)[1:2] = axes
+  attr(coordinates, "ghost_axes") = axes
+  coordinates
+}
 
 flexplot_ghost_smooth_data = function(reference_data,
                                       outcome, axis, given,
@@ -112,10 +159,7 @@ flexplot_ghost_smooth_data = function(reference_data,
   
   d_smooth = ggplot2::ggplot_build(p)$data[[fit_layers]]
   
-  d_smooth = d_smooth[, c("x", "y", "group"), drop=FALSE]
   # Avoid treating fitted identifiers as facet values when a source column is
   # named group (or already uses our internal grouping name).
-  group_names = make.unique(c(names(reference_data), ".ghost_group"))
-  names(d_smooth)[3] = group_names[length(group_names)]
-  d_smooth
+  flexplot_ghost_coordinates(d_smooth, reference_data)
 }
