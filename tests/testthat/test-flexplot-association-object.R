@@ -140,3 +140,105 @@ test_that("association second-axis requests are explicitly unsupported", {
   expect_error(flexplot(b ~ a + g, data=d),
                 "Association plots with a second-axis predictor are not supported", fixed=TRUE)
 })
+
+test_that("association tables exclude unused outcomes, predictors, and conditioning levels", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  for (ordered in c(FALSE, TRUE)) {
+    for (unused in list("b", "a", c("a", "b", "g"))) {
+      d = small
+      d$a = factor(d$a, levels=c("b", "a"), ordered=ordered)
+      d$b = factor(d$b, levels=c("z", "x", "y"), ordered=ordered)
+      d$g = factor(d$y_bin, levels=c(1, 0), ordered=ordered)
+      for (variable in unused) {
+        d[[variable]] = factor(d[[variable]],
+                                levels=append(levels(d[[variable]]), "unused", after=1),
+                                ordered=ordered)
+      }
+      formula = if ("g" %in% unused) b ~ a | g else b ~ a
+      variables = if ("g" %in% unused) c("a", "g", "b") else c("a", "b")
+      clean = droplevels(d)
+      expected = association_expected_cells(clean, variables)
+      built_plots = list()
+      for (native in c(TRUE, FALSE)) {
+        options(flexplot.object_renderer=native)
+        expect_no_warning({ p = flexplot(formula, data=d) })
+        expect_no_warning({ built = ggplot2::ggplot_build(p) })
+        expect_no_warning(ggplot2::ggplotGrob(p))
+        expect_equal(nrow(p$data), nrow(expected))
+        expect_equal(p$data$Proportion, expected$Proportion, tolerance=1e-7)
+        expect_equal(built$layout$panel_scales_x[[1]]$get_limits(), levels(clean$a))
+        expect_equal(built$plot$scales$get_scales("fill")$get_limits(), levels(clean$b))
+        for (variable in variables) {
+          expect_identical(levels(p$data[[variable]]), levels(clean[[variable]]))
+          expect_false(any(as.character(p$data[[variable]]) == "unused"))
+        }
+        if ("g" %in% unused) {
+          expect_equal(as.character(built$layout$layout$g), levels(clean$g))
+        }
+        expect_equal(nrow(built$data[[1]]), nrow(expected))
+        built_plots[[as.character(native)]] = built$data[[1]]
+      }
+      columns = c("x", "y", "fill", "group", "PANEL")
+      expect_equal(built_plots[["TRUE"]][columns], built_plots[["FALSE"]][columns])
+    }
+  }
+})
+
+test_that("dropping unused association levels retains legitimate zero cells", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  d = small[!(small$a == "a" & small$b == "x"), ]
+  d$a = factor(d$a, levels=c("b", "unused", "a"))
+  d$b = factor(d$b, levels=c("z", "unused", "x", "y"))
+  expected = association_expected_cells(droplevels(d), c("a", "b"))
+  expect_equal(expected$Freq[expected$a == "a" & expected$b == "x"], 0)
+  for (native in c(TRUE, FALSE)) {
+    options(flexplot.object_renderer=native)
+    expect_no_warning({ p = flexplot(b ~ a, data=d) })
+    expect_no_warning({ built = ggplot2::ggplot_build(p) })
+    expect_equal(nrow(p$data), 6)
+    expect_equal(p$data$Proportion, expected$Proportion, tolerance=1e-7)
+    expect_equal(p$data$Proportion[p$data$a == "a" & p$data$b == "x"], -1)
+    expect_true(all(is.finite(built$data[[1]]$y)))
+    expect_equal(nrow(built$data[[1]]), 6)
+  }
+})
+
+test_that("three observed outcome categories remain association plots", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  d = small
+  d$category = factor(as.integer(d$b) - 1, levels=c(2, 1, 3, 0), ordered=TRUE)
+  expect_false(is_binary(d$category))
+  expect_identical(factor.to.logistic(d, "category", method="logistic"), d)
+  expected = association_expected_cells(droplevels(d), c("a", "category"))
+  for (native in c(TRUE, FALSE)) {
+    options(flexplot.object_renderer=native)
+    p = flexplot(category ~ a, data=d)
+    built = ggplot2::ggplot_build(p)
+    expect_length(p$layers, 1)
+    expect_s3_class(p$layers[[1]]$geom, "GeomBar")
+    expect_equal(levels(p$data$category), c("2", "1", "0"))
+    expect_equal(p$data$Proportion, expected$Proportion, tolerance=1e-7)
+    expect_equal(length(unique(built$data[[1]]$fill)), 3)
+  }
+})
+
+test_that("association tables handle a single observed predictor or conditioning level", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  d = small
+  d$g = factor(rep("observed", nrow(d)), levels=c("unused", "observed"))
+  one_x = d[d$a == "a", ]
+  for (single_x in c(FALSE, TRUE)) {
+    original = if (single_x) one_x else d
+    expected = association_expected_cells(droplevels(original), c("a", "g", "b"))
+    for (native in c(TRUE, FALSE)) {
+      options(flexplot.object_renderer=native)
+      expect_no_warning({ p = flexplot(b ~ a | g, data=original) })
+      expect_no_warning({ built = ggplot2::ggplot_build(p) })
+      expect_equal(nrow(p$data), nrow(expected))
+      expect_equal(p$data$Proportion, expected$Proportion, tolerance=1e-7)
+      expect_equal(as.character(built$layout$layout$g), "observed")
+      expect_equal(nrow(built$data[[1]]), nrow(expected))
+      if (single_x) expect_equal(p$data$Proportion, rep(0, 3), tolerance=1e-7)
+    }
+  }
+})

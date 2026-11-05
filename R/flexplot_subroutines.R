@@ -138,8 +138,11 @@ modify_association_plot_data = function(data, formula, outcome) {
   
   #maybe best to do log linear model (poisson?)
   if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]])) {
-    m = as.data.frame(table(data[,c(predictors, outcome)])); names(m)[1:(ncol(m)-1)] = c(predictors, outcome)
-    loglin = glm(make.formula("Freq", c(predictors, outcome)), data=m, family=poisson)
+    association_data = droplevels(data[,c(predictors, outcome), drop=FALSE])
+    m = as.data.frame(table(association_data)); names(m)[1:(ncol(m)-1)] = c(predictors, outcome)
+    # Constant margins add no information and cannot receive factor contrasts.
+    varying = names(association_data)[vapply(association_data, dplyr::n_distinct, integer(1)) > 1]
+    loglin = glm(make.formula("Freq", varying), data=m, family=poisson)
     predicted = predict(loglin, type="response")
     final.pred = (m$Freq - predicted)/predicted
     m$Freq = final.pred
@@ -535,7 +538,8 @@ convert_if_less_than_five = function(data, col, check_pred = FALSE, pred = NULL)
 
 
 flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
-                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins, use_magnet=FALSE  # arguments passed from flexplot
+                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins, use_magnet=FALSE,
+                                    magnet_labels=NULL  # arguments passed from flexplot
                                    ){
 
   jitter = match_jitter_categorical(jitter)
@@ -607,10 +611,9 @@ flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, pr
     
     p = paste0(
       p,
-      ' + scale_y_continuous(
-    breaks=c(0, .25, .5, .75, 1),
-    limits=c(0, 1)
-  ) + labs(y=outcome)'
+      ' + flexplot_magnet_y_scale(',
+      paste(deparse(magnet_labels), collapse=" "),
+      ') + labs(y=outcome)'
     )
     
     return(list(

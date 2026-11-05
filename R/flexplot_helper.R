@@ -7,6 +7,7 @@ factor.to.logistic = function(data, outcome, method=NULL, labels=F){
   if (labels) return(unique(data[,outcome]))
   if (is.numeric(data[,outcome])) return(data)
   if (method != "logistic") return(data)
+  if (is.factor(data[[outcome]])) data[[outcome]] = droplevels(data[[outcome]])
   # at this point it's categorical, has two levels, but doesn't necessarily have "logistic" as a method  
   
   # if it's an ordered factor, make the second level the referent level

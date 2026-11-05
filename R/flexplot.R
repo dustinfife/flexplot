@@ -174,7 +174,7 @@ flexplot = function(formula, data=NULL, related=F,
   logistic_labels = NULL
   
   if (identical(method, "logistic") && is.factor(data[[outcome]])) {
-    logistic_labels = levels(data[[outcome]])
+    logistic_labels = levels(droplevels(data[[outcome]]))
   }
   
   ### make modifications to the data
@@ -273,7 +273,8 @@ flexplot = function(formula, data=NULL, related=F,
       alpha = alpha, 
       sample = sample, 
       raw.data = raw.data,
-      magnet_summary=!comparison_predictions
+      magnet_summary=!comparison_predictions,
+      magnet_labels=logistic_labels
     )
     
     facet = flexplot_panel_variables_object(given, break.me)
@@ -344,7 +345,7 @@ flexplot = function(formula, data=NULL, related=F,
     }
     
     
-    if (!is.null(logistic_labels)) {
+    if (!use_magnet && !is.null(logistic_labels)) {
       final = final + ggplot2::scale_y_continuous(
         breaks=c(0, 1),
         labels=logistic_labels
@@ -362,7 +363,8 @@ flexplot = function(formula, data=NULL, related=F,
 	### PLOT UNIVARIATE PLOTS
   bivariate = flexplot_bivariate_plot(formula = NULL, data=data, prediction = prediction, outcome=outcome, predictors=predictors, axis=axis,
                                                     related=related, alpha=alpha, jitter=jitter, suppress_smooth=suppress_smooth, 
-                                                    method=method, spread=spread, plot.type=plot.type, bins=bins, use_magnet = use_magnet)
+                                                    method=method, spread=spread, plot.type=plot.type, bins=bins, use_magnet = use_magnet,
+                                                    magnet_labels=logistic_labels)
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
@@ -407,7 +409,7 @@ flexplot = function(formula, data=NULL, related=F,
 	}
 
 	# convert labels for Y axis for logistic
-	if (!is.null(logistic_labels) &&
+	if (!use_magnet && !is.null(logistic_labels) &&
 	    !is.numeric(logistic_labels)) {
 
 	  ## sort based on the probabilities

@@ -1,3 +1,18 @@
+flexplot_magnet_y_limits = function(limits) {
+  range(c(0, 1, limits), na.rm=TRUE)
+}
+
+flexplot_magnet_y_scale = function(labels=NULL) {
+  if (is.null(labels)) {
+    return(ggplot2::scale_y_continuous(
+      breaks=c(0, .25, .5, .75, 1), limits=flexplot_magnet_y_limits
+    ))
+  }
+  ggplot2::scale_y_continuous(
+    breaks=c(0, 1), labels=labels, limits=flexplot_magnet_y_limits
+  )
+}
+
 flexplot_magnet_jitter = function(jitter) {
   if (is.null(jitter) || isTRUE(jitter)) return(c(.05, 0))
   if (is.numeric(jitter) && length(jitter) == 2) return(jitter)
@@ -62,7 +77,7 @@ flexplot_magnet_summary_position = function(data, group) {
 flexplot_magnet_object = function(data, outcome, axis, given=NA,
                                   jitter=TRUE, alpha=0.6,
                                   dot_size=2, raw.data=TRUE, sample=Inf,
-                                  show_fitted=TRUE) {
+                                  show_fitted=TRUE, outcome_labels=NULL) {
   
   xvar = axis[1]
   display_axis = flexplot_object_axis(data, axis)
@@ -224,9 +239,7 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
       position=summary_position,
       show.legend=FALSE
     ) +
-    ggplot2::scale_y_continuous(
-      breaks=c(0, 0.25, 0.5, 0.75, 1)
-    ) +
+    flexplot_magnet_y_scale(outcome_labels) +
     ggplot2::labs(
       title="Magnet Plot",
       x=xvar,

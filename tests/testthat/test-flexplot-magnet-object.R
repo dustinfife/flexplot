@@ -351,3 +351,101 @@ test_that("native magnet panel positions use the same factor order for every lay
     expect_equal(as.numeric(points$x), as.numeric(labels$x[match(point_keys, label_keys)]))
   }
 })
+test_that("binary magnets use observed factor levels in their original relative order", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  for (ordered in c(FALSE, TRUE)) {
+    for (declared in list(c(0, 1, 2), c(2, 1, 3, 0, 4))) {
+      d = small
+      d$y_bin = factor(d$y_bin, levels=declared, ordered=ordered)
+      observed = as.character(declared[declared %in% c(0, 1)])
+      expected_code = match(as.character(d$y_bin), observed) - 1
+      expect_true(is_binary(d$y_bin))
+      converted = factor.to.logistic(d, "y_bin", method="logistic")
+      expect_equal(converted$y_bin, expected_code)
+      model = stats::glm(y_bin ~ a, data=d, family=stats::binomial())
+      for (native in c(TRUE, FALSE)) {
+        options(flexplot.object_renderer=native)
+        expect_no_warning({ p = suppressMessages(flexplot(y_bin ~ a, data=d, jitter=FALSE)) })
+        expect_no_warning({ built = ggplot2::ggplot_build(p) })
+        expect_no_warning(ggplot2::ggplotGrob(p))
+        raw = if (native) p$layers[[2]]$data else p$data
+        expect_equal(raw$y_bin, expected_code)
+        expect_equal(nrow(built$data[[2]]), nrow(d))
+        expect_true(all(built$data[[2]]$shape == 1))
+        expect_true(all(built$data[[3]]$colour == "blue"))
+        expect_equal(p$scales$get_scales("y")$labels, observed)
+        xlevels = built$layout$panel_scales_x[[1]]$get_limits()
+        newdata = data.frame(a=factor(xlevels, levels=levels(d$a)))
+        expected = stats::predict(model, newdata=newdata, type="response")
+        expect_equal(built$data[[3]]$y,
+                       unname(expected[as.integer(built$data[[3]]$x)]), tolerance=1e-7)
+        counts = table(d$a)
+        max_n = max(counts)
+        stack = ave(seq_len(nrow(d)), d$a, expected_code, FUN=seq_along)
+        expected_y = ifelse(expected_code == 0, (stack - .5) / (2 * max_n),
+                             1 - (stack - .5) / (2 * max_n))
+        expect_equal(raw$y_scaled, expected_y)
+        if (native) {
+          expect_equal(sum(p$layers[[4]]$data$n_total), nrow(d))
+          expect_equal(nrow(built$data[[4]]), nlevels(d$a))
+        }
+      }
+    }
+  }
+})
+magnet_axis_grob_labels = function(grob) {
+  labels = if (inherits(grob, "text")) as.character(grob$label) else character()
+  for (child in grob$grobs) labels = c(labels, magnet_axis_grob_labels(child))
+  for (child in grob$children) labels = c(labels, magnet_axis_grob_labels(child))
+  labels
+}
+
+test_that("magnet outcome labels use one scale with both probability endpoints visible", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  withr::local_seed(123)
+  dz = data.frame(
+    a=factor(c("A", "A", "B", "B")),
+    b=factor(c("X", "X", "X", "Y"))
+  )
+  for (ordered in c(FALSE, TRUE)) {
+    for (declared in list(c("X", "Y"), c("Y", "unused", "X"))) {
+      d = dz
+      d$b = factor(d$b, levels=declared, ordered=ordered)
+      labels = declared[declared %in% c("X", "Y")]
+      coded = d
+      coded$b = match(as.character(d$b), labels) - 1
+      for (native in c(TRUE, FALSE)) {
+        options(flexplot.object_renderer=native)
+        expect_no_message({ p = flexplot(b ~ a, data=d, jitter=FALSE) })
+        expect_no_warning({ built = ggplot2::ggplot_build(p) })
+        expect_no_warning({ grob = ggplot2::ggplotGrob(p) })
+        y = built$layout$panel_params[[1]]$y
+        expect_equal(y$get_breaks(), c(0, 1))
+        expect_equal(y$get_labels(), labels)
+        drawn_labels = character()
+        for (axis in grob$grobs[grepl("^axis-l", grob$layout$name)]) {
+          drawn_labels = c(drawn_labels, magnet_axis_grob_labels(axis))
+        }
+        expect_true(all(labels %in% drawn_labels))
+        y_scales = 0L
+        for (scale in p$scales$scales) {
+          if ("y" %in% scale$aesthetics) y_scales = y_scales + 1L
+        }
+        expect_equal(y_scales, 1L)
+        expect_equal(nrow(built$data[[2]]), 4)
+        expect_true(all(built$data[[2]]$shape == 1))
+        expect_equal(built$data[[1]]$yintercept, .5)
+        expect_true(all(built$data[[1]]$linetype == "dashed"))
+
+        # Outcome labels must not change coding, stacks, fits, or x ordering.
+        baseline = flexplot(b ~ a, data=coded, jitter=FALSE)
+        reference = ggplot2::ggplot_build(baseline)
+        expect_equal(built$layout$panel_scales_x[[1]]$get_limits(),
+                       reference$layout$panel_scales_x[[1]]$get_limits())
+        for (layer in c(2, 3)) {
+          expect_equal(built$data[[layer]]$y, reference$data[[layer]]$y)
+        }
+      }
+    }
+  }
+})
