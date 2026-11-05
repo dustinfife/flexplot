@@ -69,6 +69,29 @@ flexplot_prediction_layer = function(prediction, axis, data,
   ))
 }
 
+flexplot_magnet_comparison = function(prediction, axis, data, given=NA) {
+  result = list(prediction=prediction, facet=NULL)
+  if (length(axis) < 2 || is.na(axis[2])) return(result)
+  if (length(unique(prediction$model)) < 2) return(result)
+
+  # Only predictions receive the model key. ggplot repeats the other layers
+  # across model panels while retaining their conditioning keys.
+  variables = make.unique(c(names(data), names(prediction), "Model"))
+  model_variable = variables[length(variables)]
+  prediction[[model_variable]] = prediction$model
+  conditioning = flexplot_magnet_display_given(data, given)
+  conditioning = conditioning[!is.na(conditioning) & nzchar(conditioning)]
+
+  list(
+    prediction=prediction,
+    facet=ggplot2::facet_grid(
+      rows=ggplot2::vars(!!!rlang::syms(conditioning)),
+      cols=ggplot2::vars(!!rlang::sym(model_variable)),
+      labeller=custom.labeler
+    )
+  )
+}
+
 flexplot_magnet_prediction_layer = function(prediction, axis, data, given=NA) {
   axis = flexplot_object_axis(data, axis)
   xvar = axis[1]
@@ -88,6 +111,11 @@ flexplot_magnet_prediction_layer = function(prediction, axis, data, given=NA) {
   }
 
   models = levels(factor(prediction$model))
+  shapes = if (is.null(group)) {
+    rep(c(17, 15, 18, 3, 7, 8), length.out=length(models))
+  } else {
+    rep(17, length(models))
+  }
   list(
     ggplot2::geom_point(
       data=prediction,
@@ -98,7 +126,7 @@ flexplot_magnet_prediction_layer = function(prediction, axis, data, given=NA) {
       show.legend=FALSE
     ),
     ggplot2::scale_shape_manual(
-      values=rep(c(17, 15, 18, 3, 7, 8), length.out=length(models)),
+      values=shapes,
       guide="none"
     )
   )

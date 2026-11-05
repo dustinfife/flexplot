@@ -341,11 +341,22 @@ expect_magnet_model_overlay = function(p, models, display_group=NULL, facets=cha
   fitted = built$data[[3]]
   raw = built$data[[2]]
   layout = built$layout$layout
-  panels = rep(as.character(layout$PANEL[1]), nrow(prediction))
-  if (length(facets) > 0) {
-    panel_keys = do.call(paste, layout[facets])
-    panels = as.character(layout$PANEL[match(do.call(paste, prediction[facets]), panel_keys)])
+  facet_models = !is.null(display_group) && length(models) > 1
+  panel_variables = facets
+  if (facet_models) {
+    model_variable = rlang::as_name(rlang::get_expr(p$facet$params$cols[[1]]))
+    expect_equal(prediction[[model_variable]], prediction$model)
+    panel_variables = c(model_variable, facets)
   }
+  panels = rep(as.character(layout$PANEL[1]), nrow(prediction))
+  if (length(panel_variables) > 0) {
+    panel_keys = do.call(paste, layout[panel_variables])
+    panels = as.character(layout$PANEL[match(do.call(paste, prediction[panel_variables]), panel_keys)])
+  }
+  copies = if (facet_models) length(models) else 1L
+  expect_equal(nrow(raw), copies * nrow(p$layers[[2]]$data))
+  expect_equal(nrow(fitted), copies * nrow(p$layers[[3]]$data))
+  expect_equal(nrow(built$data[[4]]), copies * nrow(p$layers[[4]]$data))
   expect_false(anyNA(panels))
   shape_scale = built$plot$scales$get_scales("shape")
   shapes = shape_scale$map(prediction$model)
@@ -357,9 +368,9 @@ expect_magnet_model_overlay = function(p, models, display_group=NULL, facets=cha
     expect_false(any(as.character(prediction$model) %in% color_scale$get_limits()))
     expect_equal(built$plot$labels$colour, display_group)
     expect_equal(sort(raw$colour),
-                 sort(color_scale$map(p$layers[[2]]$data[[display_group]])))
+                 sort(rep(color_scale$map(p$layers[[2]]$data[[display_group]]), copies)))
     expect_equal(sort(fitted$colour),
-                 sort(color_scale$map(p$layers[[3]]$data[[display_group]])))
+                 sort(rep(color_scale$map(p$layers[[3]]$data[[display_group]]), copies)))
   }
   expected_keys = paste(panels, as.numeric(prediction$a), colors, shapes)
   drawn_keys = paste(overlay$PANEL, round(overlay$x), overlay$colour, overlay$shape)
@@ -388,16 +399,17 @@ expect_magnet_model_overlay = function(p, models, display_group=NULL, facets=cha
   expect_false(anyNA(match(overlay_keys, fitted_keys)))
   expect_equal(as.numeric(overlay$x), as.numeric(fitted$x[match(overlay_keys, fitted_keys)]))
   expect_equal(as.numeric(raw$x), as.numeric(fitted$x[match(raw_keys, fitted_keys)]))
-  expect_equal(length(unique(overlay$shape)), length(models))
+  expected_shapes = if (is.null(display_group)) length(models) else 1L
+  expect_equal(length(unique(overlay$shape)), expected_shapes)
+  if (!is.null(display_group)) expect_true(all(overlay$shape == 17))
   expect_false(any(overlay$shape %in% c(1, 19)))
-  expect_equal(shape_scale$name, "Model")
   expect_setequal(shape_scale$get_limits(), names(models))
-  expect_false(p$layers[[5]]$show.legend[["colour"]])
-  expect_true(p$layers[[5]]$show.legend[["shape"]])
+  expect_identical(shape_scale$guide, "none")
+  expect_false(p$layers[[5]]$show.legend)
   invisible(built)
 }
 
-test_that("grouped magnet model overlays retain group colors and separate model shapes", {
+test_that("grouped magnet comparisons retain colors and use model facets for two models", {
   withr::local_options(flexplot.object_renderer=TRUE)
 
   d = small
@@ -415,6 +427,7 @@ test_that("grouped magnet model overlays retain group colors and separate model 
     names(models) = levels(p$layers[[5]]$data$model)
     # Names sort alphabetically: m precedes second.
     expect_magnet_model_overlay(p, models, "b")
+    expect_equal(nrow(ggplot2::ggplot_build(p)$layout$layout), if (two_models) 2 else 1)
     expect_equal(p$layers[[2]]$data, base$layers[[2]]$data)
     expect_equal(p$layers[[3]]$data, base$layers[[3]]$data)
     expect_equal(p$layers[[4]]$data, base$layers[[4]]$data)
@@ -425,7 +438,7 @@ test_that("grouped magnet model overlays retain group colors and separate model 
     for (legend in legends) {
       if (!is.null(legend$layout)) n_guides = n_guides + sum(legend$layout$name == "guides")
     }
-    expect_equal(n_guides, 2)
+    expect_equal(n_guides, 1)
   }
 })
 
@@ -594,5 +607,153 @@ test_that("empty and single-point magnet samples preserve full-data slots and co
         expect_equal(built$data[[layer]], full_built$data[[layer]])
       }
     }
+  }
+})
+
+magnet_comparison_grob_text = function(grob) {
+  labels = if (inherits(grob, "text")) as.character(grob$label) else character()
+  for (child in grob$grobs) labels = c(labels, magnet_comparison_grob_text(child))
+  for (child in grob$children) labels = c(labels, magnet_comparison_grob_text(child))
+  labels
+}
+
+expect_magnet_comparison_panel_rows = function(p, group, facets=character()) {
+  expect_no_warning({ built = ggplot2::ggplot_build(p) })
+  expect_no_warning({ grob = ggplot2::ggplotGrob(p) })
+  layout = built$layout$layout
+  model_variable = rlang::as_name(rlang::get_expr(p$facet$params$cols[[1]]))
+  model_names = levels(p$layers[[5]]$data$model)
+  expect_setequal(layout[[model_variable]], model_names)
+  expect_equal(length(unique(layout$COL)), length(model_names))
+  colors = built$plot$scales$get_scales("colour")
+  group_levels = colors$get_limits()
+
+  for (panel in seq_len(nrow(layout))) {
+    key = layout[panel, ]
+    for (layer in 2:4) {
+      source = p$layers[[layer]]$data
+      expect_false(model_variable %in% names(source))
+      selected = rep(TRUE, nrow(source))
+      for (variable in facets) {
+        selected = selected & as.character(source[[variable]]) == as.character(key[[variable]])
+      }
+      source = source[selected, , drop=FALSE]
+      drawn = built$data[[layer]][built$data[[layer]]$PANEL == key$PANEL, ]
+      expect_equal(nrow(drawn), nrow(source))
+      index = match(as.character(source[[group]]), group_levels)
+      expected = data.frame(
+        x=as.numeric(source$a) + .5 * ((index - .5) / length(group_levels) - .5),
+        y=if (layer == 2) source$y_scaled else
+          if (layer == 3) unname(source$pred_prob) else rep(.52, nrow(source)),
+        colour=colors$map(source[[group]])
+      )
+      actual = data.frame(x=as.numeric(drawn$x), y=drawn$y, colour=drawn$colour)
+      if (layer == 4) {
+        expected$label = paste0("N=", source$n_total)
+        actual$label = drawn$label
+      }
+      expected = expected[do.call(order, expected), , drop=FALSE]
+      actual = actual[do.call(order, actual), , drop=FALSE]
+      rownames(expected) = NULL
+      rownames(actual) = NULL
+      expect_equal(actual, expected)
+    }
+    expect_equal(built$layout$panel_params[[panel]]$x.range,
+                 built$layout$panel_params[[1]]$x.range)
+    expect_equal(built$layout$panel_params[[panel]]$y.range,
+                 built$layout$panel_params[[1]]$y.range)
+  }
+
+  text = magnet_comparison_grob_text(grob)
+  for (model in model_names) expect_true(any(grepl(model, text, fixed=TRUE)))
+  for (variable in facets) {
+    expected_labels = custom.labeler(layout[variable])[[1]]
+    expect_true(all(expected_labels %in% text))
+  }
+  legends = grob$grobs[grepl("^guide-box", grob$layout$name)]
+  expect_equal(sum(vapply(legends, inherits, logical(1), "gtable")), 1)
+  invisible(built)
+}
+
+test_that("two-model grouped magnets replicate observations within the correct conditioning panels", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+
+  d = small
+  d$a = ordered(d$a, levels=rev(levels(d$a)))
+  d$b = ordered(d$b, levels=c("z", "x", "y"))
+  d$cond = factor(ifelse(d$z < 0, "low", "high"), levels=c("high", "low"))
+  # Unused source metadata must not accidentally become the model facet key.
+  d$Model = "source metadata"
+  for (formula in list(y_bin ~ a + b, y_bin ~ a + b | cond,
+                       y_bin ~ a + b | z, y_bin ~ a + x | cond,
+                       y_bin ~ a + x | z)) {
+    variables = flexplot_axis_given(formula)
+    model_formula = stats::reformulate(all.vars(formula)[-1], response="y_bin")
+    m1 = stats::glm(model_formula, data=d, family=stats::binomial(),
+                    weights=seq_len(nrow(d)))
+    m2 = stats::glm(y_bin ~ a, data=d, family=stats::binomial())
+    p = compare.fits(formula, data=d, model1=m1, model2=m2, jitter=FALSE)
+    group = if ("x" %in% variables$axis) "x_binned" else "b"
+    facets = flexplot_magnet_display_given(p$layers[[2]]$data, variables$given)
+    facets = facets[!is.na(facets) & nzchar(facets)]
+    models = list("m1 (glm)"=m1, "m2 (glm)"=m2)
+    expect_magnet_model_overlay(p, models, group, facets)
+    built = expect_magnet_comparison_panel_rows(p, group, facets)
+    expect_equal(nrow(built$data[[2]]), 2 * nrow(d))
+    expect_equal(nrow(built$layout$layout),
+                 2 * if (length(facets)) nlevels(p$layers[[2]]$data[[facets]]) else 1)
+    base = flexplot(formula, data=d, jitter=FALSE)
+    expect_true(all(built$data[[2]]$alpha == base$layers[[2]]$aes_params$alpha))
+    for (layer in 2:4) expect_equal(p$layers[[layer]]$data, base$layers[[layer]]$data)
+    expect_equal(sum(p$layers[[4]]$data$n_total), nrow(d))
+    base_colors = ggplot2::ggplot_build(base)$plot$scales$get_scales("colour")
+    expect_equal(built$plot$scales$get_scales("colour")$map(levels(p$layers[[2]]$data[[group]])),
+                 base_colors$map(levels(p$layers[[2]]$data[[group]])))
+  }
+})
+
+test_that("two-model ungrouped magnets retain overlaid comparison symbols", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+
+  for (formula in list(y_bin ~ a, y_bin ~ a | b, y_bin ~ a | z)) {
+    m1 = stats::glm(stats::reformulate(all.vars(formula)[-1], response="y_bin"),
+                    data=small, family=stats::binomial(), weights=seq_len(nrow(small)))
+    m2 = stats::glm(y_bin ~ a, data=small, family=stats::binomial())
+    p = compare.fits(formula, data=small, model1=m1, model2=m2, jitter=FALSE)
+    facets = flexplot_magnet_display_given(p$layers[[2]]$data, flexplot_axis_given(formula)$given)
+    facets = facets[!is.na(facets) & nzchar(facets)]
+    expect_magnet_model_overlay(p, list("m1 (glm)"=m1, "m2 (glm)"=m2), facets=facets)
+    expect_no_warning({ built = ggplot2::ggplot_build(p) })
+    expect_no_warning(ggplot2::ggplotGrob(p))
+    expect_equal(nrow(built$data[[2]]), nrow(small))
+    expect_setequal(built$data[[5]]$shape, c(17, 15))
+    expect_false("Model" %in% names(built$layout$layout))
+    expect_equal(nrow(built$layout$layout),
+                 if (length(facets)) nlevels(p$layers[[2]]$data[[facets]]) else 1)
+  }
+})
+
+test_that("faceted magnet comparisons sample observations once without changing fits or counts", {
+  withr::local_options(flexplot.object_renderer=TRUE)
+  withr::local_seed(123)
+
+  d = small
+  d$row_id = seq_len(nrow(d))
+  for (group in c("b", "x")) {
+    formula = stats::as.formula(paste("y_bin ~ a +", group, "| z"))
+    m1 = stats::glm(stats::reformulate(c("a", group, "z"), response="y_bin"),
+                    data=d, family=stats::binomial())
+    m2 = stats::glm(y_bin ~ a + z, data=d, family=stats::binomial())
+    full = compare.fits(formula, data=d, model1=m1, model2=m2, jitter=FALSE)
+    set.seed(123)
+    sampled_ids = sample(seq_len(nrow(d)), 8)
+    set.seed(123)
+    p = compare.fits(formula, data=d, model1=m1, model2=m2, sample=8, jitter=FALSE)
+    display_group = if (group == "x") "x_binned" else "b"
+    built = expect_magnet_comparison_panel_rows(p, display_group, "z_binned")
+    expect_magnet_model_overlay(p, list("m1 (glm)"=m1, "m2 (glm)"=m2), display_group, "z_binned")
+    expect_identical(p$layers[[2]]$data$row_id, sampled_ids)
+    expect_equal(nrow(built$data[[2]]), 16)
+    for (layer in 3:5) expect_equal(p$layers[[layer]]$data, full$layers[[layer]]$data)
   }
 })

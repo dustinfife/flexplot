@@ -269,6 +269,13 @@ flexplot = function(formula, data=NULL, related=F,
       raw.data = raw.data
     )
     
+    facet = flexplot_panel_variables_object(given, break.me)
+    if (use_magnet && !is.null(prediction)) {
+      comparison = flexplot_magnet_comparison(prediction, axis, data, given)
+      prediction = comparison$prediction
+      if (!is.null(comparison$facet)) facet = comparison$facet
+    }
+
     # add prediction overlay lines
     if (!is.null(prediction)) {
       final = final + flexplot_prediction_layer(
@@ -336,7 +343,6 @@ flexplot = function(formula, data=NULL, related=F,
       )
     }
     
-    facet = flexplot_panel_variables_object(given, break.me)
     if (!is.null(facet)) final = final + facet
     
     final$formula = formula
