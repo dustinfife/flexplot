@@ -111,7 +111,7 @@ testthat::test_that("native magnet integration preserves stacks, counts, and fit
   expect_s3_class(p$layers[[4]]$geom, "GeomText")
   expect_equal(built$data[[1]]$yintercept, .5)
   expect_true(all(built$data[[3]]$colour == "blue"))
-  expect_true(all(built$data[[2]]$alpha == .2))
+  expect_true(all(built$data[[2]]$alpha == .4))
 
   raw = p$layers[[2]]$data
   expect_equal(nrow(built$data[[2]]), nrow(small))

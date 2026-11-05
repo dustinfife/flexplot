@@ -94,7 +94,7 @@ get_cforest_variables = function(model, return.type=c("all", "predictors", "resp
 #' names across different model types. Each model class should have its own method
 #' that handles the specifics of variable extraction for that model type.
 #'
-#' @seealso \code{\link{compare.fits}} for the main function that uses this generic
+#' @seealso \code{\link{compare_fits}} for the main function that uses this generic
 #'
 #' @examples
 #' # Linear model example
@@ -275,7 +275,9 @@ return_constant_for_predicted_data = function(missing_variable, data, model) {
   }
   
   # this had issues when a random effect (as factor)
-  val = unique(as.character(data[[missing_variable]]))[1]
+  counts = table(data[[missing_variable]])
+  mode = names(counts)[which.max(counts)]
+  val = data[[missing_variable]][match(mode, as.character(data[[missing_variable]]))]
   #only display the message if it's not a glmer mod
   if (!(class(model)[1] %in% c("lmerMod", "glmerMod"))) {
     message(paste0("Note: You didn't choose to plot ",
@@ -295,7 +297,7 @@ replace_numeric_with_average = function(variable, breaks, data) {
   data[,variable] = round(as.numeric(as.character(
                         cut(data[,variable],
                              breaks[[variable]],
-                             labels = means_by_bin[,2]))), digits=3)
+                             labels = means_by_bin[,2], include.lowest=TRUE))), digits=3)
   return(data[,variable])
 }
 
@@ -320,7 +322,7 @@ reproduce_breaks = function(data, formula, list_values) {
   
   
   break.me = flexplot_break_me(data, predictors, given, axis, bins)
-  breaks = flexplot_create_breaks(break.me = break.me, breaks, data, labels, bins=bins)
+  breaks = flexplot_magnet_breaks(break.me = break.me, breaks, data, labels, bins=bins)
 
   # now make the binned columns in the dataset
   binned_data = bin_variables(data=data, bins=bins, labels=labels, break.me=break.me, breaks=breaks)
@@ -345,8 +347,8 @@ generate_predictors = function(data, formula, model, ...) {
   
   # identify those variables in the model that are not plotted
   # (If I don't do this, we'll get a jagged line in the visuals)
-  vars_in_model = get_predictors(model)
-  which_are_missing = remove_nonlinear_terms(vars_in_model[!(vars_in_model %in% variables)])
+  vars_in_model = get_terms(model)$predictors
+  which_are_missing = setdiff(vars_in_model, variables)
   
   # replace the missing variables with mean (numeric) or a level
   new_values = which_are_missing %>% purrr::map(return_constant_for_predicted_data, data=k, model=model)
@@ -357,7 +359,7 @@ generate_predictors = function(data, formula, model, ...) {
   # remove variables not in there
   #find all variables in either formula or model
   
-  all_variables_in_either = remove_nonlinear_terms(unique(c(predictors, vars_in_model)))
+  all_variables_in_either = unique(c(predictors, vars_in_model))
   return(k[,all_variables_in_either, drop=FALSE])
 }
 

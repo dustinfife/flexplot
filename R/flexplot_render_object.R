@@ -19,7 +19,7 @@ flexplot_render_object = function(data, outcome, axis, given,
                                   alpha=.99977,
                                   raw.data=TRUE,
                                   sample=Inf,
-                                  jitter=NULL, ...) {
+                                  jitter=NULL, magnet_summary=TRUE, ...) {
   
   # Paired-difference plots
   if (related) {
@@ -45,7 +45,8 @@ flexplot_render_object = function(data, outcome, axis, given,
       alpha=alpha,
       raw.data=raw.data,
       sample=sample,
-      jitter=jitter
+      jitter=jitter,
+      show_fitted=magnet_summary
     ))
   }
   

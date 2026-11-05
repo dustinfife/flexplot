@@ -54,7 +54,7 @@ mixed.mod.visual = function(formula, data, model, n=6, jitter=F){
 
 
 	##### generate fixed effects predictions
-	preds = compare.fits(formula, data, model, return.preds=T); preds = preds[,1:(ncol(preds)-1)]	#### this contains the fixed effect prediction
+	preds = compare_fits(formula, data, model, return.preds=T); preds = preds[,1:(ncol(preds)-1)]	#### this contains the fixed effect prediction
 	names(preds)[ncol(preds)] = outcome
 	
 	#### make predictions for random effects

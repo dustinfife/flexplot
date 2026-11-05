@@ -65,7 +65,7 @@ flexplot possesses superhuman intelligence.}
 
 \item{sample}{Should a sample of the data be plotted? Defaults to NOT sampling (for all variables).}
 
-\item{prediction}{Predicted values for a prediction line. Defaults to NULL. This is generally NOT used when just using flexplot, but it's helpful with the wrapper function \link{compare.fits}}
+\item{prediction}{Predicted values for a prediction line. Defaults to NULL. This is generally NOT used when just using flexplot, but it's helpful with the wrapper function \link{compare_fits}}
 
 \item{suppress_smooth}{Should a fitted line be repressed? Defaults to FALSE}
 

@@ -31,7 +31,7 @@
 ##' @param raw.data Should raw data be plotted? Defaults to yeaaaaahhhhh-buddy! (i.e., T)
 ##' @param sample Should a sample of the data be plotted? Defaults to NOT sampling (for all variables). 
 ##' @param ghost.reference What groups should be referenced for the ghost line? See examples for how to specify this. 
-##' @param prediction Predicted values for a prediction line. Defaults to NULL. This is generally NOT used when just using flexplot, but it's helpful with the wrapper function \link{compare.fits}
+##' @param prediction Predicted values for a prediction line. Defaults to NULL. This is generally NOT used when just using flexplot, but it's helpful with the wrapper function \link{compare_fits}
 ##' @param suppress_smooth Should a fitted line be repressed? Defaults to FALSE
 ##' @param alpha The transparency of the datapoints. 
 ##' @param plot.string Should the code to generate the plot be outputted? In the background, flexplot is creating a bunch of strings before it evaluates the model. 
@@ -109,6 +109,7 @@ flexplot = function(formula, data=NULL, related=F,
 		return_data = F, ...){
 
   data_name = substitute(data)
+  comparison_predictions = isTRUE(attr(prediction, "flexplot_comparison"))
   
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
@@ -178,15 +179,16 @@ flexplot = function(formula, data=NULL, related=F,
   
   ### make modifications to the data
   magnet_x = NULL
-  if (use_magnet && isTRUE(getOption("flexplot.object_renderer", FALSE)) &&
-      !plot.string && is.factor(data[[axis[1]]])) {
+  if (use_magnet && (comparison_predictions ||
+      (isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string)) &&
+      is.factor(data[[axis[1]]])) {
     magnet_x = data[[axis[1]]]
   }
   data = flexplot_modify_data(data=data, formula = formula, variables=variables, outcome=outcome, axis=axis, given=given, related=related, labels=labels, 
           break.me=break.me, breaks=breaks, bins=bins, spread=spread, method=method, use_magnet = use_magnet)
   if (!is.null(magnet_x)) {
     # Shared summary preprocessing may sort x by the outcome; native magnets
-    # retain the caller's factor order before constructing any layer data.
+    # and comparisons retain the caller's factor order for every layer.
     data[[axis[1]]] = factor(data[[axis[1]]], levels=levels(magnet_x),
                              ordered=is.ordered(magnet_x))
     attr(data[[axis[1]]], "contrasts") = attr(magnet_x, "contrasts")
@@ -232,7 +234,11 @@ flexplot = function(formula, data=NULL, related=F,
   
   # Native magnets retain supplied probabilities and bins already prepared above.
   # Other renderers use the legacy bin aggregation and model-count restriction.
-  if (!is.null(prediction) &&
+  if (comparison_predictions && !use_magnet && length(axis) > 1 &&
+      length(unique(prediction$model)) > 1) {
+    stop("Two-model comparisons with a second axis are currently supported only for magnet plots.", call.=FALSE)
+  }
+  if (!comparison_predictions && !is.null(prediction) &&
       !(use_magnet && isTRUE(getOption("flexplot.object_renderer", FALSE)) && !plot.string)) {
     num.models = levels(prediction$model)
     
@@ -266,7 +272,8 @@ flexplot = function(formula, data=NULL, related=F,
       jitter=jitter, 
       alpha = alpha, 
       sample = sample, 
-      raw.data = raw.data
+      raw.data = raw.data,
+      magnet_summary=!comparison_predictions
     )
     
     facet = flexplot_panel_variables_object(given, break.me)
@@ -283,7 +290,8 @@ flexplot = function(formula, data=NULL, related=F,
         axis=axis,
         data=data,
         use_magnet=use_magnet,
-        given=given
+        given=given,
+        comparison=comparison_predictions
       )
     }
 
@@ -358,6 +366,7 @@ flexplot = function(formula, data=NULL, related=F,
     p = bivariate$p
     points = bivariate$points
     fitted = bivariate$fitted
+    if (comparison_predictions && use_magnet) fitted = "xxxx"
     
 	#### all the above should take care of ALL possible plots, but now we add paneling
   facets = flexplot_panel_variables(given, break.me)
@@ -382,7 +391,7 @@ flexplot = function(formula, data=NULL, related=F,
 		ghost = "xxxx"
 	}	
                                                         
-  if (!is.null(prediction)) {
+  if (!is.null(prediction) && !(comparison_predictions && use_magnet)) {
     pred.line = flexplot_generate_prediction_lines(
       prediction, axis, data, use_magnet=use_magnet
     )
@@ -432,6 +441,25 @@ flexplot = function(formula, data=NULL, related=F,
 	}
 
 	final = suppressMessages(eval(parse(text=total.call)))
+
+  if (comparison_predictions && use_magnet) {
+    display_axis = flexplot_object_axis(data, axis)
+    if (length(display_axis) > 1) {
+      # The legacy base captures the original numeric grouping variable, while
+      # comparison overlays use its display bins. Keep one discrete color scale.
+      final$mapping$colour = ggplot2::aes(colour=.data[[display_axis[2]]])$colour
+    }
+    comparison = flexplot_magnet_comparison(prediction, axis, data, given)
+    layers = flexplot_magnet_prediction_layer(comparison$prediction, axis, data, given,
+                                               comparison=TRUE)
+    # Legacy magnets keep their existing centered raw-data geometry.
+    if (length(axis) > 1) {
+      layers[[1]]$position = ggplot2::position_identity()
+      layers[[3]]$position = ggplot2::position_identity()
+    }
+    final = final + layers
+    if (!is.null(comparison$facet)) final = final + comparison$facet
+  }
 	
 	# add formula (to make it easier for marginal_plot)
 	final$formula = formula

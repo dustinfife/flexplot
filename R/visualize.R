@@ -33,7 +33,7 @@ visualize.default = function(object, plot=c("all", "residuals", "model"),formula
   new_form = make_flexplot_formula(predictors, response, data)
   
   ## call compare.fits
-  compare.fits(new_form, data=data, model1=object)
+  compare_fits(new_form, data=data, model1=object)
   
 }
 
@@ -59,7 +59,7 @@ visualize.randomForest = function(object, plot=c("all", "residuals", "model"),fo
   new_form = make_flexplot_formula(predictors, response, data)
   
   ## call compare.fits
-  compare.fits(new_form, data=data, model1=object,...)
+  compare_fits(new_form, data=data, model1=object,...)
   
 }
 
@@ -80,7 +80,7 @@ visualize.RandomForest = function(object, plot=c("all", "residuals", "model"),fo
   outcome = attr(object, "data")@get("input")
   data = cbind(response, outcome)
   if (is.null(formula)) formula = make_flexplot_formula(all_terms$predictors, all_terms$response, data)
-  compare.fits(formula, data=data, model1=object,...)
+  compare_fits(formula, data=data, model1=object,...)
 }
 
 
@@ -133,7 +133,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
       
       
       f = make_flexplot_formula(predictors, outcome, data)
-      step3 = compare.fits(f, data=data, model1=object, ...) + labs(title="Analysis Plot")
+      step3 = compare_fits(f, data=data, model1=object, ...) + labs(title="Analysis Plot")
       
       #class(step3) <- c("flexplot", class(step3))
       #return(step3)			
@@ -147,7 +147,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
     }
     
   } else if (plot=="all" | plot=="model"){
-    step3 = compare.fits(formula, data=data, model1=object, ...) + labs(title="Analysis Plot")
+    step3 = compare_fits(formula, data=data, model1=object, ...) + labs(title="Analysis Plot")
     ### if they have more than two variables, also include a added variable plot
     if (length(terms)>1){
       step3b = added.plot(f, data=d,...)+ labs(title="Added Variable Plot")
@@ -273,11 +273,11 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
   ##### generate fixed effects predictions
   #### if random is in NOT in the second slot
   if (!modify){
-    step3 = compare.fits(formula, data=k, model1=object, model2=object, re=T, ...)
+    step3 = compare_fits(formula, data=k, model1=object, model2=object, re=T, ...)
   } else {
     #### otherwise...
 
-    prediction = compare.fits(formula, data=k, model1=object, re=T, return.preds=T)	
+    prediction = compare_fits(formula, data=k, model1=object, re=T, return.preds=T)
     
     ### to prevent conflicts with base::filter
     newd = prediction[prediction$model=="random effects",]; names(newd)[names(newd)=="prediction"] = outcome

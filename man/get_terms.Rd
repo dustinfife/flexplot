@@ -34,5 +34,5 @@ terms_info$response    # "mpg"
 
 }
 \seealso{
-\code{\link{compare.fits}} for the main function that uses this generic
+\code{\link{compare_fits}} for the main function that uses this generic
 }

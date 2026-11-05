@@ -1,10 +1,10 @@
 flexplot_prediction_layer = function(prediction, axis, data,
-                                     use_magnet=FALSE, given=NA) {
+                                     use_magnet=FALSE, given=NA, comparison=FALSE) {
   
   xvar = axis[1]
   
   if (use_magnet) {
-    return(flexplot_magnet_prediction_layer(prediction, axis, data, given))
+    return(flexplot_magnet_prediction_layer(prediction, axis, data, given, comparison))
   }
   
   axis = flexplot_object_axis(data, axis)
@@ -92,7 +92,8 @@ flexplot_magnet_comparison = function(prediction, axis, data, given=NA) {
   )
 }
 
-flexplot_magnet_prediction_layer = function(prediction, axis, data, given=NA) {
+flexplot_magnet_prediction_layer = function(prediction, axis, data, given=NA,
+                                            comparison=FALSE) {
   axis = flexplot_object_axis(data, axis)
   xvar = axis[1]
   group = if (length(axis) > 1 && !is.na(axis[2])) axis[2] else NULL
@@ -111,23 +112,51 @@ flexplot_magnet_prediction_layer = function(prediction, axis, data, given=NA) {
   }
 
   models = levels(factor(prediction$model))
+  model_legend = comparison && is.null(group) && length(models) > 1
+  if (model_legend) {
+    mapping$colour = ggplot2::aes(colour=.data$model)$colour
+    position = flexplot_magnet_summary_position(prediction, "model")
+  }
+  if (is.null(group)) mapping$group = ggplot2::aes(group=.data$model)$group
   shapes = if (is.null(group)) {
     rep(c(17, 15, 18, 3, 7, 8), length.out=length(models))
   } else {
     rep(17, length(models))
   }
-  list(
+  layers = list(
     ggplot2::geom_point(
       data=prediction,
       mapping=mapping,
       position=position,
       size=3,
       inherit.aes=FALSE,
-      show.legend=FALSE
+      show.legend=model_legend
     ),
     ggplot2::scale_shape_manual(
       values=shapes,
-      guide="none"
+      guide=if (model_legend) "legend" else "none"
     )
   )
+  if (!comparison) return(layers)
+
+  # A line belongs to one model/group/panel. Singletons retain their marker
+  # without asking geom_line to draw an impossible connection.
+  conditioning = flexplot_magnet_display_given(data, given)
+  keys = unique(c("model", group, conditioning))
+  keys = keys[!is.na(keys) & nzchar(keys)]
+  line_data = dplyr::filter(
+    dplyr::group_by(prediction, dplyr::across(dplyr::all_of(keys))),
+    dplyr::n_distinct(.data[[xvar]]) > 1
+  )
+  line_mapping = mapping
+  line_mapping$shape = NULL
+  if (model_legend) line_mapping$linetype = ggplot2::aes(linetype=.data$model)$linetype
+  layers[[3]] = ggplot2::geom_line(
+    data=dplyr::ungroup(line_data), mapping=line_mapping,
+    position=position, inherit.aes=FALSE, show.legend=model_legend
+  )
+  if (model_legend) {
+    layers[[4]] = ggplot2::scale_linetype_manual(values=rep(c("solid", "dotdash"), length.out=length(models)))
+  }
+  layers
 }

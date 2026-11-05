@@ -382,7 +382,7 @@ populate_estimates_factors = function(object, factors=NULL) {
     
     #### populate the estimates/lower/upper
     f = as.formula(paste0(outcome, "~", factors[i]))
-    est = compare.fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T) %>% 
+    est = compare_fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T, prediction_method="reference") %>%
       group_by_at(factors[i]) %>%
       summarize(across(prediction.fit:prediction.upr, ~mean(.x))) %>%
       data.frame

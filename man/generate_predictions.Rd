@@ -2,9 +2,12 @@
 % Please edit documentation in R/compare.fits_methods.R
 \name{generate_predictions}
 \alias{generate_predictions}
+\alias{generate_predictions.randomForest}
 \title{Generate Predictions from Model Objects}
 \usage{
 generate_predictions(model, re, pred.values, pred.type, report.se)
+
+\method{generate_predictions}{randomForest}(model, re, pred.values, pred.type, report.se)
 }
 \arguments{
 \item{model}{A fitted model object (e.g., lm, glm, lmerMod, keras model, etc.)}
@@ -33,7 +36,7 @@ A data frame with at least two columns:
 }
 \description{
 This is a generic function for generating predictions from various types of
-model objects. It is primarily used internally by \code{\link{compare.fits}}
+model objects. It is primarily used internally by \code{\link{compare_fits}}
 to create consistent prediction outputs across different modeling frameworks.
 }
 \details{
@@ -49,7 +52,7 @@ Currently supported model types include:
   \item Ordinal regression models (polr from MASS)
   \item Random forest models (RandomForest from party)
   \item Regression trees (rpart)
-  \item Neural networks (keras models via flex_nn package)
+  \item Neural-network models require a compatible adapter (not supplied here)
 }
 }
 \examples{
@@ -78,5 +81,5 @@ both_preds = generate_predictions(mixed_model, re = TRUE, pred_data,
 
 }
 \seealso{
-\code{\link{compare.fits}} for the main function that uses this generic
+\code{\link{compare_fits}} for the main function that uses this generic
 }

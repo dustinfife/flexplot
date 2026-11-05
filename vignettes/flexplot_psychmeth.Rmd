@@ -545,18 +545,26 @@ visualize(model,
   sample = 3)
 ```
 
-## The `compare.fits()` Function
+## The `compare_fits()` Function
 
 Very often in statistical modeling, we are interested in comparing two models [@rodgers_epistemology_2010], such as one with and one without an interaction term. There are many statistics available that allow easy comparison between models, such as the AIC, BIC, Bayes Factor, $R^2$, p-values, etc. However, it is again important to *see* how the two models differ in terms of fit. On multiple occasions, I have found various statistics show preference for one model, yet the graphs show the two models differ in only trivial ways. 
 
-That is where `compare.fits()` comes in. It is simply a wrapper for the `predict()` function, combined with the graphing capabilities of `flexplot`. More specifically, `compare.fits()` will overlay the fit of both models onto the raw data. For example, Figure \@ref(fig:compare) shows the fit of two different models, one that includes an interaction and the other that does not. The arguments are very similar to `flexplot`, but with the addition of the model objects. Likewise, `compare.fits()` takes many of the same arguments. In this example, I've overlaid a black ghost line. Notice that the two lines (from `lm` and `interaction`) generate very similar predictions across the range of data, suggesting that a main effects model may be sufficient. 
+The current default, `prediction_method="observed"`, averages predictions for
+actual common eligible observations within the displayed groups or numeric x
+bins. The historical reference-profile approach remains available with
+`prediction_method="reference"`, holding omitted numeric predictors at their
+mean and omitted categorical predictors at their mode. These summaries are not
+automatically causal effects; observed averaging is not marginal standardization,
+partial dependence, or ALE.
 
-```{r, compare, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Demonstration of the `compare.fits()` function, comparing a main effects and an interaction model. Ghost lines have been added from the `cog` condition for easier comparison across panels. \\label{fig:compare}", fig.width = 8, fig.height = 4.5, size="scriptsize"}
+That is where `compare_fits()` comes in. It is simply a wrapper for the `predict()` function, combined with the graphing capabilities of `flexplot`. More specifically, `compare_fits()` will overlay the fit of both models onto the raw data. For example, Figure \@ref(fig:compare) shows the fit of two different models, one that includes an interaction and the other that does not. The arguments are very similar to `flexplot`, but with the addition of the model objects. Likewise, `compare_fits()` takes many of the same arguments. In this example, I've overlaid a black ghost line. Notice that the two lines (from `lm` and `interaction`) generate very similar predictions across the range of data, suggesting that a main effects model may be sufficient.
+
+```{r, compare, message=FALSE, echo=TRUE, warning=FALSE, fig.cap = "Demonstration of the `compare_fits()` function, comparing a main effects and an interaction model. Ghost lines have been added from the `cog` condition for easier comparison across panels. \\label{fig:compare}", fig.width = 8, fig.height = 4.5, size="scriptsize"}
 model.me = lm(weight.loss ~ motivation + therapy.type, 
               data = exercise_data)
 model.int = lm(weight.loss ~ motivation * therapy.type, 
                data = exercise_data)
-compare.fits(weight.loss ~ motivation | therapy.type, 
+compare_fits(weight.loss ~ motivation | therapy.type,
              data = exercise_data, model.me, model.int, 
              ghost.line = "black")+
   # get rid of variable name in panels

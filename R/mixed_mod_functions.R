@@ -1,7 +1,7 @@
 ### return dataset containing factorized random effects (tested)
 subset_random_model = function(object, formula, d, samp.size = 3) {
   
-  if (class(object)[1] == "lmerMod") {
+  if (inherits(object, c("lmerMod", "glmerMod"))) {
     
     ## get random term
     term.re = extract_random_term(object)
@@ -17,7 +17,7 @@ subset_random_model = function(object, formula, d, samp.size = 3) {
 }
 
 extract_random_term = function(object) {
-  if (class(object)[1] != "lmerMod") return(NULL)
+  if (!inherits(object, c("lmerMod", "glmerMod"))) return(NULL)
   
   #### extract formula
   form = as.character(formula(object))[3]
@@ -105,20 +105,15 @@ stratified_sample_re = function(formula, data, re, samp.size=6) {
   # remove id from formula
   formula_sans_re = remove_term_from_formula(formula, re)
   
-  # make preliminary flexplot (without ID)
-  flexplot_data = flexplot(formula_sans_re, data=data, suppress_smooth=T) 
-  
-  # identify/remove those variables binned
-  minus = !(paste0(predictors, "_binned") %in% names(flexplot_data$data))
-  binned_data = flexplot_data$data %>% dplyr::select(c(contains("_binned"),predictors[minus], re))
-  binned_or_not = c(paneled, paste0(paneled, "_binned")) 
-  grouped_variables = binned_or_not[binned_or_not %in% names(binned_data)]
-  toss_re = which(grouped_variables == re)
-  if (length(toss_re)>0) { grouped_variables = grouped_variables[-toss_re] } 
-  
-  # figure out how many panels there are
-  number_panels = get_row_col(flexplot_data)%>%prod
-  
+  # Reuse display binning without rendering a plot: cluster selection must not
+  # depend on the active renderer (or consume plotting/jitter randomness).
+  prepared = reproduce_breaks(data, formula_sans_re, list())$binned_data
+  minus = !(paste0(predictors, "_binned") %in% names(prepared))
+  binned_data = prepared %>% dplyr::select(c(contains("_binned"), all_of(predictors[minus]), all_of(re)))
+  binned_or_not = c(paneled, paste0(paneled, "_binned"))
+  grouped_variables = setdiff(binned_or_not[binned_or_not %in% names(binned_data)], re)
+  number_panels = prod(vapply(binned_data[grouped_variables], dplyr::n_distinct, integer(1)))
+
   # figure out how many to sample within a panel
   sample_size_within_group = round(samp.size/number_panels)
 

@@ -19,7 +19,16 @@ primary functions include:
   - `flexplot()` flexible and intelligent multivariate graphics
   - `added.plot()` added variable plots
   - `visualize()` shows a visual representation of a fitted object
-  - `compare.fits()` visually compares the fit of two different models
+  - `compare_fits()` visually compares the fit of two different models
+
+`compare_fits()` now defaults to `prediction_method="observed"`: it averages
+predictions for actual, common eligible observations within displayed groups or
+numeric x bins. Use `prediction_method="reference"` for historical profiles,
+which hold omitted numeric predictors at their mean and categorical predictors
+at their mode. `compare.fits()` remains a supported alias. Neither method is
+automatically causal; observed averaging is not marginal standardization,
+partial dependence, or ALE.
+
   - `estimates()` reports of effect sizes for statistical models
   - `model.comparison()` statistically compares the fits of two
     different models
@@ -129,7 +138,7 @@ estimates(full.mod)
 #>       variables estimate lower upper std.estimate std.lower std.upper
 #> 1   (Intercept)     2.66 -5.28 10.59         0.00      0.00      0.00
 #> 2 communication     0.76  0.62  0.91         0.49     -0.47      1.45
-compare.fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod)
+compare_fits(satisfaction~communication|separated, data=relationship_satisfaction, full.mod, reduced.mod)
 ```
 
 <img src="README_files/figure-gfm/unnamed-chunk-3-9.png" width="100%" />

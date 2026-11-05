@@ -25,7 +25,7 @@ flexplot_reverse_categorical = function(formula, data, prediction=NULL,
   if (!allow_reverse || !is.null(prediction)) {
     stop("Multinomial probability plots are not yet supported for categorical outcomes ",
          "with numeric predictors. Axis reversal is only available for descriptive plots, ",
-         "without model predictions or compare.fits().", call.=FALSE)
+         "without model predictions or compare_fits().", call.=FALSE)
   }
   if (related) {
     stop("Automatic axis reversal is not supported with related=TRUE.", call.=FALSE)

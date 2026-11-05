@@ -1,7 +1,7 @@
 #' Generate Predictions from Model Objects
 #'
 #' This is a generic function for generating predictions from various types of
-#' model objects. It is primarily used internally by \code{\link{compare.fits}}
+#' model objects. It is primarily used internally by \code{\link{compare_fits}}
 #' to create consistent prediction outputs across different modeling frameworks.
 #'
 #' @param model A fitted model object (e.g., lm, glm, lmerMod, keras model, etc.)
@@ -36,10 +36,10 @@
 #'   \item Ordinal regression models (polr from MASS)
 #'   \item Random forest models (RandomForest from party)
 #'   \item Regression trees (rpart)
-#'   \item Neural networks (keras models via flex_nn package)
+#'   \item Neural-network models require a compatible adapter (not supplied here)
 #' }
 #'
-#' @seealso \code{\link{compare.fits}} for the main function that uses this generic
+#' @seealso \code{\link{compare_fits}} for the main function that uses this generic
 #'
 #' @examples
 #' # Basic usage with linear model
@@ -163,26 +163,47 @@ generate_predictions.RandomForest = function(model, re, pred.values, pred.type, 
   response = attr(model, "data")@get("response")
   outcome = attr(model, "data")@get("input")
   data = cbind(response, outcome)
-  # check if classes differ from old to new, and correct if they are
-  class_preds = lapply(pred.values, class)
-  class_data = lapply(data[names(pred.values)], class)
-  if (!identical(class_preds, class_data)) {
-    for (i in 1:length(class_preds)) {
-      
-      if ("factor" %in% (class(data[,names(pred.values[i])]))) {
-        
-        ordered = ifelse("ordered" %in% (class(data[,names(pred.values[i])])), T, F) 
-        pred.values[,i] = factor(pred.values[,i], levels=levels(data[,names(pred.values[i])]), ordered=ordered)
-      } else {
-        class(pred.values[,i]) = class(data[,names(pred.values[i])])
-      }  
+  # Observed prediction frames may contain columns not used by this forest.
+  variables = intersect(names(pred.values), names(data))
+  for (variable in variables) {
+    if (is.factor(data[[variable]])) {
+      pred.values[[variable]] = factor(pred.values[[variable]],
+                                       levels=levels(data[[variable]]),
+                                       ordered=is.ordered(data[[variable]]))
     }
   }
-  
-  prediction = predict(model, newdata=pred.values, OOB = TRUE)
+
+  response = response[[1]]
+  if (is.factor(response) && nlevels(droplevels(response)) == 2 && pred.type == "response") {
+    probabilities = predict(model, newdata=pred.values, type="prob", OOB=FALSE)
+    positive = match(levels(droplevels(response))[2], levels(response))
+    prediction = if (is.list(probabilities)) {
+      vapply(probabilities, `[`, numeric(1), positive)
+    } else {
+      probabilities[, positive]
+    }
+  } else {
+    prediction = predict(model, newdata=pred.values, OOB=FALSE)
+  }
   d = data.frame(prediction = prediction, model="RandomForest")
   names(d)[1] = "prediction"
   return(d)  
+}
+
+#' @rdname generate_predictions
+#' @method generate_predictions randomForest
+#' @export
+generate_predictions.randomForest = function(model, re, pred.values, pred.type, report.se) {
+  if (model$type == "classification") {
+    prediction = predict(model, newdata=pred.values, type="prob")
+    if (ncol(prediction) != 2) {
+      stop("Multicategory forest probabilities are not supported by compare_fits().", call.=FALSE)
+    }
+    prediction = prediction[, 2]
+  } else {
+    prediction = predict(model, newdata=pred.values, type="response")
+  }
+  data.frame(prediction=prediction, model=class(model)[1])
 }
 
 #' Generate Predictions for Regression Tree Models
@@ -202,8 +223,15 @@ generate_predictions.RandomForest = function(model, re, pred.values, pred.type, 
 #' @method generate_predictions rpart
 #' @export
 generate_predictions.rpart = function(model, re, pred.values, pred.type, report.se) {
-  return(data.frame(prediction = predict(model, pred.values), 
-                    model = "rpart"))
+  type = if (model$method == "class") "prob" else "vector"
+  prediction = predict(model, newdata=pred.values, type=type)
+  if (is.matrix(prediction)) {
+    if (ncol(prediction) != 2) {
+      stop("Multicategory tree probabilities are not supported by compare_fits().", call.=FALSE)
+    }
+    prediction = prediction[, 2]
+  }
+  data.frame(prediction=prediction, model="rpart")
 }
 
 #' Generate Predictions for General Model Objects
@@ -241,101 +269,59 @@ get_fitted = function(model, re, pred.values=NULL, pred.type, report.se) {
 
 #' @method get_fitted default
 #' @export
-get_fitted.default = function(model, re=NULL, pred.values=NULL, pred.type="response", report.se=FALSE) {
-  
+get_fitted.default = function(model, re=FALSE, pred.values=NULL, pred.type="response", report.se=FALSE) {
   if (is.null(pred.values)) pred.values = extract_data_from_fitted_object(model)
-  int = ifelse(report.se, "confidence", "none")
-  return(data.frame(prediction = predict(model, pred.values, interval=int, type=pred.type),
-                    model = class(model)[1]))
+  generate_predictions(model, re, pred.values, pred.type, report.se)
 }
 
 #' @method get_fitted lmerMod
 #' @export
-get_fitted.lmerMod = function(model, re=FALSE, pred.values, pred.type="response", report.se=FALSE) {
-  if (!re) {
-    return(data.frame(prediction = 
-                        predict(model, type="response", re.form=NA), 
-                      model="fixed effects"))
-  } else {
-    random_effects = data.frame(prediction = predict(model, type="response", re.form=NULL), 
-                                model="random effects")
-    fixed_effects = data.frame(prediction = predict(model, type="response", re.form=NA), 
-                               model="fixed effects")
-    return(rbind(random_effects, fixed_effects))
-  }
-}
+get_fitted.lmerMod = get_fitted.default
 
 #' @method get_fitted glmerMod
 #' @export
-get_fitted.glmerMod = get_fitted.lmerMod  # Same logic
+get_fitted.glmerMod = get_fitted.default
 
 #' @method get_fitted polr
 #' @export
-get_fitted.polr = function(model, re=NULL, pred.values, pred.type="class", report.se=F) {
-  return(data.frame(prediction = predict(model, pred.values, type="class"), 
-                    model = "polr"))
-}
+get_fitted.polr = get_fitted.default
 
 #' @method get_fitted RandomForest
 #' @export
-get_fitted.RandomForest = function(model, re=NULL, pred.values, pred.type=NULL, report.se=F) {
-  response = attr(model, "data")@get("response")
-  outcome = attr(model, "data")@get("input")
-  data = cbind(response, outcome)
-  # check if classes differ from old to new, and correct if they are
-  class_preds = lapply(pred.values, class)
-  class_data = lapply(data[names(pred.values)], class)
-  if (!identical(class_preds, class_data)) {
-    for (i in 1:length(class_preds)) {
-      
-      if ("factor" %in% (class(data[,names(pred.values[i])]))) {
-        
-        ordered = ifelse("ordered" %in% (class(data[,names(pred.values[i])])), T, F) 
-        pred.values[,i] = factor(pred.values[,i], levels=levels(data[,names(pred.values[i])]), ordered=ordered)
-      } else {
-        class(pred.values[,i]) = class(data[,names(pred.values[i])])
-      }  
-    }
-  }
-  
-  prediction = predict(model, newdata=pred.values, OOB = TRUE)
-  d = data.frame(prediction = prediction, model="RandomForest")
-  names(d)[1] = "prediction"
-  return(d)  
-}
+get_fitted.RandomForest = get_fitted.default
 
 #' @method get_fitted rpart
 #' @export
-get_fitted.rpart = function(model, re, pred.values, pred.type, report.se) {
-  return(data.frame(prediction = predict(model, pred.values), 
-                    model = "rpart"))
-}
-
+get_fitted.rpart = get_fitted.default
 
 
 # prepare_data_for_compare_fits -------------------------------------------
 
 
 #' @export
-prepare_data_for_compare_fits = function(data, model1, formula, all_variables) {
-  UseMethod("prepare_data_for_compare_fits")
+prepare_data_for_compare_fits = function(data, model1, formula, all_variables=NULL, clusters=3) {
+  UseMethod("prepare_data_for_compare_fits", model1)
 }
 
 #' @method prepare_data_for_compare_fits default
 #' @export
-prepare_data_for_compare_fits.default = function(data, model1, formula, all_variables) {
+prepare_data_for_compare_fits.default = function(data, model1, formula, all_variables=NULL, clusters=3) {
   return(data)
 }
 
 #' @method prepare_data_for_compare_fits lmerMod
 #' @export
-prepare_data_for_compare_fits.lmerMod = function(data, model1, formula, clusters=NULL) {
+prepare_data_for_compare_fits.lmerMod = function(data, model1, formula, all_variables=NULL, clusters=3) {
   #### convert random effects to factors for mixed models
   data = subset_random_model(d=data, object = model1, formula=formula, samp.size = clusters)
   return(data)
 }
 
 
+
+#' @method prepare_data_for_compare_fits glmerMod
+#' @export
+prepare_data_for_compare_fits.glmerMod = prepare_data_for_compare_fits.lmerMod
 
 # get_plotted_line ---------------------------------------------------------
 
@@ -347,44 +333,30 @@ get_plotted_line = function(model, data, formula, ...) {
 
 #' @method get_plotted_line default
 #' @export
-get_plotted_line.default = function(model, data, formula,  ...) {
-
-  ## extract variable slots
-  variables = all.vars(formula, unique=FALSE)
-  outcome = variables[1]
-  predictors = variables[-1]
-  x_variable_named = predictors[1]
-  
-  # 1. Generate predictions for the entire dataset
-  k = data %>%
-    bin_if_theres_a_flexplot_formula(formula=formula, ...) %>%
-    # 2. Generate "bins" for both x-axis variable and already-binned variables
-    get_sequence_of_target_variable(x_label=x_variable_named)
-  
-  # collect variables that are "binned"
-  binned_vars = grep("_binned", names(k), value=T)
-  x_var       = grep("_sequence", names(k), value=T)
-  
-  # aggregate across those variables
-  plotted_variables = c(not_binned_but_plotted(predictors, binned_vars), "model")
-  n = k %>%
-    # replace x variable with _sequence 
-    dplyr::mutate(!!sym(x_variable_named) := .data[[x_var]]) %>%
-    dplyr::select(-all_of(x_var)) %>%
-    group_by(across(all_of(plotted_variables))) %>%
-    summarize(prediction = mean(prediction, na.rm=T), .groups = "drop") %>%
-    #convert all *_binned factors like "4.2-4.9" to numeric midpoints
-    mutate(across(ends_with("_binned"), ~ {
-      x = as.character(.x)
-      # remove parentheses if present
-      x = gsub("[()]", "", x)
-      low  = as.numeric(sub("^(-?[0-9.]+)-.*$", "\\1", x))
-      high = as.numeric(sub("^.*-(-?[0-9.]+)$", "\\1", x))
-      (low + high) / 2
-    })) %>%
-      # strip the "_binned" suffix from their names
-      rename_with(~ sub("_binned$", "", .x), ends_with("_binned"))
-  n
+get_plotted_line.default = function(model, data, formula, ...) {
+  variables = flexplot_axis_given(formula)
+  x = variables$axis[1]
+  displayed = all.vars(formula)[-1]
+  binned = reproduce_breaks(data, formula, list(...))
+  frame = binned$binned_data
+  bin_variables = names(binned$breaks)
+  bin_variables = bin_variables[paste0(bin_variables, "_binned") %in% names(frame)]
+  keys = if (length(displayed)) {
+    not_binned_but_plotted(displayed, paste0(bin_variables, "_binned"))
+  } else character(0)
+  if (is.numeric(frame[[x]])) {
+    frame = get_sequence_of_target_variable(frame, x)
+    frame[[x]] = frame[[paste0(x, "_sequence")]]
+  }
+  keys = c(keys, "model")
+  grouped = dplyr::group_by(frame, dplyr::across(dplyr::all_of(keys)), .drop=TRUE)
+  result = dplyr::summarise(
+    grouped, prediction=mean(.data$prediction),
+    dplyr::across(dplyr::all_of(bin_variables), mean), .groups="drop"
+  )
+  result = as.data.frame(result)
+  attr(result, "observation_groups") = dplyr::group_rows(grouped)
+  result
 }
 
 #' @method get_plotted_line polr

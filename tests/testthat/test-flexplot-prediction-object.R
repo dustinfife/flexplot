@@ -202,8 +202,8 @@ testthat::test_that("compare.fits preserves categorical and numeric second-axis 
     for (groupvar in c("b", "z")) {
       formula = stats::reformulate(c(xvar, groupvar), response="y")
       model = stats::lm(formula, data=small)
-      prediction = compare.fits(formula, data=small, model1=model, return.preds=TRUE)
-      p = compare.fits(formula, data=small, model1=model)
+      prediction = compare_fits(formula, data=small, model1=model, return.preds=TRUE, prediction_method="reference")
+      p = compare_fits(formula, data=small, model1=model, prediction_method="reference")
       prediction$prediction = stats::predict(model, newdata=prediction)
 
       resolved = groupvar

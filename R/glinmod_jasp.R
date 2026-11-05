@@ -140,7 +140,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   }
   
 
-  plot = compare.fits(generated.formula, data=dataset, glinmod_results, 
+  plot = compare_fits(generated.formula, data=dataset, glinmod_results,
                       alpha = options$alpha, jitter=c(options$jitx, options$jity),
                       ghost.line=ghost) 
   plot = fancifyMyLabels(plot, options, formula = generated.formula)

@@ -2,58 +2,123 @@
 % Please edit documentation in R/compare_fits.R
 \name{compare_fits}
 \alias{compare_fits}
-\title{Compare the fits of two models}
+\alias{compare.fits}
+\title{Compare fitted models using observed or reference predictions}
 \usage{
 compare_fits(
   formula,
   data,
   model1,
   model2 = NULL,
-  return.preds = F,
-  report.se = F,
-  re = F,
+  return.preds = FALSE,
+  report.se = FALSE,
+  re = FALSE,
   pred.type = "response",
   num_points = 50,
   clusters = 3,
+  prediction_method = "observed",
+  ...
+)
+
+compare.fits(
+  formula,
+  data,
+  model1,
+  model2 = NULL,
+  return.preds = FALSE,
+  report.se = FALSE,
+  re = FALSE,
+  pred.type = "response",
+  num_points = 50,
+  clusters = 3,
+  prediction_method = "observed",
   ...
 )
 }
 \arguments{
-\item{formula}{A formula that can be used in flexplot. The variables inside must not include variables outside the fitted models.}
+\item{formula}{A flexplot formula specifying the displayed predictors and
+conditioning variables, using original variable names. Transformations and
+interactions may appear in the fitted model formula, not in the plotting formula.}
 
-\item{data}{The dataset containing the variables in formula}
+\item{data}{Original observations, with their original row names.}
 
-\item{model1}{The fitted model object (e.g., lm) containing the variables specified in the formula}
+\item{model1}{A fitted model.}
 
-\item{model2}{The second fitted model object (e.g., lm) containing the variables specified in the formula}
+\item{model2}{An optional second fitted model.}
 
-\item{return.preds}{Should the function return the predictions instead of a graphic? Defaults to F}
+\item{return.preds}{Return the prediction data instead of a plot.}
 
-\item{report.se}{Should standard errors be reported alongside the estimates? Defaults to F.}
+\item{report.se}{Return prediction standard errors for lm/glm models. For
+observed averages these use coefficient covariance and the delta method;
+individual standard errors are not averaged. Compatible \code{prediction.fit},
+\code{prediction.lwr} and \code{prediction.upr} fields contain the estimate
+and approximate 95\% confidence limits. Unsupported classes give an error.}
 
-\item{re}{Should random effects be predicted? Only applies to mixed models. Defaults to F.}
+\item{re}{Include random-effects predictions for mixed models. A single model
+returns both fixed and random predictions when TRUE; two models return their
+random-effects predictions.}
 
-\item{pred.type}{What type of predictions should be outputted? This is mostly for \code{glm} models. Defaults to "response."}
+\item{pred.type}{Prediction scale, normally \code{"response"}; GLMs also
+support \code{"link"}. Predictions are averaged on the requested scale.}
 
-\item{num_points}{Number of points used for predictions. Larger numbers = slower algorithm, but smoother predictions.}
+\item{num_points}{Retained for positional/API compatibility. The historical
+grid and experimental observed-bin algorithms do not use this argument.}
 
-\item{clusters}{For visualizing mixed models, this specifies the number of clusters to display}
+\item{clusters}{Number of mixed-model clusters to display, using the existing
+stratified cluster-sampling convention.}
 
-\item{...}{Other parameters passed to flexplot}
+\item{prediction_method}{Either \code{"observed"} (default) or \code{"reference"}.}
+
+\item{...}{Arguments passed to flexplot, including display bins, breaks, labels,
+sampling and other plotting controls.}
 }
 \value{
-Either a graphic or the predictions for the specified model(s)
+A ggplot, or a data frame with displayed coordinates, \code{prediction}
+  and \code{model}; standard errors and confidence limits are added when requested.
 }
 \description{
-This function takes two fitted models as input and plots them to visually compare how the two differ in terms of fit.
-It can take a \code{glm}, \code{rlm}, \code{lm}, and \code{randomForest} model (and maybe others as well). The function takes
-a \code{\link{flexplot}}-like formula as input.
+Compare model predictions with a \code{\link{flexplot}} formula. The default
+changed from the historical reference-profile approach to observed-data
+conditional averaging. \code{compare.fits()} is a supported alias with the
+same arguments and behavior.
+}
+\details{
+\code{"observed"} predicts on actual, common eligible estimation observations,
+retaining their original predictor combinations. It averages these predictions
+within the displayed categories, grouping variables and conditioning bins.
+For numeric x with at least ten distinct values, the existing experimental
+algorithm uses up to nine quantile bins and plots each average at its bin
+midpoint. Otherwise it averages at each observed x value. Empty groups are not
+generated. Numeric grouping/conditioning uses the same display-break helpers
+as flexplot, without decoding numeric values from bin-label text.
+
+\code{"reference"} uses the historical prediction-grid approach: omitted
+numeric predictors are held at their mean and omitted categorical predictors
+at their mode. Use this method to reproduce historical reference profiles.
+
+Both methods use complete observations for the plotted and required model
+variables, intersected with the models' identifiable estimation rows. Row names
+and stored model-frame values must match; otherwise alignment fails explicitly.
+Mixed-model clusters are sampled after establishing this common sample.
+
+Neither method is automatically a causal effect. Observed conditional averaging
+is not marginal standardization, partial dependence or accumulated local effects
+(ALE). Correlated omitted predictors can make the two methods differ substantially.
+
+Ordinal polr models retain the historical predicted-class score convention and
+require numeric category labels. Multicategory probability matrices and models
+without identifiable estimation observations are unsupported. No neural-network
+prediction adapter is supplied by this package. Binary tree/forest predictions
+use probabilities for the second response level; regression trees/forests use
+their numeric fitted responses.
 }
 \examples{
-data(exercise_data)
-mod1 = lm(weight.loss~therapy.type + motivation, data=exercise_data)
-mod2 = lm(weight.loss~therapy.type * motivation, data=exercise_data)
-compare.fits(weight.loss~therapy.type | motivation, data=exercise_data, mod1, mod2)
+m1 = lm(y ~ x + z, data=small)
+m2 = lm(y ~ x, data=small)
+compare_fits(y ~ x, data=small, model1=m1, model2=m2)
+compare_fits(y ~ x, data=small, model1=m1, prediction_method="reference")
+compare_fits(y ~ a, data=small, model1=lm(y ~ a + z, data=small),
+             return.preds=TRUE)
 }
 \author{
 Dustin Fife

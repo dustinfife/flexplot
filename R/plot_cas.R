@@ -169,7 +169,7 @@ cluster_adjusted_scatter = function(formula, object=NULL, data=NULL,
   # get total clusters so it samples everything. 
   clusters = unique(d[[d$.re_term[1]]])
   smooth_geom = if (isTRUE(smooth)) geom_smooth() else NULL
-  compare.fits(form, data=d, model1=object, clusters = length(clusters), ...) +
+  compare_fits(form, data=d, model1=object, clusters = length(clusters), ...) +
     smooth_geom
     
 }

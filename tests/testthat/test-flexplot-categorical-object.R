@@ -136,7 +136,7 @@ test_that("high-cardinality categorical groups keep raw points and summaries dra
     expect_identical(rlang::as_label(p$mapping$colour), group)
     expect_length(p$layers, 4)
     expect_equal(nrow(built$data[[1]]), nrow(d))
-    expect_true(all(built$data[[1]]$alpha == .2))
+    expect_true(all(built$data[[1]]$alpha == .4))
     expect_equal(sort(built$data[[1]]$y), sort(d$y))
     expect_false(anyNA(built$data[[1]][c("x", "y", "shape", "colour")]))
     expect_length(unique(built$data[[1]]$shape), 1)

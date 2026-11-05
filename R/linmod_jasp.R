@@ -256,7 +256,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
       
   
   } else if (model.type=="model"){
-    plot = compare.fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
+    plot = compare_fits(generated.formula, data = linmod_results$model$model, model1 = linmod_results$model,
                  alpha=options$alpha, ghost.line=ghost, jitter=c(options$jitx, options$jity))
     plot = fancifyMyLabels(plot, options, generated.formula)    
   } else if (model.type == "residuals"){

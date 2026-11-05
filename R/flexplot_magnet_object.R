@@ -61,7 +61,8 @@ flexplot_magnet_summary_position = function(data, group) {
 
 flexplot_magnet_object = function(data, outcome, axis, given=NA,
                                   jitter=TRUE, alpha=0.6,
-                                  dot_size=2, raw.data=TRUE, sample=Inf) {
+                                  dot_size=2, raw.data=TRUE, sample=Inf,
+                                  show_fitted=TRUE) {
   
   xvar = axis[1]
   display_axis = flexplot_object_axis(data, axis)
@@ -214,7 +215,7 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
       stroke=1.1,
       position=point_position
     ) +
-    fitted_layer +
+    (if (show_fitted) fitted_layer else NULL) +
     ggplot2::geom_text(
       data=df_counts,
       mapping=count_mapping,

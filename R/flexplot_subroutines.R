@@ -442,7 +442,7 @@ flexplot_create_breaks = function(break.me, breaks, data, labels, bins=3){
       stop("You must name your breaks if you provide them. Be sure to do that. (e.g., breaks = list(variable1=c(5, 10, 15)), variable2=c(0,1,2))")
       
       #### make sure they spelled breaks right and such
-    } else if (!is.na(named.breaks) & !(named.breaks %in% break.me)){
+    } else if (any(!is.na(named.breaks)) && any(!named.breaks %in% break.me)){
       stop("I can't find ", named.breaks, " in your list of variables to be binned (", paste0(break.me, collapse=","), "). Did you spell everything right?")
     }
     

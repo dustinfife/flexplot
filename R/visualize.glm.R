@@ -61,7 +61,7 @@ visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = 
         step3 = step3 + labs(title="Logistic Regression Analysis")
       } else {
         # Use existing compare.fits for other GLM families
-        step3 = compare.fits(f, data=data, model1=object, ...) + labs(title="Analysis Plot")
+        step3 = compare_fits(f, data=data, model1=object, ...) + labs(title="Analysis Plot")
       }
       
       ### if they have more than two variables, also include a added variable plot
@@ -81,7 +81,7 @@ visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = 
       step3 = logistic_overlay(formula = formula, data = data, n_bins = n_bins, type = overlay_type, ...)
       step3 = step3 + labs(title="Logistic Regression Analysis")
     } else {
-      step3 = compare.fits(formula, data=data, model1=object, ...) + labs(title="Analysis Plot")
+      step3 = compare_fits(formula, data=data, model1=object, ...) + labs(title="Analysis Plot")
     }
     
     ### if they have more than two variables, also include a added variable plot
