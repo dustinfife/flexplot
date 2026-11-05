@@ -1,3 +1,27 @@
+# Inspect expressions, rather than variable names, to establish response scales.
+compare_fits_model_response = function(model, model_name) {
+  # party forests store separate one-sided response and input formulas.
+  response_formula = tryCatch(
+    if (inherits(model, "RandomForest")) attr(model, "data")@formula$response else
+      stats::formula(model),
+    error=identity
+  )
+  expected_length = if (inherits(model, "RandomForest")) 2L else 3L
+  if (!is.call(response_formula) || length(response_formula) != expected_length ||
+      !identical(response_formula[[1]], as.name("~"))) {
+    stop("Cannot inspect the fitted response expression for ", model_name,
+         " (", class(model)[1], "); its response scale cannot be verified.", call.=FALSE)
+  }
+  response = response_formula[[2]]
+  if (!is.symbol(response)) {
+    stop("Transformed model responses are unsupported in compare_fits(): ",
+         model_name, " uses response '", paste(deparse(response), collapse=" "),
+         "'. Predictions may be on a different scale from the plotted outcome. ",
+         "Use models with the same untransformed response variable.", call.=FALSE)
+  }
+  as.character(response)
+}
+
 # Identify estimation rows before generating predictions. Row names identify the
 # observations; stored model-frame values verify that those identities match.
 compare_fits_model_terms = function(model) {

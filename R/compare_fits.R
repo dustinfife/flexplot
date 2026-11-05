@@ -86,9 +86,13 @@ compare_fits = function(formula, data, model1, model2=NULL,
   }
   single_model = is.null(model2)
   models = if (single_model) list(model1) else list(model1, model2)
+  responses = character(length(models))
+  for (i in seq_along(models)) {
+    responses[i] = compare_fits_model_response(models[[i]], paste0("model", i))
+  }
   terms = lapply(models, compare_fits_model_terms)
-  outcome = terms[[1]]$response
-  if (!single_model && !identical(outcome, terms[[2]]$response)) {
+  outcome = responses[1]
+  if (!single_model && !identical(outcome, responses[2])) {
     stop("The models must have the same outcome variable.", call.=FALSE)
   }
   plotted = all.vars(formula)
