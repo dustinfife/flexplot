@@ -128,7 +128,9 @@ test_that("compare.fits for other models", {
   d = round(data.frame(y=rnorm(100, 50, 20), x=rnorm(100, 50, 20), z=rnorm(100, 50, 20)))
   class(d$y) = "integer"; class(d$x) = "integer"; class(d$z) = "integer"; 
   mod = suppressWarnings(party::cforest(y~., data=d))
-  testthat::expect_true(names(compare.fits(y~x+z, d, mod, return.preds=TRUE))[2]=="z_binned")
+  preds = compare.fits(y ~ x + z, d, mod, return.preds=TRUE)
+  expect_setequal(names(preds), c("x", "z", "prediction", "model"))
+  expect_true(all(is.finite(preds$prediction)))
   
   ### compare.fits with rpart
   fit = rpart::rpart(weight.loss~motivation + therapy.type, data=exercise_data, method="anova")

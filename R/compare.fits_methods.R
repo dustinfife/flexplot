@@ -170,6 +170,11 @@ generate_predictions.RandomForest = function(model, re, pred.values, pred.type, 
       pred.values[[variable]] = factor(pred.values[[variable]],
                                        levels=levels(data[[variable]]),
                                        ordered=is.ordered(data[[variable]]))
+    } else if (identical(class(data[[variable]]), "integer") &&
+               is.numeric(pred.values[[variable]])) {
+      # modeltools checks declared classes, although party uses double-valued
+      # inputs internally. Restore the class without coercing fractional profiles.
+      attr(pred.values[[variable]], "class") = "integer"
     }
   }
   
@@ -472,22 +477,23 @@ post_prediction_process_cf.lmerMod  = function(model1, model2=NULL, predictions,
 
 # Marginal standardization: one shared reference distribution for all curves.
 # The same reference rows are used at every plotted coordinate and for both models.
-compare_fits_marginal = function(models, data, formula, re, pred.type, labels,
+compare_fits_marginal = function(models, data, formula, re, pred.type, model_labels,
                                  single_model, report.se, num_points=50, ...) {
   if (length(num_points) != 1 || !is.finite(num_points) || num_points < 2 ||
       num_points != as.integer(num_points)) {
     stop("num_points must be an integer >= 2.", call.=FALSE)
   }
   displayed = all.vars(formula)[-1]
-  if (!length(displayed)) {
-    stop("Marginal prediction requires a displayed predictor.", call.=FALSE)
+  # No displayed predictors means one marginal estimate, with no axis columns.
+  grid = data.frame(row.names=1L)
+  if (length(displayed)) {
+    # Existing grid generator establishes conditioning/moderator values and levels.
+    grid = generate_predictors(data, formula, models[[1]], ...)
+    if (!all(displayed %in% names(grid))) {
+      stop("Prediction grid is missing displayed variables.", call.=FALSE)
+    }
+    grid = unique(grid[displayed])
   }
-  # Existing grid generator establishes conditioning/moderator values and levels.
-  grid = generate_predictors(data, formula, models[[1]], ...)
-  if (!all(displayed %in% names(grid))) {
-    stop("Prediction grid is missing displayed variables.", call.=FALSE)
-  }
-  grid = unique(grid[displayed])
   axis = flexplot_axis_given(formula)$axis[1]
   if (axis %in% displayed && is.numeric(data[[axis]]) &&
       length(unique(data[[axis]])) >= 10) {
@@ -519,7 +525,7 @@ compare_fits_marginal = function(models, data, formula, re, pred.type, labels,
       for (variable in displayed) newdata[[variable]] = rep(grid[[variable]][j], nrow(reference))
       rownames(newdata) = as.character(seq_len(nrow(newdata)))
       frame = compare_fits_prediction_frame(model, newdata, re, pred.type,
-                                            labels[i], single_model, "reference")
+                                            model_labels[i], single_model, "reference")
       for (type in unique(frame$model)) {
         values = frame$prediction[frame$model == type]
         result = grid[j, , drop=FALSE]

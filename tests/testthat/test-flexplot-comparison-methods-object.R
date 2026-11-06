@@ -20,7 +20,7 @@ test_that("observed categorical predictions average actual correlated observatio
   d = small
   d$w = 2 * d$x + d$z
   m = stats::lm(y ~ a + w, data=d)
-  observed = compare_fits(y ~ a, d, m, return.preds=TRUE)
+  observed = compare_fits(y ~ a, d, m, return.preds=TRUE, prediction_method="observed")
   expected = tapply(stats::predict(m, newdata=d), d$a, mean)
   expect_equal(observed$prediction, as.numeric(expected[as.character(observed$a)]))
   expect_setequal(names(observed), c("a", "prediction", "model"))
@@ -33,7 +33,7 @@ test_that("observed categorical predictions average actual correlated observatio
 test_that("continuous observed predictions use actual responses within common x bins", {
   withr::local_options(flexplot.object_renderer=TRUE)
   m = stats::lm(y ~ x * z + I(x^2), data=small)
-  actual = compare_fits(y ~ x, small, m, return.preds=TRUE)
+  actual = compare_fits(y ~ x, small, m, return.preds=TRUE, prediction_method="observed")
   bins = comparison_x_bins(small)
   expected = tapply(stats::predict(m, newdata=small), bins$group, mean)
   expect_equal(actual$x, unname(bins$centers[as.integer(names(expected))]))
@@ -47,12 +47,12 @@ test_that("continuous observed predictions use actual responses within common x 
 test_that("binomial predictions average probabilities rather than inverse averaged links", {
   withr::local_options(flexplot.object_renderer=TRUE)
   m = stats::glm(y_bin ~ a + b, data=small, family=stats::binomial())
-  actual = compare_fits(y_bin ~ a, small, m, return.preds=TRUE)
+  actual = compare_fits(y_bin ~ a, small, m, return.preds=TRUE, prediction_method="observed")
   expected = tapply(stats::predict(m, newdata=small, type="response"), small$a, mean)
   links = tapply(stats::predict(m, newdata=small, type="link"), small$a, mean)
   expect_equal(actual$prediction, as.numeric(expected[as.character(actual$a)]))
   expect_true(any(abs(actual$prediction - stats::plogis(links[as.character(actual$a)])) > .001))
-  actual_links = compare_fits(y_bin ~ a, small, m, return.preds=TRUE, pred.type="link")
+  actual_links = compare_fits(y_bin ~ a, small, m, return.preds=TRUE, pred.type="link", prediction_method="observed")
   expect_equal(actual_links$prediction, as.numeric(links[as.character(actual_links$a)]))
 })
 
@@ -82,7 +82,7 @@ test_that("two models use the intersection of estimation samples and missing-val
   m1 = stats::lm(y ~ x + z, data=d)
   m2 = stats::lm(y ~ x + b, data=d)
   eligible = d[-c(4, 7), ]
-  actual = compare_fits(y ~ x, d, m1, m2, return.preds=TRUE)
+  actual = compare_fits(y ~ x, d, m1, m2, return.preds=TRUE, prediction_method="observed")
   bins = comparison_x_bins(eligible)
   for (name in unique(actual$model)) {
     fit = if (name == "m1 (lm)") m1 else m2
@@ -90,7 +90,7 @@ test_that("two models use the intersection of estimation samples and missing-val
     rows = actual$model == name
     expect_equal(actual$prediction[rows], as.numeric(expected))
   }
-  p = compare_fits(y ~ x, d, m1, m2, jitter=FALSE)
+  p = compare_fits(y ~ x, d, m1, m2, jitter=FALSE, prediction_method="observed")
   expect_equal(nrow(ggplot2::ggplot_build(p)$data[[1]]), nrow(eligible))
 })
 
@@ -98,9 +98,9 @@ test_that("subset estimation rows stay aligned after input data are reordered", 
   withr::local_options(flexplot.object_renderer=TRUE)
   m1 = stats::lm(y ~ x + z, data=small, subset=1:20)
   m2 = stats::lm(y ~ x + b, data=small, subset=10:27)
-  a = compare_fits(y ~ x, small, m1, m2, return.preds=TRUE)
+  a = compare_fits(y ~ x, small, m1, m2, return.preds=TRUE, prediction_method="observed")
   reordered = small[rev(seq_len(nrow(small))), ]
-  b = compare_fits(y ~ x, reordered, m1, m2, return.preds=TRUE)
+  b = compare_fits(y ~ x, reordered, m1, m2, return.preds=TRUE, prediction_method="observed")
   expect_equal(a, b)
   eligible = small[10:20, ]
   bins = comparison_x_bins(eligible)
@@ -108,9 +108,9 @@ test_that("subset estimation rows stay aligned after input data are reordered", 
   expect_equal(a$prediction[a$model == "m1 (lm)"], as.numeric(expected))
 
   rownames(reordered) = rownames(small)
-  expect_error(compare_fits(y ~ x, reordered, m1, m2, return.preds=TRUE), "Cannot align model observations")
+  expect_error(compare_fits(y ~ x, reordered, m1, m2, return.preds=TRUE, prediction_method="observed"), "Cannot align model observations")
   disjoint = stats::lm(y ~ x, data=small, subset=21:27)
-  expect_error(compare_fits(y ~ x, small, m1, disjoint, return.preds=TRUE), "no common eligible")
+  expect_error(compare_fits(y ~ x, small, m1, disjoint, return.preds=TRUE, prediction_method="observed"), "no common eligible")
 })
 
 test_that("display groups and conditioning use shared breaks without fabricated combinations", {
@@ -120,7 +120,7 @@ test_that("display groups and conditioning use shared breaks without fabricated 
   m = stats::lm(y ~ a + b + z, data=d)
   breaks = list(z=c(-.5, .5))
   labels = list(z=c("low", "middle", "high"))
-  actual = compare_fits(y ~ a + b | z, d, m, return.preds=TRUE, breaks=breaks, labels=labels)
+  actual = compare_fits(y ~ a + b | z, d, m, return.preds=TRUE, breaks=breaks, labels=labels, prediction_method="observed")
   independent = d
   independent$z_binned = cut(d$z, c(min(d$z), -.5, .5, max(d$z)),
                               include.lowest=TRUE, labels=labels$z)
@@ -139,7 +139,7 @@ test_that("unused levels and empty displayed combinations do not create predicti
   d = small[!(small$a == "b" & small$b == "y"), ]
   d$a = factor(d$a, levels=c("b", "a", "unused"), ordered=TRUE)
   m = stats::lm(y ~ a + b + z, data=d)
-  actual = compare_fits(y ~ a + b, d, m, return.preds=TRUE)
+  actual = compare_fits(y ~ a + b, d, m, return.preds=TRUE, prediction_method="observed")
   expect_false(any(as.character(actual$a) == "unused"))
   expect_false(any(actual$a == "b" & actual$b == "y"))
   expect_equal(nrow(actual), nrow(unique(d[c("a", "b")])))
@@ -153,13 +153,15 @@ test_that("both exported comparison names and positional calls are identical", {
   m = stats::lm(y ~ a + z, data=small)
   expect_identical(compare_fits, compare.fits)
   expect_identical(formals(compare_fits), formals(compare.fits))
-  expect_identical(compare_fits(y ~ a, small, m, return.preds=TRUE),
-                   compare.fits(y ~ a, small, m, return.preds=TRUE))
+  set.seed(123)
+  canonical = compare_fits(y ~ a, small, m, return.preds=TRUE)
+  set.seed(123)
+  expect_identical(canonical, compare.fits(y ~ a, small, m, return.preds=TRUE))
   positional = compare_fits(y ~ a, small, m, NULL, TRUE, FALSE, FALSE, "response", 50, 3, "reference")
   expect_identical(positional, compare_fits(y ~ a, small, m, return.preds=TRUE,
                                            prediction_method="reference"))
   expect_error(compare_fits(y ~ a, small, m, prediction_method="partial"),
-                'prediction_method must be "observed" or "reference"', fixed=TRUE)
+                'prediction_method must be "marginal", "observed", or "reference"', fixed=TRUE)
   expect_equal(ggplot2::ggplot_build(compare_fits(y ~ a, small, m, jitter=FALSE))$data,
                ggplot2::ggplot_build(compare.fits(y ~ a, small, m, jitter=FALSE))$data)
 })
@@ -187,7 +189,7 @@ test_that("prediction data and plotted values ignore the obsolete renderer optio
 test_that("observed group standard errors use covariance of the averaged model gradient", {
   withr::local_options(flexplot.object_renderer=TRUE)
   m = stats::lm(y ~ a + z, data=small)
-  p = compare_fits(y ~ a, small, m, return.preds=TRUE, report.se=TRUE)
+  p = compare_fits(y ~ a, small, m, return.preds=TRUE, report.se=TRUE, prediction_method="observed")
   matrix = stats::model.matrix(m)
   for (i in seq_len(nrow(p))) {
     gradient = colMeans(matrix[small$a == p$a[i], , drop=FALSE])
@@ -234,7 +236,7 @@ test_that("observed magnet averages preserve groups and model-column conditionin
   withr::local_options(flexplot.object_renderer=TRUE)
   m1 = stats::glm(y_bin ~ a + b + z, small, family=stats::binomial())
   m2 = stats::glm(y_bin ~ a + z, small, family=stats::binomial())
-  p = compare_fits(y_bin ~ a + b | z, small, m1, m2, jitter=FALSE)
+  p = compare_fits(y_bin ~ a + b | z, small, m1, m2, jitter=FALSE, prediction_method="observed")
   source = p$layers[[2]]$data
   predicted = p$layers[[4]]$data
   expect_no_warning({ built = ggplot2::ggplot_build(p) })
@@ -258,7 +260,7 @@ test_that("observed magnet averages preserve groups and model-column conditionin
 test_that("factor-binomial outcomes retain unrounded response-scale averages", {
   withr::local_options(flexplot.object_renderer=TRUE)
   m = stats::glm(y_ord ~ x, data=small_logistic, family=stats::binomial())
-  actual = compare_fits(y_ord ~ x, small_logistic, m, return.preds=TRUE)
+  actual = compare_fits(y_ord ~ x, small_logistic, m, return.preds=TRUE, prediction_method="observed")
   bins = comparison_x_bins(small_logistic)
   expected = tapply(stats::predict(m, newdata=small_logistic, type="response"), bins$group, mean)
   expect_equal(actual$prediction, as.numeric(expected))
@@ -273,7 +275,7 @@ test_that("mixed-model predictions respect the selected observations and predict
   m2 = lme4::lmer(Reaction ~ Days + (1 | Subject), data=d)
   set.seed(42)
   actual = compare_fits(Reaction ~ Days | Subject, d, m1, return.preds=TRUE,
-                        re=TRUE, clusters=2)
+                        re=TRUE, clusters=2, prediction_method="observed")
   expect_equal(length(unique(actual$Subject)), 2)
   expect_setequal(actual$model, c("fixed effects", "random effects"))
   selected = d[d$Subject %in% actual$Subject, ]
@@ -289,7 +291,7 @@ test_that("mixed-model predictions respect the selected observations and predict
   }
   set.seed(42)
   pair = compare_fits(Reaction ~ Days | Subject, d, m1, m2, re=TRUE,
-                      return.preds=TRUE, clusters=2)
+                      return.preds=TRUE, clusters=2, prediction_method="observed")
   expect_setequal(pair$model, c("m1 (lmerMod)", "m2 (lmerMod)"))
   expect_setequal(pair$Subject, actual$Subject)
   for (name in unique(pair$model)) {
@@ -300,7 +302,7 @@ test_that("mixed-model predictions respect the selected observations and predict
     rows = match(paste(block$Days, block$Subject), paste(bins$centers[expected$bin], expected$Subject))
     expect_equal(block$prediction, expected$x[rows])
   }
-  expect_error(compare_fits(Reaction ~ Days, d, m1, return.preds=TRUE, report.se=TRUE), "report.se=TRUE")
+  expect_error(compare_fits(Reaction ~ Days, d, m1, return.preds=TRUE, report.se=TRUE, prediction_method="observed"), "report.se=TRUE")
 })
 
 test_that("glmer predictions honor newdata and cluster selection", {
@@ -310,7 +312,7 @@ test_that("glmer predictions honor newdata and cluster selection", {
   effect = rep(seq(-2, 2, length.out=18), each=10)
   d$binary = stats::rbinom(nrow(d), 1, stats::plogis((d$Days - 4) / 4 + effect))
   m = lme4::glmer(binary ~ Days + (1 | Subject), data=d, family=stats::binomial())
-  actual = compare_fits(binary ~ Days | Subject, d, m, return.preds=TRUE, clusters=2)
+  actual = compare_fits(binary ~ Days | Subject, d, m, return.preds=TRUE, clusters=2, prediction_method="observed")
   expect_equal(length(unique(actual$Subject)), 2)
   selected = d[d$Subject %in% actual$Subject, ]
   bins = comparison_x_bins(selected, "Days")
@@ -333,7 +335,7 @@ test_that("regression trees and forests use predictions for the actual supplied 
   }
   reordered = small[rev(seq_len(nrow(small))), ]
   for (fit in models) {
-    actual = compare_fits(y ~ a, reordered, fit, return.preds=TRUE)
+    actual = compare_fits(y ~ a, reordered, fit, return.preds=TRUE, prediction_method="observed")
     expected = tapply(stats::predict(fit, newdata=reordered), reordered$a, mean)
     expect_equal(actual$prediction, as.numeric(expected[as.character(actual$a)]))
   }
@@ -345,12 +347,12 @@ test_that("binary trees and forests average probabilities for the second respons
   d = small
   d$binary = factor(d$y_bin, levels=c(0, 1), labels=c("no", "yes"))
   tree = rpart::rpart(binary ~ a + x + z, data=d)
-  actual = compare_fits(binary ~ a, d, tree, return.preds=TRUE)
+  actual = compare_fits(binary ~ a, d, tree, return.preds=TRUE, prediction_method="observed")
   expected = tapply(stats::predict(tree, newdata=d, type="prob")[, "yes"], d$a, mean)
   expect_equal(actual$prediction, as.numeric(expected[as.character(actual$a)]))
   forest = party::cforest(binary ~ a + x + z, data=d,
                            controls=party::cforest_unbiased(ntree=15, mtry=2))
-  actual = compare_fits(binary ~ a, d, forest, return.preds=TRUE)
+  actual = compare_fits(binary ~ a, d, forest, return.preds=TRUE, prediction_method="observed")
   probability = stats::predict(forest, newdata=d, type="prob")
   probability = if (is.list(probability)) do.call(rbind, probability)[, "binary.yes"] else probability[, "yes"]
   expected = tapply(probability, d$a, mean)
@@ -363,11 +365,11 @@ test_that("numeric ordinal prediction scores retain the existing polr convention
   d$ordinal = cut(d$y, stats::quantile(d$y, c(0, 1/3, 2/3, 1)),
                    labels=c("1", "2", "3"), include.lowest=TRUE, ordered_result=TRUE)
   m = MASS::polr(ordinal ~ a + z, data=d, Hess=TRUE)
-  actual = compare_fits(ordinal ~ a, d, m, return.preds=TRUE)
+  actual = compare_fits(ordinal ~ a, d, m, return.preds=TRUE, prediction_method="observed")
   value = as.numeric(as.character(stats::predict(m, newdata=d, type="class")))
   expected = tapply(value, d$a, mean)
   expect_equal(actual$prediction, as.numeric(expected[as.character(actual$a)]))
-  expect_no_error(ggplot2::ggplot_build(compare_fits(ordinal ~ a, d, m)))
+  expect_no_error(ggplot2::ggplot_build(compare_fits(ordinal ~ a, d, m, prediction_method="observed")))
 })
 
 test_that("model transformations use original plotting coordinates and ambiguous plot transforms fail", {

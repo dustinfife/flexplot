@@ -48,10 +48,10 @@ compare_fits = function(formula, data, model1, model2=NULL,
     stop("Both models must be mixed models when comparing random effects.", call.=FALSE)
   }
   data = droplevels(data)
-  labels = paste0(paste(deparse(substitute(model1)), collapse=""), " (", class(model1)[1], ")")
+  model_labels = paste0(paste(deparse(substitute(model1)), collapse=""), " (", class(model1)[1], ")")
   if (!single_model) {
     label2 = paste0(paste(deparse(substitute(model2)), collapse=""), " (", class(model2)[1], ")")
-    labels = make.unique(c(labels, label2))
+    model_labels = make.unique(c(model_labels, label2))
   }
   
   plot_data = data
@@ -62,16 +62,16 @@ compare_fits = function(formula, data, model1, model2=NULL,
   flexplot_reverse_categorical(formula, plot_data, allow_reverse=FALSE)
   
   if (prediction_method == "reference") {
-    prediction = compare_fits_reference(models, data, formula, re, pred.type, labels,
+    prediction = compare_fits_reference(models, data, formula, re, pred.type, model_labels,
                                         single_model, report.se, ...)
   } else if (prediction_method == "marginal") {
-    prediction = compare_fits_marginal(models, data, formula, re, pred.type, labels,
+    prediction = compare_fits_marginal(models, data, formula, re, pred.type, model_labels,
                                        single_model, report.se, num_points, ...)
   } else {
     frames = vector("list", length(models))
     for (i in seq_along(models)) {
       frames[[i]] = compare_fits_observed(models[[i]], data, formula, re, pred.type,
-                                          labels[i], single_model, report.se, ...)
+                                          model_labels[i], single_model, report.se, ...)
     }
     prediction = do.call(rbind, frames)
   }

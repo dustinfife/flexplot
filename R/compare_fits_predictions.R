@@ -162,7 +162,7 @@ compare_fits_observed = function(model, data, formula, re, pred.type, label,
   compare_fits_summary_se(result, model, data, pred.type)
 }
 
-compare_fits_reference = function(models, data, formula, re, pred.type, labels,
+compare_fits_reference = function(models, data, formula, re, pred.type, model_labels,
                                    single_model, report.se, ...) {
   grid = generate_predictors(data, formula, models[[1]], ...)
   for (model in models) {
@@ -175,7 +175,7 @@ compare_fits_reference = function(models, data, formula, re, pred.type, labels,
   frames = list()
   for (i in seq_along(models)) {
     frame = compare_fits_prediction_frame(models[[i]], grid, re, pred.type,
-                                          labels[i], single_model, "reference")
+                                          model_labels[i], single_model, "reference")
     if (report.se) frame = compare_fits_reference_se(frame, models[[i]], pred.type)
     frames[[i]] = frame
   }
