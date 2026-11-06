@@ -58,7 +58,7 @@ formula_random_component = function(random) {
   }
   # The random argument historically accepts lmer syntax, not a column name.
   # Parse without evaluation, then permit only the random-effects grammar.
-  expr = stats::as.formula(paste("~", random))[[2]]
+  expr = tryCatch(str2lang(random), error=identity)
   if (!formula_random_syntax(expr)) {
     stop("Unsupported random-effects string. Use names and random-effects operators; ",
          "supply a one-sided formula for trusted transformations.", call.=FALSE)
@@ -66,9 +66,29 @@ formula_random_component = function(random) {
   expr
 }
 
-formula_random_syntax = function(expr) {
-  if (is.symbol(expr) || is.numeric(expr)) return(TRUE)
+formula_random_syntax = function(expr, component=FALSE) {
+  if (missing(expr)) return(FALSE)
+  if (is.symbol(expr)) return(component && nzchar(as.character(expr)))
+  if (is.numeric(expr)) return(component && length(expr) == 1L &&
+                                !is.complex(expr) && is.finite(expr))
   if (!is.call(expr) || !is.symbol(expr[[1]])) return(FALSE)
-  if (!as.character(expr[[1]]) %in% c("(", "+", "-", "*", "/", ":", "^", "|", "||")) return(FALSE)
-  all(vapply(as.list(expr)[-1], formula_random_syntax, logical(1)))
+  operator = as.character(expr[[1]])
+  arguments = as.list(expr)[-1]
+  if (any(nzchar(names(arguments)))) return(FALSE)
+  arity = length(arguments)
+  if (operator == "(") {
+    return(arity == 1L && formula_random_syntax(expr[[2]], component))
+  }
+  # A specification consists of random terms, optionally joined with +.
+  # Slopes and grouping expressions cannot themselves contain another bar.
+  if (!component) {
+    if (operator %in% c("|", "||") && arity == 2L) {
+      return(all(vapply(arguments, formula_random_syntax, logical(1), component=TRUE)))
+    }
+    if (operator != "+" || arity != 2L) return(FALSE)
+    return(all(vapply(arguments, formula_random_syntax, logical(1))))
+  }
+  if (!operator %in% c("+", "-", "*", "/", ":", "^")) return(FALSE)
+  if (arity != 2L && !(operator %in% c("+", "-") && arity == 1L)) return(FALSE)
+  all(vapply(arguments, formula_random_syntax, logical(1), component=TRUE))
 }

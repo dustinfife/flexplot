@@ -79,6 +79,62 @@ test_that("trusted formula expressions and random-effects syntax remain supporte
   expect_equal(as.numeric(logLik(actual)), as.numeric(logLik(expected)))
 })
 
+test_that("random-effects strings are validated before normalization or evaluation", {
+  marker = new.env(parent=emptyenv())
+  marker$called = FALSE
+  probe = function(x) {
+    marker$called = TRUE
+    x
+  }
+  invalid = c(
+    "1 = probe((1 | id))", "1 = probe(1)", "(1 | id) <- probe(1)",
+    "(1 | id) <<- probe(1)", "probe(1) -> target", "probe(1) ->> target",
+    "probe((1 | id))", "(1 | probe(id))", "{probe(1); (1 | id)}",
+    "(1 | id); probe(1)", "(1 | id)\nprobe(1)",
+    "(1 | id) + I(probe(1))", "(1 | id) + base::identity(1)",
+    "(1 | id[probe(1)])", "(1 | id$group)", "~ (1 | id)",
+    "`|`(1)", "`|`(1, id, other)", "`||`(1)",
+    "`(`()", "`(`(1 | id, other)", "(1 + `+`(x, z, q) | id)",
+    "(`*`(x) | id)", "(`+`() | id)", "(`+`(, x) | id)",
+    "`|`(slope=1, group=id)", "(1 | (x | id))",
+    "(1 | id) + x", "x", "1", "", "(1 | id"
+  )
+  for (random in invalid) {
+    expect_error(make.formula("y", "x", random), "Unsupported random-effects string")
+    expect_false(marker$called)
+  }
+})
+
+test_that("validated random strings preserve formula structure and model results", {
+  caller_environment = environment()
+  valid = c("(1 | id)", "(1 + x | id)", "(0 + x || id)",
+            "(1 | id) + (0 + x | other)", "(1 | id / other)",
+            "(-1 + x*z + x:z + x^2 | id:other)")
+  for (random in valid) {
+    actual = make.formula("y", "x", random)
+    expect_identical(actual[[3]][[3]], str2lang(random))
+    expect_identical(environment(actual), caller_environment)
+  }
+  expect_identical(make.formula("y", "0", "(1 | id)")[[3]][[2]], 0)
+  expect_identical(make.formula("y", "1", "(1 | id)")[[3]][[2]], 1)
+  trusted = make.formula("y", ~ x + I(x^2), random=~ (1 + I(x^2) | id))
+  expect_identical(trusted[[3]][[3]], quote((1 + I(x^2) | id)))
+  expect_identical(environment(trusted), caller_environment)
+  skip_if_not_installed("lme4")
+  random = "(1 | id) + (0 + x | id)"
+  expected = lme4::lmer(y ~ x + (1 | id) + (0 + x | id), small_mixed)
+  actual = lme4::lmer(make.formula("y", "x", random), small_mixed)
+  expect_equal(lme4::fixef(actual), lme4::fixef(expected))
+  expect_equal(as.numeric(logLik(actual)), as.numeric(logLik(expected)))
+  d = small_mixed
+  names(d)[names(d) == "id"] = "group`\\name"
+  random = paste0("(1 + x | ", escape_spaces_in_formulas("group`\\name"), ")")
+  expected = lme4::lmer(y ~ x + (1 + x | id), small_mixed)
+  actual = lme4::lmer(make.formula("y", "x", random), d)
+  expect_equal(lme4::fixef(actual), lme4::fixef(expected))
+  expect_equal(as.numeric(logLik(actual)), as.numeric(logLik(expected)))
+})
+
 test_that("jamovi plotting analysis and callback handle literal column names", {
   skip_if_not_installed("jmvcore")
   grDevices::pdf(NULL)

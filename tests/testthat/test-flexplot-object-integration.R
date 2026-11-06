@@ -99,11 +99,13 @@ renderer_calls_text_parser = function(object) {
         all.names(body(object)))
 }
 
-test_that("package functions do not parse generated R code", {
+test_that("only the random-effects validator parses user syntax", {
   namespace = asNamespace("flexplot")
   objects = mget(ls(namespace, all.names=TRUE), envir=namespace, inherits=FALSE)
   parsers = names(objects)[vapply(objects, renderer_calls_text_parser, logical(1))]
-  expect_length(parsers, 0)
+  # Random-effects text is parsed without evaluation and its complete AST is
+  # validated. Plot rendering must never acquire another text-parser path.
+  expect_identical(parsers, "formula_random_component")
 })
 
 test_that("default native plots retain return_data and metadata for downstream consumers", {
