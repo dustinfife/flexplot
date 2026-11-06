@@ -1,5 +1,3 @@
-
-
 formula_functions = function(formula, data) {
   
   if (is.null(data)) return(list(data=data, formula=formula))
@@ -47,22 +45,6 @@ rewrite_formula_function = function(expr, data, formula_env) {
   
   return(list(expr=as.name(variable_names), data=data))
 }
-
-
-# this function applied a function passed as string to the data
-perform_function = function(string, data) {
-  with(data, eval(parse(text=string)))
-}
-
-# function that returns the variables or functions passed from a string
-get_var_names_within_function = function(string, return.var=TRUE) {
-  components = unlist(strsplit(string, split="(", fixed=T))
-  var = gsub(")", "", components[2], fixed=T)
-  fun = match.fun(components[1])
-  if (return.var) return(var)
-  fun
-}
-
 
 
 # expect_true(length(names(flexplot_prep_variables(weight.loss~therapy.type, data=exercise_data)))==23)
@@ -119,7 +101,6 @@ flexplot_prep_variables = function(formula, data, breaks=NULL, related=F, labels
 # }  
 
 
-
 ### prep data for association plot
 modify_association_plot_data = function(data, formula, outcome) {
 
@@ -147,7 +128,7 @@ modify_association_plot_data = function(data, formula, outcome) {
     final.pred = (m$Freq - predicted)/predicted
     m$Freq = final.pred
     names(m)[names(m)=="Freq"] = "Proportion"
-    # Retain metadata for native rendering without changing legacy table classes.
+    # Retain ordered-factor metadata alongside the contingency-table classes.
     association_variables = c(predictors, outcome)
     attr(m, "association_ordered") = association_variables[
       vapply(data[association_variables], is.ordered, logical(1))
@@ -381,7 +362,6 @@ prepare_magnet_data = function(data, outcome, axis, given = NA) {
 }
 
 
-
   #### this function figures out which variables need to be binned
 #expect_identical(flexplot_break_me(exercise_data, c("muscle.gain", "income"), given="income"), "income")
 #expect_identical(flexplot_break_me(exercise_data, c("weight.loss", "income"), given="income"), "income")
@@ -537,121 +517,10 @@ convert_if_less_than_five = function(data, col, check_pred = FALSE, pred = NULL)
 }
 
 
-flexplot_bivariate_plot = function(formula = NULL, data, prediction, outcome, predictors, axis, # variable types and stuff
-                                    related, alpha, jitter, suppress_smooth, method, spread, plot.type, bins, use_magnet=FALSE,
-                                    magnet_labels=NULL  # arguments passed from flexplot
-                                   ){
-
-  jitter = match_jitter_categorical(jitter)
-  if (is.null(formula)){
-    list.na = list(outcome, predictors, axis, related, alpha, jitter, suppress_smooth, method, spread)
-    isnull =  names(which(unlist(lapply(list.na, is.null))))
-    if (length(isnull)>0){
-      stop(paste0("You must either provide a formula OR all variables requested. It looks like you're missing the variable ", isnull))
-    }
-  } else {
-    prep_vars = flexplot_prep_variables(formula, data=data)
-    predictors = prep_vars$predictors; outcome = prep_vars$outcome; axis = prep_vars$axis; 
-    related = prep_vars$related; alpha= prep_vars$alpha; jitter= prep_vars$jitter 
-    suppress_smooth= prep_vars$suppress_smooth; method= prep_vars$method; spread= prep_vars$spread
-  }
-  
-  # fail if they try to model more than one DV (or less than one)
-  if (length(outcome)!=1) stop("Sorry, friend, but you must have one and only one outcome variable.")
-  
-  #### histograms
-  if (length(predictors)==0 | axis[1] == "1"){
-    p = flexplot_histogram(data, outcome, plot.type, bins)
-    points = "xxxx"
-    fitted = "xxxx"
-    return(list(p=p, points=points, fitted=fitted))
-  } 
-  
-  ### RELATED T-TEST
-  if (related){		
-    if (length(axis)>1) stop("Sorry, my friend, you can't do a related plot when you have more than one predictor variable.")
-    return(flexplot_related(data, jitter, plot.type, spread))
-  } 
-  
-  if (use_magnet) {
-    
-    p = paste0(
-      'ggplot(data=data, aes(x=.data[[axis[1]]], ',
-      'y=y_scaled)) + ',
-      'geom_hline(yintercept=.5, linetype="dashed", ',
-      'color="gray50")'
-    )
-    
-    if (length(axis) > 1) {
-      
-      p = paste0(
-        'ggplot(data=data, aes(x=.data[[axis[1]]], ',
-        'y=y_scaled, color=.data[[axis[2]]])) + ',
-        'geom_hline(yintercept=.5, linetype="dashed", ',
-        'color="gray50")'
-      )
-    }
-    
-    points = paste0(
-      'geom_point(data=sample.subset(sample, data), alpha=alpha, ',
-      'position=position_jitter(width=.05, height=0), ',
-      'shape=1, size=2)'
-    )
-    
-    fitted = paste0(
-      'stat_summary(
-    aes(x=.data[[axis[1]]], y=.data[[outcome]]),
-    fun=mean,
-    geom="point",
-    size=4,
-    color="blue",
-    inherit.aes=FALSE
-  )'
-    )
-    
-    p = paste0(
-      p,
-      ' + flexplot_magnet_y_scale(',
-      paste(deparse(magnet_labels), collapse=" "),
-      ') + labs(y=outcome)'
-    )
-    
-    return(list(
-      p = p,
-      points = points,
-      fitted = fitted
-    ))
-  }
-  
-  ### BIVARIATE PLOTS
-  
-  if (length(axis)==1){
-    return(flexplot_bivariate_string(data, outcome, axis, jitter, plot.type, suppress_smooth, spread, method))
-  } 
-  
-  ### MULTIVARIATE PLOTS
-  p = flexplot_multivariate_aes(data, outcome, prediction, axis)
-  points = points.func(axis.var=axis, data=data, jitter=jitter)
-  fitted = fit.function(outcome, predictors=axis[1], data=data, suppress_smooth=suppress_smooth, 
-                        method=method, spread=spread, mean.line=TRUE)
-    
-  
-  ### remove the default color if they have something in the second axis
-  if (!is.numeric(data[,axis[2]])){
-    fitted = gsub(", color = '#bf0303'", "", fitted, fixed=T)
-    fitted = gsub(', color = "#bf0303"', "", fitted, fixed=T)
-  }	
-
-  
-  list(p=p, points=points, fitted=fitted)
-}
-
-
 calculate_bins_for_histograms = function(bins, levels) {
   if (bins != 3) return(bins)
   return(min(30, round(levels/2)))
 }
-
 
 
 flexplot_modify_prediction = function(prediction, axis, num.models, break.me, bins, labels, breaks, predictors){
@@ -678,8 +547,6 @@ flexplot_modify_prediction = function(prediction, axis, num.models, break.me, bi
   
   return(prediction)
 }
-
-
 
 
 check_same_variables_in_prediction = function(formula, prediction=NULL) {

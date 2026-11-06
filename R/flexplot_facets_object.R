@@ -1,5 +1,4 @@
-# Object-based counterpart to flexplot_panel_variables().
-# This intentionally leaves the existing string renderer unchanged.
+# Facets for native flexplot rendering.
 flexplot_panel_variables_object = function(given, break.me) {
   if (length(given) == 0L || is.na(given[1])) return(NULL)
 

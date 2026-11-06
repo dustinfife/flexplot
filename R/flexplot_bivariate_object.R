@@ -81,6 +81,7 @@ flexplot_logistic_layer = function(data, outcome, se) {
   ))
 }
 
+#' @importFrom MASS rlm
 flexplot_smooth_layer = function(data, outcome, method, se) {
   
   if (identical(method, "logistic")) {

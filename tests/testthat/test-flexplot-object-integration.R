@@ -19,21 +19,16 @@ test_that("object renderer supports facets and suppressed smoothing", {
   expect_silent(ggplot2::ggplot_build(p))
 })
 
-unexpected_legacy_renderer = function(...) {
-  stop("The legacy renderer was called.")
+unexpected_formula_preprocessing = function(...) {
+  stop("Formula preprocessing was called.")
 }
 
 unexpected_native_renderer = function(...) {
   stop("The native renderer was called.")
 }
 
-test_that("native rendering is the default without consulting legacy builders", {
+test_that("native rendering is the default", {
   withr::local_options(flexplot.object_renderer=NULL)
-  testthat::local_mocked_bindings(
-    flexplot_bivariate_plot=unexpected_legacy_renderer,
-    create_ghost_dataset=unexpected_legacy_renderer,
-    create_ghost_text=unexpected_legacy_renderer, .package="flexplot"
-  )
 
   p = flexplot(y ~ x, data=small, method="lm", se=FALSE, jitter=FALSE)
   built = ggplot2::ggplot_build(p)
@@ -47,9 +42,6 @@ test_that("native rendering is the default without consulting legacy builders", 
 
 test_that("the obsolete opt-out cannot select legacy rendering", {
   withr::local_options(flexplot.object_renderer=FALSE)
-  testthat::local_mocked_bindings(
-    flexplot_bivariate_plot=unexpected_legacy_renderer, .package="flexplot"
-  )
 
   p = flexplot(y ~ x, data=small, method="lm", se=FALSE, jitter=FALSE)
   built = ggplot2::ggplot_build(p)
@@ -64,9 +56,7 @@ test_that("the obsolete opt-out cannot select legacy rendering", {
 test_that("plot.string errors before preprocessing or either renderer can run", {
   withr::local_options(flexplot.object_renderer=TRUE)
   testthat::local_mocked_bindings(
-    formula_functions=unexpected_legacy_renderer,
-    flexplot_bivariate_plot=unexpected_legacy_renderer,
-    create_ghost_dataset=unexpected_legacy_renderer,
+    formula_functions=unexpected_formula_preprocessing,
     flexplot_render_object=unexpected_native_renderer, .package="flexplot"
   )
 
@@ -81,8 +71,6 @@ test_that("plot.string errors before preprocessing or either renderer can run", 
 
 test_that("obsolete options cannot affect native preprocessing or supplied predictions", {
   withr::local_options(flexplot.object_renderer=NULL)
-  testthat::local_mocked_bindings(flexplot_bivariate_plot=unexpected_legacy_renderer,
-                                  create_ghost_dataset=unexpected_legacy_renderer, .package="flexplot")
   d = small
   d$a = ordered(d$a, levels=c("b", "a"))
   d$y_bin = factor(d$y_bin, levels=c(0, 1))
@@ -103,6 +91,19 @@ test_that("obsolete options cannot affect native preprocessing or supplied predi
     expect_equal(p$data, original$data)
     expect_identical(p$formula, y_bin ~ a + z | b)
   }
+})
+
+renderer_calls_text_parser = function(object) {
+  if (!is.function(object)) return(FALSE)
+  any(c("parse", "parse_expr", "parse_exprs", "str2lang", "str2expression") %in%
+        all.names(body(object)))
+}
+
+test_that("package functions do not parse generated R code", {
+  namespace = asNamespace("flexplot")
+  objects = mget(ls(namespace, all.names=TRUE), envir=namespace, inherits=FALSE)
+  parsers = names(objects)[vapply(objects, renderer_calls_text_parser, logical(1))]
+  expect_length(parsers, 0)
 })
 
 test_that("default native plots retain return_data and metadata for downstream consumers", {

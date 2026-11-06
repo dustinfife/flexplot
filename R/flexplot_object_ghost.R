@@ -121,8 +121,8 @@ flexplot_ghost_prediction_data = function(reference_data, axis, given, data,
     stop("Prediction ghost lines require one reference category or bin per conditioning variable.",
          call.=FALSE)
   }
-  # Match the legacy ghost's duplicate-x aggregation, using only predictions
-  # already calculated by the comparison's chosen prediction method.
+  # Average duplicate x/model rows using predictions already calculated by
+  # the comparison's chosen prediction method.
   if (is.numeric(data[[axis[1]]])) {
     grouped = dplyr::group_by(reference_data, .data$model, .data[[axis[1]]])
     centers = dplyr::summarise(grouped, prediction=mean(.data$prediction), .groups="drop")
@@ -168,7 +168,7 @@ flexplot_ghost_categorical_data = function(reference_data, full_data, outcome, a
   mapping = ggplot2::aes(x=.data[[x]], y=.data[[outcome]], group=1)
   if (!is.null(group)) mapping$group = ggplot2::aes(group=.data[[group]])$group
 
-  # Legacy ghosts use the summary-point centers and their dodge positions.
+  # Ghost summaries use the summary-point centers and their dodge positions.
   # Extract just that layer, reusing the ordinary summary statistic unchanged.
   p = ggplot2::ggplot(reference_data, mapping) +
     flexplot_categorical_summary_layers(spread, group)[[1]] +

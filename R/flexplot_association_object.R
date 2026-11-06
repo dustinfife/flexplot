@@ -11,7 +11,7 @@ flexplot_association_object = function(data, outcome, axis) {
     x=.data[[xvar]], y=.data[["Proportion"]], fill=.data[[outcome]]
   )) +
     ggplot2::geom_bar(stat="identity", position="dodge") +
-    # Legacy table() output uses an unordered discrete fill palette.
+    # Contingency-table output uses an unordered discrete fill palette.
     ggplot2::scale_fill_discrete() +
     ggplot2::labs(x=xvar, y="Proportion", fill=outcome) +
     ggplot2::theme_bw() +

@@ -281,7 +281,6 @@ test_same_class = function(model1, model2) {
 }
 
 
-
 	### create custom function to sample data
 sample.subset = function(sample, data){
 	if (sample!=Inf){
@@ -323,126 +322,6 @@ match_jitter_categorical = function(x){
 #match_jitter_categorical(c(.2, .1))
 #match_jitter_categorical(F)
 #match_jitter_categorical(c(F,T))
-#jitter = c(.2, .4); data=exercise_data; axis.var=c("therapy.type", "gender")
-	#### points = the datapoints
-#' @noRd
-points.func = function(axis.var, data, jitter){
-
-  if (is.null(jitter) & !check.non.number(data[,axis.var[1]])){
-    jitter = c(0,0)
-  } else {
-    jitter = match_jitter_categorical(jitter)
-  }
-  
-  ### if they have two axis variables that are categorical
-  if (length(axis.var)>1 & all(sapply(data[,axis.var, drop=F], check.non.number))){
-    jit = paste0("geom_point(data=sample.subset(sample, ", deparse(substitute(data)), 
-                 "), alpha=raw.alph.func(raw.data, alpha=alpha), position=position_jitterdodged(jitter.width=", jitter[1], ", jitter.height=", jitter[2], ", dodge.width=.5))")				
-  
-  ### if they have one categorical axis
-  } else if (length(axis.var)==1 & check.non.number(data[,axis.var])){
-    jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=", jitter[1], ", height=", jitter[2], ")")				
-  } else {  
-    jit = paste0("geom_jitterd(data=sample.subset(sample, ", deparse(substitute(data)), "), alpha=raw.alph.func(raw.data, alpha=alpha), width=", jitter[1], ", height=", jitter[2], ")")				
-  }
-  
-	#### return the jittered string
-	return(jit)		
-}
-
-# points.func(axis.var="therapy.type", data=exercise_data, jitter=NULL)
-# points.func("therapy.type", exercise_data, T)
-# points.func("therapy.type", exercise_data, F)
-# points.func("motivation", exercise_data, NULL)
-# points.func(axis.var=c("motivation", "therapy.type"), data=exercise_data, jitter=NULL)
-# points.func(c("gender", "therapy.type"), exercise_data, NULL)
-# points.func(c("gender", "therapy.type"), exercise_data, c(.2, .1))
-
-
-
-
-##' @importFrom MASS rlm	
-#### identify the correct "fit"
-fit.function = function(outcome, predictors, data, suppress_smooth=FALSE, method="loess", spread="sterr", mean.line=F, categorical=FALSE){
-  
-	if (is.numeric(data[,predictors]) & !categorical){
-		if (suppress_smooth){
-			fit.string = "xxxx"
-		} else if (method=="logistic") {
-	
-			#### make sure there's only two levels
-			if (length(unique(data[,outcome]))!=2){
-				stop("To fit a logistic curve, you must have only two levels of your outcome variable.")
-			}
-
-			fit.string = 'geom_smooth(method = "glm", method.args = list(family = "binomial"), se = se, formula = y~x)'			
-		} else if (method=="rlm"){
-			fit.string = 'geom_smooth(method = "rlm", se = se, formula = y~x)'
-		}else if (method=="poisson" | method=="Gamma") {
-			#### specify the curve
-			fit.string = 'geom_smooth(method = "glm", method.args = list(family = method), se = se, formula = y~x)'
-		} else if (method=="polynomial" | method == "quadratic"){
-			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 2, raw=TRUE))'
-		} else if (method=="cubic"){
-			fit.string = 'stat_smooth(method="lm", se=se, formula=y ~ poly(x, 3, raw=TRUE))'
-		} else if (method=="lm"){
-			fit.string = 'stat_smooth(method="lm", se=se, formula = y~x)'
-		} else {
-			fit.string = 'geom_smooth(method="loess", se=se, formula = y~x)'
-		}
-		
-
-		
-	} else {
-		if (suppress_smooth){
-			summary1="xxxx"
-			summary2="xxxx"
-			sum.line="xxxx"						
-		} else if (spread=="stdev"){
-			summary1 = "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')" 
-			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-sd(z)}, fun.ymax = function(z) {mean(z)+sd(z)}, fun.y=median, linewidth = 1.25, width=.2, position=position_dodge(width=.5), color = '#bf0303')"
-			if (mean.line){
-				sum.line = 'stat_summary(aes(group= !!sym(axis[2])), geom="line", fun.y="mean", position=position_dodge(width=.5), color = "#bf0303")'
-			} else {
-				sum.line='xxxx'
-			}
-		} else if (spread=="sterr"){	
-			summary1 = "stat_summary(fun.y='mean', geom='point', size=3, position=position_dodge(width=.5), color = '#bf0303')"
-			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, fun.ymax = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, width=.2, size = 1.25, position=position_dodge(width=.5), color = '#bf0303')"
-			if (mean.line){
-				sum.line = 'stat_summary(aes(group = .data[[axis[2]]]), geom="line", fun.y="mean", position=position_dodge(width=.4), color = "#bf0303")'
-			} else {
-				sum.line='xxxx'
-			}
-
-		} else if (spread == "quartiles"){	
-			summary1 = "stat_summary(fun.y='median', geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')" 
-			summary2 = "stat_summary(geom='errorbar', fun.ymin = function(z){quantile(z, .25)},linewidth = 1.25,  fun.ymax = function(z) {quantile(z, .75)}, fun.y=median, width=.2, position=position_dodge(width=.4), color = '#bf0303')"
-			if (mean.line){
-				sum.line = 'stat_summary(aes(group = .data[[axis[2]]]), geom="line", fun.y="median", position=position_dodge(width=.4), color = "#bf0303")'
-			} else {
-				sum.line='xxxx'
-			}
-
-		}
-		
-		fit.string = paste0(summary1, "+",summary2, "+", sum.line)		
-		### check package version of ggplot2
-		if (packageVersion("ggplot2")>"3.2.1"){
-		  fit.string = gsub("fun.ymin", "fun.min", fit.string, fixed=T)
-		  fit.string = gsub("fun.ymax", "fun.max", fit.string, fixed=T)
-		  fit.string = gsub("fun.y", "fun", fit.string, fixed=T)
-		} else {
-		  fit.string
-		}
-		
-	}
-
-	return(fit.string)
-	
-}
-
-
 # find in file. Thanks to https://stackoverflow.com/questions/45502010/is-there-an-r-version-of-rstudios-find-in-files
 fif <- function(what, where=".", in_files="\\.[Rr]$", recursive = TRUE,
                 ignore.case = TRUE) {
