@@ -269,7 +269,6 @@ return_constant_for_predicted_data = function(missing_variable, data, model) {
   
   if (length(missing_variable)==0) return(NA)
   if (is.numeric(data[,missing_variable])) {
-    message(paste0("Note: You didn't choose to plot ", missing_variable, " so I am inputting the mean\n"))
     data[,missing_variable] = mean(data[,missing_variable], na.rm=T)
     return(data[,missing_variable])
   }
@@ -278,11 +277,7 @@ return_constant_for_predicted_data = function(missing_variable, data, model) {
   counts = table(data[[missing_variable]])
   mode = names(counts)[which.max(counts)]
   val = data[[missing_variable]][match(mode, as.character(data[[missing_variable]]))]
-  #only display the message if it's not a glmer mod
-  if (!(class(model)[1] %in% c("lmerMod", "glmerMod"))) {
-    message(paste0("Note: You didn't choose to plot ",
-                   missing_variable, " so I am inputting '", val, "'\n"))
-  }
+  
   data[,missing_variable] = val
   return(data[,missing_variable])
   

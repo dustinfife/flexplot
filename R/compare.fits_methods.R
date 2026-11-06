@@ -503,10 +503,10 @@ compare_fits_marginal = function(models, data, formula, re, pred.type, labels,
     grid$.marginal_x = NULL
     grid = grid[displayed]
   }
-  # Deterministic, evenly distributed subsample; no RNG side effects.
+
+  # Randomly sample the reference distribution
   n_ref = min(300L, nrow(data))
-  ref_rows = if (n_ref == nrow(data)) seq_len(nrow(data)) else
-    unique(as.integer(round(seq(1, nrow(data), length.out=n_ref))))
+  ref_rows = sample.int(nrow(data), size=n_ref, replace=FALSE)
   reference = data[ref_rows, , drop=FALSE]
   outputs = list()
   for (i in seq_along(models)) {
