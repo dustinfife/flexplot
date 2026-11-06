@@ -489,7 +489,7 @@ residual.plots = function(data, object,...){
     # this is necessary bc ggplot converts to ordered factor when there's few levels
     if (is.ordered(sl$data$fitted)) nd[,1] = factor(nd[,1], ordered=T)
     
-    sl = sl + geom_line(data=nd, col="#bf0303", size=1.5, group=1)
+    sl = sl + geom_line(data=nd, col="#bf0303", linewidth=1.5, group=1)
     #class(sl) = c("flexplot", class(sl))		
   } else {
     sl = flexplot(abs.res~fitted, data=data, method="lm",...)+ labs(x="fitted", y="Absolute Value\nof Residuals", title="S-L Plot")			
