@@ -86,18 +86,32 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, formula, ...) {
   pre_join_data = expand.grid(fixed.means[[outcome]], re_df) %>%
     purrr::set_names(c(outcome, term.re))
   fixed.means = full_join(fixed.means, pre_join_data)
+
+  # Keep singleton summaries as points, but only connect rows within a group
+  # and panel when at least two observations are available.
+  panel_variables = unique(c(names(step3$facet$params$rows), names(step3$facet$params$cols)))
+  line_groups = unique(c(term.re, panel_variables))
+  line.means = means %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(line_groups))) %>%
+    dplyr::filter(dplyr::n() > 1L) %>%
+    dplyr::ungroup()
+  # The fixed-effect line maps group=1: only facet variables split its rows.
+  fixed.line.means = fixed.means %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(panel_variables))) %>%
+    dplyr::filter(dplyr::n() > 1L) %>%
+    dplyr::ungroup()
   
   random_geom = 
       ### random effects
       list(
         geom_point(data=means, aes_string(x=terms[1], y=outcome), size=.5),
-        geom_line(data=means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=.25, linetype=2, alpha = .90))
+        geom_line(data=line.means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=.25, linetype=2, alpha = .90))
       
   fixed_geom =  
       ### fixed effects
       list(
         geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3, color="black", shape=16),
-        geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=1), lwd=2, color="black", linetype=1)) 
+        geom_line(data=fixed.line.means, aes_string(x=terms[1], y=outcome, group=1), lwd=2, color="black", linetype=1))
 
   return(list(random_geom = random_geom, fixed_geom = fixed_geom))
 }

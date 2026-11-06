@@ -11,7 +11,7 @@ test_that("visualize mixed models", {
   set.seed(1212)
   a = visualize(model, formula = MathAch~ SES | Sex + School, plot="model")
   b = visualize(model, formula = MathAch~ SES + School| Sex)
-  c = visualize(model, formula = MathAch~ Sex | SES+ School, plot="model")
+  c = visualize(model, formula = MathAch~ Sex | SES+ School, plot="model") %>% suppressMessages()
   
   mod = lme4::lmer(MathAch~1 + (1|School), data=math)
   a1 = visualize(mod, plot="model")
