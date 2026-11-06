@@ -172,7 +172,7 @@ generate_predictions.RandomForest = function(model, re, pred.values, pred.type, 
                                        ordered=is.ordered(data[[variable]]))
     }
   }
-
+  
   response = response[[1]]
   if (is.factor(response) && nlevels(droplevels(response)) == 2 && pred.type == "response") {
     probabilities = predict(model, newdata=pred.values, type="prob", OOB=FALSE)
@@ -470,6 +470,72 @@ post_prediction_process_cf.lmerMod  = function(model1, model2=NULL, predictions,
   return(pred.values)
 }
 
-
-
-
+# Marginal standardization: one shared reference distribution for all curves.
+# The same reference rows are used at every plotted coordinate and for both models.
+compare_fits_marginal = function(models, data, formula, re, pred.type, labels,
+                                 single_model, report.se, num_points=50, ...) {
+  if (length(num_points) != 1 || !is.finite(num_points) || num_points < 2 ||
+      num_points != as.integer(num_points)) {
+    stop("num_points must be an integer >= 2.", call.=FALSE)
+  }
+  displayed = all.vars(formula)[-1]
+  if (!length(displayed)) {
+    stop("Marginal prediction requires a displayed predictor.", call.=FALSE)
+  }
+  # Existing grid generator establishes conditioning/moderator values and levels.
+  grid = generate_predictors(data, formula, models[[1]], ...)
+  if (!all(displayed %in% names(grid))) {
+    stop("Prediction grid is missing displayed variables.", call.=FALSE)
+  }
+  grid = unique(grid[displayed])
+  axis = flexplot_axis_given(formula)$axis[1]
+  if (axis %in% displayed && is.numeric(data[[axis]]) &&
+      length(unique(data[[axis]])) >= 10) {
+    x_values = seq(min(data[[axis]]), max(data[[axis]]), length.out=num_points)
+    moderators = setdiff(displayed, axis)
+    if (length(moderators)) {
+      grid = unique(grid[moderators])
+      grid = merge(data.frame(.marginal_x=x_values), grid, by=NULL)
+    } else {
+      grid = data.frame(.marginal_x=x_values)
+    }
+    grid[[axis]] = grid$.marginal_x
+    grid$.marginal_x = NULL
+    grid = grid[displayed]
+  }
+  # Deterministic, evenly distributed subsample; no RNG side effects.
+  n_ref = min(300L, nrow(data))
+  ref_rows = if (n_ref == nrow(data)) seq_len(nrow(data)) else
+    unique(as.integer(round(seq(1, nrow(data), length.out=n_ref))))
+  reference = data[ref_rows, , drop=FALSE]
+  outputs = list()
+  for (i in seq_along(models)) {
+    model = models[[i]]
+    if (report.se && (!inherits(model, "lm") || inherits(model, "rlm"))) {
+      stop("Marginal report.se=TRUE currently supports lm/glm only.", call.=FALSE)
+    }
+    for (j in seq_len(nrow(grid))) {
+      newdata = reference
+      for (variable in displayed) newdata[[variable]] = rep(grid[[variable]][j], nrow(reference))
+      rownames(newdata) = as.character(seq_len(nrow(newdata)))
+      frame = compare_fits_prediction_frame(model, newdata, re, pred.type,
+                                            labels[i], single_model, "reference")
+      for (type in unique(frame$model)) {
+        values = frame$prediction[frame$model == type]
+        result = grid[j, , drop=FALSE]
+        result$model = type
+        result$prediction = mean(values)
+        if (report.se) {
+          gradient = compare_fits_gradient(model, newdata, pred.type)
+          avg = colMeans(gradient)
+          result$se = sqrt(drop(avg %*% stats::vcov(model) %*% avg))
+          result = compare_fits_intervals(result, model)
+        }
+        outputs[[length(outputs)+1L]] = result
+      }
+    }
+  }
+  result = do.call(rbind, outputs)
+  rownames(result) = NULL
+  result
+}
