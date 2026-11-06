@@ -15,31 +15,31 @@ cas_adjustment(
 )
 }
 \arguments{
-\item{d}{The dataset with clustered data}
+\item{d}{Data containing the original fitted observations. Preserve row names
+when reordering or subsetting. Omitted model rows receive NA when adjusting;
+adjust="none" returns the original outcomes unchanged.}
 
-\item{model}{A model. Defaults to NULL.}
+\item{model}{A fitted linear mixed model, or NULL when predictions are supplied.}
 
-\item{adjust}{The type of cluster adjustment (all, intercept, or none)}
+\item{adjust}{The type of cluster adjustment: all, intercept, or none.}
 
-\item{pred_fixed}{Prediction of the fixed effect. Defaults to NULL}
+\item{pred_fixed}{Fixed-effects predictions, optionally supplied in fitted-row
+order or named by fitted row identifiers.}
 
-\item{pred_cond}{Prediction of the conditional effect. Defaults to NULL.}
+\item{pred_cond}{Conditional predictions, optionally supplied.}
 
-\item{pred_int}{Prediction of the interceopt. Defaults to NULL.}
+\item{pred_int}{Predictions including fixed effects and random intercepts only,
+optionally supplied.}
 
-\item{outcome_name}{The name of the DV. Defaults to NULL. 
-
-There are a lot of NULL options to make it easier for testing. The best approach
-is to fit a model first, then provide that as input to the model. If not, you have
-to fit the model outside of the function, which is pretty lame. See examples}
+\item{outcome_name}{The untransformed response name. Inferred from model when available.}
 }
 \value{
-a dataset with the dependency in the data removed
+A numeric vector aligned with d, with the selected random contribution removed.
 }
 \description{
 Create cluster adjusted dataset
 }
 \examples{
-mod1 = lme4::lmer(y~x + (x | id), data=small_mixed)
-new_small  = cas_adjustment(small_mixed, model = mod1, adjust = "all")
+mod1 = lme4::lmer(y ~ x + (x | id), data=small_mixed)
+new_small = cas_adjustment(small_mixed, model=mod1, adjust="all")
 }

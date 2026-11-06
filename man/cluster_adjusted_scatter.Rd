@@ -15,21 +15,57 @@ cluster_adjusted_scatter(
 )
 }
 \arguments{
-\item{formula}{a flexplot-like formula}
+\item{formula}{A flexplot-like formula using untransformed column names.}
 
-\item{object}{a fitted lme4 object}
+\item{object}{A fitted linear mixed model with one grouping factor.}
 
-\item{...}{any other parameters passed to flexplot}
+\item{data}{Data used to fit a model when object is NULL. With a supplied model,
+observations always come from its fitted model frame, irrespective of data order.}
 
-\item{adjust}{how the outcome should be adjusted}
+\item{random}{Random-effects specification used when fitting a model. Character
+input uses the restricted make.formula grammar; formulas/calls are trusted expressions.}
+
+\item{adjust_re}{Random contributions to remove: "all", "intercept", "none",
+or a trusted re.form formula. Defaults to "all".}
+
+\item{smooth}{Add a descriptive smooth of adjusted observations, in addition to
+the original model's fixed-effects prediction curve. Defaults to FALSE.}
+
+\item{...}{Other plotting arguments passed to flexplot.}
 }
 \value{
-a cluster-adjusted scatterplot
+A cluster-adjusted ggplot, or adjusted plotting data with return_data=TRUE.
 }
 \description{
 Cluster adjusted scatterplot
 }
+\details{
+Fixed predictions use the original model with random effects excluded.
+Displayed moderators (second-axis groups and conditioning variables) are held
+at their displayed categories or representative numeric values. Numeric display
+bins use the mean original value within each bin, calculated from the full fitted
+data, matching flexplot's reference-prediction convention. Custom bins and labels
+are shared with the observations. Predictions are evaluated at these values,
+rather than averaged over a bin's moderator distribution.
+Undisplayed fixed predictors are marginalized over the same full fitted
+model-frame covariate distribution for every curve, preserving interactions.
+This is observation-weighted marginal standardization, not equal-cluster weighting.
+Curves share the fitted observations' x values across displayed moderator combinations.
+Ghosts copy a selected reference panel's model predictions to other panels,
+excluding its own panel; they never fit a descriptive smoother. smooth=TRUE adds
+an independent descriptive smooth of adjusted observations. A numeric
+ghost.reference selects the bin containing that value and retains that bin's
+representative-value curve. Prediction ghosts require conditioning and
+currently do not support second-axis grouping. Models with
+multiple grouping factors, offsets, transformed responses, or fixed predictors
+unavailable in the model frame are not currently supported.
+Model prediction methods must support the requested profiles and variable names;
+prediction failures or non-finite results are reported rather than replaced.
+Displayed variables named model or prediction are reserved for prediction metadata.
+When fitting internally, displayed predictors (including conditioning variables)
+enter with their interactions, preserving the existing CAS fitting convention.
+}
 \examples{
-mod1 = lme4::lmer(y~x + (x | id), data=small_mixed)
-cluster_adjusted_scatter(y~x, object = mod1)
+mod1 = lme4::lmer(y ~ x + (x | id), data=small_mixed)
+cluster_adjusted_scatter(y ~ x, object=mod1)
 }
