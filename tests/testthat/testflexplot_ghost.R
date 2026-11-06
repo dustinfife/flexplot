@@ -38,8 +38,3 @@ test_that("ghost line plots work", {
 })
 options(warn=0)
 
-
-flexplot(y~x + b | a, data=small, ghost.line="grey",   
-         ghost.reference=list(
-          b="x"
-))
