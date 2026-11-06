@@ -260,7 +260,8 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
       termses = gsub(criteria, "", f.char)
     }
     
-    formula.new = make.formula(outcome, termses)			
+    # termses comes from the trusted R plotting formula, rather than GUI names.
+    formula.new = make.formula(outcome, stats::as.formula(paste("~", termses), env=environment(formula)))
   } else {
     modify = F
   }

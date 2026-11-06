@@ -10,7 +10,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         	if (length(self$options$out)>0 & length(self$options$preds)>0){
         	  
         	  #### write formula for glinmod
-            formula = make.formula(self$options$out, self$options$preds)
+            formula = make.formula(as.name(self$options$out), lapply(self$options$preds, as.name))
             model = lm(formula, data=self$data)
             results = estimates.lm(model, mc=FALSE)
             

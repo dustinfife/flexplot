@@ -464,13 +464,22 @@ flexplot_create_breaks = function(break.me, breaks, data, labels, bins=3){
 # expect_true(length(flexplot_axis_given(formula(y~x+z))$axis) ==2)
 # expect_true(length(flexplot_axis_given(formula(y~x+z|z))$given) ==1)
 flexplot_axis_given = function(formula){
-  given = unlist(subsetString(base::as.character(formula)[3], sep=" | ", position=2, flexible=F))
-  given = gsub(" ", "", given)		
-  given = unlist(strsplit(given, "+", fixed=T))	
-  axis = unlist(subsetString(base::as.character(formula)[3], sep=" | ", position=1, flexible=F))
-  axis = gsub(" ", "", axis)			
-  axis = unlist(strsplit(axis, "+", fixed=T))	
+  if (is.null(formula)) return(list(given=NA_character_, axis=NA_character_))
+  rhs = formula[[3]]
+  conditioned = is.call(rhs) && identical(rhs[[1]], as.name("|"))
+  given = if (conditioned) formula_axis_names(rhs[[3]]) else NA_character_
+  axis = formula_axis_names(if (conditioned) rhs[[2]] else rhs)
   list(given=given, axis=axis)
+}
+
+formula_axis_names = function(expr) {
+  if (is.symbol(expr)) return(as.character(expr))
+  if (is.call(expr) && identical(expr[[1]], as.name("+"))) {
+    if (length(expr) == 2L) return(c("", formula_axis_names(expr[[2]])))
+    return(unlist(lapply(as.list(expr)[-1], formula_axis_names), use.names=FALSE))
+  }
+  if (is.numeric(expr)) return(as.character(expr))
+  stop("Plot axes must be column names joined with + after formula transformations.", call.=FALSE)
 }
 
 #expect_true(nrow(flexplot_delete_na(exercise_data, "muscle.gain.missing"))==167)

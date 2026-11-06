@@ -1,40 +1,20 @@
-#### write formula for flexplot
+# GUI variable selections are literal identifiers, including names resembling R.
 jamovi_formula = function(out, preds=NULL, given=NULL) {
-  
-  # escape the spaces if necessary
-  out   = escape_spaces_in_formulas(out)
-  preds = escape_spaces_in_formulas(preds)
-  given = escape_spaces_in_formulas(given)
-  
-  # construct formula for univariate plot
-  if (is.null(preds) & is.null(given) & !is.null(out)) {
-    formula = as.formula(paste0(out, "~1"))
-    return(as.formula(formula))
-  }
-  
-  # construct formula for no givens
-  if (is.null(given) & !is.null(out)) {
-    formula = paste0(out, "~", paste0(preds, collapse="+"))
-    return(as.formula(formula))
-  }
-
-  formula <- paste0(out, "~", 
-                    paste0(preds, collapse="+"), "|", 
-                    paste0(given, collapse="+"))		            	
-  return(as.formula(formula))
+  lhs = formula_component(out, response=TRUE)
+  rhs = if (length(preds)) formula_component(lapply(preds, as.name)) else 1
+  if (length(given)) rhs = call("|", rhs, formula_component(lapply(given, as.name)))
+  structure(call("~", lhs, rhs), class="formula", .Environment=parent.frame())
 }
 
+# Retained for callers needing identifier text. R's serializer escapes both
+# backslashes and backticks; hand-escaping just backticks is insufficient.
 escape_spaces_in_formulas = function(out=NULL) {
   if (is.null(out)) return(NULL)
-  escaped_items = lapply(out, function(x) {
-    if (x == make.names(x)){
-      return(x)
-    } 
-    
-    paste0("`", gsub("`", "\\`", x, fixed = TRUE), "`")
-  })
-  
-  return(unlist(escaped_items))
+  vapply(out, formula_identifier_text, character(1), USE.NAMES=FALSE)
+}
+
+formula_identifier_text = function(x) {
+  paste(deparse(as.name(x), backtick=TRUE, width.cutoff=500L), collapse="")
 }
 
 get_fitted_line = function(line) {

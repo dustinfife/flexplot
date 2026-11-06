@@ -18,7 +18,7 @@ test_that("return_labels_for_logistic_regression works", {
 test_that("flexplot_alpha_default", {
   expect_equal(flexplot_alpha_default(small, "1", .99977), .99977)
   expect_equal(flexplot_alpha_default(small, "x", .99977), .5)
-  expect_equal(flexplot_alpha_default(small, "a", .99977), .2)
+  expect_equal(flexplot_alpha_default(small, "a", .99977), .4)
   expect_equal(flexplot_alpha_default(small, "z", .21), .21)
 })
 

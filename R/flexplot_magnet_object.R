@@ -106,7 +106,7 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
   facet_vars = given[!is.na(given) & nzchar(given)]
   model_vars = unique(c(axis[!is.na(axis) & nzchar(axis)], facet_vars))
   
-  model_formula = stats::reformulate(model_vars, response=outcome)
+  model_formula = make.formula(as.name(outcome), lapply(model_vars, as.name))
   
   model = stats::glm(
     model_formula,

@@ -86,7 +86,7 @@ test_that("compare_fits with lmer", {
   require(lme4)
   mod1 = lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)  
   mod2 = lmer(ALCUSE~AGE_14 + (AGE_14|ID), data=alcuse)  
-  compare_fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2, re=T)
+  compare_fits(ALCUSE~AGE_14 | ID, data=alcuse, mod1, mod2, re=T) %>% suppressWarnings()
   
 })
 

@@ -7,12 +7,12 @@
 make.formula(response, predictors, random = NULL)
 }
 \arguments{
-\item{response}{a single string used on the left side of a formula}
+\item{response}{a literal column name, or an explicit language object or one-sided formula for a trusted expression.}
 
-\item{predictors}{a string (or a vector of strings) representing the predictors. Each will be separated by a plus sign.}
+\item{predictors}{literal column names, combined additively. Character strings are never interpreted as expressions, except a single "0" or "1" retains its intercept convention. Supply symbols for columns named "0" or "1". Trusted expressions can be supplied as a one-sided formula, a call, or a list of symbols/calls.}
 
 \item{random}{a string that indicates the random component in an \code{lmer}-like object (e.g., "(1|group)"). Defaults
-to NULL.}
+to NULL. Character random-effects syntax permits names and operators only; trusted transformations require an explicit one-sided formula or call.}
 }
 \value{
 a formula object

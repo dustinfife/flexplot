@@ -52,7 +52,7 @@ test_that("y axis is truncated when predictions go beyond limits", {
   full =    glm(kills~minutes.fighting*willpower, data=d, family=Gamma(link="log"))
 
   vdiffr::expect_doppelganger("truncated axis", 
-                              compare.fits(injuries~willpower | minutes.fighting, data=d, full))
+                              compare.fits(kills~willpower | minutes.fighting, data=d, full)%>%suppressWarnings())
 })
 
 test_that("flexplot bins when binned variable is very small", {

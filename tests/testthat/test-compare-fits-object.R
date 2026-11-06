@@ -76,7 +76,7 @@ testthat::test_that("Logistic predictions remain between zero and one", {
     y_numb ~ x + y,
     data=small_logistic,
     family=stats::binomial()
-  )
+  ) %>% suppressWarnings()
   
   withr::local_options(flexplot.object_renderer=TRUE)
   
