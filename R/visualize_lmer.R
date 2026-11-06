@@ -101,19 +101,35 @@ add_geoms_to_mixed_plot = function(prediction, step3, object, formula, ...) {
     dplyr::filter(dplyr::n() > 1L) %>%
     dplyr::ungroup()
   
-  random_geom = 
-      ### random effects
-      list(
-        geom_point(data=means, aes_string(x=terms[1], y=outcome), size=.5),
-        geom_line(data=line.means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=.25, linetype=2, alpha = .90))
-      
-  fixed_geom =  
-      ### fixed effects
-      list(
-        geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3, color="black", shape=16),
-        geom_line(data=fixed.line.means, aes_string(x=terms[1], y=outcome, group=1), lwd=2, color="black", linetype=1))
-
-  return(list(random_geom = random_geom, fixed_geom = fixed_geom))
+  random_geom =
+    list(
+      geom_point(
+        data=means,
+        aes(x=.data[[terms[1]]], y=.data[[outcome]]),
+        size=.5
+      ),
+      geom_line(
+        data=line.means,
+        aes(x=.data[[terms[1]]], y=.data[[outcome]], group=.data[[term.re]]),
+        linewidth=.25, linetype=2, alpha=.90
+      )
+    )
+  
+  fixed_geom =
+    list(
+      geom_point(
+        data=fixed.means,
+        aes(x=.data[[terms[1]]], y=.data[[outcome]]),
+        size=3, color="black", shape=16
+      ),
+      geom_line(
+        data=fixed.line.means,
+        aes(x=.data[[terms[1]]], y=.data[[outcome]], group=1),
+        linewidth=2, color="black", linetype=1
+      )
+    )
+  
+  return(list(random_geom=random_geom, fixed_geom=fixed_geom))
 }
 
 
