@@ -93,7 +93,7 @@ displayed coordinate, all displayed predictors and moderators are set to that
 coordinate in a common reference dataset. Predictions are then averaged over
 the undisplayed covariates, retaining their joint observed distribution and
 the fitted model's transformations and interactions. The reference population
-contains all common eligible observations after model-specific data preparation;
+contains all common eligible estimation observations before display-cluster selection;
 the same rows are used at every coordinate and for both models. Marginal
 averaging does not subsample observations or consume random numbers.
 This is observation weighting, not
@@ -120,8 +120,10 @@ intersected with identifiable estimation rows from both models. Original row
 names and stored model-frame values must agree. Mixed-model clusters are
 sampled after establishing this common sample, using the existing cluster
 selection policy. That separate step can consume random numbers and select
-different clusters under different seeds; marginal averaging then uses every
-eligible observation in the selected clusters without further sampling.
+different clusters under different seeds. For marginal predictions, this
+selection controls the plotted grid and observations, while averaging uses
+the full common eligible population. Each displayed cluster identity is set
+throughout that population before prediction, using the original fitted model.
 The plot's \code{sample}
 argument controls displayed observations, not the prediction reference population.
 

@@ -250,15 +250,14 @@ test_that("marginal mixed-model curves retain cluster-specific prediction stream
   }
 })
 
-test_that("mixed marginalization uses every prepared observation without RNG", withr::with_seed(58, {
+test_that("mixed marginalization uses every eligible observation without RNG", withr::with_seed(58, {
   d = small_mixed[rep(seq_len(nrow(small_mixed)), length.out=900), ]
   rownames(d) = NULL
   d$w = seq_len(nrow(d))/100 + sin(seq_len(nrow(d)))
   d$y = d$y + .1*d$w + .15*d$x*d$w
   fitted = lme4::lmer(y ~ x*w + a + (1 | id), d)
   plotting = y ~ x | id
-  # Cluster selection is a separate, existing step. Hold that selection fixed
-  # while independently checking the entire resulting reference population.
+  # Reproduce the existing display selection, keeping all data as the reference.
   prepared = withr::with_seed(42,
     prepare_data_for_compare_fits(d, fitted, plotting, clusters=3))
   actual = withr::with_seed(42,
@@ -266,16 +265,20 @@ test_that("mixed marginalization uses every prepared observation without RNG", w
                    clusters=3, num_points=3, re=TRUE))
   expect_gt(nrow(prepared), 300)
   expect_setequal(as.character(actual$id), as.character(prepared$id))
+  oracle = d
+  # The oracle replaces values in place; factor IDs retain their labels when
+  # assigned factor-valued display coordinates (rather than integer codes).
+  oracle$id = factor(oracle$id)
   for (stream in unique(actual$model)) {
     curve = actual[actual$model == stream, ]
-    expected = comparison_standardized_predictions(fitted, prepared, curve, c("x", "id"),
+    expected = comparison_standardized_predictions(fitted, oracle, curve, c("x", "id"),
                  re.form=if (stream == "fixed effects") NA else NULL)
     expect_equal(curve$prediction, expected, tolerance=1e-10)
   }
   seed = .Random.seed
   internal = compare_fits_marginal(list(fitted), droplevels(prepared), plotting,
                     re=TRUE, pred.type="response", model_labels="fitted", single_model=TRUE,
-                    report.se=FALSE, num_points=3)
+                    report.se=FALSE, num_points=3, reference_data=d)
   expect_identical(.Random.seed, seed)
   expect_equal(internal, actual)
 }))

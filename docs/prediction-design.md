@@ -37,20 +37,20 @@ become reference-population averaging weights. Transformations, interactions,
 offsets, factor contrasts, and prediction scales must retain the supplied
 model's prediction semantics. This quantity is not automatically a causal effect.
 
-**Current implementation.** `compare_fits_marginal()` uses every row it receives;
+**Current implementation.** `compare_fits_marginal()` uses every reference row;
 the previous random cap of 300 rows has been removed. It uses one shared
 reference frame for both models and all coordinates. The averaging stage is
 deterministic for fixed models, coordinates, and reference rows, and does not
 draw random numbers.
 
-**Remaining conflict.** For mixed models, upstream preparation currently filters
-the common eligible data to selected clusters *before* marginalization. Thus the
-current reference population contains all eligible rows in those selected
-clusters, rather than the full common eligible population. The agreed full-
-population design requires separating the population used for averaging from
-the clusters selected for display. Display selection should limit plotted
-clusters, not silently redefine the marginal reference population. This
-separation is proposed work, not current behavior.
+**Mixed-model implementation.** `compare_fits()` retains the full common eligible
+population before selecting display clusters. Selected-cluster data determine
+the grid, raw observations, and plotting layout; marginal averaging uses the
+retained full population. At each displayed cluster coordinate, its identity is
+substituted throughout that population before calling the original model's
+prediction method. Display selection no longer changes the marginal reference
+population. The observed and reference methods retain their selected-cluster
+data preparation.
 
 ### Observed: predictions at actual covariate combinations
 
@@ -182,9 +182,9 @@ over a hypothetical random-effects distribution.
 | Area | Source | Status |
 | --- | --- | --- |
 | Eligibility, method dispatch, model labels, alias | `R/compare_fits.R`; `R/compare_fits_predictions.R` | Existing; preserve shared eligibility and outcome-scale validation. |
-| Full prepared-population marginal averaging | `compare_fits_marginal()` in `R/compare.fits_methods.R` | Implemented without a row cap. Full pre-display-selection mixed-model population remains a target. |
+| Full eligible-population marginal averaging | `compare_fits_marginal()` in `R/compare.fits_methods.R` | Implemented without a row cap, including the population before mixed-model display-cluster selection. |
 | Observed summaries and reference profiles | `R/compare_fits_predictions.R`; `get_plotted_line()` | Existing; preserve their distinct meanings. |
-| Cluster selection and data filtering | `prepare_data_for_compare_fits()`; `subset_random_model()` and `stratified_sample_re()` in `R/mixed_mod_functions.R` | Existing; separate display selection from marginal reference data in future work. |
+| Cluster selection and data filtering | `prepare_data_for_compare_fits()`; `subset_random_model()` and `stratified_sample_re()` in `R/mixed_mod_functions.R` | Existing selection policy is preserved; marginal reference data are retained separately. |
 | Mixed-model prediction streams | `generate_predictions.lmerMod()` and its GLMM alias; `compare_fits_prediction_frame()` | Original fitted model is retained; current one-model/two-model stream conventions differ. |
 | Layout-driven random-effect display | `R/visualize_lmer.R` | Existing wrapper policy; explicit RE semantics across wrappers require review. |
 | Explicit CAS | `R/plot_cas.R` | Existing separate entry point; broader API separation is an agreed direction. |

@@ -531,7 +531,7 @@ post_prediction_process_cf.lmerMod  = function(model1, model2=NULL, predictions,
 # Marginal standardization: one shared reference distribution for all curves.
 # The same reference rows are used at every plotted coordinate and for both models.
 compare_fits_marginal = function(models, data, formula, re, pred.type, model_labels,
-                                 single_model, report.se, num_points=50, ...) {
+                                 single_model, report.se, num_points=50, reference_data=data, ...) {
   if (length(num_points) != 1 || !is.finite(num_points) || num_points < 2 ||
       num_points != as.integer(num_points)) {
     stop("num_points must be an integer >= 2.", call.=FALSE)
@@ -563,9 +563,9 @@ compare_fits_marginal = function(models, data, formula, re, pred.type, model_lab
     grid = grid[displayed]
   }
 
-  # Eligibility and mixed-model cluster preparation are shared across models.
-  # Standardize over every prepared observation, without drawing a subsample.
-  reference = data
+  # Display-cluster data define the grid; the shared reference retains all
+  # common eligible observations before selecting clusters for visualization.
+  reference = reference_data
   outputs = list()
   for (i in seq_along(models)) {
     model = models[[i]]

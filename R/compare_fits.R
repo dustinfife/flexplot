@@ -40,7 +40,7 @@
 #' coordinate in a common reference dataset. Predictions are then averaged over
 #' the undisplayed covariates, retaining their joint observed distribution and
 #' the fitted model's transformations and interactions. The reference population
-#' contains all common eligible observations after model-specific data preparation;
+#' contains all common eligible estimation observations before display-cluster selection;
 #' the same rows are used at every coordinate and for both models. Marginal
 #' averaging does not subsample observations or consume random numbers.
 #' This is observation weighting, not
@@ -67,8 +67,10 @@
 #' names and stored model-frame values must agree. Mixed-model clusters are
 #' sampled after establishing this common sample, using the existing cluster
 #' selection policy. That separate step can consume random numbers and select
-#' different clusters under different seeds; marginal averaging then uses every
-#' eligible observation in the selected clusters without further sampling.
+#' different clusters under different seeds. For marginal predictions, this
+#' selection controls the plotted grid and observations, while averaging uses
+#' the full common eligible population. Each displayed cluster identity is set
+#' throughout that population before prediction, using the original fitted model.
 #' The plot's \code{sample}
 #' argument controls displayed observations, not the prediction reference population.
 #'
@@ -122,6 +124,7 @@ compare_fits = function(formula, data, model1, model2=NULL,
   compare_fits_errors(data, plotted[1], plotted[-1], available)
   variables = unique(c(plotted, available, outcome))
   data = compare_fits_sample(data, models, variables)
+  reference_data = data
   if (inherits(model1, "merMod")) {
     if (length(lme4::getME(model1, "flist")) != 1 ||
         (!single_model && (!inherits(model2, "merMod") ||
@@ -151,7 +154,8 @@ compare_fits = function(formula, data, model1, model2=NULL,
                                         single_model, report.se, ...)
   } else if (prediction_method == "marginal") {
     prediction = compare_fits_marginal(models, data, formula, re, pred.type, model_labels,
-                                       single_model, report.se, num_points, ...)
+                                       single_model, report.se, num_points,
+                                       reference_data=droplevels(reference_data), ...)
   } else {
     frames = vector("list", length(models))
     for (i in seq_along(models)) {
@@ -169,15 +173,16 @@ compare_fits = function(formula, data, model1, model2=NULL,
     return(flexplot(formula, data=plot_data, suppress_smooth=TRUE, se=FALSE, ...))
   }
   
-  if (is.numeric(plot_data[[outcome]]) &&
-      any(prediction$prediction < min(plot_data[[outcome]]) |
-          prediction$prediction > max(plot_data[[outcome]]))) {
+  limit_data = if (inherits(model1, "merMod")) reference_data else plot_data
+  if (is.numeric(limit_data[[outcome]]) &&
+      any(prediction$prediction < min(limit_data[[outcome]]) |
+          prediction$prediction > max(limit_data[[outcome]]))) {
     warning("Some of the model's predicted values are beyond the range of the original y-values. ",
             "I'm truncating the y-axis to preserve the original scale.")
   }
   attr(prediction, "flexplot_comparison") = TRUE
   p = flexplot(formula, data=plot_data, prediction=prediction,
-               suppress_smooth=TRUE, se=FALSE, ...) + return_lims_geom(outcome, plot_data, model1)
+               suppress_smooth=TRUE, se=FALSE, ...) + return_lims_geom(outcome, limit_data, model1)
   if (single_model && length(axis) < 2) p = p + ggplot2::theme(legend.position="none")
   p
 }
