@@ -56,8 +56,7 @@ visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = 
       f = make_flexplot_formula(predictors, outcome, data)
       
       if (is_logistic) {
-        # Use logistic overlay instead of compare.fits for binomial models
-        step3 = logistic_overlay(formula = f, data = data, n_bins = n_bins, type = overlay_type, ...)
+        step3 = visualize_binomial_model(object, f, data, n_bins, overlay_type, ...)
         step3 = step3 + labs(title="Logistic Regression Analysis")
       } else {
         # Use existing compare.fits for other GLM families
@@ -78,7 +77,7 @@ visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = 
     
   } else if (plot=="all" | plot=="model"){
     if (is_logistic) {
-      step3 = logistic_overlay(formula = formula, data = data, n_bins = n_bins, type = overlay_type, ...)
+      step3 = visualize_binomial_model(object, formula, data, n_bins, overlay_type, ...)
       step3 = step3 + labs(title="Logistic Regression Analysis")
     } else {
       step3 = compare_fits(formula, data=data, model1=object, ...) + labs(title="Analysis Plot")

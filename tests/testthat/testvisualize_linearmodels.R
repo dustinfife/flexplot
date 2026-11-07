@@ -42,8 +42,16 @@ test_that("visualize function plots", {
   related_t_as_glm = lm(difference~1, data=m)
   vdiffr::expect_doppelganger("related t test", visualize(related_t_as_glm))
   
-  ### visualize when there's no numeric predictors (error)
-  expect_error(visualize(glm(a~b, data=small, family=binomial)))
+  ### categorical binomial models use their supplied fitted probabilities
+  model = glm(a ~ b, data=small, family=binomial())
+  p = visualize(model, plot="model")
+  prediction_layers = Filter(function(layer) is.data.frame(layer$data) &&
+                              "prediction" %in% names(layer$data), p$layers)
+  expect_true(length(prediction_layers) > 0)
+  for (layer in prediction_layers) {
+    expect_equal(layer$data$prediction,
+                 unname(predict(model, newdata=layer$data, type="response")))
+  }
 })
 
 test_that("added.plot function", {

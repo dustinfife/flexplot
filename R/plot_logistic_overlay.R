@@ -107,6 +107,11 @@ logistic_overlay = function(formula = NULL, data=NULL, plot = NULL, n_bins = 10,
 
   }
   
+  add_logistic_overlay_layers(plot, summary_data, type, scale)
+}
+
+# Shared drawing only; callers retain responsibility for model predictions and bins.
+add_logistic_overlay_layers = function(plot, summary_data, type, scale) {
   # Build aesthetic mapping to match original plot
   base_aes = build_inherited_aesthetics(plot, summary_data)
   

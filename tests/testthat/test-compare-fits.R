@@ -173,3 +173,41 @@ testthat::test_that(
 
 
 options(warn=0)
+
+# Coverage retained from test_compare_fits_methods.R.
+# Existing vdiffr snapshots remain in their original tests above.
+test_that("get_fitted works with various model types", {
+  expect_equal(get_fitted(model = lm(y~x + a, data=small), pred.values = small)$model[1], "lm")
+  expect_equal(get_fitted(model = glm(y_bin~x + a + I(x^2), data=small), pred.values = small)$model[1], "glm")
+  suppressMessages(expect_equal(get_fitted(model = lme4::lmer(y~x +a + (x | id), data=small_mixed), pred.values = small_mixed)$model[1], "fixed effects"))
+  suppressWarnings(expect_equal(
+    get_fitted(model = lme4::glmer(a~x +y + (y | id), data=small_mixed, family=binomial), pred.values = small_mixed)$model[1], "fixed effects"))
+  expect_equal(get_fitted(model = MASS::polr(weight.loss~rewards,
+                                data=exercise_data %>% mutate(weight.loss = factor(weight.loss, ordered=T))), 
+                                pred.values = exercise_data)$model[1], "polr")
+  model1 = randomForest::randomForest(wl~motivation + gender + rewards, 
+                                      data=exercise_data %>% mutate(wl = weight.loss + .8*motivation*as.numeric(rewards)))
+  expect_equal(get_fitted(model = model1, pred.values = exercise_data)$model[1], "randomForest.formula")
+})
+
+test_that("compare_fits supports single-model Gamma GLM predictions", {
+  exercise_gamma = exercise_data
+  exercise_gamma$weight.loss = exercise_gamma$weight.loss + 1 +
+    abs(min(exercise_gamma$weight.loss, na.rm=TRUE))
+  model = glm(weight.loss ~ motivation + health + gender,
+              data=exercise_gamma, family="Gamma")
+  expect_no_error(compare_fits(weight.loss ~ motivation | health + gender,
+                               data=exercise_gamma, model1=model) %>% suppressWarnings())
+})
+
+test_that("compare_fits alias supports random forest versus linear model", {
+  withr::local_seed(2323)
+  forest_data = exercise_data
+  forest_data$wl = forest_data$weight.loss +
+    .8 * forest_data$motivation * as.numeric(forest_data$rewards)
+  model1 = randomForest::randomForest(wl ~ motivation + gender + rewards,
+                                      data=forest_data)
+  model2 = lm(wl ~ motivation * gender * rewards, data=forest_data)
+  expect_no_error(compare_fits(wl ~ motivation | gender + rewards,
+                               data=forest_data, model1=model1, model2=model2) %>% suppressWarnings())
+})
