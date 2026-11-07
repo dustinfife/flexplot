@@ -125,6 +125,8 @@ visualize.glm = function(object, plot=c("all", "residuals", "model"), formula = 
 #' @param data The model data frame
 #' @param object The fitted glm object (binomial family)
 #' @param n_bins Number of bins for creating binned residuals
+#' @param plot_type Optional component name, such as \code{"histo"},
+#'   \code{"res.dep"}, or \code{"sl"}. If \code{NULL}, return the complete list.
 #' @param ... Additional arguments
 #' @return A list containing histogram, residual dependence plot, and scale-location plot components
 #' @details This function creates binned residuals by:
@@ -208,7 +210,7 @@ logistic_residual_plots = function(data, object, n_bins = 10, plot_type = NULL,.
     labs(
       title = "Scale-Location Plot",
       x = "Fitted", 
-      y = "√|Binned Residuals| (Logit Scale)"
+      y = "\u221a|Binned Residuals| (Logit Scale)"
     ) +
     theme_bw()
   

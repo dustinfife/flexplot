@@ -90,6 +90,13 @@ test_that("check_missing works", {
   expect_equal(nrow(check_missing(m1 , m2 , small        , c("a", "b"))), 27)
   expect_equal(     check_missing(m1, data=small, variables="a"), small)
 })
+
+test_that("comparison data errors identify missing predictors", {
+  d = data.frame(y=1:3, x=3:1)
+  expect_error(compare_fits_errors(d, "y", c("x", "missing"),
+                                  testme=c("x", "missing")),
+               "Specifically: missing\\.")
+})
   
 test_that("get_model_n works", {
   expect_equal(get_model_n(small_randomForest), nrow(small))
@@ -103,4 +110,3 @@ test_that("bin_if_theres_a_flexplot_formula works", {
   expect_true(is.null(bin_if_theres_a_flexplot_formula(y~z+b+x, data=small)$x_binned))
   expect_true(!is.null(bin_if_theres_a_flexplot_formula(y~a+b|x, data=small)$x_binned))
 })
-    

@@ -13,6 +13,9 @@ logistic_residual_plots(data, object, n_bins = 10, plot_type = NULL, ...)
 
 \item{n_bins}{Number of bins for creating binned residuals}
 
+\item{plot_type}{Optional component name, such as \code{"histo"},
+\code{"res.dep"}, or \code{"sl"}. If \code{NULL}, return the complete list.}
+
 \item{...}{Additional arguments}
 }
 \value{

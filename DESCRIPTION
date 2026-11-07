@@ -30,7 +30,9 @@ Imports: cowplot,
 	rlang,
 	scales,
 	stringr,
-	tidyr
+	tidyr,
+	utils,
+	grDevices
 Suggests: jmvcore (>= 0.8.5),
 	jaspBase,
 	jaspGraphs,

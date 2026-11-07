@@ -266,6 +266,19 @@ generate_predictions.default = function(model, re, pred.values, pred.type, repor
 # get_fitted ----------------------------------------------------
 
 
+#' Extract predictions from a fitted model
+#'
+#' Recover the model's estimation data when prediction data are not supplied,
+#' then dispatch to \code{\link{generate_predictions}}. No model is refitted.
+#' @param model A fitted model supported by the prediction adapters.
+#' @param re Include random-effects predictions for mixed models?
+#' @param pred.values Optional data frame of prediction coordinates. If
+#'   \code{NULL}, recover the original estimation data from the model.
+#' @param pred.type Prediction scale forwarded to the model's prediction method.
+#' @param report.se Request uncertainty information from the prediction adapter?
+#' @return A data frame with \code{prediction} and \code{model} columns, and
+#'   additional uncertainty columns when supported and requested.
+#' @seealso \code{\link{compare_fits}}
 #' @export
 get_fitted = function(model, re, pred.values=NULL, pred.type, report.se) {
   UseMethod("get_fitted")
@@ -303,6 +316,18 @@ get_fitted.rpart = get_fitted.default
 # prepare_data_for_compare_fits -------------------------------------------
 
 
+#' Prepare comparison data for a fitted model
+#'
+#' The default method returns the input data. Mixed-model methods select
+#' clusters and prepare their grouping variable using the existing stratified
+#' cluster-sampling convention.
+#' @param data Data used for plotting and prediction.
+#' @param model1 A fitted model; S3 dispatch is on this argument.
+#' @param formula A flexplot formula specifying the displayed variables.
+#' @param all_variables Retained for compatibility; currently unused.
+#' @param clusters Number of mixed-model clusters to display.
+#' @return The prepared data frame.
+#' @seealso \code{\link{compare_fits}}
 #' @export
 prepare_data_for_compare_fits = function(data, model1, formula, all_variables=NULL, clusters=3) {
   UseMethod("prepare_data_for_compare_fits", model1)
@@ -330,6 +355,20 @@ prepare_data_for_compare_fits.glmerMod = prepare_data_for_compare_fits.lmerMod
 
 # get_plotted_line ---------------------------------------------------------
 
+#' Summarize predictions at displayed coordinates
+#'
+#' Average predictions within displayed groups, models, and conditioning bins.
+#' Numeric x values with at least ten distinct values use quantile-bin midpoints.
+#' This helper supplies observed conditional summaries, rather than marginal
+#' standardization.
+#' @param model A fitted model used for S3 dispatch.
+#' @param data Data containing displayed variables, \code{prediction}, and
+#'   \code{model} columns.
+#' @param formula A flexplot formula specifying displayed variables.
+#' @param ... Display-binning arguments forwarded to the binning helpers.
+#' @return A data frame of plotted coordinates and averaged predictions, with
+#'   an \code{observation_groups} attribute identifying the contributing rows.
+#' @seealso \code{\link{compare_fits}}
 #' @export
 get_plotted_line = function(model, data, formula, ...) {
   UseMethod("get_plotted_line")
@@ -397,6 +436,20 @@ get_sequence_of_target_variable = function(data, x_label) {
 
 # post_prediction_process_cf ----------------------------------------------
 
+#' Combine prediction streams for a comparison
+#'
+#' A low-level compatibility helper for combining model prediction streams and
+#' reducing them to plotted coordinates. Use \code{\link{compare_fits}} for
+#' ordinary model comparisons.
+#' @param model1 A fitted model used for S3 dispatch.
+#' @param model2 An optional second fitted model.
+#' @param predictions Prediction data for the first model.
+#' @param formula A flexplot formula specifying displayed variables.
+#' @param re Include random-effects predictions?
+#' @param k Prediction coordinates aligned with the prediction rows.
+#' @param pred.type Prediction scale forwarded to prediction helpers.
+#' @param ... Arguments forwarded to prediction-summary helpers.
+#' @return A data frame of plotted prediction summaries.
 #' @export
 post_prediction_process_cf        = function(model1, model2=NULL, predictions, formula, re=FALSE, k, pred.type,  ...) {
   UseMethod("post_prediction_process_cf")

@@ -8,6 +8,10 @@ logistic_coefficients(model, location = 0.5)
 }
 \arguments{
 \item{model}{A fitted model (glm or glmerMod)}
+
+\item{location}{Probability at which to evaluate the instantaneous slope.
+Defaults to \code{0.5}. The reported threshold remains the point at which
+the fitted probability crosses \code{0.5}.}
 }
 \value{
 Discrimination and difficulty estimates for a regression model
@@ -15,7 +19,7 @@ Discrimination and difficulty estimates for a regression model
 \description{
 This function takes a logistic regression model and returns more intuitive slope/intercept
 parameters. The slope (discrimination) is interpreted as the instantaneous (tangent) slope of the ogive
-curve at p =  0.5. The intercept (difficulty) is interpreted as the value of X where
+curve at the requested probability (0.5 by default). The intercept (difficulty) is interpreted as the value of X where
 the logistic curve crosses the 50% threshold
 }
 \examples{

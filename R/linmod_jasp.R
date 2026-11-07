@@ -222,7 +222,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
     ### if user removes terms from "Model terms," it will try to build a model from different sets of variables
   terms = all.vars(formula(linmod_results$model))[-1]
   
-  if (length(terms)!=0)  generated.formula = flexplot:::make_flexplot_formula(terms, (options$dependent), linmod_results$model$model)
+  if (length(terms)!=0)  generated.formula = make_flexplot_formula(terms, (options$dependent), linmod_results$model$model)
 
   if	(options$ghost & length(options$variables)<4){
     ghost="gray"

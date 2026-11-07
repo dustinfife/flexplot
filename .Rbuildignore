@@ -47,3 +47,5 @@ vignettes/regex_syntax.txt
 ^README_files$
 ^jasp_documentation$
 ^tests/.*\.Rout(\.fail)?$
+^research$
+^binned_banding\.jpg$

@@ -27,7 +27,10 @@ partial_residual_plot(
 \item{added_term}{a formula, which specifies which terms should be de-residualized. By default,
 it will use the residuals from `model`.}
 
-\item{suppress_model}{A boolean. Should the model be suppressed? Defaults to T.}
+\item{suppress_model}{A boolean. Should the model be suppressed? Defaults to FALSE.}
+
+\item{add_mean}{Add the mean of the observed outcome to the partial residuals?
+Defaults to \code{TRUE} to retain the original outcome's location.}
 
 \item{...}{Other arguments passed to flexplot}
 }

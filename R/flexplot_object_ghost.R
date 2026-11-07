@@ -132,7 +132,7 @@ flexplot_ghost_prediction_data = function(reference_data, axis, given, data,
                                                    use_magnet, comparison)
   }
   coordinates = flexplot_ghost_coordinates(fitted, reference_data)
-  axes = tail(make.unique(c(names(reference_data), ".ghost_x", ".ghost_y")), 2)
+  axes = utils::tail(make.unique(c(names(reference_data), ".ghost_x", ".ghost_y")), 2)
   names(coordinates)[1:2] = axes
   group = names(coordinates)[3]
 
@@ -186,7 +186,7 @@ flexplot_ghost_categorical_data = function(reference_data, full_data, outcome, a
   coordinates = flexplot_ghost_coordinates(fitted, reference_data)
   # A conditioning variable may itself be named x or y. Keep coordinate fields
   # distinct so ggplot repeats the reference instead of treating it as facet data.
-  axes = tail(make.unique(c(names(reference_data), ".ghost_x", ".ghost_y")), 2)
+  axes = utils::tail(make.unique(c(names(reference_data), ".ghost_x", ".ghost_y")), 2)
   names(coordinates)[1:2] = axes
   attr(coordinates, "ghost_axes") = axes
   coordinates

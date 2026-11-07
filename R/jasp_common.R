@@ -340,7 +340,7 @@ make_mctable = function(linmod_results) {
     ### reformat : to be a times
     term.labels = as.character(mc$all.terms)
     main.effects = main_effects_2_remove(term.labels)
-    term.labels = gsub(":", "×", term.labels)
+    term.labels = gsub(":", "\u00d7", term.labels)
     
       
     ### output results

@@ -79,7 +79,7 @@ flexplot_jasp2 = function(jaspResults, dataset, options) {
 
   #### do a ghost line
   if	(options$ghost & is.numeric(dataset[,v[1]])){
-    ghost=rgb(195/255,0,0,.3)
+    ghost=grDevices::rgb(195/255,0,0,.3)
   } else {
     ghost = NULL
   }

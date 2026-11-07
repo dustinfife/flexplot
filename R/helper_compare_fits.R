@@ -47,8 +47,9 @@ compare_fits_errors = function(data, outcome, predictors, testme=NULL) {
   }
   
   ##### make sure they're using the right dataset
-  if (!(all(predictors %in% names(data)))){
-    stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(variables[!(variables%in%data)], collapse=","), ". Did you input the wrong dataset?"))
+  missing_vars = setdiff(predictors, names(data))
+  if (length(missing_vars)) {
+    stop(paste0("Sorry, but some variables in formula don't match what's in the dataset. Specifically: ", paste0(missing_vars, collapse=","), ". Did you input the wrong dataset?"))
   }	
   return(NULL)
 }
