@@ -46,3 +46,4 @@ vignettes/regex_syntax.txt
 ^R/scratch$
 ^README_files$
 ^jasp_documentation$
+^tests/.*\.Rout(\.fail)?$

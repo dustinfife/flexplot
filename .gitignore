@@ -19,3 +19,5 @@ R/scratch
 .obsidian/*
 research/
 Rplots.pdf
+*.Rout
+*.Rout.fail

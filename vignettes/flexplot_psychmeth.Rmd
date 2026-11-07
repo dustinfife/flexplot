@@ -5,7 +5,7 @@ shorttitle        : "Flexplot: Graphically Based Data Analysis"
 author: 
   - name      : "Dustin Fife"
     affiliation   : "1"
-    corresponding : yes    # Define only one corresponding author
+    corresponding : true    # Define only one corresponding author
     address       : "201 Mullica Hill Road
                     Glassboro, NJ 08028"
     email         : "fife.dustin@gmail.com"
@@ -25,13 +25,13 @@ keywords: graphical data analysis, exploratory data analysis, statistical modeli
 
 bibliography      : ["references2.bib"]
 
-floatsintext      : no
-figurelist        : no
-tablelist         : no
-footnotelist      : no
-linenumbers       : no
-mask              : no
-draft             : no
+floatsintext      : false
+figurelist        : false
+tablelist         : false
+footnotelist      : false
+linenumbers       : false
+mask              : false
+draft             : false
 
 documentclass     : "apa6"
 classoption       : "man"

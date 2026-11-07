@@ -7,7 +7,7 @@
 #' @export
 #'
 #' @examples
-#' univariate_lists(c("a", "b", "z"), small)
+#' univariate_list(c("a", "b", "z"), small)
 univariate_list = function(names, data) {
   if (!all(names %in% names(data))) stop("One or more of your variable names isn't in your dataset")
   plot_list = list()

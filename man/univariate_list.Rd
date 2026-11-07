@@ -18,5 +18,5 @@ A list of plots
 Produce a bunch of univariate plots
 }
 \examples{
-univariate_lists(c("a", "b", "z"), small)
+univariate_list(c("a", "b", "z"), small)
 }

@@ -10,7 +10,7 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     stats,
-    R (>= 2.10)
+    R (>= 4.1.0)
 Imports: cowplot,
 	MASS,
 	tibble,
@@ -27,8 +27,16 @@ Imports: cowplot,
 	lme4,
 	party,
 	mgcv,
-	rlang
+	rlang,
+	scales,
+	stringr,
+	tidyr
 Suggests: jmvcore (>= 0.8.5),
+	jaspBase,
+	jaspGraphs,
+	extrafont,
+	rpart,
+	pscl,
 	vdiffr,
 	knitr,
 	testthat,

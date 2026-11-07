@@ -12,6 +12,8 @@ youtube_plot(p, name = "plot", path = "", font = "Moon Flower Bold")
 \item{name}{the name of the file (excluding the ".jpg")}
 
 \item{path}{the path to the folder}
+
+\item{font}{Font family used for plot text.}
 }
 \description{
 Create a 1080p plot for YouTube

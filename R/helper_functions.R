@@ -127,11 +127,14 @@ identify_method = function(data, outcome, axis, method=NULL,
 #' @param p the ggplot object
 #' @param name the name of the file (excluding the ".jpg")
 #' @param path the path to the folder
+#' @param font Font family used for plot text.
 #'
 #' @export
 youtube_plot = function(p, name="plot", path="", font = "Moon Flower Bold"){
-  require(extrafont)
-  loadfonts(quiet=TRUE)
+  if (!requireNamespace("extrafont", quietly=TRUE)) {
+    stop("youtube_plot() requires the optional package 'extrafont'.", call.=FALSE)
+  }
+  extrafont::loadfonts(quiet=TRUE)
   p = p + theme(text=element_text(size=18, family=font))
   file_path = ifelse(path=="", paste0(name, ".jpg"), paste0(path, "/", name, ".jpg"))
   ggsave(file_path, plot=p, height = 1080/150, width=1920/150, dpi=150, units = "in")
