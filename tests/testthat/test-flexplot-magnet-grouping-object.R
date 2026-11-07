@@ -435,12 +435,16 @@ test_that("grouped magnet comparisons retain colors and use model facets for two
     expect_equal(p$layers[[magnet_count_layer(p)]]$data, base$layers[[magnet_count_layer(base)]]$data)
     expect_identical(levels(p$layers[[4]]$data$a), levels(d$a))
     expect_identical(levels(p$layers[[4]]$data$b), levels(d$b))
-    legends = cowplot::get_plot_component(p, "guide-box", return_all=TRUE)
-    n_guides = 0L
+    legends = cowplot::get_plot_component(p, "guide-box", return_all = TRUE)
+    if (inherits(legends, "gtable")) legends = list(legends)
+    
+    guides = 0L
     for (legend in legends) {
-      if (!is.null(legend$layout)) n_guides = n_guides + sum(legend$layout$name == "guides")
+      if (!is.null(legend$layout)) {
+        guides = guides + sum(legend$layout$name == "guides")
+      }
     }
-    expect_equal(n_guides, 1)
+    expect_equal(guides, 1)
   }
 })
 

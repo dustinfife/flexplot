@@ -361,10 +361,14 @@ test_that("primary and ghost curves share categorical and binned line-type encod
     expect_false(p$layers[[3]]$show.legend)
     expect_equal(built$plot$labels$colour, display_group)
     expect_equal(built$plot$labels$linetype, display_group)
-    legends = cowplot::get_plot_component(p, "guide-box", return_all=TRUE)
+    legends = cowplot::get_plot_component(p, "guide-box", return_all = TRUE)
+    if (inherits(legends, "gtable")) legends = list(legends)
+    
     guides = 0L
     for (legend in legends) {
-      if (!is.null(legend$layout)) guides = guides + sum(legend$layout$name == "guides")
+      if (!is.null(legend$layout)) {
+        guides = guides + sum(legend$layout$name == "guides")
+      }
     }
     expect_equal(guides, 1)
 
