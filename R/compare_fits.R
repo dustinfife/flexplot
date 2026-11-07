@@ -1,3 +1,83 @@
+#' Compare fitted models using marginal, observed, or reference predictions
+#'
+#' Compare predictions from one or two supplied models using a
+#' \code{\link{flexplot}} formula. Marginal standardization is the default;
+#' \code{compare.fits()} is an exact backward-compatible alias.
+#'
+#' @param formula A flexplot formula specifying displayed predictors and
+#'   conditioning variables using original variable names. Put transformations
+#'   and interactions in the fitted model formulas, not the plotting formula.
+#' @param data Original observations, retaining their original row names.
+#' @param model1 A fitted model with an untransformed response matching the
+#'   plotting response.
+#' @param model2 An optional second fitted model with the same response.
+#' @param return.preds Return the prediction data instead of a plot.
+#' @param report.se Include prediction standard errors for supported lm/glm
+#'   models. Standard errors for averaged predictions use coefficient covariance
+#'   and the delta method, rather than averaging individual standard errors.
+#'   The returned \code{prediction.fit}, \code{prediction.lwr}, and
+#'   \code{prediction.upr} columns contain the estimate and approximate 95\%
+#'   confidence limits. Unsupported model classes give an error.
+#' @param re Include random-effects predictions for mixed models. With one model,
+#'   \code{TRUE} returns fixed and random predictions; with two models it returns
+#'   their random-effects predictions.
+#' @param pred.type Prediction scale, normally \code{"response"}. GLMs also
+#'   support \code{"link"}. Predictions are averaged on the requested scale;
+#'   transformed model responses are unsupported and are not inverse-transformed.
+#' @param num_points Number of equally spaced numeric x coordinates for marginal
+#'   predictions when x has at least ten distinct values. Must be an integer
+#'   greater than or equal to two. Other prediction methods do not use it.
+#' @param clusters Number of mixed-model clusters to display, using stratified
+#'   cluster sampling.
+#' @param prediction_method One of \code{"marginal"} (default),
+#'   \code{"observed"}, or \code{"reference"}; see Details.
+#' @param ... Arguments passed to plotting and prediction-grid helpers, including
+#'   display \code{bins}, \code{breaks}, \code{labels}, and observation sampling.
+#'
+#' @details
+#' \code{"marginal"} uses observation-weighted marginal standardization. At each
+#' displayed coordinate, all displayed predictors and moderators are set to that
+#' coordinate in a common reference dataset. Predictions are then averaged over
+#' the undisplayed covariates, retaining their joint observed distribution and
+#' the fitted model's transformations and interactions. The reference dataset is
+#' a random sample without replacement of up to 300 common eligible observations;
+#' the same rows are used at every coordinate and for both models. Use
+#' \code{set.seed()} for reproducibility. This is observation weighting, not
+#' equal-cluster weighting, and is not automatically a causal effect.
+#'
+#' Displayed categorical moderators use their observed factor levels. Numeric
+#' moderators use flexplot's existing bin-based representative values (bin means
+#' rounded to three decimal places). Numeric x uses \code{num_points} coordinates
+#' when it has at least ten distinct values; otherwise it uses observed values.
+#' Intercept-only displays return a single prediction coordinate.
+#'
+#' \code{"observed"} predicts at actual eligible observations and averages within
+#' displayed categories, groups, and conditioning bins. Numeric x with at least
+#' ten distinct values uses the existing quantile-bin summaries, positioned at
+#' bin midpoints. This conditional averaging differs from marginal standardization
+#' because the distribution of undisplayed covariates can vary between groups.
+#'
+#' \code{"reference"} uses the historical prediction-grid approach: undisplayed
+#' numeric predictors are held at their mean and categorical predictors at their
+#' mode, rather than averaging predictions over observations.
+#'
+#' All methods use complete observations for plotting and required model variables,
+#' intersected with identifiable estimation rows from both models. Original row
+#' names and stored model-frame values must agree. Mixed-model clusters are
+#' sampled after establishing this common sample. The plot's \code{sample}
+#' argument controls displayed observations, not the prediction reference sample.
+#'
+#' Predictions must provide one numeric response per observation. Binary
+#' tree/forest models use probabilities for the second response level. Ordinal
+#' \code{polr} models retain predicted-class scores and require numeric category
+#' labels. Multicategory probability matrices and models without identifiable
+#' estimation observations are unsupported.
+#'
+#' @return A ggplot, or a data frame containing displayed coordinates,
+#'   \code{prediction}, and \code{model}. Standard errors and confidence limits
+#'   are included when requested.
+#' @author Dustin Fife
+#' @export compare_fits
 #' @examples
 #' m1 = lm(y ~ x + z, data=small)
 #' m2 = lm(y ~ x, data=small)
@@ -98,7 +178,7 @@ compare_fits = function(formula, data, model1, model2=NULL,
 }
 
 #' @rdname compare_fits
-#' @export
+#' @export compare.fits
 compare.fits = compare_fits
 
 return_lims_geom = function(outcome, data, model1) {
