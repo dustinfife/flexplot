@@ -576,8 +576,13 @@ compare_fits_marginal = function(models, data, formula, re, pred.type, model_lab
       newdata = reference
       for (variable in displayed) newdata[[variable]] = rep(grid[[variable]][j], nrow(reference))
       rownames(newdata) = as.character(seq_len(nrow(newdata)))
-      frame = compare_fits_prediction_frame(model, newdata, re, pred.type,
-                                            model_labels[i], single_model, "reference")
+      marginal = if (!report.se) compare_fits_lm_average(model, newdata, pred.type) else NULL
+      frame = if (is.null(marginal)) {
+        compare_fits_prediction_frame(model, newdata, re, pred.type,
+                                      model_labels[i], single_model, "reference")
+      } else {
+        data.frame(prediction=marginal, model=model_labels[i])
+      }
       for (type in unique(frame$model)) {
         values = frame$prediction[frame$model == type]
         result = grid[j, , drop=FALSE]
@@ -596,4 +601,26 @@ compare_fits_marginal = function(models, data, formula, re, pred.type, model_lab
   result = do.call(rbind, outputs)
   rownames(result) = NULL
   result
+}
+
+# Match predict.lm's newdata construction, without constructing row predictions.
+# Keep specialized prediction methods and rank-deficiency handling on the oracle path.
+compare_fits_lm_average = function(model, data, pred.type) {
+  if (!identical(class(model), "lm") || pred.type != "response" ||
+      model$rank != length(model$coefficients) || anyNA(model$coefficients)) return(NULL)
+  tryCatch({
+    terms = stats::delete.response(stats::terms(model))
+    frame = stats::model.frame(terms, data, na.action=stats::na.pass, xlev=model$xlevels)
+    matrix = stats::model.matrix(terms, frame, contrasts.arg=model$contrasts)
+    if (!identical(colnames(matrix), names(model$coefficients)) ||
+        nrow(matrix) != nrow(data) || any(!is.finite(matrix))) return(NULL)
+    offset = stats::model.offset(frame)
+    if (!is.null(model$call$offset)) {
+      additional = eval(model$call$offset, data, environment(terms))
+      offset = if (length(offset)) offset + additional else additional
+    }
+    if (!is.null(offset) && (!is.numeric(offset) ||
+        !length(offset) %in% c(1L, nrow(data)) || any(!is.finite(offset)))) return(NULL)
+    drop(colMeans(matrix) %*% model$coefficients) + if (is.null(offset)) 0 else mean(offset)
+  }, error=function(e) NULL)
 }

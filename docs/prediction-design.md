@@ -130,12 +130,20 @@ visualization APIs, not to claim that `compare_fits()` currently couples RE to
 automatic CAS. CAS descriptive smoothing is likewise a separate request, not a
 replacement for supplied-model prediction curves.
 
-## Future optimization: exact linear-model marginalization
+## Exact linear-model marginalization
 
-**Proposed; not implemented.** Start with `lm`, then extend to `lmer`. Replace
-repeated full-data prediction averaging only where exact numerical equivalence
-can be established. Keep full-data prediction averaging as the correctness
-oracle. Do not reintroduce reference-population sampling.
+**Implemented for ordinary `lm` response predictions.** At each coordinate,
+construct the model matrix using the fitted terms (including prediction-time
+transformations), contrasts, and factor levels, then average its rows before
+multiplying by the fitted coefficients. Include the mean formula and call
+offsets. Fitting weights affect the coefficients, not reference-row weighting.
+Rank-deficient fits, specialized `lm` subclasses, unsupported profiles, and
+uncertainty requests retain full-population prediction averaging. Existing
+uncertainty calculations are unchanged. Full-data prediction averaging remains
+the correctness oracle; no reference-population sampling is introduced.
+
+**Proposed:** extend this optimization to `lmer` after establishing exact
+equivalence for its random-effects prediction streams.
 
 For a linear predictor `X_i(g) beta + o_i(g)`, average the correctly constructed
 model-matrix rows and offsets:
@@ -161,8 +169,7 @@ Numerical equivalence tests must cover:
 - Returned estimates and any supported uncertainty calculations, including the
   covariance of the averaged design/gradient rather than averaged individual SEs.
 
-No timing estimates, performance warnings, or optimization implementation are
-part of this document.
+No performance warnings or automatic sampling are part of this design.
 
 ## Nonlinear response-scale marginalization
 
@@ -188,7 +195,7 @@ over a hypothetical random-effects distribution.
 | Mixed-model prediction streams | `generate_predictions.lmerMod()` and its GLMM alias; `compare_fits_prediction_frame()` | Original fitted model is retained; current one-model/two-model stream conventions differ. |
 | Layout-driven random-effect display | `R/visualize_lmer.R` | Existing wrapper policy; explicit RE semantics across wrappers require review. |
 | Explicit CAS | `R/plot_cas.R` | Existing separate entry point; broader API separation is an agreed direction. |
-| Exact model-matrix averaging | No optimized implementation yet | Proposed, first for `lm`, then `lmer`, subject to equivalence tests. |
+| Exact model-matrix averaging | `compare_fits_lm_average()` in `R/compare.fits_methods.R` | Implemented for full-rank ordinary `lm` response estimates; `lmer` remains proposed. |
 
 No uppercase `RE` argument, new sampling option, new refitting path, or change to
 prediction-method semantics is implemented by this design document.
