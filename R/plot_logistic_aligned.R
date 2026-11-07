@@ -133,7 +133,7 @@ logistic_aligned = function(flex_obj, resolution = 100) {
 
   
   p = ggplot(plot_data, aes(x = x_shifted, y = prob)) +
-    geom_line(aes(linetype = type, color = !!sym(axis_vars[2])), size = 1.2, na.rm = TRUE) +
+    geom_line(aes(linetype = type, color = !!sym(axis_vars[2])), linewidth = 1.2, na.rm = TRUE) +
     scale_linetype_manual(values = c(solid = "solid", dotted = "dotted")) + 
     geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray") +
     labs(
@@ -148,7 +148,7 @@ logistic_aligned = function(flex_obj, resolution = 100) {
   if (length(given_vars) == 1) {
     all_grid[[given_vars[1]]] = factor(all_grid[[given_vars[1]]])
     p = p + facet_wrap(as.formula(paste("~", given_vars[1])))
-  } else if (length(panel_vars) == 2) {
+  } else if (length(given_vars) == 2) {
     grid[[given_vars[1]]] = factor(grid[[given_vars[1]]])
     grid[[given_vars[2]]] = factor(grid[[given_vars[2]]])
     p = p + facet_grid(as.formula(paste(given_vars[2], "~", given_vars[1])))

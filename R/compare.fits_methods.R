@@ -495,7 +495,7 @@ post_prediction_process_cf.lmerMod  = function(model1, model2=NULL, predictions,
   # generate predictions for other model
   both_models_identical = identical(model1, model2)
   if (!both_models_identical) { 
-    predictions2 = get_fitted(model2, re=re, pred.type=pred.type, report.se=report.se) 
+    predictions2 = get_fitted(model2, re=re, pred.values=k, pred.type=pred.type)
   } else {
     predictions2 = predictions
   }

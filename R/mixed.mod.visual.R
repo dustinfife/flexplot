@@ -54,8 +54,9 @@ mixed.mod.visual = function(formula, data, model, n=6, jitter=F){
 
 
 	##### generate fixed effects predictions
-	preds = compare_fits(formula, data, model, return.preds=T); preds = preds[,1:(ncol(preds)-1)]	#### this contains the fixed effect prediction
-	names(preds)[ncol(preds)] = outcome
+	preds = compare_fits(formula, data, model, return.preds=TRUE)
+	preds = preds[,c(predictors, "prediction"), drop=FALSE]
+	names(preds)[names(preds) == "prediction"] = outcome
 	
 	#### make predictions for random effects
 	new_data = d_new
@@ -63,20 +64,21 @@ mixed.mod.visual = function(formula, data, model, n=6, jitter=F){
 
 
 	##### plot it
+	mapping = aes(x=.data[[predictors[1]]], y=.data[[outcome]])
 	### if it's categorical
 	if (is.factor(data[,predictors[1]])){
-		ggplot(data=d_new, aes(.d_new[[predictors[1]]], .d_new[[outcome]])) +
+		ggplot(data=d_new, mapping=mapping) +
 			jit +
 			#geom_abline(aes(slope=fixed.slope, intercept=fixed.intercept), col="red", size=2) +
-			geom_point(data=preds, aes_string(predictors, outcome), col="red", size=4) + #### fixed effect line
-			geom_point(data=new_data, aes_string(predictors, outcome), col="gray", size=4, shape=17) + 
+			geom_point(data=preds, mapping=mapping, col="red", size=4) + #### fixed effect line
+			geom_point(data=new_data, mapping=mapping, col="gray", size=4, shape=17) +
 			facet_wrap(as.formula(paste0("~", ID)), labeller = labeller(.cols=label_both)) +				
 			theme_bw()		
 	} else {
-		ggplot(data=d_new, aes_string(predictors[1], outcome)) +
+		ggplot(data=d_new, mapping=mapping) +
 			#geom_abline(aes(slope=fixed.slope, intercept=fixed.intercept), col="red", size=2) +
-			geom_line(data=preds, aes_string(predictors, outcome), col="red") + #### fixed effect line
-			geom_line(data=new_data, aes_string(predictors, outcome), col="gray") +
+			geom_line(data=preds, mapping=mapping, col="red") + #### fixed effect line
+			geom_line(data=new_data, mapping=mapping, col="gray") +
 			jit +			
 			facet_wrap(as.formula(paste0("~", ID)), labeller = labeller(.cols=label_both)) +				
 			theme_bw()

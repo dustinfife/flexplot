@@ -413,12 +413,10 @@ has_flipped_aes <- function(data, params = list(), main_is_orthogonal = NA,
 }
 #' @rdname bidirection
 #' @export
-flip_data <- function(data, flip = NULL) {
-  flip <- flip %||% data$flipped_aes[1] %||% FALSE
-  if (flip) {
-    names(data) <- switch_orientation(names(data))
-  }
-  data
+flip_data = function(data, flip = NULL) {
+  flip = flip %||% data$flipped_aes[1] %||% FALSE
+  if (!flip) return(data)
+  ggplot2::flip_data(data, flip=TRUE)
 }
 
 
