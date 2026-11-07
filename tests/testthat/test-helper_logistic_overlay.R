@@ -225,6 +225,67 @@ test_that("create_logistic_summary scales size and alpha appropriately", {
 })
 
 
+test_that("logistic_overlay rejects categorical x-axis predictors", {
+  d = data.frame(
+    y = rep(c(0, 1), 50),
+    x = rep(1:20, each = 5),
+    group = rep(c("A", "B"), 50)
+  )
+  
+  d$x_factor = factor(d$x)
+  d$x_ordered = ordered(d$x)
+  d$x_character = as.character(d$x)
+  d$x_binary = rep(c(0, 1), 50)
+  d$x_few = rep(1:5, 20)
+  
+  expected_error = "continuous numeric x-axis variable"
+  
+  expect_error(
+    logistic_overlay(y ~ x_factor, data = d),
+    expected_error
+  )
+  
+  expect_error(
+    logistic_overlay(y ~ x_ordered, data = d),
+    expected_error
+  )
+  
+  expect_error(
+    logistic_overlay(y ~ x_character, data = d),
+    expected_error
+  )
+  
+  expect_error(
+    logistic_overlay(y ~ x_binary, data = d),
+    expected_error
+  )
+  
+  expect_error(
+    logistic_overlay(y ~ x_few, data = d),
+    expected_error
+  )
+  
+  expect_error(
+    logistic_overlay(y ~ x_ordered | group, data = d),
+    expected_error
+  )
+  for (variable in c("x_factor", "x_ordered", "x_character", "x_binary", "x_few")) {
+    expect_error(convert_formula_to_logistic_bins(
+      stats::reformulate(variable, response="y"), data=d), expected_error)
+  }
+})
+
+test_that("logistic_overlay still summarizes continuous numeric predictors", {
+  d = data.frame(y=rep(c(0, 1), 50), x=rep(seq_len(20), each=5))
+  expect_no_warning({ p = logistic_overlay(y ~ x, data=d) })
+  summaries = p$layers[[length(p$layers) - 1L]]$data
+  expect_equal(sum(summaries$count), nrow(d))
+  expect_equal(summaries$proportion, rep(.5, 10))
+  expect_no_warning(ggplot2::ggplotGrob(p))
+})
+
+
+
 # 
 
 # tests for convert_formula_to_logistic_bins

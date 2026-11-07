@@ -151,6 +151,7 @@ magnet_plot = function(formula, data,
 }
 
 check_magnet_errors = function(data, yvar, xvar) {
+  data = data[!is.na(data[[yvar]]), , drop=FALSE]
   if (length(unique(data[[xvar]])) > 5 & is.numeric(data[[xvar]])) {
     stop ("Your predictor variable must be categorical. Use the logistic_overlay function instead.")
   }

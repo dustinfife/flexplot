@@ -1,3 +1,12 @@
+test_that("CAS formula extraction does not use deprecated lme4 wrappers", {
+  m = lme4::lmer(y ~ x + (x | id), small_mixed)
+  expect_no_warning({ adjusted = compute_cas_from_model(m, adjust_re="intercept") })
+  expect_equal(adjusted$y_adj,
+               small_mixed$y - unname(predict(m, re.form=~ (1 | id)) - predict(m, re.form=NA)))
+  expect_no_warning({ p = cluster_adjusted_scatter(y ~ x, m, jitter=FALSE) })
+  expect_no_warning(ggplot2::ggplot_build(p))
+})
+
 test_that("CAS subtracts each selected random contribution exactly once", {
   for (random in c("(1 | id)", "(x | id)")) {
     m = lme4::lmer(make.formula("y", "x", random), small_mixed)

@@ -72,6 +72,7 @@ test_that("grouped numeric point shapes match legacy categories and bins", {
     expect_false(p$layers[[3]]$show.legend)
 
     legends = cowplot::get_plot_component(p, "guide-box", return_all=TRUE)
+    if (inherits(legends, "gtable")) legends = list(legends)
     guides = 0L
     for (legend in legends) {
       if (!is.null(legend$layout)) guides = guides + sum(legend$layout$name == "guides")

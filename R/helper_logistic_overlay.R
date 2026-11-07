@@ -185,35 +185,46 @@ calculate_bins_for_logistic_overlay = function(x_vals, n_bins) {
 }
 
 convert_formula_to_logistic_bins = function(formula, data, x_vals = NULL, n_bins = 10) {
-  
   outcome_var = all.vars(formula)[1]
-  ### extract given and axis variables
   given.axis = flexplot_axis_given(formula)
   given = given.axis$given
   axis = given.axis$axis
-  variables_to_group_by = c(axis[2], given)[!is.na(c(axis[2], given))] %>% 
+  
+  if (is.null(x_vals))
+    x_vals = data[[axis[1]]]
+  
+  if (!is.numeric(x_vals) ||
+      is.factor(x_vals) ||
+      length(unique(x_vals[!is.na(x_vals)])) < n_bins) {
+    stop(
+      paste0(
+        "logistic_overlay() requires a continuous numeric x-axis variable ",
+        "with at least ", n_bins, " distinct nonmissing values."
+      ),
+      call. = FALSE
+    )
+  }
+  
+  variables_to_group_by = c(axis[2], given)[!is.na(c(axis[2], given))] %>%
     na.omit() %>%
-    purrr::map_vec(resolve_binned_var, data=data, return.name=T)
-  
-  
-  # Calculate bin info for the x-axis variable
-  if (is.null(x_vals)) x_vals = data[[axis[1]]]
+    purrr::map_vec(resolve_binned_var, data = data, return.name = TRUE)
   
   bin_info = calculate_bins_for_logistic_overlay(x_vals, n_bins)
-  bin_breaks = bin_info$bin_breaks; bin_width = bin_info$bin_width; bin_centers = bin_info$bin_centers
+  bin_breaks = bin_info$bin_breaks
+  bin_width = bin_info$bin_width
+  bin_centers = bin_info$bin_centers
   
-  # Add bins to data
   data$bin = cut(x_vals, breaks = bin_breaks, include.lowest = TRUE)
   
-  # Create grouping variables for summarization
   group_vars = c("bin", variables_to_group_by)
   group_vars = group_vars[!is.na(group_vars)]
   
-  # Summarize data with numeric-safe outcome
-  summary_data = create_logistic_summary(data, group_vars, outcome_var, bin_centers, bin_width)
-  return(list(summary_data=summary_data, data=data))
+  summary_data = create_logistic_summary(
+    data, group_vars, outcome_var, bin_centers, bin_width
+  )
+  
+  return(list(summary_data = summary_data, data = data))
 }
-
 
 # d = simulate_data(c(1, .75, .25, 0), .5, n=1000)
 # x = d$x1; y = d$y

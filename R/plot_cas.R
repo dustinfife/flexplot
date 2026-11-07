@@ -44,7 +44,7 @@ cas_model_predictions = function(m, d, adjust, pred_fixed=NULL, pred_cond=NULL, 
     intercepts = sum(vapply(lme4::getME(m, "cnms"), function(x) sum(x == "(Intercept)"), integer(1)))
     if (intercepts != 1L) stop("Intercept adjustment requires exactly one random-intercept term.", call.=FALSE)
     if (is.null(pred_int)) {
-      grouping = lme4::findbars(stats::formula(m))[[1]][[3]]
+      grouping = reformulas::findbars(stats::formula(m))[[1]][[3]]
       re_formula = structure(call("~", call("(", call("|", 1, grouping))),
                              class="formula", .Environment=environment(stats::formula(m)))
       pred_int = stats::predict(m, re.form=re_formula)
@@ -171,7 +171,7 @@ cas_moderator_grid = function(moderators, data, original) {
 }
 
 cas_fixed_curve = function(m, d, xvar, moderators=character(), display_data=d) {
-  fixed_variables = all.vars(lme4::nobars(stats::formula(m)))[-1]
+  fixed_variables = all.vars(reformulas::nobars(stats::formula(m)))[-1]
   if (!all(fixed_variables %in% names(d))) {
     stop("CAS marginal predictions require the original fixed-effect variables in the fitted model frame.", call.=FALSE)
   }
