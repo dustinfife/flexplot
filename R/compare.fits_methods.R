@@ -563,10 +563,9 @@ compare_fits_marginal = function(models, data, formula, re, pred.type, model_lab
     grid = grid[displayed]
   }
 
-  # Randomly sample the reference distribution
-  n_ref = min(300L, nrow(data))
-  ref_rows = sample.int(nrow(data), size=n_ref, replace=FALSE)
-  reference = data[ref_rows, , drop=FALSE]
+  # Eligibility and mixed-model cluster preparation are shared across models.
+  # Standardize over every prepared observation, without drawing a subsample.
+  reference = data
   outputs = list()
   for (i in seq_along(models)) {
     model = models[[i]]

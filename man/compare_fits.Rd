@@ -20,7 +20,7 @@ compare_fits(
   ...
 )
 
-compare.fits(
+\method{compare}{fits}(
   formula,
   data,
   model1,
@@ -92,10 +92,11 @@ Compare predictions from one or two supplied models using a
 displayed coordinate, all displayed predictors and moderators are set to that
 coordinate in a common reference dataset. Predictions are then averaged over
 the undisplayed covariates, retaining their joint observed distribution and
-the fitted model's transformations and interactions. The reference dataset is
-a random sample without replacement of up to 300 common eligible observations;
-the same rows are used at every coordinate and for both models. Use
-\code{set.seed()} for reproducibility. This is observation weighting, not
+the fitted model's transformations and interactions. The reference population
+contains all common eligible observations after model-specific data preparation;
+the same rows are used at every coordinate and for both models. Marginal
+averaging does not subsample observations or consume random numbers.
+This is observation weighting, not
 equal-cluster weighting, and is not automatically a causal effect.
 
 Displayed categorical moderators use their observed factor levels. Numeric
@@ -117,8 +118,12 @@ mode, rather than averaging predictions over observations.
 All methods use complete observations for plotting and required model variables,
 intersected with identifiable estimation rows from both models. Original row
 names and stored model-frame values must agree. Mixed-model clusters are
-sampled after establishing this common sample. The plot's \code{sample}
-argument controls displayed observations, not the prediction reference sample.
+sampled after establishing this common sample, using the existing cluster
+selection policy. That separate step can consume random numbers and select
+different clusters under different seeds; marginal averaging then uses every
+eligible observation in the selected clusters without further sampling.
+The plot's \code{sample}
+argument controls displayed observations, not the prediction reference population.
 
 Predictions must provide one numeric response per observation. Binary
 tree/forest models use probabilities for the second response level. Ordinal

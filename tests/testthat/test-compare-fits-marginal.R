@@ -6,6 +6,16 @@ comparison_standardized_predictions = function(model, reference, coordinates, di
   }, numeric(1))
 }
 
+comparison_population_fixture = function() {
+  d = small[rep(seq_len(nrow(small)), length.out=650), ]
+  rownames(d) = NULL
+  d$w = seq_len(nrow(d))/100 + sin(seq_len(nrow(d)))
+  d$weight = rep(c(1, 2, 5), length.out=nrow(d))
+  d$log_exposure = .3*cos(seq_len(nrow(d))/17)
+  d$y = d$y + .8*d$w + .3*d$x*d$w
+  d
+}
+
 test_that("marginal is the default and returns named plotting coordinates", {
   withr::local_seed(123)
   m = lm(y ~ x + a + z, small)
@@ -67,8 +77,7 @@ test_that("continuous moderator coordinates use full-data bin means", {
   expect_gt(diff(range(slopes)), .001)
 })
 
-test_that("both models share one reproducible capped random reference distribution", {
-  withr::local_seed(900)
+test_that("both models share the entire eligible reference population without RNG", withr::with_seed(900, {
   d = small[rep(seq_len(nrow(small)), length.out=650), ]
   rownames(d) = NULL
   d$w = seq_len(nrow(d))/100 + rnorm(nrow(d))
@@ -76,23 +85,21 @@ test_that("both models share one reproducible capped random reference distributi
   m1 = lm(y ~ x + w + I(w^2), d)
   m2 = lm(y ~ x*w + I(w^2), d)
   set.seed(42)
-  selected = sample.int(nrow(d), 300, replace=FALSE)
-  set.seed(42)
+  seed = .Random.seed
   actual = compare_fits(y ~ x, d, m1, m2, return.preds=TRUE, num_points=5)
-  set.seed(42)
-  expect_identical(actual, compare_fits(y ~ x, d, m1, m2, return.preds=TRUE, num_points=5))
+  expect_identical(.Random.seed, seed)
   for (name in unique(actual$model)) {
     fit = if (name == "m1 (lm)") m1 else m2
     curve = actual[actual$model == name, ]
-    expected = comparison_standardized_predictions(fit, d[selected, ], curve, "x")
+    expected = comparison_standardized_predictions(fit, d, curve, "x")
     expect_equal(curve$prediction, expected, tolerance=1e-10)
-    expect_gt(max(abs(expected - comparison_standardized_predictions(fit, d, curve, "x"))), .001)
   }
   set.seed(43)
+  seed = .Random.seed
   different = compare_fits(y ~ x, d, m1, m2, return.preds=TRUE, num_points=5)
-  expect_gt(max(abs(actual$prediction - different$prediction)), .001)
-  expect_equal(actual[c("x", "model")], different[c("x", "model")])
-})
+  expect_identical(actual, different)
+  expect_identical(.Random.seed, seed)
+}))
 
 test_that("marginal predictions use only common eligible estimation observations", {
   d = small
@@ -109,6 +116,83 @@ test_that("marginal predictions use only common eligible estimation observations
     expect_equal(curve$prediction, comparison_standardized_predictions(fit, eligible, curve, "x"))
   }
 })
+
+test_that("large marginal comparisons retain every common eligible row", withr::with_seed(54, {
+  d = comparison_population_fixture()
+  d$w[c(50, 600)] = NA
+  m1 = lm(y ~ x*w + a, d, subset=1:620)
+  m2 = lm(y ~ x + I(w^2) + b, d, subset=31:650)
+  eligible = d[setdiff(31:620, c(50, 600)), ]
+  actual = compare_fits(y ~ x, d, m1, m2, return.preds=TRUE, num_points=5)
+  expect_gt(nrow(eligible), 300)
+  for (name in unique(actual$model)) {
+    fitted = if (name == "m1 (lm)") m1 else m2
+    curve = actual[actual$model == name, ]
+    expect_equal(curve$prediction,
+                   comparison_standardized_predictions(fitted, eligible, curve, "x"),
+                   tolerance=1e-10)
+  }
+}))
+
+test_that("full-population marginalization preserves fit weights offsets and scales", withr::with_seed(56, {
+  d = comparison_population_fixture()
+  models = list(
+    lm(y ~ a*z + I(w^2) + offset(log_exposure), d, weights=weight),
+    glm(y_pois ~ a*z + w + offset(log_exposure), d, weights=weight, family=poisson()),
+    glm(y_bin ~ a*z + w + offset(log_exposure), d, weights=weight,
+          family=binomial(link="probit"))
+  )
+  for (fitted in models) {
+    response = all.vars(formula(fitted))[1]
+    plotting = stats::reformulate("a", response=response)
+    coefficients = coef(fitted)
+    weights = stats::weights(fitted)
+    scales = if (inherits(fitted, "glm")) c("response", "link") else "response"
+    for (scale in scales) {
+      seed = .Random.seed
+      actual = compare_fits(plotting, d, fitted, return.preds=TRUE,
+                              pred.type=scale, report.se=TRUE)
+      expect_identical(.Random.seed, seed)
+      expected = comparison_standardized_predictions(fitted, d, actual, "a", type=scale)
+      expect_equal(actual$prediction, expected, tolerance=1e-10)
+      for (i in seq_len(nrow(actual))) {
+        profile = d
+        profile$a[] = actual$a[i]
+        design = model.matrix(delete.response(terms(fitted)), profile,
+                                contrasts.arg=fitted$contrasts, xlev=fitted$xlevels)
+        if (inherits(fitted, "glm") && scale == "response") {
+          design = design*fitted$family$mu.eta(predict(fitted, profile, type="link"))
+        }
+        gradient = colMeans(design)
+        expected_se = sqrt(drop(gradient %*% vcov(fitted) %*% gradient))
+        expect_equal(actual$se[i], expected_se, tolerance=1e-10)
+      }
+    }
+    expect_identical(coef(fitted), coefficients)
+    expect_identical(stats::weights(fitted), weights)
+  }
+}))
+
+test_that("large tree and forest predictions average over the full population", withr::with_seed(57, {
+  d = comparison_population_fixture()
+  models = list(rpart::rpart(y ~ a + x + w, d),
+                  party::cforest(y ~ a + x + w, d,
+                    controls=party::cforest_unbiased(ntree=12, mtry=2)))
+  if (requireNamespace("randomForest", quietly=TRUE)) {
+    models[[length(models)+1]] = randomForest::randomForest(y ~ a + x + w, d, ntree=12)
+  }
+  for (fitted in models) {
+    seed = .Random.seed
+    actual = compare_fits(y ~ a, d, fitted, return.preds=TRUE)
+    expect_identical(.Random.seed, seed)
+    expected = if (inherits(fitted, "RandomForest")) {
+      comparison_standardized_predictions(fitted, d, actual, "a", OOB=FALSE)
+    } else {
+      comparison_standardized_predictions(fitted, d, actual, "a")
+    }
+    expect_equal(actual$prediction, expected, tolerance=1e-10)
+  }
+}))
 
 test_that("GLM marginalization averages response predictions before applying any link", {
   m = glm(y_bin ~ a + b + a:b + z, small, family=binomial())
@@ -165,6 +249,36 @@ test_that("marginal mixed-model curves retain cluster-specific prediction stream
     expect_equal(curve$prediction, unname(predict(fit, newdata=curve, re.form=NULL)))
   }
 })
+
+test_that("mixed marginalization uses every prepared observation without RNG", withr::with_seed(58, {
+  d = small_mixed[rep(seq_len(nrow(small_mixed)), length.out=900), ]
+  rownames(d) = NULL
+  d$w = seq_len(nrow(d))/100 + sin(seq_len(nrow(d)))
+  d$y = d$y + .1*d$w + .15*d$x*d$w
+  fitted = lme4::lmer(y ~ x*w + a + (1 | id), d)
+  plotting = y ~ x | id
+  # Cluster selection is a separate, existing step. Hold that selection fixed
+  # while independently checking the entire resulting reference population.
+  prepared = withr::with_seed(42,
+    prepare_data_for_compare_fits(d, fitted, plotting, clusters=3))
+  actual = withr::with_seed(42,
+    compare_fits(plotting, d, fitted, return.preds=TRUE,
+                   clusters=3, num_points=3, re=TRUE))
+  expect_gt(nrow(prepared), 300)
+  expect_setequal(as.character(actual$id), as.character(prepared$id))
+  for (stream in unique(actual$model)) {
+    curve = actual[actual$model == stream, ]
+    expected = comparison_standardized_predictions(fitted, prepared, curve, c("x", "id"),
+                 re.form=if (stream == "fixed effects") NA else NULL)
+    expect_equal(curve$prediction, expected, tolerance=1e-10)
+  }
+  seed = .Random.seed
+  internal = compare_fits_marginal(list(fitted), droplevels(prepared), plotting,
+                    re=TRUE, pred.type="response", model_labels="fitted", single_model=TRUE,
+                    report.se=FALSE, num_points=3)
+  expect_identical(.Random.seed, seed)
+  expect_equal(internal, actual)
+}))
 
 test_that("marginal tree and forest curves predict standardized profiles", {
   withr::local_seed(10)

@@ -6,8 +6,8 @@
   supported alias with the same signature and behavior.
 * The default `prediction_method="marginal"` uses observation-weighted marginal
   standardization. Displayed variables are fixed at each plotted coordinate;
-  predictions are averaged over a shared reference sample of up to 300 eligible
-  observations. Use `set.seed()` for reproducibility.
+  predictions are averaged over all eligible observations in the shared reference
+  population, without random subsampling.
 * Explicit `prediction_method="observed"` averages predictions for actual,
   common eligible estimation observations within displayed categories or bins,
   retaining correlations between displayed and omitted predictors.
