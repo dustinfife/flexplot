@@ -45,10 +45,19 @@ flexplot_categorical_summary_layers = function(spread="quartiles", group=NULL) {
   )))
 }
 
+flexplot_categorical_group_position = function(self, data, params, scales) {
+  index = match(as.character(data$colour), self$group_levels)
+  offset = .5 * ((index - .5) / length(self$group_levels) - .5)
+  for (coordinate in intersect(c("x", "xmin", "xmax"), names(data))) {
+    data[[coordinate]] = data[[coordinate]] + offset
+  }
+  data
+}
+
 flexplot_categorical_object = function(data, outcome, axis, plot.type="histogram",
                                         spread="quartiles", suppress_smooth=FALSE,
                                         alpha=.5, jitter=NULL, sample=Inf,
-                                        raw.data=TRUE) {
+                                        raw.data=TRUE, given=NA) {
   jitter = match_jitter_categorical(jitter)
   points_data = sample.subset(sample, data)
   x = axis[1]
@@ -85,6 +94,27 @@ flexplot_categorical_object = function(data, outcome, axis, plot.type="histogram
   if (n_groups > 6) p = p + ggplot2::guides(colour="none")
 
   if (!is.null(group)) {
+    if (plot.type %in% c("boxplot", "violin")) {
+      group_levels = flexplot_sampling_levels(data[[group]])
+      position = ggplot2::ggproto(
+        NULL, ggplot2::Position, group_levels=group_levels,
+        compute_panel=flexplot_categorical_group_position
+      )
+      width = .45 / length(group_levels)
+      if (identical(plot.type, "boxplot")) {
+        return(p + ggplot2::geom_boxplot(alpha=.1, width=width, position=position,
+                                        linetype="solid"))
+      }
+      # Densities require two observations per displayed x/group/facet cell.
+      facets = vapply(given[!is.na(given) & nzchar(given)], resolve_binned_var,
+                        character(1), data=data, return.name=TRUE)
+      violin_data = data |>
+        dplyr::group_by(dplyr::across(dplyr::all_of(c(x, group, facets)))) |>
+        dplyr::filter(dplyr::n() > 1) |>
+        dplyr::ungroup()
+      return(p + ggplot2::geom_violin(data=violin_data, alpha=.1,
+                                      width=width, position=position, linetype="solid"))
+    }
     if (suppress_smooth) return(p)
     return(p + flexplot_categorical_summary_layers(spread, group))
   }
