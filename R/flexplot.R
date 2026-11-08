@@ -252,7 +252,8 @@ flexplot = function(formula, data=NULL, related=F,
     !use_magnet && !related && !identical(axis[1], "1")
   ghost_supported = is.null(ghost.line) ||
     (!is.na(given[1]) &&
-       (is.numeric(data[[axis[1]]]) || !is.null(prediction) || categorical_ghost))
+       (is.numeric(data[[axis[1]]]) ||
+          !is.null(prediction) || categorical_ghost || use_magnet))
   
 
   if (!is.null(ghost.line) && !is.null(prediction)) {
@@ -309,7 +310,7 @@ flexplot = function(formula, data=NULL, related=F,
 
   # Add ghost-line overlay
   if (!is.null(ghost.line) && ghost_supported) {
-
+    
     ghost.reference = create_ghost_reference(
       ghost.reference=ghost.reference,
       data=as.data.frame(data),
@@ -319,46 +320,89 @@ flexplot = function(formula, data=NULL, related=F,
       axis=axis,
       labels=labels
     )
-
+    
     reference_data = flexplot_ghost_reference_data(
       data=if (is.null(prediction)) data else prediction,
       given=given,
       ghost.reference=ghost.reference,
       axis=if (categorical_ghost) NULL else axis
     )
-
-    if (!is.null(prediction)) {
-      ghost_data = flexplot_ghost_prediction_data(reference_data, axis, given, data,
-                                                 use_magnet, comparison_predictions)
-    } else if (categorical_ghost) {
-      ghost_data = flexplot_ghost_categorical_data(
-        reference_data, data, outcome, axis, given, ghost.reference, spread, plot.type
-      )
-    } else {
-      ghost_data = flexplot_ghost_smooth_data(
+    
+    if (use_magnet && is.null(prediction)) {
+      
+      ghost_data = flexplot_ghost_magnet_data(
+        final=final,
         reference_data=reference_data,
-        outcome=outcome,
-        axis=axis,
         given=given,
-        method=method,
-        plot.type=plot.type,
-        bins=bins,
-        spread=spread,
-        jitter=jitter
+        data=data
+      )
+      
+      final = final +
+        ggplot2::geom_line(
+          data=ghost_data,
+          mapping=ggplot2::aes(
+            x=.data[[axis[1]]],
+            y=.data[["pred_prob"]],
+            group=1
+          ),
+          inherit.aes=FALSE,
+          color=ghost.line,
+          linewidth=0.8
+        ) +
+        ggplot2::geom_point(
+          data=ghost_data,
+          mapping=ggplot2::aes(
+            x=.data[[axis[1]]],
+            y=.data[["pred_prob"]]
+          ),
+          inherit.aes=FALSE,
+          color=ghost.line,
+          shape=1,
+          size=3,
+          stroke=1.2
+        )
+      
+    } else {
+      
+      if (!is.null(prediction)) {
+        ghost_data = flexplot_ghost_prediction_data(
+          reference_data, axis, given, data,
+          use_magnet, comparison_predictions
+        )
+      } else if (categorical_ghost) {
+        ghost_data = flexplot_ghost_categorical_data(
+          reference_data, data, outcome, axis, given,
+          ghost.reference, spread, plot.type
+        )
+      } else {
+        ghost_data = flexplot_ghost_smooth_data(
+          reference_data=reference_data,
+          outcome=outcome,
+          axis=axis,
+          given=given,
+          method=method,
+          plot.type=plot.type,
+          bins=bins,
+          spread=spread,
+          jitter=jitter
+        )
+      }
+      
+      reference_groups = NULL
+      
+      if (!is.null(final$mapping$linetype)) {
+        group_var = flexplot_object_axis(data, axis)[2]
+        reference_groups = reference_data[[group_var]]
+      }
+      
+      final = final + flexplot_ghost_layer(
+        d_smooth=ghost_data,
+        ghost.line=ghost.line,
+        reference_groups=reference_groups
       )
     }
-
-    reference_groups = NULL
-    if (!is.null(final$mapping$linetype)) {
-      group_var = flexplot_object_axis(data, axis)[2]
-      reference_groups = reference_data[[group_var]]
-    }
-    final = final + flexplot_ghost_layer(
-      d_smooth=ghost_data,
-      ghost.line=ghost.line,
-      reference_groups=reference_groups
-    )
   }
+
 
 
   if (!use_magnet && !is.null(logistic_labels)) {

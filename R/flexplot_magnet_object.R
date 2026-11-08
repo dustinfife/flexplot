@@ -264,3 +264,42 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
 
   return(p)
 }
+
+flexplot_ghost_magnet_data = function(final, reference_data, given, data) {
+  
+  fitted_layers = Filter(
+    function(layer) {
+      inherits(layer$geom, "GeomPoint") &&
+        "pred_prob" %in% names(layer$data)
+    },
+    final$layers
+  )
+  
+  if (length(fitted_layers) != 1) {
+    stop("Expected exactly one magnet prediction layer.")
+  }
+  
+  predictions = fitted_layers[[1]]$data
+  
+  display_given = flexplot_magnet_display_given(data, given)
+  
+  reference = predictions
+  
+  for (variable in display_given) {
+    reference = reference[
+      as.character(reference[[variable]]) ==
+        as.character(reference_data[[variable]][1]),
+      ,
+      drop=FALSE
+    ]
+  }
+  
+  if (!nrow(reference)) {
+    stop("No magnet predictions match the ghost reference.")
+  }
+  
+  # Remove reference panel identifiers so predictions repeat in other panels
+  reference[display_given] = NULL
+  
+  reference
+}

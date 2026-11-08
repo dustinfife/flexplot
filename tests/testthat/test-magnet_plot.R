@@ -1,8 +1,9 @@
 test_that("magnet_plot works", {
+  set.seed(121)
   vdiffr::expect_doppelganger("magnet plot with numeric binary", magnet_plot(y_bin~a, data=small))
   expect_error(magnet_plot(b~a, data=small), "Your outcome variable must have exactly 2 levels")
   expect_message(magnet_plot(a~b, data=small), "your outcome variable levels")
-  vdiffr::expect_doppelganger("magnet plot with categorical binary", magnet_plot(a~b, data=small))
+  vdiffr::expect_doppelganger("magnet plot with categorical binary", magnet_plot(a~b, data=small)%>%suppressMessages())
   expect_error(magnet_plot(a~y, data=small))
 })
 
@@ -80,5 +81,160 @@ test_that("nonbinary outcome retains ordinary categorical plot", {
   expect_s3_class(p, "ggplot")
   expect_no_error(ggplot2::ggplot_build(p))
   expect_false("y_scaled" %in% names(p$data))
+})
+
+test_that("magnet plots support paneling", {
+  p = magnet_plot(injury ~ gender | safety, data = tablesaw.injury)
+  
+  expect_s3_class(p, "ggplot")
+  expect_true(inherits(p$facet, "FacetWrap"))
+  
+  layout = ggplot2::ggplot_build(p)$layout$layout
+  expect_equal(
+    nrow(layout),
+    length(unique(tablesaw.injury$safety))
+  )
+})
+
+
+test_that("magnet plots calculate sample sizes within panels", {
+  p = magnet_plot(injury ~ gender | safety, data = tablesaw.injury)
+  
+  counts = Filter(
+    function(layer) inherits(layer$geom, "GeomText"),
+    p$layers
+  )
+  
+  expect_length(counts, 1)
+  counts = counts[[1]]$data
+  
+  expected = tablesaw.injury |>
+    dplyr::count(safety, gender, name = "n_total")
+  
+  expect_equal(sum(counts$n_total), nrow(tablesaw.injury))
+  expect_equal(sort(counts$n_total), sort(expected$n_total))
+})
+
+
+test_that("magnet plots calculate probabilities within panels", {
+  p = magnet_plot(injury ~ gender | safety, data = tablesaw.injury)
+  
+  predictions = lapply(p$layers, function(layer) layer$data)
+  predictions = Filter(
+    function(d) "pred_prob" %in% names(d),
+    predictions
+  )
+  
+  expect_length(predictions, 1)
+  predictions = predictions[[1]]
+  
+  expect_true(all(is.finite(predictions$pred_prob)))
+  expect_true(all(predictions$pred_prob >= 0 & predictions$pred_prob <= 1))
+  
+  expected_groups = tablesaw.injury |>
+    dplyr::distinct(safety, gender)
+  
+  expect_equal(nrow(predictions), nrow(expected_groups))
+})
+
+
+test_that("magnet plots handle panels with one outcome class", {
+  d = data.frame(
+    y = c(0, 0, 0, 0, 1, 1, 1, 1),
+    x = rep(c("A", "B"), 4),
+    panel = rep(c("first", "second"), each = 4)
+  )
+  
+  p = magnet_plot(y ~ x | panel, data = d)
+  
+  predictions = p$layers[[3]]$data
+  
+  expect_equal(
+    sort(predictions$pred_prob),
+    c(0, 0, 1, 1)
+  )
+})
+
+
+test_that("magnet plots exclude missing panel values", {
+  d = tablesaw.injury
+  d$safety[1:10] = NA
+  
+  p = magnet_plot(injury ~ gender | safety, data = d)
+  
+  counts = p$layers[[4]]$data
+  
+  expect_equal(
+    sum(counts$n_total),
+    sum(stats::complete.cases(d[, c("injury", "gender", "safety")]))
+  )
+})
+
+test_that("flexplot supports ghost lines for magnet plots", {
+  p = flexplot(
+    injury ~ gender | safety,
+    data = tablesaw.injury,
+    ghost.line = "red"
+  )
+  
+  expect_s3_class(p, "ggplot")
+  
+  ghost_lines = Filter(
+    function(layer) {
+      inherits(layer$geom, "GeomLine") &&
+        identical(layer$aes_params$colour, "red")
+    },
+    p$layers
+  )
+  
+  expect_length(ghost_lines, 1)
+  expect_gt(nrow(ghost_lines[[1]]$data), 0)
+})
+
+
+test_that("magnet ghost lines reproduce reference predictions", {
+  p = flexplot(
+    injury ~ gender | safety,
+    data = tablesaw.injury,
+    ghost.line = "red"
+  )
+  
+  ghost = Filter(
+    function(layer) {
+      inherits(layer$geom, "GeomLine") &&
+        identical(layer$aes_params$colour, "red")
+    },
+    p$layers
+  )[[1]]$data
+  
+  fitted = Filter(
+    function(layer) {
+      "pred_prob" %in% names(layer$data)
+    },
+    p$layers
+  )[[1]]$data
+  
+  expect_true(all(ghost$pred_prob %in% fitted$pred_prob))
+  expect_equal(
+    length(unique(ghost$pred_prob)),
+    length(unique(ghost[[names(ghost)[1]]]))
+  )
+})
+
+
+test_that("magnet plots without ghost lines remain unchanged", {
+  p = flexplot(
+    injury ~ gender | safety,
+    data = tablesaw.injury
+  )
+  
+  ghost_lines = Filter(
+    function(layer) {
+      inherits(layer$geom, "GeomLine")
+    },
+    p$layers
+  )
+  
+  expect_length(ghost_lines, 0)
 })
 

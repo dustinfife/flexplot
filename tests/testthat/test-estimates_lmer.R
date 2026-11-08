@@ -14,6 +14,6 @@ test_that("estimates from mixed models", {
   expect_true(all(names(estimates(mod3)) %in% c("fixed", "r.squared", "rand", "icc")))
   
   # generalized mixed model
-  mod3 = lme4::glmer(y_gam~x + a + (1|b), data=small, family="Gamma")  
+  mod3 = lme4::glmer(y_gam~x + a + (1|b), data=small, family=Gamma(link="log")) %>% suppressMessages()
   expect_true(all(names(estimates(mod3)) %in% c("fixed", "r.squared", "rand", "icc")))
 })  

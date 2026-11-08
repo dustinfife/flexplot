@@ -37,116 +37,278 @@
 #'
 #' @export
 magnet_plot = function(formula, data,
-                                 jitter = TRUE,
-                                 alpha = 0.6,
-                                 dot_size = 2) {
+                       jitter = TRUE,
+                       alpha = 0.6,
+                       dot_size = 2) {
   
-  variables = all.vars(formula, unique=FALSE)
+  variables = all.vars(formula)
   yvar = variables[1]
   xvar = variables[2]
   
-  # Get variable names as symbols
-  xvar_sym = rlang::ensym(xvar)
-  yvar_sym = rlang::ensym(yvar)
+  # Extract optional panel variable
+  rhs = formula[[3]]
+  panelvar = NULL
   
-  # Check that Y is binary 0/1
+  if (is.call(rhs) && identical(rhs[[1]], as.name("|"))) {
+    panel_vars = all.vars(rhs[[3]])
+    
+    if (length(panel_vars) != 1) {
+      stop("Magnet plots support one paneling variable.")
+    }
+    
+    panelvar = panel_vars[1]
+  }
+  
+  # Validate and prepare data
   data = check_magnet_errors(data, yvar, xvar)
   
-  y_values = unique(data[[yvar]])
-  if (!all(y_values %in% c(0, 1))) {
+  required_vars = c(yvar, xvar, panelvar)
+  missing_vars = setdiff(required_vars, names(data))
+  
+  if (length(missing_vars) > 0) {
+    stop("Variables not found in data: ",
+         paste(missing_vars, collapse = ", "))
+  }
+  
+  data = data[stats::complete.cases(data[, required_vars, drop = FALSE]), ,
+              drop = FALSE]
+  
+  if (nrow(data) == 0) {
+    stop("No complete observations available.")
+  }
+  
+  if (!all(data[[yvar]] %in% c(0, 1))) {
     stop("The response variable must be binary and coded as 0/1.")
   }
   
-  # Check that x is categorical
-  if (is.numeric(data[[xvar]])) data[[xvar]] = factor(data[[xvar]])
+  # Treat numeric predictors and panel variables as categorical
+  if (is.numeric(data[[xvar]])) {
+    data[[xvar]] = factor(data[[xvar]])
+  }
   
+  if (!is.null(panelvar) && is.numeric(data[[panelvar]])) {
+    data[[panelvar]] = factor(data[[panelvar]])
+  }
   
-  # Compute proportion within each X group and scaling factor
-  df_summary = data %>%
-    group_by(!!xvar_sym) %>%
-    summarise(n_total = n(),
-              n_0 = sum(!!yvar_sym == 0),
-              n_1 = sum(!!yvar_sym == 1),
-              prop_0 = n_0 / n_total,
-              prop_1 = n_1 / n_total,
-              .groups = "drop")
+  data[[xvar]] = droplevels(factor(data[[xvar]]))
   
-  # Compute max N across all groups
-  max_n_total = max(df_summary$n_total)
+  if (!is.null(panelvar)) {
+    data[[panelvar]] = droplevels(factor(data[[panelvar]]))
+  }
   
-  df_summary = df_summary %>%
-    mutate(scaling_factor = n_total / max_n_total)
+  # Use a single internal panel variable for both cases
+  panel_col = ".magnet_panel"
   
-  # Join proportions + scaling factor back to original data
-  df_scaled = data %>%
-    left_join(df_summary, by = rlang::as_name(xvar_sym)) %>%
-    group_by(!!xvar_sym, !!yvar_sym) %>%
-    mutate(stack_pos = row_number()) %>%
-    ungroup()
+  while (panel_col %in% names(data)) {
+    panel_col = paste0(panel_col, "_")
+  }
   
-  # Compute scaled Y position
-  df_scaled = df_scaled %>%
-    mutate(
-      y_scaled = case_when(
-        !!yvar_sym == 0 ~ 0 + (stack_pos - 0.5) / n_0 * (prop_0 * scaling_factor * 0.5),
-        !!yvar_sym == 1 ~ 1 - (stack_pos - 0.5) / n_1 * (prop_1 * scaling_factor * 0.5)
+  if (is.null(panelvar)) {
+    data[[panel_col]] = factor("All")
+  } else {
+    data[[panel_col]] = data[[panelvar]]
+  }
+  
+  # Counts and proportions within each panel and X group
+  df_summary = data |>
+    dplyr::group_by(
+      dplyr::across(dplyr::all_of(c(panel_col, xvar)))
+    ) |>
+    dplyr::summarise(
+      n_total = dplyr::n(),
+      n_0 = sum(.data[[yvar]] == 0),
+      n_1 = sum(.data[[yvar]] == 1),
+      prop_0 = n_0 / n_total,
+      prop_1 = n_1 / n_total,
+      .groups = "drop"
+    ) |>
+    dplyr::group_by(.data[[panel_col]]) |>
+    dplyr::mutate(
+      scaling_factor = n_total / max(n_total)
+    ) |>
+    dplyr::ungroup()
+  
+  # Join summaries back to observations
+  df_scaled = dplyr::left_join(
+    data,
+    df_summary,
+    by = c(panel_col, xvar)
+  )
+  
+  df_scaled = df_scaled |>
+    dplyr::group_by(
+      dplyr::across(dplyr::all_of(c(panel_col, xvar, yvar)))
+    ) |>
+    dplyr::mutate(stack_pos = dplyr::row_number()) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      y_scaled = dplyr::case_when(
+        .data[[yvar]] == 0 ~
+          (stack_pos - 0.5) / n_0 *
+          (prop_0 * scaling_factor * 0.5),
+        
+        .data[[yvar]] == 1 ~
+          1 - (stack_pos - 0.5) / n_1 *
+          (prop_1 * scaling_factor * 0.5)
       )
     )
   
-  # Fit logistic regression
-  formula = as.formula(paste(rlang::as_name(yvar_sym), "~", rlang::as_name(xvar_sym)))
-  model = glm(formula, data = data, family = binomial)
+  # Fit logistic models separately within panels
+  panel_data = split(data, data[[panel_col]], drop = TRUE)
   
-  # Predicted probabilities
-  x_levels = levels(factor(data[[rlang::as_name(xvar_sym)]]))
+  model_formula = stats::reformulate(xvar, response = yvar)
   
-
-
+  predictions = lapply(panel_data, function(d) {
+    
+    x_levels = unique(as.character(d[[xvar]]))
+    
+    newdata = data.frame(
+      x = factor(x_levels, levels = levels(data[[xvar]]))
+    )
+    names(newdata) = xvar
+    
+    # If a panel has only one outcome class, use observed proportions
+    if (length(unique(d[[yvar]])) < 2 ||
+        length(unique(d[[xvar]])) < 2) {
+      probabilities = vapply(x_levels, function(x) {
+        mean(d[[yvar]][as.character(d[[xvar]]) == x])
+      }, numeric(1))
+    } else {
+      # Drop unused X levels before fitting
+      d[[xvar]] = droplevels(d[[xvar]])
+      newdata[[xvar]] = factor(
+        x_levels,
+        levels = levels(d[[xvar]])
+      )
+      
+      model = suppressWarnings(
+        stats::glm(
+          model_formula,
+          data = d,
+          family = stats::binomial()
+        )
+      )
+      
+      probabilities = as.numeric(
+        stats::predict(
+          model,
+          newdata = newdata,
+          type = "response"
+        )
+      )
+    }
+    
+    result = data.frame(
+      X = x_levels,
+      pred_prob = probabilities
+    )
+    
+    result[[panel_col]] = d[[panel_col]][1]
+    result
+  })
   
-  df_pred = data.frame(
-    X = x_levels,
-    pred_prob = predict(model, newdata = setNames(data.frame(x_levels), rlang::as_name(xvar_sym)), type = "response")
-  ) %>% arrange(desc(pred_prob))
+  df_pred = dplyr::bind_rows(predictions)
   
-  # Base ggplot object
-  p = ggplot() +
-    geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray50") +
-    scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1)) +
-    labs(title = "Magnet Plot",
-         y = rlang::as_name(yvar_sym),
-         x = rlang::as_name(xvar_sym)) +
-    theme_bw()
-
-  # order x-axis by predicted probabilities
-  if (class(df_scaled[[xvar]])[1] != "ordered") {
-    df_scaled[[xvar]] = factor(df_scaled[[xvar]], levels = df_pred$X, ordered=T)  
+  # Consistent X ordering across all panels
+  if (!is.ordered(data[[xvar]])) {
+    global_order = df_summary |>
+      dplyr::group_by(.data[[xvar]]) |>
+      dplyr::summarise(
+        proportion = sum(n_1) / sum(n_total),
+        .groups = "drop"
+      ) |>
+      dplyr::arrange(dplyr::desc(proportion)) |>
+      dplyr::pull(.data[[xvar]]) |>
+      as.character()
+  } else {
+    global_order = levels(data[[xvar]])
   }
   
+  df_scaled[[xvar]] = factor(
+    df_scaled[[xvar]],
+    levels = global_order,
+    ordered = TRUE
+  )
   
-  # Dot style options
-  point_shape = 1
-  point_position = if (jitter) position_jitter(width = 0.05) else position_identity()
+  df_summary[[xvar]] = factor(
+    df_summary[[xvar]],
+    levels = global_order,
+    ordered = TRUE
+  )
   
-  # Add stacked dots
-  p = p + geom_point(data = df_scaled,
-                     aes(x = !!xvar_sym, y = y_scaled),
-                     color = "black",
-                     alpha = alpha,
-                     shape = point_shape,
-                     size = dot_size,
-                     position = point_position)
+  df_pred$X = factor(
+    df_pred$X,
+    levels = global_order,
+    ordered = TRUE
+  )
   
-  # Add predicted probabilities
-  p = p + geom_point(data = df_pred, 
-                     aes(x = X, y = pred_prob), 
-                     color = "blue", size = 3)
+  # Build plot
+  p = ggplot2::ggplot() +
+    ggplot2::geom_hline(
+      yintercept = 0.5,
+      linetype = "dashed",
+      color = "gray50"
+    ) +
+    ggplot2::scale_y_continuous(
+      breaks = c(0, 0.25, 0.5, 0.75, 1)
+    ) +
+    ggplot2::labs(
+      title = "Magnet Plot",
+      y = yvar,
+      x = xvar
+    ) +
+    ggplot2::theme_bw()
   
-  # Add sample size labels
-  p = p + geom_text(data = df_summary,
-                    aes(x = !!xvar_sym, y = 0.52, label = paste0("N=", n_total)),
-                    vjust = 0, size = 3.5)
+  point_position = if (jitter) {
+    ggplot2::position_jitter(width = 0.05)
+  } else {
+    ggplot2::position_identity()
+  }
   
-  # Return plot
+  p = p +
+    ggplot2::geom_point(
+      data = df_scaled,
+      ggplot2::aes(
+        x = .data[[xvar]],
+        y = y_scaled
+      ),
+      color = "black",
+      alpha = alpha,
+      shape = 1,
+      size = dot_size,
+      position = point_position
+    ) +
+    ggplot2::geom_point(
+      data = df_pred,
+      ggplot2::aes(
+        x = X,
+        y = pred_prob
+      ),
+      color = "blue",
+      size = 3
+    ) +
+    ggplot2::geom_text(
+      data = df_summary,
+      ggplot2::aes(
+        x = .data[[xvar]],
+        y = 0.52,
+        label = paste0("N=", n_total)
+      ),
+      vjust = 0,
+      size = 3.5
+    )
+  
+  # Add panels only when requested
+  if (!is.null(panelvar)) {
+    p = p +
+      ggplot2::facet_wrap(
+        stats::as.formula(paste("~", panel_col))
+      )
+    
+    # Replace internal panel label with original variable name
+    names(p$data)[names(p$data) == panel_col] = panelvar
+  }
+  
   return(p)
 }
 

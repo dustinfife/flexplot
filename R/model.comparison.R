@@ -54,6 +54,21 @@ model.comparison = function(model1, model2){
 
 model_comparison_table = function(model1, model2, m1.name="Full", m2.name="Reduced", nested) {
   
+  # Refit REML mixed models using ML for model comparison
+  if (inherits(model1, "lmerMod") && inherits(model2, "lmerMod")) {
+    if (lme4::isREML(model1) || lme4::isREML(model2)) {
+      message("Refitting REML models with ML for model comparison.")
+    }
+    
+    if (lme4::isREML(model1)) {
+      model1 = lme4::refitML(model1)
+    }
+    
+    if (lme4::isREML(model2)) {
+      model2 = lme4::refitML(model2)
+    }
+  }
+  
   # check if AIC can be computed
   if(!is.null(attr((try(AIC(model1), silent=TRUE)), "class")[1]) | !is.null(attr((try(AIC(model2), silent=TRUE)), "class")[1])) {
     return(NULL)
