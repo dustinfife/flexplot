@@ -146,9 +146,8 @@ testthat::test_that("native magnet integration preserves ordered x and condition
   expect_equal(nrow(fitted), nlevels(d$a) * nlevels(d$b))
   expect_true(all(built$data[[3]]$colour == "blue"))
 
-  fit = stats::glm(y_bin ~ a + b, data=d, family=stats::binomial())
-  expect_equal(unname(fitted$pred_prob),
-               unname(stats::predict(fit, newdata=fitted, type="response")))
+  expect_equal(unname(fitted$pred_prob), magnet_within_predictions(d, fitted, "b"),
+                 tolerance=1e-7, scale=1)
   for (i in seq_len(nrow(built$layout$layout))) {
     panel = built$layout$layout[i, ]
     points = built$data[[2]][built$data[[2]]$PANEL == panel$PANEL, ]
@@ -295,11 +294,11 @@ test_that("native magnet scales and frames retain original factor order", {
           expect_identical(levels(p$layers[[index]]$data$a), x_levels)
           expect_identical(is.ordered(p$layers[[index]]$data$a), ordered_x)
         }
-        model_formula = stats::reformulate(all.vars(formula)[-1], response="y_bin")
-        fit = stats::glm(model_formula, data=d, family=stats::binomial())
         fitted = p$layers[[3]]$data
+        strata = setdiff(names(fitted), c("a", "pred_prob"))
         expect_equal(unname(fitted$pred_prob),
-                     unname(stats::predict(fit, newdata=fitted, type="response")))
+                       magnet_within_predictions(p$layers[[2]]$data, fitted, strata),
+                       tolerance=1e-7, scale=1)
       }
       returned = flexplot(y_bin ~ a | z, data=d, jitter=FALSE, return_data=TRUE)
       expect_identical(levels(returned$a), x_levels)

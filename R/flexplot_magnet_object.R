@@ -74,6 +74,21 @@ flexplot_magnet_summary_position = function(data, group) {
   flexplot_magnet_conditioned_position(data[[group]])
 }
 
+flexplot_magnet_fit = function(data, outcome, xvar, groups) {
+  prediction = unique(data[groups])
+  # These degenerate binomial fits have an exact constant MLE and need no
+  # factor contrasts (or infinite coefficients for an all-zero/all-one outcome).
+  if (length(unique(data[[xvar]])) < 2 || length(unique(data[[outcome]])) < 2) {
+    prediction$pred_prob = mean(data[[outcome]])
+    return(prediction)
+  }
+  data[[xvar]] = droplevels(data[[xvar]])
+  model = stats::glm(make.formula(as.name(outcome), as.name(xvar)),
+                      data=data, family=stats::binomial())
+  prediction$pred_prob = unname(stats::predict(model, newdata=prediction, type="response"))
+  prediction
+}
+
 flexplot_magnet_object = function(data, outcome, axis, given=NA,
                                   jitter=TRUE, alpha=0.6,
                                   dot_size=2, raw.data=TRUE, sample=Inf,
@@ -87,6 +102,8 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
   ## drop missing data
   groups = unique(c(display_axis, display_given))
   groups = groups[!is.na(groups) & nzchar(groups)]
+  data = data[stats::complete.cases(data[c(outcome, groups)]), , drop=FALSE]
+  if (!nrow(data)) stop("No complete observations available for a magnet plot.", call.=FALSE)
   
   # Accept either raw data or data already prepared for magnet plots.
   if (!"y_scaled" %in% names(data)) {
@@ -102,32 +119,17 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
     data[[xvar]] = factor(data[[xvar]])
   }
   
-  # Fit all axis predictors and conditioning variables on the full dataset.
-  facet_vars = given[!is.na(given) & nzchar(given)]
-  model_vars = unique(c(axis[!is.na(axis) & nzchar(axis)], facet_vars))
-  
-  model_formula = make.formula(as.name(outcome), lapply(model_vars, as.name))
-  
-  model = stats::glm(
-    model_formula,
-    data=data,
-    family=stats::binomial()
-  )
-  
-  df_pred = unique(data[groups])
-  # Keep all display-bin keys, evaluating each continuous model variable at its
-  # own full-data bin median, independently of x, grouping, or visualization sample.
-  for (variable in setdiff(model_vars, groups)) {
-    binned = paste0(variable, "_binned")
-    medians = stats::aggregate(data[variable], by=data[binned], FUN=stats::median)
-    df_pred[[variable]] = medians[[variable]][match(df_pred[[binned]], medians[[binned]])]
+  # Like geom_smooth(), fit separately by displayed group and panel. Sampling
+  # below affects only raw observations; every fit uses its full eligible stratum.
+  df_pred = NULL
+  if (show_fitted) {
+    strata = setdiff(groups, xvar)
+    chunks = if (length(strata)) {
+      dplyr::group_split(dplyr::group_by(data, dplyr::across(dplyr::all_of(strata))))
+    } else list(data)
+    df_pred = dplyr::bind_rows(lapply(chunks, flexplot_magnet_fit,
+                                      outcome=outcome, xvar=xvar, groups=groups))
   }
-  
-  df_pred$pred_prob = stats::predict(
-    model,
-    newdata=df_pred,
-    type="response"
-  )
   
   # One sample-size label per displayed group.
   df_counts = dplyr::summarise(

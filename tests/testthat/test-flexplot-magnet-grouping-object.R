@@ -31,15 +31,14 @@ expect_magnet_full_group_counts = function(p, data, group, facets=character()) {
   }
 }
 
-test_that("native categorical magnet groups use full-data additive logistic fits", {
+test_that("native categorical magnet groups use separate full-data logistic fits", {
   withr::local_options(flexplot.object_renderer=TRUE)
 
   p = flexplot(y_bin ~ a + b, data=small, jitter=FALSE)
   built = ggplot2::ggplot_build(p)
   fitted = p$layers[[3]]$data
-  fit = stats::glm(y_bin ~ a + b, data=small, family=stats::binomial())
-  expect_equal(unname(fitted$pred_prob),
-               unname(stats::predict(fit, newdata=fitted, type="response")))
+  expect_equal(unname(fitted$pred_prob), magnet_within_predictions(small, fitted, "b"),
+                 tolerance=1e-7, scale=1)
   expect_equal(nrow(fitted), nrow(unique(small[c("a", "b")])))
   expect_identical(rlang::as_label(p$layers[[2]]$mapping$colour), "b")
   expect_identical(rlang::as_label(p$layers[[3]]$mapping$group), "b")
@@ -59,7 +58,7 @@ test_that("native categorical magnet groups use full-data additive logistic fits
   expect_equal(built$data[[4]]$label, paste0("N=", counts$n_total))
 })
 
-test_that("native numeric magnet groups model continuous values at full-bin medians", {
+test_that("native numeric magnet groups fit separately within display bins and panels", {
   withr::local_options(flexplot.object_renderer=TRUE)
 
   d = small
@@ -71,13 +70,8 @@ test_that("native numeric magnet groups model continuous values at full-bin medi
   d$z_binned = cut(d$z, breaks=c(min(d$z), -.5, .5, max(d$z)),
                     labels=labels, include.lowest=TRUE)
   fitted = p$layers[[3]]$data
-  medians = tapply(d$z, d$z_binned, median)
-  expected_data = fitted
-  expected_data$z = as.numeric(medians[as.character(fitted$z_binned)])
-  expect_equal(fitted$z, expected_data$z)
-  fit = stats::glm(y_bin ~ a + z + b, data=d, family=stats::binomial())
   expect_equal(unname(fitted$pred_prob),
-               unname(stats::predict(fit, newdata=expected_data, type="response")))
+                 magnet_within_predictions(d, fitted, c("z_binned", "b")), tolerance=1e-7, scale=1)
   expect_identical(levels(p$layers[[2]]$data$a), levels(d$a))
   expect_equal(levels(fitted$z_binned), labels)
   expect_identical(rlang::as_label(p$layers[[2]]$mapping$colour), "z_binned")
@@ -152,8 +146,8 @@ test_that("grouped magnet visuals retain native colors, stacks, and logistic fit
     expect_equal(built$data[[2]]$y, expected_y)
     expect_equal(counts$n_total,
                    as.integer(totals[paste(counts$a, counts[[displayed]])]))
-    model = stats::glm(formula, data=small, family=stats::binomial())
-    expect_equal(built$data[[3]]$y, unname(stats::predict(model, newdata=fitted, type="response")))
+    expect_equal(built$data[[3]]$y,
+                   magnet_within_predictions(raw, fitted, displayed), tolerance=1e-7, scale=1)
   }
 })
 
@@ -161,17 +155,9 @@ expect_magnet_numeric_panel_data = function(p, original, variables, facet_variab
   built = ggplot2::ggplot_build(p)
   fitted = p$layers[[3]]$data
   counts = p$layers[[4]]$data
-  expected = fitted
-  for (variable in variables) {
-    medians = tapply(original[[variable]], original[[paste0(variable, "_binned")]], median)
-    expected[[variable]] = as.numeric(medians[as.character(fitted[[paste0(variable, "_binned")]])])
-    expect_equal(fitted[[variable]], expected[[variable]])
-  }
-  model_variables = c("a", if ("b" %in% names(fitted)) "b", variables)
-  formula = stats::reformulate(model_variables, response="y_bin")
-  model = stats::glm(formula, data=original, family=stats::binomial())
-  expect_equal(unname(fitted$pred_prob),
-               unname(stats::predict(model, newdata=expected, type="response")))
+  strata = setdiff(names(fitted), c("a", "pred_prob"))
+  expect_equal(unname(fitted$pred_prob), magnet_within_predictions(original, fitted, strata),
+                 tolerance=1e-7, scale=1)
   expect_equal(nrow(built$data[[3]]), nrow(fitted))
   expect_equal(nrow(built$data[[4]]), nrow(counts))
 

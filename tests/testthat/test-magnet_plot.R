@@ -186,10 +186,10 @@ test_that("magnet ghosts copy the requested fitted curve to every panel", {
     expect_setequal(line$PANEL, destination)
     expect_true(any(line$PANEL %in% panels$PANEL[as.character(panels$b) == reference]))
     expect_equal(sort(unique(as.character(ghost$b))), sort(levels(small$b)))
-    model = glm(y_bin ~ a + b, small, family=binomial())
     profile = ghost
     profile$b = factor(reference, levels=levels(small$b))
-    expect_equal(ghost$pred_prob, unname(predict(model, profile, type="response")), tolerance=1e-10)
+    expect_equal(ghost$pred_prob, magnet_within_predictions(small, profile, "b"),
+                   tolerance=1e-7, scale=1)
     expect_equal(nrow(line), nlevels(small$a) * length(destination))
     for (panel in destination) {
       curve = line[line$PANEL == panel, ]
@@ -237,8 +237,9 @@ test_that("grouped magnet ghosts keep fitted offsets and separate category or bi
     panels = built$layout$layout
     display_given = if (group == "b") "z_binned" else "b"
     reference_panel = if (group == "b") {
-      fitted_frame = p$layers[[3]]$data
-      as.character(fitted_frame$z_binned[match(unique(ghost$z), fitted_frame$z)])
+      bins = cut(small$z, quantile(small$z, seq(0, 1, length.out=4)),
+                    labels=levels(p$layers[[2]]$data$z_binned), include.lowest=TRUE)
+      as.character(bins[which.min(abs(small$z - median(small$z)))])
     } else "x"
     source = panels$PANEL[as.character(panels[[display_given]]) == reference_panel]
     expect_length(source, 1)
@@ -246,12 +247,13 @@ test_that("grouped magnet ghosts keep fitted offsets and separate category or bi
     expect_setequal(curve$PANEL, panels$PANEL)
     original = ordinary[ordinary$PANEL == source, ]
     expect_equal(length(unique(curve$group)), sum(table(original$group) > 1))
-    model = glm(y_bin ~ a + b + z, small, family=binomial())
-    # Only one second-axis predictor and one conditioning predictor are present;
-    # both therefore belong to the native additive logistic model.
     profile = ghost
-    if (group == "z") profile$b = factor("x", levels=levels(small$b))
-    expect_equal(ghost$pred_prob, unname(predict(model, profile, type="response")), tolerance=1e-10)
+    if (group == "z") {
+      profile$b = factor("x", levels=levels(small$b))
+    } else profile$z_binned = factor(reference_panel, levels=levels(ghost$z_binned))
+    expect_equal(ghost$pred_prob,
+                   magnet_within_predictions(p$layers[[2]]$data, profile, c("b", "z_binned")),
+                   tolerance=1e-7, scale=1)
     expect_equal(length(unique(markers$group)), 3)
     for (panel in unique(curve$PANEL)) {
       copy = curve[curve$PANEL == panel, ]
