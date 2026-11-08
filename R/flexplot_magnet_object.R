@@ -77,7 +77,7 @@ flexplot_magnet_summary_position = function(data, group) {
 flexplot_magnet_object = function(data, outcome, axis, given=NA,
                                   jitter=TRUE, alpha=0.6,
                                   dot_size=2, raw.data=TRUE, sample=Inf,
-                                  show_fitted=TRUE, outcome_labels=NULL) {
+                                  show_fitted=TRUE, outcome_labels=NULL, connect_fitted=FALSE) {
   
   xvar = axis[1]
   display_axis = flexplot_object_axis(data, axis)
@@ -262,26 +262,55 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
       ggplot2::scale_x_discrete(limits=levels(droplevels(data[[xvar]])))
   }
 
+  if (show_fitted && connect_fitted) {
+    line_groups = as.character(c(group, display_given[!is.na(display_given) & nzchar(display_given)]))
+    line_data = df_pred |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(line_groups))) |>
+      dplyr::filter(dplyr::n_distinct(.data[[xvar]]) > 1) |>
+      dplyr::ungroup()
+    line_mapping = fitted_mapping
+    if (is.null(group)) line_mapping$group = ggplot2::aes(group=1)$group
+    fitted_line = ggplot2::geom_line(
+      data=line_data, mapping=line_mapping, position=summary_position,
+      show.legend=FALSE
+    )
+    if (is.null(group)) fitted_line$aes_params$colour = "blue"
+    p = p + fitted_line
+  }
+
   return(p)
 }
 
-flexplot_ghost_magnet_data = function(final, reference_data, given, data) {
+flexplot_ghost_magnet_data = function(final, reference_data, given, data, axis) {
   
-  fitted_layers = Filter(
+  fitted_layers = which(vapply(
+    final$layers,
     function(layer) {
       inherits(layer$geom, "GeomPoint") &&
         "pred_prob" %in% names(layer$data)
     },
-    final$layers
-  )
+    logical(1)
+  ))
   
   if (length(fitted_layers) != 1) {
     stop("Expected exactly one magnet prediction layer.")
   }
   
-  predictions = fitted_layers[[1]]$data
+  predictions = final$layers[[fitted_layers]]$data
+  # Reuse the fitted markers' positions, including stable second-axis offsets.
+  fitted_plot = final
+  fitted_plot$layers = final$layers[fitted_layers]
+  fitted_plot = flexplot_sampling_scale(fitted_plot, "x", data[[axis[1]]])
+  fitted = ggplot2::ggplot_build(fitted_plot)$data[[1]]
+  coordinates = utils::tail(make.unique(c(names(predictions), ".ghost_x", ".ghost_group")), 2)
+  predictions[[coordinates[1]]] = fitted$x
+  predictions[[coordinates[2]]] = if (length(axis) > 1) fitted$group else 1L
   
   display_given = flexplot_magnet_display_given(data, given)
+  if (any(vapply(reference_data[display_given], dplyr::n_distinct, integer(1)) != 1)) {
+    stop("Magnet ghost lines require one reference category or bin per conditioning variable.",
+         call.=FALSE)
+  }
   
   reference = predictions
   
@@ -293,13 +322,23 @@ flexplot_ghost_magnet_data = function(final, reference_data, given, data) {
       drop=FALSE
     ]
   }
+  display_axis = flexplot_object_axis(data, axis)
+  if (length(display_axis) > 1) {
+    group = display_axis[2]
+    reference = reference[as.character(reference[[group]]) %in%
+                            as.character(reference_data[[group]]), , drop=FALSE]
+  }
   
   if (!nrow(reference)) {
     stop("No magnet predictions match the ghost reference.")
   }
   
-  # Remove reference panel identifiers so predictions repeat in other panels
+  # Repeat the reference relationships in every panel, including their source.
+  panels = expand.grid(lapply(data[display_given], unique), KEEP.OUT.ATTRS=FALSE,
+                       stringsAsFactors=FALSE)
   reference[display_given] = NULL
-  
+  reference = merge(reference, panels, by=NULL, sort=FALSE)
+  attr(reference, "ghost_axes") = c(coordinates[1], "pred_prob")
+  attr(reference, "ghost_group") = coordinates[2]
   reference
 }

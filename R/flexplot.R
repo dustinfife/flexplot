@@ -285,7 +285,8 @@ flexplot = function(formula, data=NULL, related=F,
     sample = sample,
     raw.data = raw.data,
     magnet_summary=!comparison_predictions,
-    magnet_labels=logistic_labels
+    magnet_labels=logistic_labels,
+    magnet_lines=!is.null(ghost.line)
   )
 
   facet = flexplot_panel_variables_object(given, break.me)
@@ -317,7 +318,7 @@ flexplot = function(formula, data=NULL, related=F,
       bins=bins,
       breaks=breaks,
       given=given,
-      axis=axis,
+      axis=if (use_magnet && is.null(prediction) && is.null(ghost.reference)) axis[1] else axis,
       labels=labels
     )
     
@@ -334,28 +335,39 @@ flexplot = function(formula, data=NULL, related=F,
         final=final,
         reference_data=reference_data,
         given=given,
-        data=data
+        data=data,
+        axis=axis
       )
+      ghost_axes = attr(ghost_data, "ghost_axes")
+      ghost_group = attr(ghost_data, "ghost_group")
+      line_groups = c(flexplot_magnet_display_given(data, given), ghost_group)
+      ghost_lines = ghost_data |>
+        dplyr::group_by(dplyr::across(dplyr::all_of(line_groups))) |>
+        dplyr::filter(dplyr::n_distinct(.data[[ghost_axes[1]]]) > 1) |>
+        dplyr::ungroup()
       
       final = final +
         ggplot2::geom_line(
-          data=ghost_data,
+          data=ghost_lines,
           mapping=ggplot2::aes(
-            x=.data[[axis[1]]],
-            y=.data[["pred_prob"]],
-            group=1
+            x=.data[[ghost_axes[1]]],
+            y=.data[[ghost_axes[2]]],
+            group=.data[[ghost_group]]
           ),
           inherit.aes=FALSE,
+          show.legend=FALSE,
           color=ghost.line,
           linewidth=0.8
         ) +
         ggplot2::geom_point(
           data=ghost_data,
           mapping=ggplot2::aes(
-            x=.data[[axis[1]]],
-            y=.data[["pred_prob"]]
+            x=.data[[ghost_axes[1]]],
+            y=.data[[ghost_axes[2]]],
+            group=.data[[ghost_group]]
           ),
           inherit.aes=FALSE,
+          show.legend=FALSE,
           color=ghost.line,
           shape=1,
           size=3,

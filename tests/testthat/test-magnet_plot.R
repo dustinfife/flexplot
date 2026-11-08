@@ -170,71 +170,186 @@ test_that("magnet plots exclude missing panel values", {
   )
 })
 
-test_that("flexplot supports ghost lines for magnet plots", {
-  p = flexplot(
-    injury ~ gender | safety,
-    data = tablesaw.injury,
-    ghost.line = "red"
-  )
-  
-  expect_s3_class(p, "ggplot")
-  
-  ghost_lines = Filter(
-    function(layer) {
-      inherits(layer$geom, "GeomLine") &&
-        identical(layer$aes_params$colour, "red")
-    },
-    p$layers
-  )
-  
-  expect_length(ghost_lines, 1)
-  expect_gt(nrow(ghost_lines[[1]]$data), 0)
+test_that("magnet ghosts copy the requested fitted curve to every panel", {
+  for (reference in c("x", "z")) {
+    p = flexplot(y_bin ~ a | b, small, jitter=FALSE, ghost.line="red",
+                   ghost.reference=list(b=reference))
+    built = ggplot2::ggplot_build(p)
+    lines = which(vapply(p$layers, function(layer) inherits(layer$geom, "GeomLine") &&
+      identical(layer$aes_params$colour, "red"), logical(1)))
+    expect_length(lines, 1)
+    line = built$data[[lines]]
+    points = built$data[[lines + 1L]]
+    ghost = p$layers[[lines]]$data
+    panels = built$layout$layout
+    destination = panels$PANEL
+    expect_setequal(line$PANEL, destination)
+    expect_true(any(line$PANEL %in% panels$PANEL[as.character(panels$b) == reference]))
+    expect_equal(sort(unique(as.character(ghost$b))), sort(levels(small$b)))
+    model = glm(y_bin ~ a + b, small, family=binomial())
+    profile = ghost
+    profile$b = factor(reference, levels=levels(small$b))
+    expect_equal(ghost$pred_prob, unname(predict(model, profile, type="response")), tolerance=1e-10)
+    expect_equal(nrow(line), nlevels(small$a) * length(destination))
+    for (panel in destination) {
+      curve = line[line$PANEL == panel, ]
+      expect_equal(length(unique(curve$group)), 1)
+      expect_equal(as.numeric(curve$x), seq_len(nlevels(small$a)))
+      markers = points[points$PANEL == panel, ]
+      expect_equal(curve$y, markers$y[order(markers$x)])
+    }
+    expect_true(all(line$colour == "red"))
+    expect_equal(p$layers[[lines]]$aes_params$linewidth, .8)
+    expect_false(p$layers[[lines]]$show.legend)
+    expect_no_warning(ggplot2::ggplotGrob(p))
+  }
 })
 
-
-test_that("magnet ghost lines reproduce reference predictions", {
-  p = flexplot(
-    injury ~ gender | safety,
-    data = tablesaw.injury,
-    ghost.line = "red"
-  )
-  
-  ghost = Filter(
-    function(layer) {
-      inherits(layer$geom, "GeomLine") &&
-        identical(layer$aes_params$colour, "red")
-    },
-    p$layers
-  )[[1]]$data
-  
-  fitted = Filter(
-    function(layer) {
-      "pred_prob" %in% names(layer$data)
-    },
-    p$layers
-  )[[1]]$data
-  
-  expect_true(all(ghost$pred_prob %in% fitted$pred_prob))
-  expect_equal(
-    length(unique(ghost$pred_prob)),
-    length(unique(ghost[[names(ghost)[1]]]))
-  )
+test_that("default magnet references and sampling reuse the same fitted probabilities", {
+  expect_message({
+    default = flexplot(y_bin ~ a | b, small, jitter=FALSE, ghost.line="gray")
+  }, "didn't specify a reference")
+  explicit = flexplot(y_bin ~ a | b, small, jitter=FALSE, ghost.line="gray",
+                       ghost.reference=list(b="y"))
+  line = which(vapply(default$layers, function(layer) inherits(layer$geom, "GeomLine") &&
+    identical(layer$aes_params$colour, "gray"), logical(1)))
+  expect_equal(default$layers[[line]]$data, explicit$layers[[line]]$data)
+  sampled = withr::with_seed(123, flexplot(y_bin ~ a | b, small, jitter=FALSE, sample=1,
+                                            ghost.line="gray", ghost.reference=list(b="y")))
+  expect_equal(sampled$layers[[line]]$data, explicit$layers[[line]]$data)
+  expect_equal(nrow(sampled$layers[[2]]$data), 1)
+  expect_error(flexplot(y_bin ~ a | b, small, ghost.line="gray",
+                         ghost.reference=list(b="absent")), "No observations match")
 })
 
-
-test_that("magnet plots without ghost lines remain unchanged", {
-  p = flexplot(
-    injury ~ gender | safety,
-    data = tablesaw.injury
-  )
-  
-  ghost_lines = Filter(
-    function(layer) {
-      inherits(layer$geom, "GeomLine")
-    },
-    p$layers
-  )
-  
-  expect_length(ghost_lines, 0)
+test_that("grouped magnet ghosts keep fitted offsets and separate category or bin paths", {
+  for (group in c("b", "z")) {
+    formula = if (group == "b") y_bin ~ a + b | z else y_bin ~ a + z | b
+    reference = if (group == "b") list(z=median(small$z)) else list(b="x")
+    p = flexplot(formula, small, jitter=FALSE, ghost.line="gray", ghost.reference=reference)
+    built = ggplot2::ggplot_build(p)
+    line_index = which(vapply(p$layers, function(layer) inherits(layer$geom, "GeomLine") &&
+    identical(layer$aes_params$colour, "gray"), logical(1)))
+    ghost = p$layers[[line_index]]$data
+    curve = built$data[[line_index]]
+    markers = built$data[[line_index + 1L]]
+    ordinary = built$data[[3]]
+    panels = built$layout$layout
+    display_given = if (group == "b") "z_binned" else "b"
+    reference_panel = if (group == "b") {
+      fitted_frame = p$layers[[3]]$data
+      as.character(fitted_frame$z_binned[match(unique(ghost$z), fitted_frame$z)])
+    } else "x"
+    source = panels$PANEL[as.character(panels[[display_given]]) == reference_panel]
+    expect_length(source, 1)
+    expect_true(any(curve$PANEL == source))
+    expect_setequal(curve$PANEL, panels$PANEL)
+    original = ordinary[ordinary$PANEL == source, ]
+    expect_equal(length(unique(curve$group)), sum(table(original$group) > 1))
+    model = glm(y_bin ~ a + b + z, small, family=binomial())
+    # Only one second-axis predictor and one conditioning predictor are present;
+    # both therefore belong to the native additive logistic model.
+    profile = ghost
+    if (group == "z") profile$b = factor("x", levels=levels(small$b))
+    expect_equal(ghost$pred_prob, unname(predict(model, profile, type="response")), tolerance=1e-10)
+    expect_equal(length(unique(markers$group)), 3)
+    for (panel in unique(curve$PANEL)) {
+      copy = curve[curve$PANEL == panel, ]
+      for (identity in unique(copy$group)) {
+        path = copy[copy$group == identity, ]
+        matched = match(as.numeric(path$x), as.numeric(original$x))
+        expect_false(anyNA(matched))
+        fitted = original[matched, ]
+        expect_equal(length(unique(fitted$group)), 1)
+        expect_gte(nrow(path), 2)
+        expect_equal(as.numeric(path$x), as.numeric(fitted$x[order(fitted$x)]))
+        expect_equal(path$y, fitted$y[order(fitted$x)], tolerance=1e-10)
+      }
+    }
+    expect_equal(sort(unique(markers$x)), sort(unique(original$x)))
+    expect_equal(sort(unique(markers$y)), sort(unique(original$y)))
+    expect_no_warning(ggplot2::ggplotGrob(p))
+  }
 })
 
+test_that("magnet ghosts honor a selected second-axis reference without recentering", {
+  p = flexplot(y_bin ~ a + b | z, small, jitter=FALSE, ghost.line="gray",
+                 ghost.reference=list(z=median(small$z), b="z"))
+  built = ggplot2::ggplot_build(p)
+  line = which(vapply(p$layers, function(layer) inherits(layer$geom, "GeomLine") &&
+    identical(layer$aes_params$colour, "gray"), logical(1)))
+  expect_identical(unique(as.character(p$layers[[line]]$data$b)), "z")
+  expect_equal(length(unique(built$data[[line]]$group)), 1)
+  expect_equal(sort(unique(as.numeric(built$data[[line]]$x))), c(1, 2) + 1/6)
+  expect_no_message(ggplot2::ggplotGrob(p))
+})
+
+test_that("magnet plots without ghosts preserve observations fits counts and facets", {
+  plain = flexplot(y_bin ~ a | b, small, jitter=FALSE)
+  ghost = flexplot(y_bin ~ a | b, small, jitter=FALSE, ghost.line="gray",
+                    ghost.reference=list(b="x"))
+  expect_false(any(vapply(plain$layers, function(layer) inherits(layer$geom, "GeomLine"), logical(1))))
+  expect_equal(length(ghost$layers), length(plain$layers) + 3L)
+  plain_built = ggplot2::ggplot_build(plain)
+  ghost_built = ggplot2::ggplot_build(ghost)
+  expect_equal(plain_built$data, head(ghost_built$data, length(plain$layers)))
+  expect_equal(plain_built$layout$layout, ghost_built$layout$layout)
+  expect_equal(plain_built$data[[3]]$y[plain_built$data[[3]]$PANEL == 1],
+                 ghost_built$data[[3]]$y[ghost_built$data[[3]]$PANEL == 1])
+})
+
+test_that("ordinary fitted magnet lines follow their own panel and group markers", {
+  for (formula in list(y_bin ~ a | b, y_bin ~ a + b | z, y_bin ~ a + z | b)) {
+    reference = if ("z" %in% flexplot_axis_given(formula)$given) list(z=median(small$z)) else list(b="x")
+    plain = flexplot(formula, small, jitter=FALSE)
+    expect_false(any(vapply(plain$layers, function(layer) inherits(layer$geom, "GeomLine"), logical(1))))
+    p = flexplot(formula, small, jitter=FALSE, ghost.line="gray", ghost.reference=reference)
+    built = ggplot2::ggplot_build(p)
+    fitted = built$data[[3]]
+    if (length(flexplot_axis_given(formula)$axis) == 1) fitted$group = 1L
+    lines = built$data[[5]]
+    expect_equal(nrow(fitted), nrow(p$layers[[3]]$data))
+    keys = interaction(fitted$PANEL, fitted$group, drop=TRUE)
+    expected_lines = sum(table(keys)[table(keys) > 1])
+    expect_equal(nrow(lines), as.numeric(expected_lines))
+    for (panel in unique(lines$PANEL)) {
+      local = lines[lines$PANEL == panel, ]
+      points = fitted[fitted$PANEL == panel, ]
+      for (group in unique(local$group)) {
+        path = local[local$group == group, ]
+        matched = match(as.numeric(path$x), as.numeric(points$x))
+        expect_false(anyNA(matched))
+        expect_equal(length(unique(points$group[matched])), 1)
+        expect_gte(nrow(path), 2)
+        expect_equal(path$y, points$y[matched])
+        expect_equal(path$colour, points$colour[matched])
+        expect_false(is.unsorted(path$x))
+      }
+    }
+    expect_no_message(ggplot2::ggplotGrob(p))
+    expect_no_warning(ggplot2::ggplotGrob(p))
+  }
+})
+
+test_that("default grouped magnet ghosts repeat every attention bin in every safety panel", {
+  expect_message({
+    p = flexplot(injury ~ gender + attention | safety, tablesaw.injury,
+                   jitter=FALSE, ghost.line="red")
+  }, "didn't specify a reference")
+  built = ggplot2::ggplot_build(p)
+  index = which(vapply(p$layers, function(layer) {
+    inherits(layer$geom, "GeomLine") && identical(layer$aes_params$colour, "red")
+  }, logical(1)))
+  ghost = built$data[[index]]
+  panels = built$layout$layout
+  expect_setequal(ghost$PANEL, panels$PANEL)
+  for (panel in panels$PANEL) {
+    curves = ghost[ghost$PANEL == panel, ]
+    expect_equal(length(unique(curves$group)), 3)
+    expect_equal(sort(as.numeric(table(curves$group))), rep(2, 3))
+    expect_true(all(curves$colour == "red"))
+  }
+  expect_equal(length(unique(p$layers[[index]]$data$attention_binned)), 3)
+  expect_no_warning(ggplot2::ggplotGrob(p))
+  expect_no_message(ggplot2::ggplotGrob(p))
+})
