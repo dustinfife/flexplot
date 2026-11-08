@@ -10,6 +10,79 @@ association_expected_cells = function(data, variables) {
   cells
 }
 
+test_that("association aggregation retains displayed numeric and categorical facet keys", {
+  d = small
+  d$a = ordered(d$a, levels=c("b", "a"))
+  d$b = ordered(d$b, levels=c("z", "x", "y"))
+  d$g = ordered(d$y_bin, levels=c(1, 0))
+  reference = d
+  for (variable in c("x", "z")) {
+    # Use existing display-bin conventions; expected frequencies below are
+    # calculated independently from products of the observed marginal counts.
+    reference[[paste0(variable, "_binned")]] = bin.me(variable, d, bins=3)
+  }
+  for (formula in list(b ~ a | x, b ~ a | g, b ~ a | x + g,
+                       b ~ a | g + x, b ~ a | x + z)) {
+    given = flexplot_axis_given(formula)$given
+    display_given = ifelse(given %in% c("x", "z"), paste0(given, "_binned"), given)
+    expected = association_expected_cells(reference, c("a", display_given, "b"))
+    expect_no_warning({ p = flexplot(formula, data=d) })
+    expect_no_error({ built = ggplot2::ggplot_build(p) })
+    expect_true(all(display_given %in% names(p$data)))
+    expect_equal(nrow(p$data), nrow(expected))
+    expect_equal(p$data$Proportion, expected$Proportion, tolerance=1e-7)
+    expect_equal(built$layout$panel_scales_x[[1]]$get_limits(), levels(d$a))
+    expect_equal(built$plot$scales$get_scales("fill")$get_limits(), levels(d$b))
+    expect_true(is.ordered(p$data$a))
+    expect_true(is.ordered(p$data$b))
+    if ("g" %in% given) {
+      expect_true(is.ordered(p$data$g))
+      expect_identical(levels(p$data$g), levels(d$g))
+    }
+    for (i in seq_along(display_given)) {
+      variable = display_given[i]
+      levels = levels(reference[[variable]])
+      if (i == 2 && given[i] %in% c("x", "z")) levels = rev(levels)
+      expect_identical(levels(p$data[[variable]]), levels)
+      expect_equal(unique(as.character(built$layout$layout[[variable]])), levels)
+    }
+    expect_equal(nrow(built$layout$layout),
+                   prod(vapply(reference[display_given], nlevels, integer(1))))
+    for (i in seq_len(nrow(built$layout$layout))) {
+      panel = built$layout$layout[i, ]
+      keep = rep(TRUE, nrow(expected))
+      for (variable in display_given) {
+        keep = keep & as.character(expected[[variable]]) == as.character(panel[[variable]])
+      }
+      bars = built$data[[1]][built$data[[1]]$PANEL == panel$PANEL, ]
+      expect_equal(sort(bars$y), sort(expected$Proportion[keep]), tolerance=1e-7)
+      expect_equal(nrow(bars), nlevels(d$a) * nlevels(d$b))
+    }
+    expect_no_warning(ggplot2::ggplotGrob(p))
+  }
+})
+
+test_that("numeric-conditioned associations retain zero cells and custom bin order", {
+  d = small[!(small$a == "a" & small$b == "x"), ]
+  d$a = factor(d$a, levels=c("b", "unused", "a"))
+  d$b = factor(d$b, levels=c("z", "unused", "x", "y"))
+  labels = c("low", "middle", "high")
+  breaks = c(min(d$x), -.5, .5, max(d$x))
+  reference = droplevels(d)
+  reference$x_binned = cut(d$x, breaks=breaks, labels=labels, include.lowest=TRUE)
+  expected = association_expected_cells(reference, c("a", "x_binned", "b"))
+  p = flexplot(b ~ a | x, d, breaks=list(x=c(-.5, .5)), labels=list(labels))
+  expect_no_error({ built = ggplot2::ggplot_build(p) })
+  expect_identical(levels(p$data$x_binned), labels)
+  expect_equal(as.character(built$layout$layout$x_binned), labels)
+  expect_equal(p$data$Proportion, expected$Proportion, tolerance=1e-7)
+  expect_true(any(expected$Freq == 0))
+  expect_equal(p$data$Proportion[expected$Freq == 0], rep(-1, sum(expected$Freq == 0)))
+  expect_equal(nrow(p$data), 2 * 3 * 3)
+  expect_false("unused" %in% as.character(p$data$a))
+  expect_false("unused" %in% as.character(p$data$b))
+})
+
 test_that("native association bars show relative deviations from independence", {
   withr::local_options(flexplot.object_renderer=TRUE)
 

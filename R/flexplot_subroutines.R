@@ -119,6 +119,12 @@ modify_association_plot_data = function(data, formula, outcome) {
   
   #maybe best to do log linear model (poisson?)
   if (!is.numeric(data[[outcome]]) & !is.numeric(data[[axis[1]]])) {
+    # Aggregate the displayed conditioning categories, retaining their facet keys.
+    for (variable in given[!is.na(given) & nzchar(given)]) {
+      binned = paste0(variable, "_binned")
+      if (!is.numeric(data[[variable]]) || !binned %in% names(data)) next
+      predictors[predictors == variable] = binned
+    }
     association_data = droplevels(data[,c(predictors, outcome), drop=FALSE])
     m = as.data.frame(table(association_data)); names(m)[1:(ncol(m)-1)] = c(predictors, outcome)
     # Constant margins add no information and cannot receive factor contrasts.
@@ -272,7 +278,13 @@ flexplot_modify_data = function(formula = NULL, data, related = FALSE, variables
   ### reorder levels of given 2
   if (length(given)>1){ 
       ### for categorical variables, they're not binned, so we have to include the option where they're not
-      if (is.numeric(data[,given[2]]) & length(unique(data[,given[2]]))>bins) data[,paste0(given[2], "_binned")] = forcats::fct_rev(data[,paste0(given[2], "_binned")])  
+      variable = given[2]
+      binned = paste0(variable, "_binned")
+      if (binned %in% names(data) &&
+          (!variable %in% names(data) ||
+             (is.numeric(data[[variable]]) && length(unique(data[[variable]])) > bins))) {
+        data[[binned]] = forcats::fct_rev(data[[binned]])
+      }
   }
   return(data)
   
