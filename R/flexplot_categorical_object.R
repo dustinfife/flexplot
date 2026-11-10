@@ -54,6 +54,22 @@ flexplot_categorical_group_position = function(self, data, params, scales) {
   data
 }
 
+flexplot_categorical_line_position = function(self, data, params, scales) {
+  if (nrow(data) < 2) return(data[FALSE, , drop=FALSE])
+  data = ggplot2::ggproto_parent(ggplot2::PositionDodge, self)$compute_panel(data, params, scales)
+  categories = match(scales$x$get_limits()[round(data$x)], self$category_levels)
+  runs = integer(nrow(data))
+  for (group in unique(data$group)) {
+    rows = which(data$group == group)
+    rows = rows[order(categories[rows])]
+    runs[rows] = cumsum(c(TRUE, diff(categories[rows]) > 1))
+  }
+  # Split after dodging so segments retain the summary markers' group slots.
+  paths = interaction(data$group, runs, drop=TRUE)
+  data$group = as.integer(paths)
+  data[stats::ave(seq_len(nrow(data)), paths, FUN=length) > 1, , drop=FALSE]
+}
+
 flexplot_categorical_object = function(data, outcome, axis, plot.type="histogram",
                                         spread="quartiles", suppress_smooth=FALSE,
                                         alpha=.5, jitter=NULL, sample=Inf,
@@ -93,6 +109,22 @@ flexplot_categorical_object = function(data, outcome, axis, plot.type="histogram
 
   if (n_groups > 6) p = p + ggplot2::guides(colour="none")
 
+  if (identical(plot.type, "line")) {
+    if (!is.null(group) && suppress_smooth) return(p)
+    line_mapping = if (is.null(group)) ggplot2::aes(group=1) else
+      ggplot2::aes(group=.data[[group]])
+    position = ggplot2::ggproto(
+      NULL, ggplot2::position_dodge(width=if (spread == "quartiles") .4 else .5),
+      category_levels=flexplot_sampling_levels(data[[x]]),
+      compute_panel=flexplot_categorical_line_position
+    )
+    line = ggplot2::stat_summary(mapping=line_mapping,
+      fun.data=flexplot_categorical_summary, fun.args=list(spread=spread),
+      geom="line", position=position)
+    if (is.null(group)) return(p + line)
+    return(p + flexplot_categorical_summary_layers(spread, group)[1:2] + line)
+  }
+
   if (!is.null(group)) {
     if (plot.type %in% c("boxplot", "violin")) {
       group_levels = flexplot_sampling_levels(data[[group]])
@@ -123,8 +155,6 @@ flexplot_categorical_object = function(data, outcome, axis, plot.type="histogram
     p = p + ggplot2::geom_boxplot(alpha=.1)
   } else if (identical(plot.type, "violin")) {
     p = p + ggplot2::geom_violin(alpha=.1)
-  } else if (identical(plot.type, "line")) {
-    p = p + ggplot2::geom_line()
   } else if (!suppress_smooth) {
     p = p + flexplot_categorical_summary_layers(spread)
   }
