@@ -31,6 +31,11 @@
 #'   cluster sampling.
 #' @param prediction_method One of \code{"marginal"} (default),
 #'   \code{"observed"}, or \code{"reference"}; see Details.
+#' @param observation.type Observed-data display: \code{"raw"} (default),
+#'   \code{"binned"}, or \code{"none"}. Binned observations require binomial
+#'   GLMs, a numeric x axis, \code{prediction_method="observed"}, and
+#'   \code{pred.type="response"}. \code{raw.data=FALSE} hides observations in
+#'   every mode. This display option does not affect \code{return.preds=TRUE}.
 #' @param ... Arguments passed to plotting and prediction-grid helpers, including
 #'   display \code{bins}, \code{breaks}, \code{labels}, and observation sampling.
 #'
@@ -51,6 +56,22 @@
 #' rounded to three decimal places). Numeric x uses \code{num_points} coordinates
 #' when it has at least ten distinct values; otherwise it uses observed values.
 #' Intercept-only displays return a single prediction coordinate.
+#'
+#' With \code{observation.type="binned"}, hollow circles show unweighted observed
+#' success proportions and colored points show the models' mean predicted probabilities.
+#' All three summaries use the exact same eligible observations in each x bin,
+#' panel, and supported second-axis group. Predictions use actual covariate
+#' values; bin midpoints are only plotting coordinates. Numeric x with at least
+#' ten distinct values retains the existing nine quantile intervals (fewer when
+#' boundaries coincide); otherwise observed x values are used. Empty cells are
+#' omitted, while singleton and all-zero/all-one cells retain their exact observed
+#' proportions on a 0--1 probability axis. Sampling affects raw observations
+#' only, not these summaries.
+#' Factor outcomes are coded globally using the fitted models' success event;
+#' models with different success coding cannot share this display. No log-odds
+#' correction, additional model fitting, or change to prediction calculations is
+#' applied. The binned option does not support categorical x/magnet plots;
+#' their existing raw display is unchanged.
 #'
 #' \code{"observed"} predicts at actual eligible observations and averages within
 #' displayed categories, groups, and conditioning bins. Numeric x with at least
@@ -92,10 +113,16 @@
 #' compare_fits(y ~ x, data=small, model1=m1, prediction_method="reference")
 #' compare_fits(y ~ a, data=small, model1=lm(y ~ a + z, data=small),
 #'              return.preds=TRUE)
+#' full = glm(y_bin ~ x + a + z, data=small, family=binomial())
+#' reduced = glm(y_bin ~ x, data=small, family=binomial())
+#' compare_fits(y_bin ~ x | a, small, full, reduced,
+#'              prediction_method="observed", observation.type="binned")
 compare_fits = function(formula, data, model1, model2=NULL,
                         return.preds=FALSE, report.se=FALSE, re=FALSE,
                         pred.type="response", num_points=50, clusters=3,
-                        prediction_method="marginal", ...) {
+                        prediction_method="marginal",
+                        observation.type=c("raw", "binned", "none"), ...) {
+  observation.type = match.arg(observation.type)
   if (length(prediction_method) != 1 || is.na(prediction_method) ||
       !prediction_method %in% c("marginal", "observed", "reference")) {
     stop('prediction_method must be "marginal", "observed", or "reference".', call.=FALSE)
@@ -168,21 +195,55 @@ compare_fits = function(formula, data, model1, model2=NULL,
   rownames(prediction) = NULL
   if (return.preds) return(prediction)
   
+  plot_options = list(...)
+  show_observations = !identical(plot_options$raw.data, FALSE) && observation.type != "none"
+  if (observation.type != "raw") plot_options$raw.data = FALSE
   axis = flexplot_axis_given(formula)$axis
   if (identical(axis[1], "1")) {
-    return(flexplot(formula, data=plot_data, suppress_smooth=TRUE, se=FALSE, ...))
+    if (observation.type == "binned") stop("Binned observations require a numeric x predictor.", call.=FALSE)
+    p = do.call(flexplot, c(list(formula=formula, data=plot_data,
+                                suppress_smooth=TRUE, se=FALSE), plot_options))
+    if (!show_observations) {
+      for (i in seq_along(p$layers)) p$layers[[i]]$aes_params$alpha = 0
+    }
+    return(p)
+  }
+
+  observed = NULL
+  if (observation.type == "binned") {
+    if (prediction_method != "observed" || pred.type != "response") {
+      stop("observation.type='binned' requires prediction_method='observed' and pred.type='response'.", call.=FALSE)
+    }
+    if (!is.numeric(data[[axis[1]]])) stop("Binned observations require a numeric x predictor.", call.=FALSE)
+    matched = compare_fits_binned_observations(models, data, frames, outcome)
+    observed = matched$summary
+    plot_data[[outcome]] = matched$response
   }
   
   limit_data = if (inherits(model1, "merMod")) reference_data else plot_data
-  if (is.numeric(limit_data[[outcome]]) &&
+  logistic_link = identical(pred.type, "link") && inherits(model1, "glm") &&
+    model1$family$family %in% c("binomial", "quasibinomial")
+  if (!logistic_link && observation.type != "binned" && is.numeric(limit_data[[outcome]]) &&
       any(prediction$prediction < min(limit_data[[outcome]]) |
           prediction$prediction > max(limit_data[[outcome]]))) {
     warning("Some of the model's predicted values are beyond the range of the original y-values. ",
             "I'm truncating the y-axis to preserve the original scale.")
   }
   attr(prediction, "flexplot_comparison") = TRUE
-  p = flexplot(formula, data=plot_data, prediction=prediction,
-               suppress_smooth=TRUE, se=FALSE, ...) + return_lims_geom(outcome, limit_data, model1)
+  attr(prediction, "flexplot_comparison_call") = match.call()
+  p = do.call(flexplot, c(list(formula=formula, data=plot_data, prediction=prediction,
+                              suppress_smooth=TRUE, se=FALSE), plot_options))
+  if (observation.type == "binned") {
+    if (!is.numeric(p$data[[axis[1]]])) {
+      stop("Binned observations require an x predictor rendered on a numeric axis.", call.=FALSE)
+    }
+    p = compare_fits_binned_layers(p, observed, axis[1], show_observations)
+  }
+  if (observation.type == "binned") {
+    p = p + ggplot2::coord_cartesian(ylim=c(0, 1))
+  } else if (!logistic_link) {
+    p = p + return_lims_geom(outcome, limit_data, model1)
+  }
   if (single_model && length(axis) < 2) p = p + ggplot2::theme(legend.position="none")
   p
 }

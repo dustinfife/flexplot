@@ -17,10 +17,11 @@ compare_fits(
   num_points = 50,
   clusters = 3,
   prediction_method = "marginal",
+  observation.type = c("raw", "binned", "none"),
   ...
 )
 
-\method{compare}{fits}(
+compare.fits(
   formula,
   data,
   model1,
@@ -32,6 +33,7 @@ compare_fits(
   num_points = 50,
   clusters = 3,
   prediction_method = "marginal",
+  observation.type = c("raw", "binned", "none"),
   ...
 )
 }
@@ -74,6 +76,12 @@ cluster sampling.}
 \item{prediction_method}{One of \code{"marginal"} (default),
 \code{"observed"}, or \code{"reference"}; see Details.}
 
+\item{observation.type}{Observed-data display: \code{"raw"} (default),
+\code{"binned"}, or \code{"none"}. Binned observations require binomial
+GLMs, a numeric x axis, \code{prediction_method="observed"}, and
+\code{pred.type="response"}. \code{raw.data=FALSE} hides observations in
+every mode. This display option does not affect \code{return.preds=TRUE}.}
+
 \item{...}{Arguments passed to plotting and prediction-grid helpers, including
 display \code{bins}, \code{breaks}, \code{labels}, and observation sampling.}
 }
@@ -104,6 +112,22 @@ moderators use flexplot's existing bin-based representative values (bin means
 rounded to three decimal places). Numeric x uses \code{num_points} coordinates
 when it has at least ten distinct values; otherwise it uses observed values.
 Intercept-only displays return a single prediction coordinate.
+
+With \code{observation.type="binned"}, hollow circles show unweighted observed
+success proportions and colored points show the models' mean predicted probabilities.
+All three summaries use the exact same eligible observations in each x bin,
+panel, and supported second-axis group. Predictions use actual covariate
+values; bin midpoints are only plotting coordinates. Numeric x with at least
+ten distinct values retains the existing nine quantile intervals (fewer when
+boundaries coincide); otherwise observed x values are used. Empty cells are
+omitted, while singleton and all-zero/all-one cells retain their exact observed
+proportions on a 0--1 probability axis. Sampling affects raw observations
+only, not these summaries.
+Factor outcomes are coded globally using the fitted models' success event;
+models with different success coding cannot share this display. No log-odds
+correction, additional model fitting, or change to prediction calculations is
+applied. The binned option does not support categorical x/magnet plots;
+their existing raw display is unchanged.
 
 \code{"observed"} predicts at actual eligible observations and averages within
 displayed categories, groups, and conditioning bins. Numeric x with at least
@@ -140,6 +164,10 @@ compare_fits(y ~ x, data=small, model1=m1, model2=m2)
 compare_fits(y ~ x, data=small, model1=m1, prediction_method="reference")
 compare_fits(y ~ a, data=small, model1=lm(y ~ a + z, data=small),
              return.preds=TRUE)
+full = glm(y_bin ~ x + a + z, data=small, family=binomial())
+reduced = glm(y_bin ~ x, data=small, family=binomial())
+compare_fits(y_bin ~ x | a, small, full, reduced,
+             prediction_method="observed", observation.type="binned")
 }
 \author{
 Dustin Fife

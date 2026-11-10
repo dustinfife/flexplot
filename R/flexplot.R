@@ -113,6 +113,8 @@ flexplot = function(formula, data=NULL, related=F,
          "Modify the returned ggplot object directly instead.", call.=FALSE)
   }
   comparison_predictions = isTRUE(attr(prediction, "flexplot_comparison"))
+  comparison_call = attr(prediction, "flexplot_comparison_call")
+  if (!is.null(comparison_call)) attr(prediction, "flexplot_comparison_call") = NULL
   
   # modify data if they have an equation in the formula
   ff = formula_functions(formula, data)
@@ -237,7 +239,16 @@ flexplot = function(formula, data=NULL, related=F,
   # Direct non-magnet predictions retain their existing bin aggregation.
   if (comparison_predictions && !use_magnet && length(axis) > 1 &&
       length(unique(prediction$model)) > 1) {
-    stop("Two-model comparisons with a second axis are currently supported only for magnet plots.", call.=FALSE)
+    panels = c(axis[-1], given[!is.na(given) & nzchar(given)])
+    panel_formula = as.name(panels[1])
+    for (variable in panels[-1]) panel_formula = call("+", panel_formula, as.name(variable))
+    if (is.null(comparison_call)) {
+      comparison_call = quote(compare_fits(formula=NULL, data=d, model1=model1, model2=model2))
+    }
+    comparison_call$formula = call("~", formula[[2]], call("|", as.name(axis[1]), panel_formula))
+    stop("Sorry, two-model comparisons don't currently support a second-axis variable ",
+         "(in this case, ", axis[2], "). Try placing it in panels instead:\n\n",
+         paste(deparse(comparison_call, width.cutoff=100L), collapse="\n"), call.=FALSE)
   }
   if (!comparison_predictions && !is.null(prediction) && !use_magnet) {
     num.models = levels(prediction$model)

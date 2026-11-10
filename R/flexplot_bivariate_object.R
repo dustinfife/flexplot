@@ -3,6 +3,7 @@ flexplot_bivariate_object = function(data, outcome, axis, method="loess",
                                      alpha=.5, jitter=NULL, sample=Inf,
                                      raw.data=TRUE, plot.type="histogram") {
   
+  if (is.null(jitter) && identical(method, "logistic")) jitter = c(0, .05)
   jitter = if (is.null(jitter)) c(0, 0) else match_jitter_categorical(jitter)
   points_data = sample.subset(sample, data)
   
