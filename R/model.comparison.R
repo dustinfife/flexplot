@@ -108,7 +108,3 @@ model_comparison_table = function(model1, model2, m1.name="Full", m2.name="Reduc
   
   return(model.table[,keep])
 }
-
-check_AIC = function(model1, model2) {
-  
-}
