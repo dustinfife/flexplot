@@ -128,6 +128,7 @@ identify_method = function(data, outcome, axis, method=NULL,
 #' @param name the name of the file (excluding the ".jpg")
 #' @param path the path to the folder
 #' @param font Font family used for plot text.
+#' @param size Base text size in points, passed to \code{ggplot2::element_text()}.
 #'
 #' @export
 youtube_plot = function(p, name="plot", path="", font = "Moon Flower Bold", size=18){

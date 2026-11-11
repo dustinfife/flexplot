@@ -300,9 +300,10 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
       
       step3 = step3+ 
         geom_line(data=m, 
-                  aes_string(terms[1], "prediction", color=NA, group=1), linetype=1, lwd=2, col="black") +
+                  ggplot2::aes(x=.data[[terms[1]]], y=.data[["prediction"]], color=NA, group=1), linetype=1, lwd=2, col="black") +
         geom_line(data=newd, 
-                  aes_string(terms[1], outcome, group=term.re, color=term.re))
+                  ggplot2::aes(x=.data[[terms[1]]], y=.data[[outcome]],
+                               group=.data[[term.re]], color=.data[[term.re]]))
       
       
       #if axis 1 is categorical, plot means as dots
@@ -340,12 +341,12 @@ visualize.glmerMod = function(object, plot=c("all", "residuals", "model"), formu
       #### plot it
       step3 = step3 + 
         ### fixed effects
-        geom_point(data=fixed.means, aes_string(x=terms[1], y=outcome), size=3, color="black", shape=16) +
-        geom_line(data=fixed.means, aes_string(x=terms[1], y=outcome, group=1), lwd=2, color="black", linetype=1) +
+        geom_point(data=fixed.means, ggplot2::aes(x=.data[[terms[1]]], y=.data[[outcome]]), size=3, color="black", shape=16) +
+        geom_line(data=fixed.means, ggplot2::aes(x=.data[[terms[1]]], y=.data[[outcome]], group=1), lwd=2, color="black", linetype=1) +
         
         ### random effects
-        geom_point(data=means, aes_string(x=terms[1], y=outcome), size=.5) +
-        geom_line(data=means, aes_string(x=terms[1], y=outcome, group=term.re), lwd=.5, linetype=2) 			
+        geom_point(data=means, ggplot2::aes(x=.data[[terms[1]]], y=.data[[outcome]]), size=.5) +
+        geom_line(data=means, ggplot2::aes(x=.data[[terms[1]]], y=.data[[outcome]], group=.data[[term.re]]), lwd=.5, linetype=2)
       
     }	
     

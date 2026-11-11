@@ -249,7 +249,7 @@ linmod_jasp<- function(jaspResults, dataset, options) {
       stat_summary(geom='errorbar', 
                    fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, 
                    fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, 
-                   width=.2, size = 1.25, 
+                   width=.2, linewidth = 1.25,
                    position=position_dodge(width=.4), color = '#bf0303') +
       coord_cartesian(xlim=c(.75, 1.25))+
       theme_bw() 
