@@ -44,6 +44,12 @@ polynomial terms) return numeric NA: a unique threshold is not established.
 Nonfinite thresholds, unreachable targets, and singular derivatives also return
 NA. A constant conditional curve has slope zero and no unique threshold (NA).
 Categorical predictors retain numeric NA values in this helper's output.
+Categorical type is determined from fitted expressions: factor(x),
+as.factor(x), ordered(x) and as.ordered(x) with a direct source column are
+excluded even if the source column is numeric. Their conditioning levels use
+valid original inputs corresponding to the fitted factor levels. Ambiguous
+or unsupported categorical transformations require an explicit factor column;
+see \code{\link{estimates.glm}} for the supported mappings and restrictions.
 }
 \examples{
 logistic_model = glm(injury ~ safety * gender + attention,
@@ -52,5 +58,5 @@ logistic_coefficients(logistic_model)
 logistic_coefficients(logistic_model, location=.7)
 }
 \seealso{
-[estimates.glm()]
+\code{\link{estimates.glm}}
 }

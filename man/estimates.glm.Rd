@@ -16,6 +16,8 @@ The existing coefficient-level glm_estimates object. For binomial logit
   models, additional attributes are irt (predictor-level conditional estimates),
   conditioning (a one-row reference profile), and marginal_probabilities
   (Variable, Level, Probability; NULL if no categorical predictors exist).
+  The continuous attribute identifies predictors eligible for the printed IRT
+  table according to their fitted expressions, rather than raw storage types.
   Coefficient rows, their names, and numeric missing IRT values are retained.
 }
 \description{
@@ -111,6 +113,26 @@ the entire observed range even when a predictor has a substantial effect.
 Always interpret the slope, observed range, uncertainty and model adequacy
 alongside the threshold; this table does not provide uncertainty intervals.
 
+\strong{Categorical expressions in formulas.} Direct factor(x), as.factor(x),
+ordered(x) and as.ordered(x) constructions (including base-qualified calls)
+are categorical even when the original x column is numeric. Types, levels
+and contrast names are obtained from the fitted terms and model frame.
+Predictions substitute a valid original input corresponding to each fitted
+level and reevaluate the original expression; they do not use the mean of a
+numeric column that the model treats as categorical. Marginal summaries use
+the original column name in Variable and fitted labels in Level. Consequently,
+conditioning can contain a numeric input value for factor(x); the continuous
+attribute, not the storage type of that input, controls IRT eligibility.
+
+Reordered or relabeled levels are supported when each fitted level maps to
+one original input and the expression retains the same labels when evaluated
+on prediction profiles. Otherwise an informative error recommends creating an
+explicit factor column and refitting. Composite categorical transformations
+such as factor(x^2) or cut(x), multiple fitted representations of the same
+source column (for example x + factor(x)), and profile-dependent labels are
+not inferred or inverted automatically. Stable relabeling can be specified
+with explicit levels and labels in factor(), or by creating a factor column.
+
 \strong{Standardized Estimates.} Standardization multiplies each coefficient
 by the standard deviation of its fitted model-matrix column. The displayed OR
 is exp(beta*SD(column)) and inverse.OR is its reciprocal. For continuous main
@@ -174,6 +196,9 @@ estimates(glm(y_gam ~ x, data=small, family=Gamma))
 # Other links retain their ordinary coefficient-summary table.
 estimates(glm(y ~ x, data=small, family=gaussian))
 estimates(glm(y_bin ~ x, data=small, family=binomial(link="probit")))
+# Numeric source columns can be explicitly modeled as categorical:
+categorical = glm(am ~ wt + factor(cyl), data=mtcars, family=binomial)
+estimates(categorical)
 }
 \seealso{
 \code{\link{estimates}}, \code{\link{logistic_coefficients}}, \code{\link{estimates.lm}}

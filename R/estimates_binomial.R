@@ -13,30 +13,102 @@ logistic_estimation_data = function(model) {
 }
 
 logistic_factor_contrasts = function(model, variable, values) {
+  fitted_levels = model$xlevels[[variable]]
+  if (is.null(fitted_levels)) fitted_levels = levels(factor(values))
   coding = model$contrasts[[variable]]
-  if (is.null(coding)) return(stats::contrasts(factor(values, levels=model$xlevels[[variable]])))
+  if (is.null(coding)) return(stats::contrasts(factor(values, levels=fitted_levels)))
   if (is.matrix(coding)) return(coding)
   contrast_function = get(coding, envir=environment(stats::formula(model)), mode="function")
-  contrast_function(model$xlevels[[variable]])
+  contrast_function(fitted_levels)
 }
 
-logistic_reference_data = function(model, data, variables) {
+# Classify fitted expressions, not the storage type of their source columns.
+logistic_predictor_info = function(model, data, variables) {
+  terms = stats::terms(model)
+  expressions = as.list(attr(stats::delete.response(terms), "variables"))[-1]
+  frame = stats::model.frame(model)
+  keys = names(frame)[seq_along(expressions) + attr(terms, "response")]
+  result = setNames(vector("list", length(variables)), variables)
+  for (variable in variables) {
+    indices = which(vapply(expressions, function(x) variable %in% all.vars(x), logical(1)))
+    categorical = vapply(frame[keys[indices]], function(x) is.factor(x) ||
+                            is.character(x) || is.logical(x), logical(1))
+    if (!any(categorical)) {
+      if (!is.numeric(data[[variable]])) {
+        stop("Cannot construct continuous prediction profiles for '", variable,
+             "'. Use an explicit numeric predictor column and refit the model.", call.=FALSE)
+      }
+      result[[variable]] = list(categorical=FALSE)
+      next
+    }
+    if (length(indices) != 1L) {
+      stop("Predictor '", variable, "' has multiple fitted representations. ",
+           "Use separate explicit predictor columns before calling estimates().", call.=FALSE)
+    }
+    expression = expressions[[indices]]
+    key = keys[indices]
+    if (!identical(expression, as.name(variable))) {
+      head = if (is.call(expression)) expression[[1]] else NULL
+      if (is.call(head) && identical(head[[1]], as.name("::")) &&
+          identical(head[[2]], as.name("base"))) head = head[[3]]
+      if (!is.call(expression) || length(expression) < 2L || !is.symbol(head) ||
+          !as.character(head) %in% c("factor", "as.factor", "ordered", "as.ordered") ||
+          !identical(expression[[2]], as.name(variable))) {
+        stop("Unsupported categorical transformation '", key, "' in estimates(). ",
+             "Create an explicit factor column and refit the model.", call.=FALSE)
+      }
+    }
+    fitted = frame[[key]]
+    fitted_levels = if (inherits(model, "glm")) model$xlevels[[key]] else NULL
+    if (is.null(fitted_levels)) fitted_levels = levels(factor(fitted))
+    rows = match(fitted_levels, as.character(fitted))
+    unique_inputs = vapply(fitted_levels, function(level) {
+      length(unique(data[[variable]][as.character(fitted) == level])) == 1L
+    }, logical(1))
+    if (anyNA(rows) || !all(unique_inputs)) {
+      stop("Cannot map fitted levels of '", key, "' to unique original inputs. ",
+           "Create an explicit factor column and refit the model.", call.=FALSE)
+    }
+    result[[variable]] = list(categorical=TRUE, variable=variable, key=key,
+                               expression=expression, levels=fitted_levels,
+                               values=data[[variable]][rows], fitted=fitted,
+                               ordered=is.ordered(fitted),
+                               environment=environment(stats::formula(model)))
+  }
+  result
+}
+
+logistic_set_factor = function(data, predictor, level) {
+  value = predictor$values[match(level, predictor$levels)]
+  data[[predictor$variable]] = rep(value, nrow(data))
+  # Verify that reevaluating the original expression retains its fitted meaning.
+  formula = structure(call("~", predictor$expression), class="formula",
+                        .Environment=predictor$environment)
+  fitted = tryCatch(stats::model.frame(formula, data=data, na.action=stats::na.pass)[[1]],
+                     error=function(e) NULL)
+  if (is.null(fitted) || anyNA(fitted) || !all(as.character(fitted) == level)) {
+    stop("Cannot safely construct predictions for categorical transformation '",
+         predictor$key, "'. Use an explicit factor column and refit the model.", call.=FALSE)
+  }
+  data
+}
+
+logistic_reference_data = function(model, data, variables, predictors) {
   reference = data[1, , drop=FALSE]
   for (variable in variables) {
-    if (is.numeric(data[[variable]])) {
+    predictor = predictors[[variable]]
+    if (!predictor$categorical) {
       reference[[variable]] = mean(data[[variable]])
       next
     }
-    levels = if (inherits(model, "glm")) model$xlevels[[variable]] else levels(data[[variable]])
-    if (is.null(levels)) levels = levels(factor(data[[variable]]))
+    levels = predictor$levels
     baseline = 1L
     if (length(levels) > 1L && inherits(model, "glm")) {
-      coding = logistic_factor_contrasts(model, variable, data[[variable]])
+      coding = logistic_factor_contrasts(model, predictor$key, predictor$fitted)
       zero = which(rowSums(abs(coding)) == 0)
       if (length(zero) == 1L) baseline = zero
     }
-    reference[[variable]] = factor(levels[baseline], levels=levels,
-                                    ordered=is.ordered(data[[variable]]))
+    reference = logistic_set_factor(reference, predictor, levels[baseline])
   }
   reference
 }
@@ -72,7 +144,7 @@ logistic_focal_transform = function(variable, terms) {
 
 logistic_conditional_summary = function(variable, model_info, location) {
   missing = c(instantaneous_slope=NA_real_, intercept_threshold=NA_real_)
-  if (!is.numeric(model_info$data[[variable]])) return(missing)
+  if (!variable %in% model_info$continuous) return(missing)
   transform = logistic_focal_transform(variable, stats::terms(model_info$model))
   if (is.null(transform)) return(missing)
   # Four coordinates check the fitted conditional link for an affine dependence
@@ -127,11 +199,10 @@ logistic_coefficient_table = function(model) {
 logistic_marginal_probabilities = function(model, info) {
   summaries = list()
   for (variable in info$variables) {
-    if (is.numeric(info$data[[variable]])) next
-    for (level in model$xlevels[[variable]]) {
-      profile = info$data
-      profile[[variable]] = factor(rep(level, nrow(profile)), levels=model$xlevels[[variable]],
-                                    ordered=is.ordered(profile[[variable]]))
+    predictor = info$predictors[[variable]]
+    if (!predictor$categorical) next
+    for (level in predictor$levels) {
+      profile = logistic_set_factor(info$data, predictor, level)
       summaries[[length(summaries)+1L]] = data.frame(
         Variable=variable, Level=level,
         Probability=mean(logistic_predict(model, profile, type="response")))
@@ -146,21 +217,21 @@ logistic_estimates_table = function(model) {
   result = logistic_coefficient_table(model)
   difference = rep(NA_real_, nrow(result))
   names(difference) = rownames(result)
-  for (variable in info$variables) {
-    if (!is.numeric(info$data[[variable]])) next
+  for (variable in info$continuous) {
     profile = info$reference[c(1, 1), , drop=FALSE]
     profile[[variable]] = mean(info$data[[variable]]) + c(1, -1)*stats::sd(info$data[[variable]])
     columns = which(rownames(result) == variable)
     if (length(columns)) difference[columns] = abs(round(diff(logistic_predict(model, profile, "response")), 2))
   }
-  factors = info$variables[!vapply(info$data[info$variables], is.numeric, logical(1))]
+  factors = setdiff(info$variables, info$continuous)
   for (variable in factors) {
-    levels = model$xlevels[[variable]]
-    coding = logistic_factor_contrasts(model, variable, info$data[[variable]])
+    predictor = info$predictors[[variable]]
+    levels = predictor$levels
+    coding = logistic_factor_contrasts(model, predictor$key, predictor$fitted)
     baseline = which(rowSums(abs(coding)) == 0)
     if (length(baseline) != 1L) next
-    profile = info$reference[rep(1, length(levels)), , drop=FALSE]
-    profile[[variable]] = factor(levels, levels=levels, ordered=is.ordered(info$data[[variable]]))
+    profiles = lapply(levels, logistic_set_factor, data=info$reference, predictor=predictor)
+    profile = do.call(rbind, profiles)
     predictions = logistic_predict(model, profile, "response")
     matrix = stats::model.matrix(stats::delete.response(stats::terms(model)), profile,
                                   contrasts.arg=model$contrasts, xlev=model$xlevels)
@@ -168,7 +239,7 @@ logistic_estimates_table = function(model) {
     terms = stats::delete.response(stats::terms(model))
     expressions = as.list(attr(terms, "variables"))[-1]
     factor_terms = attr(terms, "factors")
-    main_row = which(vapply(expressions, identical, logical(1), y=as.name(variable)))
+    main_row = which(vapply(expressions, identical, logical(1), y=predictor$expression))
     term = if (length(main_row)) which(factor_terms[main_row, ] != 0 &
                                         colSums(factor_terms != 0) == 1L) else integer()
     columns = which(attr(matrix, "assign") %in% term)
@@ -180,16 +251,17 @@ logistic_estimates_table = function(model) {
       difference[name] = paste0(round_string(predictions[changed] - predictions[baseline]),
                                 " (relative to ", variable, levels[baseline], ")")
     }
-    if (length(factors) == 1L && !is.ordered(info$data[[variable]]) && "(Intercept)" %in% names(difference)) {
+    if (length(factors) == 1L && !predictor$ordered && "(Intercept)" %in% names(difference)) {
       difference["(Intercept)"] = paste0(round_string(predictions[baseline]), " (", variable,
                                          levels[baseline], " prediction)")
     }
   }
   result[["Prediction Difference (+/- 1 SD)"]] = unname(difference)
   # Preserve the existing display precision while retaining numeric NA values.
-  if (any(vapply(info$data[info$variables], is.numeric, logical(1)))) result = round_coefficient_matrix(result)
+  if (length(info$continuous)) result = round_coefficient_matrix(result)
   attr(result, "irt") = logistic_coefficients(model)
   attr(result, "marginal_probabilities") = logistic_marginal_probabilities(model, info)
   attr(result, "conditioning") = info$reference[info$variables]
+  attr(result, "continuous") = info$continuous
   result
 }

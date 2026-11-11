@@ -119,7 +119,10 @@ print.glm_estimates = function(x, ...) {
                                         intercept_threshold)) #%>%
     conditional = attr(x, "irt")
     if (!is.null(conditional)) {
-      continuous = names(attr(x, "conditioning"))[vapply(attr(x, "conditioning"), is.numeric, logical(1))]
+      continuous = attr(x, "continuous")
+      if (is.null(continuous)) {
+        continuous = names(attr(x, "conditioning"))[vapply(attr(x, "conditioning"), is.numeric, logical(1))]
+      }
       irt = conditional[conditional$variable %in% continuous, ]
       names(irt)[1] = "Variables"
     } else {

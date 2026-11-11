@@ -30,10 +30,16 @@
 #' Nonfinite thresholds, unreachable targets, and singular derivatives also return
 #' NA. A constant conditional curve has slope zero and no unique threshold (NA).
 #' Categorical predictors retain numeric NA values in this helper's output.
+#' Categorical type is determined from fitted expressions: factor(x),
+#' as.factor(x), ordered(x) and as.ordered(x) with a direct source column are
+#' excluded even if the source column is numeric. Their conditioning levels use
+#' valid original inputs corresponding to the fitted factor levels. Ambiguous
+#' or unsupported categorical transformations require an explicit factor column;
+#' see \code{\link{estimates.glm}} for the supported mappings and restrictions.
 #'
 #' @returns A tibble with one row per underlying predictor and columns variable,
 #'   instantaneous_slope and intercept_threshold. Missing estimates are numeric NA.
-#' @seealso [estimates.glm()]
+#' @seealso \code{\link{estimates.glm}}
 #' @export
 #' @examples
 #' logistic_model = glm(injury ~ safety * gender + attention,
@@ -64,10 +70,13 @@ gather_model_info = function(model) {
   if (inherits(model, "glmerMod")) {
     variables = all.vars(reformulas::nobars(stats::formula(model))[[3]])
   }
+  predictors = logistic_predictor_info(model, model_data, variables)
+  continuous = variables[!vapply(predictors, function(x) x$categorical, logical(1))]
   list(model=model, data=model_data, coefs=coefs, coef_names=names(coefs),
        term_names=attr(stats::terms(model), "term.labels"),
        term_labels=attr(mm, "assign"), mm=mm, variables=variables,
-       reference=logistic_reference_data(model, model_data, variables))
+       predictors=predictors, continuous=continuous,
+       reference=logistic_reference_data(model, model_data, variables, predictors))
 }
 
 compute_logistic_summary_for_variable = function(var, model, model_info=NULL, location=.5) {
