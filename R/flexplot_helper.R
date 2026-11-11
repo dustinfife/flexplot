@@ -85,11 +85,6 @@ is_binary = function(x) {
   return(FALSE)
 }
 
-is_categorical = function(x) {
-  is.factor(x) || is.character(x) ||
-    (is.numeric(x) &&
-       length(unique(stats::na.omit(x))) <= 5)
-}
 
 
 make_levels_same_for_prediction_dataset = function(data, prediction, axis) {

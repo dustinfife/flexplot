@@ -185,29 +185,6 @@ get_model_n.default = function(model) {
   return(nrow(model$model))
 }
 
-make_data_types_the_same = function(variable, predicted_data, model_data) {
-  
-  class_model = class(model_data[,variable])
-  class_prediction = class(predicted_data[,variable])
-  if (identical(class_model, class_prediction)) return(predicted_data[,variable])
-  
-  # if it's an ordered factor
-  if (class_model[1] == "ordered") {
-    old_levels = levels(model_data[,variable])
-    new_x = factor(predicted_data[,variable], levels=old_levels, ordered=T)
-    return(new_x)
-  } 
-  # if it's a regular factor
-  if (class_model[1] == "factor") {
-    old_levels = levels(model_data[,variable])
-    new_x = factor(predicted_data[,variable], levels=old_levels)
-    return(new_x)
-  }
-  
-  if (class(model_data[,variable])[1] == "numeric") return(as.numeric(as.character(predicted_data[,variable])))
-  if (class(model_data[,variable])[1] == "integer") return(as.integer(predicted_data[,variable]))
-  
-}
 
 #not_binned_but_plotted(c("a", "b", "c"), c("b_binned"))
 #not_binned_but_plotted(c("a", "b"), c(""))
@@ -244,26 +221,6 @@ bin_if_theres_a_flexplot_formula = function(formula, data, ...) {
   return(k)
 }
 
-bin_if_theres_a_flexplot_formula2 = function(data, formula,  ...) {
-  
-  # extract given/axis
-  given.axis = flexplot_axis_given(formula)
-  given = given.axis$given
-  axis = given.axis$axis
-  
-  # reproduce breaks from flexplot in the dataset (if they supply them)
-  list_values = list(...)
-  
-  # see if they didn't give a flexplot formula
-  given_length = length(given)
-  axis_length  = length(axis)
-  if (axis_length>2 & is.na(given[1])) return(data) 
-  
-  # if they have a flexplot formula, bin things
-  binned_data = reproduce_breaks(data, formula, list_values)
-  k=binned_data$binned_data
-  return(k)
-}
 
 
 return_constant_for_predicted_data = function(missing_variable, data, model) {
@@ -327,9 +284,6 @@ reproduce_breaks = function(data, formula, list_values) {
  
 }
 
-generate_quadriture = function(x, number_points = 15) {
-  seq(from=min(x), to=max(x), length.out=15)
-}
 
 ### function to generate prediction matrix spanning the range of the data
 generate_predictors = function(data, formula, model, ...) {

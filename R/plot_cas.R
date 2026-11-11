@@ -349,11 +349,3 @@ cluster_adjusted_scatter = function(formula, object=NULL, data=NULL,
   if (isTRUE(smooth)) p = p + ggplot2::geom_smooth()
   p
 }
-
-add_random = function(form, random_terms) {
-  to_piece = function(x) {
-    if (inherits(x, "formula")) sub("^~", "", paste(deparse(x), collapse="")) else as.character(x)
-  }
-  rhs = paste(vapply(as.list(random_terms), to_piece, character(1)), collapse = " + ")
-  update(form, as.formula(paste("~ . +", rhs), env = environment(form)))
-}
