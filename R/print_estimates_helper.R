@@ -117,7 +117,14 @@ print.glm_estimates = function(x, ...) {
     irt =          with(x, dplyr::tibble(Variables=attr(x, "row.names"), 
                                         instantaneous_slope, 
                                         intercept_threshold)) #%>%
-    irt = irt[-which(irt$Variables=="(Intercept)"),]
+    conditional = attr(x, "irt")
+    if (!is.null(conditional)) {
+      continuous = names(attr(x, "conditioning"))[vapply(attr(x, "conditioning"), is.numeric, logical(1))]
+      irt = conditional[conditional$variable %in% continuous, ]
+      names(irt)[1] = "Variables"
+    } else {
+      irt = irt[irt$Variables != "(Intercept)", ]
+    }
     standardized = with(x, dplyr::tibble(variables=attr(x, "row.names"), 
                                          standardized.OR, inverse.standardized.OR, 
                                          `Prediction Difference (+/- 1 SD)`)) %>%
@@ -127,10 +134,21 @@ print.glm_estimates = function(x, ...) {
     
     cat("\n\nIRT Estimates:\n")
     print(irt)
-    
+    if (length(attr(x, "conditioning")) > 1L) {
+      cat("\nNote: IRT estimates are conditional on other continuous predictors being held at their means and categorical predictors at their reference levels. For predictors involved in interactions, estimates may differ at other moderator values.\n")
+    }
+    if (!is.null(conditional) && nrow(irt) < nrow(conditional)) {
+      cat("\nIRT estimates are reported only for continuous predictors. Categorical predictors are excluded because instantaneous slopes and thresholds are not defined for discrete changes.\n")
+    }
+
     cat("\n\nStandardized Estimates:\n")
     print(standardized)
-    
+    marginal = attr(x, "marginal_probabilities")
+    if (!is.null(marginal)) {
+      cat("\n\nMarginal Predicted Probabilities:\n\n")
+      print(tibble::as_tibble(marginal))
+    }
+
     cat("\n\n To see the documentation for each of these estimates, type ?estimates.glm")
     } else {
       results = x

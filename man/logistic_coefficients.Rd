@@ -2,27 +2,55 @@
 % Please edit documentation in R/helper_estimates.R
 \name{logistic_coefficients}
 \alias{logistic_coefficients}
-\title{Output calculus-based logistic regression coefficients}
+\title{Conditional calculus-based logistic regression estimates}
 \usage{
 logistic_coefficients(model, location = 0.5)
 }
 \arguments{
-\item{model}{A fitted model (glm or glmerMod)}
+\item{model}{A fitted logit-link glm or glmerMod model. For glmerMod models,
+predictions exclude random effects.}
 
-\item{location}{Probability at which to evaluate the instantaneous slope.
-Defaults to \code{0.5}. The reported threshold remains the point at which
-the fitted probability crosses \code{0.5}.}
+\item{location}{Target probability strictly between zero and one, default 0.5.
+Both the slope and threshold refer to this same probability.}
 }
 \value{
-Discrimination and difficulty estimates for a regression model
+A tibble with one row per underlying predictor and columns variable,
+  instantaneous_slope and intercept_threshold. Missing estimates are numeric NA.
 }
 \description{
-This function takes a logistic regression model and returns more intuitive slope/intercept
-parameters. The slope (discrimination) is interpreted as the instantaneous (tangent) slope of the ogive
-curve at the requested probability (0.5 by default). The intercept (difficulty) is interpreted as the value of X where
-the logistic curve crosses the 50% threshold
+Report instantaneous probability slopes and target-probability thresholds for
+continuous predictors in a fitted logit-link model. These are conditional
+estimates, not average marginal effects. No model is refitted.
+}
+\details{
+Other continuous predictors are held at their estimation-row means and factors
+at their fitted reference levels. A treatment-contrast reference is the level
+whose contrast row is zero, including a non-first reference. Contrasts such as
+sum and polynomial coding have no unique reference category; their first
+fitted level is used instead. Interactions are evaluated at these same settings
+for both the threshold and slope. Estimates can differ at other moderator values.
+
+If the conditional logit is a + b*x, the threshold is
+(qlogis(location) - a)/b and the instantaneous slope is
+b*location*(1-location), in probability units per unit of x. The original fitted
+model supplies the link predictions, retaining its contrasts and interactions.
+Thresholds may lie outside the observed range and then describe extrapolation.
+
+Single log(x) and sqrt(x) focal transformations, including their interactions,
+are supported when the conditional link is affine in that transformation.
+Thresholds and derivatives are expressed in original x units using the chain
+rule. General nonlinear or mixed transformations (including quadratic and
+polynomial terms) return numeric NA: a unique threshold is not established.
+Nonfinite thresholds, unreachable targets, and singular derivatives also return
+NA. A constant conditional curve has slope zero and no unique threshold (NA).
+Categorical predictors retain numeric NA values in this helper's output.
 }
 \examples{
-logistic_model = glm(y_bin~x + a, data=small, family=binomial)
+logistic_model = glm(injury ~ safety * gender + attention,
+                     data=tablesaw.injury, family=binomial)
 logistic_coefficients(logistic_model)
+logistic_coefficients(logistic_model, location=.7)
+}
+\seealso{
+[estimates.glm()]
 }

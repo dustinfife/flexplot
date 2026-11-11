@@ -205,26 +205,127 @@ estimates.RandomForest = function(object, mc=TRUE) {
 
 
 
-#' Report glm object Estimates (effect sizes and parameters)
+#' Interpretable estimates for generalized linear models
 #'
-#' Report glm object Estimates
-#' @param object a glm object
-#' @param mc Should model comparisons be performed? Currently not used
-#' @return One or more objects containing parameter estimates and effect sizes. 
-#' 
-#' For logistic regression, it will return the following:
-#' \describe{
-#'   \item{`raw.coefficients`}{The raw log-odds coefficients.}
-#'   \item{`OR`}{Odds ratios (exp(beta)).}
-#'   \item{`inverse.OR`}{Inverse odds ratios (1 / OR).}
-#'   \item{`standardized.OR`}{Standardized odds ratios (exp(beta)).}
-#'   \item{`inverse.standardized.OR`}{Standardized version of the inverse odds ratios (1 / OR).}
-#'   \item{`instantaneous_slope`}{The slope of the probability curve at p = 0.5.}
-#'   \item{`intercept_threshold`}{The value of X where p = 0.5.}
-#'   \item{`Prediction Difference (+/- 1 SD)`}{Change in predicted probability from -1 to +1 SD.}
-#' }
+#' Report coefficients and effect sizes from the original fitted model. For
+#' binomial logit models, printing retains Raw Estimates, IRT Estimates, and
+#' Standardized Estimates, followed by Marginal Predicted Probabilities when
+#' categorical predictors are present. No models are refitted.
+#'
+#' @param object A fitted glm object.
+#' @param mc Should model comparisons be performed? Currently not used.
+#' @return The existing coefficient-level glm_estimates object. For binomial logit
+#'   models, additional attributes are irt (predictor-level conditional estimates),
+#'   conditioning (a one-row reference profile), and marginal_probabilities
+#'   (Variable, Level, Probability; NULL if no categorical predictors exist).
+#'   Coefficient rows, their names, and numeric missing IRT values are retained.
+#' @details
+#' The following definitions apply to binomial logistic regression. The modeled
+#' success is the outcome recognized by the fitted binomial model: for a two-level
+#' factor it is the second level. A proportion or two-column binomial response
+#' retains the original model's success coding.
+#'
+#' \strong{Raw Estimates.} If eta = X beta is the logit of success probability,
+#' raw.coefficients contains beta. A continuous main-effect coefficient measures
+#' log-odds per predictor unit, conditional on the remaining covariates. In an
+#' interaction model it is the effect at zero/reference moderator settings under
+#' the fitted parameterization, not necessarily at the IRT conditioning settings.
+#' OR = exp(beta) is the corresponding odds multiplier; inverse.OR = exp(-beta)
+#' is its reciprocal. Treatment-coded factor coefficients compare a level with
+#' its reference; sum, ordered-polynomial and other contrasts describe their
+#' fitted contrast, not necessarily a pairwise level comparison. Interaction
+#' coefficients describe changes in these effects.
+#'
+#' \strong{IRT Estimates.} Only continuous predictors are printed here; factors
+#' remain in Raw and Standardized Estimates. Other continuous predictors are
+#' held at their estimation-row means and categorical predictors at fitted
+#' reference levels. Nondefault treatment references are respected. When the
+#' fitted contrasts have no reference level (for example sum or polynomial
+#' contrasts), the first fitted category is used. Inspect the conditioning
+#' attribute for the actual settings. These are conditional estimates at specified
+#' covariate values, not average marginal effects.
+#'
+#' The instantaneous_slope is the derivative of predicted success probability
+#' with respect to the original predictor at target probability p. Its units are
+#' probability per predictor unit. The intercept_threshold is the predictor value
+#' where that same conditional curve reaches p. estimates uses p = 0.5;
+#' [logistic_coefficients()] exposes location to request another p, changing both
+#' calculations consistently. For a conditional affine logit a + b*x, these are
+#' b*p*(1-p) and (qlogis(p)-a)/b. Interactions retain all fitted terms, evaluated
+#' at the documented mean/reference settings, so results may change at other
+#' moderator values. Log and square-root focal transformations use the chain
+#' rule and original predictor units. General nonlinear transformations, including
+#' quadratic terms, return numeric NA when uniqueness cannot be established.
+#' Unreachable targets and nonfinite derivatives also yield NA. A zero conditional
+#' slope is reported as zero with an NA threshold because no unique crossing exists.
+#'
+#' A threshold outside the observed range is an extrapolated crossing, not evidence
+#' by itself of a poor predictor. Baseline risk may remain below or above 0.5 over
+#' the entire observed range even when a predictor has a substantial effect.
+#' Always interpret the slope, observed range, uncertainty and model adequacy
+#' alongside the threshold; this table does not provide uncertainty intervals.
+#'
+#' \strong{Standardized Estimates.} Standardization multiplies each coefficient
+#' by the standard deviation of its fitted model-matrix column. The displayed OR
+#' is exp(beta*SD(column)) and inverse.OR is its reciprocal. For continuous main
+#' effects this is the odds multiplier for one SD; factor contrasts and interaction
+#' columns use their own coded-column SD and are not generic between-level effects.
+#' The intercept has column SD zero and standardized OR one by convention.
+#'
+#' Prediction Difference (+/- 1 SD) retains the absolute difference between
+#' response-scale predictions at a continuous main predictor's mean plus and minus
+#' one SD, with other predictors at the same conditional settings. This spans two
+#' SD and is not an odds ratio. Supported treatment-coded factor rows instead
+#' display signed probability differences from the reference level; when there is
+#' one unordered factor, the intercept row also displays its reference probability.
+#' Contrasts without a single reference comparison, interaction coefficient rows,
+#' and transformed coefficient rows have NA prediction differences rather than
+#' inventing a discrete comparison or attaching a predictor result positionally.
+#'
+#' \strong{Marginal Predicted Probabilities.} For each categorical predictor and
+#' each fitted level, set that predictor to the level for every eligible estimation
+#' observation, retain all other observed covariates, predict with the original
+#' model on the response scale, and take the arithmetic mean. Equivalently,
+#' probability(level) = mean_i inverse_logit(eta_i with that level substituted).
+#' This accounts for interactions and contrasts without interpreting coefficient
+#' names. It is observation-weighted standardization over estimation rows, not a
+#' prediction at mean covariates, equal-cluster weighting, a pairwise difference,
+#' or automatically a causal effect. Fitting weights do not become averaging
+#' weights. Missing rows excluded during fitting do not reenter this population.
+#'
+#' Existing output for other GLM families/links is unchanged. For transformed
+#' predictors, original estimation-row predictor values must be recoverable from
+#' the stored frame or original data call. Coefficient-level values retain existing
+#' display rounding; the summary attributes retain full numerical precision.
+#' @examples
+#' model = glm(injury ~ safety + attention + gender,
+#'             data=tablesaw.injury, family=binomial)
+#' result = estimates(model)
+#' result
+#' # Raw OR: conditional odds multiplier for one original safety unit.
+#' exp(coef(model)["safety"])
+#' # IRT: probability slope and 50 percent crossing with attention at its mean
+#' # and gender at its fitted reference category. Check those actual values:
+#' attr(result, "conditioning")
+#' # The 70 percent threshold and tangent slope describe a different point:
+#' logistic_coefficients(model, location=.7)
+#' # Standardized OR uses one SD; prediction difference spans mean +/- one SD.
+#' # Gender probabilities average over observed safety and attention instead:
+#' attr(result, "marginal_probabilities")
+#' interacting = glm(injury ~ safety * gender + attention,
+#'                   data=tablesaw.injury, family=binomial)
+#' estimates(interacting)
+#' # The safety IRT values are conditional on reference gender; the marginal
+#' # gender probabilities retain each observation's actual safety and attention.
+#' @seealso [logistic_coefficients()]
 #' @export
 estimates.glm = function(object, mc=FALSE){
+  if (identical(stats::family(object)$family, "binomial") &&
+      identical(stats::family(object)$link, "logit")) {
+    result = logistic_estimates_table(object)
+    attr(result, "class") = "glm_estimates"
+    return(result)
+  }
 
 	#### generate list of coefficients
 	terms = remove_interaction_terms(object)

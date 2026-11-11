@@ -53,7 +53,7 @@ test_that("factors do not break compute_logistic_summary_for_variable", {
   model = glm(y_bin ~ x + a, data = small, family = binomial)
   result = compute_logistic_summary_for_variable("a", model = model)
   expect_equal(result$variable, "a")
-  expect_equal(result$intercept_threshold, NA)
+  expect_identical(result$intercept_threshold, NA_real_)
 })
 
 

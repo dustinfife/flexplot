@@ -30,7 +30,6 @@ Imports: cowplot,
 	mgcv,
 	rlang,
 	scales,
-	stringr,
 	tidyr,
 	utils,
 	grDevices

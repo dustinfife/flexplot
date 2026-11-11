@@ -1,109 +1,80 @@
-#' Output calculus-based logistic regression coefficients
-#' 
-#' This function takes a logistic regression model and returns more intuitive slope/intercept
-#' parameters. The slope (discrimination) is interpreted as the instantaneous (tangent) slope of the ogive
-#' curve at the requested probability (0.5 by default). The intercept (difficulty) is interpreted as the value of X where
-#' the logistic curve crosses the 50% threshold
+#' Conditional calculus-based logistic regression estimates
 #'
-#' @param model A fitted model (glm or glmerMod)
-#' @param location Probability at which to evaluate the instantaneous slope.
-#'   Defaults to \code{0.5}. The reported threshold remains the point at which
-#'   the fitted probability crosses \code{0.5}.
+#' Report instantaneous probability slopes and target-probability thresholds for
+#' continuous predictors in a fitted logit-link model. These are conditional
+#' estimates, not average marginal effects. No model is refitted.
 #'
-#' @returns Discrimination and difficulty estimates for a regression model
+#' @param model A fitted logit-link glm or glmerMod model. For glmerMod models,
+#'   predictions exclude random effects.
+#' @param location Target probability strictly between zero and one, default 0.5.
+#'   Both the slope and threshold refer to this same probability.
+#' @details
+#' Other continuous predictors are held at their estimation-row means and factors
+#' at their fitted reference levels. A treatment-contrast reference is the level
+#' whose contrast row is zero, including a non-first reference. Contrasts such as
+#' sum and polynomial coding have no unique reference category; their first
+#' fitted level is used instead. Interactions are evaluated at these same settings
+#' for both the threshold and slope. Estimates can differ at other moderator values.
+#'
+#' If the conditional logit is a + b*x, the threshold is
+#' (qlogis(location) - a)/b and the instantaneous slope is
+#' b*location*(1-location), in probability units per unit of x. The original fitted
+#' model supplies the link predictions, retaining its contrasts and interactions.
+#' Thresholds may lie outside the observed range and then describe extrapolation.
+#'
+#' Single log(x) and sqrt(x) focal transformations, including their interactions,
+#' are supported when the conditional link is affine in that transformation.
+#' Thresholds and derivatives are expressed in original x units using the chain
+#' rule. General nonlinear or mixed transformations (including quadratic and
+#' polynomial terms) return numeric NA: a unique threshold is not established.
+#' Nonfinite thresholds, unreachable targets, and singular derivatives also return
+#' NA. A constant conditional curve has slope zero and no unique threshold (NA).
+#' Categorical predictors retain numeric NA values in this helper's output.
+#'
+#' @returns A tibble with one row per underlying predictor and columns variable,
+#'   instantaneous_slope and intercept_threshold. Missing estimates are numeric NA.
+#' @seealso [estimates.glm()]
 #' @export
-#'
 #' @examples
-#' logistic_model = glm(y_bin~x + a, data=small, family=binomial)
+#' logistic_model = glm(injury ~ safety * gender + attention,
+#'                      data=tablesaw.injury, family=binomial)
 #' logistic_coefficients(logistic_model)
+#' logistic_coefficients(logistic_model, location=.7)
 logistic_coefficients = function(model, location = .5) {
-
-  model_info = gather_model_info(model)
-  coefs = model_info$coefs
-  coef_names = model_info$coef_names
-  
-  coef_terms = sapply(coef_names[-1], match_term_names, model_info = model_info)
-  
-  vars = unique(coef_terms[coef_terms != "unknown"])
-  b0 = coefs[1]
-  
-  default_means = model_info$term_names %>%
-    purrr::set_names() %>%
-    purrr::map(~ if (is.numeric(model_info$data[[.x]]))
-      mean(model_info$data[[.x]], na.rm = TRUE)
-      else NA)
-  
-  result = purrr::map_dfr(vars, 
-                          compute_logistic_summary_for_variable,
-                          model_info = model_info,
-                          location = location)
-  
-  return(result)
+  if (length(location) != 1L || !is.numeric(location) || is.na(location) ||
+      !is.finite(location) || location <= 0 || location >= 1) {
+    stop("location must be a probability strictly between 0 and 1.", call.=FALSE)
+  }
+  info = gather_model_info(model)
+  summaries = lapply(info$variables, compute_logistic_summary_for_variable,
+                      model_info=info, location=location)
+  if (!length(summaries)) {
+    return(tibble::tibble(variable=character(), instantaneous_slope=double(),
+                           intercept_threshold=double()))
+  }
+  dplyr::bind_rows(summaries)
 }
 
 gather_model_info = function(model) {
   coefs = return_logistic_coefficients(model)
-  model_data = extract_data_from_fitted_object(model)
-  mm = model.matrix(model, data = model_data)
-  term_labels = attr(mm, "assign")
-  term_names = attr(terms(model), "term.labels")
-  coef_names = names(coefs)
-  
-  model_info = list(
-    model = model,
-    data = model_data,
-    coefs = coefs,
-    coef_names = coef_names,
-    term_names = term_names,
-    term_labels = term_labels,
-    mm = mm
-  )
-  
-  return(model_info)
+  model_data = logistic_estimation_data(model)
+  mm = stats::model.matrix(model)
+  variables = all.vars(stats::delete.response(stats::terms(model)))
+  # Grouping columns are not fixed-effect predictors in glmer models.
+  if (inherits(model, "glmerMod")) {
+    variables = all.vars(reformulas::nobars(stats::formula(model))[[3]])
+  }
+  list(model=model, data=model_data, coefs=coefs, coef_names=names(coefs),
+       term_names=attr(stats::terms(model), "term.labels"),
+       term_labels=attr(mm, "assign"), mm=mm, variables=variables,
+       reference=logistic_reference_data(model, model_data, variables))
 }
 
-compute_logistic_summary_for_variable = function(var,
-                                                 model, 
-                                                 model_info = NULL, 
-                                                 location = .5) {
-  # Derive model_info if not supplied
+compute_logistic_summary_for_variable = function(var, model, model_info=NULL, location=.5) {
   if (is.null(model_info)) model_info = gather_model_info(model)
-  
-  b0 = model_info$coefs[1]
-  
-  # Compute default means 
-  default_means = model_info$term_names %>%
-    purrr::set_names() %>%
-    purrr::map(~ if (is.numeric(model_info$data[[.x]]))
-      mean(model_info$data[[.x]], na.rm = TRUE)
-      else NA)
-  
-  related_coefs = model_info$coef_names[stringr::str_starts(model_info$coef_names, var)]
-  b_j = sum(model_info$coefs[related_coefs], na.rm = TRUE)
-  
-  other_vars = setdiff(model_info$term_names, var)
-  
-  offset = b0 + sum(purrr::map_dbl(other_vars, function(other_var) {
-    val = default_means[[other_var]]
-    if (is.na(val)) return(0)
-    other_related = model_info$coef_names[stringr::str_starts(model_info$coef_names, other_var)]
-    sum(model_info$coefs[other_related], na.rm = TRUE) * val
-  }))
-  
-  # Only compute slope and threshold if the predictor is numeric
-  if (is.numeric(model_info$data[[var]])) {
-    slope = b_j * (location*(1-location))
-    threshold = -offset / b_j
-  } else {
-    slope = NA
-    threshold = NA
-  }
-  
-  dplyr::tibble(
-    variable = var,
-    instantaneous_slope = slope,
-    intercept_threshold = threshold
-  )
+  values = logistic_conditional_summary(var, model_info, location)
+  tibble::tibble(variable=var, instantaneous_slope=unname(values[1]),
+                 intercept_threshold=unname(values[2]))
 }
 
 

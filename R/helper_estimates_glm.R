@@ -1,5 +1,8 @@
 compute_factor_differences = function(preds=NULL, factors=NULL, coef.matrix=NULL, d=NULL, object=NULL){
-  
+  if (inherits(object, "glm") && identical(stats::family(object)$family, "binomial") &&
+      identical(stats::family(object)$link, "logit") && is.null(preds)) {
+    return(logistic_estimates_table(object))
+  }
   if (is.null(preds)) {
     d = extract_data_from_fitted_object(object) %>% data.frame
     terms = remove_interaction_terms(object)
@@ -119,6 +122,8 @@ n.func = function(term, object){
 }
 
 output_coef_matrix_glm = function(object, preds=NULL, numbers=NULL) {
+  if (inherits(object, "glm") && identical(stats::family(object)$family, "binomial") &&
+      identical(stats::family(object)$link, "logit")) return(logistic_coefficient_table(object))
   
   #### <<<<<< for testing purposes
   if (is.null(preds)) {
