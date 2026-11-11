@@ -8,26 +8,6 @@ get_re = function(model) {
   return(re)
 }
 
-whats_model2 = function(model1,model2=NULL) {
-  if (is.null(model2)){
-    return(model1)
-  } 
-  return(model2)
-}
-
-is_binary_01 = function(predictions) {
-  all(unique(predictions) %in% c(0, 1))
-}
-
-should_shift_predictions = function(model_type, model, outcome, predictions, data) {
-  if (model_type == "glm") {
-    return(FALSE)
-  } else if (model_type == "RandomForest") {
-    return(is_binary_01(predictions))
-  }
-  return(FALSE)
-}
-
 compare_fits_errors = function(data, outcome, predictors, testme=NULL) {
   
   ## see if all predictors are categorical
@@ -144,22 +124,6 @@ get_terms.default = function(model) {
   predictors = all.vars(form)[-1]  
   response = all.vars(form)[1]
   return(list(predictors = predictors, response = response))
-}
-
-check_missing = function(model1, model2=NULL, data, variables) {
-
-  ### if they haven't supplied model 2, no need to check
-  if (is.null(model2)) return(data)
-  
-  n1 = get_model_n(model1)
-  n2 = get_model_n(model2)
-  
-  # Only check if both are not NULL
-  if (!is.null(n1) && !is.null(n2) && (n1 < nrow(data) | n2 < nrow(data))) {
-    data = na.omit(data[,variables])
-  }
-  
-  return(data)
 }
 
 #' Get Number of Observations from Model Objects

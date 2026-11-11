@@ -1,49 +1,45 @@
 context("test helper_compare_fits")
 
-test_that("is_binary_01 identifies 0/1 vectors correctly", {
-  expect_true(is_binary_01(c(0, 1, 0, 1)))
-  expect_true(is_binary_01(rep(1, 10)))
-  expect_true(is_binary_01(rep(0, 10)))
-  
-  expect_false(is_binary_01(c(1, 2)))
-  expect_false(is_binary_01(c(0, 1, 2)))
-  expect_false(is_binary_01(c(NA, 1, 0)))
-})
-
 library(testthat)
 library(randomForest)
 
-# simulate data
-data <- data.frame(
-  x = rnorm(100),
-  y_factor = factor(sample(c("No", "Yes"), 100, replace = TRUE)),
-  y_numeric = sample(0:1, 100, replace = TRUE)
-)
-
-# glm model with factor outcome
-glm_model <- glm(y_factor ~ x, data = data, family = binomial)
-
-# glm model with numeric outcome (should NOT shift)
-glm_model_numeric <- glm(y_numeric ~ x, data = data, family = binomial)
-
-# random forest model with binary 0/1 output
-rf_model <- suppressWarnings(party::cforest(as.factor(y_numeric) ~ x, data = data, control=party::cforest_unbiased(ntree=10)))
-
-rf_preds <- as.numeric(predict(rf_model, type = "response")) - 1  # force 0/1
-
-test_that("should_shift_predictions skips glm with numeric DV", {
-  expect_false(should_shift_predictions("glm", glm_model_numeric, outcome = "y_numeric",
-                                        predictions = predict(glm_model_numeric, type = "response"), data = data))
+test_that("public GLM comparisons preserve probabilities for numeric and factor outcomes", {
+  for (factor_outcome in c(FALSE, TRUE)) {
+    d = small
+    if (factor_outcome) d$y_bin = factor(d$y_bin, levels=c(0, 1), labels=c("no", "yes"))
+    fit = glm(y_bin ~ a, data=d, family=binomial())
+    for (method in c("marginal", "observed", "reference")) {
+      actual = compare_fits(y_bin ~ a, d, fit, return.preds=TRUE,
+                              prediction_method=method)
+      expected = unname(predict(fit, newdata=actual, type="response"))
+      expect_equal(actual$prediction, expected, tolerance=1e-10)
+      expect_true(all(actual$prediction >= 0 & actual$prediction <= 1))
+      plot = compare_fits(y_bin ~ a, d, fit, prediction_method=method, jitter=FALSE)
+      overlay = which(vapply(plot$layers,
+                              function(layer) is.data.frame(layer$data) && "prediction" %in% names(layer$data),
+                              logical(1)))
+      expect_true(length(overlay) > 0)
+      built = ggplot2::ggplot_build(plot)
+      for (i in overlay) expect_equal(sort(built$data[[i]]$y), sort(expected), tolerance=1e-10)
+    }
+  }
 })
 
-test_that("should_shift_predictions works for RandomForest with 0/1 predictions", {
-  expect_true(should_shift_predictions("RandomForest", rf_model, outcome = "y_numeric",
-                                       predictions = rf_preds, data = data))
-})
-
-test_that("should_shift_predictions returns FALSE for unknown model type", {
-  expect_false(should_shift_predictions("nnet", NULL, outcome = "y_numeric",
-                                        predictions = c(0, 1), data = data))
+test_that("public forest comparisons preserve zero and one success probabilities", {
+  withr::local_seed(81)
+  d = data.frame(a=factor(rep(c("low", "high"), each=24), levels=c("high", "low")),
+                 binary=factor(rep(c("0", "1"), each=24), levels=c("0", "1")))
+  forest = party::cforest(binary ~ a, data=d,
+    controls=party::cforest_unbiased(ntree=10, mtry=1, minsplit=2, minbucket=1))
+  probabilities = do.call(rbind, predict(forest, newdata=d, type="prob", OOB=FALSE))
+  # Compare with the actual probability column, never recoded class predictions.
+  expected = tapply(probabilities[, "binary.1"], d$a, mean)
+  expect_setequal(unname(expected), c(0, 1))
+  for (method in c("marginal", "observed", "reference")) {
+    actual = compare_fits(binary ~ a, d, forest, return.preds=TRUE,
+                            prediction_method=method)
+    expect_equal(actual$prediction, as.numeric(expected[as.character(actual$a)]), tolerance=1e-10)
+  }
 })
 
 
@@ -54,11 +50,6 @@ test_that("get_re works", {
   expect_true(get_re(lmer(MathAch~1 + (1 | School), data=math))=="School")
   expect_null(get_re(lm(MathAch~1 + (1 | School), data=math)))
 })  
-
-test_that("whats_model2 works", {
-  expect_equal(whats_model2(lm(y~x, data=small), NULL), lm(y~x, data=small))
-  expect_equal(whats_model2(lm(y~x + a, data=small), lm(y~x, data=small)), lm(y~x, data=small))
-})
 
 test_that("get_model_n works", {
   expect_equal(get_model_n(lm(weight.loss~therapy.type, data=exercise_data)), 200)
@@ -79,16 +70,40 @@ test_that("get_terms works", {
   expect_equal(get_terms(small_rf)$predictors, names(small)[-1])
 })
 
-test_that("check_missing works", {
-  small_missing = small 
-  small_missing$b[5] = NA
-  m1m = lm(y~a,     data=small_missing)
-  m2m = lm(y~a + b, data=small_missing)
-  m1  = lm(y~a,     data=small)
-  m2  = lm(y~a + b, data=small)
-  expect_equal(nrow(check_missing(m1m, m2m, small_missing, c("a", "b"))), 26)
-  expect_equal(nrow(check_missing(m1 , m2 , small        , c("a", "b"))), 27)
-  expect_equal(     check_missing(m1, data=small, variables="a"), small)
+test_that("public one- and two-model comparisons use the appropriate eligible observations", {
+  for (missing in c(FALSE, TRUE)) {
+    d = small
+    if (missing) {
+      d$y[3] = NA
+      d$b[5] = NA
+    }
+    d$unused = NA_real_
+    reduced = lm(y ~ a, data=d)
+    full = lm(y ~ a + b, data=d)
+    for (two_models in c(FALSE, TRUE)) {
+      eligible = d[complete.cases(d[if (two_models) c("y", "a", "b") else c("y", "a")]), ]
+      for (method in c("marginal", "observed")) {
+        actual = compare_fits(y ~ a, d, reduced, if (two_models) full else NULL,
+                                return.preds=TRUE, prediction_method=method)
+        expect_length(unique(actual$model), if (two_models) 2 else 1)
+        for (label in unique(actual$model)) {
+          curve = actual[actual$model == label, ]
+          fit = if (label == "reduced (lm)") reduced else full
+          expected = vapply(as.character(curve$a), function(level) {
+            profile = if (method == "observed") eligible[eligible$a == level, ] else eligible
+            profile$a = factor(rep(level, nrow(profile)), levels=levels(d$a))
+            mean(predict(fit, newdata=profile))
+          }, numeric(1))
+          expect_equal(curve$prediction, unname(expected), tolerance=1e-10)
+        }
+        plot = compare_fits(y ~ a, d, reduced, if (two_models) full else NULL,
+                              prediction_method=method, jitter=FALSE)
+        raw = ggplot2::ggplot_build(plot)$data[[1]]
+        expect_equal(nrow(raw), nrow(eligible))
+        expect_equal(sort(raw$y), sort(eligible$y))
+      }
+    }
+  }
 })
 
 test_that("comparison data errors identify missing predictors", {
