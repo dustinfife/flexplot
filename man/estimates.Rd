@@ -2,15 +2,66 @@
 % Please edit documentation in R/estimates.R
 \name{estimates}
 \alias{estimates}
-\title{Report Estimates (effect sizes and parameters)}
+\title{Model-specific estimates and effect-size summaries}
 \usage{
 estimates(object, mc = TRUE)
 }
 \arguments{
-\item{object}{a object}
+\item{object}{A fitted model. Specialized methods are registered for lm, glm,
+lmerMod, glmerMod, party's RandomForest, and pscl's zeroinfl classes.}
 
-\item{mc}{Should model comparisons be performed?}
+\item{mc}{Request nested model comparisons for the lm method. Other methods
+currently ignore this argument. Method-specific defaults may differ.}
+}
+\value{
+A model-dependent object. The lm, glm and mixed-model methods use
+  custom print classes; intercept-only lm models instead return a data frame.
+  Zero-inflated models may return a coefficient table or a list.
 }
 \description{
-Report object Estimates
+Dispatch to an estimates method for the fitted model's class. Outputs differ
+by model type; this is not a common coefficient extractor or a general
+interface to marginal effects.
+}
+\details{
+\describe{
+  \item{lm}{Model R-squared, sequential ANOVA contributions, numeric coefficients
+    and standardized coefficients, conditional factor predictions and pairwise
+    differences, residual SD, and optional term-deletion model comparisons.}
+  \item{glm}{Link-dependent coefficient summaries and response prediction
+    differences. Binomial logit models also provide conditional IRT estimates
+    and categorical marginal predicted probabilities. Poisson log-link
+    coefficients describe multiplicative expected-count changes.}
+  \item{lmerMod}{Fixed effects, original-model random-effect variances,
+    variance reductions relative to a fitted random-intercept baseline, and
+    baseline ICC/design-effect calculations.}
+  \item{glmerMod}{Fixed effects, random-effect variances and baseline
+    ICC/design-effect calculations. No generalized-model R-squared is currently
+    supplied; see the method's restrictions on ICC interpretation.}
+  \item{RandomForest}{party::cforest out-of-bag predictive performance and
+    permutation importance. This is not the randomForest package's class.}
+  \item{zeroinfl}{Limited summaries for aligned count and logit-zero components
+    of pscl zero-inflated models; see the method's restrictions.}
+}
+Classes without a specialized method use estimates.default, which calls
+summary(object) and replaces its class. A successful fallback does not imply
+that flexplot implements model-specific effect sizes for that class.
+
+The methods do not report the same estimands: conditional coefficients,
+reference-profile predictions, standardized coefficients, marginal probabilities
+and out-of-bag performance answer different questions. Consult the method page
+before comparing results across classes. In particular, baseline mixed models
+and lm term-deletion comparisons involve refitting; binomial GLM marginal
+probabilities use the original fitted model without refitting.
+}
+\examples{
+model = lm(y ~ x + a, data=small)
+result = estimates(model, mc=FALSE)
+result$numbers.summary
+result$factor.summary
+}
+\seealso{
+\code{\link{estimates.lm}}, \code{\link{estimates.glm}}, \code{\link{estimates.lmerMod}},
+  \code{\link{estimates.glmerMod}}, \code{\link{estimates.RandomForest}}, \code{\link{estimates.zeroinfl}},
+  \code{\link{estimates.default}}
 }

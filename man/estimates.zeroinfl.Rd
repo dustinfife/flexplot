@@ -2,18 +2,67 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.zeroinfl}
 \alias{estimates.zeroinfl}
-\title{Report zeroinfl object Estimates (effect sizes and parameters)}
+\title{Limited estimates for pscl zero-inflated count models}
 \usage{
 \method{estimates}{zeroinfl}(object, mc = FALSE)
 }
 \arguments{
-\item{object}{a zeroinfl object}
+\item{object}{A pscl zeroinfl model, with a logit zero component and matching
+additive terms in the count and zero components.}
 
-\item{mc}{Should model comparisons be performed? Currently not used}
+\item{mc}{Currently ignored.}
 }
 \value{
-Estimates for a zero inflated model
+With numeric predictors only, a coefficient data frame. When the
+  factor-prediction path succeeds, a list containing coef.matrix and means.
+  No dedicated custom estimates print class is assigned.
 }
 \description{
-Report zeroinfl object Estimates
+Summarize count coefficients and logit-zero coefficients for a pscl zeroinfl
+model. The specialized method is registered, but its component alignment and
+prediction helpers restrict which model specifications are reliable.
+}
+\details{
+For a zero-inflated model, the conditional response mean is (1-pi)*mu, where
+mu is the count-component mean and pi is the structural-zero probability.
+The table column named for object$dist contains raw count coefficients,
+and multiplicative.coefficient is their exponential. For a log count component,
+exp(beta) multiplies mu per predictor unit or fitted factor contrast; it is
+not necessarily a multiplier of the overall mean when pi also changes.
+logit contains the zero-component log-odds coefficients and OR their exponential,
+describing structural-zero odds rather than success odds or the count mean.
+Numeric main-predictor Prediction Difference (+/- 1 SD) is the absolute
+response-mean prediction difference at its mean plus/minus one SD, rounded to
+two decimals, using the original fitted model. Other numeric predictors are
+held at means and categorical predictors at the first observed values by the
+anchor-prediction helper. Tables otherwise retain existing three-decimal
+rounding. No coefficient standardization or uncertainty intervals are added.
+
+The optional means table attempts reference-profile predictions for factor
+combinations, with undisplayed numeric predictors at means and categorical
+predictors at modes under generate_predictors. Its prediction column is the
+overall expected response count. Despite its name, its logit column comes from
+predict(type="zero") and is the structural-zero probability, not log odds.
+It is not a table of marginal probabilities or raw group proportions.
+
+\strong{Limitations.} The implementation pairs count/zero coefficients
+positionally and hard-codes a logit column. Different term sets, unequal
+component dimensions, alternative zero links and component-specific contrasts
+are not generally supported and can fail or misalign results. Interactions
+and transformed terms are not robustly handled by the term-name helpers.
+Factor-only prediction configurations can fail (including a single multilevel
+factor); the existence of a registered method does not establish full support
+for these cases. Use the numeric, matching-component example below, inspect
+the underlying model coefficients/predictions, and avoid interpreting unsupported
+configurations. These restrictions are documented without changing calculations.
+}
+\examples{
+if (requireNamespace("pscl", quietly=TRUE)) {
+  model = pscl::zeroinfl(y_pois ~ x | x, data=small)
+  result = estimates(model)
+  result
+}
+}
+\seealso{
+\code{\link{estimates}}, \code{\link[pscl]{zeroinfl}}, \code{\link{anchor.predictions}}
 }

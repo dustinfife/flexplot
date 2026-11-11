@@ -2,28 +2,63 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.RandomForest}
 \alias{estimates.RandomForest}
-\title{Report RandomForest object Estimates (effect sizes and parameters)}
+\title{Out-of-bag estimates for party conditional inference forests}
 \usage{
 \method{estimates}{RandomForest}(object, mc = TRUE)
 }
 \arguments{
-\item{object}{a zeroinfl object}
+\item{object}{A party::cforest RandomForest object, not an object of class
+randomForest from the randomForest package.}
 
-\item{mc}{Should model comparisons be performed? Currently not used}
+\item{mc}{Currently ignored.}
 }
 \value{
-Estimates for a RandomForest model. For classification, it will return the following:
-\itemize{
-\item{OOB Accuracy in prediction: The total accuracy (correct classifications/incorrect classifications) for the OOB data}
-\item{Variable importance: The difference in accuracy between the unshuffled and shuffled scores for the OOB data. Higher values indicate higher importance}
-}
-For regression, it will return the following:
-\itemize{
-\item{Quantiles of absolute value of OOB performance: This compares the OOB predicted values to the observed values, computing the difference between, and returns the quantiles.}
-\item{Model R Squared: The squared correlation between the OOB predicted and the observed, just like in regular regression.}
-\item{Variable importance: This is essentially the average difference in predictions between the original versus permutated values.}
-}
+A list of class rf_estimates with oob, rsq and importance, and a
+  numeric attribute identifying regression rather than classification output.
 }
 \description{
-Report RandomForest object Estimates
+Summarize predictive performance and permutation importance for the S4
+RandomForest class returned by party::cforest. There are no regression
+coefficients, slopes, thresholds, or level-specific marginal estimates.
+}
+\details{
+For a nonnumeric response (normally a factor), oob is the fraction of all
+response observations whose out-of-bag predicted class equals the observed
+class, rounded to three decimals. It is correct classifications divided by
+the total count, not correct divided by incorrect classifications. rsq is NA.
+importance is party::varimp(object), sorted decreasingly and rounded to four
+decimals, retaining the upstream classification permutation-importance scale.
+
+For a numeric response, oob contains the default five quantiles (minimum,
+quartiles and maximum) of absolute out-of-bag prediction error, rounded to three
+decimals and expressed in response units. rsq is the squared Pearson correlation
+between out-of-bag predictions and observations. This is not
+1 - sum((y-prediction)^2)/sum((y-mean(y))^2), and does not by itself measure
+calibration. importance sorts the permutation importance, truncates negative
+values to zero, and reports their square roots rounded to three decimals.
+It is a transformed importance score, not the RMSE of the forest or an exact
+root-MSE distance between original and shuffled predictions despite the current
+print label. No importance uncertainty intervals are calculated.
+
+Predictors, including factors and interactions learned by the trees, are
+handled by the supplied forest. There is no additional factor coding,
+reference-level conditioning, coefficient standardization, or marginal
+averaging in this method. The implementation selects regression/classification
+by whether the stored response is numeric: encode a classification response
+as a factor rather than relying on numeric 0/1 coding. Missing out-of-bag
+predictions or a constant response can produce missing performance values.
+Forest fitting and permutation importance can depend on the random seed.
+}
+\examples{
+set.seed(72)
+regression = party::cforest(y ~ x + a, data=small,
+  controls=party::cforest_unbiased(ntree=50, mtry=2))
+estimates(regression)
+set.seed(72)
+classification = party::cforest(b ~ x + a, data=small,
+  controls=party::cforest_unbiased(ntree=50, mtry=2))
+estimates(classification)
+}
+\seealso{
+\code{\link{estimates}}, \code{\link[party]{cforest}}, \code{\link[party]{varimp}}
 }

@@ -2,18 +2,111 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.lm}
 \alias{estimates.lm}
-\title{Report lm object Estimates (effect sizes and parameters)}
+\title{Estimates for ordinary linear regression}
 \usage{
 \method{estimates}{lm}(object, mc = TRUE)
 }
 \arguments{
-\item{object}{a lm object}
+\item{object}{An lm model, normally fitted with an intercept.}
 
-\item{mc}{Should model comparisons be performed?}
+\item{mc}{If TRUE and there are at least two non-interaction terms, refit
+term-deletion models and return R-squared changes and BIC-based comparisons.}
 }
 \value{
-One or more objects containing parameter estimates and effect sizes
+Normally a list of class estimates containing r.squared, semi.p,
+  correlation, factor.summary, difference.matrix, factors, numbers.summary,
+  numbers, sigma and model.comparison. Absent numeric or factor tables are NA.
+  An intercept-only fit instead returns a data frame with Mean, Lower, Upper
+  and d; see details.
 }
 \description{
-Report lm object Estimates
+Summarize an lm fit with coefficients, standardized coefficients, conditional
+factor predictions and differences, and model-fit measures. The calculations
+described below are the current implementation, including its approximations.
+}
+\details{
+\describe{
+  \item{r.squared}{summary(object)$r.squared and approximate lower/upper limits,
+    rounded to four decimals. With R2 the fitted R-squared and n the model-frame
+    row count, the standard-error approximation is
+    sqrt(4*R2*(1-R2)^2*(n-2)^2 / ((n^2-1)*(n+3))). Limits are R2 plus/minus
+    qt(.975, n-2) times that value. They are not clipped to [0,1] and are not
+    exact model-specific confidence bounds for arbitrary multiple regression.}
+  \item{semi.p}{Despite its historical name and printed label, this is the
+    sequential ANOVA sum of squares for each term divided by the sum of term
+    and residual sums of squares. It is dimensionless and order-dependent,
+    not a general unique/semi-partial contribution obtained by dropping each
+    term from the full model. The interaction-related message does not change
+    this calculation.}
+  \item{correlation}{The ordinary Pearson response/predictor correlation only
+    when there is one numeric non-interaction term and no factors; otherwise
+    NA. It is dimensionless and not a partial correlation.}
+  \item{numbers.summary}{The intercept and numeric main-term coefficients,
+    with lower/upper = coefficient plus/minus 1.96*SE. Slopes have response
+    units per predictor unit; the intercept has response units. Standardized
+    coefficients equal coefficient*SD(model-matrix column)/SD(response), with
+    SE rescaled by the same factor and analogous 1.96-SE bounds. These are
+    dimensionless conditional coefficients, not average marginal effects.
+    The standardized intercept and its bounds are set to zero.}
+  \item{factor.summary}{For each categorical main predictor and level,
+    model-based response predictions and approximate intervals from
+    compare_fits(prediction_method="reference", report.se=TRUE). Other numeric
+    predictors are held at their means and other categorical predictors at
+    their modes under the existing reference-profile machinery. The interval
+    calculation uses coefficient covariance, not a raw group SD. These are
+    conditional reference predictions in response units, not observed group
+    means or full-population marginal means.}
+  \item{difference.matrix}{All within-factor level pairs, labeled with their
+    signed prediction difference in response units. For k levels, residual SD
+    sigma, df = n - length(coef(object)) and cell counts n_i,n_j, the implemented
+    half-width is qtukey(.95,k,df)*sigma*sqrt(1/n_i+1/n_j). This is a
+    Tukey-style construction using raw factor counts; it is not a covariance-
+    based contrast interval for arbitrary adjusted predictions, and omits the
+    sqrt(2) divisor of the usual Tukey-Kramer width. cohens.d is the signed
+    difference divided by the full model's residual SD, not a separately pooled
+    pairwise raw-group SD.}
+  \item{sigma}{summary(object)$sigma, the residual SD in response units.}
+  \item{model.comparison}{NULL if mc=FALSE or fewer than two non-interaction
+    terms; otherwise a table with all.terms, rsq and bayes.factor. The Full
+    Model row holds the full R-squared. Other rsq rows contain full minus
+    term-deleted R-squared, not the deleted model's R-squared. Bayes factors
+    approximate evidence for retaining the term via the BIC difference; they
+    are not exact integrated likelihoods. Models are refitted, so marginality
+    and interaction interpretation require care.}
+}
+The factors and numbers components record which main-term predictors enter
+each table. Factor/character predictors use modeled level predictions instead
+of printing their contrast coefficients; numeric tables omit explicit
+interaction coefficients. The original model's interactions still affect its
+predictions, and main numeric coefficients retain the fitted contrast/zero-
+moderator interpretation. Do not interpret them as slopes at moderator means.
+
+For an intercept-only fit, Mean and its bounds come from compare_fits with
+report.se=TRUE and d = intercept/residual SD. This d is relative to zero,
+not a between-group effect. This branch returns a data frame, not the usual
+estimates list. The mean is the fitted intercept (weighted if the lm fit is
+weighted), rather than necessarily an unweighted raw arithmetic mean.
+
+\strong{Limitations.} Unestimable numeric coefficients cause an error. There
+is no dedicated robust/survey-weighted inference: weighted lm fits can pass
+through parts of this machinery, but raw counts, ordinary SDs and ANOVA-based
+calculations should not be treated as design-based estimators. Transformed
+terms, no-intercept fits, rank deficiency and complex factor structures are
+not uniformly supported across helpers. Standardized interaction coefficients
+are not printed in numbers.summary. The implementation also assigns the model
+frame to a global dataset variable for integration compatibility.
+}
+\examples{
+model = lm(y ~ x + z + a, data=small)
+result = estimates(model, mc=FALSE)
+result$numbers.summary
+result$factor.summary
+result$difference.matrix
+result$semi.p
+estimates(lm(y ~ 1, data=small))
+# Optional term-deletion comparisons involve additional fitted models:
+estimates(lm(y ~ x + z, data=small), mc=TRUE)$model.comparison
+}
+\seealso{
+\code{\link{estimates}}, \code{\link{standardized.beta}}, \code{\link{compare_fits}}
 }

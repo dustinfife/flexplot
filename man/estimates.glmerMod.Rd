@@ -2,18 +2,68 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.glmerMod}
 \alias{estimates.glmerMod}
-\title{Report glmerMod object Estimates (effect sizes and parameters)}
+\title{Estimates for generalized mixed-effects models}
 \usage{
 \method{estimates}{glmerMod}(object, mc = FALSE)
 }
 \arguments{
-\item{object}{a glmerMod object}
+\item{object}{An lme4 glmerMod model.}
 
-\item{mc}{Should model comparisons be performed? Currently not used}
+\item{mc}{Currently ignored. The baseline is fitted even when FALSE.}
 }
 \value{
-One or more objects containing parameter estimates and effect sizes
+A list with fixed, r.squared, rand and icc, currently assigned class
+  lmer_estimates (not glmer_estimates). The r.squared component is normally NULL:
+  model.comparison does not currently return variance-reduction R-squared for
+  glmerMod models.
 }
 \description{
-Report glmerMod object Estimates
+Report fixed effects and random-effect variances from the original glmerMod
+model and calculate ICC/design-effect summaries from a fitted baseline.
+}
+\details{
+fixed contains lme4::fixef(object) on the fitted link scale. For a binomial
+logit model these are log-odds coefficients; for a Poisson log model they are
+log expected-count coefficients. The method does not exponentiate, standardize,
+or attach confidence intervals to them. Numeric coefficients are per predictor
+unit on the link scale, factor coefficients follow fitted contrasts, and
+interactions are conditional coefficient changes at zero/reference settings.
+No marginal probabilities or GLM IRT estimates are calculated by this method.
+
+rand is the original VarCorr object, with random-effect variances and
+correlations on the model's latent linear-predictor scale (and any dispersion
+scale reported by lme4). It is not a response-scale variance decomposition.
+
+The baseline replaces the fixed predictors and random slopes with
+response ~ 1 + (1 | group), retaining the original family/link through update.
+The icc helper divides its first reported variance component by the sum of its
+VarCorr vcov entries, then calculates 1 + ICC*(m-1), with m obtained from its
+residual count and baseline coefficient-based cluster count.
+
+\strong{Important limitation:} this calculation does not add distribution-
+specific observation variance. In particular it does not add pi-squared/3 for
+a binomial logit model, and is not a conventional latent-scale binomial ICC.
+With only one reported component the ratio can be 1, or NaN if it is zero;
+the resulting design effect should not be interpreted as a validated GLMM
+sampling-design correction. The same simple-grouping and baseline-refitting
+restrictions as estimates.lmerMod apply. Family support is conditional on the
+existing baseline/model-comparison helpers; this method is not a universal
+generalized mixed-model effect-size implementation. Matrix-valued binomial
+responses such as cbind(successes, failures), and transformed responses, can
+fail baseline construction because its response extractor retains only a
+variable name rather than the complete response expression.
+}
+\examples{
+# A reproducible Bernoulli response derived from the package fixture:
+d = small_mixed
+d$binary = as.integer(d$y > median(d$y))
+model = lme4::glmer(binary ~ x + (1 | id), data=d, family=binomial)
+result = estimates(model)
+result$fixed
+result$rand
+is.null(result$r.squared)
+# Read the ICC limitation above before interpreting result$icc.
+}
+\seealso{
+\code{\link{estimates}}, \code{\link{estimates.lmerMod}}, \code{\link{estimates.glm}}, \code{\link{icc}}
 }

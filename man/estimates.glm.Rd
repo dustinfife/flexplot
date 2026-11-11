@@ -25,6 +25,47 @@ Standardized Estimates, followed by Marginal Predicted Probabilities when
 categorical predictors are present. No models are refitted.
 }
 \details{
+\strong{Other GLM families and links.} Outside the binomial-logit branch,
+column selection depends primarily on the fitted link, not just the family.
+A log link (including Poisson, log-Gamma and compatible glm subclasses such as
+MASS::glm.nb) returns raw.coefficients, multiplicative.coef = exp(beta), and
+std.mult.coef = exp(beta*SD(model-matrix column)). These multiply the conditional
+expected response per original unit or one coded-column SD, respectively.
+For Poisson models the response is an expected count; with a modeled exposure
+offset the same multiplier applies to the rate at fixed exposure. Factor
+coefficients and interaction coefficients retain their fitted contrast and
+conditional link-scale interpretations, rather than generic mean differences.
+
+An inverse link (for example the default Gamma link) instead reports
+raw.coefficients, inverse.coef = 1/beta, and std.mult.coef =
+1/(beta*SD(model-matrix column)). These reciprocals are \emph{not} multiplicative
+response effects: because mu = 1/eta, the response change depends on the whole
+linear predictor. The standardized-intercept reciprocal can be infinite because
+the intercept column has SD zero. Do not interpret the legacy column name as
+a constant mean ratio.
+
+Other links, including Gaussian identity and binomial probit/cloglog, use
+summary(object)$coefficients (coefficient, standard error, test statistic and
+p-value), plus the existing prediction-difference column. Names may be sanitized
+by data.frame conversion. Their units are those of the fitted linear predictor;
+link inversion is needed for a response-scale interpretation. The extended IRT
+and categorical marginal-probability attributes described below are currently
+provided only for binomial logit fits, not all binomial links. Quasibinomial
+logit fits still use the older coefficient-alignment path and are not guaranteed
+to support interactions or multilevel factors.
+
+In these older paths, numeric main-term prediction differences use absolute
+response predictions at mean plus/minus one SD (rounded to two decimals), with
+other numeric terms at means and factors at their first observed values.
+Factor rows attempt signed response differences relative to a reference level
+identified from coefficient names; a single unordered factor also places its
+reference prediction in the intercept row. These are response units (counts
+for Poisson, positive-response units for Gamma), not always probabilities.
+This legacy name-based calculation is not robust to arbitrary contrasts,
+transformed terms or complex factor interactions. It should not be confused
+with binomial logit marginal standardization. Other numeric coefficient columns
+are generally rounded to three decimals when numeric predictors are present.
+
 The following definitions apply to binomial logistic regression. The modeled
 success is the outcome recognized by the fitted binomial model: for a two-level
 factor it is the second level. A proportion or two-column binomial response
@@ -54,7 +95,7 @@ The instantaneous_slope is the derivative of predicted success probability
 with respect to the original predictor at target probability p. Its units are
 probability per predictor unit. The intercept_threshold is the predictor value
 where that same conditional curve reaches p. estimates uses p = 0.5;
-[logistic_coefficients()] exposes location to request another p, changing both
+\code{\link{logistic_coefficients}} exposes location to request another p, changing both
 calculations consistently. For a conditional affine logit a + b*x, these are
 b*p*(1-p) and (qlogis(p)-a)/b. Interactions retain all fitted terms, evaluated
 at the documented mean/reference settings, so results may change at other
@@ -123,7 +164,17 @@ interacting = glm(injury ~ safety * gender + attention,
 estimates(interacting)
 # The safety IRT values are conditional on reference gender; the marginal
 # gender probabilities retain each observation's actual safety and attention.
+# Log-link counts: exp(beta) multiplies the conditional expected count.
+counts = glm(y_pois ~ x + a, data=small, family=poisson)
+estimates(counts)
+# A log-Gamma fit uses the same multiplicative interpretation for its mean.
+estimates(glm(y_gam ~ x, data=small, family=Gamma(link="log")))
+# Inverse-link reciprocals are not constant response mean ratios.
+estimates(glm(y_gam ~ x, data=small, family=Gamma))
+# Other links retain their ordinary coefficient-summary table.
+estimates(glm(y ~ x, data=small, family=gaussian))
+estimates(glm(y_bin ~ x, data=small, family=binomial(link="probit")))
 }
 \seealso{
-[logistic_coefficients()]
+\code{\link{estimates}}, \code{\link{logistic_coefficients}}, \code{\link{estimates.lm}}
 }

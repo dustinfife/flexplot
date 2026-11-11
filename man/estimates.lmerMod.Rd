@@ -2,18 +2,71 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.lmerMod}
 \alias{estimates.lmerMod}
-\title{Report lmerMod object Estimates (effect sizes and parameters)}
+\title{Estimates for linear mixed-effects models}
 \usage{
 \method{estimates}{lmerMod}(object, mc = TRUE)
 }
 \arguments{
-\item{object}{a lm object}
+\item{object}{An lme4 lmerMod model, including compatible subclasses using
+this S3 method.}
 
-\item{mc}{Should model comparisons be performed?}
+\item{mc}{Currently ignored. Baseline fitting and comparison occur regardless
+of its value.}
 }
 \value{
-One or more objects containing parameter estimates and effect sizes
+A list of class lmer_estimates with fixed, r.squared, rand and icc
+  components, printed as fixed effects, random effects, ICC/design effect and
+  R Squared. These are not the GLM IRT or marginal-probability tables.
 }
 \description{
-Report lmerMod object Estimates
+Return fixed effects and random-effect components from a fitted lmerMod model,
+together with summaries relative to a newly fitted intercept-only baseline.
+}
+\details{
+\describe{
+  \item{fixed}{The original model's lme4::fixef coefficients. Numeric slopes
+    have response units per predictor unit; factor coefficients follow the
+    fitted contrasts. Interactions retain their conditional coefficient meaning
+    at zero/reference moderator settings. No coefficient standardization,
+    marginal averaging or coefficient confidence intervals are added.}
+  \item{rand}{The original model's lme4::VarCorr object. Random-intercept
+    variances have squared response units, random-slope variances have squared
+    response-per-predictor units, and correlations are dimensionless. Printing
+    uses lme4's variance-component presentation, typically SDs/correlations.}
+  \item{r.squared}{Proportional reductions in matched variance components
+    compared with the fitted baseline: (baseline variance - full variance) /
+    baseline variance. Components are labeled by the matched random-effect
+    term and Residual. These are variance reductions, not marginal/conditional
+    R-squared or variance of fixed predictions divided by total variance.
+    Values can be negative or nonfinite; no interval is supplied.}
+  \item{icc}{The baseline model's first variance component divided by the sum
+    of its VarCorr vcov entries, and design.effect = 1 + ICC*(m-1). For a
+    single random-intercept Gaussian baseline, m is the observation count
+    divided by the cluster count, ICC = tau-squared/(tau-squared+sigma-squared),
+    and both reported quantities are dimensionless. These describe the baseline,
+    not the adjusted full-model ICC.}
+}
+The baseline is formed by update(object, response ~ 1 + (1 | group)), using
+the existing grouping-variable extractor. Random slopes and fixed predictors
+are removed from that baseline, but the original fitted model is not replaced.
+The model-comparison helper may refit REML models with ML for comparison.
+
+This workflow is intended for a single, simply named grouping variable. Nested
+or crossed grouping structures, complex grouping expressions and multiple
+random terms are not robustly handled by the formula-text extractor. A baseline
+with missing-data differences may also invoke model-comparison row handling.
+Only variance components present in the baseline are matched; do not interpret
+this output as an R-squared for every random slope. Zero baseline variance,
+singular fits and convergence problems can make summaries unstable or undefined.
+}
+\examples{
+model = lme4::lmer(y ~ x + (1 | id), data=small_mixed)
+result = estimates(model)
+result$fixed
+result$rand
+result$r.squared
+result$icc
+}
+\seealso{
+\code{\link{estimates}}, \code{\link{estimates.glmerMod}}, \code{\link{icc}}, \code{\link{rsq_change}}
 }

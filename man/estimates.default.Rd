@@ -2,18 +2,41 @@
 % Please edit documentation in R/estimates.R
 \name{estimates.default}
 \alias{estimates.default}
-\title{Output APA style statistical significance from an object}
+\title{Summary fallback for models without an estimates method}
 \usage{
 \method{estimates}{default}(object, mc = TRUE)
 }
 \arguments{
-\item{object}{a object}
+\item{object}{An object with a suitable summary method.}
 
-\item{mc}{Should model comparisons be performed?}
+\item{mc}{Ignored by this method.}
 }
 \value{
-One or more objects containing parameter estimates and effect sizes
+The result of summary(object), with its class replaced by estimates.
 }
 \description{
-Output APA style statistical significance from an object
+Call summary(object) and replace its class with estimates. This fallback does
+not calculate standardized coefficients, conditional effects, marginal
+predictions, confidence intervals, or model comparisons of its own.
+}
+\details{
+The mathematical definitions, units, treatment of categorical predictors and
+interactions, and any uncertainty measures are entirely those of the object's
+summary method. The class replacement does not preserve its original print
+method: print.estimates expects particular list components and may omit output
+or fail for incompatible summaries, including atomic summary objects. Thus this
+is a limited fallback, not a guarantee of support for every fitted-model class.
+Inspect the returned components rather than assuming an APA-style table.
+No dedicated estimates methods currently exist for rpart, ranger or the
+randomForest package's randomForest class.
+}
+\examples{
+if (requireNamespace("rpart", quietly=TRUE)) {
+  model = rpart::rpart(y ~ x, data=small)
+  result = estimates(model)
+  names(result)
+}
+}
+\seealso{
+\code{\link{estimates}}
 }
