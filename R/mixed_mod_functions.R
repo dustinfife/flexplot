@@ -204,7 +204,8 @@ add_random_geom = function(formula, term.re, newd, outcome=NULL) {
   criteria = paste0("\\+[ ]?", term.re)
   is_re_colored = grep(criteria, rhs)
   if (length(is_re_colored)==1) return(geom_line(data=newd, 
-                                                 aes_string(terms[1], outcome, group=term.re, color=term.re), 
+                                                 aes(x=.data[[terms[1]]], y=.data[[outcome]],
+                                                     group=.data[[term.re]], color=.data[[term.re]]),
                                                  alpha = .5))
   
   # when there's something in the second slot
@@ -213,11 +214,12 @@ add_random_geom = function(formula, term.re, newd, outcome=NULL) {
 
   if (length(is_anything_colored)==1) {
     variable = sub("\\+", "", sub("\\|", "", is_anything_colored))
-    return(geom_line(data=newd, aes_string(terms[1], outcome, group=variable, color=variable), 
+    return(geom_line(data=newd, aes(x=.data[[terms[1]]], y=.data[[outcome]],
+                                  group=.data[[terms[2]]], color=.data[[terms[2]]]),
                                                        alpha = .5))
   }
   random_geom = geom_line(data=newd, 
-                        aes_string(terms[1], outcome), alpha = .5)
+                        aes(x=.data[[terms[1]]], y=.data[[outcome]]), alpha = .5)
   
 }
 
@@ -231,8 +233,8 @@ add_fixed_geom = function(formula, term.re, m) {
   # when re is in second slot:
   criteria = paste0("\\+[ ]?", term.re)
   is_re_colored = grep(criteria, rhs)
-  if (length(is_re_colored)==1) return(geom_line(data=m, aes_string(terms[1], 
-                                                                    "prediction", color=NA, group=1), linetype=1, lwd=2, col="black"))
+  if (length(is_re_colored)==1) return(geom_line(data=m, aes(x=.data[[terms[1]]],
+                                                                    y=.data[["prediction"]], color=NA, group=1), linetype=1, lwd=2, col="black"))
     
   # when another variable is in second slot
   criteria = paste0("\\+[^\\|]+\\|")
@@ -240,10 +242,11 @@ add_fixed_geom = function(formula, term.re, m) {
   if (length(is_anything_colored)==1) {
     variable = sub("\\+", "", sub("\\|", "", is_anything_colored)) %>% trimws()
     return(geom_line(data=m, 
-                     aes_string(terms[1], "prediction", color=variable, group=variable, linetype=variable), lwd=2)) 
+                     aes(x=.data[[terms[1]]], y=.data[["prediction"]],
+                         color=.data[[terms[2]]], group=.data[[terms[2]]], linetype=.data[[terms[2]]]), lwd=2))
   }
   
-  return(geom_line(data=m, aes_string(terms[1], "prediction", color=NA, group=1), linetype=1, lwd=2, col="black"))
+  return(geom_line(data=m, aes(x=.data[[terms[1]]], y=.data[["prediction"]], color=NA, group=1), linetype=1, lwd=2, col="black"))
 
 }
 # converts numeric to ordinal when there's < 5 unique values

@@ -130,12 +130,12 @@ identify_method = function(data, outcome, axis, method=NULL,
 #' @param font Font family used for plot text.
 #'
 #' @export
-youtube_plot = function(p, name="plot", path="", font = "Moon Flower Bold"){
+youtube_plot = function(p, name="plot", path="", font = "Moon Flower Bold", size=18){
   if (!requireNamespace("extrafont", quietly=TRUE)) {
     stop("youtube_plot() requires the optional package 'extrafont'.", call.=FALSE)
   }
   extrafont::loadfonts(quiet=TRUE)
-  p = p + theme(text=element_text(size=18, family=font))
+  p = p + theme(text=element_text(size=size, family=font))
   file_path = ifelse(path=="", paste0(name, ".jpg"), paste0(path, "/", name, ".jpg"))
   ggsave(file_path, plot=p, height = 1080/150, width=1920/150, dpi=150, units = "in")
 }
