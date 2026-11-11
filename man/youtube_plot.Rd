@@ -4,7 +4,7 @@
 \alias{youtube_plot}
 \title{Create a 1080p plot for YouTube}
 \usage{
-youtube_plot(p, name = "plot", path = "", font = "Moon Flower Bold")
+youtube_plot(p, name = "plot", path = "", font = "Moon Flower Bold", size = 18)
 }
 \arguments{
 \item{p}{the ggplot object}
@@ -14,6 +14,8 @@ youtube_plot(p, name = "plot", path = "", font = "Moon Flower Bold")
 \item{path}{the path to the folder}
 
 \item{font}{Font family used for plot text.}
+
+\item{size}{Base text size in points, passed to \code{ggplot2::element_text()}.}
 }
 \description{
 Create a 1080p plot for YouTube
