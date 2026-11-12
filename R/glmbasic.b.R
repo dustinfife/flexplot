@@ -13,6 +13,8 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             formula = make.formula(as.name(self$options$out), lapply(self$options$preds, as.name))
             model = lm(formula, data=self$data)
             results = estimates.lm(model, mc=FALSE)
+            has_factors = is.data.frame(results$factor.summary) && nrow(results$factor.summary) > 0L
+            has_numbers = is.data.frame(results$numbers.summary) && nrow(results$numbers.summary) > 0L
             
           	#### s*ve formula/dataset to a file (to be used for plotting)
           	if (length(self$options$preds)>0){
@@ -36,7 +38,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
   			f = function(x){ x[is.na(x)] = "-"; x}
       
   			#### if there are factors, report those results....           
-  			if (!is.na(results$factor.summary)){        
+			if (has_factors){
   				
   			#### prepare difference scores output
   			diff.out = list(diff = results$difference.matrix)
@@ -70,10 +72,10 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				
 			} 
 
-			m = nrow(table)
+			m = if (has_factors) nrow(results$factor.summary) + 2L else 0L
 			
 			####  if there are numbers, report those results.... 
-			if (!is.na(results$numbers.summary)){
+			if (has_numbers){
 							
 				#### prepoulate first row with label
 				table$addRow(rowKey=m+1, values=list(
@@ -84,7 +86,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					upper=""
 				))
 							
-				rows.tot = ifelse(is.na(results$factor.summary)[1], 2, nrow(results$factor.summary)+2)
+				rows.tot = m + 2L
 
 				rows.all = seq(from=rows.tot, to=(rows.tot + nrow(results$numbers.summary) - 1))
 				#table2 = self$results$glmnum				
