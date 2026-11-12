@@ -175,7 +175,7 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
     "Normal" = "identity",
     "Logistic" = "logit",
     "Poisson" = "log",
-    "Negative binomial" = "logit",
+    "negativebinomial" = "log",
     "Gamma" = "inverse"
   )
   
@@ -247,13 +247,16 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
       "Normal" = "gaussian",
       "Logistic" = "binomial",
       "Poisson" = "poisson",
-      "negativebinomial" = "quasipoisson",
       "Gamma" = "Gamma"
     )
     
     chosen.family = family[[options$family]]
     #
-    model = glm(f, dataset, family=chosen.family)
+    model = if (identical(options$family, "negativebinomial")) {
+      MASS::glm.nb(f, data=dataset)
+    } else {
+      glm(f, dataset, family=chosen.family)
+    }
     glinmod_results$object = model
     return()
   }
