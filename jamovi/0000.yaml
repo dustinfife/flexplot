@@ -20,11 +20,13 @@ analyses:
     ns: flexplot
     menuGroup: Flexplot
     menuTitle: General Linear Model
+    category: analyses
   - title: Flexplot
     name: flexplota
     ns: flexplot
     menuGroup: Flexplot
     menuTitle: Flexplot
+    category: analyses
 usesNative: true
 minApp: 1.0.8
 

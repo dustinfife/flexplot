@@ -1,6 +1,6 @@
 title: General Linear Model
 name: glmbasic
-jus: '2.0'
+jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
@@ -21,6 +21,66 @@ children:
           - type: VariablesListBox
             name: preds
             isTarget: true
+  - type: Supplier
+    name: primarySupplier
+    label: Selected predictors
+    format: term
+    persistentItems: true
+    higherOrders: true
+    children:
+      - type: TargetLayoutBox
+        label: Primary model terms
+        transferAction: interactions
+        children:
+          - type: ListBox
+            name: modelTerms
+            isTarget: true
+            valueFilter: unique
+            template:
+              type: TermLabel
+  - type: CollapseBox
+    label: Model Comparison
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: compare
+      - type: Supplier
+        name: comparisonSupplier
+        label: Selected predictors
+        format: term
+        persistentItems: true
+        higherOrders: true
+        children:
+          - type: TargetLayoutBox
+            label: Second model terms
+            transferAction: interactions
+            children:
+              - type: ListBox
+                name: comparisonTerms
+                isTarget: true
+                enable: (compare)
+                valueFilter: unique
+                template:
+                  type: TermLabel
+      - type: VariableSupplier
+        persistentItems: false
+        children:
+          - type: TargetLayoutBox
+            label: Comparison x variable
+            children:
+              - type: VariablesListBox
+                name: comparisonX
+                maxItemCount: 1
+                isTarget: true
+                enable: (compare)
+          - type: TargetLayoutBox
+            label: Comparison panel variables (up to two)
+            children:
+              - type: VariablesListBox
+                name: comparisonPanels
+                maxItemCount: 2
+                isTarget: true
+                enable: (compare)
   - type: LayoutBox
     margin: large
     stretchFactor: 1

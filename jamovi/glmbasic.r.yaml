@@ -80,4 +80,42 @@ items:
         - name: Estimate
           type: number                                                          
       visible: (estimates)   
+    - name: comparisonplot
+      title: Model comparison plot
+      type: Image
+      width: 700
+      height: 450
+      renderFun: .comparisonplot
+      visible: (compare)
+
+    - name: comparison
+      title: Model comparison statistics
+      type: Table
+      visible: (compare)
+      columns:
+        - name: model
+          title: Model
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: aic
+          title: AIC
+          type: number
+        - name: bic
+          title: BIC
+          type: number
+        - name: bayes.factor
+          title: BIC Bayes factor
+          type: number
+        - name: p
+          title: p (nested F-test)
+          type: number
+          format: zto,pvalue
+        - name: rsq
+          title: R-squared
+          type: number
+        - name: adj.rsq
+          title: Adjusted R-squared
+          type: number
 ...

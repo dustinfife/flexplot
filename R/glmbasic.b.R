@@ -1,6 +1,37 @@
 
 # This file is a generated template, your changes will not be overwritten
 
+jamovi_glm_model_plot = function(model, se, ...) {
+  # visualize.lm uses a descriptive added-variable plot for larger models.
+  if (length(all.vars(stats::formula(model))[-1]) > 4L) {
+    return(visualize(model, plot="model", se=se, ...))
+  }
+  plot = visualize(model, plot="model", report.se=se, ...)
+  if (!se) return(plot)
+
+  for (layer in plot$layers) {
+    data = layer$data
+    if (!is.data.frame(data) ||
+        !all(c("prediction", "prediction.lwr", "prediction.upr") %in% names(data))) next
+    numeric_x = is.numeric(rlang::eval_tidy(layer$mapping$x, data=data))
+    if (numeric_x && !inherits(layer$geom, "GeomLine")) next
+    if (!numeric_x && !inherits(layer$geom, "GeomPoint")) next
+    mapping = layer$mapping
+    mapping$ymin = ggplot2::aes(ymin=.data[["prediction.lwr"]])$ymin
+    mapping$ymax = ggplot2::aes(ymax=.data[["prediction.upr"]])$ymax
+    if (numeric_x) {
+      mapping$fill = mapping$colour
+      mapping$colour = mapping$linetype = NULL
+      plot = plot + ggplot2::geom_ribbon(data=data, mapping=mapping, alpha=.2,
+                                         inherit.aes=FALSE, show.legend=FALSE)
+    } else {
+      plot = plot + ggplot2::geom_errorbar(data=data, mapping=mapping, width=.1,
+                      position=layer$position, inherit.aes=FALSE, show.legend=FALSE)
+    }
+  }
+  plot
+}
+
 glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "glmbasicClass",
     inherit = glmbasicBase,
@@ -10,21 +41,61 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         	if (length(self$options$out)>0 & length(self$options$preds)>0){
         	  
         	  #### write formula for glinmod
-            formula = make.formula(as.name(self$options$out), lapply(self$options$preds, as.name))
-            model = lm(formula, data=self$data)
-            results = estimates.lm(model, mc=FALSE)
-            has_factors = is.data.frame(results$factor.summary) && nrow(results$factor.summary) > 0L
-            has_numbers = is.data.frame(results$numbers.summary) && nrow(results$numbers.summary) > 0L
+            data = self$data
+            if (self$options$compare) {
+              comparison = tryCatch(jamovi_glm_comparison(self$options, data), error=identity)
+              if (inherits(comparison, "error")) {
+                self$results$comparison$setError(conditionMessage(comparison))
+                self$results$comparisonplot$setError(conditionMessage(comparison))
+                return(invisible(NULL))
+              }
+              self$results$comparisonplot$setState(comparison)
+              jamovi_glm_comparison_table(self$results$comparison, comparison)
+              model = comparison$model1
+              formula = stats::formula(model)
+              data = comparison$data
+            } else {
+              formula = tryCatch(jamovi_glm_formula(self$options$out, self$options$preds,
+                                                   self$options$modelTerms), error=identity)
+              if (inherits(formula, "error")) {
+                self$results$glmcat$setError(conditionMessage(formula))
+                return(invisible(NULL))
+              }
+              model = if (is.null(self$options$modelTerms)) lm(formula, data=data) else
+                tryCatch(lm(formula, data=data), error=identity)
+              if (!is.null(self$options$modelTerms) &&
+                  (inherits(model, "error") || model$rank < length(stats::coef(model)))) {
+                self$results$glmcat$setError("The primary model is not estimable. Check its terms and complete observations.")
+                return(invisible(NULL))
+              }
+            }
+            results = if (!self$options$compare && is.null(self$options$modelTerms))
+              estimates.lm(model, mc=FALSE) else tryCatch(estimates.lm(model, mc=FALSE), error=identity)
             
           	#### s*ve formula/dataset to a file (to be used for plotting)
           	if (length(self$options$preds)>0){
-  			    	output = list(formula=formula, data=self$data)
+            output = list(formula=formula, data=data)
   			    	image <- self$results$plot
   			    	image$setState(output)
   				
   			    	image2 <- self$results$assumpplot
   			    	image2$setState(output)			
   		  	  }
+
+            if (inherits(results, "error")) {
+              self$results$glmcat$setError(paste("Primary-model summaries are unavailable:",
+                                                conditionMessage(results)))
+              return(invisible(NULL))
+            }
+
+            if (is.data.frame(results)) {
+              self$results$glmcat$addRow(rowKey=1, values=list(var="Intercept",
+                levels="", means=results$Mean, lower=results$Lower, upper=results$Upper))
+              return(invisible(NULL))
+            }
+
+            has_factors = is.data.frame(results$factor.summary) && nrow(results$factor.summary) > 0L
+            has_numbers = is.data.frame(results$numbers.summary) && nrow(results$numbers.summary) > 0L
 
   			#### prepare r square output
   			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p, correlation=results$correlation)
@@ -115,6 +186,16 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # `self$options` contains the options
             # `self$results` contains the results object (to populate)
         }},
+        .comparisonplot = function(image, ...) {
+            if (is.null(image$state)) return(FALSE)
+            plot = tryCatch(jamovi_glm_comparison_plot(image$state), error=identity)
+            if (inherits(plot, "error")) {
+              image$setError(conditionMessage(plot))
+              return(FALSE)
+            }
+            print(plot)
+            TRUE
+        },
 		.plot = function(image, ...){
 			if (self$options$line=="Loess"){line="loess"}
 			if (self$options$line=="Regression"){line ="lm"}
@@ -127,7 +208,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			data = image$state$data
             mod = lm(formula, data=data)
             theme_set(theme_bw(base_size = 16))
-            plot = visualize(mod, plot="model", se=self$options$se, method=line, spread=se.type) 
+            plot = jamovi_glm_model_plot(mod, se=self$options$se, method=line, spread=se.type)
 			print(plot)
 			TRUE
 			},

@@ -4,6 +4,8 @@ title: General Linear Model
 menuGroup: Flexplot
 version: '1.0.0'
 jas: '1.2'
+# Keep the public R wrapper in R/glmbasic.R when regenerating R6 classes.
+export: false
 
 options:
     - name: data
@@ -57,4 +59,33 @@ options:
       
             
            
+    - name: modelTerms
+      title: Primary model terms
+      type: Terms
+      default: null
+      description: Main effects and interactions. NULL retains the additive model; an empty list fits an intercept only.
+
+    - name: compare
+      title: Compare two models
+      type: Bool
+      default: false
+      description: Fit and compare two models on the same complete observations.
+
+    - name: comparisonTerms
+      title: Second model terms
+      type: Terms
+      default: null
+      description: Independent main effects and interactions for Model 2. NULL uses all selected main effects.
+
+    - name: comparisonX
+      title: Comparison x variable
+      type: Variable
+      default: null
+      description: Predictor used on the comparison x axis; defaults to the first numeric model predictor, otherwise the first model predictor.
+
+    - name: comparisonPanels
+      title: Comparison panel variables (up to two)
+      type: Variables
+      default: null
+      description: Additional model predictors displayed in panels, not on a second axis.
 ...
