@@ -2,7 +2,7 @@
 % Please edit documentation in R/glmbasic.R
 \name{glmbasic}
 \alias{glmbasic}
-\title{General Linear Model}
+\title{Linear Model}
 \usage{
 glmbasic(
   data,
@@ -18,7 +18,11 @@ glmbasic(
   compare = FALSE,
   comparisonTerms = NULL,
   comparisonX = NULL,
-  comparisonPanels = NULL
+  comparisonPanels = NULL,
+  plotX = NULL,
+  plotPanels = NULL,
+  plotGroup = NULL,
+  comparisonGroup = NULL
 )
 }
 \arguments{
@@ -54,6 +58,10 @@ first numeric model predictor, otherwise the first model predictor.}
 
 \item{comparisonPanels}{Additional model predictors displayed in panels,
 not on a second axis.}
+
+\item{plotX, plotPanels, plotGroup}{Visualization roles restricted to primary-model predictors.}
+
+\item{comparisonGroup}{Optional grouping predictor in either model; two-model grouping is supported only for magnet plots. Use panels for other comparisons.}
 }
 \value{
 A results object containing:
@@ -74,5 +82,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$glmcat)}
 }
 \description{
-General Linear Model
+Linear Model
 }

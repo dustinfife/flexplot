@@ -1,7 +1,8 @@
 ---
 name:  glmbasic
-title: General Linear Model
+title: Linear Model
 jrs:   '1.1'
+refs: [flexplot, graphicalAnalysis]
 
 items:      
     - name: assumpplot

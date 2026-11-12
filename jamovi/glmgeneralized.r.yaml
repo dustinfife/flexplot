@@ -1,0 +1,52 @@
+---
+name: glmgeneralized
+title: Generalized Linear Model
+jrs: '1.1'
+refs: [flexplot, graphicalAnalysis]
+items:
+  - name: coefficients
+    title: Coefficient estimates
+    type: Table
+    columns:
+      - name: term
+        title: Term
+        type: text
+      - name: estimate
+        title: Estimate
+        type: number
+      - name: se
+        title: SE
+        type: number
+      - name: lower
+        title: Lower
+        superTitle: 95% Wald CI
+        type: number
+      - name: upper
+        title: Upper
+        superTitle: 95% Wald CI
+        type: number
+      - name: statistic
+        title: t / z
+        type: number
+      - name: p
+        title: p
+        type: number
+        format: zto,pvalue
+  - name: fit
+    title: Model fit
+    type: Table
+    columns:
+      - name: measure
+        title: Measure
+        type: text
+      - name: value
+        title: Value
+        type: number
+  - name: plot
+    title: Model visualization
+    type: Image
+    width: 700
+    height: 450
+    visible: (graphic)
+    renderFun: .plot
+...

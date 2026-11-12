@@ -1,4 +1,4 @@
-title: General Linear Model
+title: Linear Model
 name: glmbasic
 jus: '3.0'
 stage: 0
@@ -62,8 +62,11 @@ children:
                 valueFilter: unique
                 template:
                   type: TermLabel
-      - type: VariableSupplier
-        persistentItems: false
+      - type: Supplier
+        name: comparisonPlotSupplier
+        label: Predictors in either model
+        format: variable
+        persistentItems: true
         children:
           - type: TargetLayoutBox
             label: Comparison x variable
@@ -81,6 +84,45 @@ children:
                 maxItemCount: 2
                 isTarget: true
                 enable: (compare)
+          - type: TargetLayoutBox
+            label: Grouping (magnet plots only; otherwise use panels)
+            children:
+              - type: VariablesListBox
+                name: comparisonGroup
+                maxItemCount: 1
+                isTarget: true
+                enable: (compare)
+  - type: CollapseBox
+    label: Model visualization layout
+    collapsed: true
+    children:
+      - type: Supplier
+        name: plotSupplier
+        label: Predictors in the model
+        format: variable
+        persistentItems: true
+        children:
+          - type: TargetLayoutBox
+            label: Plot x variable (automatic if empty)
+            children:
+              - type: VariablesListBox
+                name: plotX
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Panel variables
+            children:
+              - type: VariablesListBox
+                name: plotPanels
+                maxItemCount: 2
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Grouping variable
+            children:
+              - type: VariablesListBox
+                name: plotGroup
+                maxItemCount: 1
+                isTarget: true
   - type: LayoutBox
     margin: large
     stretchFactor: 1

@@ -9,21 +9,22 @@ const vm = require('node:vm');
 const {pathToFileURL} = require('node:url');
 
 (async () => {
-    const [root, compilerPath, output, runtime] = process.argv.slice(2);
+    const [root, compilerPath, output, runtime, analysis = 'glmbasic'] = process.argv.slice(2);
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'flexplot-ui-'));
     try {
         for (const suffix of ['a.yaml', 'r.yaml', 'u.yaml'])
-            fs.copyFileSync(path.join(root, 'jamovi', 'glmbasic.' + suffix), path.join(temp, 'glmbasic.' + suffix));
-        fs.copyFileSync(path.join(root, 'jamovi/js/glmbasic.js'), path.join(temp, 'glmbasic.js'));
+            fs.copyFileSync(path.join(root, 'jamovi', analysis + '.' + suffix), path.join(temp, analysis + '.' + suffix));
+        fs.copyFileSync(path.join(root, 'jamovi/js/' + analysis + '.js'), path.join(temp, analysis + '.js'));
+        fs.copyFileSync(path.join(root, 'jamovi/js/model-terms.js'), path.join(temp, 'model-terms.js'));
         const {default: compileR} = await import(pathToFileURL(path.join(compilerPath, 'compiler.js')));
-        compileR('flexplot', path.join(temp, 'glmbasic.a.yaml'), path.join(temp, 'glmbasic.r.yaml'),
+        compileR('flexplot', path.join(temp, analysis + '.a.yaml'), path.join(temp, analysis + '.r.yaml'),
             path.join(compilerPath, 'header.template'), output + '.header.R');
         const {default: compile} = await import(pathToFileURL(path.join(compilerPath, 'uicompiler.js')));
-        compile(path.join(temp, 'glmbasic.a.yaml'), path.join(temp, 'glmbasic.u.yaml'),
-            path.join(root, 'jamovi/js/glmbasic.js'), 'glmbasic',
-            path.join(compilerPath, 'src.template'), path.join(temp, 'glmbasic.src.js'));
+        compile(path.join(temp, analysis + '.a.yaml'), path.join(temp, analysis + '.u.yaml'),
+            path.join(root, 'jamovi/js/' + analysis + '.js'), analysis,
+            path.join(compilerPath, 'src.template'), path.join(temp, analysis + '.src.js'));
 
-        const FormatDef = {term: {name:'term'}};
+        const FormatDef = {term: {name:'term'}, variable: {name:'variable'}};
         const utils = {valuesToItems: (values, format) => values.map(raw => ({value:{raw, format}}))};
         // This is the automatic-handler contract: helpers are NOT installed on
         // the View when this.handlers exists. The previous stand-in did that.
@@ -52,7 +53,7 @@ const {pathToFileURL} = require('node:url');
             ui:{extend: value => value}, DefaultControls:new Proxy({}, {get: (_, name) => name}),
             View:{extend}});
         const browserify = require(require.resolve('browserify', {paths:[compilerPath]}));
-        const bundle = await new Promise((resolve, reject) => browserify(path.join(temp, 'glmbasic.src.js'),
+        const bundle = await new Promise((resolve, reject) => browserify(path.join(temp, analysis + '.src.js'),
             {standalone:'module'}).bundle((error, data) => error ? reject(error) : resolve(data)));
         vm.runInContext(bundle.toString(), sandbox);
         const compiled = sandbox.module.exports;
@@ -65,7 +66,8 @@ const {pathToFileURL} = require('node:url');
             for (const child of control.controls || []) walk(child);
         };
         walk(compiled.view.layout);
-        for (const name of ['preds','modelTerms','comparisonTerms','primarySupplier','comparisonSupplier'])
+        const dual = controls.has('comparisonTerms');
+        for (const name of (dual ? ['preds','modelTerms','comparisonTerms','primarySupplier','comparisonSupplier'] : ['preds','modelTerms','primarySupplier']))
             assert.ok(controls.has(name), 'Missing compiled control: ' + name);
         const fire = (name, event) => {
             assert.ok(controls.has(name));
@@ -81,16 +83,19 @@ const {pathToFileURL} = require('node:url');
         const ui = {preds:control([]), modelTerms:control(null), comparisonTerms:control(null),
             primarySupplier:control([]), comparisonSupplier:control([]),
             view:{model:{options:{beginEdit(){depth++;}, endEdit(){depth--;}}}}};
+        for (const name of controls) {
+            if (!(name in ui)) ui[name] = control(name.endsWith('Supplier') ? [] : null);
+        }
         const records = ['stage\tpreds\tprimary\tsecondary\tcompare'];
         const encode = terms => terms == null ? '__NULL__' :
             (terms.length ? terms.map(term => term.join(':')).join(';') : '__EMPTY__');
         const snapshot = (stage, compare=false) => {
             assert.equal(depth, 0, 'Option edit transaction left open');
-            for (const supplier of [ui.primarySupplier, ui.comparisonSupplier])
+            for (const supplier of (dual ? [ui.primarySupplier, ui.comparisonSupplier] : [ui.primarySupplier]))
                 assert.equal(JSON.stringify(supplier.value().map(item => item.value.raw)),
                     JSON.stringify(ui.preds.value().map(name => [name])));
             records.push([stage, ui.preds.value().join(';'), encode(ui.modelTerms.value()),
-                encode(ui.comparisonTerms.value()), compare].join('\t'));
+                encode(dual ? ui.comparisonTerms.value() : null), compare && dual].join('\t'));
         };
         fire('view', 'loaded');
         ui.preds.setValue(['supp']); fire('preds', 'changed'); snapshot('supp');
@@ -98,12 +103,41 @@ const {pathToFileURL} = require('node:url');
         assert.equal(encode(ui.modelTerms.value()), 'supp;dose');
         ui.modelTerms.setValue([['supp'],['dose'],['supp','dose']]);
         ui.comparisonTerms.setValue([['supp']]);
-        fire('primarySupplier', 'updated'); fire('comparisonSupplier', 'updated');
+        fire('primarySupplier', 'updated'); if (dual) fire('comparisonSupplier', 'updated');
         snapshot('interaction', true);
         assert.equal(encode(ui.modelTerms.value()), 'supp;dose;supp:dose');
         assert.equal(encode(ui.comparisonTerms.value()), 'supp');
         ui.modelTerms.setValue([['supp'],['dose']]);
         fire('view', 'updated'); snapshot('remove-interaction');
+        // Display variables come from terms, not the original variable pool.
+        ui.plotX.setValue('dose'); ui.plotGroup.setValue('supp');
+        ui.plotPanels.setValue(['supp']);
+        fire('modelTerms', 'changed');
+        assert.equal(ui.plotX.value(), 'dose');
+        ui.modelTerms.setValue([['supp']]);
+        if (dual) {
+            ui.comparisonTerms.setValue([['dose']]);
+            ui.comparisonX.setValue('dose');
+            ui.comparisonPanels.setValue(['supp']);
+        }
+        fire('modelTerms', 'changed');
+        assert.equal(ui.plotX.value(), null);
+        assert.equal(JSON.stringify(ui.plotSupplier.value().map(item => item.value.raw)), '["supp"]');
+        if (dual) {
+            assert.equal(ui.comparisonX.value(), 'dose');
+            assert.equal(JSON.stringify(ui.comparisonPlotSupplier.value().map(item => item.value.raw)), '["supp","dose"]');
+            ui.comparisonTerms.setValue([['supp']]);
+            fire('comparisonTerms', 'changed');
+            assert.equal(ui.comparisonX.value(), null);
+        }
+        ui.modelTerms.setValue([['supp','dose']]);
+        fire('modelTerms', 'changed');
+        assert.equal(ui.plotSupplier.value().length, 2);
+        ui.modelTerms.setValue([]); fire('modelTerms', 'changed');
+        assert.equal(ui.plotSupplier.value().length, 0);
+        assert.equal(ui.plotGroup.value(), null);
+        assert.equal(ui.plotPanels.value().length, 0);
+        ui.modelTerms.setValue([['supp']]);
         ui.preds.setValue(['supp']); fire('preds', 'changed'); snapshot('remove-dose');
         assert.equal(encode(ui.modelTerms.value()), 'supp');
         ui.comparisonTerms.setValue([]); fire('view', 'updated');

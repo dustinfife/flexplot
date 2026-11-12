@@ -1,5 +1,5 @@
 # The R interface is kept outside the generated R6 definitions.
-#' General Linear Model
+#' Linear Model
 #'
 #'
 #' @param data .
@@ -21,6 +21,8 @@
 #'   first numeric model predictor, otherwise the first model predictor.
 #' @param comparisonPanels Additional model predictors displayed in panels,
 #'   not on a second axis.
+#' @param plotX,plotPanels,plotGroup Visualization roles restricted to primary-model predictors.
+#' @param comparisonGroup Optional grouping predictor in either model; two-model grouping is supported only for magnet plots. Use panels for other comparisons.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$assumpplot} \tab \tab \tab \tab \tab an image \cr
@@ -53,7 +55,11 @@ glmbasic = function(
     compare = FALSE,
     comparisonTerms = NULL,
     comparisonX = NULL,
-    comparisonPanels = NULL) {
+    comparisonPanels = NULL,
+    plotX = NULL,
+    plotPanels = NULL,
+    plotGroup = NULL,
+    comparisonGroup = NULL) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("glmbasic requires jmvcore to be installed (restart may be required)")
@@ -62,13 +68,21 @@ glmbasic = function(
     if ( ! missing(preds)) preds = jmvcore::resolveQuo(jmvcore::enquo(preds))
     if ( ! missing(comparisonX)) comparisonX = jmvcore::resolveQuo(jmvcore::enquo(comparisonX))
     if ( ! missing(comparisonPanels)) comparisonPanels = jmvcore::resolveQuo(jmvcore::enquo(comparisonPanels))
+    if ( ! missing(plotX)) plotX = jmvcore::resolveQuo(jmvcore::enquo(plotX))
+    if ( ! missing(plotPanels)) plotPanels = jmvcore::resolveQuo(jmvcore::enquo(plotPanels))
+    if ( ! missing(plotGroup)) plotGroup = jmvcore::resolveQuo(jmvcore::enquo(plotGroup))
+    if ( ! missing(comparisonGroup)) comparisonGroup = jmvcore::resolveQuo(jmvcore::enquo(comparisonGroup))
     if (missing(data))
         data = jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(out), out, NULL),
             `if`( ! missing(preds), preds, NULL),
             `if`( ! missing(comparisonX), comparisonX, NULL),
-            `if`( ! missing(comparisonPanels), comparisonPanels, NULL))
+            `if`( ! missing(comparisonPanels), comparisonPanels, NULL),
+            `if`( ! missing(plotX), plotX, NULL),
+            `if`( ! missing(plotPanels), plotPanels, NULL),
+            `if`( ! missing(plotGroup), plotGroup, NULL),
+            `if`( ! missing(comparisonGroup), comparisonGroup, NULL))
 
     if (inherits(modelTerms, "formula")) modelTerms = jamovi_glm_terms(modelTerms)
     if (inherits(comparisonTerms, "formula")) comparisonTerms = jamovi_glm_terms(comparisonTerms)
@@ -86,7 +100,11 @@ glmbasic = function(
         compare = compare,
         comparisonTerms = comparisonTerms,
         comparisonX = comparisonX,
-        comparisonPanels = comparisonPanels)
+        comparisonPanels = comparisonPanels,
+        plotX = plotX,
+        plotPanels = plotPanels,
+        plotGroup = plotGroup,
+        comparisonGroup = comparisonGroup)
 
     analysis = glmbasicClass$new(
         options = options,

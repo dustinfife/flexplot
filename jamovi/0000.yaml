@@ -15,11 +15,17 @@ description: >-
   modeling and, like flexplot,  chooses an appropriate graphic to present
   alongside the statistical 
 analyses:
-  - title: General Linear Model
+  - title: Linear Model
     name: glmbasic
     ns: flexplot
     menuGroup: Flexplot
-    menuTitle: General Linear Model
+    menuTitle: Linear Model
+    category: analyses
+  - title: Generalized Linear Model
+    name: glmgeneralized
+    ns: flexplot
+    menuGroup: Flexplot
+    menuTitle: Generalized Linear Model
     category: analyses
   - title: Flexplot
     name: flexplota

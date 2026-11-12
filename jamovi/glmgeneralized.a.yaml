@@ -1,0 +1,65 @@
+---
+name: glmgeneralized
+title: Generalized Linear Model
+menuGroup: Flexplot
+version: '1.0.0'
+jas: '1.2'
+export: false
+options:
+  - name: data
+    type: Data
+  - name: out
+    title: Outcome
+    type: Variable
+  - name: preds
+    title: Predictors
+    type: Variables
+  - name: family
+    title: Distribution and link
+    type: List
+    options:
+      - name: gaussian
+        title: Gaussian (identity)
+      - name: binomial
+        title: Binomial / Logistic (logit)
+      - name: poisson
+        title: Poisson (log)
+      - name: Gamma
+        title: Gamma (inverse)
+      - name: negativebinomial
+        title: Negative Binomial (log)
+    default: gaussian
+  - name: modelTerms
+    title: Model terms
+    type: Terms
+    default: null
+  - name: graphic
+    title: Model visualization
+    type: Bool
+    default: true
+  - name: plotX
+    title: Plot x variable (automatic if empty)
+    type: Variable
+    default: null
+  - name: plotPanels
+    title: Panel variables (up to two)
+    type: Variables
+    default: null
+  - name: plotGroup
+    title: Plot grouping variable
+    type: Variable
+    default: null
+  - name: plotStyle
+    title: Binomial visualization
+    type: List
+    options:
+      - name: auto
+        title: Automatic (logistic overlay for continuous x)
+      - name: raw
+        title: Raw observations and model predictions
+    default: auto
+  - name: se
+    title: Prediction confidence intervals
+    type: Bool
+    default: true
+...

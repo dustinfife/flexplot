@@ -16,6 +16,57 @@ jamovi_comparison_recorder = function(capture) {
   recorder
 }
 
+# Run jmvcore's real serializer without requiring the host's RProtoBuf runtime.
+jamovi_comparison_message = function(type, ...) list2env(list(...), parent=emptyenv())
+
+jamovi_comparison_cell = function(cell) {
+  serialize = cell$asProtoBuf
+  environment(serialize) = list2env(list(RProtoBuf_new=jamovi_comparison_message,
+    jamovi.coms.ResultsCell=NULL,
+    jamovi.coms.ResultsCell.Other=list(MISSING="MISSING", NOT_A_NUMBER="NOT_A_NUMBER")),
+    parent=environment(serialize))
+  as.list(serialize())
+}
+
+test_that("jamovi comparison p-value cells are numeric or genuinely blank and Bayes factors are explained", {
+  skip_if_not_installed("jmvcore")
+  for (second in list(list("x"), list("z"))) {
+    analysis = jamovi_comparison_analysis(modelTerms=list("x", "a"),
+      comparisonTerms=second, comparisonX="x")
+    expect_true(analysis$run())
+    table = analysis$results$comparison
+    state = analysis$results$comparisonplot$state
+    first = jamovi_comparison_cell(table$getCell("p", rowNo=1))
+    second_cell = jamovi_comparison_cell(table$getCell("p", rowNo=2))
+    if (identical(second, list("x"))) {
+      expected = anova(lm(y ~ x+a, small), lm(y ~ x, small))$`Pr(>F)`[2]
+      expect_equal(first$d, expected, tolerance=1e-12)
+      expect_false("o" %in% names(first))
+    } else {
+      expect_identical(first$o, "MISSING")
+      expect_false("d" %in% names(first))
+    }
+    expect_null(table$getCell("p", rowNo=2)$value)
+    expect_identical(second_cell$o, "MISSING")
+    expect_false("d" %in% names(second_cell))
+    # Preserve the existing rounded values and their model-specific directions.
+    values = table$asDF$bayes.factor
+    expect_identical(values, as.numeric(state$statistics$bayes.factor))
+    bic = c(BIC(state$model1), BIC(state$model2))
+    expect_equal(values, round(exp(c(bic[2]-bic[1], bic[1]-bic[2])/2), 3))
+    models = table$notes$models$note
+    expect_length(strsplit(models, "\n\n", fixed=TRUE)[[1]], 2L)
+    expect_match(models, "^Model 1:.*\n\nModel 2:")
+    notes = table$footnotes
+    bayes = notes[grepl("Bayes factors", notes, fixed=TRUE)]
+    expect_length(bayes, 1L)
+    expect_identical(unname(bayes), paste(
+      "These are approximate Bayes factors derived from BIC.",
+      "Model 1's Bayes factor expresses evidence favoring Model 1 over Model 2.",
+      "Model 2's Bayes factor expresses evidence favoring Model 2 over Model 1."))
+  }
+})
+
 test_that("jamovi compares nonnested interaction models on one complete-case population", {
   skip_if_not_installed("jmvcore")
   data = small
@@ -207,4 +258,18 @@ test_that("interaction-only and intercept-only primary models retain valid compa
       expect_equal(analysis$results$glmcat$asDF$means, mean(small$y), tolerance=1e-12)
     }
   }
+})
+
+test_that("model specifications become separate paragraphs in the installed jamovi renderer", {
+  skip_if_not_installed("jmvcore")
+  node = Sys.which("node")
+  assets = "/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets"
+  skip_if(!nzchar(node) || !dir.exists(assets), "Installed jamovi renderer unavailable")
+  analysis = jamovi_comparison_analysis(modelTerms=list("x", "a"), comparisonTerms=list("x"))
+  expect_true(analysis$run())
+  file = tempfile(fileext=".txt")
+  withr::defer(unlink(file))
+  writeLines(analysis$results$comparison$notes$models$note, file)
+  log = system2(node, shQuote(c(test_path("js", "jamovi-note-layout.cjs"), assets, file)), stdout=TRUE, stderr=TRUE)
+  expect_null(attr(log, "status"), info=paste(log, collapse="\n"))
 })

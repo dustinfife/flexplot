@@ -2,6 +2,7 @@
 name:  flexplota
 title: Flexplot
 jrs:   '1.1'
+refs: [flexplot, graphicalAnalysis]
 
 items:      
     - name: plot

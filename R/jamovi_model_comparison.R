@@ -49,22 +49,8 @@ jamovi_glm_comparison = function(options, data) {
   model1 = jamovi_glm_fit(formula1, eligible, "Model 1")
   model2 = jamovi_glm_fit(formula2, eligible, "Model 2")
 
-  predictors = setdiff(variables, options$out)
-  x = options$comparisonX
-  if (!length(x)) {
-    numeric = predictors[vapply(eligible[predictors], is.numeric, logical(1))]
-    x = if (length(numeric)) numeric[1] else predictors[1]
-  }
-  panels = options$comparisonPanels
-  if (length(x) != 1L || is.na(x) || !x %in% predictors ||
-      length(panels) > 2L || any(!panels %in% predictors) ||
-      anyDuplicated(c(x, panels))) {
-    stop("Choose one comparison x variable and up to two different panel variables ",
-         "from the predictors used by either model.", call.=FALSE)
-  }
-  rhs = as.name(x)
-  if (length(panels)) rhs = call("|", rhs, formula_component(lapply(panels, as.name)))
-  plot_formula = make.formula(as.name(options$out), rhs)
+  plot_formula = jamovi_model_layout(list(model1, model2), eligible, options$comparisonX,
+                                    options$comparisonPanels, options$comparisonGroup)
   comparison = model.comparison(model1, model2)
   # Keep the F-test numeric: model.comparison formats its rounded p-value as text.
   p = get_p_value(model1, model2, check_nested(model1, model2))
@@ -79,14 +65,19 @@ jamovi_glm_comparison_table = function(table, state) {
     for (name in c("aic", "bic", "bayes.factor", "rsq", "adj.rsq")) {
       row[[name]] = if (name %in% names(statistics)) as.numeric(statistics[i, name]) else NA_real_
     }
-    row$p = if (i == 1L) state$p else NA_real_
+    # An omitted cell is blank; numeric NA is serialized as a NaN double.
+    if (i == 1L && !is.na(state$p)) row$p = state$p
     table$addRow(rowKey=i, values=row)
   }
   formulas = vapply(list(state$model1, state$model2), function(model)
     paste(deparse(stats::formula(model)), collapse=" "), character(1))
-  table$addFootnote(rowNo=1, col="model", note=paste("Model 1:", formulas[1], "Model 2:", formulas[2]))
+  table$setNote("models", paste(paste("Model 1:", formulas[1]),
+                                paste("Model 2:", formulas[2]), sep="\n\n"))
   table$addFootnote(rowNo=1, col="n", note="Both models use the same complete observations across their combined variables.")
-  table$addFootnote(rowNo=1, col="bayes.factor", note="Approximate Bayes factors from BIC, as reported by model.comparison().")
+  table$addFootnote(rowNo=1, col="bayes.factor", note=paste(
+    "These are approximate Bayes factors derived from BIC.",
+    "Model 1's Bayes factor expresses evidence favoring Model 1 over Model 2.",
+    "Model 2's Bayes factor expresses evidence favoring Model 2 over Model 1."))
   table$addFootnote(rowNo=1, col="p", note="F-test for nested models only; unavailable for nonnested or equivalent models.")
 }
 

@@ -1,6 +1,6 @@
 ---
 name:  glmbasic
-title: General Linear Model
+title: Linear Model
 menuGroup: Flexplot
 version: '1.0.0'
 jas: '1.2'
@@ -88,4 +88,24 @@ options:
       type: Variables
       default: null
       description: Additional model predictors displayed in panels, not on a second axis.
+    - name: plotX
+      title: Plot x variable (automatic if empty)
+      type: Variable
+      default: null
+      description: Visualization variables must occur in the fitted model terms (either model for comparisons).
+    - name: plotPanels
+      title: Plot panel variables (up to two)
+      type: Variables
+      default: null
+      description: Visualization variables must occur in the fitted model terms (either model for comparisons).
+    - name: plotGroup
+      title: Plot grouping variable
+      type: Variable
+      default: null
+      description: Visualization variables must occur in the fitted model terms (either model for comparisons).
+    - name: comparisonGroup
+      title: Comparison grouping variable (magnet plots only)
+      type: Variable
+      default: null
+      description: Visualization variables must occur in the fitted model terms (either model for comparisons).
 ...

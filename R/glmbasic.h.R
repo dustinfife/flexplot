@@ -18,7 +18,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             compare = FALSE,
             comparisonTerms = NULL,
             comparisonX = NULL,
-            comparisonPanels = NULL, ...) {
+            comparisonPanels = NULL,
+            plotX = NULL,
+            plotPanels = NULL,
+            plotGroup = NULL,
+            comparisonGroup = NULL, ...) {
 
             super$initialize(
                 package="flexplot",
@@ -84,6 +88,22 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "comparisonPanels",
                 comparisonPanels,
                 default=NULL)
+            private$..plotX <- jmvcore::OptionVariable$new(
+                "plotX",
+                plotX,
+                default=NULL)
+            private$..plotPanels <- jmvcore::OptionVariables$new(
+                "plotPanels",
+                plotPanels,
+                default=NULL)
+            private$..plotGroup <- jmvcore::OptionVariable$new(
+                "plotGroup",
+                plotGroup,
+                default=NULL)
+            private$..comparisonGroup <- jmvcore::OptionVariable$new(
+                "comparisonGroup",
+                comparisonGroup,
+                default=NULL)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -98,6 +118,10 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..comparisonTerms)
             self$.addOption(private$..comparisonX)
             self$.addOption(private$..comparisonPanels)
+            self$.addOption(private$..plotX)
+            self$.addOption(private$..plotPanels)
+            self$.addOption(private$..plotGroup)
+            self$.addOption(private$..comparisonGroup)
         }),
     active = list(
         out = function() private$..out$value,
@@ -112,7 +136,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         compare = function() private$..compare$value,
         comparisonTerms = function() private$..comparisonTerms$value,
         comparisonX = function() private$..comparisonX$value,
-        comparisonPanels = function() private$..comparisonPanels$value),
+        comparisonPanels = function() private$..comparisonPanels$value,
+        plotX = function() private$..plotX$value,
+        plotPanels = function() private$..plotPanels$value,
+        plotGroup = function() private$..plotGroup$value,
+        comparisonGroup = function() private$..comparisonGroup$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -126,7 +154,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..compare = NA,
         ..comparisonTerms = NA,
         ..comparisonX = NA,
-        ..comparisonPanels = NA)
+        ..comparisonPanels = NA,
+        ..plotX = NA,
+        ..plotPanels = NA,
+        ..plotGroup = NA,
+        ..comparisonGroup = NA)
 )
 
 glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -146,7 +178,10 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="General Linear Model")
+                title="Linear Model",
+                refs=list(
+                    "flexplot",
+                    "graphicalAnalysis"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="assumpplot",

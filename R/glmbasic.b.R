@@ -1,35 +1,14 @@
 
 # This file is a generated template, your changes will not be overwritten
 
-jamovi_glm_model_plot = function(model, se, ...) {
+jamovi_glm_model_plot = function(model, se, formula=NULL, ...) {
   # visualize.lm uses a descriptive added-variable plot for larger models.
-  if (length(all.vars(stats::formula(model))[-1]) > 4L) {
+  if (is.null(formula) && length(all.vars(stats::formula(model))[-1]) > 4L) {
     return(visualize(model, plot="model", se=se, ...))
   }
-  plot = visualize(model, plot="model", report.se=se, ...)
-  if (!se) return(plot)
-
-  for (layer in plot$layers) {
-    data = layer$data
-    if (!is.data.frame(data) ||
-        !all(c("prediction", "prediction.lwr", "prediction.upr") %in% names(data))) next
-    numeric_x = is.numeric(rlang::eval_tidy(layer$mapping$x, data=data))
-    if (numeric_x && !inherits(layer$geom, "GeomLine")) next
-    if (!numeric_x && !inherits(layer$geom, "GeomPoint")) next
-    mapping = layer$mapping
-    mapping$ymin = ggplot2::aes(ymin=.data[["prediction.lwr"]])$ymin
-    mapping$ymax = ggplot2::aes(ymax=.data[["prediction.upr"]])$ymax
-    if (numeric_x) {
-      mapping$fill = mapping$colour
-      mapping$colour = mapping$linetype = NULL
-      plot = plot + ggplot2::geom_ribbon(data=data, mapping=mapping, alpha=.2,
-                                         inherit.aes=FALSE, show.legend=FALSE)
-    } else {
-      plot = plot + ggplot2::geom_errorbar(data=data, mapping=mapping, width=.1,
-                      position=layer$position, inherit.aes=FALSE, show.legend=FALSE)
-    }
-  }
-  plot
+  plot = if (is.null(formula)) visualize(model, plot="model", report.se=se, ...) else
+    compare_fits(formula, data=model$model, model1=model, report.se=se, ...)
+  jamovi_model_intervals(plot, se=se)
 }
 
 glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -208,7 +187,17 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			data = image$state$data
             mod = lm(formula, data=data)
             theme_set(theme_bw(base_size = 16))
-            plot = jamovi_glm_model_plot(mod, se=self$options$se, method=line, spread=se.type)
+            layout = NULL
+            if (length(c(self$options$plotX, self$options$plotPanels, self$options$plotGroup))) {
+              layout = tryCatch(jamovi_model_layout(list(mod), data, self$options$plotX,
+                self$options$plotPanels, self$options$plotGroup), error=identity)
+            }
+            if (inherits(layout, "error")) {
+              image$setError(conditionMessage(layout))
+              return(FALSE)
+            }
+            plot = jamovi_glm_model_plot(mod, se=self$options$se, formula=layout,
+                                         method=line, spread=se.type)
 			print(plot)
 			TRUE
 			},

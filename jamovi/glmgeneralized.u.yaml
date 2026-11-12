@@ -1,0 +1,78 @@
+title: Generalized Linear Model
+name: glmgeneralized
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: out
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Predictor Variable(s)
+        children:
+          - type: VariablesListBox
+            name: preds
+            isTarget: true
+  - type: Supplier
+    name: primarySupplier
+    label: Selected predictors
+    format: term
+    persistentItems: true
+    children:
+      - type: TargetLayoutBox
+        label: Model terms
+        transferAction: interactions
+        children:
+          - type: ListBox
+            name: modelTerms
+            isTarget: true
+            valueFilter: unique
+            template:
+              type: TermLabel
+  - type: ComboBox
+    name: family
+  - type: CollapseBox
+    label: Model visualization
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: graphic
+      - type: Supplier
+        name: plotSupplier
+        label: Predictors in the model
+        format: variable
+        persistentItems: true
+        children:
+          - type: TargetLayoutBox
+            label: Plot x variable (automatic if empty)
+            children:
+              - type: VariablesListBox
+                name: plotX
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Panel variables (up to two)
+            children:
+              - type: VariablesListBox
+                name: plotPanels
+                maxItemCount: 2
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Grouping variable
+            children:
+              - type: VariablesListBox
+                name: plotGroup
+                maxItemCount: 1
+                isTarget: true
+      - type: ComboBox
+        name: plotStyle
+      - type: CheckBox
+        name: se

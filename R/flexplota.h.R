@@ -180,7 +180,10 @@ flexplotaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Flexplot")
+                title="Flexplot",
+                refs=list(
+                    "flexplot",
+                    "graphicalAnalysis"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
