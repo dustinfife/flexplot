@@ -18,6 +18,19 @@ glinmod_jasp<- function(jaspResults, dataset, options) {
   if (ready){
     
     dataset = .read_glinmod_data(dataset, options)
+
+    if (identical(options$family, "Logistic")) {
+      response = dataset[[encodeColNames(options$dependent)]]
+      observed = response[!is.na(response)]
+      valid = if (is.factor(response) || is.character(response)) {
+        length(unique(observed)) == 2L
+      } else {
+        (is.numeric(response) || is.logical(response)) &&
+          length(observed) > 0L && all(observed %in% c(0, 1))
+      }
+      if (!valid) stop("Logistic regression requires a numeric 0/1 outcome or a categorical outcome with exactly two observed levels.",
+                        call.=FALSE)
+    }
     
     #### modify dataset to convert to numeric (where applicable)
     dataset = modify_dv(dataset, encodeColNames(options$dependent), options$family)

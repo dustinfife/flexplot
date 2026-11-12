@@ -42,6 +42,74 @@ jasp_glm_counts = function() {
 
 jasp_glm_unexpected_refit = function(...) stop("Unexpected model refit")
 
+test_that("the active JASP family selector exposes Logistic without changing other options", {
+  qml = readLines(system.file("qml", "glinmod.qml", package="flexplot", mustWork=TRUE))
+  start = grep("id: family", qml, fixed=TRUE)
+  end = grep('label: qsTr("Distribution family")', qml, fixed=TRUE)
+  selector = qml[seq.int(start, end)]
+  entries = grep('value: "', selector, value=TRUE, fixed=TRUE)
+  values = sub('.*value: "([^"]+)".*', '\\1', entries)
+  expect_identical(values, c("Normal", "Logistic", "Poisson", "negativebinomial", "Gamma"))
+  expect_true(any(grepl('label: qsTr("Logistic"), value: "Logistic"', entries, fixed=TRUE)))
+})
+
+test_that("JASP Logistic handles numeric and factor success coding in tables and plots", {
+  host = jasp_glm_environment()
+  binary = as.numeric((jasp_glm_counts()$replicate-.5)/12 <
+                        plogis(.3+.5*jasp_glm_counts()$x))
+  for (coding in c("numeric", "factor", "ordered")) {
+    data = jasp_glm_counts()
+    data$y = binary
+    if (coding != "numeric") {
+      # The fitted second level is success, even with explicitly reversed labels.
+      data$y = factor(binary, levels=c(1, 0), labels=c("yes", "no"),
+                        ordered=coding == "ordered")
+    }
+    independent = glm(y ~ x*g, data=data, family=binomial())
+    results = new.env(parent=emptyenv())
+    expect_no_warning(host$glinmod_jasp(results, data, jasp_glm_options("Logistic")))
+    fit = results$glinmod_results$object
+    expect_identical(fit$family$family, "binomial")
+    expect_identical(fit$family$link, "logit")
+    expect_equal(coef(fit), coef(independent), tolerance=1e-10)
+    table = results$glinmod_table_fixed
+    expect_equal(table$data$est, summary(independent)$coefficients[, 1], tolerance=1e-10)
+    expect_equal(table$data$sterr, summary(independent)$coefficients[, 2], tolerance=1e-10)
+    expect_equal(table$data$z, summary(independent)$coefficients[, 3], tolerance=1e-10)
+    expect_match(table$footnotes, "the logit function", fixed=TRUE)
+    plot = results$modelplot$plotObject
+    built = ggplot2::ggplot_build(plot)
+    overlays = which(vapply(plot$layers, function(layer) is.data.frame(layer$data) &&
+      all(c("prediction", "model") %in% names(layer$data)), logical(1)))
+    expect_length(overlays, 1)
+    for (i in overlays) {
+      source = plot$layers[[i]]$data
+      expected = unname(predict(independent, source, type="response"))
+      expect_equal(source$prediction, expected, tolerance=1e-10)
+      expect_equal(sort(built$data[[i]]$y), sort(expected), tolerance=1e-10)
+      expect_true(all(expected >= 0 & expected <= 1))
+    }
+    expect_no_warning(ggplot2::ggplotGrob(plot))
+  }
+})
+
+test_that("invalid JASP Logistic outcomes are rejected before a model is fitted", {
+  host = jasp_glm_environment()
+  invalid = list(negative=c(-1, 0), counts=c(0, 2), fractions=c(.2, .8),
+                 three_levels=factor(c("A", "B", "C")),
+                 one_category=factor("A"), missing=c(NA_real_, NA_real_))
+  local_mocked_bindings(glm.fit=jasp_glm_unexpected_refit, .package="stats")
+  for (response in invalid) {
+    data = jasp_glm_counts()
+    data$y = rep(response, length.out=nrow(data))
+    results = new.env(parent=emptyenv())
+    expect_error(host$glinmod_jasp(results, data, jasp_glm_options("Logistic", plot=FALSE)),
+                   "Logistic regression requires a numeric 0/1 outcome or a categorical outcome with exactly two observed levels.",
+                   fixed=TRUE)
+    expect_null(results$glinmod_results)
+  }
+})
+
 test_that("JASP negative binomial fits, tables and plots use the actual NB model", {
   data = jasp_glm_counts()
   independent = MASS::glm.nb(y ~ x*g, data=data)

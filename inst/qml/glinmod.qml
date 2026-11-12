@@ -19,6 +19,7 @@ Form
 			values: 
 			[
 			  {label: qsTr("Normal"), value: "Normal"},
+			  {label: qsTr("Logistic"), value: "Logistic"},
 			  {label: qsTr("Poisson"), value: "Poisson"},
 			  {label: qsTr("Negative Binomial"), value: "negativebinomial"},
 			  {label: qsTr("Gamma"), value: "Gamma"}
