@@ -440,6 +440,7 @@ arrange_jasp_plots = function(plot_list, theme, bw=FALSE){
 theme_it = function(plot, theme) {
   originalTheme <- theme
   theme <- tolower(theme)
+  if (identical(theme, "tron")) theme = "dark"
   if (!theme %in% c("jasp", "black and white", "minimal", "classic", "dark"))
     stop("Invalid theme provided: ", originalTheme)
   
