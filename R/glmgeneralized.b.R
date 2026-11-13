@@ -25,7 +25,7 @@ jamovi_glm_generalized_data = function(data, formula, family) {
   if (family %in% c("poisson", "negativebinomial") && (any(response < 0 | response != floor(response)) || !any(response > 0))) {
     stop("Count regression requires nonnegative integer counts, including at least one positive count.", call.=FALSE)
   }
-  if (family == "Gamma" && any(response <= 0)) {
+  if (family %in% c("Gamma", "gammaLog") && any(response <= 0)) {
     stop("Gamma regression requires strictly positive outcomes.", call.=FALSE)
   }
   if (family == "gaussian" && length(unique(response)) < 2L) {
@@ -36,9 +36,16 @@ jamovi_glm_generalized_data = function(data, formula, family) {
 
 jamovi_glm_generalized_fit = function(options, data) {
   formula = jamovi_glm_formula(options$out, options$preds, options$modelTerms)
+  for (variable in options$quadratic) {
+    if (!variable %in% options$preds || !is.numeric(data[[variable]])) {
+      stop("Quadratic terms require selected numeric predictors.", call.=FALSE)
+    }
+    formula[[3]] = call("+", formula[[3]], call("I", call("^", as.name(variable), 2)))
+  }
   eligible = jamovi_glm_generalized_data(data, formula, options$family)
   family = switch(options$family, gaussian=stats::gaussian(link="identity"),
-    binomial=stats::binomial(link="logit"), poisson=stats::poisson(link="log"), Gamma=stats::Gamma(link="inverse"))
+    binomial=stats::binomial(link="logit"), poisson=stats::poisson(link="log"),
+    gammaLog=stats::Gamma(link="log"), Gamma=stats::Gamma(link="inverse"))
   warnings = new.env(parent=emptyenv())
   warnings$messages = character()
   model = withCallingHandlers(
@@ -49,7 +56,7 @@ jamovi_glm_generalized_fit = function(options, data) {
       invokeRestart("muffleWarning")
     })
   if (!isTRUE(model$converged) || model$rank < length(stats::coef(model)) ||
-      (options$family %in% c("gaussian", "Gamma") && stats::df.residual(model) <= 0L) ||
+      (options$family %in% c("gaussian", "Gamma", "gammaLog") && stats::df.residual(model) <= 0L) ||
       any(!is.finite(stats::coef(model)))) {
     stop("The model is not estimable or did not converge. Check redundant terms, sparse categories, separation, and the number of complete observations.", call.=FALSE)
   }
@@ -62,17 +69,18 @@ jamovi_glm_generalized_fit = function(options, data) {
 jamovi_glm_generalized_plot = function(state, x=NULL, panels=NULL, group=NULL, style="auto", se=TRUE) {
   model = state$model
   formula = jamovi_model_layout(list(model), state$data, x, panels, group)
+  if (!length(all.vars(formula)[-1])) {
+    stop("Choose exactly one fitted-model predictor for the plot x variable; this model has no predictors.", call.=FALSE)
+  }
   xvar = flexplot_axis_given(formula)$axis[1]
   continuous = !is.na(xvar) && xvar %in% names(state$data) && is.numeric(state$data[[xvar]]) &&
     length(unique(state$data[[xvar]][!is.na(state$data[[xvar]])])) >= 10L
   if (model$family$family == "binomial" && continuous && style == "auto") {
     plot = visualize_binomial_model(model, formula, state$data, n_bins=10, overlay_type="dot", se=se)
-    return(plot + ggplot2::labs(caption=paste(
-      "Dots: observed bin proportions. Curves: model probabilities.",
-      "Unshown predictors are averaged over eligible observations; curves are not bin-matched predictions.")))
+    return(plot)
   }
   plot = compare_fits(formula, state$data, model1=model, pred.type="response", report.se=se)
-  if (model$family$family == "Gamma") {
+  if (model$family$family == "Gamma" && model$family$link == "inverse") {
     for (layer in plot$layers) {
       if (!is.data.frame(layer$data) || !"prediction" %in% names(layer$data)) next
       variables = all.vars(formula)[-1]
@@ -102,11 +110,12 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
       if (!length(self$options$out) || !length(self$options$preds)) return(invisible(NULL))
       state = tryCatch(jamovi_glm_generalized_fit(self$options, self$data), error=identity)
       if (inherits(state, "error")) {
-        for (name in c("coefficients", "fit", "plot")) self$results[[name]]$setError(conditionMessage(state))
+        for (name in c("coefficients", "fit", "likelihood", "plot")) self$results[[name]]$setError(conditionMessage(state))
         return(invisible(NULL))
       }
       state$predictors = self$options$preds
       self$results$plot$setState(state)
+      jamovi_glm_estimates(self$results, state)
       model = state$model
       summary = summary(model)
       coefficients = summary$coefficients
@@ -134,14 +143,18 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         BIC=stats::BIC(model), Dispersion=summary$dispersion)
       if (inherits(model, "negbin")) measures = c(measures, `Size (theta)`=model$theta,
                                                               `SE (theta)`=model$SE.theta)
-      for (i in seq_along(measures)) self$results$fit$addRow(rowKey=i,
-        values=list(measure=names(measures)[i], value=unname(measures[i])))
+      for (i in seq_along(measures)) {
+        table = if (names(measures)[i] %in% c("Log likelihood", "AIC", "BIC")) self$results$likelihood else self$results$fit
+        table$addRow(rowKey=i, values=list(measure=names(measures)[i], value=unname(measures[i])))
+      }
       self$results$fit$setNote("family", paste("Family:", model$family$family, " Link:", model$family$link))
       self$results$fit$setNote("missing", paste(state$omitted, "observations omitted because model variables were missing."))
-      self$results$fit$setNote("deviance", "Gaussian deviance is residual sum of squares; other families report deviance relative to a saturated model. Negative Binomial coefficient intervals condition on estimated theta.")
-      if (self$options$graphic) self$results$fit$setNote("visualization",
-        "Plots show response-scale predictions, averaged over eligible observations for predictors not displayed.")
       if (length(state$warnings)) self$results$fit$setNote("warnings", paste("Model warnings:", paste(state$warnings, collapse="; ")))
+      if (self$options$graphic) {
+        guide = tryCatch(jamovi_glm_plot_guide(state, self$options$plotX,
+          self$options$plotPanels, self$options$plotGroup, self$options$plotStyle), error=function(error) "")
+        self$results$plotExplanation$setContent(guide)
+      }
     },
     .plot=function(image, ...) {
       if (is.null(image$state)) return(FALSE)

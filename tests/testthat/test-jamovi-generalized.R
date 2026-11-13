@@ -21,12 +21,12 @@ test_that("jamovi generalized models reproduce glm coefficients, uncertainty and
     critical = if (family == "gaussian") qt(.975, df.residual(expected)) else qnorm(.975)
     expect_equal(table$lower, unname(coefficients[, 1]-critical*coefficients[, 2]), tolerance=1e-12)
     expect_equal(table$upper, unname(coefficients[, 1]+critical*coefficients[, 2]), tolerance=1e-12)
-    fit = analysis$results$fit$asDF
+    fit = rbind(analysis$results$fit$asDF, analysis$results$likelihood$asDF)
     values = c(nobs(expected), df.residual(expected), deviance(expected), expected$null.deviance,
       as.numeric(logLik(expected)), AIC(expected), BIC(expected), summary(expected)$dispersion)
-    expect_equal(fit$value, values, tolerance=1e-12)
+    expect_equal(fit$value[match(c("N", "Residual df", "Deviance", "Null deviance", "Log likelihood", "AIC", "BIC", "Dispersion"), fit$measure)], values, tolerance=1e-12)
     expect_identical(state$model$family$link, switch(family, gaussian="identity", binomial="logit", poisson="log"))
-    expect_setequal(analysis$results$getRefs(), c("flexplot", "graphicalAnalysis"))
+    expect_setequal(analysis$results$coefficients$getRefs(), c("flexplot", "graphicalAnalysis"))
   }
 })
 
@@ -189,7 +189,7 @@ test_that("saturated Poisson models retain fixed-dispersion inference", {
   expect_equal(table$estimate, unname(coef(expected)), tolerance=1e-12)
   expect_equal(table$se, unname(summary(expected)$coefficients[, 2]), tolerance=1e-12)
   expect_equal(table$lower, unname(coef(expected)-qnorm(.975)*summary(expected)$coefficients[, 2]), tolerance=1e-12)
-  fit = analysis$results$fit$asDF
+  fit = rbind(analysis$results$fit$asDF, analysis$results$likelihood$asDF)
   expect_equal(fit$value[fit$measure == "Residual df"], 0)
   expect_equal(fit$value[fit$measure == "Dispersion"], 1)
 })

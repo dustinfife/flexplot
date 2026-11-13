@@ -15,15 +15,14 @@ executable expressions.
 
 Visualization suppliers contain only predictors used in the model terms. A
 variable occurring only in an interaction is still a model predictor. Removing
-all terms involving a variable clears its display selections. The R adapters
+all terms involving a variable clears its display selections (unless it retains a quadratic term). The R adapters
 also reject selections outside the fitted formulas, including variables still
 present in the original variable-selection pool.
 
 Both analyses allow one x variable, one grouping variable, and up to two panel
 variables, using different predictors for each role. Numeric groups and panels
 use flexplot's existing display bins. Leaving x empty selects a numeric model
-predictor if available. An intercept-only model has no predictor available for
-these roles.
+predictor if available. For the GLM, native nonpersistent suppliers hide assigned variables from the available list. Each predictor can occupy only one role; removing it from a target makes it available again. X initializes automatically to an available model predictor, and an intercept-only model reports a clear visualization error.
 
 Linear-model comparisons use the union of the two fitted models' predictors and
 their shared complete-case dataset. The original `comparisonX` and
@@ -33,7 +32,7 @@ Generalized-model comparison is not implemented.
 
 ## Families and coefficient tables
 
-The five family/link combinations match the active JASP GLM adapter. JASP's
+The supported families match the active JASP GLM adapter; Gamma additionally offers a log link. JASP's
 custom-link control is commented out; custom links are not exposed here.
 
 - **Gaussian (identity):** finite numeric outcomes that vary. Coefficients are
@@ -49,6 +48,7 @@ custom-link control is commented out; custom links are not exposed here.
   count. Coefficients are on the log-mean scale. Dispersion is fixed at one;
   normal-Wald intervals and z tests are used. Robust/overdispersion corrections
   are not provided.
+- **Gamma (log):** the preferred Gamma choice for new analyses. Strictly positive finite outcomes, with multiplicative mean coefficients and estimated-dispersion t inference.
 - **Gamma (inverse):** strictly positive finite numeric outcomes. Coefficients
   are on the inverse-mean scale. Dispersion is estimated; coefficient tests and
   Wald intervals use the residual-df t distribution returned by `summary.glm()`.
@@ -74,6 +74,34 @@ selected columns do not exclude observations. Invalid outcomes, rank deficiency
 and failed convergence produce analysis errors. Other estimation warnings are
 retained in fit-table notes. No bias correction or substitute estimator is used.
 
+## GLM reporting and quadratic terms
+
+The raw coefficient table retains fitted-model estimates, standard errors, Wald
+confidence intervals and tests. Supplementary tables reuse `estimates.glm()`:
+logistic odds ratios, conditional IRT slopes/thresholds, standardized odds ratios,
+and observation-weighted marginal categorical probabilities. IRT rows include
+only continuous predictors; nonunique or undefined thresholds remain missing.
+Other families display their existing family/link-specific estimates rather than
+borrowing the logistic interpretation. The existing non-binomial `estimates.glm()`
+helpers cannot summarize some transformed formulas, including quadratic terms;
+in these cases an explicit note replaces only the supplementary summaries.
+Coefficient inference, fit measures and model predictions remain available.
+
+Fit statistics are transposed into two compact tables: model/deviance/dispersion
+and likelihood/AIC/BIC. Longer explanations are separate HTML blocks so they
+are not constrained by the old two-column table width. Research references are
+attached to the reporting table, not the result group surrounding the plot.
+
+The GLM **Add squared terms** control accepts selected numeric predictors.
+It adds literal language calls `I(x^2)` to the supplied model terms. Selecting a
+quadratic initially adds its linear term; it can subsequently be removed from
+the main term list. This mirrors JASP's additive-polynomial approach without
+parsing user text. The independent quadratic selection is saved/restored and
+cleared when its predictor is removed. Factor quadratics are rejected in R.
+
+`gammaLog` identifies Gamma/log for new selections. The saved `Gamma` option
+continues to mean Gamma/inverse, so existing analyses retain their fitted link.
+
 ## Predictions, overlays and uncertainty
 
 All model curves are response-scale predictions from the actual fitted model:
@@ -88,7 +116,7 @@ probabilities and observed bin proportions. This does not call the public
 proportions, not bin-matched adjusted predictions; the plot caption explains this
 distinction. **Raw observations and model predictions** retains the jittered
 binary data instead. Categorical and low-cardinality x variables keep native
-categorical/magnet plots, and non-binomial families keep their native plots.
+categorical/magnet plots, and non-binomial families keep their native plots. The explanatory guide is a separate results block rather than a long plot caption. Averaging text appears only when fitted-model predictors are actually undisplayed.
 
 Prediction confidence intervals can be disabled. With all model predictors
 displayed, the intervals agree with link-scale `predict.glm(..., se.fit=TRUE)`

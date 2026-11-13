@@ -90,7 +90,7 @@ test_that("Gamma and Negative Binomial tables and plotted intervals use the actu
     expect_equal(table$se, unname(coefficients[,2]), tolerance=1e-10)
     expect_equal(table$p, unname(coefficients[,4]), tolerance=1e-10)
     expect_equal(table$lower, unname(coefficients[,1]-critical*coefficients[,2]), tolerance=1e-10)
-    fit = analysis$results$fit$asDF
+    fit = rbind(analysis$results$fit$asDF, analysis$results$likelihood$asDF)
     expect_equal(fit$value[fit$measure=="AIC"], AIC(expected), tolerance=1e-10)
     expect_equal(fit$value[fit$measure=="BIC"], BIC(expected), tolerance=1e-10)
     expect_equal(fit$value[fit$measure=="Log likelihood"], as.numeric(logLik(expected)), tolerance=1e-10)

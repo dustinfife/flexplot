@@ -24,6 +24,8 @@ options:
         title: Binomial / Logistic (logit)
       - name: poisson
         title: Poisson (log)
+      - name: gammaLog
+        title: Gamma (log)
       - name: Gamma
         title: Gamma (inverse)
       - name: negativebinomial
@@ -33,12 +35,16 @@ options:
     title: Model terms
     type: Terms
     default: null
+  - name: quadratic
+    title: Quadratic predictors
+    type: Variables
+    default: null
   - name: graphic
     title: Model visualization
     type: Bool
     default: true
   - name: plotX
-    title: Plot x variable (automatic if empty)
+    title: Plot x variable
     type: Variable
     default: null
   - name: plotPanels
@@ -46,7 +52,7 @@ options:
     type: Variables
     default: null
   - name: plotGroup
-    title: Plot grouping variable
+    title: Color / symbol variable
     type: Variable
     default: null
   - name: plotStyle

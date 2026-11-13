@@ -37,6 +37,19 @@ children:
             valueFilter: unique
             template:
               type: TermLabel
+  - type: Supplier
+    name: quadraticSupplier
+    label: Selected predictors
+    format: variable
+    persistentItems: true
+    children:
+      - type: TargetLayoutBox
+        label: Add squared terms (numeric predictors)
+        children:
+          - type: VariablesListBox
+            name: quadratic
+            isTarget: true
+            permitted: [numeric]
   - type: ComboBox
     name: family
   - type: CollapseBox
@@ -49,10 +62,10 @@ children:
         name: plotSupplier
         label: Predictors in the model
         format: variable
-        persistentItems: true
+        persistentItems: false
         children:
           - type: TargetLayoutBox
-            label: Plot x variable (automatic if empty)
+            label: Plot x variable
             children:
               - type: VariablesListBox
                 name: plotX
@@ -66,7 +79,7 @@ children:
                 maxItemCount: 2
                 isTarget: true
           - type: TargetLayoutBox
-            label: Grouping variable
+            label: Color / symbol variable
             children:
               - type: VariablesListBox
                 name: plotGroup
@@ -74,5 +87,6 @@ children:
                 isTarget: true
       - type: ComboBox
         name: plotStyle
+        contentLink: (family:binomial)
       - type: CheckBox
         name: se

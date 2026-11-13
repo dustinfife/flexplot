@@ -2,11 +2,11 @@
 name: glmgeneralized
 title: Generalized Linear Model
 jrs: '1.1'
-refs: [flexplot, graphicalAnalysis]
 items:
   - name: coefficients
-    title: Coefficient estimates
+    title: Raw coefficient estimates
     type: Table
+    refs: [flexplot, graphicalAnalysis]
     columns:
       - name: term
         title: Term
@@ -35,6 +35,7 @@ items:
   - name: fit
     title: Model fit
     type: Table
+    swapRowsColumns: true
     columns:
       - name: measure
         title: Measure
@@ -42,6 +43,91 @@ items:
       - name: value
         title: Value
         type: number
+  - name: likelihood
+    title: Likelihood fit
+    type: Table
+    swapRowsColumns: true
+    columns:
+      - name: measure
+        title: Measure
+        type: text
+      - name: value
+        title: Value
+        type: number
+  - name: effects
+    title: Family-specific estimates
+    type: Table
+    visible: (family != 'binomial')
+    columns:
+      - name: term
+        title: Term
+        type: text
+  - name: odds
+    title: Odds ratios
+    type: Table
+    visible: (family:binomial)
+    columns:
+      - name: term
+        title: Term
+        type: text
+      - name: odds
+        title: OR
+        type: number
+      - name: inverse
+        title: Inverse OR
+        type: number
+  - name: irt
+    title: IRT estimates
+    type: Table
+    visible: (family:binomial)
+    columns:
+      - name: variable
+        title: Predictor
+        type: text
+      - name: slope
+        title: Instantaneous slope
+        type: number
+      - name: threshold
+        title: Probability 0.5 threshold
+        type: number
+  - name: standardized
+    title: Standardized estimates
+    type: Table
+    visible: (family:binomial)
+    columns:
+      - name: term
+        title: Term
+        type: text
+      - name: odds
+        title: Standardized OR
+        type: number
+      - name: inverse
+        title: Inverse standardized OR
+        type: number
+      - name: difference
+        title: Prediction difference (+/- 1 SD)
+        type: text
+  - name: probabilities
+    title: Marginal predicted probabilities
+    type: Table
+    visible: (family:binomial)
+    columns:
+      - name: variable
+        title: Predictor
+        type: text
+      - name: level
+        title: Level
+        type: text
+      - name: probability
+        title: Probability
+        type: number
+  - name: explanation
+    title: Interpretation
+    type: Html
+  - name: plotExplanation
+    title: Visualization guide
+    type: Html
+    visible: (graphic)
   - name: plot
     title: Model visualization
     type: Image

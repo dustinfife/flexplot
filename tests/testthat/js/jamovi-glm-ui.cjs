@@ -121,7 +121,7 @@ const {pathToFileURL} = require('node:url');
             ui.comparisonPanels.setValue(['supp']);
         }
         fire('modelTerms', 'changed');
-        assert.equal(ui.plotX.value(), null);
+        assert.equal(ui.plotX.value(), dual ? null : 'supp');
         assert.equal(JSON.stringify(ui.plotSupplier.value().map(item => item.value.raw)), '["supp"]');
         if (dual) {
             assert.equal(ui.comparisonX.value(), 'dose');
@@ -147,6 +147,63 @@ const {pathToFileURL} = require('node:url');
         ui.preds.setValue(['dose']); ui.modelTerms.setValue(null); ui.comparisonTerms.setValue(null);
         fire('view', 'updated'); snapshot('reopen');
         assert.equal(encode(ui.modelTerms.value()), 'dose');
+        if (!dual) {
+            ui.preds.setValue(['dose','supp']); ui.modelTerms.setValue([['dose'],['supp']]);
+            ui.plotX.setValue(null); ui.plotPanels.setValue([]); ui.plotGroup.setValue(null);
+            fire('view', 'updated');
+            assert.equal(ui.plotX.value(), 'dose');
+            ui.plotPanels.setValue(['dose','supp']); ui.plotGroup.setValue('supp');
+            fire('plotPanels', 'changed');
+            assert.equal(JSON.stringify(ui.plotPanels.value()), '["supp"]');
+            assert.equal(ui.plotGroup.value(), null);
+            ui.plotX.setValue(null); ui.plotPanels.setValue(['dose']);
+            fire('plotX', 'changed');
+            assert.equal(ui.plotX.value(), 'supp');
+            ui.quadratic.setValue(['dose']); ui.modelTerms.setValue([['supp']]);
+            fire('quadratic', 'changed');
+            assert.equal(encode(ui.modelTerms.value()), 'supp;dose');
+            ui.modelTerms.setValue([['supp']]); fire('view', 'updated');
+            assert.equal(JSON.stringify(ui.quadratic.value()), '["dose"]');
+            assert.ok(ui.plotSupplier.value().some(item => item.value.raw === 'dose'));
+            ui.preds.setValue(['supp']); fire('preds', 'changed');
+            assert.equal(JSON.stringify(ui.quadratic.value()), '[]');
+            assert.equal(ui.plotPanels.value().length, 0);
+            // Native supplier removes assigned entries; all model variables remain its source.
+            const supplier = compiled.view.layout.controls.flatMap(c => c.controls || []).find(c => c.name === 'plotSupplier');
+            assert.ok(supplier && supplier.persistentItems === false);
+            const style = compiled.view.layout.controls.flatMap(c => c.controls || []).find(c => c.name === 'plotStyle');
+            assert.ok(style && style.contentLink === '(family:binomial)');
+            if (runtime) {
+                const installed = fs.readFileSync(runtime, 'utf8');
+                const start = installed.indexOf('filterSuppliersList(e=!1){');
+                assert.ok(start > 0);
+                const brace = installed.indexOf('{', start);
+                let end = brace + 1, depth = 1;
+                while (depth) {
+                    if (installed[end] === '{') depth++;
+                    if (installed[end] === '}') depth--;
+                    end++;
+                }
+                const filter = vm.runInNewContext('(function' + installed.slice(start + 'filterSuppliersList'.length, end) + ')');
+                const visible = [];
+                const nativeSupplier = {blockFilterProcess:false, $searchInput:{value:''}, _persistentItems:false,
+                    _items:[{used:1},{used:0}], supplier:{getRow: row => [{setVisibility: value => {visible[row-1] = value;}}]}};
+                filter.call(nativeSupplier);
+                assert.equal(JSON.stringify(visible), '[false,true]');
+                nativeSupplier._items[0].used = 0; filter.call(nativeSupplier);
+                assert.equal(JSON.stringify(visible), '[true,true]');
+                // Exercise the installed contentLink -> cell visibility branch.
+                const branch = 'e==="contentLink"&&this._cell&&this._cell.setVisibility(this.getPropertyValue("contentLink"),!0)';
+                assert.ok(installed.includes(branch));
+                const change = vm.runInNewContext('(function(e){' + branch + '})');
+                for (const family of ['binomial','poisson','gammaLog','binomial','gaussian']) {
+                    let shown;
+                    change.call({_cell:{setVisibility:value => {shown=value;}},
+                        getPropertyValue:() => family === 'binomial'}, 'contentLink');
+                    assert.equal(shown, family === 'binomial');
+                }
+            }
+        }
         fs.writeFileSync(output, records.join('\n') + '\n');
         console.log(runtime ? 'Used installed jamovi View.extend' : 'Used portable automatic-handler contract');
     } finally {

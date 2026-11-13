@@ -24,14 +24,28 @@ const updateTerms = function(ui, context, addNew, models, suppliers, layouts = [
             const available = [...new Set(layout.models.flatMap(name => {
                 const terms = ui[name].value();
                 return terms == null ? predictors : terms.flat();
-            }))].filter(name => predictors.includes(name));
+            }).concat(layout.extra ? (ui[layout.extra].value() || []) : []))].filter(name => predictors.includes(name));
             ui[layout.supplier].setValue(utils.valuesToItems(available, FormatDef.variable));
+            const assigned = new Set();
             for (const name of layout.selections) {
                 const value = ui[name].value();
                 if (value == null) continue;
-                const filtered = Array.isArray(value) ? value.filter(item => available.includes(item)) :
-                    (available.includes(value) ? value : null);
+                const permitted = name => available.includes(name) && (!layout.exclusive || !assigned.has(name));
+                const filtered = Array.isArray(value) ? value.filter(item => permitted(item)) :
+                    (permitted(value) ? value : null);
+                for (const item of (Array.isArray(filtered) ? filtered : [filtered])) if (item) assigned.add(item);
                 if (JSON.stringify(value) !== JSON.stringify(filtered)) ui[name].setValue(filtered);
+            }
+            if (layout.requireX && !ui[layout.selections[0]].value()) {
+                const x = available.find(name => !assigned.has(name)) || available[0];
+                if (x) {
+                    ui[layout.selections[0]].setValue(x);
+                    for (const name of layout.selections.slice(1)) {
+                        const value = ui[name].value();
+                        const filtered = Array.isArray(value) ? value.filter(item => item !== x) : (value === x ? null : value);
+                        if (JSON.stringify(value) !== JSON.stringify(filtered)) ui[name].setValue(filtered);
+                    }
+                }
             }
         }
     } finally {
