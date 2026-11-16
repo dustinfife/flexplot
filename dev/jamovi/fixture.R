@@ -29,7 +29,11 @@ jamovi_smoke_fixture = function(root, home, output) {
     list(name="glmgeneralized", title="GLM - logistic interaction", options=list(out="binary",preds=c("x","group","z"),
       family="binomial",modelTerms=list("x","group","z",c("x","group")),plotX="x",plotPanels="group")),
     list(name="glmgeneralized", title="GLM - Poisson", options=list(out="count",preds=c("x","group","z"),
-      family="poisson",modelTerms=list("x","group","z"),plotX="x",plotPanels="group")))
+      family="poisson",modelTerms=list("x","group","z"),plotX="x",plotPanels="group")),
+    list(name="glmgeneralized", title="GLM - logistic model comparison", options=list(out="binary",preds=c("x","group","z"),
+      family="binomial",modelTerms=list("x","group","z",c("x","group")),
+      compare=TRUE,comparisonTerms=list("x","group","z"),comparisonX="x",comparisonPanels="group",
+      plotX="x",plotPanels="group")))
   work = tempfile("jamovi-smoke-")
   dir.create(work)
   on.exit(unlink(work,recursive=TRUE),add=TRUE)

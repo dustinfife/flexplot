@@ -75,8 +75,10 @@ round trips; handler/R6 tests alone do not establish these behaviors.
 
 ## Preconfigured smoke document
 
-The default file is `.jamovi-dev/smoke.omv`, generated on this Mac and actually
-opened in jamovi with tables and four plot images. Its fixed synthetic dataset
+The default file is `.jamovi-dev/smoke.omv`, generated with five analyses and
+six plot images. The original four cases were opened in jamovi; the newly added
+GLM comparison is verified by automated saved-option restoration and still
+requires a GUI smoke pass. Its fixed synthetic dataset
 has 120 rows, numeric `x` and `z`, a two-level `group`, and three outcomes.
 The analyses appear in this order:
 
@@ -86,6 +88,7 @@ The analyses appear in this order:
 | Linear Model, interaction | `continuous ~ x + group + z + x:group` | Group panels, interaction term and fitted slopes |
 | GLM, logistic interaction | `binary ~ x + group + z + x:group` | Logistic overlay, probability scale, IRT and optional p-values |
 | GLM, Poisson | `count ~ x + group + z` | Response counts, multipliers, uncertainty; binomial controls hidden |
+| GLM, logistic comparison | Interaction model versus `binary ~ x + group + z` | Two response-probability curves, descriptive observed proportions, shared population, likelihood ratio and BIC Bayes factors |
 
 The generator uses actual flexplot R6 analysis classes and plot callbacks,
 jamovi's bundled `jmvReadWrite` and `RProtoBuf`, and jamovi's native option
@@ -115,7 +118,7 @@ already-running application was tested. New windows and the existing document
 remained separate. Keep useful custom cases in your own golden `.omv`, rather
 than saving over the reserved generated default.
 
-For a GUI smoke pass, verify all four populated analyses, model-term retention,
+For a GUI smoke pass, verify all five populated analyses, model-term retention,
 plots, logistic/Poisson scales, p-value toggles, and switching between families.
 The prepared file removes repeated setup, not the need to inspect the GUI.
 The option-panel term-loss finding above should be treated as a failed smoke

@@ -34,14 +34,19 @@ jamovi_glm_generalized_data = function(data, formula, family) {
   data
 }
 
-jamovi_glm_generalized_fit = function(options, data) {
-  formula = jamovi_glm_formula(options$out, options$preds, options$modelTerms)
-  for (variable in options$quadratic) {
+jamovi_glm_generalized_formula = function(options, data, terms=options$modelTerms, quadratic=options$quadratic) {
+  formula = jamovi_glm_formula(options$out, options$preds, terms)
+  if (is.null(quadratic)) quadratic = character()
+  for (variable in quadratic) {
     if (!variable %in% options$preds || !is.numeric(data[[variable]])) {
       stop("Quadratic terms require selected numeric predictors.", call.=FALSE)
     }
     formula[[3]] = call("+", formula[[3]], call("I", call("^", as.name(variable), 2)))
   }
+  formula
+}
+
+jamovi_glm_generalized_fit = function(options, data, formula=jamovi_glm_generalized_formula(options, data)) {
   eligible = jamovi_glm_generalized_data(data, formula, options$family)
   family = switch(options$family, gaussian=stats::gaussian(link="identity"),
     binomial=stats::binomial(link="logit"), poisson=stats::poisson(link="log"),
@@ -113,12 +118,24 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
           (!is.null(self$options$modelTerms) && !length(self$options$modelTerms) && !length(self$options$quadratic))) {
         return(invisible(NULL))
       }
-      state = tryCatch(jamovi_glm_generalized_fit(self$options, self$data), error=identity)
+      comparison = NULL
+      state = tryCatch({
+        if (self$options$compare) {
+          comparison = jamovi_glm_generalized_comparison(self$options, self$data)
+          comparison$primary
+        } else jamovi_glm_generalized_fit(self$options, self$data)
+      }, error=identity)
       if (inherits(state, "error")) {
         self$results$waiting$setVisible(FALSE)
         self$results$explanation$setVisible(TRUE)
         self$results$explanation$setError(conditionMessage(state))
         return(invisible(NULL))
+      }
+      if (!is.null(comparison)) {
+        self$results$comparison$setVisible(TRUE)
+        jamovi_glm_generalized_comparison_table(self$results$comparison, comparison)
+        self$results$comparisonplot$setState(comparison)
+        self$results$comparisonplot$setVisible(self$options$graphic)
       }
       model = state$model
       summary = summary(model)
@@ -142,6 +159,16 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
           self$options$plotPanels, self$options$plotGroup, self$options$plotStyle), error=function(error) "")
         self$results$plotExplanation$setContent(guide)
       }
+    },
+    .comparisonplot=function(image, ...) {
+      if (is.null(image$state)) return(FALSE)
+      tryCatch({
+        print(jamovi_glm_generalized_comparison_plot(image$state, self$options$se, self$options$plotStyle))
+        TRUE
+      }, error=function(error) {
+        image$setError(conditionMessage(error))
+        FALSE
+      })
     },
     .plot=function(image, ...) {
       if (is.null(image$state)) return(FALSE)

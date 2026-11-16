@@ -39,4 +39,4 @@ with zipfile.ZipFile(archive) as source:
         for entry in source.infolist():
             target.writestr(entry, replacements.get(entry.filename, source.read(entry.filename)))
 os.replace(temporary, archive)
-print("Verified saved options for all four analyses.")
+print(f"Verified saved options for all {len(manifest['configurations'])} analyses.")

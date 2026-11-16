@@ -173,3 +173,33 @@ jmvtools::install(pkg = ".", home = "/Applications/jamovi.app")
 exercise generated R6 classes, actual plotting callbacks, and compiled/bundled UI
 handlers when the optional tools are available. Actual GUI layout and interaction
 still require manual verification in jamovi.
+
+## Optional GLM model comparison
+
+**Model Comparison** is collapsed and disabled by default. Enabling it adds an
+independent second set of model terms and squared numeric predictors. Both
+models use the selected outcome, distribution and link. They are fitted to the
+same complete observations across the union of their required variables;
+missing values in unused selected predictors do not remove observations.
+Turning comparison off restores the original single-model analysis.
+
+The comparison table reuses `model.comparison()` for AIC, BIC and BIC-based
+approximate Bayes factors. Each row's Bayes factor favors that row's model over
+the other model. Smaller AIC/BIC is better. No ordinary linear-model F-test or
+R-squared is reported. A nested-model asymptotic likelihood-ratio test uses the
+fitted model likelihoods and their parameter-count difference; nonnested and
+equivalent models have blank test cells. Negative Binomial theta is estimated
+separately for each model and included in the likelihood parameter count.
+These tests rely on regularity and adequate sample size; sparse or separated
+logistic data and unstable dispersion estimates require caution. Fitting
+warnings are included in the comparison note.
+
+Comparison plots use `compare_fits()` response-scale marginal predictions from
+the original fitted models and their common eligible population. Choose one x
+predictor and up to two panel predictors from either model. There is no comparison
+color/symbol selector: use panels instead of unsupported second-axis grouping.
+For a continuous binomial x, Automatic retains descriptive binned observed
+proportions beside both model curves; these proportions are not bin-matched
+adjusted predictions. The Raw option retains jittered binary observations.
+Single-model estimates, optional p-values and visualization controls are
+unchanged when comparison is disabled.

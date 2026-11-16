@@ -67,7 +67,8 @@ const {pathToFileURL} = require('node:url');
         };
         walk(compiled.view.layout);
         const dual = controls.has('comparisonTerms');
-        if (!dual) assert.ok(controls.has('includeP'), 'Missing Include p-values control');
+        const generalized = analysis === 'glmgeneralized';
+        if (generalized) assert.ok(controls.has('includeP'), 'Missing Include p-values control');
         for (const name of (dual ? ['preds','modelTerms','comparisonTerms','primarySupplier','comparisonSupplier'] : ['preds','modelTerms','primarySupplier']))
             assert.ok(controls.has(name), 'Missing compiled control: ' + name);
         const fire = (name, event) => {
@@ -122,14 +123,14 @@ const {pathToFileURL} = require('node:url');
             ui.comparisonPanels.setValue(['supp']);
         }
         fire('modelTerms', 'changed');
-        assert.equal(ui.plotX.value(), dual ? null : 'supp');
+        assert.equal(ui.plotX.value(), generalized ? 'supp' : null);
         assert.equal(JSON.stringify(ui.plotSupplier.value().map(item => item.value.raw)), '["supp"]');
         if (dual) {
             assert.equal(ui.comparisonX.value(), 'dose');
             assert.equal(JSON.stringify(ui.comparisonPlotSupplier.value().map(item => item.value.raw)), '["supp","dose"]');
             ui.comparisonTerms.setValue([['supp']]);
             fire('comparisonTerms', 'changed');
-            assert.equal(ui.comparisonX.value(), null);
+            assert.equal(ui.comparisonX.value(), generalized ? 'supp' : null);
         }
         ui.modelTerms.setValue([['supp','dose']]);
         fire('modelTerms', 'changed');
@@ -148,7 +149,7 @@ const {pathToFileURL} = require('node:url');
         ui.preds.setValue(['dose']); ui.modelTerms.setValue(null); ui.comparisonTerms.setValue(null);
         fire('view', 'updated'); snapshot('reopen');
         assert.equal(encode(ui.modelTerms.value()), 'dose');
-        if (!dual) {
+        if (generalized) {
             ui.preds.setValue(['dose','supp']); ui.modelTerms.setValue([['dose'],['supp']]);
             ui.plotX.setValue(null); ui.plotPanels.setValue([]); ui.plotGroup.setValue(null);
             fire('view', 'updated');
@@ -169,6 +170,17 @@ const {pathToFileURL} = require('node:url');
             ui.preds.setValue(['supp']); fire('preds', 'changed');
             assert.equal(JSON.stringify(ui.quadratic.value()), '[]');
             assert.equal(ui.plotPanels.value().length, 0);
+            ui.preds.setValue(['supp','dose']); fire('preds', 'changed');
+            ui.comparisonTerms.setValue([['supp']]);
+            ui.comparisonQuadratic.setValue(['dose']); fire('comparisonQuadratic', 'changed');
+            assert.equal(encode(ui.comparisonTerms.value()), 'supp;dose');
+            ui.comparisonTerms.setValue([['supp']]); fire('view', 'updated');
+            assert.equal(JSON.stringify(ui.comparisonQuadratic.value()), '["dose"]');
+            assert.ok(ui.comparisonPlotSupplier.value().some(item => item.value.raw === 'dose'));
+            assert.equal(encode(ui.modelTerms.value()), 'supp;dose');
+            ui.preds.setValue(['supp']); fire('preds', 'changed');
+            assert.equal(JSON.stringify(ui.comparisonQuadratic.value()), '[]');
+            assert.equal(encode(ui.comparisonTerms.value()), 'supp');
             // Native supplier removes assigned entries; all model variables remain its source.
             const supplier = compiled.view.layout.controls.flatMap(c => c.controls || []).find(c => c.name === 'plotSupplier');
             assert.ok(supplier && supplier.persistentItems === false);

@@ -14,6 +14,7 @@ jamovi_glm_reporting_reset = function(results) {
     if (inherits(item, "Html")) item$setContent("")
   }
   results$plot$setState(NULL)
+  results$comparisonplot$setState(NULL)
   results$waiting$setContent("<p>Select an outcome and predictors, and specify at least one model term.</p>")
   results$waiting$setVisible(TRUE)
   invisible(NULL)

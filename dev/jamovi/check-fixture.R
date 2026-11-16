@@ -11,9 +11,9 @@ if (!file.exists(file)) stop("Run Rscript dev/jamovi.R fixture first")
 data = jmvReadWrite::read_omv(fleInp=file)
 entries = utils::unzip(file,list=TRUE)$Name
 analyses = grep("/analysis$",entries,value=TRUE)
-stopifnot(length(analyses)==4L,length(grep("/resources/.*png$",entries))==4L,nrow(data)==120L)
+stopifnot(length(analyses)==5L,length(grep("/resources/.*png$",entries))==6L,nrow(data)==120L)
 formulas = list(continuous~x+group,continuous~x+group+z+x:group,
-  binary~x+group+z+x:group,count~x+group+z)
+  binary~x+group+z+x:group,count~x+group+z,binary~x+group+z+x:group)
 for (i in seq_along(analyses)) {
   connection = unz(file,analyses[i],open="rb")
   raw = readBin(connection,"raw",1000000L);close(connection)
@@ -27,8 +27,14 @@ for (i in seq_along(analyses)) {
   formula = if (message$name=="glmgeneralized") stats::formula(state$model) else state$formula
   stopifnot(isTRUE(all.equal(stats::model.matrix(formula,data),stats::model.matrix(formulas[[i]],data))))
   if (message$name=="glmgeneralized") {
-    independent = glm(formulas[[i]],data=data,family=if(i==3L) binomial() else poisson())
+    independent = glm(formulas[[i]],data=data,family=if(i %in% c(3L,5L)) binomial() else poisson())
     stopifnot(isTRUE(all.equal(stats::coef(state$model),stats::coef(independent),tolerance=1e-12)))
+    if (isTRUE(options$compare)) {
+      comparison = analysis$results$comparisonplot$state
+      reduced = glm(binary~x+group+z, data=data, family=binomial())
+      stopifnot(isTRUE(all.equal(coef(comparison$model2),coef(reduced),tolerance=1e-12)),
+        analysis$results$comparison$visible,analysis$results$comparisonplot$visible)
+    }
   }
 }
-cat("PASS: four saved model specifications restore through R6; interaction matrices and GLM coefficients agree with independent models.\n")
+cat("PASS: five saved model specifications including a GLM comparison restore through R6; interaction matrices and GLM coefficients agree with independent models.\n")

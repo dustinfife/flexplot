@@ -24,7 +24,7 @@ const updateTerms = function(ui, context, addNew, models, suppliers, layouts = [
             const available = [...new Set(layout.models.flatMap(name => {
                 const terms = ui[name].value();
                 return terms == null ? predictors : terms.flat();
-            }).concat(layout.extra ? (ui[layout.extra].value() || []) : []))].filter(name => predictors.includes(name));
+            }).concat((layout.extra ? [].concat(layout.extra) : []).flatMap(name => ui[name].value() || [])))].filter(name => predictors.includes(name));
             ui[layout.supplier].setValue(utils.valuesToItems(available, FormatDef.variable));
             const assigned = new Set();
             for (const name of layout.selections) {

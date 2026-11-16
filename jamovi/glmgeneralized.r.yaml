@@ -59,4 +59,41 @@ items:
     height: 450
     visible: false
     renderFun: .plot
+  - name: comparison
+    title: Model comparison statistics
+    type: Table
+    visible: false
+    columns:
+      - name: model
+        title: Model
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: aic
+        title: AIC
+        type: number
+      - name: bic
+        title: BIC
+        type: number
+      - name: bayes.factor
+        title: BIC Bayes factor
+        type: number
+      - name: lr
+        title: Likelihood ratio
+        type: number
+      - name: df
+        title: df
+        type: integer
+      - name: p
+        title: p (nested LRT)
+        type: number
+        format: zto,pvalue
+  - name: comparisonplot
+    title: Model comparison plot
+    type: Image
+    width: 700
+    height: 450
+    visible: false
+    renderFun: .comparisonplot
 ...

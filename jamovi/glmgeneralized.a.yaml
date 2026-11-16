@@ -39,6 +39,26 @@ options:
     title: Quadratic predictors
     type: Variables
     default: null
+  - name: compare
+    title: Compare two models
+    type: Bool
+    default: false
+  - name: comparisonTerms
+    title: Second model terms
+    type: Terms
+    default: null
+  - name: comparisonQuadratic
+    title: Second model quadratic predictors
+    type: Variables
+    default: null
+  - name: comparisonX
+    title: Comparison x variable
+    type: Variable
+    default: null
+  - name: comparisonPanels
+    title: Comparison panel variables (up to two)
+    type: Variables
+    default: null
   - name: graphic
     title: Model visualization
     type: Bool

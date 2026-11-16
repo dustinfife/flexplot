@@ -50,6 +50,65 @@ children:
             name: quadratic
             isTarget: true
             permitted: [numeric]
+  - type: CollapseBox
+    label: Model Comparison
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: compare
+      - type: Supplier
+        name: comparisonSupplier
+        label: Selected predictors
+        format: term
+        persistentItems: true
+        children:
+          - type: TargetLayoutBox
+            label: Second model terms
+            transferAction: interactions
+            children:
+              - type: ListBox
+                name: comparisonTerms
+                isTarget: true
+                enable: (compare)
+                valueFilter: unique
+                template:
+                  type: TermLabel
+      - type: Supplier
+        name: comparisonQuadraticSupplier
+        label: Selected predictors
+        format: variable
+        persistentItems: true
+        children:
+          - type: TargetLayoutBox
+            label: Add squared terms to second model (numeric predictors)
+            children:
+              - type: VariablesListBox
+                name: comparisonQuadratic
+                isTarget: true
+                permitted: [numeric]
+                enable: (compare)
+      - type: Supplier
+        name: comparisonPlotSupplier
+        label: Predictors in either model
+        format: variable
+        persistentItems: false
+        children:
+          - type: TargetLayoutBox
+            label: Comparison x variable
+            children:
+              - type: VariablesListBox
+                name: comparisonX
+                maxItemCount: 1
+                isTarget: true
+                enable: (compare)
+          - type: TargetLayoutBox
+            label: Comparison panel variables (up to two)
+            children:
+              - type: VariablesListBox
+                name: comparisonPanels
+                maxItemCount: 2
+                isTarget: true
+                enable: (compare)
   - type: ComboBox
     name: family
   - type: CollapseBox
