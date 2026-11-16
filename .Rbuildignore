@@ -49,3 +49,6 @@ vignettes/regex_syntax.txt
 ^tests/.*\.Rout(\.fail)?$
 ^research$
 ^binned_banding\.jpg$
+
+^dev$
+^\.jamovi-dev$

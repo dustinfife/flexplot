@@ -68,4 +68,8 @@ options:
     title: Prediction confidence intervals
     type: Bool
     default: true
+  - name: includeP
+    title: Include p-values
+    type: Bool
+    default: false
 ...

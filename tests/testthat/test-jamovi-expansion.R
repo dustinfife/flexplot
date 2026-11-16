@@ -86,18 +86,18 @@ test_that("Gamma and Negative Binomial tables and plotted intervals use the actu
     table = analysis$results$coefficients$asDF
     coefficients = summary(expected)$coefficients
     critical = if (family == "Gamma") qt(.975,df.residual(expected)) else qnorm(.975)
-    expect_equal(table$estimate, unname(coefficients[,1]), tolerance=1e-10)
-    expect_equal(table$se, unname(coefficients[,2]), tolerance=1e-10)
-    expect_equal(table$p, unname(coefficients[,4]), tolerance=1e-10)
+    expect_equal(table$raw.coefficients, estimates(expected)$raw.coefficients, tolerance=1e-10)
+    expect_equal(jamovi_reported_se(table), unname(coefficients[,2]), tolerance=1e-10)
+    expect_false("p" %in% names(table))
     expect_equal(table$lower, unname(coefficients[,1]-critical*coefficients[,2]), tolerance=1e-10)
-    fit = rbind(analysis$results$fit$asDF, analysis$results$likelihood$asDF)
-    expect_equal(fit$value[fit$measure=="AIC"], AIC(expected), tolerance=1e-10)
-    expect_equal(fit$value[fit$measure=="BIC"], BIC(expected), tolerance=1e-10)
-    expect_equal(fit$value[fit$measure=="Log likelihood"], as.numeric(logLik(expected)), tolerance=1e-10)
+    fit = analysis$results$plot$state$fitStats
+    expect_equal(unname(fit["AIC"]), AIC(expected), tolerance=1e-10)
+    expect_equal(unname(fit["BIC"]), BIC(expected), tolerance=1e-10)
+    expect_equal(unname(fit["Log likelihood"]), as.numeric(logLik(expected)), tolerance=1e-10)
     if (family == "negativebinomial") {
       expect_s3_class(state$model,"negbin")
-      expect_equal(fit$value[fit$measure=="Size (theta)"],expected$theta,tolerance=1e-10)
-      expect_equal(fit$value[fit$measure=="SE (theta)"],expected$SE.theta,tolerance=1e-10)
+      expect_equal(unname(fit["Size (theta)"]),expected$theta,tolerance=1e-10)
+      expect_equal(unname(fit["SE (theta)"]),expected$SE.theta,tolerance=1e-10)
     }
     expect_no_warning(expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot)))
     plot = capture$plot
@@ -177,8 +177,8 @@ test_that("new family outcome validation reports errors rather than changing the
       options=flexplot:::glmgeneralizedOptions$new(out="y",preds="x",family=family)
       analysis=flexplot:::glmgeneralizedClass$new(options=options,data=data)
       expect_true(analysis$run())
-      expect_identical(analysis$results$fit$status,"error")
-      expect_match(analysis$results$fit$.__enclos_env__$private$.error,
+      expect_identical(analysis$results$explanation$status,"error")
+      expect_match(analysis$results$explanation$.__enclos_env__$private$.error,
                    if(family=="Gamma") "strictly positive" else "nonnegative integer")
     }
   }

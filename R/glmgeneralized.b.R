@@ -106,50 +106,37 @@ jamovi_glm_generalized_plot = function(state, x=NULL, panels=NULL, group=NULL, s
 glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
   "glmgeneralizedClass", inherit=glmgeneralizedBase,
   private=list(
+    .init=function() jamovi_glm_reporting_reset(self$results),
     .run=function() {
-      if (!length(self$options$out) || !length(self$options$preds)) return(invisible(NULL))
-      state = tryCatch(jamovi_glm_generalized_fit(self$options, self$data), error=identity)
-      if (inherits(state, "error")) {
-        for (name in c("coefficients", "fit", "likelihood", "plot")) self$results[[name]]$setError(conditionMessage(state))
+      jamovi_glm_reporting_reset(self$results)
+      if (!length(self$options$out) || !length(self$options$preds) ||
+          (!is.null(self$options$modelTerms) && !length(self$options$modelTerms) && !length(self$options$quadratic))) {
         return(invisible(NULL))
       }
-      state$predictors = self$options$preds
-      self$results$plot$setState(state)
-      jamovi_glm_estimates(self$results, state)
+      state = tryCatch(jamovi_glm_generalized_fit(self$options, self$data), error=identity)
+      if (inherits(state, "error")) {
+        self$results$waiting$setVisible(FALSE)
+        self$results$explanation$setVisible(TRUE)
+        self$results$explanation$setError(conditionMessage(state))
+        return(invisible(NULL))
+      }
       model = state$model
       summary = summary(model)
-      coefficients = summary$coefficients
-      uses_t = colnames(coefficients)[3] == "t value"
-      critical = if (uses_t) stats::qt(.975, stats::df.residual(model)) else stats::qnorm(.975)
-      for (i in seq_len(nrow(coefficients))) {
-        self$results$coefficients$addRow(rowKey=i, values=list(term=rownames(coefficients)[i],
-          estimate=coefficients[i, 1], se=coefficients[i, 2],
-          lower=coefficients[i, 1]-critical*coefficients[i, 2],
-          upper=coefficients[i, 1]+critical*coefficients[i, 2],
-          statistic=coefficients[i, 3], p=coefficients[i, 4]))
-      }
-      scale = if (model$family$link == "identity") "outcome" else model$family$link
-      note = paste("Estimates are on the", scale, "scale. Intervals and tests use",
-        if (uses_t) "the residual-df t distribution." else "the normal (z) distribution.")
-      self$results$coefficients$setNote("inference", note)
-      if (self$options$family == "binomial") {
-        response = stats::model.response(stats::model.frame(model))
-        success = if (is.factor(response)) levels(response)[2] else "1"
-        self$results$coefficients$setNote("success", paste("Success event:", success))
-      }
-      measures = c(N=stats::nobs(model), `Residual df`=stats::df.residual(model),
+      state$predictors = self$options$preds
+      # Retain fit measures in state for consumers; they are not default report tables.
+      state$fitStats = c(N=stats::nobs(model), `Residual df`=stats::df.residual(model),
         Deviance=model$deviance, `Null deviance`=model$null.deviance,
         `Log likelihood`=as.numeric(stats::logLik(model)), AIC=stats::AIC(model),
         BIC=stats::BIC(model), Dispersion=summary$dispersion)
-      if (inherits(model, "negbin")) measures = c(measures, `Size (theta)`=model$theta,
-                                                              `SE (theta)`=model$SE.theta)
-      for (i in seq_along(measures)) {
-        table = if (names(measures)[i] %in% c("Log likelihood", "AIC", "BIC")) self$results$likelihood else self$results$fit
-        table$addRow(rowKey=i, values=list(measure=names(measures)[i], value=unname(measures[i])))
-      }
-      self$results$fit$setNote("family", paste("Family:", model$family$family, " Link:", model$family$link))
-      self$results$fit$setNote("missing", paste(state$omitted, "observations omitted because model variables were missing."))
-      if (length(state$warnings)) self$results$fit$setNote("warnings", paste("Model warnings:", paste(state$warnings, collapse="; ")))
+      if (inherits(model, "negbin")) state$fitStats = c(state$fitStats,
+        `Size (theta)`=model$theta, `SE (theta)`=model$SE.theta)
+      self$results$plot$setState(state)
+      jamovi_glm_estimates(self$results, state, includeP=self$options$includeP)
+      self$results$waiting$setVisible(FALSE)
+      self$results$coefficients$setVisible(TRUE)
+      self$results$explanation$setVisible(TRUE)
+      self$results$plot$setVisible(self$options$graphic)
+      self$results$plotExplanation$setVisible(self$options$graphic)
       if (self$options$graphic) {
         guide = tryCatch(jamovi_glm_plot_guide(state, self$options$plotX,
           self$options$plotPanels, self$options$plotGroup, self$options$plotStyle), error=function(error) "")

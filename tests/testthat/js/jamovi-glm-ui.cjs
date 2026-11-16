@@ -67,6 +67,7 @@ const {pathToFileURL} = require('node:url');
         };
         walk(compiled.view.layout);
         const dual = controls.has('comparisonTerms');
+        if (!dual) assert.ok(controls.has('includeP'), 'Missing Include p-values control');
         for (const name of (dual ? ['preds','modelTerms','comparisonTerms','primarySupplier','comparisonSupplier'] : ['preds','modelTerms','primarySupplier']))
             assert.ok(controls.has(name), 'Missing compiled control: ' + name);
         const fire = (name, event) => {
@@ -192,16 +193,9 @@ const {pathToFileURL} = require('node:url');
                 assert.equal(JSON.stringify(visible), '[false,true]');
                 nativeSupplier._items[0].used = 0; filter.call(nativeSupplier);
                 assert.equal(JSON.stringify(visible), '[true,true]');
-                // Exercise the installed contentLink -> cell visibility branch.
-                const branch = 'e==="contentLink"&&this._cell&&this._cell.setVisibility(this.getPropertyValue("contentLink"),!0)';
-                assert.ok(installed.includes(branch));
-                const change = vm.runInNewContext('(function(e){' + branch + '})');
-                for (const family of ['binomial','poisson','gammaLog','binomial','gaussian']) {
-                    let shown;
-                    change.call({_cell:{setVisibility:value => {shown=value;}},
-                        getPropertyValue:() => family === 'binomial'}, 'contentLink');
-                    assert.equal(shown, family === 'binomial');
-                }
+                const se = compiled.view.layout.controls.flatMap(c => c.controls || []).find(c => c.name === 'se');
+                require('./jamovi-binomial-visibility.cjs')(installed, style, se, compilerPath);
+
             }
         }
         fs.writeFileSync(output, records.join('\n') + '\n');

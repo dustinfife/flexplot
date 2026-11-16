@@ -30,3 +30,31 @@ jamovi_generalized_recorder = function(capture) {
   recorder
 }
 
+
+# Coefficient summaries follow estimates.glm(); CI bounds retain full precision.
+jamovi_reported_se = function(table) {
+  table[[intersect(c("SE", "Std..Error", "Std. Error"), names(table))[1]]]
+}
+
+# Minimal host data reader: the actual R6 analysis still initializes and runs.
+jamovi_reporting_read = function(columns) {
+  data[, unique(unlist(columns, use.names=FALSE)), drop=FALSE]
+}
+
+jamovi_reporting_host = function(options, data) {
+  analysis = flexplot:::glmgeneralizedClass$new(options=options, data=NULL)
+  reader = jamovi_reporting_read
+  environment(reader) = list2env(list(data=data), parent=environment(reader))
+  analysis$.setReadDatasetSource(reader)
+  analysis$.setReadDatasetHeaderSource(reader)
+  analysis
+}
+
+jamovi_reporting_update = function(analysis, values) {
+  for (name in names(values)) {
+    option = analysis$options$option(name)
+    option$value = values[[name]]
+  }
+  analysis$optionsChangedHandler(names(values))
+  analysis$run()
+}

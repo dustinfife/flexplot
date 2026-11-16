@@ -10,7 +10,8 @@ name `glmgeneralized`.
 Choose an outcome and predictors. Model terms start with the selected main
 effects; use the selected-predictor supplier to add interactions. Removing a
 predictor removes terms involving it. An explicitly empty term list specifies
-an intercept-only model. Terms use literal column names and interactions, not
+an intercept-only linear model. The GLM report waits until at least one model
+term (including an eligible quadratic term) is present. Terms use literal column names and interactions, not
 executable expressions.
 
 Visualization suppliers contain only predictors used in the model terms. A
@@ -22,7 +23,7 @@ present in the original variable-selection pool.
 Both analyses allow one x variable, one grouping variable, and up to two panel
 variables, using different predictors for each role. Numeric groups and panels
 use flexplot's existing display bins. Leaving x empty selects a numeric model
-predictor if available. For the GLM, native nonpersistent suppliers hide assigned variables from the available list. Each predictor can occupy only one role; removing it from a target makes it available again. X initializes automatically to an available model predictor, and an intercept-only model reports a clear visualization error.
+predictor if available. For the GLM, native nonpersistent suppliers hide assigned variables from the available list. Each predictor can occupy only one role; removing it from a target makes it available again. X initializes automatically to an available model predictor, and a GLM without model terms returns to the waiting instruction.
 
 Linear-model comparisons use the union of the two fitted models' predictors and
 their shared complete-case dataset. The original `comparisonX` and
@@ -56,41 +57,60 @@ custom-link control is commented out; custom links are not exposed here.
   one positive count, fitted with `MASS::glm.nb()`. Coefficients are on the
   log-mean scale. Normal-Wald intervals and z tests use the fitted coefficient
   covariance conditional on estimated size (theta). Theta and its standard
-  error are reported in the fit table. This is not quasipoisson regression.
+  error remain available in the retained fitted-model state. This is not quasipoisson regression.
 
 Fitting uses the supplied terms and ordinary fitted-model contrasts. Interaction
-coefficients retain their conditional interpretation. The coefficient table
-reports one row per design-matrix column: estimate, standard error, test
-statistic, p-value and interval. No model is refitted for visualization.
+coefficients retain their conditional interpretation. The family-aware estimates table
+reports one row per design-matrix column, using the column names and substantive
+estimates returned by `estimates.glm()`, plus coefficient uncertainty. No model is refitted for visualization.
 
-The fit table reports N, residual degrees of freedom, deviance, null deviance,
-log likelihood, AIC, BIC and dispersion, plus theta statistics for Negative
-Binomial models. AIC and BIC use the fitted model's own parameter counts, including
-theta. Gaussian deviance is residual sum of squares; other families use deviance
-relative to a saturated model. These are not pseudo-R-squared measures.
+Generic Model fit and Likelihood fit tables are no longer displayed. N, residual
+df, deviance, null deviance, log likelihood, AIC, BIC, dispersion and applicable
+theta statistics remain in `results$plot$state$fitStats` and the original model.
+No fit or likelihood calculations were removed.
 
 Complete cases use the outcome and variables in the fitted terms. Unused
 selected columns do not exclude observations. Invalid outcomes, rank deficiency
 and failed convergence produce analysis errors. Other estimation warnings are
-retained in fit-table notes. No bias correction or substitute estimator is used.
+retained in estimates-table notes. No bias correction or substitute estimator is used.
 
 ## GLM reporting and quadratic terms
 
-The raw coefficient table retains fitted-model estimates, standard errors, Wald
-confidence intervals and tests. Supplementary tables reuse `estimates.glm()`:
-logistic odds ratios, conditional IRT slopes/thresholds, standardized odds ratios,
-and observation-weighted marginal categorical probabilities. IRT rows include
-only continuous predictors; nonunique or undefined thresholds remain missing.
-Other families display their existing family/link-specific estimates rather than
-borrowing the logistic interpretation. The existing non-binomial `estimates.glm()`
-helpers cannot summarize some transformed formulas, including quadratic terms;
-in these cases an explicit note replaces only the supplementary summaries.
-Coefficient inference, fit measures and model predictions remain available.
+Before an outcome, predictors and at least one valid model term are supplied,
+only a short selection instruction is shown. All tables and plotting elements
+start hidden. Removing required selections hides and clears the existing result
+objects and prediction state; it does not delete result objects. A NULL model-term
+selection preserves older saved analyses' selected-main-effects convention; an
+explicit empty list does not silently add main effects.
 
-Fit statistics are transposed into two compact tables: model/deviance/dispersion
-and likelihood/AIC/BIC. Longer explanations are separate HTML blocks so they
-are not constrained by the old two-column table width. Research references are
-attached to the reporting table, not the result group surrounding the plot.
+There is one coefficient-level **Estimates** table. It reuses the column names
+and values of `estimates.glm()` (including its existing display rounding),
+augmented with raw-coefficient standard errors and full-precision 95% Wald bounds.
+Where the method already supplies a standard-error column, that value and name
+are retained rather than duplicated. Log-link families retain `raw.coefficients`,
+`multiplicative.coef`, `std.mult.coef` and `Prediction Difference (+/- 1 SD)`.
+Inverse-link reciprocal summaries keep their existing interpretation. Logistic
+ORs, inverse ORs and standardized ORs share the same coefficient table.
+
+Logistic IRT slopes and thresholds and categorical marginal probabilities have
+predictor-level rows, so they retain separate, nonduplicate tables, shown only
+when applicable. IRT rows include continuous predictors only. Undefined numeric
+and missing cells are left blank; legitimate category labels such as "NA" are
+preserved. Supplementary statistics unavailable for quadratic/non-binomial
+formulas are identified explicitly; raw coefficients, uncertainty and model
+predictions remain available without inventing supplementary values.
+
+**Output Options** contains one statistical checkbox, **Include p-values**, off
+by default. The checkbox controls p-value columns only; all effect estimates,
+standard errors and confidence intervals remain automatic. Existing visualization
+controls are unchanged. P-values supplied by `estimates.glm()` retain that method's
+precision; otherwise they come from the fitted model summary.
+
+Long explanations remain separate HTML blocks. Research references are attached
+to the coefficient table rather than the plot. The stable `coefficients` result
+ID is retained; obsolete supplementary and generic-fit result IDs are ignored
+when old result records are restored. Rebuilding/reinstalling the module is
+required to apply the new results schema to the GUI.
 
 The GLM **Add squared terms** control accepts selected numeric predictors.
 It adds literal language calls `I(x^2)` to the supplied model terms. Selecting a

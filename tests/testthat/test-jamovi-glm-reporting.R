@@ -12,21 +12,21 @@ test_that("jamovi logistic sections reuse estimates.glm and independent conditio
   irt = analysis$results$irt$asDF
   expected = attr(values,"irt")
   expected = expected[expected$variable %in% c("x","z"),]
-  expect_equal(irt$slope, expected$instantaneous_slope, tolerance=1e-12)
-  expect_equal(irt$threshold, expected$intercept_threshold, tolerance=1e-12)
+  expect_equal(irt$instantaneous_slope, expected$instantaneous_slope, tolerance=1e-12)
+  expect_equal(irt$intercept_threshold, expected$intercept_threshold, tolerance=1e-12)
   b = coef(model)
   slope = b["x"]+b["x:z"]*mean(d$z)
   intercept = b["(Intercept)"]+b["z"]*mean(d$z)
-  expect_equal(irt$slope[irt$variable=="x"], unname(slope/4), tolerance=1e-10)
-  expect_equal(irt$threshold[irt$variable=="x"], unname(-intercept/slope), tolerance=1e-10)
-  expect_equal(analysis$results$odds$asDF$odds, values$OR)
-  expect_equal(analysis$results$standardized$asDF$odds, values$standardized.OR)
+  expect_equal(irt$instantaneous_slope[irt$variable=="x"], unname(slope/4), tolerance=1e-10)
+  expect_equal(irt$intercept_threshold[irt$variable=="x"], unname(-intercept/slope), tolerance=1e-10)
+  expect_equal(analysis$results$coefficients$asDF$OR, values$OR)
+  expect_equal(analysis$results$coefficients$asDF$standardized.OR, values$standardized.OR)
   probabilities = analysis$results$probabilities$asDF
   expected = vapply(levels(d$a), function(level) {
     profile=d; profile$a=factor(level,levels=levels(d$a))
     mean(predict(model,profile,type="response"))
   },numeric(1))
-  expect_equal(probabilities$probability, unname(expected), tolerance=1e-12)
+  expect_equal(probabilities$Probability, unname(expected), tolerance=1e-12)
   expect_match(analysis$results$irt$notes$conditioning$note, "conditional")
   expect_false(grepl("Unshown",analysis$results$plotExplanation$content))
   expect_length(analysis$results$plot$getRefs(),0L)
@@ -50,14 +50,18 @@ test_that("all families retain fitted-model inference and existing family summar
         gammaLog=Gamma(link="log"),Gamma=Gamma(link="inverse")))
     model = analysis$results$plot$state$model
     expect_equal(coef(model),coef(expected),tolerance=1e-10)
-    expect_equal(analysis$results$coefficients$asDF$se,unname(summary(expected)$coefficients[,2]),tolerance=1e-10)
-    expect_equal(analysis$results$likelihood$asDF$value,
+    expect_equal(jamovi_reported_se(analysis$results$coefficients$asDF),unname(if(family=="gaussian") round(summary(expected)$coefficients[,2],3) else summary(expected)$coefficients[,2]),tolerance=1e-10)
+    expect_equal(unname(analysis$results$plot$state$fitStats[c("Log likelihood","AIC","BIC")]),
       c(as.numeric(logLik(expected)),AIC(expected),BIC(expected)),tolerance=1e-10)
     values = estimates(expected)
     if(family!="binomial") {
-      table = analysis$results$effects$asDF
+      table = analysis$results$coefficients$asDF
       expect_identical(table$term,attr(values,"row.names"))
-      for (name in setdiff(names(table),"term")) expect_equal(table[[name]],values[[name]])
+      for (name in setdiff(names(values),c("Pr...t..","Pr...z.."))) {
+        value = values[[name]]
+        if(is.numeric(value)) value[!is.finite(value)] = NA_real_
+        expect_equal(table[[name]],value)
+      }
     }
     plot = flexplot:::jamovi_glm_generalized_plot(analysis$results$plot$state,x="x",panels="a",se=FALSE)
     curves = Filter(function(layer) is.data.frame(layer$data) && "prediction" %in% names(layer$data),plot$layers)
@@ -91,13 +95,14 @@ test_that("quadratic terms preserve linear defaults, predictions, and intercept-
     expect_equal(curve$prediction,expected_means,tolerance=1e-10)
     expect_no_warning(ggplot2::ggplotGrob(plot))
     if(family!="binomial") expect_match(analysis$results$explanation$content,"Additional estimates.glm summaries are unavailable")
-    if(family=="binomial") expect_true(is.na(analysis$results$irt$asDF$threshold[analysis$results$irt$asDF$variable=="x"]))
+    if(family=="binomial") expect_true(is.na(analysis$results$irt$asDF$intercept_threshold[analysis$results$irt$asDF$variable=="x"]))
   }
   options=flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","z"),modelTerms=list(),plotX=NULL)
   analysis=flexplot:::glmgeneralizedClass$new(options=options,data=d)
   expect_true(analysis$run())
   expect_false(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
-  expect_match(analysis$results$plot$.__enclos_env__$private$.error,"exactly one")
+  expect_null(analysis$results$plot$state)
+  expect_true(analysis$results$waiting$visible)
   options=flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","z"),plotX=NULL)
   analysis=flexplot:::glmgeneralizedClass$new(options=options,data=d)
   expect_true(analysis$run())

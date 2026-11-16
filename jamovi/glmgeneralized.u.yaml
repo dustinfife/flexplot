@@ -53,6 +53,12 @@ children:
   - type: ComboBox
     name: family
   - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: includeP
+  - type: CollapseBox
     label: Model visualization
     collapsed: true
     children:
@@ -87,6 +93,7 @@ children:
                 isTarget: true
       - type: ComboBox
         name: plotStyle
+        useSingleCell: true
         contentLink: (family:binomial)
       - type: CheckBox
         name: se

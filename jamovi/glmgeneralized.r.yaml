@@ -3,136 +3,60 @@ name: glmgeneralized
 title: Generalized Linear Model
 jrs: '1.1'
 items:
+  - name: waiting
+    title: ''
+    type: Html
+    content: '<p>Select an outcome and predictors, and specify at least one model term.</p>'
   - name: coefficients
-    title: Raw coefficient estimates
+    title: Estimates
     type: Table
+    visible: false
     refs: [flexplot, graphicalAnalysis]
     columns:
       - name: term
         title: Term
         type: text
-      - name: estimate
-        title: Estimate
-        type: number
-      - name: se
-        title: SE
-        type: number
-      - name: lower
-        title: Lower
-        superTitle: 95% Wald CI
-        type: number
-      - name: upper
-        title: Upper
-        superTitle: 95% Wald CI
-        type: number
-      - name: statistic
-        title: t / z
-        type: number
-      - name: p
-        title: p
-        type: number
-        format: zto,pvalue
-  - name: fit
-    title: Model fit
-    type: Table
-    swapRowsColumns: true
-    columns:
-      - name: measure
-        title: Measure
-        type: text
-      - name: value
-        title: Value
-        type: number
-  - name: likelihood
-    title: Likelihood fit
-    type: Table
-    swapRowsColumns: true
-    columns:
-      - name: measure
-        title: Measure
-        type: text
-      - name: value
-        title: Value
-        type: number
-  - name: effects
-    title: Family-specific estimates
-    type: Table
-    visible: (family != 'binomial')
-    columns:
-      - name: term
-        title: Term
-        type: text
-  - name: odds
-    title: Odds ratios
-    type: Table
-    visible: (family:binomial)
-    columns:
-      - name: term
-        title: Term
-        type: text
-      - name: odds
-        title: OR
-        type: number
-      - name: inverse
-        title: Inverse OR
-        type: number
   - name: irt
     title: IRT estimates
     type: Table
-    visible: (family:binomial)
+    visible: false
     columns:
       - name: variable
-        title: Predictor
+        title: variable
         type: text
-      - name: slope
-        title: Instantaneous slope
+      - name: instantaneous_slope
+        title: instantaneous_slope
         type: number
-      - name: threshold
-        title: Probability 0.5 threshold
+      - name: intercept_threshold
+        title: intercept_threshold
         type: number
-  - name: standardized
-    title: Standardized estimates
-    type: Table
-    visible: (family:binomial)
-    columns:
-      - name: term
-        title: Term
-        type: text
-      - name: odds
-        title: Standardized OR
-        type: number
-      - name: inverse
-        title: Inverse standardized OR
-        type: number
-      - name: difference
-        title: Prediction difference (+/- 1 SD)
-        type: text
   - name: probabilities
     title: Marginal predicted probabilities
     type: Table
-    visible: (family:binomial)
+    visible: false
     columns:
-      - name: variable
-        title: Predictor
+      - name: Variable
+        title: Variable
         type: text
-      - name: level
+      - name: Level
         title: Level
         type: text
-      - name: probability
+      - name: Probability
         title: Probability
         type: number
   - name: explanation
     title: Interpretation
     type: Html
+    visible: false
   - name: plotExplanation
     title: Visualization guide
     type: Html
-    visible: (graphic)
+    visible: false
   - name: plot
     title: Model visualization
     type: Image
     width: 700
     height: 450
-    visible: (graphic)
+    visible: false
     renderFun: .plot
 ...

@@ -14,17 +14,18 @@ test_that("jamovi generalized models reproduce glm coefficients, uncertainty and
     table = analysis$results$coefficients$asDF
     coefficients = summary(expected)$coefficients
     expect_identical(table$term, rownames(coefficients))
-    expect_equal(table$estimate, unname(coefficients[, 1]), tolerance=1e-12)
-    expect_equal(table$se, unname(coefficients[, 2]), tolerance=1e-12)
-    expect_equal(table$statistic, unname(coefficients[, 3]), tolerance=1e-12)
-    expect_equal(table$p, unname(coefficients[, 4]), tolerance=1e-12)
+    reported = estimates(expected)
+    raw = if (family == "gaussian") "Estimate" else "raw.coefficients"
+    expect_equal(table[[raw]], reported[[raw]], tolerance=1e-12)
+    expect_equal(jamovi_reported_se(table), unname(if (family == "gaussian") round(coefficients[, 2], 3) else coefficients[, 2]), tolerance=1e-12)
+    expect_false(any(c("p", "Pr...t..", "Pr...z..") %in% names(table)))
     critical = if (family == "gaussian") qt(.975, df.residual(expected)) else qnorm(.975)
     expect_equal(table$lower, unname(coefficients[, 1]-critical*coefficients[, 2]), tolerance=1e-12)
     expect_equal(table$upper, unname(coefficients[, 1]+critical*coefficients[, 2]), tolerance=1e-12)
-    fit = rbind(analysis$results$fit$asDF, analysis$results$likelihood$asDF)
+    fit = analysis$results$plot$state$fitStats
     values = c(nobs(expected), df.residual(expected), deviance(expected), expected$null.deviance,
       as.numeric(logLik(expected)), AIC(expected), BIC(expected), summary(expected)$dispersion)
-    expect_equal(fit$value[match(c("N", "Residual df", "Deviance", "Null deviance", "Log likelihood", "AIC", "BIC", "Dispersion"), fit$measure)], values, tolerance=1e-12)
+    expect_equal(unname(fit[c("N", "Residual df", "Deviance", "Null deviance", "Log likelihood", "AIC", "BIC", "Dispersion")]), values, tolerance=1e-12)
     expect_identical(state$model$family$link, switch(family, gaussian="identity", binomial="logit", poisson="log"))
     expect_setequal(analysis$results$coefficients$getRefs(), c("flexplot", "graphicalAnalysis"))
   }
@@ -111,7 +112,7 @@ test_that("invalid generalized models produce clear analysis errors", {
     analysis = jamovi_generalized_analysis(case$data, case$family,
       predictors=if (isTRUE(case$alias)) c("x", "z") else c("x", "a"))
     expect_true(analysis$run())
-    for (name in c("coefficients", "fit", "plot")) {
+    for (name in "explanation") {
       expect_identical(analysis$results[[name]]$status, "error")
       expect_match(analysis$results[[name]]$.__enclos_env__$private$.error, case$message)
     }
@@ -129,7 +130,7 @@ test_that("categorical interactions preserve ordered contrasts and supplied-mode
   state = analysis$results$plot$state
   expected = glm(y ~ a*b, data, family=binomial())
   expect_equal(coef(state$model), coef(expected), tolerance=1e-12)
-  expect_equal(analysis$results$coefficients$asDF$se, unname(summary(expected)$coefficients[, 2]), tolerance=1e-12)
+  expect_equal(jamovi_reported_se(analysis$results$coefficients$asDF), unname(summary(expected)$coefficients[, 2]), tolerance=1e-12)
   plot = flexplot:::jamovi_glm_generalized_plot(state, "a", "b")
   for (layer in plot$layers) {
     if (!is.data.frame(layer$data) || !"prediction" %in% names(layer$data)) next
@@ -186,10 +187,10 @@ test_that("saturated Poisson models retain fixed-dispersion inference", {
   expect_true(analysis$run())
   expected = glm(y ~ x, data=data, family=poisson())
   table = analysis$results$coefficients$asDF
-  expect_equal(table$estimate, unname(coef(expected)), tolerance=1e-12)
-  expect_equal(table$se, unname(summary(expected)$coefficients[, 2]), tolerance=1e-12)
+  expect_equal(table$raw.coefficients, estimates(expected)$raw.coefficients, tolerance=1e-12)
+  expect_equal(jamovi_reported_se(table), unname(summary(expected)$coefficients[, 2]), tolerance=1e-12)
   expect_equal(table$lower, unname(coef(expected)-qnorm(.975)*summary(expected)$coefficients[, 2]), tolerance=1e-12)
-  fit = rbind(analysis$results$fit$asDF, analysis$results$likelihood$asDF)
-  expect_equal(fit$value[fit$measure == "Residual df"], 0)
-  expect_equal(fit$value[fit$measure == "Dispersion"], 1)
+  fit = analysis$results$plot$state$fitStats
+  expect_equal(unname(fit["Residual df"]), 0)
+  expect_equal(unname(fit["Dispersion"]), 1)
 })

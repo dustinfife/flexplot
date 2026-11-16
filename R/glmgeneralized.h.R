@@ -16,7 +16,8 @@ glmgeneralizedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             plotPanels = NULL,
             plotGroup = NULL,
             plotStyle = "auto",
-            se = TRUE, ...) {
+            se = TRUE,
+            includeP = FALSE, ...) {
 
             super$initialize(
                 package="flexplot",
@@ -76,6 +77,10 @@ glmgeneralizedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "se",
                 se,
                 default=TRUE)
+            private$..includeP <- jmvcore::OptionBool$new(
+                "includeP",
+                includeP,
+                default=FALSE)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -88,6 +93,7 @@ glmgeneralizedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..plotGroup)
             self$.addOption(private$..plotStyle)
             self$.addOption(private$..se)
+            self$.addOption(private$..includeP)
         }),
     active = list(
         out = function() private$..out$value,
@@ -100,7 +106,8 @@ glmgeneralizedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         plotPanels = function() private$..plotPanels$value,
         plotGroup = function() private$..plotGroup$value,
         plotStyle = function() private$..plotStyle$value,
-        se = function() private$..se$value),
+        se = function() private$..se$value,
+        includeP = function() private$..includeP$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -112,20 +119,17 @@ glmgeneralizedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..plotPanels = NA,
         ..plotGroup = NA,
         ..plotStyle = NA,
-        ..se = NA)
+        ..se = NA,
+        ..includeP = NA)
 )
 
 glmgeneralizedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "glmgeneralizedResults",
     inherit = jmvcore::Group,
     active = list(
+        waiting = function() private$.items[["waiting"]],
         coefficients = function() private$.items[["coefficients"]],
-        fit = function() private$.items[["fit"]],
-        likelihood = function() private$.items[["likelihood"]],
-        effects = function() private$.items[["effects"]],
-        odds = function() private$.items[["odds"]],
         irt = function() private$.items[["irt"]],
-        standardized = function() private$.items[["standardized"]],
         probabilities = function() private$.items[["probabilities"]],
         explanation = function() private$.items[["explanation"]],
         plotExplanation = function() private$.items[["plotExplanation"]],
@@ -137,10 +141,16 @@ glmgeneralizedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="",
                 title="Generalized Linear Model")
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="waiting",
+                title="",
+                content="<p>Select an outcome and predictors, and specify at least one model term.</p>"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="coefficients",
-                title="Raw coefficient estimates",
+                title="Estimates",
+                visible=FALSE,
                 refs=list(
                     "flexplot",
                     "graphicalAnalysis"),
@@ -148,164 +158,60 @@ glmgeneralizedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="term", 
                         `title`="Term", 
-                        `type`="text"),
-                    list(
-                        `name`="estimate", 
-                        `title`="Estimate", 
-                        `type`="number"),
-                    list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number"),
-                    list(
-                        `name`="lower", 
-                        `title`="Lower", 
-                        `superTitle`="95% Wald CI", 
-                        `type`="number"),
-                    list(
-                        `name`="upper", 
-                        `title`="Upper", 
-                        `superTitle`="95% Wald CI", 
-                        `type`="number"),
-                    list(
-                        `name`="statistic", 
-                        `title`="t / z", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="fit",
-                title="Model fit",
-                swapRowsColumns=TRUE,
-                columns=list(
-                    list(
-                        `name`="measure", 
-                        `title`="Measure", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="likelihood",
-                title="Likelihood fit",
-                swapRowsColumns=TRUE,
-                columns=list(
-                    list(
-                        `name`="measure", 
-                        `title`="Measure", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="effects",
-                title="Family-specific estimates",
-                visible="(family != 'binomial')",
-                columns=list(
-                    list(
-                        `name`="term", 
-                        `title`="Term", 
                         `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="odds",
-                title="Odds ratios",
-                visible="(family:binomial)",
-                columns=list(
-                    list(
-                        `name`="term", 
-                        `title`="Term", 
-                        `type`="text"),
-                    list(
-                        `name`="odds", 
-                        `title`="OR", 
-                        `type`="number"),
-                    list(
-                        `name`="inverse", 
-                        `title`="Inverse OR", 
-                        `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="irt",
                 title="IRT estimates",
-                visible="(family:binomial)",
+                visible=FALSE,
                 columns=list(
                     list(
                         `name`="variable", 
-                        `title`="Predictor", 
+                        `title`="variable", 
                         `type`="text"),
                     list(
-                        `name`="slope", 
-                        `title`="Instantaneous slope", 
+                        `name`="instantaneous_slope", 
+                        `title`="instantaneous_slope", 
                         `type`="number"),
                     list(
-                        `name`="threshold", 
-                        `title`="Probability 0.5 threshold", 
+                        `name`="intercept_threshold", 
+                        `title`="intercept_threshold", 
                         `type`="number"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="standardized",
-                title="Standardized estimates",
-                visible="(family:binomial)",
-                columns=list(
-                    list(
-                        `name`="term", 
-                        `title`="Term", 
-                        `type`="text"),
-                    list(
-                        `name`="odds", 
-                        `title`="Standardized OR", 
-                        `type`="number"),
-                    list(
-                        `name`="inverse", 
-                        `title`="Inverse standardized OR", 
-                        `type`="number"),
-                    list(
-                        `name`="difference", 
-                        `title`="Prediction difference (+/- 1 SD)", 
-                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="probabilities",
                 title="Marginal predicted probabilities",
-                visible="(family:binomial)",
+                visible=FALSE,
                 columns=list(
                     list(
-                        `name`="variable", 
-                        `title`="Predictor", 
+                        `name`="Variable", 
+                        `title`="Variable", 
                         `type`="text"),
                     list(
-                        `name`="level", 
+                        `name`="Level", 
                         `title`="Level", 
                         `type`="text"),
                     list(
-                        `name`="probability", 
+                        `name`="Probability", 
                         `title`="Probability", 
                         `type`="number"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanation",
-                title="Interpretation"))
+                title="Interpretation",
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="plotExplanation",
                 title="Visualization guide",
-                visible="(graphic)"))
+                visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Model visualization",
                 width=700,
                 height=450,
-                visible="(graphic)",
+                visible=FALSE,
                 renderFun=".plot"))}))
 
 glmgeneralizedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

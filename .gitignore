@@ -21,3 +21,5 @@ research/
 Rplots.pdf
 *.Rout
 *.Rout.fail
+
+.jamovi-dev/
