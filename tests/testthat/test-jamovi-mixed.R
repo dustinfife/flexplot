@@ -1,33 +1,3 @@
-jamovi_mixed_test_data = function() {
-  set.seed(925)
-  data = data.frame(id=factor(rep(seq_len(16), each=15)),
-    x=rep(seq(-1.5,1.5,length.out=15),16), z=rnorm(240),
-    a=ordered(rep(c("low","middle","high"),80),levels=c("middle","low","high")))
-  intercept = rnorm(16,sd=.8)
-  slope = .25*intercept+rnorm(16,sd=.45)
-  data$y = .3+.6*data$x+.2*data$z+.4*(data$a=="high")+.3*data$x*(data$a=="high")+
-    .15*data$x^2+intercept[data$id]+slope[data$id]*data$x+rnorm(240,sd=.4)
-  data
-}
-
-jamovi_mixed_analysis = function(data=jamovi_mixed_test_data(), ...) {
-  options = do.call(flexplot:::mixedmodelOptions$new, utils::modifyList(
-    list(out="y",preds=c("x","z","a"),cluster="id",graphic=FALSE),list(...),keep.null=TRUE))
-  flexplot:::mixedmodelClass$new(options=options,data=data)
-}
-
-jamovi_mixed_capture = function(...) {
-  capture$plot = original(...)
-  capture$plot
-}
-
-jamovi_mixed_recorder = function(capture) {
-  recorder = jamovi_mixed_capture
-  environment(recorder) = list2env(list(capture=capture,original=flexplot:::jamovi_mixed_plot),
-    parent=environment(recorder))
-  recorder
-}
-
 test_that("Mixed Model estimates preserve the requested random structure and estimation method", {
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_test_data()
@@ -38,7 +8,8 @@ test_that("Mixed Model estimates preserve the requested random structure and est
     list(terms=list("x","a"),slopes="x",intercept=TRUE,quadratic="x",formula=y~x+a+I(x^2)+(1+x|id)))
   for (specification in specifications) for (estimation in c("REML","ML")) {
     analysis = jamovi_mixed_analysis(data,modelTerms=specification$terms,randomSlopes=specification$slopes,
-      randomIntercept=specification$intercept,quadratic=specification$quadratic,estimation=estimation)
+      randomIntercept=specification$intercept,quadratic=specification$quadratic,estimation=estimation,
+      interactions=any(lengths(specification$terms)>1L),polynomials=length(specification$quadratic)>0L)
     expect_true(analysis$run())
     state = analysis$results$plot$state
     expect_false(is.null(state))
@@ -98,7 +69,7 @@ test_that("Mixed Model rejects invalid specifications and reports singular fits 
     list(options=list(cluster="y"),data=data,error="different from"),
     list(options=list(),data=transform(data,id=factor("one")),error="at least two"),
     list(options=list(modelTerms=list("x","z")),data=transform(data,z=x),error="rank deficient"),
-    list(options=list(quadratic="a"),data=data,error="numeric predictors"))
+    list(options=list(quadratic="a",polynomials=TRUE),data=data,error="numeric predictors"))
   for (case in cases) {
     analysis = do.call(jamovi_mixed_analysis,c(list(data=case$data),case$options))
     expect_true(analysis$run())
@@ -116,7 +87,7 @@ test_that("Mixed Model rejects invalid specifications and reports singular fits 
   expect_true(state$singular)
   expect_false(any(grepl("boundary.*singular",state$warnings)))
   expect_length(reformulas::findbars(formula(state$model)),1L)
-  expect_match(analysis$results$diagnostics$content,"not been automatically simplified")
+  expect_false(grepl("not been automatically simplified",analysis$results$diagnostics$content))
   expect_false(grepl("singular",analysis$results$explanation$content,ignore.case=TRUE))
 })
 
@@ -129,7 +100,7 @@ test_that("actual Mixed Model plot callbacks use only the requested original-mod
     list(x="x",panels="a",group="id",quadratic=NULL,intercept=FALSE),
     list(x="a",panels=c("id","z"),group=NULL,quadratic="x"))
   for (case in cases) for (type in c("population","cluster")) {
-    analysis = jamovi_mixed_analysis(data,modelTerms=list("x","z","a",c("x","a")),
+    analysis = jamovi_mixed_analysis(data,modelTerms=list("x","z","a",c("x","a")),interactions=TRUE,polynomials=TRUE,
       quadratic=case$quadratic,randomSlopes="x",randomIntercept=!identical(case$intercept,FALSE),graphic=TRUE,plotX=case$x,
       plotPanels=case$panels,plotGroup=case$group,predictionType=type)
     expect_true(analysis$run())
@@ -262,9 +233,9 @@ test_that("native UI server option batches rerun Mixed Model and clear stale res
   environment(reader) = list2env(list(data=data),parent=environment(reader))
   analysis$.setReadDatasetSource(reader)
   analysis$.setReadDatasetHeaderSource(reader)
-  formulas = list(group=y~1+(1|id),predictors=y~x+a+(1|id),interaction=y~x*a+(1|id),
+  formulas = list(group=y~1+(1|id),predictors=y~x+a+(1|id),`allow-interactions`=y~x+a+(1|id),interaction=y~x*a+(1|id),
     slope=y~x*a+(1+x|id),`no-random-intercept`=y~x*a+(0+x|id),ML=y~x*a+(0+x|id),
-    squared=y~x*a+I(x^2)+(0+x|id),
+    `allow-polynomials`=y~x*a+(0+x|id),squared=y~x*a+I(x^2)+(0+x|id),
     `disable-interactions`=y~x+a+I(x^2)+(0+x|id),`enable-interactions`=y~x+a+I(x^2)+(0+x|id),
     `disable-polynomials`=y~x+a+(0+x|id),`enable-polynomials`=y~x+a+(0+x|id),`restore-intercept`=y~a+(1|id),
     `change-group`=y~a+(1|school),`restore-outcome`=y~a+(1|school),`restore-group`=y~a+(1|id))
@@ -274,11 +245,11 @@ test_that("native UI server option batches rerun Mixed Model and clear stale res
     changed = strsplit(packets$changed[i],";",fixed=TRUE)[[1]]
     for (name in changed) {
       value = as.character(packets[[name]][i])
-      if (value == "__NULL__") value = NULL else if (name == "modelTerms") {
+      if (value == "__NULL__") value = NULL else if (name %in% c("modelTerms","comparisonTerms")) {
         value = if (value == "__EMPTY__") list() else strsplit(strsplit(value,";",fixed=TRUE)[[1]],":",fixed=TRUE)
-      } else if (name %in% c("preds","quadratic","randomSlopes","plotPanels")) {
+      } else if (name %in% c("preds","quadratic","randomSlopes","plotPanels","comparisonQuadratic","comparisonRandomSlopes")) {
         value = if (value == "__EMPTY__") character() else strsplit(value,";",fixed=TRUE)[[1]]
-      } else if (name %in% c("randomIntercept","includeP","graphic","interactions","polynomials")) value = value == "true" else
+      } else if (name %in% c("randomIntercept","includeP","graphic","interactions","polynomials","compare","comparisonInteractions","comparisonPolynomials","comparisonRandomIntercept")) value = value == "true" else
         if (name == "clusters") value = as.integer(value)
       option = options$option(name)
       option$value = value
@@ -318,7 +289,7 @@ test_that("Mixed Model term switches remove terms in R and never recreate them o
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_test_data()
   options = flexplot:::mixedmodelOptions$new(out="y",preds=c("x","a"),cluster="id",
-    modelTerms=list("x","a",c("x","a")),quadratic="x",graphic=FALSE)
+    modelTerms=list("x","a",c("x","a")),quadratic="x",graphic=FALSE,interactions=TRUE,polynomials=TRUE)
   analysis = flexplot:::mixedmodelClass$new(options=options,data=NULL)
   reader = jamovi_reporting_read
   environment(reader) = list2env(list(data=data),parent=environment(reader))
@@ -339,7 +310,7 @@ test_that("Mixed Model term switches remove terms in R and never recreate them o
 
 test_that("Mixed Model CAS delegates adjustment and model curves to the fitted-model CAS implementation", {
   skip_if_not_installed("jmvcore")
-  analysis = jamovi_mixed_analysis(modelTerms=list("x","a",c("x","a")),randomSlopes="x",
+  analysis = jamovi_mixed_analysis(modelTerms=list("x","a",c("x","a")),randomSlopes="x",interactions=TRUE,
     graphic=TRUE,predictionType="cas",plotX="x",plotPanels="a")
   expect_true(analysis$run())
   state = analysis$results$plot$state
@@ -364,7 +335,7 @@ test_that("Mixed Model CAS delegates adjustment and model curves to the fitted-m
   expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
   expect_equal(capture$plot$data$y_adj,plot$data$y_adj)
   # Existing CAS errors are propagated, rather than replaced by a smoother.
-  options = flexplot:::mixedmodelOptions$new(out="y",preds=c("x","z"),cluster="id",quadratic="x")
+  options = flexplot:::mixedmodelOptions$new(out="y",preds=c("x","z"),cluster="id",quadratic="x",polynomials=TRUE)
   quadratic = flexplot:::jamovi_mixed_fit(options,jamovi_mixed_test_data())
   quadratic_plot = flexplot:::jamovi_mixed_plot(quadratic,"x",type="cas")
   direct = cluster_adjusted_scatter(y~x,object=quadratic$model,adjust_re="all")
@@ -432,7 +403,7 @@ test_that("Mixed Model diagnostics precede estimates and distinguish singularity
   message = analysis$results$diagnostics$content
   expect_true(analysis$results$diagnostics$visible)
   expect_match(message,"rank-deficient")
-  expect_match(message,"not been automatically simplified")
+  expect_false(grepl("not been automatically simplified",message))
   expect_match(message,"failed to converge")
   expect_length(gregexpr("Singular fit detected",message,fixed=TRUE)[[1]],1)
   expect_false(grepl("boundary.*singular",message))
@@ -568,4 +539,33 @@ test_that("Mixed Model categorical-axis labels keep automatic defaults and only 
   expect_true(analysis$run())
   expect_identical(flexplot:::jamovi_mixed_apply_labels(analysis$results$plot$state$displayPlot,analysis$options$plotLabels),
     analysis$results$plot$state$displayPlot)
+})
+
+test_that("new Mixed Model term builders default off while explicit saved settings survive", {
+  skip_if_not_installed("jmvcore")
+  fresh = flexplot:::mixedmodelOptions$new()
+  expect_false(fresh$interactions)
+  expect_false(fresh$polynomials)
+  data = jamovi_mixed_test_data()
+  withr::local_libpaths(c(.libPaths(),"/Applications/jamovi.app/Contents/Resources/modules/base/R"))
+  skip_if_not_installed("RProtoBuf")
+  jmvcore:::initProtoBuf()
+  # Restore the explicit saved settings through jamovi's actual options protocol.
+  for (enabled in c(TRUE,FALSE)) {
+    options = flexplot:::mixedmodelOptions$new(out="y",preds=c("x","a"),cluster="id",
+      modelTerms=list("x","a",c("x","a")),quadratic="x",graphic=FALSE)
+    pb = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
+    flag = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
+    flag$o = as.integer(enabled)
+    pb$names = c("interactions","polynomials")
+    pb$options = list(flag,flag)
+    options$fromProtoBuf(pb)
+    analysis = flexplot:::mixedmodelClass$new(options=options,data=data)
+    expect_true(analysis$run())
+    formula = if (enabled) y~x*a+I(x^2)+(1|id) else y~x+a+(1|id)
+    independent = lme4::lmer(formula,data)
+    expect_equal(lme4::fixef(analysis$results$plot$state$model),lme4::fixef(independent),tolerance=1e-10)
+    expect_identical(options$interactions,enabled)
+    expect_identical(options$polynomials,enabled)
+  }
 })

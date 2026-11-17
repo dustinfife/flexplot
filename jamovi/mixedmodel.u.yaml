@@ -86,6 +86,69 @@ children:
   - type: ComboBox
     name: estimation
 - type: CollapseBox
+  label: Model Comparison
+  collapsed: true
+  children:
+  - type: CheckBox
+    name: compare
+  - type: LayoutBox
+    useSingleCell: true
+    contentLink: (compare)
+    children:
+    - type: CheckBox
+      name: comparisonInteractions
+    - type: Supplier
+      name: comparisonSupplier
+      label: Model 2 fixed effects and interactions
+      format: term
+      persistentItems: true
+      useSingleCell: true
+      contentLink: (comparisonInteractions)
+      children:
+      - type: TargetLayoutBox
+        label: Model 2 fixed-effect terms
+        transferAction: interactions
+        children:
+        - type: ListBox
+          name: comparisonTerms
+          isTarget: true
+          valueFilter: unique
+          template:
+            type: TermLabel
+    - type: CheckBox
+      name: comparisonPolynomials
+    - type: Supplier
+      name: comparisonQuadraticSupplier
+      label: Model 2 squared terms
+      format: variable
+      persistentItems: true
+      useSingleCell: true
+      contentLink: (comparisonPolynomials)
+      children:
+      - type: TargetLayoutBox
+        label: Add Model 2 squared terms
+        children:
+        - type: VariablesListBox
+          name: comparisonQuadratic
+          isTarget: true
+          permitted: [numeric]
+    - type: CheckBox
+      name: comparisonRandomIntercept
+    - type: Supplier
+      name: comparisonRandomSupplier
+      label: Selected predictors
+      format: variable
+      persistentItems: true
+      children:
+      - type: TargetLayoutBox
+        label: Model 2 random slopes (correlated components)
+        children:
+        - type: VariablesListBox
+          name: comparisonRandomSlopes
+          isTarget: true
+    - type: ComboBox
+      name: comparisonEstimation
+- type: CollapseBox
   label: Output Options
   collapsed: true
   children:

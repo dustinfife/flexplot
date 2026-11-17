@@ -10,6 +10,8 @@ module.exports = function(ui, view, fire, assert) {
     assert.equal(JSON.stringify(ui.modelTerms.value()), '[["x"],["a"]]');
     assert.equal(ui.plotX.value(), 'x');
     assert.equal(JSON.stringify(ui.plotPanels.value()), '["id"]');
+    ui.interactions.setValue(true); fire('interactions','changed');
+    ui.polynomials.setValue(true); fire('polynomials','changed');
     ui.modelTerms.setValue([['x'],['a'],['x','a']]); fire('modelTerms','changed');
     ui.randomSlopes.setValue(['x']); fire('randomSlopes','changed');
     ui.quadratic.setValue(['x']); fire('quadratic','changed');

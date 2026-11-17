@@ -1,10 +1,7 @@
 'use strict';
 
 const updateTerms = require('./model-terms');
-const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
-    selections:['plotX','plotPanels','plotGroup'], exclusive:true, requireX:true,
-    extra:['quadratic','randomSlopes','cluster'], include:'cluster'}];
-const synchronize = function(ui, context, added, quadraticChanged = false) {
+const synchronize = function(ui, context, added, quadraticChanged = null) {
     // Native setters synchronously invoke other handlers while an option edit is
     // still in progress. Synchronize once, and send the complete option batch.
     if (context.flags && context.flags.updating) return;
@@ -14,23 +11,32 @@ const synchronize = function(ui, context, added, quadraticChanged = false) {
     options.beginEdit();
     try {
         const predictors = ui.preds.value() || [];
-        if (ui.interactions.value() === false && ui.modelTerms.value() != null) {
-            const main = ui.modelTerms.value().filter(term => term.length === 1);
-            if (JSON.stringify(main) !== JSON.stringify(ui.modelTerms.value())) ui.modelTerms.setValue(main);
+        for (const [termsName, interactionName, polynomialName, quadraticName, slopesName, supplier, randomSupplier] of [
+            ['modelTerms','interactions','polynomials','quadratic','randomSlopes','quadraticSupplier','randomSupplier'],
+            ['comparisonTerms','comparisonInteractions','comparisonPolynomials','comparisonQuadratic','comparisonRandomSlopes','comparisonQuadraticSupplier','comparisonRandomSupplier']]) {
+            if (ui[interactionName].value() === false && ui[termsName].value() != null) {
+                const main = ui[termsName].value().filter(term => term.length === 1);
+                if (JSON.stringify(main) !== JSON.stringify(ui[termsName].value())) ui[termsName].setValue(main);
+            }
+            if (ui[polynomialName].value() === false && (ui[quadraticName].value() || []).length)
+                ui[quadraticName].setValue([]);
+            for (const name of [quadraticName,slopesName]) {
+                const value = (ui[name].value() || []).filter(variable => predictors.includes(variable));
+                if (JSON.stringify(ui[name].value()) !== JSON.stringify(value)) ui[name].setValue(value);
+            }
+            ui[supplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
+            ui[randomSupplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
+            if (quadraticChanged === quadraticName) {
+                const terms = ui[termsName].value() || [];
+                const missing = (ui[quadraticName].value() || []).filter(name => !terms.some(term => term.length === 1 && term[0] === name));
+                if (missing.length) ui[termsName].setValue(terms.concat(missing.map(name => [name])));
+            }
         }
-        if (ui.polynomials.value() === false && (ui.quadratic.value() || []).length)
-            ui.quadratic.setValue([]);
-        for (const name of ['quadratic','randomSlopes']) {
-            const value = (ui[name].value() || []).filter(variable => predictors.includes(variable));
-            if (JSON.stringify(ui[name].value()) !== JSON.stringify(value)) ui[name].setValue(value);
-        }
-        ui.quadraticSupplier.setValue(utils.valuesToItems(predictors, FormatDef.variable));
-        ui.randomSupplier.setValue(utils.valuesToItems(predictors, FormatDef.variable));
-        if (quadraticChanged) {
-            const terms = ui.modelTerms.value() || [];
-            const missing = (ui.quadratic.value() || []).filter(name => !terms.some(term => term.length === 1 && term[0] === name));
-            if (missing.length) ui.modelTerms.setValue(terms.concat(missing.map(name => [name])));
-        }
+        const comparing = ui.compare.value() === true;
+        const layouts = [{supplier:'plotSupplier', models:comparing ? ['modelTerms','comparisonTerms'] : ['modelTerms'],
+            selections:['plotX','plotPanels','plotGroup'], exclusive:true, requireX:true,
+            extra:comparing ? ['quadratic','randomSlopes','comparisonQuadratic','comparisonRandomSlopes','cluster'] : ['quadratic','randomSlopes','cluster'],
+            include:'cluster'}];
         // A new grouping selection defaults to panels; do not overwrite a saved layout.
         const cluster = ui.cluster.value();
         if (cluster !== context.workspace.mixedCluster) {
@@ -45,7 +51,7 @@ const synchronize = function(ui, context, added, quadraticChanged = false) {
             if (JSON.stringify(ui.plotPanels.value()) !== JSON.stringify(panels)) ui.plotPanels.setValue(panels);
         }
         if (cluster && ui.plotX.value() === cluster) ui.plotX.setValue(null);
-        updateTerms(ui, context, added, ['modelTerms'], ['primarySupplier'], layouts);
+        updateTerms(ui, context, added, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
         if (cluster && ui.plotX.value() === cluster) {
             ui.plotX.setValue(null);
             const panels = ui.plotPanels.value() || [];
@@ -67,10 +73,19 @@ module.exports = {
     polynomials_changed: function(ui) { synchronize(ui,this,false); },
     modelTerms_changed: function(ui) { synchronize(ui,this,false); },
     primarySupplier_updated: function(ui) { synchronize(ui,this,false); },
-    quadratic_changed: function(ui) { synchronize(ui,this,false,true); },
+    quadratic_changed: function(ui) { synchronize(ui,this,false,'quadratic'); },
     quadraticSupplier_updated: function(ui) { synchronize(ui,this,false); },
     randomSlopes_changed: function(ui) { synchronize(ui,this,false); },
     randomSupplier_updated: function(ui) { synchronize(ui,this,false); },
+    compare_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonTerms_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonInteractions_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonPolynomials_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonQuadratic_changed: function(ui) { synchronize(ui,this,false,'comparisonQuadratic'); },
+    comparisonRandomSlopes_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonSupplier_updated: function(ui) { synchronize(ui,this,false); },
+    comparisonQuadraticSupplier_updated: function(ui) { synchronize(ui,this,false); },
+    comparisonRandomSupplier_updated: function(ui) { synchronize(ui,this,false); },
     cluster_changed: function(ui) { synchronize(ui,this,false); },
     plotSupplier_updated: function(ui) { synchronize(ui,this,false); },
     plotX_changed: function(ui) { synchronize(ui,this,false); },

@@ -8,14 +8,22 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             out = NULL,
             preds = NULL,
-            interactions = TRUE,
-            polynomials = TRUE,
+            interactions = FALSE,
+            polynomials = FALSE,
             modelTerms = NULL,
             quadratic = NULL,
             cluster = NULL,
             randomIntercept = TRUE,
             randomSlopes = NULL,
             estimation = "REML",
+            compare = FALSE,
+            comparisonTerms = NULL,
+            comparisonInteractions = FALSE,
+            comparisonPolynomials = FALSE,
+            comparisonQuadratic = NULL,
+            comparisonRandomIntercept = TRUE,
+            comparisonRandomSlopes = NULL,
+            comparisonEstimation = "REML",
             includeP = FALSE,
             showCorrelations = FALSE,
             graphic = TRUE,
@@ -42,11 +50,11 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..interactions = jmvcore::OptionBool$new(
                 "interactions",
                 interactions,
-                default=TRUE)
+                default=FALSE)
             private$..polynomials = jmvcore::OptionBool$new(
                 "polynomials",
                 polynomials,
-                default=TRUE)
+                default=FALSE)
             private$..modelTerms = jmvcore::OptionTerms$new(
                 "modelTerms",
                 modelTerms,
@@ -70,6 +78,41 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..estimation = jmvcore::OptionList$new(
                 "estimation",
                 estimation,
+                options=list(
+                    "REML",
+                    "ML"),
+                default="REML")
+            private$..compare = jmvcore::OptionBool$new(
+                "compare",
+                compare,
+                default=FALSE)
+            private$..comparisonTerms = jmvcore::OptionTerms$new(
+                "comparisonTerms",
+                comparisonTerms,
+                default=NULL)
+            private$..comparisonInteractions = jmvcore::OptionBool$new(
+                "comparisonInteractions",
+                comparisonInteractions,
+                default=FALSE)
+            private$..comparisonPolynomials = jmvcore::OptionBool$new(
+                "comparisonPolynomials",
+                comparisonPolynomials,
+                default=FALSE)
+            private$..comparisonQuadratic = jmvcore::OptionVariables$new(
+                "comparisonQuadratic",
+                comparisonQuadratic,
+                default=NULL)
+            private$..comparisonRandomIntercept = jmvcore::OptionBool$new(
+                "comparisonRandomIntercept",
+                comparisonRandomIntercept,
+                default=TRUE)
+            private$..comparisonRandomSlopes = jmvcore::OptionVariables$new(
+                "comparisonRandomSlopes",
+                comparisonRandomSlopes,
+                default=NULL)
+            private$..comparisonEstimation = jmvcore::OptionList$new(
+                "comparisonEstimation",
+                comparisonEstimation,
                 options=list(
                     "REML",
                     "ML"),
@@ -178,6 +221,14 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..randomIntercept)
             self$.addOption(private$..randomSlopes)
             self$.addOption(private$..estimation)
+            self$.addOption(private$..compare)
+            self$.addOption(private$..comparisonTerms)
+            self$.addOption(private$..comparisonInteractions)
+            self$.addOption(private$..comparisonPolynomials)
+            self$.addOption(private$..comparisonQuadratic)
+            self$.addOption(private$..comparisonRandomIntercept)
+            self$.addOption(private$..comparisonRandomSlopes)
+            self$.addOption(private$..comparisonEstimation)
             self$.addOption(private$..includeP)
             self$.addOption(private$..showCorrelations)
             self$.addOption(private$..graphic)
@@ -200,6 +251,14 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         randomIntercept = function() private$..randomIntercept$value,
         randomSlopes = function() private$..randomSlopes$value,
         estimation = function() private$..estimation$value,
+        compare = function() private$..compare$value,
+        comparisonTerms = function() private$..comparisonTerms$value,
+        comparisonInteractions = function() private$..comparisonInteractions$value,
+        comparisonPolynomials = function() private$..comparisonPolynomials$value,
+        comparisonQuadratic = function() private$..comparisonQuadratic$value,
+        comparisonRandomIntercept = function() private$..comparisonRandomIntercept$value,
+        comparisonRandomSlopes = function() private$..comparisonRandomSlopes$value,
+        comparisonEstimation = function() private$..comparisonEstimation$value,
         includeP = function() private$..includeP$value,
         showCorrelations = function() private$..showCorrelations$value,
         graphic = function() private$..graphic$value,
@@ -221,6 +280,14 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..randomIntercept = NA,
         ..randomSlopes = NA,
         ..estimation = NA,
+        ..compare = NA,
+        ..comparisonTerms = NA,
+        ..comparisonInteractions = NA,
+        ..comparisonPolynomials = NA,
+        ..comparisonQuadratic = NA,
+        ..comparisonRandomIntercept = NA,
+        ..comparisonRandomSlopes = NA,
+        ..comparisonEstimation = NA,
         ..includeP = NA,
         ..showCorrelations = NA,
         ..graphic = NA,
@@ -239,13 +306,16 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         waiting = function() private$.items[["waiting"]],
         specification = function() private$.items[["specification"]],
+        comparisonSpecification = function() private$.items[["comparisonSpecification"]],
         diagnostics = function() private$.items[["diagnostics"]],
         fixed = function() private$.items[["fixed"]],
         random = function() private$.items[["random"]],
         correlations = function() private$.items[["correlations"]],
         explanation = function() private$.items[["explanation"]],
         plotExplanation = function() private$.items[["plotExplanation"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        comparison = function() private$.items[["comparison"]],
+        comparisonplot = function() private$.items[["comparisonplot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -265,6 +335,11 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="specification",
                 title="Model specification",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="comparisonSpecification",
+                title="Comparison model specifications",
                 visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -358,7 +433,55 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=700,
                 height=450,
                 visible=FALSE,
-                renderFun=".plot"))}))
+                renderFun=".plot"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparison",
+                title="Mixed-model comparison (ML)",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="model",
+                        `title`="Model",
+                        `type`="text"),
+                    list(
+                        `name`="n",
+                        `title`="N",
+                        `type`="integer"),
+                    list(
+                        `name`="aic",
+                        `title`="AIC",
+                        `type`="number"),
+                    list(
+                        `name`="bic",
+                        `title`="BIC",
+                        `type`="number"),
+                    list(
+                        `name`="bayes.factor",
+                        `title`="Approximate BIC Bayes factor",
+                        `type`="number"),
+                    list(
+                        `name`="lr",
+                        `title`="Likelihood ratio",
+                        `type`="number"),
+                    list(
+                        `name`="df",
+                        `title`="df",
+                        `type`="integer"),
+                    list(
+                        `name`="p",
+                        `title`="p (fixed-effect LRT)",
+                        `type`="number",
+                        `format`="zto,pvalue",
+                        `visible`="(includeP)"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="comparisonplot",
+                title="Mixed-model comparison",
+                width=700,
+                height=450,
+                visible=FALSE,
+                renderFun=".comparisonplot"))}))
 
 mixedmodelBase = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "mixedmodelBase",

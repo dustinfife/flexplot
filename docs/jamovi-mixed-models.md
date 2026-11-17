@@ -28,7 +28,7 @@ The **Include Interaction Terms** and **Include Polynomial Terms** checkboxes co
 not just the interface. Turning one off clears its selected terms, hides its
 builder, and refits while preserving selected main effects. Turning it back on
 only reveals the builder; removed terms are not restored automatically. Both
-options default on to preserve earlier saved models that predate the checkboxes.
+options default off for new analyses. Explicit saved settings are restored unchanged.
 Restoration defers normalization until all saved options have loaded. R also
 excludes disabled terms if a stale saved selection reaches the adapter.
 
@@ -62,8 +62,7 @@ off-diagonal correlations. No empty matrix is shown for a single random term.
 No variance-component intervals are supplied.
 
 Singular-fit diagnostics appear immediately below the model specification,
-before the estimates. They describe rank deficiency and confirm that the
-requested random structure has not been simplified. Redundant lme4 boundary
+before the estimates. They describe rank deficiency and advise caution. Redundant lme4 boundary
 messages are removed; distinct convergence diagnostics remain visible there.
 Research citations are analysis-level references, not unexplained numbers under
 the fixed-effect table.
@@ -115,7 +114,7 @@ needs grouping in panels/color; and the existing formula-text grouping extractor
 cannot reliably visualize nonstandard grouping names containing spaces or
 formula punctuation. Such names can still be used for fitting/reporting. These
 are optional plotting limitations, not blockers for the supported one-group
-analysis. Mixed-model comparison remains outside this milestone.
+analysis. Mixed-model comparison is available as described below.
 
 ### Custom plot labels
 
@@ -134,6 +133,51 @@ plot role hides its controls but retains its labels for later reuse. The same
 editor supports population, cluster-specific, and CAS displays. Label metadata
 is returned through jamovi's options response so the editor and saved options
 stay synchronized.
+
+## Model comparison
+
+**Compare two models** defaults off. Model 2 has independent main effects,
+interaction and polynomial switches, squared terms, random intercept/slopes,
+and ML/REML estimation. Both models share the outcome, grouping variable and
+selected predictor pool. The shared visualization roles may use predictors in
+either model. Saved settings and dependent selections follow the same native
+synchronization rules as Model 1.
+
+The original Model 1 tables retain its requested estimation and its own eligible
+observations. Separate comparison fits use identical complete observations over
+the union of variables actually required by either formula, including random
+slopes. Consequently, comparison Model 1 can differ from the original table
+when Model 2 requires additional variables with missing values; the comparison
+sample size and this distinction are stated in the output.
+
+All comparison AIC, BIC and likelihood calculations use ML copies, obtained with
+`lme4::refitML()` when needed. REML likelihoods are never compared across fixed
+effects. The original fits, their requested ML/REML settings, and the fits used
+for visualization are preserved. The existing `bf.bic()` supplies the BIC-based
+approximation: Model 1's value favors Model 1 over Model 2 and vice versa. These
+reciprocal values are not exact Bayes factors.
+
+An ordinary asymptotic chi-square LRT is reported only for nested fixed-effect
+design spaces with identical actual random-effect designs and converged,
+nonsingular ML fits. Fixed nesting is checked using model matrices, including
+contrasts and polynomial terms. Changing the random structure does not receive
+an ordinary chi-square p-value: boundary-calibrated bootstrap or other methods
+are not implemented. Nonnested/equivalent comparisons also omit the LRT.
+Singular ML fits retain descriptive information criteria, but omit the BIC Bayes
+factor and ordinary LRT p-value. Convergence failures omit comparison statistics;
+unavailable cells are blank and explained. P-values remain optional.
+
+The comparison visualization replaces the single-model image while comparison
+is enabled, using `compare_fits()` with two named prediction streams. Population
+and cluster-specific views use the comparison-sample original fits, never the
+ML copies created solely for statistics. Existing x/panel selections and custom
+labels are retained. Model colors and line types distinguish Model 1 and Model 2;
+there are no prediction confidence bands. Cluster-specific views require the
+shared grouping variable in panels. Two-model CAS and second-axis grouping for
+numeric outcomes remain unsupported and produce informative plot errors; use
+panels for grouping. Intercept-only models have valid statistics but no predictor
+for an x-axis plot. Existing shared-renderer restrictions on grouping-variable
+names also remain in effect. No shared prediction algorithms have been changed.
 
 ## Development and GUI verification
 

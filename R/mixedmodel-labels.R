@@ -10,6 +10,11 @@ jamovi_mixed_label_catalog = function(plot, layout) {
   rows = list(jamovi_mixed_label_row("x", paste(x,collapse=""), display="X-axis label"),
     jamovi_mixed_label_row("y", jamovi_mixed_axis_key(plot,"y"), display="Y-axis label"))
   group = layout$group
+  if (isTRUE(attr(plot,"jamovi_mixed_comparison"))) {
+    rows = c(rows,list(jamovi_mixed_label_row("legend","model",display="Model legend title")))
+    models = unique(unlist(lapply(plot$layers,jamovi_mixed_layer_models)))
+    for (i in seq_along(models)) rows = c(rows,list(jamovi_mixed_label_row("legendLevel","model",models[i],paste0("Legend: Model ",i))))
+  }
   if (length(group) && !identical(plot$theme$legend.position, "none")) {
     column = if (paste0(group,"_binned") %in% names(plot$data)) paste0(group,"_binned") else group
     rows = c(rows,list(jamovi_mixed_label_row("legend",column,display=paste0("Color / line / symbol title: ",group))))
@@ -162,4 +167,9 @@ jamovi_mixed_axis_key = function(plot, axis) {
   mapping = plot$mapping[[axis]]
   if (is.null(mapping)) return("")
   rlang::as_label(mapping)
+}
+
+jamovi_mixed_layer_models = function(layer) {
+  if (!is.data.frame(layer$data) || !"model" %in% names(layer$data)) return(character())
+  as.character(layer$data$model)
 }

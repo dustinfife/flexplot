@@ -149,6 +149,7 @@ compare_fits = function(formula, data, model1, model2=NULL,
   }
   available = unique(unlist(lapply(terms, `[[`, "predictors")))
   compare_fits_errors(data, plotted[1], plotted[-1], available)
+  compare_fits_validate_binomial_coding(models,data,outcome)
   variables = unique(c(plotted, available, outcome))
   data = compare_fits_sample(data, models, variables)
   reference_data = data

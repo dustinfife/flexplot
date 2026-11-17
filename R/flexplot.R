@@ -41,6 +41,12 @@
 ##' @param plot.type This argument allows the user to control the type of plot used. Flexplot defaults to histograms (for univariate variables)
 ##' but could also do qqplots (using "qq" as the argument) or density plots (using "density"). Also, the user can specify "boxplot" for boxplots and
 ##' "violin" for violin plots. 
+##' @param prediction.draw Optional name of a draw-identifier column in
+##' prediction. Draws represent relationships from one model, independently of
+##' categorical groups and panels. The model column is optional in draw mode;
+##' if supplied it must identify one model. See \code{\link{prepare_flexplot}}.
+##' @param prediction.alpha Transparency of supplied prediction draws, from
+##' zero to one. Does not change raw-observation opacity. Defaults to one.
 ##' @param return_data Should flexplot return the dataset? Defaults to No. This is useful if you want to recycle the bin assigments from flexplot. 
 ##' @param ... Other arguments passed to \code{\link[ggplot2]{aes}}
 ##' @author Dustin Fife
@@ -106,11 +112,20 @@ flexplot = function(formula, data=NULL, related=F,
 		prediction = NULL, suppress_smooth=F, alpha=.99977, plot.string=F, silent=F,
 		third.eye=NULL,
 		plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"), 
-		return_data = F, ...){
+		return_data = F, ..., prediction.draw=NULL, prediction.alpha=1){
 
   if (isTRUE(plot.string)) {
     stop("String-based plotting has been retired; plot.string=TRUE is no longer supported. ",
          "Modify the returned ggplot object directly instead.", call.=FALSE)
+  }
+  draw_predictions = !is.null(prediction.draw)
+  if (draw_predictions) {
+    prediction = flexplot_validate_prediction_draws(prediction,prediction.draw,prediction.alpha,formula)
+    draw_outcome = all.vars(formula)[1]
+    if (!is.null(data) && !is.numeric(data[[draw_outcome]]) && !is_binary(data[[draw_outcome]]))
+      stop("Prediction draws support numeric or binary outcomes, not association plots.",call.=FALSE)
+    if (related || !is.null(ghost.line)) stop("Prediction draws do not support paired-difference or ghost overlays.",call.=FALSE)
+    suppress_smooth = TRUE
   }
   comparison_predictions = isTRUE(attr(prediction, "flexplot_comparison"))
   comparison_call = attr(prediction, "flexplot_comparison_call")
@@ -237,7 +252,7 @@ flexplot = function(formula, data=NULL, related=F,
   
   # Native magnets retain supplied probabilities and bins already prepared above.
   # Direct non-magnet predictions retain their existing bin aggregation.
-  if (comparison_predictions && !use_magnet && length(axis) > 1 &&
+  if (comparison_predictions && !draw_predictions && !use_magnet && length(axis) > 1 &&
       length(unique(prediction$model)) > 1) {
     panels = c(axis[-1], given[!is.na(given) & nzchar(given)])
     panel_formula = as.name(panels[1])
@@ -250,7 +265,7 @@ flexplot = function(formula, data=NULL, related=F,
          "(in this case, ", axis[2], "). Try placing it in panels instead:\n\n",
          paste(deparse(comparison_call, width.cutoff=100L), collapse="\n"), call.=FALSE)
   }
-  if (!comparison_predictions && !is.null(prediction) && !use_magnet) {
+  if (!comparison_predictions && !draw_predictions && !is.null(prediction) && !use_magnet) {
     num.models = levels(prediction$model)
     
     prediction = flexplot_modify_prediction(
@@ -295,13 +310,13 @@ flexplot = function(formula, data=NULL, related=F,
     alpha = alpha,
     sample = sample,
     raw.data = raw.data,
-    magnet_summary=!comparison_predictions,
+    magnet_summary=!comparison_predictions && !draw_predictions,
     magnet_labels=logistic_labels,
     magnet_lines=!is.null(ghost.line)
   )
 
   facet = flexplot_panel_variables_object(given, break.me)
-  if (use_magnet && !is.null(prediction)) {
+  if (use_magnet && !draw_predictions && !is.null(prediction)) {
     comparison = flexplot_magnet_comparison(prediction, axis, data, given)
     prediction = comparison$prediction
     if (!is.null(comparison$facet)) facet = comparison$facet
@@ -315,7 +330,8 @@ flexplot = function(formula, data=NULL, related=F,
       data=data,
       use_magnet=use_magnet,
       given=given,
-      comparison=comparison_predictions
+      comparison=comparison_predictions,
+      draw=prediction.draw, draw_alpha=prediction.alpha
     )
   }
 

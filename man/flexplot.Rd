@@ -27,7 +27,9 @@ flexplot(
   third.eye = NULL,
   plot.type = c("histogram", "qq", "density", "boxplot", "violin", "line"),
   return_data = F,
-  ...
+  ...,
+  prediction.draw = NULL,
+  prediction.alpha = 1
 )
 }
 \arguments{
@@ -86,6 +88,14 @@ but could also do qqplots (using "qq" as the argument) or density plots (using "
 \item{return_data}{Should flexplot return the dataset? Defaults to No. This is useful if you want to recycle the bin assigments from flexplot.}
 
 \item{...}{Other arguments passed to \code{\link[ggplot2]{aes}}}
+
+\item{prediction.draw}{Optional name of a draw-identifier column in
+prediction. Draws represent relationships from one model, independently of
+categorical groups and panels. The model column is optional in draw mode;
+if supplied it must identify one model. See \code{\link{prepare_flexplot}}.}
+
+\item{prediction.alpha}{Transparency of supplied prediction draws, from
+zero to one. Does not change raw-observation opacity. Defaults to one.}
 }
 \value{
 a ggplot2 object

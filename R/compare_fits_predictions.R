@@ -63,6 +63,53 @@ compare_fits_model_frame = function(model) {
   frame
 }
 
+# A binomial factor's first level is failure; remaining levels are success.
+# The ordered attribute and predictor contrasts do not define this event.
+compare_fits_binomial_encoding = function(model) {
+  if (!inherits(model,c("glm","glmerMod"))) return(NULL)
+  if (!stats::family(model)$family %in% c("binomial","quasibinomial")) return(NULL)
+  response = stats::model.response(compare_fits_model_frame(model))
+  if (is.factor(response)) return(levels(response))
+  if (is.logical(response)) return(c("FALSE","TRUE"))
+  if (is.numeric(response) && !is.matrix(response)) return(c("0","1"))
+  NULL
+}
+
+compare_fits_validate_binomial_coding = function(models, data, outcome) {
+  encodings = lapply(models,compare_fits_binomial_encoding)
+  binomial = which(!vapply(encodings,is.null,logical(1)))
+  if (!length(binomial)) return(invisible(NULL))
+  first = binomial[1]
+  expected = encodings[[first]]
+  for (i in binomial[-1]) {
+    if (identical(expected,encodings[[i]])) next
+    stop("Compared binomial models use different success coding: model",first,
+      " uses levels [",paste(expected,collapse=", "),"], whereas model",i,
+      " uses [",paste(encodings[[i]],collapse=", "),"]. ",
+      "The first level is failure; the remaining level is success. ",
+      "Refit both models using the same outcome level order and success event.",call.=FALSE)
+  }
+  supplied = data[[outcome]]
+  if (is.factor(supplied)) {
+    # Ignore unused extra declarations: plotting drops them before conversion.
+    actual = levels(supplied)[levels(supplied) %in% expected]
+  } else if (is.character(supplied)) {
+    actual = levels(factor(supplied))
+    actual = actual[actual %in% expected]
+  } else if (is.logical(supplied)) {
+    actual = c("FALSE","TRUE")
+  } else if (is.numeric(supplied) && !is.matrix(supplied)) {
+    actual = c("0","1")
+  } else return(invisible(NULL))
+  if (identical(expected,actual)) return(invisible(NULL))
+  stop("Binomial outcome coding for '",outcome,"' in 'data' does not match model",first,
+    ". Fitted outcome levels are [",paste(expected,collapse=", "),
+    "] (success: ",paste(expected[-1],collapse=", "),
+    "), but supplied data uses [",paste(actual,collapse=", "),"]. ",
+    "Restore the fitted outcome level order in data, or refit both models with the desired coding. ",
+    "Changing only the ordered-factor attribute is allowed.",call.=FALSE)
+}
+
 compare_fits_matching_rows = function(model, data) {
   frame = compare_fits_model_frame(model)
   ids = rownames(frame)

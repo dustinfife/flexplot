@@ -71,6 +71,7 @@ jamovi_mixed_reset = function(results) {
     if (inherits(item, "Html")) item$setContent("")
   }
   results$plot$setState(NULL)
+  results$comparisonplot$setState(NULL)
   results$waiting$setContent("<p>Select a numeric outcome and one grouping variable.</p>")
   results$waiting$setVisible(TRUE)
 }
@@ -106,7 +107,7 @@ jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE)
   }
   diagnostics = character()
   if (isTRUE(state$singular)) diagnostics = c(diagnostics,
-    "Singular fit detected. The estimated random-effects covariance matrix is rank-deficient. Interpret random-effect estimates cautiously. The requested random-effects structure has not been automatically simplified.")
+    "Singular fit detected. The estimated random-effects covariance matrix is rank-deficient. Interpret random-effect estimates cautiously.")
   if (length(state$warnings)) diagnostics = c(diagnostics, paste0("Convergence / fitting diagnostic: ",state$warnings))
   if (length(diagnostics)) {
     results$diagnostics$setContent(paste0("<p><strong>",paste(jamovi_mixed_escape(diagnostics),collapse="</strong></p><p><strong>"),"</strong></p>"))
@@ -168,6 +169,7 @@ jamovi_mixed_plot = function(state, x=NULL, panels=NULL, group=NULL, type="clust
 mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
   "mixedmodelClass", inherit=mixedmodelBase, private=list(
     .modelState=NULL,
+    .comparisonState=NULL,
     .init=function() {
       if (is.null(private$.modelState)) private$.modelState = self$results$plot$state
       jamovi_mixed_reset(self$results)
@@ -191,7 +193,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       }
       state$fitOptions = fit_options
       state$inputData = self$data
-      if (self$options$graphic) {
+      if (self$options$graphic && !self$options$compare) {
         layout = list(x=self$options$plotX,panels=self$options$plotPanels,group=self$options$plotGroup,
           type=self$options$predictionType,clusters=self$options$clusters)
         plot = tryCatch(do.call(jamovi_mixed_plot,c(list(state=state),layout)),error=identity)
@@ -208,7 +210,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       for (item in c("specification", "fixed", "random", "explanation")) self$results[[item]]$setVisible(TRUE)
       private$.modelState = state
       self$results$plot$setState(state)
-      self$results$plot$setVisible(self$options$graphic)
+      self$results$plot$setVisible(self$options$graphic && !self$options$compare)
       self$results$plotExplanation$setVisible(self$options$graphic)
       self$results$plotExplanation$setContent(paste0("<p>",
         if (self$options$predictionType == "cas")
@@ -218,6 +220,52 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           " Curves use the existing marginal prediction method; undisplayed covariates retain the full eligible reference population.",
           " Up to ", self$options$clusters, " randomly selected clusters are displayed."),
         " No prediction confidence bands are calculated.</p>"))
+      if (!self$options$compare) return(invisible(NULL))
+      comparison_options = c(fit_options,lapply(c("comparisonTerms","comparisonInteractions","comparisonPolynomials",
+        "comparisonQuadratic","comparisonRandomIntercept","comparisonRandomSlopes","comparisonEstimation"),self$options$get))
+      comparison = private$.comparisonState
+      if (is.null(comparison) || !identical(comparison$fitOptions,comparison_options) ||
+          !identical(comparison$inputData,self$data)) {
+        comparison = tryCatch(jamovi_mixed_comparison(self$options,self$data),error=identity)
+      }
+      if (inherits(comparison,"error")) {
+        private$.comparisonState = NULL
+        self$results$comparison$setVisible(TRUE)
+        self$results$comparison$setError(conditionMessage(comparison))
+        return(invisible(NULL))
+      }
+      comparison$fitOptions = comparison_options
+      comparison$inputData = self$data
+      jamovi_mixed_comparison_report(self$results,comparison)
+      if (self$options$graphic) {
+        layout = list(x=self$options$plotX,panels=self$options$plotPanels,group=self$options$plotGroup,
+          type=self$options$predictionType,clusters=self$options$clusters)
+        plot = tryCatch(do.call(jamovi_mixed_comparison_plot,c(list(state=comparison),layout)),error=identity)
+        if (inherits(plot,"error")) {
+          comparison$displayPlot = NULL
+          self$results$comparisonplot$setError(conditionMessage(plot))
+        } else {
+          comparison$displayPlot = plot
+          comparison$displayLayout = layout
+          jamovi_mixed_sync_labels(self$options,plot,layout)
+        }
+      }
+      private$.comparisonState = comparison
+      self$results$comparisonplot$setState(comparison)
+      self$results$comparisonplot$setVisible(self$options$graphic)
+      self$results$plotExplanation$setContent("<p>Comparison curves use the two original fits on the common estimation sample, with their requested ML/REML settings. Population curves exclude random effects; cluster-specific curves include estimated random effects for the displayed clusters. Statistics use separate ML copies. No prediction confidence bands or two-model CAS adjustment are calculated.</p>")
+    },
+    .comparisonplot=function(image, ...) {
+      if (is.null(image$state)) return(FALSE)
+      tryCatch({
+        plot = jamovi_mixed_comparison_plot(image$state,self$options$plotX,self$options$plotPanels,
+          self$options$plotGroup,self$options$predictionType,self$options$clusters)
+        print(jamovi_mixed_apply_labels(plot,self$options$plotLabels))
+        TRUE
+      },error=function(error) {
+        image$setError(conditionMessage(error))
+        FALSE
+      })
     },
     .plot=function(image, ...) {
       if (is.null(image$state)) return(FALSE)

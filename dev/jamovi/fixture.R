@@ -41,10 +41,10 @@ jamovi_smoke_fixture = function(root, home, output) {
     list(name="mixedmodel", title="Mixed - random intercept", options=list(out="mixed",preds=c("x","z"),
       cluster="id",modelTerms=list("x","z"),plotX="x",plotPanels="id")),
     list(name="mixedmodel", title="Mixed - random slope and quadratic", options=list(out="mixed",preds=c("x","z"),
-      cluster="id",modelTerms=list("x","z"),randomSlopes="x",randomIntercept=FALSE,quadratic="x",estimation="ML",
+      cluster="id",modelTerms=list("x","z"),randomSlopes="x",randomIntercept=FALSE,quadratic="x",polynomials=TRUE,estimation="ML",
       predictionType="population",plotX="x",plotPanels="id")),
     list(name="mixedmodel", title="Mixed - fixed interaction", options=list(out="mixed",preds=c("x","z","group"),
-      cluster="id",modelTerms=list("x","z","group",c("x","group")),randomSlopes="x",
+      cluster="id",modelTerms=list("x","z","group",c("x","group")),interactions=TRUE,randomSlopes="x",
       plotX="x",plotPanels="id",plotGroup="group")))
   work = tempfile("jamovi-smoke-")
   dir.create(work)

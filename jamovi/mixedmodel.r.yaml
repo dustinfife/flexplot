@@ -12,6 +12,10 @@ items:
     title: Model specification
     type: Html
     visible: false
+  - name: comparisonSpecification
+    title: Comparison model specifications
+    type: Html
+    visible: false
   - name: diagnostics
     title: Model diagnostics
     type: Html
@@ -86,4 +90,42 @@ items:
     height: 450
     visible: false
     renderFun: .plot
+  - name: comparison
+    title: Mixed-model comparison (ML)
+    type: Table
+    visible: false
+    columns:
+      - name: model
+        title: Model
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: aic
+        title: AIC
+        type: number
+      - name: bic
+        title: BIC
+        type: number
+      - name: bayes.factor
+        title: Approximate BIC Bayes factor
+        type: number
+      - name: lr
+        title: Likelihood ratio
+        type: number
+      - name: df
+        title: df
+        type: integer
+      - name: p
+        title: p (fixed-effect LRT)
+        type: number
+        format: zto,pvalue
+        visible: (includeP)
+  - name: comparisonplot
+    title: Mixed-model comparison
+    type: Image
+    width: 700
+    height: 450
+    visible: false
+    renderFun: .comparisonplot
 ...

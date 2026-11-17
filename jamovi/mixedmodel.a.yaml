@@ -17,11 +17,11 @@ options:
   - name: interactions
     title: Include Interaction Terms
     type: Bool
-    default: true
+    default: false
   - name: polynomials
     title: Include Polynomial Terms
     type: Bool
-    default: true
+    default: false
   - name: modelTerms
     title: Fixed-effect terms
     type: Terms
@@ -44,6 +44,43 @@ options:
     default: null
   - name: estimation
     title: Estimation
+    type: List
+    options:
+      - name: REML
+        title: REML
+      - name: ML
+        title: Maximum likelihood (ML)
+    default: REML
+  - name: compare
+    title: Compare two models
+    type: Bool
+    default: false
+  - name: comparisonTerms
+    title: Model 2 fixed-effect terms
+    type: Terms
+    default: null
+  - name: comparisonInteractions
+    title: Include Interaction Terms
+    type: Bool
+    default: false
+  - name: comparisonPolynomials
+    title: Include Polynomial Terms
+    type: Bool
+    default: false
+  - name: comparisonQuadratic
+    title: Model 2 quadratic predictors
+    type: Variables
+    default: null
+  - name: comparisonRandomIntercept
+    title: Model 2 random intercept
+    type: Bool
+    default: true
+  - name: comparisonRandomSlopes
+    title: Model 2 random slopes
+    type: Variables
+    default: null
+  - name: comparisonEstimation
+    title: Model 2 estimation
     type: List
     options:
       - name: REML
