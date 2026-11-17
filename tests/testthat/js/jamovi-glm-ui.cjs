@@ -124,8 +124,18 @@ const {pathToFileURL} = require('node:url');
             assert.equal(definition.options.find(option => option.name === 'polynomials').title,'Include Polynomial Terms');
             assert.equal(definition.options.find(option => option.name === 'showCorrelations').default,false);
             assert.equal(definition.options.find(option => option.name === 'compare').default,false);
+            assert.equal(definition.title,'Mixed Models');
+            assert.equal(definition.options.find(option => option.name === 'cluster').title,'Cluster variable');
+            const variables = compiled.view.layout.controls.find(control => control.type === 'VariableSupplier');
+            assert.ok(JSON.stringify(variables).includes('Cluster Variable'));
+            assert.ok(!JSON.stringify(variables).includes('Grouping Variable'));
+
             const comparison = compiled.view.layout.controls.find(control => control.label === 'Model Comparison');
             assert.equal(comparison.controls.find(control => control.contentLink === '(compare)').useSingleCell,true);
+            const randomControls = JSON.stringify(comparison);
+            assert.ok(randomControls.includes('Random slopes (Model 2)'));
+            assert.ok(!randomControls.includes('Model 2 random slopes (correlated components)'));
+
             assert.equal(definition.options.find(option => option.name === 'interactions').default,false);
             assert.equal(definition.options.find(option => option.name === 'polynomials').default,false);
             const visualization = compiled.view.layout.controls.find(control => control.label === 'Model visualization');

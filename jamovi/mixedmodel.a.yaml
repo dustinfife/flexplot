@@ -1,6 +1,6 @@
 ---
 name: mixedmodel
-title: Mixed Model
+title: Mixed Models
 menuGroup: Flexplot
 version: '1.0.0'
 jas: '1.2'
@@ -31,7 +31,7 @@ options:
     type: Variables
     default: null
   - name: cluster
-    title: Grouping variable
+    title: Cluster variable
     type: Variable
     default: null
   - name: randomIntercept

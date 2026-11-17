@@ -322,7 +322,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Mixed Model",
+                title="Mixed Models",
                 refs=list(
                     "flexplot",
                     "graphicalAnalysis"))
@@ -330,7 +330,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="waiting",
                 title="",
-                content="<p>Select a numeric outcome and one grouping variable.</p>"))
+                content="<p>Select a numeric outcome and one cluster variable.</p>"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="specification",

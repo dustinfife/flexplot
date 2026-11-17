@@ -15,6 +15,12 @@ description: >-
   modeling and, like flexplot,  chooses an appropriate graphic to present
   alongside the statistical 
 analyses:
+  - title: Flexplot
+    name: flexplota
+    ns: flexplot
+    menuGroup: Flexplot
+    menuTitle: Flexplot
+    category: analyses
   - title: Linear Model
     name: glmbasic
     ns: flexplot
@@ -27,17 +33,11 @@ analyses:
     menuGroup: Flexplot
     menuTitle: Generalized Linear Model
     category: analyses
-  - title: Mixed Model
+  - title: Mixed Models
     name: mixedmodel
     ns: flexplot
     menuGroup: Flexplot
-    menuTitle: Mixed Model
-    category: analyses
-  - title: Flexplot
-    name: flexplota
-    ns: flexplot
-    menuGroup: Flexplot
-    menuTitle: Flexplot
+    menuTitle: Mixed Models
     category: analyses
 usesNative: true
 minApp: 1.0.8

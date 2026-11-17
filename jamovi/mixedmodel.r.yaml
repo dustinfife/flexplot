@@ -1,13 +1,13 @@
 ---
 name: mixedmodel
-title: Mixed Model
+title: Mixed Models
 jrs: '1.1'
 refs: [flexplot, graphicalAnalysis]
 items:
   - name: waiting
     title: ''
     type: Html
-    content: '<p>Select a numeric outcome and one grouping variable.</p>'
+    content: '<p>Select a numeric outcome and one cluster variable.</p>'
   - name: specification
     title: Model specification
     type: Html

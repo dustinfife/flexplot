@@ -8,7 +8,7 @@ jamovi_mixed_escape = function(text) {
 jamovi_mixed_formula = function(options, data) {
   if (length(options$cluster) != 1L || !options$cluster %in% names(data) ||
       identical(options$out, options$cluster)) {
-    stop("Select exactly one grouping variable, different from the outcome.", call.=FALSE)
+    stop("Select exactly one cluster variable, different from the outcome.", call.=FALSE)
   }
   slopes = options$randomSlopes
   if (any(!slopes %in% options$preds) || anyDuplicated(slopes)) {
@@ -38,7 +38,7 @@ jamovi_mixed_fit = function(options, data) {
     stop("Mixed Model requires a finite numeric outcome that varies.", call.=FALSE)
   }
   eligible[[options$cluster]] = droplevels(factor(eligible[[options$cluster]]))
-  if (nlevels(eligible[[options$cluster]]) < 2L) stop("The grouping variable needs at least two observed groups.", call.=FALSE)
+  if (nlevels(eligible[[options$cluster]]) < 2L) stop("The cluster variable needs at least two observed groups.", call.=FALSE)
   warnings = new.env(parent=emptyenv())
   warnings$messages = character()
   model = withCallingHandlers(lme4::lmer(specification$formula, data=eligible,
@@ -72,7 +72,7 @@ jamovi_mixed_reset = function(results) {
   }
   results$plot$setState(NULL)
   results$comparisonplot$setState(NULL)
-  results$waiting$setContent("<p>Select a numeric outcome and one grouping variable.</p>")
+  results$waiting$setContent("<p>Select a numeric outcome and one cluster variable.</p>")
   results$waiting$setVisible(TRUE)
 }
 
@@ -113,10 +113,9 @@ jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE)
     results$diagnostics$setContent(paste0("<p><strong>",paste(jamovi_mixed_escape(diagnostics),collapse="</strong></p><p><strong>"),"</strong></p>"))
     results$diagnostics$setVisible(TRUE)
   }
-  fixed_text = paste(deparse(state$specification$fixed), collapse=" ")
-  random_text = paste(deparse(state$specification$random), collapse=" ")
-  results$specification$setContent(paste0("<p>Fixed: ", jamovi_mixed_escape(fixed_text), "</p><p>Random: ",
-    jamovi_mixed_escape(random_text), "</p><p>Estimation: ", if (lme4::isREML(state$model)) "REML" else "ML", "</p>"))
+  formula_text = paste(deparse(stats::formula(state$model)), collapse=" ")
+  results$specification$setContent(paste0("<p><strong>Model:</strong> ", jamovi_mixed_escape(formula_text),
+    " (", if (lme4::isREML(state$model)) "REML" else "ML", ")</p>"))
   information = paste0("<p>", stats::nobs(state$model), " complete observations; ",
     nlevels(state$data[[state$cluster]]), " groups; ", state$omitted, " observations omitted.</p>")
 
@@ -236,7 +235,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       }
       comparison$fitOptions = comparison_options
       comparison$inputData = self$data
-      jamovi_mixed_comparison_report(self$results,comparison)
+      jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP)
       if (self$options$graphic) {
         layout = list(x=self$options$plotX,panels=self$options$plotPanels,group=self$options$plotGroup,
           type=self$options$predictionType,clusters=self$options$clusters)

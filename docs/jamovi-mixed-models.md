@@ -157,15 +157,22 @@ for visualization are preserved. The existing `bf.bic()` supplies the BIC-based
 approximation: Model 1's value favors Model 1 over Model 2 and vice versa. These
 reciprocal values are not exact Bayes factors.
 
-An ordinary asymptotic chi-square LRT is reported only for nested fixed-effect
-design spaces with identical actual random-effect designs and converged,
-nonsingular ML fits. Fixed nesting is checked using model matrices, including
-contrasts and polynomial terms. Changing the random structure does not receive
-an ordinary chi-square p-value: boundary-calibrated bootstrap or other methods
-are not implemented. Nonnested/equivalent comparisons also omit the LRT.
-Singular ML fits retain descriptive information criteria, but omit the BIC Bayes
-factor and ordinary LRT p-value. Convergence failures omit comparison statistics;
-unavailable cells are blank and explained. P-values remain optional.
+An ordinary asymptotic chi-square LRT p-value is reported only for nested
+fixed-effect design spaces with identical actual random-effect designs and
+converged, nonsingular ML fits. Fixed nesting is checked using model matrices,
+including contrasts and polynomial terms. Nested random-effect comparisons
+retain the LR statistic and parameter-count difference, but do not receive an
+ordinary chi-square p-value. A concise note explains the missing p-value only
+when p-values are enabled. Random nesting requires the smaller correlated
+block's actual random-design components to be a subset of the larger block's.
+Nonnested/equivalent comparisons omit the LRT and the random-effects p-value note.
+
+Singular but successfully optimized ML fits retain meaningful nested LR
+statistics and degrees of freedom, along with descriptive information criteria;
+the existing conservative omission of BIC Bayes factors and ordinary p-values
+is preserved. Convergence failures omit comparison statistics. Unavailable cells
+are blank and explained. **Include p-values** controls the entire p-value column,
+not just its cell values; it defaults off.
 
 The comparison visualization replaces the single-model image while comparison
 is enabled, using `compare_fits()` with two named prediction streams. Population
@@ -211,3 +218,19 @@ compare fits/predictions with independent lmer calculations. Fresh GUI analyses,
 GUI save/reopen, subsequent edits and required-variable removal were also checked
 in jamovi 2.7.41. Updates require rebuilding/installing the module; reopen an
 analysis/document to load the corrected UI bundle.
+
+
+## Compact results presentation
+
+The Cluster Variable selector retains the saved `cluster` option. Model formulas
+and their estimation methods are displayed together; comparison mode displays
+Model 1 and Model 2 on separate compact lines without repeating Model 1 above.
+Ordinary comparison notes identify the common ML sample, preserve the original
+estimation methods, and explain approximate reciprocal BIC Bayes factors when
+available. Calibration, singularity, and convergence notes appear only as needed.
+
+The analysis menu order is Flexplot, Linear Model, Generalized Linear Model,
+Mixed Models. Internal analysis identifiers are unchanged. jamovi 2.7 supplies
+the Flexplot ribbon icon through its own built-in stylesheet; this module cannot
+replace it with `inst/icons/FlexplotLogo-sm.png` through a supported icon option.
+The original logo assets and host icon are retained without modifying jamovi.

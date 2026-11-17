@@ -34,8 +34,9 @@ test_that("Mixed Model estimates preserve the requested random structure and est
     expect_equal(random$sd,components$sdcor[is.na(components$var2)])
     expect_false(analysis$results$correlations$visible)
     expect_true("Residual" %in% random$group)
-    expect_match(analysis$results$specification$content,"Fixed:")
-    expect_match(analysis$results$specification$content,"Random:")
+    content = analysis$results$specification$content
+    expect_match(content,flexplot:::jamovi_mixed_escape(paste(deparse(state$specification$formula),collapse=" ")),fixed=TRUE)
+    expect_match(content,paste0("(",estimation,")"),fixed=TRUE)
     expect_identical(state$data$a,data$a)
   }
 })

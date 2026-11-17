@@ -1,4 +1,4 @@
-title: Mixed Model
+title: Mixed Models
 name: mixedmodel
 jus: '3.0'
 stage: 0
@@ -22,7 +22,7 @@ children:
       name: preds
       isTarget: true
   - type: TargetLayoutBox
-    label: Grouping Variable
+    label: Cluster Variable
     children:
     - type: VariablesListBox
       name: cluster
@@ -141,7 +141,7 @@ children:
       persistentItems: true
       children:
       - type: TargetLayoutBox
-        label: Model 2 random slopes (correlated components)
+        label: Random slopes (Model 2)
         children:
         - type: VariablesListBox
           name: comparisonRandomSlopes

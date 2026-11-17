@@ -34,7 +34,7 @@ jamovi_mixed_comparison_statistics = function(models) {
   converged = all(vapply(fitted,jamovi_mixed_converged,logical(1)))
   singular = any(vapply(fitted,lme4::isSingular,logical(1)))
   result = list(models=fitted,aic=rep(NA_real_,2),bic=rep(NA_real_,2),bayes=rep(NA_real_,2),
-    lr=NA_real_,df=NA_real_,p=NA_real_,warnings=unique(unlist(lapply(copies,`[[`,"warnings"))))
+    lr=NA_real_,df=NA_real_,p=NA_real_,random_p_unavailable=FALSE,singular=singular,warnings=unique(unlist(lapply(copies,`[[`,"warnings"))))
   if (!converged) {
     result$reason = "Comparison statistics unavailable: at least one ML fit has convergence diagnostics."
     return(result)
@@ -48,30 +48,31 @@ jamovi_mixed_comparison_statistics = function(models) {
   random_same = jamovi_mixed_same_random_design(fitted[[1]],fitted[[2]])
   matrix = lapply(fitted,lme4::getME,name="X")
   ranks = vapply(matrix,ncol,integer(1))
-  full = which.max(ranks); reduced = 3L-full
-  nested = diff(range(ranks)) > 0 && qr(cbind(matrix[[full]],matrix[[reduced]]))$rank == ranks[full]
-  if (singular) {
-    result$reason = "Singular ML fit: information criteria are descriptive; the BIC Bayes factor and ordinary LRT p-value are unavailable."
-    return(result)
-  }
-  if (!random_same) {
-    result$reason = "Random-effects structures differ. An ordinary chi-square LRT p-value is not reported because variance-component comparisons involve boundary conditions; a calibrated method is not implemented."
-    return(result)
-  }
-  if (!nested) {
-    result$reason = "LRT unavailable: fixed-effect models are nonnested or equivalent."
-    return(result)
-  }
   likelihoods = lapply(fitted,stats::logLik)
-  df = attr(likelihoods[[full]],"df")-attr(likelihoods[[reduced]],"df")
+  parameters = vapply(likelihoods,attr,integer(1),which="df")
+  full = which.max(parameters); reduced = 3L-full
+  fixed_nested = qr(cbind(matrix[[full]],matrix[[reduced]]))$rank == ranks[full]
+  random_nested = jamovi_mixed_random_subset(fitted[[reduced]],fitted[[full]])
+  if (!fixed_nested || !random_nested || parameters[full] == parameters[reduced]) {
+    result$reason = "LRT unavailable: models are nonnested or equivalent."
+    return(result)
+  }
+  df = parameters[full]-parameters[reduced]
   lr = 2*as.numeric(likelihoods[[full]]-likelihoods[[reduced]])
   if (df <= 0 || !is.finite(lr) || lr < -1e-8) {
     result$reason = "LRT unavailable: the likelihood difference or parameter-count difference is invalid."
     return(result)
   }
   result$lr = max(0,lr); result$df = df
-  result$p = stats::pchisq(result$lr,df=df,lower.tail=FALSE)
-  result$reason = paste0("Nested fixed-effect likelihood-ratio test using ML (asymptotic chi-square); Model ",full,
+  if (!random_same) {
+    result$random_p_unavailable = TRUE
+    result$reason = paste0("Nested ML likelihood-ratio comparison; Model ",full," is the larger model.")
+    return(result)
+  }
+  if (!singular) result$p = stats::pchisq(result$lr,df=df,lower.tail=FALSE)
+  test = if (singular) "Nested fixed-effect ML likelihood-ratio comparison" else
+    "Nested fixed-effect likelihood-ratio test using ML (asymptotic chi-square)"
+  result$reason = paste0(test,"; Model ",full,
     " is the larger model. Random-effects structures are identical.")
   result
 }
@@ -92,29 +93,43 @@ jamovi_mixed_comparison = function(options, data) {
     first=first,second=second,statistics=statistics,omitted=nrow(data)-nrow(eligible))
 }
 
-jamovi_mixed_comparison_report = function(results, state) {
+jamovi_mixed_comparison_report = function(results, state, includeP=FALSE) {
   statistics = state$statistics
   values = data.frame(model=c("Model 1","Model 2"),n=c(stats::nobs(state$model1),stats::nobs(state$model2)),
     aic=statistics$aic,bic=statistics$bic,bayes.factor=statistics$bayes,
     lr=c(statistics$lr,NA_real_),df=c(statistics$df,NA_real_),p=c(statistics$p,NA_real_))
   p_column = results$comparison$getColumn("p")
-  p_column$visible = results$fixed$getColumn("p")$visible
+  p_column$setVisible(includeP)
   jamovi_glm_table_rows(results$comparison,values)
-  results$comparison$setNote("estimation","All comparison statistics use ML fits on identical complete observations. REML fits are copied and refitted with ML; the original model estimates and visualization fits retain their requested estimation methods.")
-  results$comparison$setNote("population",paste0(nrow(state$data)," common observations; ",state$omitted,
-    " omitted across both formulas. The original Model 1 estimates above retain its own eligible observations."))
-  results$comparison$setNote("bayes","Approximate Bayes factors derived from BIC: Model 1's value favors Model 1 over Model 2; Model 2's value favors Model 2 over Model 1. The values are reciprocal, not exact Bayes factors. Unavailable approximations are blank.")
-  results$comparison$setNote("test",statistics$reason)
+  results$comparison$setNote("estimation",paste0("ML fits on ",nrow(state$data),
+    " identical observations (",state$omitted," omitted). Original estimates and plots retain their selected ML/REML methods."))
+  results$comparison$setNote("bayes",NULL)
+  if (any(is.finite(statistics$bayes))) results$comparison$setNote("bayes",
+    "Approximate BIC Bayes factors favor the model in each row; the two values are reciprocal.")
+  test_note = statistics$reason
+  if (is.finite(statistics$lr)) test_note = if (isTRUE(statistics$random_p_unavailable)) NULL else
+    if (is.finite(statistics$p)) "Nested fixed-effects LRT (asymptotic chi-square)." else NULL
+  results$comparison$setNote("test",test_note)
+  results$comparison$setNote("randomP",NULL)
+  if (isTRUE(p_column$visible) && isTRUE(statistics$random_p_unavailable)) {
+    results$comparison$setNote("randomP",
+      "P-value unavailable: random-effects comparisons may not follow the usual chi-square distribution; no calibrated alternative is implemented.")
+  }
+  if (isTRUE(statistics$singular)) results$comparison$setNote("singular",paste0(
+    "Singular ML comparison fit; interpret covariance estimates cautiously. BIC Bayes factors",
+    if (isTRUE(p_column$visible) && !isTRUE(statistics$random_p_unavailable)) " and ordinary p-values are" else " are",
+    " unavailable."))
   warnings = unique(c(state$first$warnings,state$second$warnings,statistics$warnings))
   if (length(warnings)) results$comparison$setNote("warnings",paste(warnings,collapse="; "))
   content = character()
   for (i in seq_len(2)) {
     model = state[[paste0("model",i)]]
-    content = c(content,paste0("<p>Model ",i,": ",jamovi_mixed_escape(paste(deparse(stats::formula(model)),collapse=" ")),
+    content = c(content,paste0("<strong>Model ",i,":</strong> ",jamovi_mixed_escape(paste(deparse(stats::formula(model)),collapse=" ")),
       " (",if (lme4::isREML(model)) "REML" else "ML",
-      if (lme4::isSingular(model)) "; singular fit" else "", ")</p>"))
+      if (lme4::isSingular(model)) "; singular fit" else "", ")"))
   }
-  results$comparisonSpecification$setContent(paste(content,collapse=""))
+  results$comparisonSpecification$setContent(paste0("<p>",paste(content,collapse="<br>"),"</p>"))
+  results$specification$setVisible(FALSE)
   results$comparisonSpecification$setVisible(TRUE)
   results$comparison$setVisible(TRUE)
 }
@@ -151,4 +166,13 @@ jamovi_mixed_same_random_design = function(model1, model2) {
   second = lme4::getME(model2,"Ztlist")
   if (!setequal(names(first),names(second))) return(FALSE)
   identical(first[order(names(first))],second[order(names(second))])
+}
+
+# The milestone supports one correlated block: adding random coefficients nests
+# its covariance structure. Compare actual designs, not just formula labels.
+jamovi_mixed_random_subset = function(reduced, full) {
+  first = lme4::getME(reduced,"Ztlist")
+  second = lme4::getME(full,"Ztlist")
+  if (!all(names(first) %in% names(second))) return(FALSE)
+  all(vapply(names(first),function(term) identical(first[[term]],second[[term]]),logical(1)))
 }

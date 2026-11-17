@@ -41,7 +41,7 @@ test_that("Mixed comparisons use ML copies for nested fixed effects and preserve
   expect_equal(table$p[1],independent$`Pr(>Chisq)`[2],tolerance=1e-8)
   expect_null(analysis$results$comparison$getCell("p",rowNo=2)$value)
   expect_match(analysis$results$comparison$notes$estimation$note,"ML fits")
-  expect_match(analysis$results$comparison$notes$bayes$note,"Model 1.*Model 2.*not exact")
+  expect_match(analysis$results$comparison$notes$bayes$note,"Approximate BIC.*each row.*reciprocal")
   expect_match(analysis$results$comparisonSpecification$content,"Model 2")
 })
 
@@ -80,14 +80,21 @@ test_that("Mixed comparisons with random boundary changes or nonnested fixed eff
     expect_true(all(is.finite(state$statistics$bic)))
     expect_true(is.na(state$statistics$p))
     expect_null(analysis$results$comparison$getCell("p",rowNo=1)$value)
-    if (is.null(slopes)) expect_match(state$statistics$reason,"boundary conditions") else
-      expect_match(state$statistics$reason,"equivalent")
+    if (is.null(slopes)) {
+      independent = anova(state$statistics$models[[1]],state$statistics$models[[2]],refit=FALSE)
+      expect_equal(state$statistics$lr,independent$Chisq[2],tolerance=1e-8)
+      expect_equal(state$statistics$df,independent$Df[2])
+      expect_match(analysis$results$comparison$notes$randomP$note,
+        "^P-value unavailable.*random-effects comparisons.*chi-square")
+    } else expect_match(state$statistics$reason,"equivalent")
   }
   analysis = jamovi_mixed_comparison_analysis(modelTerms=list("x"),quadratic=NULL,polynomials=FALSE,
     comparisonTerms=list("z"),estimation="ML",comparisonEstimation="ML")
   expect_true(analysis$run())
   expect_true(is.na(analysis$results$comparisonplot$state$statistics$p))
   expect_match(analysis$results$comparison$notes$test$note,"nonnested")
+  expect_null(analysis$results$comparison$notes$randomP)
+  expect_true(is.na(analysis$results$comparisonplot$state$statistics$lr))
   expect_false("p" %in% names(analysis$results$comparison$asDF))
   # Intercept-free structures are fitted as requested and do not receive a naive boundary p-value.
   analysis = jamovi_mixed_comparison_analysis(modelTerms=list("x"),quadratic=NULL,polynomials=FALSE,
@@ -108,8 +115,21 @@ test_that("Mixed comparisons handle singular fits and invalid second models with
   state = analysis$results$comparisonplot$state
   expect_true(lme4::isSingular(state$model1))
   expect_true(all(is.na(state$statistics$bayes)))
+  expect_true(all(vapply(state$statistics$models,flexplot:::jamovi_mixed_converged,logical(1))))
+  independent = anova(state$statistics$models[[1]],state$statistics$models[[2]],refit=FALSE)
+  expect_equal(state$statistics$lr,independent$Chisq[2],tolerance=1e-8)
+  expect_equal(state$statistics$df,independent$Df[2])
   expect_true(is.na(state$statistics$p))
-  expect_match(analysis$results$comparison$notes$test$note,"Singular ML fit")
+  expect_match(analysis$results$comparison$notes$singular$note,"Singular ML comparison fit")
+  expect_null(analysis$results$comparison$notes$randomP)
+  expect_true(jamovi_reporting_update(analysis,list(comparisonTerms=list("x"),comparisonRandomSlopes="x")))
+  random_state = analysis$results$comparisonplot$state
+  expect_true(any(vapply(random_state$statistics$models,lme4::isSingular,logical(1))))
+  expect_true(all(vapply(random_state$statistics$models,flexplot:::jamovi_mixed_converged,logical(1))))
+  expect_true(is.finite(random_state$statistics$lr))
+  expect_gt(random_state$statistics$df,0)
+  expect_true(is.na(random_state$statistics$p))
+  expect_match(analysis$results$comparison$notes$randomP$note,"P-value unavailable")
   expect_match(analysis$results$diagnostics$content,"rank-deficient")
   expect_false(grepl("not been automatically simplified",analysis$results$diagnostics$content))
   invalid = jamovi_mixed_comparison_analysis(comparisonRandomIntercept=FALSE,comparisonRandomSlopes=NULL)
@@ -194,7 +214,7 @@ test_that("Mixed comparisons restore independent second-model specifications and
     compare=TRUE,comparisonTerms=list("x","a",c("x","a")),comparisonInteractions=TRUE,
     comparisonPolynomials=TRUE,comparisonQuadratic="x",randomSlopes="x",
     comparisonRandomIntercept=FALSE,comparisonRandomSlopes="x",comparisonEstimation="ML",
-    graphic=TRUE,plotX="x",plotPanels="id",predictionType="population")
+    includeP=TRUE,graphic=TRUE,plotX="x",plotPanels="id",predictionType="population")
   message = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
   template = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
   message$names=names(saved)
@@ -209,6 +229,8 @@ test_that("Mixed comparisons restore independent second-model specifications and
   analysis$.setReadDatasetHeaderSource(reader)
   expect_true(analysis$run())
   expect_true(options$compare)
+  expect_true(options$includeP)
+  expect_true(analysis$results$comparison$getColumn("p")$visible)
   state=analysis$results$comparisonplot$state
   independent=lme4::lmer(y~x*a+I(x^2)+(0+x|id),data,REML=FALSE)
   expect_equal(lme4::fixef(state$model2),lme4::fixef(independent),tolerance=1e-10)
@@ -252,6 +274,9 @@ test_that("Mixed comparisons recognize actual random designs and reject unreliab
   expect_true(all(is.na(state$aic)))
   expect_true(all(is.na(state$bayes)))
   expect_true(is.na(state$p))
+  expect_true(is.na(state$lr))
+  expect_true(is.na(state$df))
+  expect_false(state$random_p_unavailable)
 })
 
 
@@ -268,4 +293,64 @@ test_that("Mixed categorical comparison layouts build and intercept-only visuali
   expect_true(analysis$run())
   expect_true(analysis$results$comparison$visible)
   expect_error(flexplot:::jamovi_mixed_comparison_plot(analysis$results$comparisonplot$state,type="population"),"intercept-only")
+})
+
+
+test_that("Mixed comparison p columns and random-test notes follow options in serialized results", {
+  skip_if_not_installed("jmvcore")
+  withr::local_libpaths(c(.libPaths(),"/Applications/jamovi.app/Contents/Resources/modules/base/R"))
+  skip_if_not_installed("RProtoBuf")
+  jmvcore:::initProtoBuf()
+  analysis = jamovi_mixed_comparison_analysis(modelTerms=list("x"),polynomials=FALSE,quadratic=NULL,
+    comparisonTerms=list("x"),comparisonRandomSlopes=NULL,includeP=TRUE)
+  expect_true(analysis$run())
+  state = analysis$results$comparisonplot$state
+  expect_true(state$statistics$random_p_unavailable)
+  expect_true(is.finite(state$statistics$lr))
+  expect_gt(state$statistics$df,0)
+  for (enabled in c(TRUE,FALSE,TRUE)) {
+    expect_true(jamovi_reporting_update(analysis,list(includeP=enabled)))
+    table = analysis$results$comparison
+    expect_identical(table$getColumn("p")$visible,enabled)
+    serialized = table$asProtoBuf()$table$columns
+    column = Filter(function(column) column$name == "p",serialized)[[1]]
+    visibility = get("jamovi.coms.Visible",asNamespace("jmvcore"))
+    expect_equal(column$visible,if (enabled) visibility$YES else visibility$NO)
+    if (enabled) expect_match(table$notes$randomP$note,"^P-value unavailable") else
+      expect_null(table$notes$randomP)
+    expect_identical(analysis$results$comparisonplot$state$model1,state$model1)
+    expect_equal(table$asDF$lr[1],state$statistics$lr)
+    expect_equal(table$asDF$df[1],state$statistics$df)
+  }
+  # A nonnested random structure does not receive the boundary-test note.
+  expect_true(jamovi_reporting_update(analysis,list(randomSlopes="x",comparisonRandomSlopes="z",includeP=TRUE)))
+  expect_match(analysis$results$comparison$notes$test$note,"nonnested")
+  expect_null(analysis$results$comparison$notes$randomP)
+  expect_true(is.na(analysis$results$comparisonplot$state$statistics$p))
+})
+
+
+test_that("Mixed comparison presentation is compact without losing model specifications", {
+  skip_if_not_installed("jmvcore")
+  analysis = jamovi_mixed_comparison_analysis(includeP=TRUE)
+  expect_true(analysis$run())
+  state = analysis$results$comparisonplot$state
+  notes = vapply(analysis$results$comparison$notes,`[[`,character(1),"note")
+  expect_length(notes,3L)
+  expect_lt(sum(nchar(notes)),350)
+  expect_match(notes[["estimation"]],"ML fits.*identical observations.*Original estimates and plots")
+  expect_match(notes[["bayes"]],"Approximate BIC.*reciprocal")
+  expect_false(analysis$results$specification$visible)
+  content = analysis$results$comparisonSpecification$content
+  expect_match(content,"</strong>.*<br><strong>Model 2:")
+  for (model in list(state$model1,state$model2))
+    expect_match(content,flexplot:::jamovi_mixed_escape(paste(deparse(formula(model)),collapse=" ")),fixed=TRUE)
+  first = lme4::fixef(state$model1)
+  expect_true(jamovi_reporting_update(analysis,list(comparisonInteractions=TRUE,
+    comparisonTerms=list("x","z",c("x","z")),comparisonPolynomials=TRUE,comparisonQuadratic="z")))
+  updated = analysis$results$comparisonplot$state
+  expect_identical(lme4::fixef(updated$model1),first)
+  expect_match(paste(deparse(formula(updated$model2)),collapse=" "),"x:z",fixed=TRUE)
+  expect_match(paste(deparse(formula(updated$model2)),collapse=" "),"I(z^2)",fixed=TRUE)
+  expect_match(analysis$results$comparison$notes$test$note,"nonnested")
 })
