@@ -21,13 +21,39 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
         }
         return expression ? source.slice(start,end).replace(/^[^(]+/, 'function') : source.slice(start,end);
     };
+    // Resolve the actual installed contentLink bindings on checkbox changes.
+    // Whole-builder wrapper rendering is specified by the compiled UI metadata.
+    const nativeMethod = signature => vm.runInNewContext('('+extract(signature,true)+')', {
+        Ps:value => value !== null && typeof value === 'object'
+    });
+    for (const name of ['interactions','polynomials']) {
+        let checked = true;
+        const property = {value:null, binding:'('+name+')'};
+        property.get = () => property.value;
+        property.set = value => {property.value = value;};
+        const cell = {visible:true,setVisibility(value){this.visible=value;}};
+        const control = {properties:{contentLink:property},params:{},_cell:cell,
+            getPropertyValue:nativeMethod('getPropertyValue(e){'),
+            setPropertyValue:nativeMethod('setPropertyValue(e,t){'),firePropertyChangedEvent(){},
+            onPropertyChanged(key) {if (key === 'contentLink') cell.setVisibility(this.getPropertyValue(key));}};
+        const engine = {_resources:{[name]:{value:()=>checked},builder:control},actions:[],
+            addDirectAction(key,action){this.actions.push(action);}};
+        for (const signature of ['_nextNonWhiteChar(e,t){','_arrayUnique(e){','_resolveBindPart(e,t){',
+            '_resolveBinding(e,t){','bindActionParams(e,t,s){','bindingsToActions(){'])
+            engine[signature.slice(0,signature.indexOf('('))] = nativeMethod(signature);
+        engine.bindingsToActions();
+        for (checked of [false,true,false,true]) {
+            for (const action of engine.actions) if (action.onChange.includes(name)) action.execute(engine._resources);
+            assert.equal(cell.visible,checked,'Immediate builder visibility: '+name);
+        }
+    }
     const FormattedValue = vm.runInNewContext('('+extract('class Z{',false)+')');
     const Option = vm.runInNewContext('('+extract('class he extends rt{',false)+')', {rt:EventEmitter,Z:FormattedValue});
     utils.valuesToItems = vm.runInNewContext('('+extract('valuesToItems(e,t){',true)+')', {Z:FormattedValue,G:FormatDef});
     const beginEdit = vm.runInNewContext('('+extract('beginEdit(){',true)+')');
     const endEdit = vm.runInNewContext('('+extract('endEdit(){',true)+')');
     const view = {workspace:{}};
-    const defaults = {out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
+    const defaults = {interactions:true,polynomials:true,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
         randomIntercept:true,estimation:'REML',includeP:false,graphic:true,predictionType:'cluster',
         clusters:3,plotX:null,plotPanels:null,plotGroup:null};
     const native = {}, packets = [], queued = new Set();
@@ -87,6 +113,14 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     record('no-random-intercept',() => ui.randomIntercept.setValue(false));
     record('ML',() => ui.estimation.setValue('ML'));
     record('squared',() => ui.quadratic.setValue(['x']));
+    options = record('disable-interactions',() => ui.interactions.setValue(false));
+    assert.equal(JSON.stringify(options.modelTerms),'[["x"],["a"]]');
+    options = record('enable-interactions',() => ui.interactions.setValue(true));
+    assert.equal(JSON.stringify(options.modelTerms),'[["x"],["a"]]');
+    options = record('disable-polynomials',() => ui.polynomials.setValue(false));
+    assert.equal(options.quadratic.length,0);
+    options = record('enable-polynomials',() => ui.polynomials.setValue(true));
+    assert.equal(options.quadratic.length,0);
     options = record('remove-predictor',() => ui.preds.setValue(['a']));
     assert.equal(options.quadratic.length,0);
     assert.equal(options.randomSlopes.length,0);
@@ -120,6 +154,20 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     assert.equal(ui.plotGroup.value(),'id');
     assert.equal(ui.plotPanels.value().length,0);
     assert.equal(manager._beginEdit,0);
+    events.find(event => event.onEvent === 'view.data-initializing').execute.call(view,ui,{id:'disabled'});
+    native.interactions.setValue(false); native.polynomials.setValue(false);
+    native.modelTerms.setValue([['x'],['a'],['x','a']]); native.quadratic.setValue(['x']);
+    assert.equal(JSON.stringify(ui.quadratic.value()),'["x"]');
+    events.find(event => event.onEvent === 'view.ready').execute.call(view,ui,{id:'disabled'});
+    assert.equal(JSON.stringify(ui.modelTerms.value()),'[["x"],["a"]]');
+    assert.equal(ui.quadratic.value().length,0);
+    const savedLabels = [{key:'title-x',role:'x',variable:'x',value:'',display:'X-axis label',label:'Length (cm)'}];
+    ui.plotLabels.setValue(savedLabels);
+    events.find(event => event.onEvent === 'view.data-initializing').execute.call(view,ui,{id:'labels'});
+    native.plotLabels.setValue(savedLabels); native.plotLabelStore.setValue(savedLabels);
+    events.find(event => event.onEvent === 'view.ready').execute.call(view,ui,{id:'labels'});
+    assert.equal(JSON.stringify(ui.plotLabels.value()),JSON.stringify(savedLabels));
+    assert.equal(JSON.stringify(ui.plotLabelStore.value()),JSON.stringify(savedLabels));
     console.log('PASS: installed native option setters, synchronous handler re-entry and server batches; fresh and restored options.');
     return records;
 };

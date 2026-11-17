@@ -89,6 +89,51 @@ const {pathToFileURL} = require('node:url');
             if (!(name in ui)) ui[name] = control(name.endsWith('Supplier') ? [] : null);
         }
         if (analysis === 'mixedmodel') {
+            const yaml = require(require.resolve('js-yaml',{paths:[compilerPath]}));
+            if (runtime) {
+                const resultsFile = fs.readdirSync(path.dirname(runtime)).find(name => /^resultsview-.*\.js$/.test(name));
+                assert.ok(resultsFile,'Installed results renderer is required for citation checks');
+                const source = fs.readFileSync(path.join(path.dirname(runtime),resultsFile),'utf8');
+                const className = source.match(/customElements.define\("jmv-reference-numbers",([\w$]+)\)/)[1];
+                const start = source.indexOf('class '+className+' extends');
+                const end = source.indexOf('customElements.define("jmv-reference-numbers"',start);
+                class Element {
+                    attachShadow() {
+                        const body = {innerHTML:'',insertAdjacentHTML(position,html){this.innerHTML+=html;}};
+                        return {innerHTML:'',querySelector:()=>body};
+                    }
+                }
+                const References = vm.runInNewContext('('+source.slice(start,end)+')',{HTMLElement:Element,Tg:''});
+                const references = new References();
+                references.setTable({mode:'all',table:{flexplot:3,graphicalAnalysis:4},addEventListener(){}});
+                references.setRefs(['flexplot','graphicalAnalysis']);
+                assert.ok(references._body.innerHTML.includes('[3]') && references._body.innerHTML.includes('[4]'));
+                const results = yaml.load(fs.readFileSync(path.join(root,'jamovi/mixedmodel.r.yaml'),'utf8'));
+                for (const name of ['fixed','random','correlations']) {
+                    references.setRefs(results.items.find(item=>item.name===name).refs || []);
+                    assert.equal(references.count(),0);
+                    assert.equal(references._body.innerHTML,'');
+                    assert.equal(references.hasVisibleContent(),false);
+                }
+                references.setRefs(results.refs);
+                assert.equal(references.hasVisibleContent(),true,'Retain analysis-level research references');
+            }
+
+            const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi/mixedmodel.a.yaml'),'utf8'));
+            assert.equal(definition.options.find(option => option.name === 'interactions').title,'Include Interaction Terms');
+            assert.equal(definition.options.find(option => option.name === 'polynomials').title,'Include Polynomial Terms');
+            assert.equal(definition.options.find(option => option.name === 'showCorrelations').default,false);
+            const visualization = compiled.view.layout.controls.find(control => control.label === 'Model visualization');
+            const editor = visualization.controls.find(control => control.label === 'Plot Labels');
+            assert.equal(editor.contentLink,'(graphic)');
+            assert.ok(editor.controls.find(control => control.name === 'plotLabels').columns.some(column => column.name === 'label'));
+
+            for (const [name, option] of [['primarySupplier','interactions'], ['quadraticSupplier','polynomials']]) {
+                const definition = compiled.view.layout.controls.find(control => control.name === name);
+                assert.ok(definition, name);
+                assert.equal(definition.useSingleCell, true, 'Hide the whole builder, including labels');
+                assert.equal(definition.contentLink, '('+option+')');
+            }
             require('./jamovi-mixed-ui.cjs')(ui, view, fire, assert);
             if (runtime) {
                 const records = require('./jamovi-mixed-native-options.cjs')(

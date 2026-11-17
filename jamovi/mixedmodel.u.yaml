@@ -28,8 +28,12 @@ children:
       name: cluster
       maxItemCount: 1
       isTarget: true
+- type: CheckBox
+  name: interactions
 - type: Supplier
   name: primarySupplier
+  useSingleCell: true
+  contentLink: (interactions)
   label: Fixed effects and interactions
   format: term
   persistentItems: true
@@ -44,8 +48,12 @@ children:
       valueFilter: unique
       template:
         type: TermLabel
+- type: CheckBox
+  name: polynomials
 - type: Supplier
   name: quadraticSupplier
+  useSingleCell: true
+  contentLink: (polynomials)
   label: Squared terms
   format: variable
   persistentItems: true
@@ -83,6 +91,8 @@ children:
   children:
   - type: CheckBox
     name: includeP
+  - type: CheckBox
+    name: showCorrelations
 - type: CollapseBox
   label: Model visualization
   collapsed: true
@@ -93,6 +103,7 @@ children:
     name: predictionType
   - type: TextBox
     name: clusters
+    enable: (!predictionType:cas)
     format: number
   - type: Supplier
     name: plotSupplier
@@ -121,3 +132,23 @@ children:
         name: plotGroup
         maxItemCount: 1
         isTarget: true
+
+  - type: CollapseBox
+    label: Plot Labels
+    useSingleCell: true
+    contentLink: (graphic)
+    collapsed: true
+    children:
+    - type: ListBox
+      name: plotLabels
+      stretchFactor: 1
+      columns:
+      - name: display
+        label: Plot element
+        template:
+          type: Label
+      - name: label
+        label: Custom label (blank = automatic)
+        template:
+          type: TextBox
+          format: string

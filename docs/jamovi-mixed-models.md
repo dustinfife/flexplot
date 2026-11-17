@@ -24,6 +24,14 @@ grouping factors are outside this milestone. A predictor can be selected as a
 random slope independently of its fixed term. Removing a predictor clears its
 squared/random-slope selections and invalid visualization roles.
 
+The **Include Interaction Terms** and **Include Polynomial Terms** checkboxes control the model,
+not just the interface. Turning one off clears its selected terms, hides its
+builder, and refits while preserving selected main effects. Turning it back on
+only reveals the builder; removed terms are not restored automatically. Both
+options default on to preserve earlier saved models that predate the checkboxes.
+Restoration defers normalization until all saved options have loaded. R also
+excludes disabled terms if a stale saved selection reaches the adapter.
+
 Both fixed and random variables determine complete-case eligibility. Unused
 selected columns do not remove observations. The outcome must be finite numeric
 and vary, and there must be at least two observed groups. Singular fits and
@@ -45,9 +53,20 @@ make this approximation unreliable.
 an explanation: ordinary lme4 fits do not provide denominator degrees of freedom
 or the corresponding p-values. No approximation or new dependency is added.
 
-Random-effect variances, SDs, correlations and the residual variance/SD come
-from `VarCorr()` on the original model. Correlation rows identify both component
-names, with variance/SD cells blank. No variance-component intervals are supplied.
+The main random-effect table reports grouping factor, term, variance and SD,
+including residual variance and SD, directly from `VarCorr()` on the original
+model. **Random-effect correlations** defaults off. When requested and at least
+two random-effect coefficients are fitted, a separate symmetric correlation
+matrix uses the fitted term names, diagonal values of 1, and the estimated
+off-diagonal correlations. No empty matrix is shown for a single random term.
+No variance-component intervals are supplied.
+
+Singular-fit diagnostics appear immediately below the model specification,
+before the estimates. They describe rank deficiency and confirm that the
+requested random structure has not been simplified. Redundant lme4 boundary
+messages are removed; distinct convergence diagnostics remain visible there.
+Research citations are analysis-level references, not unexplained numbers under
+the fixed-effect table.
 The adapter does not invoke the baseline refits, ICC or supplementary variance-
 reduction calculations in `estimates.lmerMod()`. No generic fit table or model
 comparison is included.
@@ -65,6 +84,22 @@ a restored grouping-color layout. Plot types are explicitly labeled:
   the existing conditional prediction stream before rendering, so the additional
   population reference stream cannot be mistaken for a second compared model.
 
+- **Cluster-adjusted scatterplot** calls the existing
+  `cluster_adjusted_scatter(formula, object=fitted_model, adjust_re="all", smooth=FALSE)`.
+  It removes the estimated random contribution from each fitted observation and
+  draws the original model's fixed-effects curve. No model is refitted and no
+  separate descriptive smoother is added. It uses all eligible fitted observations,
+  so the displayed-cluster-count control is disabled for this mode. Displayed
+  numeric moderators use CAS bin means, and undisplayed covariates use its
+  observation-weighted marginal standardization. This remains distinct from the
+  population and cluster-specific prediction displays.
+
+CAS retains the existing package limitations: one grouping factor, no offsets
+or transformed responses, and original fixed predictors must be recoverable
+from the model frame. Supported quadratics and interactions are passed through.
+Errors from CAS are displayed rather than replaced with another adjustment or
+smoother. Its existing ghost restrictions also remain unchanged.
+
 Predictions use the existing full-reference marginal machinery: displayed
 predictors are substituted at the plotting coordinates, while undisplayed
 covariates retain all eligible reference observations. The existing bin-median
@@ -81,6 +116,24 @@ cannot reliably visualize nonstandard grouping names containing spaces or
 formula punctuation. Such names can still be used for fitting/reporting. These
 are optional plotting limitations, not blockers for the supported one-group
 analysis. Mixed-model comparison remains outside this milestone.
+
+### Custom plot labels
+
+The collapsible **Plot Labels** editor lists only elements in the generated plot:
+x/y titles, an applicable color/line/symbol legend title and its categories,
+and row/column panel titles and the displayed facet levels. Numeric bins and
+the selected displayed clusters come from the actual plot, not a second binning
+algorithm. Edit the Custom label cells; leave a cell blank to retain its automatic
+label. Labels affect returned ggplot objects only, never model data, group keys,
+contrasts, facet membership, or predictions.
+
+Label edits update the visualization while reusing the existing fit and selected
+clusters. Custom labels are keyed by variable, role, and original level, so they
+survive unrelated settings changes and saved-analysis restoration. Removing a
+plot role hides its controls but retains its labels for later reuse. The same
+editor supports population, cluster-specific, and CAS displays. Label metadata
+is returned through jamovi's options response so the editor and saved options
+stay synchronized.
 
 ## Development and GUI verification
 

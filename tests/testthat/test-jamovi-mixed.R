@@ -58,9 +58,10 @@ test_that("Mixed Model estimates preserve the requested random structure and est
     expect_false("p" %in% names(table))
     random = analysis$results$random$asDF
     components = as.data.frame(lme4::VarCorr(independent))
-    expect_equal(random$variance[is.na(components$var2)],components$vcov[is.na(components$var2)])
-    expect_equal(random$sd[is.na(components$var2)],components$sdcor[is.na(components$var2)])
-    expect_equal(as.numeric(random$correlation[!is.na(components$var2)]),components$sdcor[!is.na(components$var2)])
+    expect_named(random,c("group","term","variance","sd"))
+    expect_equal(random$variance,components$vcov[is.na(components$var2)])
+    expect_equal(random$sd,components$sdcor[is.na(components$var2)])
+    expect_false(analysis$results$correlations$visible)
     expect_true("Residual" %in% random$group)
     expect_match(analysis$results$specification$content,"Fixed:")
     expect_match(analysis$results$specification$content,"Random:")
@@ -112,9 +113,11 @@ test_that("Mixed Model rejects invalid specifications and reports singular fits 
   expect_true(analysis$run())
   state = analysis$results$plot$state
   expect_true(lme4::isSingular(state$model))
-  expect_true(any(grepl("Singular fit",state$warnings)))
+  expect_true(state$singular)
+  expect_false(any(grepl("boundary.*singular",state$warnings)))
   expect_length(reformulas::findbars(formula(state$model)),1L)
-  expect_match(analysis$results$explanation$content,"not been simplified")
+  expect_match(analysis$results$diagnostics$content,"not been automatically simplified")
+  expect_false(grepl("singular",analysis$results$explanation$content,ignore.case=TRUE))
 })
 
 test_that("actual Mixed Model plot callbacks use only the requested original-model prediction stream", {
@@ -261,7 +264,9 @@ test_that("native UI server option batches rerun Mixed Model and clear stale res
   analysis$.setReadDatasetHeaderSource(reader)
   formulas = list(group=y~1+(1|id),predictors=y~x+a+(1|id),interaction=y~x*a+(1|id),
     slope=y~x*a+(1+x|id),`no-random-intercept`=y~x*a+(0+x|id),ML=y~x*a+(0+x|id),
-    squared=y~x*a+I(x^2)+(0+x|id),`restore-intercept`=y~a+(1|id),
+    squared=y~x*a+I(x^2)+(0+x|id),
+    `disable-interactions`=y~x+a+I(x^2)+(0+x|id),`enable-interactions`=y~x+a+I(x^2)+(0+x|id),
+    `disable-polynomials`=y~x+a+(0+x|id),`enable-polynomials`=y~x+a+(0+x|id),`restore-intercept`=y~a+(1|id),
     `change-group`=y~a+(1|school),`restore-outcome`=y~a+(1|school),`restore-group`=y~a+(1|id))
   capture = new.env(parent=emptyenv())
   local_mocked_bindings(jamovi_mixed_plot=jamovi_mixed_recorder(capture))
@@ -273,7 +278,7 @@ test_that("native UI server option batches rerun Mixed Model and clear stale res
         value = if (value == "__EMPTY__") list() else strsplit(strsplit(value,";",fixed=TRUE)[[1]],":",fixed=TRUE)
       } else if (name %in% c("preds","quadratic","randomSlopes","plotPanels")) {
         value = if (value == "__EMPTY__") character() else strsplit(value,";",fixed=TRUE)[[1]]
-      } else if (name %in% c("randomIntercept","includeP","graphic")) value = value == "true" else
+      } else if (name %in% c("randomIntercept","includeP","graphic","interactions","polynomials")) value = value == "true" else
         if (name == "clusters") value = as.integer(value)
       option = options$option(name)
       option$value = value
@@ -307,4 +312,260 @@ test_that("native UI server option batches rerun Mixed Model and clear stale res
     },numeric(1))
     expect_equal(curve$prediction,expected,tolerance=1e-10)
   }
+})
+
+test_that("Mixed Model term switches remove terms in R and never recreate them on enabling", {
+  skip_if_not_installed("jmvcore")
+  data = jamovi_mixed_test_data()
+  options = flexplot:::mixedmodelOptions$new(out="y",preds=c("x","a"),cluster="id",
+    modelTerms=list("x","a",c("x","a")),quadratic="x",graphic=FALSE)
+  analysis = flexplot:::mixedmodelClass$new(options=options,data=NULL)
+  reader = jamovi_reporting_read
+  environment(reader) = list2env(list(data=data),parent=environment(reader))
+  analysis$.setReadDatasetSource(reader)
+  analysis$.setReadDatasetHeaderSource(reader)
+  expect_true(analysis$run())
+  expect_true(jamovi_reporting_update(analysis,list(interactions=FALSE)))
+  independent = lme4::lmer(y~x+a+I(x^2)+(1|id),data)
+  expect_equal(lme4::fixef(analysis$results$plot$state$model),lme4::fixef(independent),tolerance=1e-10)
+  expect_true(jamovi_reporting_update(analysis,list(polynomials=FALSE)))
+  independent = lme4::lmer(y~x+a+(1|id),data)
+  expect_equal(lme4::fixef(analysis$results$plot$state$model),lme4::fixef(independent),tolerance=1e-10)
+  # Synchronized saved options have removed the selections, not merely hidden them.
+  expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("x","a"),quadratic=character(),
+    interactions=TRUE,polynomials=TRUE)))
+  expect_equal(lme4::fixef(analysis$results$plot$state$model),lme4::fixef(independent),tolerance=1e-10)
+})
+
+test_that("Mixed Model CAS delegates adjustment and model curves to the fitted-model CAS implementation", {
+  skip_if_not_installed("jmvcore")
+  analysis = jamovi_mixed_analysis(modelTerms=list("x","a",c("x","a")),randomSlopes="x",
+    graphic=TRUE,predictionType="cas",plotX="x",plotPanels="a")
+  expect_true(analysis$run())
+  state = analysis$results$plot$state
+  original = state$model
+  plot = flexplot:::jamovi_mixed_plot(state,"x","a",type="cas")
+  expected = cluster_adjusted_scatter(y~x|a,object=original,adjust_re="all",smooth=FALSE)
+  expect_equal(plot$data,expected$data)
+  expected_y = model.response(model.frame(original)) -
+    (predict(original,re.form=NULL)-predict(original,re.form=NA))
+  expect_equal(plot$data$y_adj,unname(expected_y),ignore_attr=TRUE)
+  set.seed(945)
+  actual_layers = ggplot2::ggplot_build(plot)$data
+  set.seed(945)
+  expect_equal(actual_layers,ggplot2::ggplot_build(expected)$data)
+  expect_match(plot$labels$subtitle,"Cluster-adjusted")
+  expect_false(any(vapply(plot$layers,function(layer) inherits(layer$geom,"GeomSmooth"),logical(1))))
+  expect_match(analysis$results$plotExplanation$content,"All eligible fitted observations")
+  expect_identical(state$model,original)
+  # Exercise the actual rendering callback in the CAS mode.
+  capture = new.env(parent=emptyenv())
+  local_mocked_bindings(jamovi_mixed_plot=jamovi_mixed_recorder(capture))
+  expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
+  expect_equal(capture$plot$data$y_adj,plot$data$y_adj)
+  # Existing CAS errors are propagated, rather than replaced by a smoother.
+  options = flexplot:::mixedmodelOptions$new(out="y",preds=c("x","z"),cluster="id",quadratic="x")
+  quadratic = flexplot:::jamovi_mixed_fit(options,jamovi_mixed_test_data())
+  quadratic_plot = flexplot:::jamovi_mixed_plot(quadratic,"x",type="cas")
+  direct = cluster_adjusted_scatter(y~x,object=quadratic$model,adjust_re="all")
+  expect_equal(quadratic_plot$data,direct$data)
+  quadratic_curve = Filter(function(layer) is.data.frame(layer$data) && "prediction" %in% names(layer$data),quadratic_plot$layers)[[1]]$data
+  expected_curve = vapply(quadratic_curve$x,function(x) {
+    profile = quadratic$data
+    profile$x = x
+    mean(predict(quadratic$model,newdata=profile,re.form=NA))
+  },numeric(1))
+  expect_equal(quadratic_curve$prediction,expected_curve,tolerance=1e-10)
+  offset = quadratic
+  offset$model = lme4::lmer(y~x+offset(z)+(1|id),data=quadratic$data)
+  expect_error(flexplot:::jamovi_mixed_plot(offset,"x",type="cas"),"original fixed-effect variables")
+})
+
+test_that("Mixed Model tables separate correlations and keep citations out of table footnotes", {
+  skip_if_not_installed("jmvcore")
+  analysis = jamovi_mixed_analysis(modelTerms=list("x","a"),randomSlopes=c("x","a"),showCorrelations=TRUE)
+  expect_true(analysis$run())
+  results = analysis$results
+  expect_length(results$fixed$getRefs(),0)
+  expect_length(results$random$getRefs(),0)
+  expect_length(results$correlations$getRefs(),0)
+  expect_true(all(c("flexplot","graphicalAnalysis") %in% results$getRefs(recurse=TRUE)))
+  expect_named(results$random$asDF,c("group","term","variance","sd"))
+  expected = attr(lme4::VarCorr(results$plot$state$model)[[1]],"correlation")
+  actual = results$correlations$asDF
+  expect_true(results$correlations$visible)
+  expect_identical(actual$term,rownames(expected))
+  expect_equal(unname(as.matrix(actual[-1])),unname(expected),tolerance=1e-12)
+  expect_equal(diag(as.matrix(actual[-1])),rep(1,nrow(expected)))
+  expect_equal(unname(as.matrix(actual[-1])),unname(t(as.matrix(actual[-1]))))
+  expect_identical(vapply(results$correlations$columns[-1],function(column) column$title,character(1)),
+    stats::setNames(colnames(expected),names(results$correlations$columns)[-1]))
+  # Switching structures cannot leave old matrix columns or residual rows as correlations.
+  options = analysis$options
+  option = options$option("randomSlopes"); option$value = "x"
+  analysis$optionsChangedHandler("randomSlopes")
+  expect_true(analysis$run())
+  expect_equal(ncol(results$correlations$asDF),3L)
+  option$value = character()
+  analysis$optionsChangedHandler("randomSlopes")
+  expect_true(analysis$run())
+  expect_false(results$correlations$visible)
+  expect_equal(results$correlations$rowCount,0L)
+  expect_true("Residual" %in% results$random$asDF$group)
+  slope_only = jamovi_mixed_analysis(modelTerms=list("x"),randomSlopes="x",randomIntercept=FALSE,showCorrelations=TRUE)
+  expect_true(slope_only$run())
+  expect_false(slope_only$results$correlations$visible)
+})
+
+test_that("Mixed Model diagnostics precede estimates and distinguish singularity from convergence", {
+  skip_if_not_installed("jmvcore")
+  analysis = jamovi_mixed_analysis(modelTerms=list("x"))
+  expect_true(analysis$run())
+  order = vapply(analysis$results$items,function(item) item$name,character(1))
+  expect_true(match("specification",order)<match("diagnostics",order))
+  expect_true(match("diagnostics",order)<match("fixed",order))
+  state = analysis$results$plot$state
+  state$singular = TRUE
+  state$warnings = "Model failed to converge with max|grad| = 0.03"
+  flexplot:::jamovi_mixed_reset(analysis$results)
+  flexplot:::jamovi_mixed_report(analysis$results,state,FALSE)
+  message = analysis$results$diagnostics$content
+  expect_true(analysis$results$diagnostics$visible)
+  expect_match(message,"rank-deficient")
+  expect_match(message,"not been automatically simplified")
+  expect_match(message,"failed to converge")
+  expect_length(gregexpr("Singular fit detected",message,fixed=TRUE)[[1]],1)
+  expect_false(grepl("boundary.*singular",message))
+  expect_false(grepl("failed to converge",analysis$results$explanation$content))
+})
+
+jamovi_mixed_grob_text = function(grob) {
+  text = if (is.character(grob$label)) grob$label else character()
+  children = c(grob$grobs,as.list(grob$children))
+  for (child in children) text = c(text,jamovi_mixed_grob_text(child))
+  text
+}
+
+test_that("Mixed Model plot-label edits preserve coordinates, fitted model and inactive labels", {
+  skip_if_not_installed("jmvcore")
+  data = jamovi_mixed_test_data()
+  for (type in c("population","cluster","cas")) {
+    set.seed(153)
+    options = flexplot:::mixedmodelOptions$new(out="y",preds=c("x","a","z"),cluster="id",
+      randomSlopes="x",graphic=TRUE,predictionType=type,plotX="x",plotPanels=c("id","z"),plotGroup="a")
+    analysis = flexplot:::mixedmodelClass$new(options=options,data=NULL)
+    reader = jamovi_reporting_read
+    environment(reader) = list2env(list(data=data),parent=environment(reader))
+    analysis$.setReadDatasetSource(reader)
+    analysis$.setReadDatasetHeaderSource(reader)
+    expect_true(analysis$run())
+    state = analysis$results$plot$state
+    original = state$displayPlot
+    catalog = options$plotLabels
+    roles = vapply(catalog,`[[`,character(1),"role")
+    expect_true(all(c("x","y","legend","legendLevel","rowTitle","columnTitle","facetLevel") %in% roles))
+    # Edit each title and one level of each kind, leaving remaining levels automatic.
+    for (role in unique(roles)) {
+      index = match(role,roles)
+      catalog[[index]]$label = paste0("Custom ",role)
+    }
+    option = options$option("plotLabels");option$value = catalog
+    analysis$optionsChangedHandler("plotLabels")
+    before_rng = .Random.seed
+    expect_true(analysis$run())
+    expect_identical(.Random.seed,before_rng)
+    expect_identical(analysis$results$plot$state$model,state$model)
+    expect_identical(analysis$results$plot$state$displayPlot,original)
+    labeled = flexplot:::jamovi_mixed_apply_labels(original,options$plotLabels)
+    expect_equal(labeled$labels$x,"Custom x")
+    expect_equal(labeled$labels$y,"Custom y")
+    expect_equal(labeled$labels$colour,"Custom legend")
+    set.seed(39);before = ggplot2::ggplot_build(original)
+    set.seed(39);after = ggplot2::ggplot_build(labeled)
+    expect_equal(after$data,before$data)
+    expect_equal(after$layout$layout,before$layout$layout)
+    expect_equal(after$layout$panel_params[[1]]$x.range,before$layout$panel_params[[1]]$x.range)
+    scale = after$plot$scales$get_scales("colour")
+    expect_true("Custom legendLevel" %in% scale$get_labels())
+    labels = labeled$facet$params$labeller(after$layout$layout[names(labeled$facet$params$rows)])
+    expect_true(any(grepl("Custom rowTitle",unlist(labels))))
+    grob = expect_no_warning(ggplot2::ggplotGrob(labeled))
+    rendered = jamovi_mixed_grob_text(grob)
+    expect_true(all(c("Custom x","Custom y","Custom legend","Custom legendLevel") %in% rendered))
+    expect_true(any(grepl("Custom rowTitle",rendered)))
+    expect_true(any(grepl("Custom columnTitle",rendered)))
+    # Changes unrelated to plot variables retain custom entries and selected clusters.
+    expect_true(jamovi_reporting_update(analysis,list(includeP=TRUE)))
+    expect_identical(options$plotLabels,catalog)
+    # Removing a role hides its editor rows; its labels survive reintroduction.
+    expect_true(jamovi_reporting_update(analysis,list(plotGroup=NULL)))
+    expect_false(any(vapply(options$plotLabels,`[[`,character(1),"role") == "legend"))
+    expect_true(jamovi_reporting_update(analysis,list(plotGroup="a")))
+    restored = Filter(function(entry) entry$role == "legend",options$plotLabels)[[1]]
+    expect_equal(restored$label,"Custom legend")
+    # Saved-analysis options restored to a new R6 instance retain the label store.
+    saved = flexplot:::mixedmodelOptions$new(out="y",preds=c("x","a","z"),cluster="id",
+      randomSlopes="x",graphic=TRUE,predictionType=type,plotX="x",plotPanels=c("id","z"),plotGroup="a",
+      plotLabels=options$plotLabels,plotLabelStore=options$plotLabelStore)
+    reopened = flexplot:::mixedmodelClass$new(options=saved,data=data)
+    expect_true(reopened$run())
+    expect_equal(Filter(function(entry) entry$role == "legend",saved$plotLabels)[[1]]$label,"Custom legend")
+    expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
+  }
+})
+
+test_that("Mixed Model dynamic label rows serialize back through jamovi's options response", {
+  skip_if_not_installed("jmvcore")
+  withr::local_libpaths(c(.libPaths(),"/Applications/jamovi.app/Contents/Resources/modules/base/R"))
+  skip_if_not_installed("RProtoBuf")
+  jmvcore:::initProtoBuf()
+  # Minimal real host request, using the installed protocol definitions.
+  pb = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
+  empty = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
+  empty$o = 2L
+  pb$names = c("plotLabels","plotLabelStore")
+  pb$options = list(empty,empty)
+  options = flexplot:::mixedmodelOptions$new()
+  options$fromProtoBuf(pb)
+  row = flexplot:::jamovi_mixed_label_row("x","x",display="X-axis label")
+  row$label = "Length (cm)"
+  flexplot:::jamovi_mixed_publish_labels(options,"plotLabels",list(row))
+  restored = flexplot:::mixedmodelOptions$new()
+  restored$fromProtoBuf(options$asProtoBuf())
+  expect_equal(restored$plotLabels,list(row))
+  expect_null(restored$plotLabelStore)
+  legacy = pb$clone(); legacy$names = "out"
+  scalar = empty$clone(); scalar$clear(); scalar$s = "y"
+  legacy$options = list(scalar)
+  options$fromProtoBuf(legacy)
+  flexplot:::jamovi_mixed_publish_labels(options,"plotLabels",list(row))
+  restored$fromProtoBuf(options$asProtoBuf())
+  expect_equal(restored$plotLabels,list(row))
+  expect_equal(restored$out,"y")
+})
+
+test_that("Mixed Model categorical-axis labels keep automatic defaults and only applicable controls", {
+  skip_if_not_installed("jmvcore")
+  analysis = jamovi_mixed_analysis(modelTerms=list("a"),graphic=TRUE,predictionType="population",plotX="a")
+  expect_true(analysis$run())
+  original = analysis$results$plot$state$displayPlot
+  catalog = analysis$options$plotLabels
+  expect_identical(vapply(catalog,`[[`,character(1),"role"),c("x","y"))
+  expect_true(nzchar(catalog[[2]]$variable))
+  expect_identical(flexplot:::jamovi_mixed_apply_labels(original,catalog),original)
+  catalog[[1]]$label = "Treatment category"
+  option = analysis$options$option("plotLabels");option$value = catalog
+  analysis$optionsChangedHandler("plotLabels")
+  expect_true(analysis$run())
+  labeled = flexplot:::jamovi_mixed_apply_labels(analysis$results$plot$state$displayPlot,analysis$options$plotLabels)
+  set.seed(90); before = ggplot2::ggplot_build(original)$data
+  set.seed(90); after = ggplot2::ggplot_build(labeled)$data
+  expect_equal(after,before)
+  expect_true("Treatment category" %in% jamovi_mixed_grob_text(ggplot2::ggplotGrob(labeled)))
+  catalog[[1]]$label = ""
+  option$value = catalog
+  analysis$optionsChangedHandler("plotLabels")
+  expect_true(analysis$run())
+  expect_identical(flexplot:::jamovi_mixed_apply_labels(analysis$results$plot$state$displayPlot,analysis$options$plotLabels),
+    analysis$results$plot$state$displayPlot)
 })

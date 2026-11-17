@@ -14,6 +14,12 @@ const synchronize = function(ui, context, added, quadraticChanged = false) {
     options.beginEdit();
     try {
         const predictors = ui.preds.value() || [];
+        if (ui.interactions.value() === false && ui.modelTerms.value() != null) {
+            const main = ui.modelTerms.value().filter(term => term.length === 1);
+            if (JSON.stringify(main) !== JSON.stringify(ui.modelTerms.value())) ui.modelTerms.setValue(main);
+        }
+        if (ui.polynomials.value() === false && (ui.quadratic.value() || []).length)
+            ui.quadratic.setValue([]);
         for (const name of ['quadratic','randomSlopes']) {
             const value = (ui[name].value() || []).filter(variable => predictors.includes(variable));
             if (JSON.stringify(ui[name].value()) !== JSON.stringify(value)) ui[name].setValue(value);
@@ -57,6 +63,8 @@ module.exports = {
     view_loaded: function() {},
     view_updated: function(ui) { synchronize(ui,this,false); },
     preds_changed: function(ui) { synchronize(ui,this,true); },
+    interactions_changed: function(ui) { synchronize(ui,this,false); },
+    polynomials_changed: function(ui) { synchronize(ui,this,false); },
     modelTerms_changed: function(ui) { synchronize(ui,this,false); },
     primarySupplier_updated: function(ui) { synchronize(ui,this,false); },
     quadratic_changed: function(ui) { synchronize(ui,this,false,true); },

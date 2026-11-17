@@ -2,6 +2,7 @@
 name: mixedmodel
 title: Mixed Model
 jrs: '1.1'
+refs: [flexplot, graphicalAnalysis]
 items:
   - name: waiting
     title: ''
@@ -11,11 +12,14 @@ items:
     title: Model specification
     type: Html
     visible: false
+  - name: diagnostics
+    title: Model diagnostics
+    type: Html
+    visible: false
   - name: fixed
     title: Fixed-effect estimates
     type: Table
     visible: false
-    refs: [flexplot, graphicalAnalysis]
     columns:
       - name: term
         title: Term
@@ -48,13 +52,10 @@ items:
     visible: false
     columns:
       - name: group
-        title: Group
+        title: Grouping factor
         type: text
       - name: term
-        title: Term
-        type: text
-      - name: term2
-        title: With
+        title: Random-effect term
         type: text
       - name: variance
         title: Variance
@@ -62,9 +63,14 @@ items:
       - name: sd
         title: Standard deviation
         type: number
-      - name: correlation
-        title: Correlation
-        type: number
+  - name: correlations
+    title: Random-effect correlations
+    type: Table
+    visible: false
+    columns:
+      - name: term
+        title: Random-effect term
+        type: text
   - name: explanation
     title: Model information
     type: Html

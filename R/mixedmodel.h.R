@@ -8,6 +8,8 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             out = NULL,
             preds = NULL,
+            interactions = TRUE,
+            polynomials = TRUE,
             modelTerms = NULL,
             quadratic = NULL,
             cluster = NULL,
@@ -15,12 +17,15 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             randomSlopes = NULL,
             estimation = "REML",
             includeP = FALSE,
+            showCorrelations = FALSE,
             graphic = TRUE,
             predictionType = "cluster",
             clusters = 3,
             plotX = NULL,
             plotPanels = NULL,
-            plotGroup = NULL, ...) {
+            plotGroup = NULL,
+            plotLabels = list(),
+            plotLabelStore = list(), ...) {
 
             super$initialize(
                 package="flexplot",
@@ -34,6 +39,14 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..preds = jmvcore::OptionVariables$new(
                 "preds",
                 preds)
+            private$..interactions = jmvcore::OptionBool$new(
+                "interactions",
+                interactions,
+                default=TRUE)
+            private$..polynomials = jmvcore::OptionBool$new(
+                "polynomials",
+                polynomials,
+                default=TRUE)
             private$..modelTerms = jmvcore::OptionTerms$new(
                 "modelTerms",
                 modelTerms,
@@ -65,6 +78,10 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "includeP",
                 includeP,
                 default=FALSE)
+            private$..showCorrelations = jmvcore::OptionBool$new(
+                "showCorrelations",
+                showCorrelations,
+                default=FALSE)
             private$..graphic = jmvcore::OptionBool$new(
                 "graphic",
                 graphic,
@@ -74,6 +91,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 predictionType,
                 options=list(
                     "population",
+                    "cas",
                     "cluster"),
                 default="cluster")
             private$..clusters = jmvcore::OptionInteger$new(
@@ -94,9 +112,66 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plotGroup",
                 plotGroup,
                 default=NULL)
+            private$..plotLabels = jmvcore::OptionArray$new(
+                "plotLabels",
+                plotLabels,
+                default=list(),
+                template=jmvcore::OptionGroup$new(
+                    "plotLabels",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
+            private$..plotLabelStore = jmvcore::OptionArray$new(
+                "plotLabelStore",
+                plotLabelStore,
+                hidden=TRUE,
+                default=list(),
+                template=jmvcore::OptionGroup$new(
+                    "plotLabelStore",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
+            self$.addOption(private$..interactions)
+            self$.addOption(private$..polynomials)
             self$.addOption(private$..modelTerms)
             self$.addOption(private$..quadratic)
             self$.addOption(private$..cluster)
@@ -104,16 +179,21 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..randomSlopes)
             self$.addOption(private$..estimation)
             self$.addOption(private$..includeP)
+            self$.addOption(private$..showCorrelations)
             self$.addOption(private$..graphic)
             self$.addOption(private$..predictionType)
             self$.addOption(private$..clusters)
             self$.addOption(private$..plotX)
             self$.addOption(private$..plotPanels)
             self$.addOption(private$..plotGroup)
+            self$.addOption(private$..plotLabels)
+            self$.addOption(private$..plotLabelStore)
         }),
     active = list(
         out = function() private$..out$value,
         preds = function() private$..preds$value,
+        interactions = function() private$..interactions$value,
+        polynomials = function() private$..polynomials$value,
         modelTerms = function() private$..modelTerms$value,
         quadratic = function() private$..quadratic$value,
         cluster = function() private$..cluster$value,
@@ -121,15 +201,20 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         randomSlopes = function() private$..randomSlopes$value,
         estimation = function() private$..estimation$value,
         includeP = function() private$..includeP$value,
+        showCorrelations = function() private$..showCorrelations$value,
         graphic = function() private$..graphic$value,
         predictionType = function() private$..predictionType$value,
         clusters = function() private$..clusters$value,
         plotX = function() private$..plotX$value,
         plotPanels = function() private$..plotPanels$value,
-        plotGroup = function() private$..plotGroup$value),
+        plotGroup = function() private$..plotGroup$value,
+        plotLabels = function() private$..plotLabels$value,
+        plotLabelStore = function() private$..plotLabelStore$value),
     private = list(
         ..out = NA,
         ..preds = NA,
+        ..interactions = NA,
+        ..polynomials = NA,
         ..modelTerms = NA,
         ..quadratic = NA,
         ..cluster = NA,
@@ -137,12 +222,15 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..randomSlopes = NA,
         ..estimation = NA,
         ..includeP = NA,
+        ..showCorrelations = NA,
         ..graphic = NA,
         ..predictionType = NA,
         ..clusters = NA,
         ..plotX = NA,
         ..plotPanels = NA,
-        ..plotGroup = NA)
+        ..plotGroup = NA,
+        ..plotLabels = NA,
+        ..plotLabelStore = NA)
 )
 
 mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -151,8 +239,10 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         waiting = function() private$.items[["waiting"]],
         specification = function() private$.items[["specification"]],
+        diagnostics = function() private$.items[["diagnostics"]],
         fixed = function() private$.items[["fixed"]],
         random = function() private$.items[["random"]],
+        correlations = function() private$.items[["correlations"]],
         explanation = function() private$.items[["explanation"]],
         plotExplanation = function() private$.items[["plotExplanation"]],
         plot = function() private$.items[["plot"]]),
@@ -162,7 +252,10 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Mixed Model")
+                title="Mixed Model",
+                refs=list(
+                    "flexplot",
+                    "graphicalAnalysis"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="waiting",
@@ -173,14 +266,16 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="specification",
                 title="Model specification",
                 visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="diagnostics",
+                title="Model diagnostics",
+                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="fixed",
                 title="Fixed-effect estimates",
                 visible=FALSE,
-                refs=list(
-                    "flexplot",
-                    "graphicalAnalysis"),
                 columns=list(
                     list(
                         `name`="term",
@@ -222,15 +317,11 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="group",
-                        `title`="Group",
+                        `title`="Grouping factor",
                         `type`="text"),
                     list(
                         `name`="term",
-                        `title`="Term",
-                        `type`="text"),
-                    list(
-                        `name`="term2",
-                        `title`="With",
+                        `title`="Random-effect term",
                         `type`="text"),
                     list(
                         `name`="variance",
@@ -239,11 +330,17 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="sd",
                         `title`="Standard deviation",
-                        `type`="number"),
-                    list(
-                        `name`="correlation",
-                        `title`="Correlation",
                         `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="correlations",
+                title="Random-effect correlations",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="term",
+                        `title`="Random-effect term",
+                        `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanation",
