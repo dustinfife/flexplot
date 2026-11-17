@@ -1,0 +1,81 @@
+---
+name: mixedmodel
+title: Mixed Model
+menuGroup: Flexplot
+version: '1.0.0'
+jas: '1.2'
+export: false
+options:
+  - name: data
+    type: Data
+  - name: out
+    title: Outcome
+    type: Variable
+  - name: preds
+    title: Fixed-effect predictors
+    type: Variables
+  - name: modelTerms
+    title: Fixed-effect terms
+    type: Terms
+    default: null
+  - name: quadratic
+    title: Quadratic predictors
+    type: Variables
+    default: null
+  - name: cluster
+    title: Grouping variable
+    type: Variable
+    default: null
+  - name: randomIntercept
+    title: Random intercept
+    type: Bool
+    default: true
+  - name: randomSlopes
+    title: Random slopes
+    type: Variables
+    default: null
+  - name: estimation
+    title: Estimation
+    type: List
+    options:
+      - name: REML
+        title: REML
+      - name: ML
+        title: Maximum likelihood (ML)
+    default: REML
+  - name: includeP
+    title: Include p-values (where available)
+    type: Bool
+    default: false
+  - name: graphic
+    title: Model visualization
+    type: Bool
+    default: true
+  - name: predictionType
+    title: Predictions
+    type: List
+    options:
+      - name: population
+        title: Population-level (exclude random effects)
+      - name: cluster
+        title: Cluster-specific (include estimated random effects)
+    default: cluster
+  - name: clusters
+    title: Number of displayed clusters
+    type: Integer
+    default: 3
+    min: 1
+    max: 20
+  - name: plotX
+    title: Plot x variable
+    type: Variable
+    default: null
+  - name: plotPanels
+    title: Panel variables (up to two)
+    type: Variables
+    default: null
+  - name: plotGroup
+    title: Color / symbol variable
+    type: Variable
+    default: null
+...

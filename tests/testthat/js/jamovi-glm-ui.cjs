@@ -88,6 +88,20 @@ const {pathToFileURL} = require('node:url');
         for (const name of controls) {
             if (!(name in ui)) ui[name] = control(name.endsWith('Supplier') ? [] : null);
         }
+        if (analysis === 'mixedmodel') {
+            require('./jamovi-mixed-ui.cjs')(ui, view, fire, assert);
+            if (runtime) {
+                const records = require('./jamovi-mixed-native-options.cjs')(
+                    fs.readFileSync(runtime,'utf8'),compilerPath,view.handlers,FormatDef,utils,assert);
+                const names = Object.keys(records[0].options);
+                const encodeValue = (name,value) => value === null ? '__NULL__' :
+                    (Array.isArray(value) ? (value.length ? value.map(item => Array.isArray(item) ? item.join(':') : item).join(';') : '__EMPTY__') : String(value));
+                const rows = records.map(record => [record.stage,record.changed.join(';'),
+                    ...names.map(name => encodeValue(name,record.options[name]))].join('\t'));
+                fs.writeFileSync(output, ['stage\tchanged\t'+names.join('\t'),...rows].join('\n'));
+            } else fs.writeFileSync(output, '[]');
+            return;
+        }
         const records = ['stage\tpreds\tprimary\tsecondary\tcompare'];
         const encode = terms => terms == null ? '__NULL__' :
             (terms.length ? terms.map(term => term.join(':')).join(';') : '__EMPTY__');

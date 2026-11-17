@@ -1,0 +1,123 @@
+title: Mixed Model
+name: mixedmodel
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+- type: VariableSupplier
+  persistentItems: false
+  stretchFactor: 1
+  children:
+  - type: TargetLayoutBox
+    label: Outcome Variable
+    children:
+    - type: VariablesListBox
+      name: out
+      maxItemCount: 1
+      isTarget: true
+  - type: TargetLayoutBox
+    label: Fixed-effect Predictors
+    children:
+    - type: VariablesListBox
+      name: preds
+      isTarget: true
+  - type: TargetLayoutBox
+    label: Grouping Variable
+    children:
+    - type: VariablesListBox
+      name: cluster
+      maxItemCount: 1
+      isTarget: true
+- type: Supplier
+  name: primarySupplier
+  label: Fixed effects and interactions
+  format: term
+  persistentItems: true
+  children:
+  - type: TargetLayoutBox
+    label: Fixed-effect terms
+    transferAction: interactions
+    children:
+    - type: ListBox
+      name: modelTerms
+      isTarget: true
+      valueFilter: unique
+      template:
+        type: TermLabel
+- type: Supplier
+  name: quadraticSupplier
+  label: Squared terms
+  format: variable
+  persistentItems: true
+  children:
+  - type: TargetLayoutBox
+    label: Add squared terms (numeric predictors)
+    children:
+    - type: VariablesListBox
+      name: quadratic
+      isTarget: true
+      permitted: [numeric]
+- type: CollapseBox
+  label: Random effects and estimation
+  collapsed: false
+  children:
+  - type: CheckBox
+    name: randomIntercept
+  - type: Supplier
+    name: randomSupplier
+    label: Selected predictors
+    format: variable
+    persistentItems: true
+    children:
+    - type: TargetLayoutBox
+      label: Random slopes (correlated components)
+      children:
+      - type: VariablesListBox
+        name: randomSlopes
+        isTarget: true
+  - type: ComboBox
+    name: estimation
+- type: CollapseBox
+  label: Output Options
+  collapsed: true
+  children:
+  - type: CheckBox
+    name: includeP
+- type: CollapseBox
+  label: Model visualization
+  collapsed: true
+  children:
+  - type: CheckBox
+    name: graphic
+  - type: ComboBox
+    name: predictionType
+  - type: TextBox
+    name: clusters
+    format: number
+  - type: Supplier
+    name: plotSupplier
+    label: Model predictors and grouping variable
+    format: variable
+    persistentItems: false
+    children:
+    - type: TargetLayoutBox
+      label: Plot x variable
+      children:
+      - type: VariablesListBox
+        name: plotX
+        maxItemCount: 1
+        isTarget: true
+    - type: TargetLayoutBox
+      label: Panel variables (up to two)
+      children:
+      - type: VariablesListBox
+        name: plotPanels
+        maxItemCount: 2
+        isTarget: true
+    - type: TargetLayoutBox
+      label: Color / symbol variable
+      children:
+      - type: VariablesListBox
+        name: plotGroup
+        maxItemCount: 1
+        isTarget: true

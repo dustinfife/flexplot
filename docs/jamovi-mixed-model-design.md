@@ -1,7 +1,9 @@
 # Mixed Model analysis: inspected design and implementation gates
 
-Status: proposal only. No Mixed Model analysis is registered or implemented in
-this change. The GLM/LM presentation polish is independent of this proposal.
+Status: Milestone 1 is implemented in `docs/jamovi-mixed-models.md`: one grouping
+factor, original-model population/cluster predictions, coefficient Wald intervals,
+no prediction bands and no comparison. The broader proposal and shared-code gates
+below remain for future milestones.
 
 ## Existing JASP behavior and reusable components
 

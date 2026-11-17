@@ -21,6 +21,10 @@ jamovi_smoke_fixture = function(root, home, output) {
   data$continuous = eta+rnorm(nrow(data), sd=.7)
   data$binary = factor(rbinom(nrow(data),1,plogis(eta)), levels=c(0,1), labels=c("No","Yes"))
   data$count = rpois(nrow(data),exp(.3+.25*data$x+.2*(data$group=="B")+.1*data$z))
+  data$id = factor(rep(seq_len(12),10))
+  intercept = rnorm(12,sd=1)
+  slope = rnorm(12,sd=.7)
+  data$mixed = eta+intercept[data$id]+slope[data$id]*data$x+rnorm(120,sd=.3)
   configurations = list(
     list(name="glmbasic", title="LM - main effects", options=list(out="continuous",preds=c("x","group"),
       modelTerms=list("x","group"),plotX="x",plotGroup="group")),
@@ -33,7 +37,15 @@ jamovi_smoke_fixture = function(root, home, output) {
     list(name="glmgeneralized", title="GLM - logistic model comparison", options=list(out="binary",preds=c("x","group","z"),
       family="binomial",modelTerms=list("x","group","z",c("x","group")),
       compare=TRUE,comparisonTerms=list("x","group","z"),comparisonX="x",comparisonPanels="group",
-      plotX="x",plotPanels="group")))
+      plotX="x",plotPanels="group")),
+    list(name="mixedmodel", title="Mixed - random intercept", options=list(out="mixed",preds=c("x","z"),
+      cluster="id",modelTerms=list("x","z"),plotX="x",plotPanels="id")),
+    list(name="mixedmodel", title="Mixed - random slope and quadratic", options=list(out="mixed",preds=c("x","z"),
+      cluster="id",modelTerms=list("x","z"),randomSlopes="x",randomIntercept=FALSE,quadratic="x",estimation="ML",
+      predictionType="population",plotX="x",plotPanels="id")),
+    list(name="mixedmodel", title="Mixed - fixed interaction", options=list(out="mixed",preds=c("x","z","group"),
+      cluster="id",modelTerms=list("x","z","group",c("x","group")),randomSlopes="x",
+      plotX="x",plotPanels="id",plotGroup="group")))
   work = tempfile("jamovi-smoke-")
   dir.create(work)
   on.exit(unlink(work,recursive=TRUE),add=TRUE)
@@ -70,6 +82,7 @@ jamovi_smoke_fixture = function(root, home, output) {
   if (!identical(as.integer(status),0L)) stop("Could not archive smoke analyses")
   manifest = list(configurations=configurations, definitions=list(
     glmbasic=yaml::read_yaml(file.path(root,"jamovi/glmbasic.a.yaml"))$options,
+    mixedmodel=yaml::read_yaml(file.path(root,"jamovi/mixedmodel.a.yaml"))$options,
     glmgeneralized=yaml::read_yaml(file.path(root,"jamovi/glmgeneralized.a.yaml"))$options))
   manifest_path = file.path(work,"manifest.json")
   jsonlite::write_json(manifest,manifest_path,auto_unbox=TRUE,null="null")

@@ -27,6 +27,12 @@ analyses:
     menuGroup: Flexplot
     menuTitle: Generalized Linear Model
     category: analyses
+  - title: Mixed Model
+    name: mixedmodel
+    ns: flexplot
+    menuGroup: Flexplot
+    menuTitle: Mixed Model
+    category: analyses
   - title: Flexplot
     name: flexplota
     ns: flexplot

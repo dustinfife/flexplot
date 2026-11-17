@@ -40,21 +40,82 @@ jamovi_dev_stage = function(root) {
   stage
 }
 
-jamovi_dev_open = function(root, home, file) {
+jamovi_dev_gui = function(root, action, stem="") {
+  output = system2("/usr/bin/osascript",shQuote(c("-l","JavaScript",
+    file.path(root,"dev/jamovi/gui-session.js"),action,stem)),stdout=TRUE,stderr=TRUE)
+  status = attr(output,"status")
+  if (!is.null(status) && status != 0L) stop("macOS could not manage the registered test window. No unrelated windows were closed. ",
+    "If permission was denied, allow Automation/Accessibility for your terminal in System Settings. ",
+    "The document registration is retained; retry cleanup before opening another copy. Details: ",
+    paste(output,collapse="\n"))
+  invisible(output)
+}
+
+jamovi_dev_lock = function(root) {
+  output = file.path(root,".jamovi-dev")
+  dir.create(output,recursive=TRUE,showWarnings=FALSE)
+  lock = file.path(output,"operation-lock")
+  if (!dir.create(lock,showWarnings=FALSE)) stop("Another development command is active; wait before installing, opening, or cleaning up")
+  lock
+}
+
+jamovi_dev_cleanup = function(root, locked=FALSE) {
+  if (!locked) {
+    lock = jamovi_dev_lock(root)
+    on.exit(unlink(lock,recursive=TRUE),add=TRUE)
+  }
+  registry = file.path(root,".jamovi-dev","gui-session","document.rds")
+  if (!file.exists(registry)) return(invisible(NULL))
+  copy = readRDS(registry)
+  sessions = normalizePath(file.path(root,".jamovi-dev","open-sessions"),mustWork=TRUE)
+  if (!is.character(copy) || length(copy) != 1L || dirname(copy) != sessions ||
+      !startsWith(basename(copy),"flexplot-test-") || tools::file_ext(copy) != "omv")
+    stop("Invalid test registry; refusing cleanup")
+  jamovi_dev_gui(root,"close",tools::file_path_sans_ext(basename(copy)))
+  unlink(dirname(registry),recursive=TRUE)
+  cat("Closed registered test document (or confirmed it was already closed); user sessions preserved.\n")
+  invisible(NULL)
+}
+
+jamovi_dev_open = function(root, home, file, locked=FALSE) {
   if (!file.exists(file)) stop("Saved analysis file does not exist: ",file)
   if (tolower(tools::file_ext(file)) != "omv") stop("Choose a saved .omv file")
+  if (!locked) {
+    lock = jamovi_dev_lock(root)
+    on.exit(unlink(lock,recursive=TRUE),add=TRUE)
+  }
+  # Stop before opening another document if the previous one cannot be closed safely.
+  jamovi_dev_cleanup(root,locked=TRUE)
   sessions = file.path(root,".jamovi-dev","open-sessions")
   dir.create(sessions,recursive=TRUE,showWarnings=FALSE)
-  copy = tempfile(paste0(tools::file_path_sans_ext(basename(file)),"-"),tmpdir=sessions,fileext=".omv")
+  copy = tempfile("flexplot-test-",tmpdir=normalizePath(sessions),fileext=".omv")
   if (!file.copy(file,copy)) stop("Could not create a disposable copy")
-  jamovi_dev_run("/usr/bin/open",c("-a",home,copy))
-  cat("Sent a disposable document to jamovi; no close or quit commands were sent.\n",copy,"\n",sep="")
+  registry = file.path(root,".jamovi-dev","gui-session","document.rds")
+  dir.create(dirname(registry),showWarnings=FALSE)
+  # Retain ownership even if launch/verification fails, for safe retry or cleanup.
+  saveRDS(copy,registry)
+  jamovi_dev_run("/usr/bin/open",c("-a",home,copy)) # Launch if needed; never use -n.
+  jamovi_dev_gui(root,"wait",tools::file_path_sans_ext(basename(copy)))
+  cat("PASS: smoke-test document is open for manual inspection: ",copy,"\n",sep="")
   invisible(copy)
+}
+
+jamovi_dev_confirm_install = function(stamp, log) {
+  installed = file.path(path.expand("~/Library/Application Support/jamovi/modules/flexplot"),"jamovi.yaml")
+  confirmed = FALSE
+  for (attempt in seq_len(60)) {
+    if (file.exists(installed) && any(grepl(stamp,readLines(installed,warn=FALSE),fixed=TRUE))) {
+      confirmed = TRUE;break
+    }
+    Sys.sleep(.5)
+  }
+  if (!confirmed) stop("Installer returned, but the installed build stamp was not confirmed. Check ",log)
+  invisible(NULL)
 }
 
 jamovi_dev_main = function(args, root) {
   if (!length(args) || args[1] %in% c("help","--help","-h")) {
-    cat("Usage: Rscript dev/jamovi.R <ui|test|install|fixture|open> [--open] [--deps] [--force] [--file PATH]\n",
+    cat("Usage: Rscript dev/jamovi.R <ui|test|install|fixture|open|cleanup> [--open] [--deps] [--force] [--file PATH]\n",
       "  ui       Compile/bundle definitions and run installed-UI handler tests; no install\n",
       "  test     Run focused jamovi R6 tests; no install\n",
       "  install  Build an isolated copy and update running jamovi (cached dependencies)\n",
@@ -62,7 +123,8 @@ jamovi_dev_main = function(args, root) {
       "           --open opens a disposable copy of the smoke fixture after installation\n",
       "  fixture  Generate preconfigured LM, LM interaction, logistic, and Poisson .omv\n",
       "           --force replaces the generated fixture, never a user session\n",
-      "  open     Open a disposable copy of the fixture, or --file your-saved.omv\n",
+      "  open     Open the smoke document, launching jamovi if necessary; leave it open\n",
+      "  cleanup  Close only the registered disposable test document\n",
       "JAMOVI_HOME defaults to /Applications/jamovi.app.\n",sep="")
     return(invisible(NULL))
   }
@@ -77,10 +139,11 @@ jamovi_dev_main = function(args, root) {
     flags = flags[-c(index,index+1)]
   }
   if (any(!flags %in% c("--open","--deps","--force"))) stop("Unknown option; use --help")
-  if (!command %in% c("ui","test","install","fixture","open")) stop("Unknown command; use --help")
+  if (!command %in% c("ui","test","install","fixture","open","cleanup")) stop("Unknown command; use --help")
   home = path.expand(Sys.getenv("JAMOVI_HOME","/Applications/jamovi.app"))
   output = file.path(root,".jamovi-dev")
   dir.create(output,showWarnings=FALSE)
+  if (command == "cleanup") return(jamovi_dev_cleanup(root))
   if (command == "test") {
     if (!requireNamespace("devtools",quietly=TRUE)) stop("devtools is required for test mode")
     previous_path = Sys.getenv("PATH")
@@ -101,12 +164,14 @@ jamovi_dev_main = function(args, root) {
     jamovi_dev_run(node,c(file.path(root,"dev/jamovi/validate-ui.mjs"),root,compiler,work))
     runtime = Sys.glob(file.path(home,"Contents/Resources/jamovi/client/dist/assets/analysisui-*.js"))
     if (!length(runtime)) stop("Installed jamovi UI runtime not found; cannot verify handlers")
-    for (analysis in c("glmbasic","glmgeneralized")) jamovi_dev_run(node,c(
+    for (analysis in c("glmbasic","glmgeneralized","mixedmodel")) jamovi_dev_run(node,c(
       file.path(root,"tests/testthat/js/jamovi-glm-ui.cjs"),root,compiler,
       file.path(work,paste0(analysis,".tsv")),runtime[1],analysis))
     cat("PASS: installed-UI handler tests; no module installed.\n")
     return(invisible(NULL))
   }
+  operation_lock = jamovi_dev_lock(root)
+  on.exit(unlink(operation_lock,recursive=TRUE),add=TRUE)
   if (custom_file && command != "fixture" && !file.exists(file)) stop("Saved .omv file does not exist: ",file)
   refresh_default = command == "install" && "--open" %in% flags && !custom_file
   if (command == "fixture" || (command == "open" && !file.exists(file)) || refresh_default) {
@@ -116,7 +181,7 @@ jamovi_dev_main = function(args, root) {
     cat("Created preconfigured smoke fixture: ",file,"\n",sep="")
     if (command == "fixture") return(invisible(NULL))
   }
-  if (command == "open") return(jamovi_dev_open(root,home,file))
+  if (command == "open") return(jamovi_dev_open(root,home,file,locked=TRUE))
   compiler = system.file("node_modules/jamovi-compiler",package="jmvtools")
   if (!nzchar(compiler)) stop("jmvtools is required for installation")
   stage = jamovi_dev_stage(root)
@@ -130,15 +195,7 @@ jamovi_dev_main = function(args, root) {
   cat("jamovi may briefly recalculate open analyses while its R engines restart.\n")
   started = Sys.time()
   jamovi_dev_run(jamovi_dev_node(),build_args,log=log)
-  installed = file.path(path.expand("~/Library/Application Support/jamovi/modules/flexplot"),"jamovi.yaml")
-  confirmed = FALSE
-  for (attempt in seq_len(60)) {
-    if (file.exists(installed) && any(grepl(stamp,readLines(installed,warn=FALSE),fixed=TRUE))) {
-      confirmed = TRUE;break
-    }
-    Sys.sleep(.5)
-  }
-  if (!confirmed) stop("Installer returned, but the installed build stamp was not confirmed. Check ",log)
+  jamovi_dev_confirm_install(stamp,log)
   if ("--deps" %in% flags) {
     cache = file.path(output,"cache");dir.create(cache,showWarnings=FALSE)
     if (!all(file.copy(list.files(file.path(stage,"build"),full.names=TRUE),cache,recursive=TRUE)))
@@ -146,7 +203,7 @@ jamovi_dev_main = function(args, root) {
   }
   cat("PASS: installed ",stamp," in ",round(as.numeric(difftime(Sys.time(),started,units="secs")),1),
       " s; application restart not requested.\n",sep="")
-  if ("--open" %in% flags) jamovi_dev_open(root,home,file)
+  if ("--open" %in% flags) jamovi_dev_open(root,home,file,locked=TRUE)
   invisible(stamp)
 }
 

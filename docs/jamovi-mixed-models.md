@@ -1,0 +1,116 @@
+# Mixed Model — milestone 1
+
+The jamovi **Mixed Model** analysis fits Gaussian linear mixed models with
+`lme4::lmer()`. It uses one grouping variable, REML by default or optional ML,
+and the same fixed-term and quadratic controls as the other model analyses.
+Selected predictors initially enter as main effects. Interactions and explicit
+term removals are preserved when restoring an analysis. Numeric squared terms
+add their linear main effect by default; it can subsequently be removed.
+
+## Specification and fitting
+
+Fixed and random formulas are previewed separately. The random-intercept checkbox
+and the random-slope selection are independent. Selected random slopes are literal
+predictor columns, numeric or categorical; factor slopes use lme4's standard
+contrasts. Random effects are correlated when fitted together:
+
+- Intercept only: `y ~ x + (1 | id)`.
+- Intercept and slope: `y ~ x + (1 + x | id)`.
+- Intercept-free slope: `y ~ x + (0 + x | id)`.
+
+At least one random component is required. Fixed interactions and numeric
+quadratics are supported; random interaction/polynomial terms and multiple
+grouping factors are outside this milestone. A predictor can be selected as a
+random slope independently of its fixed term. Removing a predictor clears its
+squared/random-slope selections and invalid visualization roles.
+
+Both fixed and random variables determine complete-case eligibility. Unused
+selected columns do not remove observations. The outcome must be finite numeric
+and vary, and there must be at least two observed groups. Singular fits and
+convergence diagnostics are displayed alongside the estimates; the requested
+structure is never silently reduced. Redundant fixed terms that lmer would drop
+are reported as an invalid specification rather than presented as a simplified
+fit. There are no alternative optimizer or simplified-model retries.
+
+## Reporting
+
+Fixed coefficients and standard errors follow the original model's `fixef()` and
+summary, as in the JASP adapter. They have their usual conditional coefficient
+interpretations, fitted contrasts, and outcome/predictor units. The 95% normal-Wald
+coefficient intervals are `estimate +/- qnorm(.975)*SE`. They are asymptotic mean-
+coefficient uncertainty, not prediction intervals; small numbers of clusters can
+make this approximation unreliable.
+
+**Include p-values** defaults off. If enabled, the p-value column is blank with
+an explanation: ordinary lme4 fits do not provide denominator degrees of freedom
+or the corresponding p-values. No approximation or new dependency is added.
+
+Random-effect variances, SDs, correlations and the residual variance/SD come
+from `VarCorr()` on the original model. Correlation rows identify both component
+names, with variance/SD cells blank. No variance-component intervals are supplied.
+The adapter does not invoke the baseline refits, ICC or supplementary variance-
+reduction calculations in `estimates.lmerMod()`. No generic fit table or model
+comparison is included.
+
+## Visualization
+
+X, up to two panels and color/symbol roles are restricted to fitted-model
+variables. Use an actual predictor for x; the grouping variable belongs in panels
+or color/symbol. The grouping selection initializes a panel without overwriting
+a restored grouping-color layout. Plot types are explicitly labeled:
+
+- **Population-level** excludes estimated random effects (`re.form=NA`).
+- **Cluster-specific** includes the original model's estimated random effects
+  (`re.form=NULL`), and requires grouping to be displayed. The adapter selects
+  the existing conditional prediction stream before rendering, so the additional
+  population reference stream cannot be mistaken for a second compared model.
+
+Predictions use the existing full-reference marginal machinery: displayed
+predictors are substituted at the plotting coordinates, while undisplayed
+covariates retain all eligible reference observations. The existing bin-median
+convention is retained for numeric panels. Both modes display observations from
+up to three randomly selected clusters by default, configurable from 1 to 20.
+Population curves can therefore be identical across cluster panels. Neither
+mode refits on the selected clusters. Full eligible outcome-axis coverage is
+retained. There are **no prediction confidence bands or descriptive smoothers**.
+
+Unsupported layouts produce an explanatory plot error. In particular, an
+intercept-only model has no predictor for an x-axis plot; a cluster-specific view
+needs grouping in panels/color; and the existing formula-text grouping extractor
+cannot reliably visualize nonstandard grouping names containing spaces or
+formula punctuation. Such names can still be used for fitting/reporting. These
+are optional plotting limitations, not blockers for the supported one-group
+analysis. Mixed-model comparison remains outside this milestone.
+
+## Development and GUI verification
+
+```sh
+Rscript --vanilla dev/jamovi.R ui
+Rscript --vanilla dev/jamovi.R test
+Rscript --vanilla dev/jamovi.R fixture --force
+Rscript --vanilla dev/jamovi/check-fixture.R
+Rscript --vanilla dev/jamovi.R install --open
+```
+
+The generated smoke document includes a random-intercept example, an ML
+intercept-free random-slope/quadratic example, and a correlated-slope model with a
+fixed-effect interaction. Native option serialization/restoration, independent
+lmer comparisons, installed UI-handler contracts and R6 rendering tests are
+automated. Actual jamovi layout and user interaction require a GUI smoke pass.
+
+### GUI synchronization regression coverage
+
+Mixed Model synchronization starts at jamovi's `ready` / `view_updated` hook,
+not `view_loaded`, which precedes saved-option initialization. During host option
+loading, handlers respect `flags.updating`. Dependent changes are made in one
+native option edit with a re-entry guard. This prevents the grouping-only state
+from repeatedly assigning the grouping factor to x and then clearing it, and
+prevents partially restored options from replacing a saved model with an
+intercept-only specification.
+
+Tests use the installed native option setters and View initialization events,
+then pass the resulting server option batches into the actual R6 analysis and
+compare fits/predictions with independent lmer calculations. Fresh GUI analyses,
+GUI save/reopen, subsequent edits and required-variable removal were also checked
+in jamovi 2.7.41. Updates require rebuilding/installing the module; reopen an
+analysis/document to load the corrected UI bundle.

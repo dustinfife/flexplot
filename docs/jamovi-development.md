@@ -14,11 +14,11 @@ Rscript --vanilla dev/jamovi.R test
 Rscript --vanilla dev/jamovi.R install --open
 ```
 
-From the RStudio console, the equivalent installation command is:
+For an installation without a GUI check, the RStudio console equivalent is:
 
 ```r
 source("dev/jamovi.R")
-jamovi_dev_main(c("install", "--open"), normalizePath("."))
+jamovi_dev_main("install", normalizePath("."))
 ```
 
 ## What was verified locally
@@ -75,8 +75,8 @@ round trips; handler/R6 tests alone do not establish these behaviors.
 
 ## Preconfigured smoke document
 
-The default file is `.jamovi-dev/smoke.omv`, generated with five analyses and
-six plot images. The original four cases were opened in jamovi; the newly added
+The default file is `.jamovi-dev/smoke.omv`, generated with eight analyses and
+nine plot images. The original four cases were opened in jamovi; the newly added
 GLM comparison is verified by automated saved-option restoration and still
 requires a GUI smoke pass. Its fixed synthetic dataset
 has 120 rows, numeric `x` and `z`, a two-level `group`, and three outcomes.
@@ -89,6 +89,9 @@ The analyses appear in this order:
 | GLM, logistic interaction | `binary ~ x + group + z + x:group` | Logistic overlay, probability scale, IRT and optional p-values |
 | GLM, Poisson | `count ~ x + group + z` | Response counts, multipliers, uncertainty; binomial controls hidden |
 | GLM, logistic comparison | Interaction model versus `binary ~ x + group + z` | Two response-probability curves, descriptive observed proportions, shared population, likelihood ratio and BIC Bayes factors |
+| Mixed, random intercept | `mixed ~ x + z + (1 | id)` | Three cluster panels; original-model conditional predictions and fixed/random estimates |
+| Mixed, slope and quadratic | `mixed ~ x + z + I(x^2) + (0 + x | id)` | ML, intercept-free slopes, population mode and retained squared term |
+| Mixed, interaction | `mixed ~ x + z + group + x:group + (1 + x | id)` | Separate group colors, three selected clusters and conditional predictions |
 
 The generator uses actual flexplot R6 analysis classes and plot callbacks,
 jamovi's bundled `jmvReadWrite` and `RProtoBuf`, and jamovi's native option
@@ -110,15 +113,51 @@ Rscript --vanilla dev/jamovi.R open --file "/absolute/path/my-smoke.omv"
 Rscript --vanilla dev/jamovi.R install --open --file "/absolute/path/my-smoke.omv"
 ```
 
-Every open request copies the file to a unique name under
-`.jamovi-dev/open-sessions/` and uses macOS's normal `open -a` document mechanism.
-The installed desktop's file-open handler creates a new window; no close, quit
-or replace-document commands are sent. Opening the generated fixture in the
-already-running application was tested. New windows and the existing document
-remained separate. Keep useful custom cases in your own golden `.omv`, rather
-than saving over the reserved generated default.
+`install --open` installs the module, launches jamovi if necessary, and opens a
+preconfigured smoke-test document. `open` opens that document without installing
+the module. Both commands finish normally once the document window appears;
+there is no prompt, terminal-session requirement, or exit-time document cleanup.
+Leave the document open for manual inspection.
 
-For a GUI smoke pass, verify all five populated analyses, model-term retention,
+Each launch copies the source `.omv` to a uniquely named `flexplot-test-…` file
+under `.jamovi-dev/open-sessions/`. Before opening another copy, the launcher
+closes only the previously registered disposable document. Preexisting and
+unregistered documents are never closed, and jamovi itself is never quit.
+The ordinary `open -a` mechanism launches or reuses the application; `-n` is not
+used. Save useful cases to a separate golden filename before replacing a test
+copy, because disposable changes are discarded during cleanup.
+
+A short-lived operation lock prevents concurrent installations, openings, and
+cleanup commands. The persistent document registry is separate from this lock:
+a document remaining open does not block the next installation or opening.
+`ui`, `test`, and `fixture` do not open GUI windows.
+
+To close the registered test document without opening another:
+
+```sh
+Rscript --vanilla dev/jamovi.R cleanup
+```
+
+Window verification and cleanup use macOS System Events and require the calling
+terminal's Automation/Accessibility permission. The script does not change
+permissions. If window access or cleanup fails, the command exits with failure,
+retains the registry, and does not close unrelated documents. A failed cleanup
+blocks replacement so repeated attempts cannot accumulate disposable windows.
+A launch that succeeds but cannot be verified also retains its registration for
+later cleanup. If jamovi is not running, cleanup simply clears the stale record.
+
+The command lock is removed on ordinary errors and interrupts. After forced
+termination, verify that no development command is running before removing a
+leftover `.jamovi-dev/operation-lock` directory. Do not remove the document
+registry as a substitute for closing a disposable window.
+
+Running/stopped-app scenarios, install/open/cleanup control flow, permission
+errors, concurrent commands, and preservation of user documents are verified
+with mocked OS APIs, including execution of the actual window-helper script.
+This repair did not launch additional GUI windows or reinstall the module;
+actual macOS permissions and save-dialog behavior remain host-dependent.
+
+For a GUI smoke pass, verify all eight populated analyses, model-term retention,
 plots, logistic/Poisson scales, p-value toggles, and switching between families.
 The prepared file removes repeated setup, not the need to inspect the GUI.
 The option-panel term-loss finding above should be treated as a failed smoke
@@ -153,8 +192,8 @@ can emit an upstream `element_line(size=...)` deprecation warning; the local
 
 Local logs, fixtures and disposable copies live in the git-ignored
 `.jamovi-dev/`. Both `dev/` and `.jamovi-dev/` are excluded from R package builds.
-You can remove old disposable copies after closing their windows. No script
-cleans up an active document or overwrites a custom `.omv` automatically.
+You can remove old disposable copies after closing their windows. Managed cleanup
+never overwrites the original `.omv` or closes unregistered documents.
 
 ## Development-tool verification
 
