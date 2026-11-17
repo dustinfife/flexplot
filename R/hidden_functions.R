@@ -251,14 +251,14 @@ make_flexplot_formula = function(predictors, outcome, data){
   slots = names(custom.sort)[favored.slots]
   
   
-  #### now create formula
-  x = c(outcome, "~",slots[1], slots[2], "|", slots[3], slots[4])
-  if (any(is.na(x)))  x = x[-which(is.na(x))]
-  x = paste0(x, collapse="+")
-  x = gsub("+|+", "|", x, fixed=T);x = gsub("+~+", "~", x, fixed=T)
-  x = gsub("+|", "", x, fixed=T)
-  f = as.formula(x)	
-  return(f)
+  # Keep the existing slot heuristic, but column names are literal identifiers.
+  axis = slots[1:2]
+  axis = axis[!is.na(axis)]
+  given = slots[3:4]
+  given = given[!is.na(given)]
+  rhs = formula_component(lapply(axis, as.name))
+  if (length(given)) rhs = call("|", rhs, formula_component(lapply(given, as.name)))
+  make.formula(as.name(outcome), rhs)
   
 }
 

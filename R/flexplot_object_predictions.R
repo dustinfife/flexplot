@@ -1,6 +1,9 @@
 flexplot_prediction_layer = function(prediction, axis, data,
-                                     use_magnet=FALSE, given=NA, comparison=FALSE) {
+                                     use_magnet=FALSE, given=NA, comparison=FALSE,
+                                     draw=NULL, draw_alpha=1) {
   
+  if (!is.null(draw)) return(flexplot_draw_prediction_layers(prediction,axis,data,given,draw,draw_alpha,use_magnet))
+
   xvar = axis[1]
   
   if (use_magnet) {
