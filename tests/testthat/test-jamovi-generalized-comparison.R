@@ -65,7 +65,7 @@ test_that("GLM comparisons fit common observations and use family likelihoods, n
     expect_equal(table$p[1], pchisq(lr, df, lower.tail=FALSE), tolerance=1e-12)
     expect_null(analysis$results$comparison$getCell("p", rowNo=2)$value)
     expect_false(any(c("rsq", "adj.rsq") %in% names(table)))
-    expect_match(analysis$results$comparison$notes$test$note, "No linear-model F-test")
+    expect_match(analysis$results$comparison$notes$test$note, "Nested-model likelihood-ratio test")
     expect_equal(analysis$results$plot$state$data, state$data)
     expect_false(analysis$results$comparisonplot$visible)
   }

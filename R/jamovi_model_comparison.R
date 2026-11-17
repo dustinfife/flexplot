@@ -84,5 +84,5 @@ jamovi_glm_comparison_table = function(table, state) {
 jamovi_glm_comparison_plot = function(state) {
   model1 = state$model1
   model2 = state$model2
-  compare_fits(state$formula, data=state$data, model1=model1, model2=model2)
+  jamovi_comparison_style(compare_fits(state$formula, data=state$data, model1=model1, model2=model2))
 }

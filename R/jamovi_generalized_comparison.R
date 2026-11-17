@@ -54,12 +54,13 @@ jamovi_glm_generalized_comparison_table = function(table, state) {
   formulas = vapply(list(state$model1, state$model2), function(model)
     paste(deparse(stats::formula(model)), collapse=" "), character(1))
   table$setNote("models", paste(paste("Model 1:", formulas[1]), paste("Model 2:", formulas[2]), sep="\n\n"))
-  table$setNote("population", "Both models use the same complete observations across their combined variables.")
+  table$setNote("population", "Same complete observations for both models.")
   table$setNote("bayes", paste("Approximate Bayes factors derived from BIC:",
     "Model 1's value favors Model 1 over Model 2; Model 2's value favors Model 2 over Model 1."))
-  table$setNote("test", paste("The asymptotic likelihood-ratio test compares nested models only;",
-    "blank cells indicate nonnested or equivalent models. No linear-model F-test is used.",
-    "Negative Binomial size is estimated separately for each model."))
+  test_note = if (is.finite(state$p)) "Nested-model likelihood-ratio test (asymptotic chi-square)." else
+    "Likelihood-ratio test unavailable: nonnested/equivalent models or invalid likelihood comparison."
+  if (inherits(state$model1, "negbin")) test_note = paste(test_note, "Size estimated separately per model.")
+  table$setNote("test", test_note)
   if (length(state$warnings)) table$setNote("warnings", paste(state$warnings, collapse="; "))
 }
 
@@ -86,6 +87,7 @@ jamovi_glm_generalized_comparison_plot = function(state, se=TRUE, style="auto") 
       }
     }
   }
+  plot = jamovi_comparison_style(plot)
   if (!overlay) return(plot)
   summary = convert_formula_to_logistic_bins(state$formula, plot$data, n_bins=10)$summary_data
   add_logistic_overlay_layers(plot, summary, "dot", "probability")
