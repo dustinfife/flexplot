@@ -12,7 +12,7 @@
   center = mean(z)
   interval = stats::sd(z)
   if (identical(spread, "sterr")) {
-    interval = 1.96 * interval / sqrt(length(z) - 1)
+    interval = interval / sqrt(length(z))
   }
 
   data.frame(y=center, ymin=center - interval, ymax=center + interval)

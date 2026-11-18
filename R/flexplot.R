@@ -25,7 +25,14 @@
 ##' flexplot possesses superhuman intelligence. 
 ##' @param se Should standard errors be drawn? Defaults to T. 
 ##' @param ghost.line Color of the ghost line. Default is NULL (in which case, the ghost line isn't shown). 
-##' @param spread Specifies how the "whiskers" of the plots should be draw. Can be "quartiles", "stdev", or "sterr." Defaults to quartiles
+##' @param spread Summary whiskers for numeric outcomes with categorical predictors.
+##' \code{"quartiles"} (the default) shows the median and first/third quartiles;
+##' \code{"stdev"} shows the mean plus/minus one sample standard deviation;
+##' \code{"sterr"} shows the mean plus/minus one standard error,
+##' \code{sd(y) / sqrt(n)}, using nonmissing observations in each group and panel.
+##' Standard errors are undefined for singleton groups, so their means are shown
+##' without whiskers. These are not 95 percent confidence intervals. For
+##' \code{related=TRUE}, the summaries describe the paired differences.
 ##' @param jitter Can be either T/F, or a vector of length two, specifying the degree of jitter for the x and y axis, respectively. 
 ##' @param raw.data Should raw data be plotted? Defaults to yeaaaaahhhhh-buddy! (i.e., T)
 ##' @param sample Should a sample of the data be plotted? Defaults to NOT sampling (for all variables). 

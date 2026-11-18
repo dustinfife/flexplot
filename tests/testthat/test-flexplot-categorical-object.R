@@ -9,7 +9,7 @@ test_that("categorical summary points and intervals equal base R statistics", {
                    c("GeomPoint", "GeomPoint", "GeomErrorbar"))
     center = vapply(values, if (spread == "quartiles") median else mean, numeric(1))
     radius = vapply(values, sd, numeric(1))
-    if (spread == "sterr") radius = 1.96 * radius / sqrt(lengths(values) - 1)
+    if (spread == "sterr") radius = radius / sqrt(lengths(values))
     lower = if (spread == "quartiles") vapply(values, quantile, numeric(1), probs=.25) else center - radius
     upper = if (spread == "quartiles") vapply(values, quantile, numeric(1), probs=.75) else center + radius
     expect_equal(sort(built$data[[1]]$y), sort(d$y))
@@ -73,7 +73,7 @@ test_that("categorical second axes preserve summaries and connecting lines", {
       interval = aggregate(y ~ a + b, data=p$data, FUN=sd)$y
       if (spread == "sterr") {
         counts = aggregate(y ~ a + b, data=p$data, FUN=length)$y
-        interval = 1.96 * interval / sqrt(counts - 1)
+        interval = interval / sqrt(counts)
       }
       lower = expected$y - interval
       upper = expected$y + interval
@@ -140,7 +140,7 @@ test_that("faceted categorical summaries use eligible rows and survive sampling"
   eligible = d[complete.cases(d[c("y", "a", "b", "panel")]), ]
   expected = aggregate(y ~ a + b + panel, eligible, mean)
   counts = aggregate(y ~ a + b + panel, eligible, length)$y
-  interval = 1.96 * aggregate(y ~ a + b + panel, eligible, sd)$y / sqrt(counts - 1)
+  interval = aggregate(y ~ a + b + panel, eligible, sd)$y / sqrt(counts)
   for (sample in c(Inf, 1)) {
     p = withr::with_seed(36, flexplot(y ~ a + b | panel, d, spread="sterr",
                                        jitter=FALSE, sample=sample))

@@ -41,7 +41,7 @@ test_that("paired summaries use positional differences and full eligible data", 
   for (spread in c("quartiles", "stdev", "sterr")) {
     center = if (spread == "quartiles") median(difference) else mean(difference)
     interval = sd(difference)
-    if (spread == "sterr") interval = 1.96 * interval / sqrt(length(difference) - 1)
+    if (spread == "sterr") interval = interval / sqrt(length(difference))
     bounds = if (spread == "quartiles") quantile(difference, c(.25, .75)) else
       c(center - interval, center + interval)
     for (sample in c(Inf, 2)) {
