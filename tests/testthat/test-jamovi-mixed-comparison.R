@@ -184,7 +184,9 @@ test_that("Mixed comparison plots use actual original-model predictions and pres
     local_mocked_bindings(jamovi_mixed_apply_labels=recorder)
     expect_true(analysis$.__enclos_env__$private$.comparisonplot(analysis$results$comparisonplot))
     expect_equal(capture$plot$labels$x,"Time")
-    expect_error(flexplot:::jamovi_mixed_comparison_plot(state,"x","id",type="cas"),"single-model")
+    cas = flexplot:::jamovi_mixed_comparison_plot(state,"x","id",type="cas")
+    expect_match(cas$labels$subtitle,"Model 1 cluster-adjusted")
+    expect_match(cas$labels$caption,"Model 1 only")
     expect_error(flexplot:::jamovi_mixed_comparison_plot(state,"x","id",group="a",type=type),"panels instead")
   }
 })

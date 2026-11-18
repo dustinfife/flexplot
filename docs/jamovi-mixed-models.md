@@ -180,9 +180,9 @@ and cluster-specific views use the comparison-sample original fits, never the
 ML copies created solely for statistics. Existing x/panel selections and custom
 labels are retained. Model colors and line types distinguish Model 1 and Model 2;
 there are no prediction confidence bands. Cluster-specific views require the
-shared grouping variable in panels. Two-model CAS and second-axis grouping for
-numeric outcomes remain unsupported and produce informative plot errors; use
-panels for grouping. Intercept-only models have valid statistics but no predictor
+shared grouping variable in panels. CAS during comparison renders Model 1 only, explicitly labeled; it does not
+adjust or compare both models. Second-axis grouping for numeric-outcome
+comparisons remains unsupported; use panels for grouping. Intercept-only models have valid statistics but no predictor
 for an x-axis plot. Existing shared-renderer restrictions on grouping-variable
 names also remain in effect. No shared prediction algorithms have been changed.
 
@@ -248,3 +248,13 @@ Model 2 selection. Existing saved explicit terms initialize the new control.
 
 Comparison plots do not have a separate implementation-detail paragraph. The
 comparison table briefly identifies ML statistics and use of original fits for plots.
+
+
+## CAS with model comparison enabled
+
+The cluster-adjusted scatterplot uses the original Model 1 comparison fit and its
+eligible observations, without a second-model adjustment or another model fit.
+Its subtitle and caption identify Model 1 explicitly. Population and
+cluster-specific comparisons continue to show both models. CAS works with or
+without cluster panels through the existing CAS implementation. Unsupported
+layouts display an error rather than leaving the image in a rendering state.

@@ -192,6 +192,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       }
       state$fitOptions = fit_options
       state$inputData = self$data
+      plot_failed = FALSE
       if (self$options$graphic && !self$options$compare) {
         layout = list(x=self$options$plotX,panels=self$options$plotPanels,group=self$options$plotGroup,
           type=self$options$predictionType,clusters=self$options$clusters)
@@ -202,13 +203,14 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           jamovi_mixed_sync_labels(self$options,plot,layout)
         } else {
           state$displayPlot = NULL
+          plot_failed = TRUE
           self$results$plot$setError(conditionMessage(plot))
         }
       }
       jamovi_mixed_report(self$results, state, self$options$includeP, self$options$showCorrelations)
       for (item in c("specification", "fixed", "random", "explanation")) self$results[[item]]$setVisible(TRUE)
       private$.modelState = state
-      self$results$plot$setState(state)
+      self$results$plot$setState(if (plot_failed) NULL else state)
       self$results$plot$setVisible(self$options$graphic && !self$options$compare)
       self$results$plotExplanation$setVisible(self$options$graphic && !self$options$compare)
       self$results$plotExplanation$setContent(paste0("<p>",
@@ -236,12 +238,14 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       comparison$fitOptions = comparison_options
       comparison$inputData = self$data
       jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP)
+      comparison_plot_failed = FALSE
       if (self$options$graphic) {
         layout = list(x=self$options$plotX,panels=self$options$plotPanels,group=self$options$plotGroup,
           type=self$options$predictionType,clusters=self$options$clusters)
         plot = tryCatch(do.call(jamovi_mixed_comparison_plot,c(list(state=comparison),layout)),error=identity)
         if (inherits(plot,"error")) {
           comparison$displayPlot = NULL
+          comparison_plot_failed = TRUE
           self$results$comparisonplot$setError(conditionMessage(plot))
         } else {
           comparison$displayPlot = plot
@@ -250,7 +254,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         }
       }
       private$.comparisonState = comparison
-      self$results$comparisonplot$setState(comparison)
+      self$results$comparisonplot$setState(if (comparison_plot_failed) NULL else comparison)
       self$results$comparisonplot$setVisible(self$options$graphic)
       self$results$plotExplanation$setContent("")
       self$results$plotExplanation$setVisible(FALSE)
@@ -263,6 +267,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         print(jamovi_mixed_apply_labels(plot,self$options$plotLabels))
         TRUE
       },error=function(error) {
+        # jmvcore otherwise labels a failed image with non-null state as rendering.
+        image$setState(NULL)
         image$setError(conditionMessage(error))
         FALSE
       })
@@ -275,6 +281,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         print(jamovi_mixed_apply_labels(plot,self$options$plotLabels))
         TRUE
       }, error=function(error) {
+        # jmvcore otherwise labels a failed image with non-null state as rendering.
+        image$setState(NULL)
         image$setError(conditionMessage(error))
         FALSE
       })

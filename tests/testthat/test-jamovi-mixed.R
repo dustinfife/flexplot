@@ -257,7 +257,7 @@ test_that("native UI server option batches rerun Mixed Model and clear stale res
     }
     analysis$optionsChangedHandler(changed)
     expect_true(analysis$run())
-    state = analysis$results$plot$state
+    state = analysis$.__enclos_env__$private$.modelState
     stage = packets$stage[i]
     if (!stage %in% names(formulas)) {
       expect_null(state)
@@ -268,6 +268,12 @@ test_that("native UI server option batches rerun Mixed Model and clear stale res
     }
     expect_false(is.null(state),info=stage)
     if (is.null(state)) next
+    if (stage == "group") {
+      # The intercept-only fit is valid before a plot predictor is selected.
+      expect_null(analysis$results$plot$state)
+      expect_identical(analysis$results$plot$status,"error")
+      expect_identical(analysis$results$plot$asProtoBuf(status=3L)$status,4L)
+    }
     independent = suppressMessages(lme4::lmer(formulas[[stage]],data=data,REML=options$estimation=="REML"))
     expect_equal(lme4::fixef(state$model),lme4::fixef(independent),tolerance=1e-10)
     expect_equal(as.data.frame(lme4::VarCorr(state$model)),as.data.frame(lme4::VarCorr(independent)),tolerance=1e-10)

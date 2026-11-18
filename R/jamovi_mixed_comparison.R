@@ -151,7 +151,12 @@ jamovi_mixed_comparison_report = function(results, state, includeP=FALSE) {
 jamovi_mixed_comparison_plot = function(state, x=NULL, panels=NULL, group=NULL, type="cluster", clusters=3) {
   layout = list(x=x,panels=panels,group=group,type=type,clusters=clusters)
   if (!is.null(state$displayPlot) && identical(state$displayLayout,layout)) return(state$displayPlot)
-  if (type == "cas") stop("Cluster-adjusted scatterplots are single-model displays. Choose population-level or cluster-specific predictions for model comparison.",call.=FALSE)
+  if (type == "cas") {
+    # CAS adjusts one model's outcomes; it is not a two-model adjustment.
+    plot = jamovi_mixed_plot(state$first,x,panels,group,type="cas",clusters=clusters)
+    return(plot + ggplot2::labs(subtitle="Model 1 cluster-adjusted scatterplot",
+      caption="Model 1 only; CAS does not compare two models."))
+  }
   if (!type %in% c("population","cluster")) stop("Choose population-level or cluster-specific comparisons.",call.=FALSE)
   predictors = setdiff(unique(c(all.vars(stats::formula(state$model1))[-1],all.vars(stats::formula(state$model2))[-1])),state$cluster)
   if (!length(predictors)) stop("These intercept-only models have no predictor for an x-axis comparison.",call.=FALSE)
