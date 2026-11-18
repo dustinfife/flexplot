@@ -422,7 +422,10 @@ test_that("saved CAS ghost settings restore the same note and serialized result 
       "<p>Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions.</p>" else "")
     message = restored$results$asProtoBuf(status=3L)
     items = vapply(message$group$elements,function(item)item$name,character(1))
-    expect_identical(match("explanation",items),match("comparisonSpecification",items)+1L)
+    specification = message$group$elements[[match("comparisonSpecification",items)]]
+    expect_match(specification$html$content,"</p><p>240 complete observations; 16 groups; 0 observations omitted.</p>",fixed=TRUE)
+    expect_false(restored$results$explanation$visible)
+    expect_identical(restored$results$explanation$content,"")
     expect_identical(match("comparisonPlotNote",items),match("comparisonplot",items)+1L)
   }
 })

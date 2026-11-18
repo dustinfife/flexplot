@@ -44,7 +44,7 @@ test_that("an enabled ghost option does not advertise a singleton prediction as 
   expect_false(analysis$results$comparisonPlotNote$visible)
 })
 
-test_that("sample information occurs once immediately after the visible model specification", {
+test_that("sample information shares the model specification without a separate output block", {
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_test_data()
   data$z[c(1,3)] = NA
@@ -55,12 +55,37 @@ test_that("sample information occurs once immediately after the visible model sp
     results = analysis$results
     visible = vapply(Filter(function(item)isTRUE(item$visible),results$items),function(item)item$name,character(1))
     specification = if (comparison) "comparisonSpecification" else "specification"
-    expect_identical(match("explanation",visible),match(specification,visible)+1L)
-    expect_lt(match("explanation",visible),match("fixed",visible))
-    expect_identical(results$explanation$title,"")
-    expect_identical(results$explanation$content,"<p>238 complete observations; 16 groups; 2 observations omitted.</p>")
+    expect_lt(match(specification,visible),match("fixed",visible))
+    expect_false(results$explanation$visible)
+    expect_identical(results$explanation$content,"")
+    expect_match(results[[specification]]$content,
+      "</p><p>238 complete observations; 16 groups; 2 observations omitted.</p>",fixed=TRUE)
     text = vapply(Filter(function(item)inherits(item,"Html"),results$items),function(item)item$content,character(1))
     expect_identical(sum(grepl("complete observations;",text,fixed=TRUE)),1L)
     expect_false(results$comparisonPlotNote$visible)
+  }
+})
+
+test_that("CAS layout changes preserve the original cluster data and fitted random effects", {
+  skip_if_not_installed("jmvcore")
+  for (comparison in c(FALSE,TRUE)) {
+    analysis = jamovi_mixed_analysis(graphic=TRUE,compare=comparison,predictionType="population",plotX="x",
+      modelTerms=list("x","z"),randomSlopes="x",comparisonTerms=list("x"))
+    expect_true(analysis$run())
+    original = if (comparison) analysis$results$comparisonplot$state else analysis$results$plot$state
+    local({
+      local_mocked_bindings(jamovi_mixed_fit=function(...)stop("Unexpected model refit"),
+        jamovi_mixed_comparison=function(...)stop("Unexpected comparison refit"))
+      expect_true(jamovi_reporting_update(analysis,list(predictionType="cas",plotPanels="z")))
+      current = if (comparison) analysis$results$comparisonplot$state else analysis$results$plot$state
+      expect_identical(analysis$options$cluster,"id")
+      expect_true("id" %in% names(current$data))
+      if (comparison) {
+        expect_identical(current$model1,original$model1)
+        expect_identical(current$model2,original$model2)
+      } else expect_identical(current$model,original$model)
+      expect_identical(analysis$options$plotPanels,"z")
+      expect_true(jamovi_reporting_update(analysis,list(predictionType="cluster",plotPanels="id")))
+    })
   }
 })

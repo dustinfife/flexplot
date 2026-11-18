@@ -106,7 +106,7 @@ jamovi_mixed_comparison = function(options, data) {
     first=first,second=second,statistics=statistics,omitted=nrow(data)-nrow(eligible))
 }
 
-jamovi_mixed_comparison_report = function(results, state, includeP=FALSE) {
+jamovi_mixed_comparison_report = function(results, state, includeP=FALSE, information="") {
   statistics = state$statistics
   values = data.frame(model=c("Model 1","Model 2"),n=c(stats::nobs(state$model1),stats::nobs(state$model2)),
     aic=statistics$aic,bic=statistics$bic,bayes.factor=statistics$bayes,
@@ -142,8 +142,9 @@ jamovi_mixed_comparison_report = function(results, state, includeP=FALSE) {
       " (",if (lme4::isREML(model)) "REML" else "ML",
       if (lme4::isSingular(model)) "; singular fit" else "", ")"))
   }
-  results$comparisonSpecification$setContent(paste0("<p>",paste(content,collapse="<br>"),"</p>"))
+  results$comparisonSpecification$setContent(paste0("<p>",paste(content,collapse="<br>"),"</p>",information))
   results$specification$setVisible(FALSE)
+  results$specification$setContent("")
   results$comparisonSpecification$setVisible(TRUE)
   results$comparison$setVisible(TRUE)
 }

@@ -58,12 +58,13 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
                 if (missing.length) ui[termsName].setValue(terms.concat(missing.map(name => [name])));
             }
         }
+        const cluster = ui.cluster.value();
+        const cas = ui.predictionType.value() === 'cas';
         const layouts = [{supplier:'plotSupplier', models:comparing ? ['modelTerms','comparisonTerms'] : ['modelTerms'],
             selections:['plotX','plotPanels','plotGroup'], exclusive:true, requireX:true,
             extra:comparing ? ['quadratic','randomSlopes','comparisonQuadratic','comparisonRandomSlopes','cluster'] : ['quadratic','randomSlopes','cluster'],
-            include:'cluster'}];
+            include:'cluster', exclude:cas && cluster ? [cluster] : []}];
         // A new grouping selection defaults to panels; do not overwrite a saved layout.
-        const cluster = ui.cluster.value();
         if (cluster !== context.workspace.mixedCluster) {
             const previous = context.workspace.mixedCluster;
             if (previous && ui.plotX.value() === previous) ui.plotX.setValue(null);
@@ -71,7 +72,7 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
             const panels = (ui.plotPanels.value() || []).filter(name => name !== previous);
             const restored = context.workspace.mixedCluster === undefined &&
                 [ui.plotX.value(), ui.plotGroup.value(), ...panels].includes(cluster);
-            if (cluster && !restored && panels.length < 2 && ![ui.plotX.value(),ui.plotGroup.value(),...panels].includes(cluster)) panels.push(cluster);
+            if (cluster && !cas && !restored && panels.length < 2 && ![ui.plotX.value(),ui.plotGroup.value(),...panels].includes(cluster)) panels.push(cluster);
             context.workspace.mixedCluster = cluster;
             if (JSON.stringify(ui.plotPanels.value()) !== JSON.stringify(panels)) ui.plotPanels.setValue(panels);
         }
@@ -115,6 +116,7 @@ module.exports = {
     comparisonQuadraticSupplier_updated: function(ui) { synchronize(ui,this,false); },
     comparisonRandomSupplier_updated: function(ui) { synchronize(ui,this,false); },
     cluster_changed: function(ui) { synchronize(ui,this,false); },
+    predictionType_changed: function(ui) { synchronize(ui,this,false); },
     plotSupplier_updated: function(ui) { synchronize(ui,this,false); },
     plotX_changed: function(ui) { synchronize(ui,this,false); },
     plotPanels_changed: function(ui) { synchronize(ui,this,false); },

@@ -249,6 +249,50 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     assert.equal(JSON.stringify(ui.modelTerms.value()),unchangedFirst);
     // The earlier primary-model packet stream is consumed by its existing R6 test.
     records.splice(primaryRecords);
+    // Native mode changes must edit the visible targets and supplier in the
+    // same server batch, without touching either fitted-model specification.
+    ui.preds.setValue(['x','a','z']);
+    ui.modelTerms.setValue([['x'],['a'],['z']]);
+    const fitNames = ['preds','modelTerms','quadratic','cluster','randomIntercept','randomSlopes','estimation',
+        'comparisonFixed','comparisonTerms','comparisonQuadratic','comparisonRandomIntercept',
+        'comparisonRandomSlopes','comparisonEstimation'];
+    const fitSnapshot = () => JSON.stringify(fitNames.map(name=>ui[name].value()));
+    for (const comparison of [false,true]) {
+        ui.compare.setValue(comparison);
+        ui.predictionType.setValue('cluster');
+        ui.plotX.setValue('x'); ui.plotPanels.setValue(['id','z']); ui.plotGroup.setValue('a');
+        const before = fitSnapshot();
+        const count = packets.length;
+        ui.predictionType.setValue('cas');
+        assert.equal(packets.length,count+1,'CAS selection is one atomic server update');
+        assert.equal(JSON.stringify(packets.at(-1).options.plotPanels),'["z"]');
+        assert.equal(ui.plotX.value(),'x');
+        assert.equal(ui.plotGroup.value(),'a');
+        assert.ok(!ui.plotSupplier.value().some(item=>item.value.raw==='id'));
+        ui.plotPanels.setValue(['id','z']);
+        assert.equal(JSON.stringify(ui.plotPanels.value()),'["z"]');
+        ui.plotGroup.setValue('id'); assert.equal(ui.plotGroup.value(),null);
+        ui.plotX.setValue('id'); assert.notEqual(ui.plotX.value(),'id');
+        assert.equal(fitSnapshot(),before,'CAS must not edit fixed or random effects');
+        for (const type of ['population','cluster']) {
+            ui.predictionType.setValue(type);
+            assert.ok(ui.plotSupplier.value().some(item=>item.value.raw==='id'));
+            ui.plotGroup.setValue('id'); assert.equal(ui.plotGroup.value(),'id');
+            ui.predictionType.setValue('cas'); assert.equal(ui.plotGroup.value(),null);
+        }
+        events.find(event=>event.onEvent==='view.data-initializing').execute.call(view,ui,{id:'saved-cas-'+comparison});
+        native.predictionType.setValue('cas'); native.plotX.setValue('id');
+        native.plotPanels.setValue(['id','z']); native.plotGroup.setValue('a');
+        events.find(event=>event.onEvent==='view.ready').execute.call(view,ui,{id:'saved-cas-'+comparison});
+        assert.equal(ui.cluster.value(),'id');
+        assert.equal(ui.plotX.value(),'x');
+        assert.equal(JSON.stringify(ui.plotPanels.value()),'["z"]');
+        assert.equal(ui.plotGroup.value(),'a');
+        assert.equal(fitSnapshot(),before);
+        assert.ok(!ui.plotSupplier.value().some(item=>item.value.raw==='id'));
+        assert.equal(manager._beginEdit,0);
+    }
+    console.log('PASS: native CAS selection filtering, mode switching, and saved-option restoration; model specifications unchanged.');
     console.log('PASS: installed native option setters, synchronous handler re-entry and server batches; fresh and restored options.');
     return records;
 };

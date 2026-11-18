@@ -114,12 +114,11 @@ jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE)
     results$diagnostics$setVisible(TRUE)
   }
   formula_text = paste(deparse(stats::formula(state$model)), collapse=" ")
-  results$specification$setContent(paste0("<p><strong>Model:</strong> ", jamovi_mixed_escape(formula_text),
-    " (", if (lme4::isREML(state$model)) "REML" else "ML", ")</p>"))
   information = paste0("<p>", stats::nobs(state$model), " complete observations; ",
     nlevels(state$data[[state$cluster]]), " groups; ", state$omitted, " observations omitted.</p>")
-
-  results$explanation$setContent(information)
+  results$specification$setContent(paste0("<p><strong>Model:</strong> ", jamovi_mixed_escape(formula_text),
+    " (", if (lme4::isREML(state$model)) "REML" else "ML", ")</p>", information))
+  invisible(information)
 }
 
 jamovi_mixed_plot = function(state, x=NULL, panels=NULL, group=NULL, type="cluster", clusters=3) {
@@ -207,8 +206,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           self$results$plot$setError(conditionMessage(plot))
         }
       }
-      jamovi_mixed_report(self$results, state, self$options$includeP, self$options$showCorrelations)
-      for (item in c("specification", "fixed", "random", "explanation")) self$results[[item]]$setVisible(TRUE)
+      information = jamovi_mixed_report(self$results, state, self$options$includeP, self$options$showCorrelations)
+      for (item in c("specification", "fixed", "random")) self$results[[item]]$setVisible(TRUE)
       private$.modelState = state
       self$results$plot$setState(if (plot_failed) NULL else state)
       self$results$plot$setVisible(self$options$graphic && !self$options$compare)
@@ -237,7 +236,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       }
       comparison$fitOptions = comparison_options
       comparison$inputData = self$data
-      jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP)
+      jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP,information)
       self$results$comparisonplot$setSize(if (self$options$predictionType == "cas") 1100 else 700,450)
       comparison_plot_failed = FALSE
       if (self$options$graphic) {
