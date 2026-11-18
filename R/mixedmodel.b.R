@@ -238,10 +238,11 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       comparison$fitOptions = comparison_options
       comparison$inputData = self$data
       jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP)
+      self$results$comparisonplot$setSize(if (self$options$predictionType == "cas") 1100 else 700,450)
       comparison_plot_failed = FALSE
       if (self$options$graphic) {
         layout = list(x=self$options$plotX,panels=self$options$plotPanels,group=self$options$plotGroup,
-          type=self$options$predictionType,clusters=self$options$clusters)
+          type=self$options$predictionType,clusters=self$options$clusters,casGhost=self$options$casGhost)
         plot = tryCatch(do.call(jamovi_mixed_comparison_plot,c(list(state=comparison),layout)),error=identity)
         if (inherits(plot,"error")) {
           comparison$displayPlot = NULL
@@ -263,7 +264,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       if (is.null(image$state)) return(FALSE)
       tryCatch({
         plot = jamovi_mixed_comparison_plot(image$state,self$options$plotX,self$options$plotPanels,
-          self$options$plotGroup,self$options$predictionType,self$options$clusters)
+          self$options$plotGroup,self$options$predictionType,self$options$clusters,self$options$casGhost)
         print(jamovi_mixed_apply_labels(plot,self$options$plotLabels))
         TRUE
       },error=function(error) {

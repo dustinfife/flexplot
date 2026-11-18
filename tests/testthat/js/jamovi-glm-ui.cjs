@@ -123,6 +123,12 @@ const {pathToFileURL} = require('node:url');
             }
 
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi/mixedmodel.a.yaml'),'utf8'));
+            assert.equal(definition.options.find(option => option.name === "casGhost").default,false);
+            const casVisualization = compiled.view.layout.controls.find(control => control.label === "Model visualization");
+            const ghost = casVisualization.controls.find(control => control.name === "casGhost");
+            assert.equal(ghost.contentLink,"(compare && predictionType:cas)");
+            assert.equal(ghost.useSingleCell,true);
+            if (runtime) require("./jamovi-binomial-visibility.cjs")(fs.readFileSync(runtime,"utf8"),ghost,null,compilerPath);
             assert.equal(definition.options.find(option => option.name === 'interactions').title,'Include Interaction Terms');
             assert.equal(definition.options.find(option => option.name === 'polynomials').title,'Include Polynomial Terms');
             assert.equal(definition.options.find(option => option.name === 'showCorrelations').default,false);

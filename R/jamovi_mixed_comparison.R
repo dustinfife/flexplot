@@ -148,14 +148,11 @@ jamovi_mixed_comparison_report = function(results, state, includeP=FALSE) {
   results$comparison$setVisible(TRUE)
 }
 
-jamovi_mixed_comparison_plot = function(state, x=NULL, panels=NULL, group=NULL, type="cluster", clusters=3) {
-  layout = list(x=x,panels=panels,group=group,type=type,clusters=clusters)
+jamovi_mixed_comparison_plot = function(state, x=NULL, panels=NULL, group=NULL, type="cluster", clusters=3, casGhost=FALSE) {
+  layout = list(x=x,panels=panels,group=group,type=type,clusters=clusters,casGhost=casGhost)
   if (!is.null(state$displayPlot) && identical(state$displayLayout,layout)) return(state$displayPlot)
   if (type == "cas") {
-    # CAS adjusts one model's outcomes; it is not a two-model adjustment.
-    plot = jamovi_mixed_plot(state$first,x,panels,group,type="cas",clusters=clusters)
-    return(plot + ggplot2::labs(subtitle="Model 1 cluster-adjusted scatterplot",
-      caption="Model 1 only; CAS does not compare two models."))
+    return(jamovi_mixed_cas_comparison(state,x,panels,group,casGhost))
   }
   if (!type %in% c("population","cluster")) stop("Choose population-level or cluster-specific comparisons.",call.=FALSE)
   predictors = setdiff(unique(c(all.vars(stats::formula(state$model1))[-1],all.vars(stats::formula(state$model2))[-1])),state$cluster)

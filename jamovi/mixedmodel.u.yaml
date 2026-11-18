@@ -178,6 +178,10 @@ children:
     name: graphic
   - type: ComboBox
     name: predictionType
+  - type: CheckBox
+    name: casGhost
+    useSingleCell: true
+    contentLink: (compare && predictionType:cas)
   - type: TextBox
     name: clusters
     enable: (!predictionType:cas)

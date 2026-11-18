@@ -324,8 +324,15 @@ cluster_adjusted_scatter = function(formula, object=NULL, data=NULL,
     object = lme4::lmer(fit_formula, data=data)
   }
   d = compute_cas_from_model(object, outcome_name=outcome, adjust_re=adjust_re)
+  cas_render_model(formula, object, d, smooth, list(...))
+}
+
+# Shared rendering entry point; comparison data are validated before arriving here.
+cas_render_model = function(formula, object, d, smooth=FALSE, options=list()) {
+  roles = flexplot_axis_given(formula)
+  xvar = roles$axis[1]
+  outcome = as.character(formula[[2]])
   if (!all(all.vars(formula) %in% names(d))) stop("Plot variables must exist in the fitted model frame.", call.=FALSE)
-  options = list(...)
   if (!is.null(options$ghost.line)) {
     if (length(roles$axis) > 1L) stop("CAS prediction ghosts do not yet support second-axis grouping.", call.=FALSE)
     if (all(is.na(roles$given) | !nzchar(roles$given))) stop("CAS prediction ghosts require a conditioning variable.", call.=FALSE)
@@ -347,5 +354,6 @@ cluster_adjusted_scatter = function(formula, object=NULL, data=NULL,
     p = p + cas_prediction_ghost(curve, p$data, adjusted_formula, roles, options)
   }
   if (isTRUE(smooth)) p = p + ggplot2::geom_smooth()
+  attr(p, "cas_prediction") = curve
   p
 }

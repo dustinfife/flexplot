@@ -115,6 +115,10 @@ options:
       - name: cluster
         title: Cluster-specific (include estimated random effects)
     default: cluster
+  - name: casGhost
+    title: Show other model's predictions
+    type: Bool
+    default: false
   - name: clusters
     title: Number of displayed clusters
     type: Integer

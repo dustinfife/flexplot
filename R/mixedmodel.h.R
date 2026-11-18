@@ -29,6 +29,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showCorrelations = FALSE,
             graphic = TRUE,
             predictionType = "cluster",
+            casGhost = FALSE,
             clusters = 3,
             plotX = NULL,
             plotPanels = NULL,
@@ -142,6 +143,10 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cas",
                     "cluster"),
                 default="cluster")
+            private$..casGhost = jmvcore::OptionBool$new(
+                "casGhost",
+                casGhost,
+                default=FALSE)
             private$..clusters = jmvcore::OptionInteger$new(
                 "clusters",
                 clusters,
@@ -239,6 +244,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showCorrelations)
             self$.addOption(private$..graphic)
             self$.addOption(private$..predictionType)
+            self$.addOption(private$..casGhost)
             self$.addOption(private$..clusters)
             self$.addOption(private$..plotX)
             self$.addOption(private$..plotPanels)
@@ -270,6 +276,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showCorrelations = function() private$..showCorrelations$value,
         graphic = function() private$..graphic$value,
         predictionType = function() private$..predictionType$value,
+        casGhost = function() private$..casGhost$value,
         clusters = function() private$..clusters$value,
         plotX = function() private$..plotX$value,
         plotPanels = function() private$..plotPanels$value,
@@ -300,6 +307,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showCorrelations = NA,
         ..graphic = NA,
         ..predictionType = NA,
+        ..casGhost = NA,
         ..clusters = NA,
         ..plotX = NA,
         ..plotPanels = NA,

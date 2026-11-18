@@ -24,6 +24,7 @@ test_that("the simplified CAS case renders real images with comparison on or off
     expect_true(analysis$run())
     image = if (comparison) analysis$results$comparisonplot else analysis$results$plot
     plot = image$state$displayPlot
+    if (comparison) plot = attr(plot,"jamovi_cas_children")[[1]]
     model = if (comparison) image$state$model1 else image$state$model
     expected = model.response(model.frame(model)) - (predict(model)-predict(model,re.form=NA))
     expect_equal(plot$data$mixed_adj,unname(expected),ignore_attr=TRUE,tolerance=1e-10)
@@ -40,8 +41,8 @@ test_that("the simplified CAS case renders real images with comparison on or off
     built = ggplot2::ggplot_build(plot)
     expect_equal(nrow(built$layout$layout),if (is.null(panels)) 1L else nlevels(model.frame(model)$id))
     if (comparison) {
-      expect_match(plot$labels$subtitle,"Model 1 cluster-adjusted scatterplot",fixed=TRUE)
-      expect_match(plot$labels$caption,"Model 1 only",fixed=TRUE)
+      expect_identical(plot$labels$title,"Model 1")
+      expect_null(plot$labels$caption)
       expect_true(analysis$results$comparison$visible)
     }
     analysis$.setResourcesPathSource(resources)
@@ -63,6 +64,7 @@ test_that("CAS handles the original numeric moderator and cluster-panel layout",
     expect_true(analysis$run())
     image = if (comparison) analysis$results$comparisonplot else analysis$results$plot
     plot = image$state$displayPlot
+    if (comparison) plot = attr(plot,"jamovi_cas_children")[[1]]
     model = if (comparison) image$state$model1 else image$state$model
     expected = model.response(model.frame(model)) - (predict(model)-predict(model,re.form=NA))
     expect_equal(plot$data$z_adj,unname(expected),ignore_attr=TRUE,tolerance=1e-10)

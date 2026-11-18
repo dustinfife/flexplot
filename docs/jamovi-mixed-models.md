@@ -180,8 +180,8 @@ and cluster-specific views use the comparison-sample original fits, never the
 ML copies created solely for statistics. Existing x/panel selections and custom
 labels are retained. Model colors and line types distinguish Model 1 and Model 2;
 there are no prediction confidence bands. Cluster-specific views require the
-shared grouping variable in panels. CAS during comparison renders Model 1 only, explicitly labeled; it does not
-adjust or compare both models. Second-axis grouping for numeric-outcome
+shared grouping variable in panels. CAS during comparison displays Model 1 and Model 2 side by side, each with its
+own adjustment and fixed-effects predictions. Second-axis grouping for numeric-outcome
 comparisons remains unsupported; use panels for grouping. Intercept-only models have valid statistics but no predictor
 for an x-axis plot. Existing shared-renderer restrictions on grouping-variable
 names also remain in effect. No shared prediction algorithms have been changed.
@@ -252,9 +252,26 @@ comparison table briefly identifies ML statistics and use of original fits for p
 
 ## CAS with model comparison enabled
 
-The cluster-adjusted scatterplot uses the original Model 1 comparison fit and its
-eligible observations, without a second-model adjustment or another model fit.
-Its subtitle and caption identify Model 1 explicitly. Population and
-cluster-specific comparisons continue to show both models. CAS works with or
-without cluster panels through the existing CAS implementation. Unsupported
-layouts display an error rather than leaving the image in a rendering state.
+CAS shows Model 1 on the left and Model 2 on the right. Both use the same common
+complete-case observations, but each removes its own estimated random contribution:
+`adjusted outcome = outcome - (conditional prediction - fixed-effects prediction)`.
+The original requested ML/REML fits are used, not the ML copies for comparison statistics.
+
+Both curves use the same x coordinates, moderator categories, numeric bins and
+within-bin means. Undisplayed covariates are observation-weighted marginalized
+across the same full estimation population. Variables omitted from one model can
+still be displayed without adding them to that model. Axes and group encodings
+are shared; existing facets remain inside each model display.
+
+**Show other model's predictions** is available only for CAS comparisons and is
+off by default. Solid curves are the panel's own fixed-effects predictions;
+dashed, translucent ghosts are the competing model's fixed-effects predictions
+under the same conditions. Ghosts are not fitted to that panel's adjusted dots.
+Less scatter after a more flexible random-effects adjustment does not by itself
+indicate better model fit. No prediction confidence bands are added.
+
+Custom axis, group and facet labels apply to both plots. Unsupported layouts or
+failures in either plot produce a terminal error rather than a partial comparison
+or indefinite rendering state. Existing CAS restrictions (one grouping factor,
+untransformed numeric response, no offsets, required raw fixed-effect variables)
+continue to apply. Single-model CAS and other comparison modes are unchanged.

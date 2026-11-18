@@ -73,6 +73,27 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
             updateDisplayValue:updateDisplay, setRootElement(value){this.el = value;},
             translate:value => value, getSourceValue:() => selection, setValue:value => {selection = value;}};
     };
+    if (definition.name === 'casGhost') {
+        const state = {compare:false,predictionType:'cluster'};
+        const control = create(true);
+        const grid = new Grid(); render.call(control,grid,0,0,{});
+        const engine = {_resources:{casGhost:control,
+            compare:{value:()=>state.compare},predictionType:{value:()=>state.predictionType}},actions:[],
+            addDirectAction(name,action){this.actions.push(action);}};
+        for (const signature of ['_nextNonWhiteChar(e,t){','_arrayUnique(e){','_resolveBindPart(e,t){',
+            '_resolveBinding(e,t){','bindActionParams(e,t,s){','bindingsToActions(){'])
+            engine[signature.slice(0,signature.indexOf('('))] = method(signature);
+        engine.bindingsToActions();
+        control.setValue(true);
+        for (const compare of [false,true,false,true]) for (const type of ['cas','population','cluster','cas']) {
+            state.compare=compare;state.predictionType=type;
+            for (const action of engine.actions) action.execute(engine._resources);
+            assert.equal(control._cell.visible,compare && type==='cas');
+            assert.equal(control.getSourceValue(),true);
+        }
+        console.log('Installed native visibility bindings restrict CAS ghosts to CAS comparisons and retain the saved choice.');
+        return;
+    }
     let family = 'gaussian';
     const attach = control => {
         const engine = {_resources:{family:{value:() => family},plotStyle:control}, actions:[],

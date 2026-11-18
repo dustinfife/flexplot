@@ -185,8 +185,7 @@ test_that("Mixed comparison plots use actual original-model predictions and pres
     expect_true(analysis$.__enclos_env__$private$.comparisonplot(analysis$results$comparisonplot))
     expect_equal(capture$plot$labels$x,"Time")
     cas = flexplot:::jamovi_mixed_comparison_plot(state,"x","id",type="cas")
-    expect_match(cas$labels$subtitle,"Model 1 cluster-adjusted")
-    expect_match(cas$labels$caption,"Model 1 only")
+    expect_identical(vapply(attr(cas,"jamovi_cas_children"),function(p) p$labels$title,character(1)),c("Model 1","Model 2"))
     expect_error(flexplot:::jamovi_mixed_comparison_plot(state,"x","id",group="a",type=type),"panels instead")
   }
 })
@@ -216,7 +215,7 @@ test_that("Mixed comparisons restore independent second-model specifications and
     compare=TRUE,comparisonFixed=c("x","a"),comparisonTerms=list("x","a",c("x","a")),comparisonInteractions=TRUE,
     comparisonPolynomials=TRUE,comparisonQuadratic="x",randomSlopes="x",
     comparisonRandomIntercept=FALSE,comparisonRandomSlopes="x",comparisonEstimation="ML",
-    includeP=TRUE,graphic=TRUE,plotX="x",plotPanels="id",predictionType="population")
+    includeP=TRUE,casGhost=TRUE,graphic=TRUE,plotX="x",plotPanels="id",predictionType="population")
   message = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
   template = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
   message$names=names(saved)
@@ -232,6 +231,7 @@ test_that("Mixed comparisons restore independent second-model specifications and
   expect_true(analysis$run())
   expect_true(options$compare)
   expect_true(options$includeP)
+  expect_true(options$casGhost)
   expect_true(analysis$results$comparison$getColumn("p")$visible)
   state=analysis$results$comparisonplot$state
   independent=lme4::lmer(y~x*a+I(x^2)+(0+x|id),data,REML=FALSE)

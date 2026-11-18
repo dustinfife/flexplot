@@ -3,6 +3,7 @@
 // Runs through the compiled view's installed automatic event bindings.
 module.exports = function(ui, view, fire, assert) {
     fire('view','loaded');
+    ui.casGhost.setValue(true);
     ui.cluster.setValue('id'); fire('cluster','changed');
     assert.equal(ui.plotX.value(), null);
     assert.deepEqual(JSON.parse(JSON.stringify(ui.plotPanels.value())), ['id']);
@@ -40,5 +41,6 @@ module.exports = function(ui, view, fire, assert) {
     ui.modelTerms.setValue([]); fire('modelTerms','changed');
     assert.equal(ui.plotX.value(), null);
     assert.equal(JSON.stringify(ui.plotPanels.value()), '["school"]');
+    assert.equal(ui.casGhost.value(), true, 'Unrelated updates must preserve the saved CAS ghost choice');
     console.log('PASS: Mixed Model initialization, independent random slopes, quadratics, role synchronization and restored layouts.');
 };

@@ -5,6 +5,7 @@ jamovi_mixed_label_row = function(role, variable, value="", display) {
 }
 
 jamovi_mixed_label_catalog = function(plot, layout) {
+  if (!is.null(attr(plot,"jamovi_cas_children"))) plot = attr(plot,"jamovi_cas_children")[[1]]
   x = layout$x
   if (is.null(x)) x = jamovi_mixed_axis_key(plot,"x")
   rows = list(jamovi_mixed_label_row("x", paste(x,collapse=""), display="X-axis label"),
@@ -80,6 +81,10 @@ jamovi_mixed_strip_labels = function(labels) {
 }
 
 jamovi_mixed_apply_labels = function(plot, entries) {
+  children = attr(plot,"jamovi_cas_children")
+  if (!is.null(children)) {
+    return(jamovi_mixed_cas_compose(lapply(children,jamovi_mixed_apply_labels,entries=entries)))
+  }
   entries = Filter(jamovi_mixed_nonblank_label,entries)
   if (!length(entries)) return(plot)
   plot$scales = plot$scales$clone()
