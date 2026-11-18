@@ -234,3 +234,17 @@ Mixed Models. Internal analysis identifiers are unchanged. jamovi 2.7 supplies
 the Flexplot ribbon icon through its own built-in stylesheet; this module cannot
 replace it with `inst/icons/FlexplotLogo-sm.png` through a supported icon option.
 The original logo assets and host icon are retained without modifying jamovi.
+
+
+## Model 2 fixed-effects selector
+
+When comparison is enabled, **Model 2 — Fixed Effects** remains visible, independently
+of the interaction and polynomial switches. It is a native variable target supplied
+from the selected predictors. A new comparison initializes it from Model 1's fixed
+predictors. Removing a variable prunes its Model 2 terms and squared terms; adding
+it back adds its main effect. Model 1 is unchanged. Random slopes remain separate
+and do not select fixed effects. Interaction and squared-term builders use the
+Model 2 selection. Existing saved explicit terms initialize the new control.
+
+Comparison plots do not have a separate implementation-detail paragraph. The
+comparison table briefly identifies ML statistics and use of original fits for plots.

@@ -54,7 +54,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     const beginEdit = vm.runInNewContext('('+extract('beginEdit(){',true)+')');
     const endEdit = vm.runInNewContext('('+extract('endEdit(){',true)+')');
     const view = {workspace:{}};
-    const defaults = {compare:false,comparisonTerms:null,comparisonInteractions:false,comparisonPolynomials:false,comparisonQuadratic:null,comparisonRandomIntercept:true,comparisonRandomSlopes:null,comparisonEstimation:"REML",interactions:false,polynomials:false,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
+    const defaults = {compare:false,comparisonFixed:null,comparisonTerms:null,comparisonInteractions:false,comparisonPolynomials:false,comparisonQuadratic:null,comparisonRandomIntercept:true,comparisonRandomSlopes:null,comparisonEstimation:"REML",interactions:false,polynomials:false,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
         randomIntercept:true,estimation:'REML',includeP:false,graphic:true,predictionType:'cluster',
         clusters:3,plotX:null,plotPanels:null,plotGroup:null};
     const native = {}, packets = [], queued = new Set();
@@ -79,7 +79,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
             finally { manager.endEdit(); }
         }};
     }
-    for (const name of ['quadraticSupplier','randomSupplier','primarySupplier','plotSupplier','comparisonSupplier','comparisonQuadraticSupplier','comparisonRandomSupplier']) {
+    for (const name of ['quadraticSupplier','randomSupplier','primarySupplier','plotSupplier','comparisonFixedSupplier','comparisonSupplier','comparisonQuadraticSupplier','comparisonRandomSupplier']) {
         let value = [];
         ui[name] = {value:() => value,setValue(updated) {
             if (JSON.stringify(value) === JSON.stringify(updated)) return;
@@ -188,7 +188,12 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     const primaryRecords = records.length;
     record('comparison-predictors',()=>ui.preds.setValue(['x','a','z']));
     record('primary-main-effects',()=>ui.modelTerms.setValue([['x'],['a']]));
-    record('second-fixed',()=>ui.comparisonTerms.setValue([['x'],['z']]));
+    record('initialize-second',()=>ui.compare.setValue(true));
+    assert.equal(JSON.stringify(ui.comparisonFixed.value()),'["x","a"]',
+        'A new comparison initializes from Model 1, not every selected candidate predictor');
+    record('initialize-second-off',()=>ui.compare.setValue(false));
+    record('select-second-predictors',()=>ui.comparisonFixed.setValue(['x','z']));
+    assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"],["z"]]');
     record('comparison-on',()=>ui.compare.setValue(true));
     assert.ok(ui.plotSupplier.value().some(item=>item.value.raw==='z'));
     const firstTerms = JSON.stringify(ui.modelTerms.value());
@@ -206,7 +211,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"],["z"],["x","z"]]');
     record('comparison-back-on',()=>ui.compare.setValue(true));
     events.find(event=>event.onEvent==='view.data-initializing').execute.call(view,ui,{id:'comparison'});
-    for (const [name,value] of [['preds',[]],['compare',true],['comparisonInteractions',true],
+    for (const [name,value] of [['preds',[]],['comparisonFixed',null],['compare',true],['comparisonInteractions',true],
         ['comparisonPolynomials',true],['comparisonTerms',[['x'],['z'],['x','z']]],
         ['comparisonQuadratic',['z']],['comparisonRandomIntercept',false],['comparisonRandomSlopes',['z']],
         ['comparisonEstimation','ML'],['preds',['x','a','z']]]) native[name].setValue(value);
@@ -220,6 +225,28 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     assert.equal(JSON.stringify(options.comparisonTerms),'[["x"]]');
     assert.equal(options.comparisonQuadratic.length,0);
     assert.equal(options.comparisonRandomSlopes.length,0);
+
+    // The always-visible native variable target edits Model 2, not random slopes or Model 1.
+    const unchangedFirst = JSON.stringify(ui.modelTerms.value());
+    ui.comparisonFixed.setValue(['x','a']);
+    ui.comparisonTerms.setValue([['x'],['a']]);
+    ui.comparisonRandomSlopes.setValue(['a']);
+    ui.comparisonFixed.setValue(['x']);
+    assert.equal(JSON.stringify(ui.comparisonFixedSupplier.value().map(item=>item.value.raw)),'["a"]');
+    const beforeDisplay = JSON.stringify(ui.comparisonTerms.value());
+    handlers.comparisonFixedSupplier_updated.call(view,ui);
+    assert.equal(JSON.stringify(ui.comparisonTerms.value()),beforeDisplay,'Supplier display updates must not edit model terms');
+    assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"]]');
+    assert.equal(JSON.stringify(ui.comparisonRandomSlopes.value()),'["a"]');
+    ui.comparisonFixed.setValue(['x','a']);
+    assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"],["a"]]');
+    assert.equal(JSON.stringify(ui.modelTerms.value()),unchangedFirst);
+    ui.comparisonInteractions.setValue(true);
+    ui.comparisonTerms.setValue([['x'],['a'],['x','a']]);
+    ui.comparisonPolynomials.setValue(true);
+    ui.comparisonQuadratic.setValue(['x']);
+    assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"],["a"],["x","a"]]');
+    assert.equal(JSON.stringify(ui.modelTerms.value()),unchangedFirst);
     // The earlier primary-model packet stream is consumed by its existing R6 test.
     records.splice(primaryRecords);
     console.log('PASS: installed native option setters, synchronous handler re-entry and server batches; fresh and restored options.');

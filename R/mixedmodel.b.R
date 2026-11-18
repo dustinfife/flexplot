@@ -210,7 +210,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       private$.modelState = state
       self$results$plot$setState(state)
       self$results$plot$setVisible(self$options$graphic && !self$options$compare)
-      self$results$plotExplanation$setVisible(self$options$graphic)
+      self$results$plotExplanation$setVisible(self$options$graphic && !self$options$compare)
       self$results$plotExplanation$setContent(paste0("<p>",
         if (self$options$predictionType == "cas")
           "Cluster-adjusted scatterplot: the existing CAS implementation removes all estimated random effects from the fitted observations and draws the original model's fixed-effects curve. All eligible fitted observations are shown; the displayed-cluster count does not apply. Displayed moderators use CAS representative values, and undisplayed covariates are observation-weighted marginalized." else paste0(
@@ -220,7 +220,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           " Up to ", self$options$clusters, " randomly selected clusters are displayed."),
         " No prediction confidence bands are calculated.</p>"))
       if (!self$options$compare) return(invisible(NULL))
-      comparison_options = c(fit_options,lapply(c("comparisonTerms","comparisonInteractions","comparisonPolynomials",
+      comparison_options = c(fit_options,lapply(c("comparisonFixed","comparisonTerms","comparisonInteractions","comparisonPolynomials",
         "comparisonQuadratic","comparisonRandomIntercept","comparisonRandomSlopes","comparisonEstimation"),self$options$get))
       comparison = private$.comparisonState
       if (is.null(comparison) || !identical(comparison$fitOptions,comparison_options) ||
@@ -252,7 +252,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       private$.comparisonState = comparison
       self$results$comparisonplot$setState(comparison)
       self$results$comparisonplot$setVisible(self$options$graphic)
-      self$results$plotExplanation$setContent("<p>Comparison curves use the two original fits on the common estimation sample, with their requested ML/REML settings. Population curves exclude random effects; cluster-specific curves include estimated random effects for the displayed clusters. Statistics use separate ML copies. No prediction confidence bands or two-model CAS adjustment are calculated.</p>")
+      self$results$plotExplanation$setContent("")
+      self$results$plotExplanation$setVisible(FALSE)
     },
     .comparisonplot=function(image, ...) {
       if (is.null(image$state)) return(FALSE)

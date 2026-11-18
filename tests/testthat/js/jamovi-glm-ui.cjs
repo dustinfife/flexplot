@@ -62,6 +62,9 @@ const {pathToFileURL} = require('node:url');
         assert.equal(view.valuesToItems, undefined);
         const controls = new Set(['view']);
         const walk = control => {
+            if (analysis === 'mixedmodel' && control.type === 'Supplier')
+                assert.equal(typeof view.handlers[control.name + '_updated'],'function',
+                    'Native Supplier requires an updated handler: ' + control.name);
             if (control.name) controls.add(control.name);
             for (const child of control.controls || []) walk(child);
         };
@@ -131,6 +134,10 @@ const {pathToFileURL} = require('node:url');
             assert.ok(!JSON.stringify(variables).includes('Grouping Variable'));
 
             const comparison = compiled.view.layout.controls.find(control => control.label === 'Model Comparison');
+            assert.ok(JSON.stringify(comparison).includes('Model 2 — Fixed Effects'));
+            assert.ok(JSON.stringify(comparison).includes('comparisonFixed'));
+            assert.ok(JSON.stringify(comparison).includes('Model 2 — Random Effects'));
+
             assert.equal(comparison.controls.find(control => control.contentLink === '(compare)').useSingleCell,true);
             const randomControls = JSON.stringify(comparison);
             assert.ok(randomControls.includes('Random slopes (Model 2)'));

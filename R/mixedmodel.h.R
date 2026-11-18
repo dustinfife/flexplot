@@ -17,6 +17,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             randomSlopes = NULL,
             estimation = "REML",
             compare = FALSE,
+            comparisonFixed = NULL,
             comparisonTerms = NULL,
             comparisonInteractions = FALSE,
             comparisonPolynomials = FALSE,
@@ -86,6 +87,10 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "compare",
                 compare,
                 default=FALSE)
+            private$..comparisonFixed = jmvcore::OptionVariables$new(
+                "comparisonFixed",
+                comparisonFixed,
+                default=NULL)
             private$..comparisonTerms = jmvcore::OptionTerms$new(
                 "comparisonTerms",
                 comparisonTerms,
@@ -222,6 +227,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..randomSlopes)
             self$.addOption(private$..estimation)
             self$.addOption(private$..compare)
+            self$.addOption(private$..comparisonFixed)
             self$.addOption(private$..comparisonTerms)
             self$.addOption(private$..comparisonInteractions)
             self$.addOption(private$..comparisonPolynomials)
@@ -252,6 +258,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         randomSlopes = function() private$..randomSlopes$value,
         estimation = function() private$..estimation$value,
         compare = function() private$..compare$value,
+        comparisonFixed = function() private$..comparisonFixed$value,
         comparisonTerms = function() private$..comparisonTerms$value,
         comparisonInteractions = function() private$..comparisonInteractions$value,
         comparisonPolynomials = function() private$..comparisonPolynomials$value,
@@ -281,6 +288,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..randomSlopes = NA,
         ..estimation = NA,
         ..compare = NA,
+        ..comparisonFixed = NA,
         ..comparisonTerms = NA,
         ..comparisonInteractions = NA,
         ..comparisonPolynomials = NA,

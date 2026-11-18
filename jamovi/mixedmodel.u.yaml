@@ -95,6 +95,18 @@ children:
     useSingleCell: true
     contentLink: (compare)
     children:
+    - type: Supplier
+      name: comparisonFixedSupplier
+      label: Available predictors
+      format: variable
+      persistentItems: false
+      children:
+      - type: TargetLayoutBox
+        label: Model 2 — Fixed Effects
+        children:
+        - type: VariablesListBox
+          name: comparisonFixed
+          isTarget: true
     - type: CheckBox
       name: comparisonInteractions
     - type: Supplier
@@ -132,6 +144,8 @@ children:
           name: comparisonQuadratic
           isTarget: true
           permitted: [numeric]
+    - type: Label
+      label: Model 2 — Random Effects
     - type: CheckBox
       name: comparisonRandomIntercept
     - type: Supplier

@@ -40,7 +40,7 @@ test_that("Mixed comparisons use ML copies for nested fixed effects and preserve
   expect_equal(state$statistics$df,independent$Df[2])
   expect_equal(table$p[1],independent$`Pr(>Chisq)`[2],tolerance=1e-8)
   expect_null(analysis$results$comparison$getCell("p",rowNo=2)$value)
-  expect_match(analysis$results$comparison$notes$estimation$note,"ML fits")
+  expect_match(analysis$results$comparison$notes$estimation$note,"Model comparisons use ML")
   expect_match(analysis$results$comparison$notes$bayes$note,"Approximate BIC.*each row.*reciprocal")
   expect_match(analysis$results$comparisonSpecification$content,"Model 2")
 })
@@ -211,7 +211,7 @@ test_that("Mixed comparisons restore independent second-model specifications and
   skip_if_not_installed("RProtoBuf")
   jmvcore:::initProtoBuf()
   saved = list(out="y",preds=c("x","a","z"),cluster="id",modelTerms=list("x","a"),
-    compare=TRUE,comparisonTerms=list("x","a",c("x","a")),comparisonInteractions=TRUE,
+    compare=TRUE,comparisonFixed=c("x","a"),comparisonTerms=list("x","a",c("x","a")),comparisonInteractions=TRUE,
     comparisonPolynomials=TRUE,comparisonQuadratic="x",randomSlopes="x",
     comparisonRandomIntercept=FALSE,comparisonRandomSlopes="x",comparisonEstimation="ML",
     includeP=TRUE,graphic=TRUE,plotX="x",plotPanels="id",predictionType="population")
@@ -338,7 +338,7 @@ test_that("Mixed comparison presentation is compact without losing model specifi
   notes = vapply(analysis$results$comparison$notes,`[[`,character(1),"note")
   expect_length(notes,3L)
   expect_lt(sum(nchar(notes)),350)
-  expect_match(notes[["estimation"]],"ML fits.*identical observations.*Original estimates and plots")
+  expect_match(notes[["estimation"]],"Model comparisons use ML on identical observations; plots use the original fitted models")
   expect_match(notes[["bayes"]],"Approximate BIC.*reciprocal")
   expect_false(analysis$results$specification$visible)
   content = analysis$results$comparisonSpecification$content
@@ -353,4 +353,42 @@ test_that("Mixed comparison presentation is compact without losing model specifi
   expect_match(paste(deparse(formula(updated$model2)),collapse=" "),"x:z",fixed=TRUE)
   expect_match(paste(deparse(formula(updated$model2)),collapse=" "),"I(z^2)",fixed=TRUE)
   expect_match(analysis$results$comparison$notes$test$note,"nonnested")
+})
+
+
+test_that("Mixed Model 2 fixed selections constrain terms without selecting fixed effects from slopes", {
+  skip_if_not_installed("jmvcore")
+  analysis = jamovi_mixed_comparison_analysis(modelTerms=list("x","a"),polynomials=FALSE,quadratic=NULL,
+    comparisonFixed="a",comparisonTerms=list("x","a"),comparisonRandomSlopes="x",graphic=TRUE,plotX="x",plotPanels="id")
+  expect_true(analysis$run())
+  state = analysis$results$comparisonplot$state
+  expect_identical(colnames(lme4::getME(state$model1,"X")),c("(Intercept)","x","a.L","a.Q"))
+  expect_identical(colnames(lme4::getME(state$model2,"X")),c("(Intercept)","a.L","a.Q"))
+  expect_identical(lme4::getME(state$model2,"cnms")[[1]],c("(Intercept)","x"))
+  expect_false(analysis$results$plotExplanation$visible)
+  expect_identical(analysis$results$plotExplanation$content,"")
+  expect_match(analysis$results$comparison$notes$estimation$note,
+    "Model comparisons use ML on identical observations; plots use the original fitted models",fixed=TRUE)
+  expect_true(jamovi_reporting_update(analysis,list(comparisonFixed=c("x","a"),comparisonTerms=list("x","a"))))
+  restored = analysis$results$comparisonplot$state
+  expect_identical(lme4::fixef(restored$model1),lme4::fixef(state$model1))
+  expect_identical(colnames(lme4::getME(restored$model2,"X")),colnames(lme4::getME(state$model1,"X")))
+  # Old saved analyses do not have the new option: explicit legacy terms are retained.
+  options = analysis$options
+  option = options$option("comparisonFixed"); option$value = NULL
+  option = options$option("comparisonTerms"); option$value = list("x")
+  legacy = flexplot:::jamovi_mixed_comparison(options,jamovi_mixed_test_data())
+  expect_identical(colnames(lme4::getME(legacy$model2,"X")),c("(Intercept)","x"))
+})
+
+
+test_that("new backend comparisons initialize from Model 1 fixed predictors rather than unused candidates", {
+  skip_if_not_installed("jmvcore")
+  analysis = jamovi_mixed_comparison_analysis(modelTerms=list("x","a"),polynomials=FALSE,quadratic=NULL,
+    comparisonFixed=NULL,comparisonTerms=NULL)
+  expect_true(analysis$run())
+  state = analysis$results$comparisonplot$state
+  expect_identical(colnames(lme4::getME(state$model1,"X")),colnames(lme4::getME(state$model2,"X")))
+  expect_false("z" %in% all.vars(formula(state$model2)))
+  expect_equal(lme4::fixef(state$model1),lme4::fixef(state$model2),tolerance=1e-10)
 })

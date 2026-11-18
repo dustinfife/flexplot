@@ -55,6 +55,10 @@ options:
     title: Compare two models
     type: Bool
     default: false
+  - name: comparisonFixed
+    title: Model 2 fixed-effect predictors
+    type: Variables
+    default: null
   - name: comparisonTerms
     title: Model 2 fixed-effect terms
     type: Terms

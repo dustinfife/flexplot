@@ -1,8 +1,21 @@
 # Comparison fits are separate from the original single-model estimates.
 jamovi_mixed_second_options = function(options) {
+  terms = options$comparisonTerms
+  selected = options$comparisonFixed
+  quadratic = options$comparisonQuadratic
+  if (!is.null(selected)) {
+    if (any(!selected %in% options$preds)) stop("Model 2 fixed effects must use selected predictor variables.",call.=FALSE)
+    terms = if (is.null(terms)) lapply(selected,identity) else
+      Filter(function(term) all(term %in% selected),terms)
+    quadratic = quadratic[quadratic %in% selected]
+  } else if (is.null(terms)) {
+    predictors = if (is.null(options$modelTerms)) options$preds else unlist(options$modelTerms)
+    if (isTRUE(options$polynomials)) predictors = c(predictors,options$quadratic)
+    terms = lapply(unique(predictors),identity)
+  }
   list(out=options$out, preds=options$preds, cluster=options$cluster,
-    modelTerms=options$comparisonTerms, interactions=options$comparisonInteractions,
-    polynomials=options$comparisonPolynomials, quadratic=options$comparisonQuadratic,
+    modelTerms=terms, interactions=options$comparisonInteractions,
+    polynomials=options$comparisonPolynomials, quadratic=quadratic,
     randomIntercept=options$comparisonRandomIntercept, randomSlopes=options$comparisonRandomSlopes,
     estimation=options$comparisonEstimation)
 }
@@ -101,8 +114,9 @@ jamovi_mixed_comparison_report = function(results, state, includeP=FALSE) {
   p_column = results$comparison$getColumn("p")
   p_column$setVisible(includeP)
   jamovi_glm_table_rows(results$comparison,values)
-  results$comparison$setNote("estimation",paste0("ML fits on ",nrow(state$data),
-    " identical observations (",state$omitted," omitted). Original estimates and plots retain their selected ML/REML methods."))
+  results$comparison$setNote("estimation",paste0(
+    "Model comparisons use ML on identical observations; plots use the original fitted models.",
+    if (state$omitted > 0) paste0(" ",state$omitted," observations omitted.") else ""))
   results$comparison$setNote("bayes",NULL)
   if (any(is.finite(statistics$bayes))) results$comparison$setNote("bayes",
     "Approximate BIC Bayes factors favor the model in each row; the two values are reciprocal.")
