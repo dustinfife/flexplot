@@ -37,7 +37,8 @@ jamovi_plots = function(formula, data, options=NULL) {
   groups_are_equal   = table(data[,predictors[1]])[1]==table(data[,predictors[1]])[2]
   related = ifelse(diff_selected & only_one_predictor & only_two_levels & groups_are_equal,
                    TRUE, FALSE)
-  given_exists = !is.na(given)
+  # Routing tests presence; the complete conditioning vector stays in formula.
+  given_exists = length(given) > 0L && !all(is.na(given))
   preds_exist  = length(options$preds)>0
   
   ### added variable plot
