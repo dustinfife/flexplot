@@ -85,9 +85,9 @@ test_that("complete jamovi GLM runs preserve factor means and covariate-adjusted
       expect_identical(names(differences), c("variables", "comparison", "diff", "lower", "upper", "cohensd"))
       expect_equal(nrow(differences), 1)
       difference = unname(expected[2, "fit"]-expected[1, "fit"])
-      counts = table(model$model$a)
-      # Preserve the existing Tukey-scaled difference interval calculation.
-      width = qtukey(.95, 2, df.residual(model))*sigma(model)*sqrt(sum(1/counts))
+      design = model.matrix(delete.response(terms(model)), profile, contrasts.arg=model$contrasts)
+      contrast = design[2,]-design[1,]
+      width = qt(.975, df.residual(model))*sqrt(drop(contrast %*% vcov(model) %*% contrast))
       expect_identical(differences$comparison, paste(levels[2], levels[1], sep="-"))
       expect_equal(differences$diff, round(difference, 2))
       expect_equal(differences$lower, round(difference-width, 2))

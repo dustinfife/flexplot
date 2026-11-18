@@ -227,6 +227,11 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			.diff = function(l){
 				
 				table <- self$results$diff
+        adjustments = attr(l, "adjustments")
+        table$setNote("intervals", paste0("95% confidence intervals: ",
+          paste(paste(names(adjustments), adjustments, sep=": "), collapse="; "),
+          ". Adjusted intervals cover the estimable pairwise family within each factor. Other numeric predictors are held at their means and categorical predictors at their modes."))
+
 
 				for (i in 1:(nrow(l))){
 						row = list('variables' = l$variables[i], 

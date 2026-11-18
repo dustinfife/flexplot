@@ -57,14 +57,16 @@ described below are the current implementation, including its approximations.
     conditional reference predictions in response units, not observed group
     means or full-population marginal means.}
   \item{difference.matrix}{All within-factor level pairs, labeled with their
-    signed prediction difference in response units. For k levels, residual SD
-    sigma, df = n - length(coef(object)) and cell counts n_i,n_j, the implemented
-    half-width is qtukey(.95,k,df)*sigma*sqrt(1/n_i+1/n_j). This is a
-    Tukey-style construction using raw factor counts; it is not a covariance-
-    based contrast interval for arbitrary adjusted predictions, and omits the
-    sqrt(2) divisor of the usual Tukey-Kramer width. cohens.d is the signed
-    difference divided by the full model's residual SD, not a separately pooled
-    pairwise raw-group SD.}
+    signed conditional reference-prediction difference in response units.
+    Estimates and SEs use fitted design-matrix contrasts L: L*coef(object)
+    and sqrt(L*vcov(object)*t(L)). Two-level factors use pointwise 95% t
+    intervals with residual degrees of freedom. Classical unweighted one-way
+    ANOVA with more levels uses Tukey-Kramer intervals, with critical value
+    qtukey(.95,k,df)/sqrt(2). General adjusted comparisons use Bonferroni t
+    intervals over all estimable pairs within each factor. Nonestimable pairs
+    have NA estimates and bounds. The adjustments attribute identifies the
+    method per factor. These are not marginal-population contrasts.
+    cohens.d is the signed difference divided by the full model residual SD.}
   \item{sigma}{summary(object)$sigma, the residual SD in response units.}
   \item{model.comparison}{NULL if mc=FALSE or fewer than two non-interaction
     terms; otherwise a table with all.terms, rsq and bayes.factor. The Full

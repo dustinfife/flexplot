@@ -294,6 +294,47 @@ compute_semi_partial = function(object) {
   return(semi.p)
 }
 
+# Pairwise conditional reference contrasts, retaining fitted coding and covariance.
+lm_factor_contrasts = function(object, variable, profiles, levels) {
+  for (name in intersect(names(object$xlevels), names(profiles))) attr(profiles[[name]], "contrasts") = NULL
+  design = stats::model.matrix(stats::delete.response(stats::terms(object)), profiles,
+    contrasts.arg=object$contrasts, xlev=object$xlevels)
+  design = do.call(rbind, lapply(levels, function(level)
+    colMeans(design[as.character(profiles[[variable]]) == level, , drop=FALSE])))
+  pairs = which(lower.tri(matrix(0, length(levels), length(levels))), arr.ind=TRUE)
+  contrast = design[pairs[,1], , drop=FALSE] - design[pairs[,2], , drop=FALSE]
+  fitted_matrix = stats::model.matrix(object)
+  estimable = rep(TRUE, nrow(contrast))
+  if (object$rank < ncol(fitted_matrix)) {
+    decomposition = qr(t(fitted_matrix))
+    basis = qr.Q(decomposition)[, seq_len(decomposition$rank), drop=FALSE]
+    error = apply(abs(contrast - contrast %*% basis %*% t(basis)), 1, max)
+    estimable = error < 1e-8 * pmax(1, apply(abs(contrast), 1, max))
+  }
+  coefficients = stats::coef(object)
+  included = !is.na(coefficients)
+  estimate = unname(drop(contrast[,included,drop=FALSE] %*% coefficients[included]))
+  covariance = stats::vcov(object, complete=FALSE)
+  standard_error = unname(sqrt(pmax(0, rowSums((contrast[,included,drop=FALSE] %*% covariance) *
+    contrast[,included,drop=FALSE]))))
+  count = sum(estimable)
+  df = stats::df.residual(object)
+  one_way = identical(attr(stats::terms(object), "term.labels"), variable) &&
+    attr(stats::terms(object), "intercept") == 1L &&
+    is.null(stats::model.weights(stats::model.frame(object))) &&
+    is.null(stats::model.offset(stats::model.frame(object)))
+  adjustment = if (length(levels) == 2L) "Pointwise t (one comparison)" else
+    if (one_way) "Tukey-Kramer" else "Bonferroni"
+  critical = if (adjustment == "Tukey-Kramer") stats::qtukey(.95, length(levels), df)/sqrt(2) else
+    stats::qt(1 - .05/(2*max(1L,count)), df)
+  estimate[!estimable] = standard_error[!estimable] = NA_real_
+  result = data.frame(comparison=paste(levels[pairs[,1]], levels[pairs[,2]], sep="-"),
+    difference=estimate, lower=estimate-critical*standard_error,
+    upper=estimate+critical*standard_error)
+  attr(result, "adjustment") = adjustment
+  result
+}
+
 populate_estimates_factors = function(object, factors=NULL) {
   
   if (is.null(factors)) factors = which_terms_are_factors_or_numbers(object$model, 
@@ -317,6 +358,7 @@ populate_estimates_factors = function(object, factors=NULL) {
                                  lower=NA, upper=NA, cohens.d=NA)
   
   p = 1; p2=1; i=1
+  adjustments = character()
   
   for (i in 1:length(factors)){
     
@@ -343,21 +385,10 @@ populate_estimates_factors = function(object, factors=NULL) {
     
     #### fill in the difference matrix
     difference.matrix$variables[p2] = factors[i]
-    center = outer(est$prediction.fit, est$prediction.fit, "-")
-    keep = lower.tri(center)
-    center = center[keep]
-    nn = table(d[,factors[i]])
-    df = nrow(d) - length(coef(object))
-    width = qtukey(.95, levs, df) *
-      summary(object)$sigma * 
-      sqrt(outer(1/nn, 1/nn, "+"))[keep]
-    difference.names = outer(as.character(est[[factors[i]]]), 
-                             as.character(est[[factors[i]]]), 
-                             paste, sep = "-")[keep]
-    
-    difference.matrix$comparison[current.rows2] = difference.names
-    difference.matrix[current.rows2,c("difference", "lower", "upper")] = 
-      c(center, center-width, center+width)				
+    profiles = unique(generate_predictors(d, f, object))
+    differences = lm_factor_contrasts(object, factors[i], profiles, as.character(est[[factors[i]]]))
+    difference.matrix[current.rows2,c("comparison", "difference", "lower", "upper")] = differences
+    adjustments[factors[i]] = attr(differences, "adjustment")
     difference.matrix$cohens.d[current.rows2] = difference.matrix$difference[current.rows2]/summary(object)$sigma
     
     #### increment the counter
@@ -365,6 +396,7 @@ populate_estimates_factors = function(object, factors=NULL) {
     p2 = p2+levs2
     
   }
+  attr(difference.matrix, "adjustments") = adjustments
   return(list(coef.matrix=coef.matrix,
               difference.matrix = difference.matrix))
   

@@ -34,7 +34,10 @@ print.estimates = function(x,...){
     cat(paste0("\n\nMean Differences:\n"))
     x$difference.matrix[,3:ncol(x$difference.matrix)] = round(x$difference.matrix[,3:ncol(x$difference.matrix)], digits=2)
     x$difference.matrix$variables[is.na(x$difference.matrix$variables)] = ""
-    print(x$difference.matrix)		
+    print(x$difference.matrix)
+    adjustments = attr(x$difference.matrix, "adjustments")
+    if (length(adjustments)) cat("95% contrast intervals: ",
+      paste(paste(names(adjustments), adjustments, sep=": "), collapse="; "), "\n", sep="")
   }
   if (length(x$numbers)>0){
     cat(paste("\n\nEstimates for Numeric Variables = \n"))
