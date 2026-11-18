@@ -263,10 +263,11 @@ across the same full estimation population. Variables omitted from one model can
 still be displayed without adding them to that model. Axes and group encodings
 are shared; existing facets remain inside each model display.
 
-**Show other model's predictions** is available only for CAS comparisons and is
+**Add ghost line** is available only for CAS comparisons and is
 off by default. Solid curves are the panel's own fixed-effects predictions;
-dashed, translucent ghosts are the competing model's fixed-effects predictions
-under the same conditions. Ghosts are not fitted to that panel's adjusted dots.
+a dashed, translucent ghost in Model 1 shows Model 2's fixed-effects predictions
+under the same conditions. Model 2 shows only its own fitted curves. The ghost is
+not fitted to Model 1's adjusted dots.
 Less scatter after a more flexible random-effects adjustment does not by itself
 indicate better model fit. No prediction confidence bands are added.
 

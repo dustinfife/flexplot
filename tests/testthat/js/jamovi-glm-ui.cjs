@@ -124,6 +124,7 @@ const {pathToFileURL} = require('node:url');
 
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi/mixedmodel.a.yaml'),'utf8'));
             assert.equal(definition.options.find(option => option.name === "casGhost").default,false);
+            assert.equal(definition.options.find(option => option.name === "casGhost").title,"Add ghost line");
             const casVisualization = compiled.view.layout.controls.find(control => control.label === "Model visualization");
             const ghost = casVisualization.controls.find(control => control.name === "casGhost");
             assert.equal(ghost.contentLink,"(compare && predictionType:cas)");

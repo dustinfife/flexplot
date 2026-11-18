@@ -34,8 +34,8 @@ jamovi_mixed_cas_comparison = function(state, x, panels=NULL, group=NULL, ghost=
     }
   }
   curves = lapply(plots,attr,which="cas_prediction")
-  if (isTRUE(ghost)) for (i in seq_along(plots)) {
-    layers = cas_prediction_layers(curves[[3L-i]],flexplot_axis_given(formula)$axis,plots[[i]]$data)
+  if (isTRUE(ghost)) {
+    layers = cas_prediction_layers(curves[[2]],flexplot_axis_given(formula)$axis,plots[[1]]$data)
     if (inherits(layers,"Layer")) layers = list(layers)
     layers = Filter(cas_is_prediction_layer,layers)
     for (j in seq_along(layers)) {
@@ -44,7 +44,7 @@ jamovi_mixed_cas_comparison = function(state, x, panels=NULL, group=NULL, ghost=
       layers[[j]]$show.legend = FALSE
       if (inherits(layers[[j]]$geom,"GeomLine")) layers[[j]]$aes_params$linetype = "dashed"
     }
-    plots[[i]] = plots[[i]] + layers
+    plots[[1]] = plots[[1]] + layers
   }
   # Coordinates preserve all rows and summary calculations while sharing coverage.
   builds = lapply(plots,ggplot2::ggplot_build)
@@ -56,9 +56,7 @@ jamovi_mixed_cas_comparison = function(state, x, panels=NULL, group=NULL, ghost=
   for (i in seq_along(plots)) {
     plots[[i]]$coordinates = ggplot2::coord_cartesian(
       xlim=if (is.numeric(plots[[i]]$data[[x]])) range(reference[[x]],finite=TRUE) else NULL,ylim=limits)
-    plots[[i]] = plots[[i]] + ggplot2::labs(title=paste("Model",i),
-      subtitle="Cluster-adjusted observations; own fixed-effects predictions",
-      caption=if (ghost) "Solid: own model; dashed: other model's fixed predictions.\nGhosts are not fitted to these adjusted observations." else NULL)
+    plots[[i]] = plots[[i]] + ggplot2::labs(title=paste("Model",i),subtitle=NULL,caption=NULL)
   }
   jamovi_mixed_cas_compose(plots)
 }

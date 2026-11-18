@@ -116,7 +116,7 @@ options:
         title: Cluster-specific (include estimated random effects)
     default: cluster
   - name: casGhost
-    title: Show other model's predictions
+    title: Add ghost line
     type: Bool
     default: false
   - name: clusters

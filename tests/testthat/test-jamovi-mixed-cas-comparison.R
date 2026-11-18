@@ -34,9 +34,13 @@ test_that("two-model CAS uses independent adjustments and shared marginal predic
   expect_gt(max(abs(children[[1]]$data$y_adj-children[[2]]$data$y_adj)),.01)
   for (i in 1:2) {
     ghosts = Filter(function(layer) identical(layer$aes_params$linetype,"dashed"),children[[i]]$layers)
-    expect_length(ghosts,1)
-    expect_equal(ghosts[[1]]$data$prediction,curves[[3-i]]$prediction)
-    expect_identical(ghosts[[1]]$aes_params$alpha,.55)
+    expect_null(children[[i]]$labels$subtitle)
+    expect_null(children[[i]]$labels$caption)
+    expect_length(ghosts,if (i==1L) 1L else 0L)
+    if (i==1L) {
+      expect_equal(ghosts[[1]]$data,curves[[2]])
+      expect_identical(ghosts[[1]]$aes_params$alpha,.55)
+    }
   }
   expect_equal(children[[1]]$coordinates$limits,children[[2]]$coordinates$limits)
   coverage = range(unlist(lapply(children,function(p) c(p$data$y_adj,attr(p,"cas_prediction")$prediction))))
@@ -48,6 +52,9 @@ test_that("two-model CAS uses independent adjustments and shared marginal predic
   expect_true(jamovi_reporting_update(analysis,list(casGhost=FALSE)))
   updated = analysis$results$comparisonplot$state
   expect_identical(updated$model1,models[[1]]);expect_identical(updated$model2,models[[2]])
+  expect_equal(ggplot2::ggplot_build(jamovi_cas_children(analysis)[[2]])$data,
+    ggplot2::ggplot_build(children[[2]])$data)
+  expect_equal(attr(jamovi_cas_children(analysis)[[1]],"cas_prediction"),curves[[1]])
   for (child in jamovi_cas_children(analysis)) {
     expect_false(any(vapply(child$layers,function(layer) identical(layer$aes_params$linetype,"dashed"),logical(1))))
   }
@@ -61,6 +68,11 @@ test_that("CAS comparison synchronizes categorical encodings, cluster facets and
   expect_true(analysis$run())
   children = jamovi_cas_children(analysis)
   jamovi_cas_check_curves(analysis$results$comparisonplot$state,children,c("a","id","z"))
+  for (i in 1:2) {
+    ghosts = Filter(function(layer) identical(layer$aes_params$linetype,"dashed"),children[[i]]$layers)
+    expect_length(ghosts,if (i==1L) 1L else 0L)
+    if (i==1L) expect_equal(ghosts[[1]]$data$prediction,attr(children[[2]],"cas_prediction")$prediction)
+  }
   builds = lapply(children,ggplot2::ggplot_build)
   expect_equal(builds[[1]]$layout$layout,builds[[2]]$layout$layout)
   expect_equal(builds[[1]]$layout$panel_scales_x[[1]]$get_limits(),levels(data$a))
