@@ -58,7 +58,16 @@ jamovi_mixed_cas_comparison = function(state, x, panels=NULL, group=NULL, ghost=
       xlim=if (is.numeric(plots[[i]]$data[[x]])) range(reference[[x]],finite=TRUE) else NULL,ylim=limits)
     plots[[i]] = plots[[i]] + ggplot2::labs(title=paste("Model",i),subtitle=NULL,caption=NULL)
   }
-  jamovi_mixed_cas_compose(plots)
+  result = jamovi_mixed_cas_compose(plots)
+  # Use built coordinates so an empty or singleton path cannot advertise a line.
+  attr(result,"jamovi_cas_ghost") = isTRUE(ghost) && any(vapply(seq_along(plots[[1]]$layers),function(i) {
+    layer = plots[[1]]$layers[[i]]
+    if (!inherits(layer$geom,"GeomLine") || !identical(layer$aes_params$linetype,"dashed")) return(FALSE)
+    data = builds[[1]]$data[[i]]
+    data = data[is.finite(data$x) & is.finite(data$y),,drop=FALSE]
+    any(table(interaction(data$PANEL,data$group,drop=TRUE)) >= 2L)
+  },logical(1)))
+  result
 }
 
 jamovi_mixed_cas_compose = function(plots) {

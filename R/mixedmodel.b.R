@@ -257,6 +257,12 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       private$.comparisonState = comparison
       self$results$comparisonplot$setState(if (comparison_plot_failed) NULL else comparison)
       self$results$comparisonplot$setVisible(self$options$graphic)
+      if (self$options$graphic && !comparison_plot_failed &&
+          self$options$predictionType == "cas" && self$options$casGhost &&
+          isTRUE(attr(comparison$displayPlot,"jamovi_cas_ghost"))) {
+        self$results$comparisonPlotNote$setContent("<p>Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions.</p>")
+        self$results$comparisonPlotNote$setVisible(TRUE)
+      }
       self$results$plotExplanation$setContent("")
       self$results$plotExplanation$setVisible(FALSE)
     },
@@ -271,6 +277,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         # jmvcore otherwise labels a failed image with non-null state as rendering.
         image$setState(NULL)
         image$setError(conditionMessage(error))
+        self$results$comparisonPlotNote$setVisible(FALSE)
+        self$results$comparisonPlotNote$setContent("")
         FALSE
       })
     },

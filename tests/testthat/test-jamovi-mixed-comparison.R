@@ -394,3 +394,35 @@ test_that("new backend comparisons initialize from Model 1 fixed predictors rath
   expect_false("z" %in% all.vars(formula(state$model2)))
   expect_equal(lme4::fixef(state$model1),lme4::fixef(state$model2),tolerance=1e-10)
 })
+
+test_that("saved CAS ghost settings restore the same note and serialized result order", {
+  skip_if_not_installed("jmvcore")
+  withr::local_libpaths(c(.libPaths(),"/Applications/jamovi.app/Contents/Resources/modules/base/R"))
+  skip_if_not_installed("RProtoBuf")
+  jmvcore:::initProtoBuf()
+  for (enabled in c(TRUE,FALSE)) {
+    saved = list(out="y",preds=c("x","z"),cluster="id",modelTerms=list("x","z"),
+      comparisonFixed=c("x","z"),comparisonTerms=list("z"),compare=TRUE,graphic=TRUE,
+      predictionType="cas",plotX="x",casGhost=enabled)
+    message = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
+    template = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
+    message$names = names(saved)
+    message$options = lapply(saved,jamovi_mixed_saved_option,option_template=template,group_template=message)
+    options = flexplot:::mixedmodelOptions$new()
+    options$fromProtoBuf(message)
+    restored = flexplot:::mixedmodelClass$new(options=options,data=NULL)
+    reader = jamovi_reporting_read
+    environment(reader) = list2env(list(data=jamovi_mixed_test_data()),parent=environment(reader))
+    restored$.setReadDatasetSource(reader)
+    restored$.setReadDatasetHeaderSource(reader)
+    expect_true(restored$run())
+    expect_identical(restored$results$comparisonPlotNote$visible,enabled)
+    note = restored$results$comparisonPlotNote$asProtoBuf()
+    expect_identical(note$html$content,if (enabled)
+      "<p>Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions.</p>" else "")
+    message = restored$results$asProtoBuf(status=3L)
+    items = vapply(message$group$elements,function(item)item$name,character(1))
+    expect_identical(match("explanation",items),match("comparisonSpecification",items)+1L)
+    expect_identical(match("comparisonPlotNote",items),match("comparisonplot",items)+1L)
+  }
+})

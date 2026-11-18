@@ -16,6 +16,10 @@ items:
     title: Comparison model specifications
     type: Html
     visible: false
+  - name: explanation
+    title: ''
+    type: Html
+    visible: false
   - name: diagnostics
     title: Model diagnostics
     type: Html
@@ -75,10 +79,6 @@ items:
       - name: term
         title: Random-effect term
         type: text
-  - name: explanation
-    title: Model information
-    type: Html
-    visible: false
   - name: plotExplanation
     title: Visualization guide
     type: Html
@@ -128,4 +128,8 @@ items:
     height: 450
     visible: false
     renderFun: .comparisonplot
+  - name: comparisonPlotNote
+    title: ''
+    type: Html
+    visible: false
 ...
