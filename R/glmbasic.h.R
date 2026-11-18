@@ -11,6 +11,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             graphic = TRUE,
             graphicassump = FALSE,
             estimates = TRUE,
+            includeP = FALSE,
             se = TRUE,
             line = "Loess",
             center = "Median + quartiles",
@@ -48,6 +49,10 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "estimates",
                 estimates,
                 default=TRUE)
+            private$..includeP <- jmvcore::OptionBool$new(
+                "includeP",
+                includeP,
+                default=FALSE)
             private$..se <- jmvcore::OptionBool$new(
                 "se",
                 se,
@@ -110,6 +115,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..graphic)
             self$.addOption(private$..graphicassump)
             self$.addOption(private$..estimates)
+            self$.addOption(private$..includeP)
             self$.addOption(private$..se)
             self$.addOption(private$..line)
             self$.addOption(private$..center)
@@ -129,6 +135,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         graphic = function() private$..graphic$value,
         graphicassump = function() private$..graphicassump$value,
         estimates = function() private$..estimates$value,
+        includeP = function() private$..includeP$value,
         se = function() private$..se$value,
         line = function() private$..line$value,
         center = function() private$..center$value,
@@ -147,6 +154,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..graphic = NA,
         ..graphicassump = NA,
         ..estimates = NA,
+        ..includeP = NA,
         ..se = NA,
         ..line = NA,
         ..center = NA,
@@ -168,6 +176,7 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         assumpplot = function() private$.items[["assumpplot"]],
         plot = function() private$.items[["plot"]],
         glmcat = function() private$.items[["glmcat"]],
+        factorMeans = function() private$.items[["factorMeans"]],
         diff = function() private$.items[["diff"]],
         rsq = function() private$.items[["rsq"]],
         comparisonplot = function() private$.items[["comparisonplot"]],
@@ -201,7 +210,50 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="glmcat",
-                title="Estimates and effect sizes for categorical predictors",
+                title="Coefficient estimates",
+                visible="(estimates)",
+                columns=list(
+                    list(
+                        `name`="var",
+                        `title`="Coefficient",
+                        `type`="text"),
+                    list(
+                        `name`="means",
+                        `title`="Estimate",
+                        `type`="number"),
+                    list(
+                        `name`="se",
+                        `title`="SE",
+                        `type`="number"),
+                    list(
+                        `name`="lower",
+                        `title`="Lower",
+                        `superTitle`="95% Confidence Interval",
+                        `type`="number"),
+                    list(
+                        `name`="upper",
+                        `title`="Upper",
+                        `superTitle`="95% Confidence Interval",
+                        `type`="number"),
+                    list(
+                        `name`="t",
+                        `title`="t",
+                        `type`="number"),
+                    list(
+                        `name`="p",
+                        `title`="p",
+                        `type`="number",
+                        `format`="zto,pvalue",
+                        `visible`="(includeP)"),
+                    list(
+                        `name`="status",
+                        `title`="Status",
+                        `type`="text",
+                        `visible`=FALSE))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="factorMeans",
+                title="Conditional factor means",
                 columns=list(
                     list(
                         `name`="var", 

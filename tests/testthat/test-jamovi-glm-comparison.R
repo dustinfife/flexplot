@@ -235,10 +235,9 @@ test_that("jamovi model-term options support formula input without interpreting 
   state = analysis$results$comparisonplot$state
   expect_identical(all.vars(formula(state$model1)), c("y", "x + 1", "a"))
   expect_equal(unname(coef(state$model1)), unname(coef(lm(y ~ x*a, small))), tolerance=1e-12)
-  # The existing estimates helper cannot summarize this name, but a valid
-  # comparison remains available and the summary table explains the failure.
-  expect_identical(analysis$results$glmcat$status, "error")
-  expect_match(analysis$results$glmcat$.__enclos_env__$private$.error, "summaries are unavailable")
+  # Supplementary summaries may fail, but fitted coefficients remain available.
+  jamovi_expect_lm_coefficients(analysis,state$model1)
+  expect_match(analysis$results$glmcat$notes$summaries$note,"summaries are unavailable")
 })
 
 test_that("interaction-only and intercept-only primary models retain valid comparison results", {
@@ -253,7 +252,7 @@ test_that("interaction-only and intercept-only primary models retain valid compa
     expect_equal(nrow(analysis$results$comparison$asDF), 2L)
     expect_no_warning(ggplot2::ggplot_build(flexplot:::jamovi_glm_comparison_plot(state)))
     if (length(terms)) {
-      expect_identical(analysis$results$glmcat$status, "error")
+      jamovi_expect_lm_coefficients(analysis,state$model1)
     } else {
       expect_equal(analysis$results$glmcat$asDF$means, mean(small$y), tolerance=1e-12)
     }

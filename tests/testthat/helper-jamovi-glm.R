@@ -58,3 +58,22 @@ jamovi_reporting_update = function(analysis, values) {
   analysis$optionsChangedHandler(names(values))
   analysis$run()
 }
+
+# Independent fitted-model inference, including full coefficient-name alignment.
+jamovi_expect_lm_coefficients = function(analysis, model, includeP=FALSE) {
+  table = analysis$results$glmcat$asDF
+  expect_identical(analysis$results$glmcat$status,"complete")
+  coefficients = coef(model)
+  inference = summary(model)$coefficients
+  intervals = confint(model)
+  expect_identical(table$var,names(coefficients))
+  expect_equal(table$means,unname(coefficients),tolerance=1e-12)
+  index = match(names(coefficients),rownames(inference))
+  expect_equal(table$se,unname(inference[index,2]),tolerance=1e-12)
+  expect_equal(table$lower,unname(intervals[,1]),tolerance=1e-12)
+  expect_equal(table$upper,unname(intervals[,2]),tolerance=1e-12)
+  expect_equal(table$t,unname(inference[index,3]),tolerance=1e-12)
+  if (includeP) expect_equal(table$p,unname(inference[index,4]),tolerance=1e-12) else
+    expect_false("p" %in% names(table))
+  invisible(table)
+}

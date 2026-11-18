@@ -22,8 +22,43 @@ items:
       visible: (graphic)
       
       
-    - name:  glmcat
-      title: Estimates and effect sizes for categorical predictors
+    - name: glmcat
+      title: Coefficient estimates
+      type: Table
+      visible: (estimates)
+      columns:
+        - name: var
+          title: Coefficient
+          type: text
+        - name: means
+          title: Estimate
+          type: number
+        - name: se
+          title: SE
+          type: number
+        - name: lower
+          title: Lower
+          superTitle: '95% Confidence Interval'
+          type: number
+        - name: upper
+          title: Upper
+          superTitle: '95% Confidence Interval'
+          type: number
+        - name: t
+          title: t
+          type: number
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (includeP)
+        - name: status
+          title: Status
+          type: text
+          visible: false
+
+    - name: factorMeans
+      title: Conditional factor means
       type: Table
       columns:
         - name: var

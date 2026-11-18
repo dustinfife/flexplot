@@ -143,6 +143,8 @@ children:
                 name: graphicassump
               - type: CheckBox
                 name: estimates
+              - type: CheckBox
+                name: includeP
   - type: LayoutBox
     margin: large
     children:

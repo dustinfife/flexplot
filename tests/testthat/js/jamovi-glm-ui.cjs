@@ -176,6 +176,22 @@ const {pathToFileURL} = require('node:url');
             } else fs.writeFileSync(output, '[]');
             return;
         }
+        if (analysis === 'glmbasic') {
+            // Saved terms can arrive before native predictor controls finish loading.
+            const restored = [['supp'],['dose'],['supp','dose']];
+            ui.preds.setValue([]); ui.modelTerms.setValue(restored);
+            ui.comparisonTerms.setValue([['supp']]);
+            fire('view','loaded'); fire('primarySupplier','updated');
+            assert.equal(JSON.stringify(ui.modelTerms.value()),JSON.stringify(restored));
+            assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["supp"]]');
+            ui.preds.setValue(['supp','dose']); fire('view','updated');
+            assert.equal(JSON.stringify(ui.modelTerms.value()),JSON.stringify(restored));
+            // Explicit removal must still clear model terms.
+            ui.preds.setValue([]); fire('preds','changed');
+            assert.equal(JSON.stringify(ui.modelTerms.value()),'[]');
+            view.workspace = {};
+            ui.modelTerms.setValue(null); ui.comparisonTerms.setValue(null);
+        }
         const records = ['stage\tpreds\tprimary\tsecondary\tcompare'];
         const encode = terms => terms == null ? '__NULL__' :
             (terms.length ? terms.map(term => term.join(':')).join(';') : '__EMPTY__');

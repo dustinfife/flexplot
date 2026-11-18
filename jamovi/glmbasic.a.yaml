@@ -34,6 +34,12 @@ options:
       type: Bool
       default: true 
       
+    - name: includeP
+      title: Include p-values
+      type: Bool
+      default: false
+      description: Include coefficient t-test p-values in the estimates table.
+
     - name: se
       title: Standard errors
       type: Bool

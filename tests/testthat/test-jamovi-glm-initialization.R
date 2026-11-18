@@ -69,18 +69,19 @@ test_that("ToothGrowth default and UI-initialized analyses populate the original
     expect_identical(attr(stats::terms(state$formula), "term.labels"), c("supp", "dose"))
     expect_equal(coef(lm(state$formula, state$data)), coef(expected), tolerance=1e-12)
     table = analysis$results$glmcat$asDF
-    rows = match(c("Intercept", "Slope: dose"), table$var)
+    rows = match(c("(Intercept)", "dose"), table$var)
     coefficients = summary(expected)$coefficients[c("(Intercept)", "dose"), ]
     expect_equal(as.numeric(table$means[rows]), unname(coefficients[, 1]), tolerance=1e-12)
-    expect_equal(as.numeric(table$lower[rows]), unname(round(coefficients[, 1]-1.96*coefficients[, 2], 2)))
-    expect_equal(as.numeric(table$upper[rows]), unname(round(coefficients[, 1]+1.96*coefficients[, 2], 2)))
+    expect_equal(as.numeric(table$lower[rows]), unname(confint(expected)[c("(Intercept)","dose"),1]))
+    expect_equal(as.numeric(table$upper[rows]), unname(confint(expected)[c("(Intercept)","dose"),2]))
     profile = data.frame(supp=factor(levels(ToothGrowth$supp), levels=levels(ToothGrowth$supp)),
                          dose=mean(ToothGrowth$dose))
     intervals = predict(expected, profile, interval="confidence")
-    rows = match(levels(ToothGrowth$supp), table$levels)
-    expect_equal(as.numeric(table$means[rows]), unname(round(intervals[, "fit"], 2)))
-    expect_equal(as.numeric(table$lower[rows]), unname(round(intervals[, "lwr"], 2)))
-    expect_equal(as.numeric(table$upper[rows]), unname(round(intervals[, "upr"], 2)))
+    factor_table = analysis$results$factorMeans$asDF
+    rows = match(levels(ToothGrowth$supp), factor_table$levels)
+    expect_equal(as.numeric(factor_table$means[rows]), unname(round(intervals[, "fit"], 2)))
+    expect_equal(as.numeric(factor_table$lower[rows]), unname(round(intervals[, "lwr"], 2)))
+    expect_equal(as.numeric(factor_table$upper[rows]), unname(round(intervals[, "upr"], 2)))
     differences = analysis$results$diff$asDF
     difference = unname(diff(intervals[, "fit"]))
     expect_equal(differences$diff, round(difference, 2))
@@ -90,8 +91,8 @@ test_that("ToothGrowth default and UI-initialized analyses populate the original
     contributions = vapply(c("supp","dose"),function(term)
       summary(expected)$r.squared-summary(lm(reformulate(setdiff(c("supp","dose"),term),"len"),model.frame(expected)))$r.squared,numeric(1))
     expect_equal(unname(rsq$Estimate[match(c("supp", "dose"), rsq$var)]), unname(contributions), tolerance=1e-12)
-    if (!is.null(saved)) expect_equal(list(table, differences, rsq), saved)
-    saved = list(table, differences, rsq)
+    if (!is.null(saved)) expect_equal(list(table, factor_table, differences, rsq), saved)
+    saved = list(table, factor_table, differences, rsq)
     expect_no_warning(expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot)))
     plot = capture$plot
     expect_no_warning({ built = ggplot2::ggplot_build(plot) })

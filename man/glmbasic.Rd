@@ -22,7 +22,8 @@ glmbasic(
   plotX = NULL,
   plotPanels = NULL,
   plotGroup = NULL,
-  comparisonGroup = NULL
+  comparisonGroup = NULL,
+  includeP = FALSE
 )
 }
 \arguments{
@@ -62,6 +63,8 @@ not on a second axis.}
 \item{plotX, plotPanels, plotGroup}{Visualization roles restricted to primary-model predictors.}
 
 \item{comparisonGroup}{Optional grouping predictor in either model; two-model grouping is supported only for magnet plots. Use panels for other comparisons.}
+
+\item{includeP}{Include coefficient t-test p-values; defaults to FALSE.}
 }
 \value{
 A results object containing:
@@ -69,6 +72,7 @@ A results object containing:
   \code{results$assumpplot} \tab \tab \tab \tab \tab an image \cr
   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
   \code{results$glmcat} \tab \tab \tab \tab \tab a table \cr
+  \code{results$factorMeans} \tab \tab \tab \tab \tab conditional factor predictions \cr
   \code{results$diff} \tab \tab \tab \tab \tab a table \cr
   \code{results$rsq} \tab \tab \tab \tab \tab a table \cr
   \code{results$comparisonplot} \tab \tab \tab \tab \tab an image \cr
@@ -83,4 +87,11 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Linear Model
+}
+\details{
+Coefficient estimates retain the fitted model-matrix names, including
+  contrasts and interactions. Standard errors use the fitted covariance matrix;
+  confidence intervals and optional tests use residual t degrees of freedom.
+  Aliased coefficients are identified with blank inference cells. Conditional
+  factor means and pairwise differences remain separate from coefficients.
 }

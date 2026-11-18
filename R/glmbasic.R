@@ -8,6 +8,7 @@
 #' @param graphic .
 #' @param graphicassump .
 #' @param estimates .
+#' @param includeP Include coefficient t-test p-values; defaults to FALSE.
 #' @param se .
 #' @param line .
 #' @param center .
@@ -23,11 +24,17 @@
 #'   not on a second axis.
 #' @param plotX,plotPanels,plotGroup Visualization roles restricted to primary-model predictors.
 #' @param comparisonGroup Optional grouping predictor in either model; two-model grouping is supported only for magnet plots. Use panels for other comparisons.
+#' @details Coefficient estimates retain the fitted model-matrix names, including
+#'   contrasts and interactions. Standard errors use the fitted covariance matrix;
+#'   confidence intervals and optional tests use residual t degrees of freedom.
+#'   Aliased coefficients are identified with blank inference cells. Conditional
+#'   factor means and pairwise differences remain separate from coefficients.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$assumpplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$glmcat} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$factorMeans} \tab \tab \tab \tab \tab conditional factor predictions \cr
 #'   \code{results$diff} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rsq} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$comparisonplot} \tab \tab \tab \tab \tab an image \cr
@@ -59,7 +66,8 @@ glmbasic = function(
     plotX = NULL,
     plotPanels = NULL,
     plotGroup = NULL,
-    comparisonGroup = NULL) {
+    comparisonGroup = NULL,
+    includeP = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("glmbasic requires jmvcore to be installed (restart may be required)")
@@ -104,7 +112,8 @@ glmbasic = function(
         plotX = plotX,
         plotPanels = plotPanels,
         plotGroup = plotGroup,
-        comparisonGroup = comparisonGroup)
+        comparisonGroup = comparisonGroup,
+        includeP = includeP)
 
     analysis = glmbasicClass$new(
         options = options,

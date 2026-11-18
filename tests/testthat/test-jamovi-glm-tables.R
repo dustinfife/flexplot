@@ -4,7 +4,7 @@ jamovi_glm_analysis = function(data, predictors) {
   flexplot:::glmbasicClass$new(options=options, data=data)
 }
 
-test_that("complete jamovi GLM runs report numeric coefficients and existing Wald intervals", {
+test_that("complete jamovi Linear Model runs report all coefficients and finite-sample t intervals", {
   skip_if_not_installed("jmvcore")
   for (missing in c(FALSE, TRUE)) {
     data = small
@@ -19,17 +19,7 @@ test_that("complete jamovi GLM runs report numeric coefficients and existing Wal
     expect_no_warning({ completed = analysis$run() })
     expect_true(completed)
     table = analysis$results$glmcat$asDF
-    expect_identical(names(table), c("var", "levels", "means", "lower", "upper"))
-    expect_identical(table$var, c("Numeric Variables (Estimates reported are slopes/intercepts)",
-                                  "Intercept", "Slope: x", "Slope: z"))
-    expect_true(all(is.na(table[1, c("levels", "means", "lower", "upper")])))
-    coefficients = summary(model)$coefficients
-    expect_equal(as.numeric(table$means[-1]), unname(coef(model)), tolerance=1e-10)
-    # The numeric summary already uses 1.96, not a t critical value. Preserve it.
-    expect_equal(as.numeric(table$lower[-1]), unname(round(coef(model)-1.96*coefficients[, 2], 2)))
-    expect_equal(as.numeric(table$upper[-1]), unname(round(coef(model)+1.96*coefficients[, 2], 2)))
-    unrounded = estimates.lm(model, mc=FALSE)$numbers.summary
-    expect_equal((unrounded$upper-unrounded$lower)/(2*1.96), unname(coefficients[, 2]), tolerance=1e-10)
+    jamovi_expect_lm_coefficients(analysis,model)
     expect_equal(nrow(analysis$results$diff$asDF), 0)
     rsq = analysis$results$rsq$asDF
     expect_equal(rsq$Estimate[rsq$var == "model"], round(summary(model)$r.squared, 4))
@@ -61,24 +51,24 @@ test_that("complete jamovi GLM runs preserve factor means and covariate-adjusted
       analysis = jamovi_glm_analysis(data, if (adjusted) c("x", "a") else "a")
       expect_no_warning({ completed = analysis$run() })
       expect_true(completed)
-      table = analysis$results$glmcat$asDF
+      jamovi_expect_lm_coefficients(analysis,model)
+      table = analysis$results$factorMeans$asDF
       expect_identical(names(table), c("var", "levels", "means", "lower", "upper"))
-      expect_identical(table$var[1], "Factors (Estimates reported are means)")
       levels = levels(model$model$a)
       profile = data.frame(a=factor(levels, levels=levels))
       if (adjusted) profile$x = mean(model$model$x)
       predicted = predict(model, profile, se.fit=TRUE)
       expected = predict(model, profile, interval="confidence")
-      expect_identical(table$levels[2:3], levels)
-      expect_equal(as.numeric(table$means[2:3]), unname(round(expected[, "fit"], 2)))
-      expect_equal(as.numeric(table$lower[2:3]), unname(round(expected[, "lwr"], 2)))
-      expect_equal(as.numeric(table$upper[2:3]), unname(round(expected[, "upr"], 2)))
+      expect_identical(table$levels, levels)
+      expect_equal(as.numeric(table$means), unname(round(expected[, "fit"], 2)))
+      expect_equal(as.numeric(table$lower), unname(round(expected[, "lwr"], 2)))
+      expect_equal(as.numeric(table$upper), unname(round(expected[, "upr"], 2)))
       unrounded = estimates.lm(model, mc=FALSE)$factor.summary
       expect_equal((unrounded$upper-unrounded$lower)/(2*qt(.975, df.residual(model))),
                      unname(predicted$se.fit), tolerance=1e-10)
       if (!adjusted) {
         observed = tapply(model$model$y, model$model$a, mean)
-        expect_equal(as.numeric(table$means[2:3]), as.numeric(round(observed[levels], 2)))
+        expect_equal(as.numeric(table$means), as.numeric(round(observed[levels], 2)))
       }
 
       differences = analysis$results$diff$asDF
@@ -94,19 +84,7 @@ test_that("complete jamovi GLM runs preserve factor means and covariate-adjusted
       expect_equal(differences$upper, round(difference+width, 2))
       expect_equal(differences$cohensd, round(difference/sigma(model), 2))
 
-      if (adjusted) {
-        expect_equal(nrow(table), 6)
-        expect_identical(table$var[4:6], c("Numeric Variables (Estimates reported are slopes/intercepts)",
-                                            "Intercept", "Slope: x"))
-        expect_true(all(is.na(table[4, c("levels", "means", "lower", "upper")])))
-        numeric = summary(model)$coefficients[c("(Intercept)", "x"), ]
-        expect_equal(as.numeric(table$means[5:6]), unname(numeric[, 1]), tolerance=1e-10)
-        expect_equal(as.numeric(table$lower[5:6]), unname(round(numeric[, 1]-1.96*numeric[, 2], 2)))
-        expect_equal(as.numeric(table$upper[5:6]), unname(round(numeric[, 1]+1.96*numeric[, 2], 2)))
-      } else {
-        expect_equal(nrow(table), 3)
-        expect_false(any(grepl("Numeric Variables", table$var), na.rm=TRUE))
-      }
+      expect_equal(nrow(table),2L)
       expect_equal(analysis$results$rsq$asDF$Estimate[1], round(summary(model)$r.squared, 4))
     }
   }

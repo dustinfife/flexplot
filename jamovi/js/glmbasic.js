@@ -2,7 +2,12 @@
 
 const updateTerms = require('./model-terms');
 const layouts = [{"supplier": "plotSupplier", "models": ["modelTerms"], "selections": ["plotX", "plotPanels", "plotGroup"]}, {"supplier": "comparisonPlotSupplier", "models": ["modelTerms", "comparisonTerms"], "selections": ["comparisonX", "comparisonPanels", "comparisonGroup"]}];
-const synchronize = (ui, context, added) => updateTerms(ui, context, added, ["modelTerms", "comparisonTerms"], ["primarySupplier", "comparisonSupplier"], layouts);
+const synchronize = (ui, context, added) => {
+    // During restoration, suppliers may update before predictors have loaded.
+    // Explicit predictor changes still clear terms when the user removes them.
+    if (!added && !(ui.preds.value() || []).length) return;
+    return updateTerms(ui, context, added, ["modelTerms", "comparisonTerms"], ["primarySupplier", "comparisonSupplier"], layouts);
+};
 
 module.exports = {
     view_loaded: function(ui) { synchronize(ui, this, false); },

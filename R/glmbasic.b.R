@@ -11,160 +11,97 @@ jamovi_glm_model_plot = function(model, se, formula=NULL, ...) {
   jamovi_model_intervals(plot, se=se)
 }
 
+# Coefficients are model-matrix quantities, independent of predictor summaries.
+jamovi_lm_coefficients = function(table, model, includeP=FALSE) {
+  table$deleteRows()
+  table$setError("")
+  table$setStatus("complete")
+  coefficients = stats::coef(model)
+  inference = summary(model)$coefficients
+  index = match(names(coefficients), rownames(inference))
+  standard_error = sqrt(diag(stats::vcov(model)))[names(coefficients)]
+  df = stats::df.residual(model)
+  critical = if (df > 0) stats::qt(.975,df) else NA_real_
+  values = data.frame(var=names(coefficients), means=unname(coefficients),
+    se=unname(standard_error), lower=unname(coefficients-critical*standard_error),
+    upper=unname(coefficients+critical*standard_error),
+    t=unname(inference[index,3]), p=unname(inference[index,4]),
+    status=ifelse(is.na(coefficients),"Aliased (not estimable)",""))
+  table$getColumn("p")$setVisible(includeP)
+  table$getColumn("status")$setVisible(anyNA(coefficients))
+  table$setNote("aliased",if (anyNA(coefficients))
+    "Aliased coefficients are not uniquely estimable; their inference cells are blank." else NULL)
+  table$setNote("intervals",if (df > 0)
+    paste0("95% t confidence intervals; residual df = ",df,".") else
+    "Residual degrees of freedom are insufficient for coefficient inference.")
+  jamovi_glm_table_rows(table,values)
+}
+
 glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "glmbasicClass",
     inherit = glmbasicBase,
     private = list(
       
         .run = function() {
-        	if (length(self$options$out)>0 & length(self$options$preds)>0){
-        	  
-        	  #### write formula for glinmod
-            data = self$data
-            if (self$options$compare) {
-              comparison = tryCatch(jamovi_glm_comparison(self$options, data), error=identity)
-              if (inherits(comparison, "error")) {
-                self$results$comparison$setError(conditionMessage(comparison))
-                self$results$comparisonplot$setError(conditionMessage(comparison))
-                return(invisible(NULL))
-              }
-              self$results$comparisonplot$setState(comparison)
-              jamovi_glm_comparison_table(self$results$comparison, comparison)
-              model = comparison$model1
-              formula = stats::formula(model)
-              data = comparison$data
-            } else {
-              formula = tryCatch(jamovi_glm_formula(self$options$out, self$options$preds,
-                                                   self$options$modelTerms), error=identity)
-              if (inherits(formula, "error")) {
-                self$results$glmcat$setError(conditionMessage(formula))
-                return(invisible(NULL))
-              }
-              model = if (is.null(self$options$modelTerms)) lm(formula, data=data) else
-                tryCatch(lm(formula, data=data), error=identity)
-              if (!is.null(self$options$modelTerms) &&
-                  (inherits(model, "error") || model$rank < length(stats::coef(model)))) {
-                self$results$glmcat$setError("The primary model is not estimable. Check its terms and complete observations.")
-                return(invisible(NULL))
-              }
-            }
-            results = if (!self$options$compare && is.null(self$options$modelTerms))
-              estimates.lm(model, mc=FALSE) else tryCatch(estimates.lm(model, mc=FALSE), error=identity)
-            
-          	#### s*ve formula/dataset to a file (to be used for plotting)
-          	if (length(self$options$preds)>0){
-            output = list(formula=formula, data=data)
-  			    	image <- self$results$plot
-  			    	image$setState(output)
-  				
-  			    	image2 <- self$results$assumpplot
-  			    	image2$setState(output)			
-  		  	  }
-
-            if (inherits(results, "error")) {
-              self$results$glmcat$setError(paste("Primary-model summaries are unavailable:",
-                                                conditionMessage(results)))
+          # Replace rows on every model change, including failed specifications.
+          for (name in c("glmcat","factorMeans","diff","rsq")) {
+            table = self$results[[name]]
+            table$deleteRows()
+            table$setError("")
+            table$setStatus("complete")
+            for (key in names(table$notes)) table$setNote(key,NULL)
+          }
+          self$results$factorMeans$setVisible(FALSE)
+          if (!length(self$options$out) || !length(self$options$preds)) return(invisible(NULL))
+          data = self$data
+          if (self$options$compare) {
+            comparison = tryCatch(jamovi_glm_comparison(self$options,data),error=identity)
+            if (inherits(comparison,"error")) {
+              self$results$comparison$setError(conditionMessage(comparison))
+              self$results$comparisonplot$setError(conditionMessage(comparison))
               return(invisible(NULL))
             }
-
-            if (is.data.frame(results)) {
-              self$results$glmcat$addRow(rowKey=1, values=list(var="Intercept",
-                levels="", means=results$Mean, lower=results$Lower, upper=results$Upper))
+            self$results$comparisonplot$setState(comparison)
+            jamovi_glm_comparison_table(self$results$comparison,comparison)
+            model = comparison$model1
+            formula = stats::formula(model)
+            data = comparison$data
+          } else {
+            formula = tryCatch(jamovi_glm_formula(self$options$out,self$options$preds,
+              self$options$modelTerms),error=identity)
+            if (inherits(formula,"error")) {
+              self$results$glmcat$setError(conditionMessage(formula))
               return(invisible(NULL))
             }
-
-            has_factors = is.data.frame(results$factor.summary) && nrow(results$factor.summary) > 0L
-            has_numbers = is.data.frame(results$numbers.summary) && nrow(results$numbers.summary) > 0L
-
-  			#### prepare r square output
-  			rsq_out = list(rsq = results$r.squared, semi.p = results$semi.p, correlation=results$correlation)
-  			private$.rsq(rsq_out, preds = self$options$preds)	
-  									
-  
-  			#### prepopulate table
-        table = self$results$glmcat			
-              
-              #### format factor summary to look nice
-  			f = function(x){ x[is.na(x)] = "-"; x}
-      
-  			#### if there are factors, report those results....           
-			if (has_factors){
-  				
-  			#### prepare difference scores output
-  			diff.out = list(diff = results$difference.matrix)
-  			private$.diff(results$difference.matrix)						   
-  				
-  				#### prepoulate first row with label
-  				table$addRow(rowKey=1, values=list(
-  					var = "Factors (Estimates reported are means)",
-  					levels="",
-  					means="",
-  					lower="",
-  					upper=""
-  				))
-  					
-
-    		#### make output for categorical predictors
-
-        results$factor.summary[,3:ncol(results$factor.summary)] = apply(results$factor.summary[,3:ncol(results$factor.summary)], 2, round, digits=2)
-        results$factor.summary[,3:ncol(results$factor.summary)] = apply(results$factor.summary[,3:ncol(results$factor.summary)], 2, f)
-	                        
-	                        ### loop through all rows in summary
-	       for (i in 3:(nrow(results$factor.summary)+2)){
-				  	table$addRow(rowKey = i, values=list(
-					    var=paste0("", as.character(results$factor.summary$variables[i-2])),
-					    levels=results$factor.summary$levels[i-2],
-						means = results$factor.summary$estimate[i-2],
-						lower = results$factor.summary$lower[i-2],
-						upper = results$factor.summary$upper[i-2]			
-					))
-				}  
-				
-			} 
-
-			m = if (has_factors) nrow(results$factor.summary) + 2L else 0L
-			
-			####  if there are numbers, report those results.... 
-			if (has_numbers){
-							
-				#### prepoulate first row with label
-				table$addRow(rowKey=m+1, values=list(
-					var = "Numeric Variables (Estimates reported are slopes/intercepts)",
-					levels="",
-					means="",
-					lower="",
-					upper=""
-				))
-							
-				rows.tot = m + 2L
-
-				rows.all = seq(from=rows.tot, to=(rows.tot + nrow(results$numbers.summary) - 1))
-				#table2 = self$results$glmnum				
-	            results$numbers.summary[,3:ncol(results$numbers.summary)] = apply(results$numbers.summary[,3:ncol(results$numbers.summary)], 2, round, digits=2)
-	            results$numbers.summary[,3:ncol(results$numbers.summary)] = apply(results$numbers.summary[,3:ncol(results$numbers.summary)], 2, f)			
-				i = 1
-	     		for (j in rows.all){
-	            
-	            	if (i ==1){
-	            		levs = "Intercept"
-	            	} else {
-	            		levs = paste0("Slope: ", as.character(results$numbers.summary$variables[i]))
-	            	}
-					table$addRow(rowKey = j, values=list(
-					    var=levs,
-					    levels = "", 
-						means = results$numbers.summary$estimate[i],
-						lower = results$numbers.summary$lower[i],
-						upper = results$numbers.summary$upper[i]				
-					))
-				i = i+1
-				} 
-			}
-						  	        
-            # `self$data` contains the data
-            # `self$options` contains the options
-            # `self$results` contains the results object (to populate)
-        }},
+            model = tryCatch(stats::lm(formula,data=data),error=identity)
+            if (inherits(model,"error")) {
+              self$results$glmcat$setError(paste("The primary model could not be fitted:",conditionMessage(model)))
+              return(invisible(NULL))
+            }
+          }
+          jamovi_lm_coefficients(self$results$glmcat,model,self$options$includeP)
+          output = list(formula=formula,data=data)
+          self$results$plot$setState(output)
+          self$results$assumpplot$setState(output)
+          # A failed supplementary summary must not remove valid coefficients.
+          results = tryCatch(estimates.lm(model,mc=FALSE),error=identity)
+          if (inherits(results,"error")) {
+            self$results$glmcat$setNote("summaries",paste("Supplementary summaries are unavailable:",conditionMessage(results)))
+            return(invisible(NULL))
+          }
+          if (is.data.frame(results)) return(invisible(NULL))
+          private$.rsq(list(rsq=results$r.squared,semi.p=results$semi.p,
+            correlation=results$correlation),preds=self$options$preds)
+          if (!is.data.frame(results$factor.summary) || !nrow(results$factor.summary)) return(invisible(NULL))
+          values = results$factor.summary
+          jamovi_glm_table_rows(self$results$factorMeans,data.frame(
+            var=as.character(values$variables),levels=values$levels,
+            means=round(values$estimate,2),lower=round(values$lower,2),upper=round(values$upper,2)))
+          self$results$factorMeans$setNote("reference",
+            "Conditional predictions: other numeric predictors are held at their means and categorical predictors at their modes. These are not model coefficients.")
+          self$results$factorMeans$setVisible(self$options$estimates)
+          private$.diff(results$difference.matrix)
+        },
         .comparisonplot = function(image, ...) {
             if (is.null(image$state)) return(FALSE)
             plot = tryCatch(jamovi_glm_comparison_plot(image$state), error=identity)
