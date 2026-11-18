@@ -235,9 +235,15 @@ test_that("jamovi model-term options support formula input without interpreting 
   state = analysis$results$comparisonplot$state
   expect_identical(all.vars(formula(state$model1)), c("y", "x + 1", "a"))
   expect_equal(unname(coef(state$model1)), unname(coef(lm(y ~ x*a, small))), tolerance=1e-12)
-  # Supplementary summaries may fail, but fitted coefficients remain available.
+  # Literal names retain both fitted coefficients and supplementary summaries.
   jamovi_expect_lm_coefficients(analysis,state$model1)
-  expect_match(analysis$results$glmcat$notes$summaries$note,"summaries are unavailable")
+  expect_null(analysis$results$glmcat$notes$summaries)
+  reference = estimates(lm(y ~ x*a, small), mc=FALSE)
+  expect_equal(analysis$results$factorMeans$asDF$means, round(reference$factor.summary$estimate,2))
+  expect_equal(analysis$results$diff$asDF$diff, round(reference$difference.matrix$difference,2))
+  reported = analysis$results$rsq$asDF
+  rows = match(names(compute_semi_partial(state$model1)), reported$var)
+  expect_equal(reported$Estimate[rows], as.numeric(reference$semi.p), tolerance=1e-12)
 })
 
 test_that("interaction-only and intercept-only primary models retain valid comparison results", {

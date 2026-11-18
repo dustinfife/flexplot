@@ -266,6 +266,16 @@ bf.bic = bf_bic = function(model1, model2, invert=F){
   }
 }
 
+# Main-term labels index the terms matrix; its rows index fitted frame variables.
+# Keep the frame's literal names separate from printed formula/coefficient names.
+lm_summary_columns = function(object) {
+  terms = stats::terms(object)
+  incidence = attr(terms, "factors")
+  main = which(attr(terms, "order") == 1L)
+  rows = vapply(main, function(i) which(incidence[,i] != 0L), integer(1))
+  stats::setNames(names(stats::model.frame(object))[rows], colnames(incidence)[main])
+}
+
 which_terms_are_factors_or_numbers = function(d, terms) {
   
   chars              = unlist(lapply(d[,terms, drop=F], is.character))
@@ -385,7 +395,8 @@ lm_factor_contrasts = function(object, variable, profiles, levels) {
     contrast[,included,drop=FALSE]))))
   count = sum(estimable)
   df = stats::df.residual(object)
-  one_way = identical(attr(stats::terms(object), "term.labels"), variable) &&
+  one_way = length(attr(stats::terms(object), "term.labels")) == 1L &&
+    identical(unname(lm_summary_columns(object)), variable) &&
     attr(stats::terms(object), "intercept") == 1L &&
     is.null(stats::model.weights(stats::model.frame(object))) &&
     is.null(stats::model.offset(stats::model.frame(object)))
@@ -403,12 +414,11 @@ lm_factor_contrasts = function(object, variable, profiles, levels) {
 
 populate_estimates_factors = function(object, factors=NULL) {
   
-  if (is.null(factors)) factors = which_terms_are_factors_or_numbers(object$model, 
-                                                                     attr(terms(object), "term.labels"))$factors
+  if (is.null(factors)) factors = which_terms_are_factors_or_numbers(object$model,
+    unname(lm_summary_columns(object)))$factors
   if (length(factors)==0) return(list(coef.matrix=NA, difference.matrix=NA))
   
   d = object$model
-  outcome = as.character(attr(terms(object), "variables"))[-1][1]
   
   #### generate table with names
   factor.names = unlist(lapply(d[,factors, drop=F], unique))
@@ -438,11 +448,12 @@ populate_estimates_factors = function(object, factors=NULL) {
     coef.matrix$variables[p] = factors[i]
     
     #### populate the estimates/lower/upper
-    f = as.formula(paste0(outcome, "~", factors[i]))
+    response = as.list(attr(stats::terms(object), "variables"))[[2]]
+    f = make.formula(response, as.name(factors[i]))
     est = compare_fits(formula = f, data=d, model1=object, model2=NULL, return.preds=T, report.se=T, prediction_method="reference") %>%
       group_by_at(factors[i]) %>%
       summarize(across(prediction.fit:prediction.upr, ~mean(.x))) %>%
-      data.frame
+      data.frame(check.names=FALSE)
     
     coef.matrix$levels[current.rows] = unique(as.character(est[,1]))
     coef.matrix$estimate[current.rows] = est$prediction.fit
@@ -491,11 +502,15 @@ remove_interaction_terms = function(object) {
 
 populate_estimates_numeric = function(object, numbers=NULL) {
   
-  if (is.null(numbers)) numbers = which_terms_are_factors_or_numbers(object$model, 
-                                                                     attr(terms(object), "term.labels"))$numbers
+  columns = lm_summary_columns(object)
+  if (is.null(numbers)) numbers = which_terms_are_factors_or_numbers(object$model,
+    unname(columns))$numbers
   if (length(numbers)==0) return(NA)
-  
-  vars = c("(Intercept)", numbers)
+
+  design = stats::model.matrix(object)
+  numeric_terms = match(names(columns)[columns %in% numbers], attr(stats::terms(object), "term.labels"))
+  numeric_columns = colnames(design)[attr(design, "assign") %in% numeric_terms]
+  vars = c("(Intercept)", numeric_columns)
   coef.matrix.numb = data.frame(variables=vars, estimate=NA, lower=NA, upper=NA, 
                                 std.estimate=NA, std.lower=NA, std.upper=NA)
   coef.matrix.numb$estimate = coef(object)[vars]
@@ -526,7 +541,7 @@ populate_estimates_numeric = function(object, numbers=NULL) {
   coef.std = standardized.beta(object, se=T)
   
   #### remove those that are numeric
-  num = which(names(coef.std$beta) %in% numbers)	
+  num = which(names(coef.std$beta) %in% numeric_columns)
   coef.std$beta = coef.std$beta[num]
   coef.std$se = coef.std$se[num]					
   coef.matrix.numb$std.estimate = c(0, coef.std$beta)
@@ -551,21 +566,22 @@ compute_correlation = function(object) {
   
   #### get dataset
   d = object$model
-  terms = attr(terms(object), "term.labels")
-  terms = remove_interaction_terms(object)
+  terms = unname(lm_summary_columns(object))
   
   #### identify factors
   variable_types = which_terms_are_factors_or_numbers(d, terms)
   factors = variable_types$factors
   numbers = variable_types$numbers
   
-  if (length(numbers)==1 & length(factors)==0) return(cor(d)[1,2])
+  if (length(numbers)==1 && length(factors)==0 && !is.matrix(d[[numbers]])) return(cor(d)[1,2])
   return(NA)
 }
 
 removed.one.at.a.time = function(i, terms, object){
-  new.f = as.formula(paste0(". ~ . -", terms[i]))
-  new.object = update(object, new.f)
+  new.f = stats::formula(stats::drop.terms(stats::terms(object), dropx=i, keep.response=TRUE))
+  # Reuse the original fitted call in its own environment, not formula text.
+  new.object = eval(stats::update(object, new.f, evaluate=FALSE),
+    envir=environment(stats::formula(object)))
   list(
     rsq = summary(object)$r.squared - summary(new.object)$r.squared,
     bayes.factor = bf.bic(object, new.object, invert=FALSE)

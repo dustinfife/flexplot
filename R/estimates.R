@@ -366,14 +366,14 @@ estimates.lm = function(object, mc=TRUE){
 	  return(return)
 	}
 
-  #### look for interaction terms
-	terms = remove_interaction_terms(object)
+  #### main terms from fitted metadata, including literal names containing colons
+	terms = names(lm_summary_columns(object))
 	
 	#### get dataset
 	d = object$model
 	
   #### identify factors
-	variable_types = which_terms_are_factors_or_numbers(d, terms)
+  variable_types = which_terms_are_factors_or_numbers(d, unname(lm_summary_columns(object)))
 	factors = variable_types$factors
 	numbers = variable_types$numbers
 	
