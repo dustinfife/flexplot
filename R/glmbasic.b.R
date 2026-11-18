@@ -252,6 +252,12 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 				
 				if (length(preds)>0){
 				table <- self$results$rsq
+        table$deleteRows()
+        table$setNote("hierarchy", attr(l$semi.p,"note"))
+        if (any(endsWith(names(l$semi.p)," (combined polynomial)") |
+                endsWith(names(l$semi.p)," (incremental curvature)"))) {
+          table$setNote("polynomial", "Curvature is incremental to the linear term; combined polynomial rows include linear and curvature contributions.")
+        } else table$setNote("polynomial", NULL)
 				
 				for (i in 1:(length(l$semi.p)+1)){
 					if (i == 1){
@@ -259,6 +265,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 					} else {
 						row = list('var' = names(l$semi.p)[i-1], 'Estimate' = l$semi.p[i-1])
 					}
+        if (is.na(row$Estimate)) row$Estimate = NULL
 					table$addRow(rowKey=i, values=row)
 				}
 				

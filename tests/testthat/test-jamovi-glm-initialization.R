@@ -87,8 +87,9 @@ test_that("ToothGrowth default and UI-initialized analyses populate the original
     expect_equal(differences$cohensd, round(difference/sigma(expected), 2))
     rsq = analysis$results$rsq$asDF
     expect_equal(rsq$Estimate[rsq$var == "model"], round(summary(expected)$r.squared, 4))
-    sums = anova(expected)$`Sum Sq`
-    expect_equal(rsq$Estimate[match(c("supp", "dose"), rsq$var)], sums[1:2]/sum(sums), tolerance=1e-12)
+    contributions = vapply(c("supp","dose"),function(term)
+      summary(expected)$r.squared-summary(lm(reformulate(setdiff(c("supp","dose"),term),"len"),model.frame(expected)))$r.squared,numeric(1))
+    expect_equal(unname(rsq$Estimate[match(c("supp", "dose"), rsq$var)]), unname(contributions), tolerance=1e-12)
     if (!is.null(saved)) expect_equal(list(table, differences, rsq), saved)
     saved = list(table, differences, rsq)
     expect_no_warning(expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot)))

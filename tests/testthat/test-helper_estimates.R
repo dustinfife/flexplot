@@ -127,7 +127,9 @@ test_that("compute_semi_partial works", {
   expect_equal(as.numeric(compute_semi_partial(mod)), summary(mod)$r.squared)
   expect_equal(names(compute_semi_partial(lm(y~a, data=small))), "a")
   expect_equal(names(compute_semi_partial(lm(y~a+b+z, data=small))), c("a", "b", "z"))
-  expect_message(compute_semi_partial(lm(y~a*b, data=small)))
+  result = compute_semi_partial(lm(y~a*b, data=small))
+  expect_true(all(is.na(result[c("a","b")])))
+  expect_true(is.finite(result[["a:b"]]))
 })
 
 test_that("populate_estimates_factors works", {

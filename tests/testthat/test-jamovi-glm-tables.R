@@ -33,10 +33,10 @@ test_that("complete jamovi GLM runs report numeric coefficients and existing Wal
     expect_equal(nrow(analysis$results$diff$asDF), 0)
     rsq = analysis$results$rsq$asDF
     expect_equal(rsq$Estimate[rsq$var == "model"], round(summary(model)$r.squared, 4))
-    # Preserve the existing sequential sums-of-squares effect-size output.
-    anova = stats::anova(model)
-    expected = anova$`Sum Sq`[1:2]/sum(anova$`Sum Sq`)
-    expect_equal(rsq$Estimate[match(c("x", "z"), rsq$var)], expected, tolerance=1e-10)
+    expected = vapply(c("x","z"), function(term)
+      summary(model)$r.squared-summary(lm(reformulate(setdiff(c("x","z"),term),"y"),data=model.frame(model)))$r.squared,
+      numeric(1))
+    expect_equal(unname(rsq$Estimate[match(c("x", "z"), rsq$var)]), unname(expected), tolerance=1e-10)
     expect_identical(all.vars(analysis$results$plot$state$formula), c("y", "x", "z"))
     expect_identical(names(analysis$results$plot$state$data), c("y", "x", "z"))
     for (variable in c("y", "x", "z")) {

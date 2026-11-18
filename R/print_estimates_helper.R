@@ -13,7 +13,10 @@ print.estimates = function(x,...){
   # check for r squared
   if ("r.squared" %in% names(x)) {
     cat(paste("Model R squared:\n", round(x$r.squared[1], digits=3), " (", round(x$r.squared[2], digits=2),", ", round(x$r.squared[3], digits=2),")\n\nSemi-Partial R squared:\n",sep=""))
-    print(round(x$semi.p, digits=3))
+    contributions = x$semi.p
+    attr(contributions,"note") = NULL
+    print(round(contributions, digits=3))
+    if (!is.null(attr(x$semi.p,"note"))) cat(attr(x$semi.p,"note"), "\n")
   }
   
   #### print correlation

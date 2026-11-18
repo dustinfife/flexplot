@@ -276,22 +276,88 @@ which_terms_are_factors_or_numbers = function(d, terms) {
   return(list(factors=factors, numbers=numbers))
 }
 
-compute_semi_partial = function(object) {
-  #### compute change in r squared
-  ssr = drop1(aov(object))[-1,"Sum of Sq"]
-  ssr2 = aov(object)$effects
-  if (length(ssr)<(nrow(anova(object))-1)){
-    message("Note: I am not reporting the semi-partial R squared for the main effects because an interaction is present. 
-            To obtain main effect sizes, drop the interaction from your model. \n\n")
+# Recognize univariate quadratic representations without evaluating formula text.
+semi_partial_polynomial = function(term) {
+  expression = str2lang(term)
+  if (is.symbol(expression)) return(list(variable=as.character(expression), kind="linear"))
+  if (is.call(expression) && identical(expression[[1]], as.name("I"))) {
+    power = expression[[2]]
+    if (is.call(power) && identical(power[[1]], as.name("^")) &&
+        is.symbol(power[[2]]) && is.numeric(power[[3]]) && length(power[[3]]) == 1L && power[[3]] >= 2) {
+      return(list(variable=as.character(power[[2]]), kind=if (power[[3]] == 2) "quadratic" else "unsupported"))
+    }
   }
-  sst = sum(anova(object)[,"Sum Sq"])
-  sse = anova(object)[,"Sum Sq"]
-  semi.p = (sse[1:(length(sse)-1)]/sst)
-  max = nrow(anova(object))-1
-  min = max-length(semi.p)+1
-  nms = row.names(anova(object))[min:max]	
-  names(semi.p) = nms
-  return(semi.p)
+  if (!is.call(expression) || !(identical(expression[[1]], as.name("poly")) || identical(expression[[1]], quote(stats::poly)))) return(NULL)
+  arguments = as.list(expression)[-1]
+  degree = if ("degree" %in% names(arguments)) arguments$degree else if (length(arguments) >= 2L) arguments[[2]] else NULL
+  if (length(arguments) && is.symbol(arguments[[1]]) && is.numeric(degree) && length(degree) == 1L && degree >= 2) {
+    return(list(variable=as.character(arguments[[1]]), kind=if (degree == 2) "poly" else "unsupported"))
+  }
+  NULL
+}
+
+compute_semi_partial = function(object) {
+  terms = stats::terms(object)
+  labels = attr(terms, "term.labels")
+  if (!length(labels)) return(setNames(numeric(), character()))
+  design = stats::model.matrix(object)
+  assignment = attr(design, "assign")
+  frame = stats::model.frame(object)
+  response = stats::model.response(frame)
+  weights = stats::model.weights(frame)
+  offset = stats::model.offset(frame)
+  if (is.null(offset)) offset = rep(0, length(response))
+  full = summary(object)$r.squared
+  # Refit only the reduced design on the original estimation rows. Keeping the
+  # fitted basis also preserves factor contrasts and orthogonal polynomial spans.
+  contribution = function(remove) {
+    reduced = design[, !seq_len(ncol(design)) %in% remove, drop=FALSE]
+    fit = if (is.null(weights)) stats::lm.fit(reduced, response-offset) else
+      stats::lm.wfit(reduced, response-offset, weights)
+    fitted = fit$fitted.values + offset
+    center = if (attr(terms,"intercept")) {
+      if (is.null(weights)) mean(fitted) else stats::weighted.mean(fitted,weights)
+    } else 0
+    if (is.null(weights)) weights = rep(1,length(response))
+    explained = sum(weights*(fitted-center)^2)
+    residual = sum(weights*fit$residuals^2)
+    full - explained/(explained+residual)
+  }
+  eligible = labels %in% stats::drop.scope(terms)
+  result = setNames(rep(NA_real_,length(labels)), labels)
+  for (i in which(eligible)) result[i] = contribution(which(assignment == i))
+  polynomial = lapply(labels,semi_partial_polynomial)
+  variables = unique(vapply(Filter(Negate(is.null),polynomial), `[[`, character(1), "variable"))
+  unsupported = FALSE
+  for (variable in variables) {
+    indices = which(vapply(polynomial,function(term) !is.null(term) && term$variable == variable,logical(1)))
+    kinds = vapply(polynomial[indices], `[[`, character(1), "kind")
+    if ("unsupported" %in% kinds) {
+      result[indices] = NA_real_
+      unsupported = TRUE
+      next
+    }
+    quadratic = indices[kinds == "quadratic"]
+    linear = indices[kinds == "linear"]
+    block = indices[kinds == "poly"]
+    if (length(quadratic) && length(linear) && !length(block)) {
+      names(result)[linear] = paste0(variable," (combined polynomial)")
+      result[linear] = if (all(eligible[indices])) contribution(which(assignment %in% indices)) else NA_real_
+      names(result)[quadratic] = paste0(labels[quadratic]," (incremental curvature)")
+    }
+    if (length(block) == 1L && length(indices) == 1L) {
+      columns = which(assignment == block)
+      if (length(columns) != 2L) next
+      names(result)[block] = paste0(variable," (combined polynomial)")
+      result[paste0(labels[block]," (incremental curvature)")] =
+        if (eligible[block]) contribution(columns[-1]) else NA_real_
+    }
+  }
+  notes = character()
+  if (any(!eligible)) notes = "Main effects and lower-order terms involved in interactions are not assigned separate contributions."
+  if (unsupported) notes = c(notes,"Polynomial decomposition currently supports univariate quadratics; higher-degree contributions are unavailable.")
+  if (length(notes)) attr(result,"note") = paste(notes,collapse=" ")
+  result
 }
 
 # Pairwise conditional reference contrasts, retaining fitted coding and covariance.

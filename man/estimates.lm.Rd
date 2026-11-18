@@ -32,12 +32,19 @@ described below are the current implementation, including its approximations.
     sqrt(4*R2*(1-R2)^2*(n-2)^2 / ((n^2-1)*(n+3))). Limits are R2 plus/minus
     qt(.975, n-2) times that value. They are not clipped to [0,1] and are not
     exact model-specific confidence bounds for arbitrary multiple regression.}
-  \item{semi.p}{Despite its historical name and printed label, this is the
-    sequential ANOVA sum of squares for each term divided by the sum of term
-    and residual sums of squares. It is dimensionless and order-dependent,
-    not a general unique/semi-partial contribution obtained by dropping each
-    term from the full model. The interaction-related message does not change
-    this calculation.}
+  \item{semi.p}{Unique/incremental contributions, calculated as full-model
+    R-squared minus reduced-model R-squared on identical fitted observations.
+    Factors are deleted as complete terms. Main effects and lower-order
+    terms protected by interactions are NA, respecting marginality; no bundled
+    interaction contributions are reported. For x + I(x^2), the x row is
+    replaced by x (combined polynomial), deleting both terms, and the quadratic
+    row reports incremental curvature conditional on the linear term. Equivalent
+    univariate poly(x,2) blocks report the same model-space comparisons.
+    Polynomial bundles that would violate interaction marginality are NA.
+    Decomposition is currently limited to univariate quadratics; recognized
+    higher-degree polynomial contributions are NA with an explanatory note.
+    Contributions are dimensionless and independent of predictor entry order;
+    they need not sum to the model R-squared.}
   \item{correlation}{The ordinary Pearson response/predictor correlation only
     when there is one numeric non-interaction term and no factors; otherwise
     NA. It is dimensionless and not a partial correlation.}
