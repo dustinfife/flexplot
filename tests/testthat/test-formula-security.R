@@ -158,18 +158,39 @@ test_that("jamovi plotting analysis and callback handle literal column names", {
 test_that("jamovi GLM entry point fits literal names before downstream summaries", {
   skip_if_not_installed("jmvcore")
   captured = new.env(parent=emptyenv())
-  # The old summary/table code has independent nonstandard-name failures.
-  # Stop after capturing the actual lm fit rather than mocking model fitting.
+  probe = function() {
+    captured$executed = TRUE
+    stop("COLUMN_NAME_EXECUTED")
+  }
+  rlang::local_bindings(formula_security_probe=probe, .env=environment(formula_security_probe))
+  rlang::local_bindings(formula_security_probe=probe, .env=globalenv())
+  # Capture the real fit; supplementary errors must leave primary results intact.
   local_mocked_bindings(estimates.lm=function(object, mc=TRUE) {
+    captured$calls = captured$calls + 1L
     captured$model = object
     stop("FIT_CAPTURED")
   }, .package="flexplot")
+  independent = lm(y ~ x, small)
   for (name in formula_security_names) {
+    captured$model = NULL
+    captured$calls = 0L
+    captured$executed = FALSE
     d = data.frame(y=small$y, check.names=FALSE)
     d[[name]] = small$x
-    expect_error(do.call(glmbasic, list(data=d, out="y", preds=name, graphic=FALSE)), "FIT_CAPTURED")
+    expect_no_error({result = do.call(glmbasic, list(data=d, out="y", preds=name, graphic=FALSE))})
+    expect_identical(captured$calls, 1L)
+    expect_s3_class(captured$model, "lm")
     expect_identical(all.vars(formula(captured$model)), c("y", name))
-    expect_equal(unname(coef(captured$model)), unname(coef(lm(y ~ x, small))))
+    expect_equal(unname(coef(captured$model)), unname(coef(independent)), tolerance=1e-12)
+    expect_equal(unname(summary(captured$model)$coefficients[,2]),
+      unname(summary(independent)$coefficients[,2]), tolerance=1e-12)
+    reported = result$glmcat$asDF
+    expect_identical(reported$var, names(coef(captured$model)))
+    expect_equal(reported$means, unname(coef(independent)), tolerance=1e-12)
+    expect_equal(reported$se, unname(summary(independent)$coefficients[,2]), tolerance=1e-12)
+    expect_identical(result$glmcat$notes$summaries$note,
+      "Supplementary summaries are unavailable: FIT_CAPTURED")
+    expect_false(captured$executed)
   }
 })
 

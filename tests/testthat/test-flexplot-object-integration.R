@@ -99,13 +99,37 @@ renderer_calls_text_parser = function(object) {
         all.names(body(object)))
 }
 
-test_that("only the random-effects validator parses user syntax", {
+test_that("only approved syntax-inspection helpers parse text", {
   namespace = asNamespace("flexplot")
   objects = mget(ls(namespace, all.names=TRUE), envir=namespace, inherits=FALSE)
   parsers = names(objects)[vapply(objects, renderer_calls_text_parser, logical(1))]
-  # Random-effects text is parsed without evaluation and its complete AST is
-  # validated. Plot rendering must never acquire another text-parser path.
-  expect_identical(parsers, "formula_random_component")
+  # Both helpers inspect syntax without evaluating it. Keep this inventory exact
+  # so an additional parser anywhere in the namespace requires explicit review.
+  expect_identical(parsers, c("formula_random_component", "semi_partial_polynomial"))
+})
+
+test_that("polynomial term inspection never evaluates supplied expressions", {
+  captured = new.env(parent=emptyenv())
+  captured$executed = FALSE
+  polynomial_security_probe = function() {
+    captured$executed = TRUE
+    stop("POLYNOMIAL_EXPRESSION_EXECUTED")
+  }
+  rlang::local_bindings(polynomial_security_probe=polynomial_security_probe, .env=globalenv())
+  for (term in c("polynomial_security_probe()", "I(polynomial_security_probe()^2)",
+                 "poly(polynomial_security_probe(), 2)", "poly(x, polynomial_security_probe())",
+                 "{ polynomial_security_probe(); x }")) {
+    expect_null(semi_partial_polynomial(term))
+    expect_false(captured$executed)
+  }
+  expect_identical(semi_partial_polynomial("`polynomial_security_probe()`"),
+    list(variable="polynomial_security_probe()", kind="linear"))
+  expect_identical(semi_partial_polynomial("I(x^2)"), list(variable="x", kind="quadratic"))
+  for (term in c("poly(x, 2)", "stats::poly(x, degree=2)",
+                 "poly(x, 2, raw=polynomial_security_probe())")) {
+    expect_identical(semi_partial_polynomial(term), list(variable="x", kind="poly"))
+  }
+  expect_false(captured$executed)
 })
 
 test_that("default native plots retain return_data and metadata for downstream consumers", {
