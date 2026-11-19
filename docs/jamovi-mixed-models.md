@@ -143,12 +143,23 @@ selected predictor pool. The shared visualization roles may use predictors in
 either model. Saved settings and dependent selections follow the same native
 synchronization rules as Model 1.
 
-The original Model 1 tables retain its requested estimation and its own eligible
-observations. Separate comparison fits use identical complete observations over
-the union of variables actually required by either formula, including random
-slopes. Consequently, comparison Model 1 can differ from the original table
-when Model 2 requires additional variables with missing values; the comparison
-sample size and this distinction are stated in the output.
+When comparison is enabled, all estimates, diagnostics, plots and comparison
+statistics use the same complete observations over the union of variables
+actually required by either formula, including random slopes, interactions and
+squared terms. Model 1 tables use the same requested-method fit as its comparison
+plot. The sample note beneath the specifications reports this common population's
+observations, retained groups and omissions. Adding a Model 2 variable with
+missing observations can therefore change Model 1's reported estimates.
+Disabling comparison restores Model 1's own eligible sample.
+
+Requested ML/REML settings are preserved for estimates and plots; only the
+statistical comparison uses ML copies. No standalone Model 1 is fitted in
+comparison mode. Fit caches distinguish standalone and common-sample results;
+label changes reuse the existing fits. Saved model options retain their format.
+Old saved comparisons request a one-time recalculation when their analysis
+controls initialize. Jamovi may display stored results before those controls
+are opened, because module code has not yet run; activate the analysis to refresh
+such an old saved result. Subsequent saves retain the calculation revision.
 
 All comparison AIC, BIC and likelihood calculations use ML copies, obtained with
 `lme4::refitML()` when needed. REML likelihoods are never compared across fixed

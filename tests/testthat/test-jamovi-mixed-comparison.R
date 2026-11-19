@@ -45,7 +45,7 @@ test_that("Mixed comparisons use ML copies for nested fixed effects and preserve
   expect_match(analysis$results$comparisonSpecification$content,"Model 2")
 })
 
-test_that("Mixed comparisons fit on a common sample without changing the primary analysis sample", {
+test_that("Mixed comparisons use the common sample for primary estimates and comparison fits", {
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_test_data()
   data$z[c(1,21,41)] = NA
@@ -58,7 +58,7 @@ test_that("Mixed comparisons fit on a common sample without changing the primary
   expect_identical(rownames(model.frame(state$model1)),rownames(model.frame(state$model2)))
   eligible = data[complete.cases(data[c("y","x","z","id")]),]
   expect_identical(rownames(state$data),rownames(eligible))
-  expect_equal(nobs(primary$model),nrow(data)) # Unused selected a/z do not alter Model 1.
+  expect_equal(nobs(primary$model),nrow(eligible))
   expect_equal(nobs(state$model1),nrow(data)-3L)
   expect_true(lme4::isREML(state$model1))
   expect_false(lme4::isREML(state$model2))
@@ -66,7 +66,7 @@ test_that("Mixed comparisons fit on a common sample without changing the primary
   expected2 = lme4::lmer(y~x+z+(1+x|id),eligible,REML=FALSE)
   expect_equal(lme4::fixef(state$model1),lme4::fixef(expected1),tolerance=1e-10)
   expect_equal(lme4::fixef(state$model2),lme4::fixef(expected2),tolerance=1e-10)
-  expect_equal(lme4::fixef(primary$model),lme4::fixef(lme4::lmer(y~x+(1+x|id),data)),tolerance=1e-10)
+  expect_equal(lme4::fixef(primary$model),lme4::fixef(expected1),tolerance=1e-10)
 })
 
 test_that("Mixed comparisons with random boundary changes or nonnested fixed effects omit ordinary LRT p-values", {
@@ -105,7 +105,7 @@ test_that("Mixed comparisons with random boundary changes or nonnested fixed eff
   expect_true(is.na(state$statistics$p))
 })
 
-test_that("Mixed comparisons handle singular fits and invalid second models without losing primary results", {
+test_that("Mixed comparisons retain singular estimates and clear results when a common fit is invalid", {
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_test_data()
   data$y = rep(seq(-1,1,length.out=15)+sin(seq_len(15)),16)
@@ -134,7 +134,7 @@ test_that("Mixed comparisons handle singular fits and invalid second models with
   expect_false(grepl("not been automatically simplified",analysis$results$diagnostics$content))
   invalid = jamovi_mixed_comparison_analysis(comparisonRandomIntercept=FALSE,comparisonRandomSlopes=NULL)
   expect_true(invalid$run())
-  expect_true(invalid$results$fixed$visible)
+  expect_false(invalid$results$fixed$visible)
   expect_true(invalid$results$comparison$visible)
   expect_null(invalid$results$comparisonplot$state)
   expect_match(invalid$results$comparison$.__enclos_env__$private$.error,"random intercept or")
@@ -242,7 +242,7 @@ test_that("Mixed comparisons restore independent second-model specifications and
   original_primary=analysis$results$plot$state$model
   expect_true(jamovi_reporting_update(analysis,list(comparisonEstimation="REML")))
   expect_true(lme4::isREML(analysis$results$comparisonplot$state$model2))
-  expect_identical(analysis$results$plot$state$model,original_primary)
+  expect_equal(lme4::fixef(analysis$results$plot$state$model),lme4::fixef(original_primary),tolerance=1e-10)
   expect_true(jamovi_reporting_update(analysis,list(compare=FALSE)))
   expect_false(analysis$results$comparison$visible)
   expect_false(analysis$results$comparisonSpecification$visible)
@@ -253,7 +253,7 @@ test_that("Mixed comparisons restore independent second-model specifications and
   expect_true(jamovi_reporting_update(analysis,list(compare=TRUE)))
   expect_true(analysis$results$comparisonplot$visible)
   expect_true(analysis$results$comparison$visible)
-  expect_identical(analysis$results$plot$state$model,original_primary)
+  expect_equal(lme4::fixef(analysis$results$plot$state$model),lme4::fixef(original_primary),tolerance=1e-10)
   expect_true(jamovi_reporting_update(analysis,list(out=NULL)))
   expect_true(analysis$results$waiting$visible)
   expect_false(analysis$results$comparison$visible)

@@ -54,7 +54,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     const beginEdit = vm.runInNewContext('('+extract('beginEdit(){',true)+')');
     const endEdit = vm.runInNewContext('('+extract('endEdit(){',true)+')');
     const view = {workspace:{}};
-    const defaults = {casGhost:false,compare:false,comparisonFixed:null,comparisonTerms:null,comparisonInteractions:false,comparisonPolynomials:false,comparisonQuadratic:null,comparisonRandomIntercept:true,comparisonRandomSlopes:null,comparisonEstimation:"REML",interactions:false,polynomials:false,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
+    const defaults = {samplePolicyVersion:0,casGhost:false,compare:false,comparisonFixed:null,comparisonTerms:null,comparisonInteractions:false,comparisonPolynomials:false,comparisonQuadratic:null,comparisonRandomIntercept:true,comparisonRandomSlopes:null,comparisonEstimation:"REML",interactions:false,polynomials:false,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
         randomIntercept:true,estimation:'REML',includeP:false,graphic:true,predictionType:'cluster',
         clusters:3,plotX:null,plotPanels:null,plotGroup:null};
     const native = {}, packets = [], queued = new Set();
@@ -79,6 +79,8 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
             finally { manager.endEdit(); }
         }};
     }
+    manager.getOption = name => native[name];
+    manager.setOptionValue = (name,value) => ui[name].setValue(value);
     for (const name of ['quadraticSupplier','randomSupplier','primarySupplier','plotSupplier','comparisonFixedSupplier','comparisonSupplier','comparisonQuadraticSupplier','comparisonRandomSupplier']) {
         let value = [];
         ui[name] = {value:() => value,setValue(updated) {
@@ -292,6 +294,21 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
         assert.ok(!ui.plotSupplier.value().some(item=>item.value.raw==='id'));
         assert.equal(manager._beginEdit,0);
     }
+    ui.compare.setValue(false);
+    ui.samplePolicyVersion.setValue(0);
+    const beforeMigration = JSON.stringify([ui.modelTerms.value(),ui.comparisonTerms.value(),
+        ui.randomSlopes.value(),ui.comparisonRandomSlopes.value()]);
+    const beforePackets = packets.length;
+    ui.compare.setValue(true);
+    assert.equal(packets.length,beforePackets+1);
+    assert.equal(ui.samplePolicyVersion.value(),1);
+    assert.ok(packets.at(-1).changed.includes('samplePolicyVersion'));
+    assert.equal(JSON.stringify([ui.modelTerms.value(),ui.comparisonTerms.value(),
+        ui.randomSlopes.value(),ui.comparisonRandomSlopes.value()]),beforeMigration);
+    const afterMigration = packets.length;
+    handlers.view_updated.call(view,ui);
+    assert.equal(packets.length,afterMigration,'Current calculations must not trigger a repeated migration');
+    console.log('PASS: legacy comparison requests one native calculation update without changing models.');
     console.log('PASS: native CAS selection filtering, mode switching, and saved-option restoration; model specifications unchanged.');
     console.log('PASS: installed native option setters, synchronous handler re-entry and server batches; fresh and restored options.');
     return records;

@@ -42,5 +42,21 @@ module.exports = function(ui, view, fire, assert) {
     assert.equal(ui.plotX.value(), null);
     assert.equal(JSON.stringify(ui.plotPanels.value()), '["school"]');
     assert.equal(ui.casGhost.value(), true, 'Unrelated updates must preserve the saved CAS ghost choice');
+    // A legacy saved comparison requests one non-passive calculation update.
+    ui.preds.setValue(['x','a']);
+    ui.modelTerms.setValue([['x']]);
+    ui.comparisonFixed.setValue(['x','a']);
+    ui.comparisonTerms.setValue([['x'],['a']]);
+    ui.samplePolicyVersion.setValue(0);
+    ui.compare.setValue(true);
+    fire('view','updated');
+    assert.equal(ui.samplePolicyVersion.value(), 1);
+    assert.equal(JSON.stringify(ui.modelTerms.value()), '[["x"]]');
+    assert.equal(JSON.stringify(ui.comparisonTerms.value()), '[["x"],["a"]]');
+    let changes = 0;
+    const setRevision = ui.samplePolicyVersion.setValue;
+    ui.samplePolicyVersion.setValue = value => { changes++; setRevision(value); };
+    fire('view','updated');
+    assert.equal(changes, 0, 'A current saved comparison must not request another recalculation');
     console.log('PASS: Mixed Model initialization, independent random slopes, quadratics, role synchronization and restored layouts.');
 };

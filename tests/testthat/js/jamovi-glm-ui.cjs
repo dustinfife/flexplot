@@ -92,6 +92,9 @@ const {pathToFileURL} = require('node:url');
             if (!(name in ui)) ui[name] = control(name.endsWith('Supplier') ? [] : null);
         }
         if (analysis === 'mixedmodel') {
+            ui.samplePolicyVersion = control(0);
+            ui.view.model.options.getOption = name => ({getValue:ui[name].value});
+            ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
             const yaml = require(require.resolve('js-yaml',{paths:[compilerPath]}));
             if (runtime) {
                 const resultsFile = fs.readdirSync(path.dirname(runtime)).find(name => /^resultsview-.*\.js$/.test(name));

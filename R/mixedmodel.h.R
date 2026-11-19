@@ -35,7 +35,8 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plotPanels = NULL,
             plotGroup = NULL,
             plotLabels = list(),
-            plotLabelStore = list(), ...) {
+            plotLabelStore = list(),
+            samplePolicyVersion = 0, ...) {
 
             super$initialize(
                 package="flexplot",
@@ -220,6 +221,11 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             "label",
                             NULL,
                             default=""))))
+            private$..samplePolicyVersion = jmvcore::OptionInteger$new(
+                "samplePolicyVersion",
+                samplePolicyVersion,
+                hidden=TRUE,
+                default=0)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -251,6 +257,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plotGroup)
             self$.addOption(private$..plotLabels)
             self$.addOption(private$..plotLabelStore)
+            self$.addOption(private$..samplePolicyVersion)
         }),
     active = list(
         out = function() private$..out$value,
@@ -282,7 +289,8 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plotPanels = function() private$..plotPanels$value,
         plotGroup = function() private$..plotGroup$value,
         plotLabels = function() private$..plotLabels$value,
-        plotLabelStore = function() private$..plotLabelStore$value),
+        plotLabelStore = function() private$..plotLabelStore$value,
+        samplePolicyVersion = function() private$..samplePolicyVersion$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -313,7 +321,8 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plotPanels = NA,
         ..plotGroup = NA,
         ..plotLabels = NA,
-        ..plotLabelStore = NA)
+        ..plotLabelStore = NA,
+        ..samplePolicyVersion = NA)
 )
 
 mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

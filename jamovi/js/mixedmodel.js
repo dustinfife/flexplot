@@ -12,6 +12,10 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
     try {
         const predictors = ui.preds.value() || [];
         const comparing = ui.compare.value() === true;
+        // Old saved results can be displayed without an R run. Request one
+        // recalculation when their controls initialize, preserving model options.
+        if (comparing && options.getOption('samplePolicyVersion').getValue() !== 1)
+            options.setOptionValue('samplePolicyVersion', 1);
         let secondPredictors = ui.comparisonFixed.value();
         if (secondPredictors == null && (comparing || ui.comparisonTerms.value() != null)) {
             // Old saved analyses already contain explicit terms. Preserve them;

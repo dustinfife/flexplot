@@ -180,10 +180,33 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       if (!length(self$options$out) || !length(self$options$cluster)) return(invisible(NULL))
       fit_options = lapply(c("out","preds","interactions","polynomials","modelTerms","quadratic","cluster",
         "randomIntercept","randomSlopes","estimation"),self$options$get)
-      if (!is.null(previous) && identical(previous$fitOptions,fit_options) && identical(previous$inputData,self$data)) {
-        state = previous
-      } else state = tryCatch(jamovi_mixed_fit(self$options, self$data), error=identity)
       self$results$waiting$setVisible(FALSE)
+      comparison = NULL
+      if (self$options$compare) {
+        comparison_options = c(fit_options,lapply(c("comparisonFixed","comparisonTerms","comparisonInteractions","comparisonPolynomials",
+          "comparisonQuadratic","comparisonRandomIntercept","comparisonRandomSlopes","comparisonEstimation"),self$options$get))
+        comparison = private$.comparisonState
+        if (is.null(comparison) || !identical(comparison$samplePolicy,"common") || !identical(comparison$fitOptions,comparison_options) ||
+            !identical(comparison$inputData,self$data)) {
+          comparison = tryCatch(jamovi_mixed_comparison(self$options,self$data),error=identity)
+        }
+        if (inherits(comparison,"error")) {
+          private$.comparisonState = NULL
+          self$results$comparison$setVisible(TRUE)
+          self$results$comparison$setError(conditionMessage(comparison))
+          return(invisible(NULL))
+        }
+        comparison$fitOptions = comparison_options
+        comparison$inputData = self$data
+        state = comparison$first
+        state$samplePolicy = "common"
+      } else {
+        if (!is.null(previous) && identical(previous$samplePolicy,"standalone") &&
+            identical(previous$fitOptions,fit_options) && identical(previous$inputData,self$data)) {
+          state = previous
+        } else state = tryCatch(jamovi_mixed_fit(self$options,self$data),error=identity)
+        if (!inherits(state,"error")) state$samplePolicy = "standalone"
+      }
       if (inherits(state, "error")) {
         self$results$explanation$setVisible(TRUE)
         self$results$explanation$setError(conditionMessage(state))
@@ -221,21 +244,6 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           " Up to ", self$options$clusters, " randomly selected clusters are displayed."),
         " No prediction confidence bands are calculated.</p>"))
       if (!self$options$compare) return(invisible(NULL))
-      comparison_options = c(fit_options,lapply(c("comparisonFixed","comparisonTerms","comparisonInteractions","comparisonPolynomials",
-        "comparisonQuadratic","comparisonRandomIntercept","comparisonRandomSlopes","comparisonEstimation"),self$options$get))
-      comparison = private$.comparisonState
-      if (is.null(comparison) || !identical(comparison$fitOptions,comparison_options) ||
-          !identical(comparison$inputData,self$data)) {
-        comparison = tryCatch(jamovi_mixed_comparison(self$options,self$data),error=identity)
-      }
-      if (inherits(comparison,"error")) {
-        private$.comparisonState = NULL
-        self$results$comparison$setVisible(TRUE)
-        self$results$comparison$setError(conditionMessage(comparison))
-        return(invisible(NULL))
-      }
-      comparison$fitOptions = comparison_options
-      comparison$inputData = self$data
       jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP,information)
       self$results$comparisonplot$setSize(if (self$options$predictionType == "cas") 1100 else 700,450)
       comparison_plot_failed = FALSE

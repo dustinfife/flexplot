@@ -162,4 +162,9 @@ options:
     hidden: true
     default: []
     template: *plotLabel
+  - name: samplePolicyVersion
+    title: Internal calculation revision
+    hidden: true
+    type: Integer
+    default: 0
 ...
