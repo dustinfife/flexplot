@@ -3,19 +3,19 @@ set.seed(2323)
 
 test_that("partial_residual_plot works", {
   mod = lm(health~motivation + weight.loss , data=exercise_data)
-  vdiffr::expect_doppelganger("partial_residual plot with one variable",
+  expect_flexplot_snapshot("partial/partial-residual-plot-with-one-variable.svg", "partial_residual plot with one variable",
                               partial_residual_plot(health~weight.loss, 
                                                     model=mod, 
                                                     added_term = ~weight.loss, 
                                                     data=exercise_data))
   mod = lm(health~motivation + weight.loss + therapy.type , data=exercise_data)
-  vdiffr::expect_doppelganger("partial_residual plot with two variables",
+  expect_flexplot_snapshot("partial/partial-residual-plot-with-two-variables.svg", "partial_residual plot with two variables",
                               partial_residual_plot(health~weight.loss + therapy.type, 
                                                     model=mod, 
                                                     added_term = ~weight.loss + therapy.type, 
                                                     data=exercise_data) ) 
   mod = lm(health~weight.loss + motivation * therapy.type, data=exercise_data)
-  vdiffr::expect_doppelganger("partial_residual plot with formula term",
+  expect_flexplot_snapshot("partial/partial-residual-plot-with-formula-term.svg", "partial_residual plot with formula term",
                               partial_residual_plot(health~ motivation + therapy.type, 
                                                     model=mod,
                                                     added_term = ~motivation*therapy.type, 
@@ -25,11 +25,11 @@ test_that("partial_residual_plot works", {
   p = partial_residual_plot(ideation~friend_ideation_c | depression_c,
                             model=right_model,
                             added_term = ~friend_ideation_c*depression_c, data=ideation)
-  vdiffr::expect_doppelganger("partial_residual with interaction specified backward", 
+  expect_flexplot_snapshot("partial/partial-residual-with-interaction-specified-backward.svg", "partial_residual with interaction specified backward",
                               p)
   
   #prp with no added_term arguments
-  vdiffr::expect_doppelganger("prp with no added_term argument specified", 
+  expect_flexplot_snapshot("partial/prp-with-no-added-term-argument-specified.svg", "prp with no added_term argument specified",
                               partial_residual_plot(ideation~friend_ideation_c | depression_c,
                                                     model=right_model,
                                                     data=ideation,
@@ -38,7 +38,7 @@ test_that("partial_residual_plot works", {
 
 test_that("prp with binary predictor", {
   data("small", package = "flexplot")
-  vdiffr::expect_doppelganger("prp with binary predictor on x axis",
+  expect_flexplot_snapshot("partial/prp-with-binary-predictor-on-x-axis.svg", "prp with binary predictor on x axis",
                     partial_residual_plot(x~y_bin + a, data=small,
                         model=lm(x~y_bin + a + z, data=small),
                         added_term = ~y_bin))

@@ -4,35 +4,29 @@ test_that("flexplot with logistic regression works", {
   set.seed(2323)
   
   # logistic with a character
-  vdiffr::expect_doppelganger(
-    "logistic: character outcome", 
+  expect_flexplot_snapshot("flexplot_glm/logistic-character-outcome.svg", "logistic: character outcome",
     flexplot(y_char~x, data=small_logistic, method="logistic"))
   # logistic with 1/0
-  vdiffr::expect_doppelganger(
-    "logistic: 0/1 outcome", 
+  expect_flexplot_snapshot("flexplot_glm/logistic-0-1-outcome.svg", "logistic: 0/1 outcome",
     flexplot(y_numb~x, data=small_logistic, method="logistic"))
   
   
   # logistic with ordered factor
-  vdiffr::expect_doppelganger(
-    "logistic with ordered factor",
+  expect_flexplot_snapshot("flexplot_glm/logistic-with-ordered-factor.svg", "logistic with ordered factor",
     flexplot(y_ord~x, data=small_logistic, method="logistic"))
 
   mod = glm(injury~attention, data=tablesaw.injury, family=binomial)
-  vdiffr::expect_doppelganger(
-    "logistic with numeric outcome",
+  expect_flexplot_snapshot("flexplot_glm/logistic-with-numeric-outcome.svg", "logistic with numeric outcome",
     compare.fits(injury~attention, data=tablesaw.injury, mod, jitter=c(0, .1))
   )
   
   mod = glm(y_numb~x, data=small_logistic, family=binomial)
-  vdiffr::expect_doppelganger(
-    "compare.fits with logistic",
+  expect_flexplot_snapshot("flexplot_glm/compare-fits-with-logistic.svg", "compare.fits with logistic",
     compare.fits(y_numb~x, data=small_logistic, mod, jitter=c(0, .1))
   )
   
   
-  vdiffr::expect_doppelganger(
-    "panelled logistic with sampling",
+  expect_flexplot_snapshot("flexplot_glm/panelled-logistic-with-sampling.svg", "panelled logistic with sampling",
     flexplot(y_bin ~ x | a, data = small, method = "logistic")
   )
 })

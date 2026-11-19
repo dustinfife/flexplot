@@ -28,7 +28,7 @@ test_that("magnet_plot output is visually correct", {
   
   p = magnet_plot(Y ~ X, data = df)
   
-  vdiffr::expect_doppelganger("default magnet plot", p)
+  expect_flexplot_snapshot("plot_logistic_magnet/default-magnet-plot.svg", "default magnet plot", p)
 })
 
 test_that("magnet plots ignore missing outcomes in binary validation and calculations", {

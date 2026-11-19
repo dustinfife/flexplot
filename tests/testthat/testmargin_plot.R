@@ -3,14 +3,14 @@ options(warn=-1)
 set.seed(12312)
 test_that("marginal_plot works", {
   a = flexplot(ptsd~speed | agility + strength, data=avengers)
-  vdiffr::expect_doppelganger("marginal plot", marginal_plot(a))
+  expect_flexplot_snapshot("testmargin_plot/marginal-plot.svg", "marginal plot", marginal_plot(a))
 })
 
 test_that("marginal_plot with lm/loess/quadratic", {
   b = flexplot(ptsd~speed | agility + strength, data=avengers, method="quadratic")
   c = flexplot(ptsd~speed | agility + strength, data=avengers, method="lm")
-  vdiffr::expect_doppelganger("marginal plot with quadratic", marginal_plot(b))
-  vdiffr::expect_doppelganger("marginal plot with lm", marginal_plot(c))
+  expect_flexplot_snapshot("testmargin_plot/marginal-plot-with-quadratic.svg", "marginal plot with quadratic", marginal_plot(b))
+  expect_flexplot_snapshot("testmargin_plot/marginal-plot-with-lm.svg", "marginal plot with lm", marginal_plot(c))
 })
 
 test_that("return_panel_vars works", {

@@ -37,7 +37,7 @@ test_that("cas_adjustment works", {
 
 test_that("cluser_adjusted_scatter works", {
   expect_error(cluster_adjusted_scatter(y~x+a, mod1))
-  vdiffr::expect_doppelganger("cas normal", cluster_adjusted_scatter(y~x, object = mod1))
-  vdiffr::expect_doppelganger("cas intercept", cluster_adjusted_scatter(y~x, object = mod1, adjust = "intercept"))
-  vdiffr::expect_doppelganger("cas none", cluster_adjusted_scatter(y~x, object = mod1, adjust = "none"))
+  expect_flexplot_snapshot("plot_cas/cas-normal.svg", "cas normal", cluster_adjusted_scatter(y~x, object = mod1))
+  expect_flexplot_snapshot("plot_cas/cas-intercept.svg", "cas intercept", cluster_adjusted_scatter(y~x, object = mod1, adjust = "intercept"))
+  expect_flexplot_snapshot("plot_cas/cas-none.svg", "cas none", cluster_adjusted_scatter(y~x, object = mod1, adjust = "none"))
 })

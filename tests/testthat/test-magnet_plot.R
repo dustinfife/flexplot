@@ -1,9 +1,9 @@
 test_that("magnet_plot works", {
   set.seed(121)
-  vdiffr::expect_doppelganger("magnet plot with numeric binary", magnet_plot(y_bin~a, data=small))
+  expect_flexplot_snapshot("magnet_plot/magnet-plot-with-numeric-binary.svg", "magnet plot with numeric binary", magnet_plot(y_bin~a, data=small))
   expect_error(magnet_plot(b~a, data=small), "Your outcome variable must have exactly 2 levels")
   expect_message(magnet_plot(a~b, data=small), "your outcome variable levels")
-  vdiffr::expect_doppelganger("magnet plot with categorical binary", magnet_plot(a~b, data=small)%>%suppressMessages())
+  expect_flexplot_snapshot("magnet_plot/magnet-plot-with-categorical-binary.svg", "magnet plot with categorical binary", magnet_plot(a~b, data=small)%>%suppressMessages())
   expect_error(magnet_plot(a~y, data=small))
 })
 
@@ -62,7 +62,7 @@ test_that("magnet plot renders without error", {
   d = magnet_plot_fixture()
   p = flexplot(y ~ group, data=d)
   expect_no_error(ggplot2::ggplot_build(p))
-  vdiffr::expect_doppelganger("magnet: binary outcome categorical x", p)
+  expect_flexplot_snapshot("magnet_plot/magnet-binary-outcome-categorical-x.svg", "magnet: binary outcome categorical x", p)
 })
 
 test_that("continuous x still produces a logistic plot", {

@@ -488,5 +488,5 @@ test_that("marginal additive and interaction plots preserve their validated curv
   additive = lm(y ~ x + a + z, small)
   interaction = lm(y ~ x*a + I(z^2), small)
   p = compare_fits(y ~ x | a, small, additive, interaction, jitter=FALSE, num_points=10)
-  vdiffr::expect_doppelganger("marginal additive and interaction curves", p)
+  expect_flexplot_snapshot("compare-fits-marginal/marginal-additive-and-interaction-curves.svg", "marginal additive and interaction curves", p)
 })

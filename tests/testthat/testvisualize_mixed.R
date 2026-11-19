@@ -20,16 +20,16 @@ test_that("visualize mixed models", {
   a3 = visualize(model, plot = "model",
                  formula = MathAch ~  Sex + School| SES, 
                  sample = 30)
-  vdiffr::expect_doppelganger("mixed row panels",a)
-  vdiffr::expect_doppelganger("mixed diff lines",b)
-  vdiffr::expect_doppelganger("mixed small sample",c)
-  vdiffr::expect_doppelganger("mixed anova with no formula",a1)
-  vdiffr::expect_doppelganger("mixed no formula one covariate", a2)
-  vdiffr::expect_doppelganger("mixed old error1", a3)
+  expect_flexplot_snapshot("testvisualize_mixed/mixed-row-panels.svg", "mixed row panels",a)
+  expect_flexplot_snapshot("testvisualize_mixed/mixed-diff-lines.svg", "mixed diff lines",b)
+  expect_flexplot_snapshot("testvisualize_mixed/mixed-small-sample.svg", "mixed small sample",c)
+  expect_flexplot_snapshot("testvisualize_mixed/mixed-anova-with-no-formula.svg", "mixed anova with no formula",a1)
+  expect_flexplot_snapshot("testvisualize_mixed/mixed-no-formula-one-covariate.svg", "mixed no formula one covariate", a2)
+  expect_flexplot_snapshot("testvisualize_mixed/mixed-old-error1.svg", "mixed old error1", a3)
   
   ## error when I have a categorical predictor on x axis, now fixed
   mod = lmer(MathAch~Sex + SES + (1|School), data=math)
-  vdiffr::expect_doppelganger("mixed old error2", visualize(mod, plot="model"))
+  expect_flexplot_snapshot("testvisualize_mixed/mixed-old-error2.svg", "mixed old error2", visualize(mod, plot="model"))
             
 })
 
@@ -41,7 +41,7 @@ test_that("visualize mixed models with alcuse", {
   mod2 = lme4::lmer(ALCUSE~AGE_14 + (1|ID), data=alcuse)
   a4 = visualize(mod2, plot="model")  
   
-  vdiffr::expect_doppelganger("mixed when x axis has <5 levels", a4)
+  expect_flexplot_snapshot("testvisualize_mixed/mixed-when-x-axis-has-5-levels.svg", "mixed when x axis has <5 levels", a4)
   #vdiffr::expect_doppelganger("random effects anova", a5)
   
 })
@@ -71,7 +71,7 @@ test_that("visualize based on issue 105 with scaled variables", {
     data = exercise_data_scaled
   )
   
-  vdiffr::expect_doppelganger("visualize scaled variable with mixed model", 
+  expect_flexplot_snapshot("testvisualize_mixed/visualize-scaled-variable-with-mixed-model.svg", "visualize scaled variable with mixed model",
                               flexplot::visualize(glm1, plot = "residuals"))
 })
 options(warn=0)
