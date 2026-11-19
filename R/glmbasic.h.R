@@ -23,7 +23,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plotX = NULL,
             plotPanels = NULL,
             plotGroup = NULL,
-            comparisonGroup = NULL, ...) {
+            comparisonGroup = NULL,
+            polynomials = FALSE,
+            quadratic = NULL,
+            comparisonPolynomials = FALSE,
+            comparisonQuadratic = NULL, ...) {
 
             super$initialize(
                 package="flexplot",
@@ -109,6 +113,22 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "comparisonGroup",
                 comparisonGroup,
                 default=NULL)
+            private$..polynomials = jmvcore::OptionBool$new(
+                "polynomials",
+                polynomials,
+                default=FALSE)
+            private$..quadratic = jmvcore::OptionVariables$new(
+                "quadratic",
+                quadratic,
+                default=NULL)
+            private$..comparisonPolynomials = jmvcore::OptionBool$new(
+                "comparisonPolynomials",
+                comparisonPolynomials,
+                default=FALSE)
+            private$..comparisonQuadratic = jmvcore::OptionVariables$new(
+                "comparisonQuadratic",
+                comparisonQuadratic,
+                default=NULL)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -128,6 +148,10 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plotPanels)
             self$.addOption(private$..plotGroup)
             self$.addOption(private$..comparisonGroup)
+            self$.addOption(private$..polynomials)
+            self$.addOption(private$..quadratic)
+            self$.addOption(private$..comparisonPolynomials)
+            self$.addOption(private$..comparisonQuadratic)
         }),
     active = list(
         out = function() private$..out$value,
@@ -147,7 +171,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plotX = function() private$..plotX$value,
         plotPanels = function() private$..plotPanels$value,
         plotGroup = function() private$..plotGroup$value,
-        comparisonGroup = function() private$..comparisonGroup$value),
+        comparisonGroup = function() private$..comparisonGroup$value,
+        polynomials = function() private$..polynomials$value,
+        quadratic = function() private$..quadratic$value,
+        comparisonPolynomials = function() private$..comparisonPolynomials$value,
+        comparisonQuadratic = function() private$..comparisonQuadratic$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -166,7 +194,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plotX = NA,
         ..plotPanels = NA,
         ..plotGroup = NA,
-        ..comparisonGroup = NA)
+        ..comparisonGroup = NA,
+        ..polynomials = NA,
+        ..quadratic = NA,
+        ..comparisonPolynomials = NA,
+        ..comparisonQuadratic = NA)
 )
 
 glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

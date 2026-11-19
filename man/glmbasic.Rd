@@ -23,7 +23,11 @@ glmbasic(
   plotPanels = NULL,
   plotGroup = NULL,
   comparisonGroup = NULL,
-  includeP = FALSE
+  includeP = FALSE,
+  polynomials = FALSE,
+  quadratic = NULL,
+  comparisonPolynomials = FALSE,
+  comparisonQuadratic = NULL
 )
 }
 \arguments{
@@ -46,7 +50,8 @@ glmbasic(
 \item{center}{.}
 
 \item{modelTerms}{Main effects and interactions. NULL retains the additive
-model; an empty list fits an intercept only.}
+model; an empty list omits ordinary terms (intercept-only unless squared
+terms are enabled).}
 
 \item{compare}{Fit and compare two models on the same complete
 observations.}
@@ -65,6 +70,13 @@ not on a second axis.}
 \item{comparisonGroup}{Optional grouping predictor in either model; two-model grouping is supported only for magnet plots. Use panels for other comparisons.}
 
 \item{includeP}{Include coefficient t-test p-values; defaults to FALSE.}
+
+\item{polynomials, comparisonPolynomials}{Enable squared terms for Model 1
+and Model 2 respectively; defaults to FALSE.}
+
+\item{quadratic, comparisonQuadratic}{Literal numeric predictor names to square
+in each model. Linear terms are added initially by the GUI, but may be removed
+deliberately. Model terms continue to contain names and interactions only.}
 }
 \value{
 A results object containing:
@@ -94,4 +106,8 @@ Coefficient estimates retain the fitted model-matrix names, including
   confidence intervals and optional tests use residual t degrees of freedom.
   Aliased coefficients are identified with blank inference cells. Conditional
   factor means and pairwise differences remain separate from coefficients.
+  Polynomial controls add literal numeric predictors as I(x^2). Disabling
+  a polynomial checkbox excludes its squares while retaining main effects.
+  Semi-partial R-squared retains combined polynomial and incremental
+  curvature contributions on the model's estimation observations.
 }

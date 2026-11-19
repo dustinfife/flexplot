@@ -114,4 +114,20 @@ options:
       type: Variable
       default: null
       description: Visualization variables must occur in the fitted model terms (either model for comparisons).
+    - name: polynomials
+      title: Include Polynomial Terms
+      type: Bool
+      default: false
+    - name: quadratic
+      title: Quadratic predictors
+      type: Variables
+      default: null
+    - name: comparisonPolynomials
+      title: Include Polynomial Terms
+      type: Bool
+      default: false
+    - name: comparisonQuadratic
+      title: Model 2 quadratic predictors
+      type: Variables
+      default: null
 ...

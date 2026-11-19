@@ -13,7 +13,13 @@
 #' @param line .
 #' @param center .
 #' @param modelTerms Main effects and interactions. NULL retains the additive
-#'   model; an empty list fits an intercept only.
+#'   model; an empty list omits ordinary terms (intercept-only unless squared
+#'   terms are enabled).
+#' @param polynomials,comparisonPolynomials Enable squared terms for Model 1
+#'   and Model 2 respectively; defaults to FALSE.
+#' @param quadratic,comparisonQuadratic Literal numeric predictor names to square
+#'   in each model. Linear terms are added initially by the GUI, but may be removed
+#'   deliberately. Model terms continue to contain names and interactions only.
 #' @param compare Fit and compare two models on the same complete
 #'   observations.
 #' @param comparisonTerms Independent main effects and interactions for Model
@@ -29,6 +35,10 @@
 #'   confidence intervals and optional tests use residual t degrees of freedom.
 #'   Aliased coefficients are identified with blank inference cells. Conditional
 #'   factor means and pairwise differences remain separate from coefficients.
+#'   Polynomial controls add literal numeric predictors as I(x^2). Disabling
+#'   a polynomial checkbox excludes its squares while retaining main effects.
+#'   Semi-partial R-squared retains combined polynomial and incremental
+#'   curvature contributions on the model's estimation observations.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$assumpplot} \tab \tab \tab \tab \tab an image \cr
@@ -67,7 +77,11 @@ glmbasic = function(
     plotPanels = NULL,
     plotGroup = NULL,
     comparisonGroup = NULL,
-    includeP = FALSE) {
+    includeP = FALSE,
+    polynomials = FALSE,
+    quadratic = NULL,
+    comparisonPolynomials = FALSE,
+    comparisonQuadratic = NULL) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("glmbasic requires jmvcore to be installed (restart may be required)")
@@ -80,6 +94,8 @@ glmbasic = function(
     if ( ! missing(plotPanels)) plotPanels = jmvcore::resolveQuo(jmvcore::enquo(plotPanels))
     if ( ! missing(plotGroup)) plotGroup = jmvcore::resolveQuo(jmvcore::enquo(plotGroup))
     if ( ! missing(comparisonGroup)) comparisonGroup = jmvcore::resolveQuo(jmvcore::enquo(comparisonGroup))
+    if (!missing(quadratic)) quadratic = jmvcore::resolveQuo(jmvcore::enquo(quadratic))
+    if (!missing(comparisonQuadratic)) comparisonQuadratic = jmvcore::resolveQuo(jmvcore::enquo(comparisonQuadratic))
     if (missing(data))
         data = jmvcore::marshalData(
             parent.frame(),
@@ -113,7 +129,11 @@ glmbasic = function(
         plotPanels = plotPanels,
         plotGroup = plotGroup,
         comparisonGroup = comparisonGroup,
-        includeP = includeP)
+        includeP = includeP,
+        polynomials = polynomials,
+        quadratic = quadratic,
+        comparisonPolynomials = comparisonPolynomials,
+        comparisonQuadratic = comparisonQuadratic)
 
     analysis = glmbasicClass$new(
         options = options,

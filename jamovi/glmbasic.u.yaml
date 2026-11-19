@@ -38,6 +38,23 @@ children:
             valueFilter: unique
             template:
               type: TermLabel
+  - type: CheckBox
+    name: polynomials
+  - type: Supplier
+    name: quadraticSupplier
+    useSingleCell: true
+    contentLink: (polynomials)
+    label: Squared terms
+    format: variable
+    persistentItems: true
+    children:
+      - type: TargetLayoutBox
+        label: Add squared terms (numeric predictors)
+        children:
+          - type: VariablesListBox
+            name: quadratic
+            isTarget: true
+            permitted: [numeric]
   - type: CollapseBox
     label: Model Comparison
     collapsed: true
@@ -62,6 +79,28 @@ children:
                 valueFilter: unique
                 template:
                   type: TermLabel
+      - type: Label
+        label: Model 2 polynomial terms
+        useSingleCell: true
+        contentLink: (compare)
+        children:
+          - type: CheckBox
+            name: comparisonPolynomials
+          - type: Supplier
+            name: comparisonQuadraticSupplier
+            useSingleCell: true
+            contentLink: (comparisonPolynomials)
+            label: Model 2 squared terms
+            format: variable
+            persistentItems: true
+            children:
+              - type: TargetLayoutBox
+                label: Add Model 2 squared terms
+                children:
+                  - type: VariablesListBox
+                    name: comparisonQuadratic
+                    isTarget: true
+                    permitted: [numeric]
       - type: Supplier
         name: comparisonPlotSupplier
         label: Predictors in either model

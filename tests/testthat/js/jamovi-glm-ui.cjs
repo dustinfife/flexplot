@@ -317,6 +317,10 @@ const {pathToFileURL} = require('node:url');
 
             }
         }
+        if (analysis === 'glmbasic') {
+            const quadraticRecords = require('./jamovi-lm-quadratic.cjs')(ui,view,fire,assert);
+            fs.writeFileSync(output+'.quadratic.json',JSON.stringify(quadraticRecords));
+        }
         fs.writeFileSync(output, records.join('\n') + '\n');
         console.log(runtime ? 'Used installed jamovi View.extend' : 'Used portable automatic-handler contract');
     } finally {

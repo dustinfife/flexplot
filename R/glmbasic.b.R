@@ -1,13 +1,17 @@
 
 # This file is a generated template, your changes will not be overwritten
 
-jamovi_glm_model_plot = function(model, se, formula=NULL, ...) {
+jamovi_glm_model_plot = function(model, se, formula=NULL, data=model$model, ...) {
+  # A square-only fitted frame omits raw x; prepare its layout from input data.
+  if (is.null(formula) && length(setdiff(all.vars(stats::formula(model)),names(model$model)))) {
+    formula = jamovi_model_layout(list(model),data)
+  }
   # visualize.lm uses a descriptive added-variable plot for larger models.
   if (is.null(formula) && length(all.vars(stats::formula(model))[-1]) > 4L) {
     return(visualize(model, plot="model", se=se, ...))
   }
   plot = if (is.null(formula)) visualize(model, plot="model", report.se=se, ...) else
-    compare_fits(formula, data=model$model, model1=model, report.se=se, ...)
+    compare_fits(formula, data=data, model1=model, report.se=se, ...)
   jamovi_model_intervals(plot, se=se)
 }
 
@@ -67,8 +71,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             formula = stats::formula(model)
             data = comparison$data
           } else {
-            formula = tryCatch(jamovi_glm_formula(self$options$out,self$options$preds,
-              self$options$modelTerms),error=identity)
+            formula = tryCatch(jamovi_lm_formula(self$options,data),error=identity)
             if (inherits(formula,"error")) {
               self$results$glmcat$setError(conditionMessage(formula))
               return(invisible(NULL))
@@ -133,7 +136,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               image$setError(conditionMessage(layout))
               return(FALSE)
             }
-            plot = jamovi_glm_model_plot(mod, se=self$options$se, formula=layout,
+            plot = jamovi_glm_model_plot(mod, se=self$options$se, formula=layout, data=data,
                                          method=line, spread=se.type)
 			print(plot)
 			TRUE

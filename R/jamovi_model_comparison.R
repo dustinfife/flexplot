@@ -30,6 +30,16 @@ jamovi_glm_formula = function(outcome, predictors, terms) {
   make.formula(as.name(outcome), lapply(terms, jamovi_glm_term, predictors=predictors))
 }
 
+# Quadratic selections are literal numeric predictor names, not formula text.
+jamovi_lm_formula = function(options, data, second=FALSE) {
+  terms = if (second) options$comparisonTerms else options$modelTerms
+  enabled = if (second) options$comparisonPolynomials else options$polynomials
+  quadratic = if (isTRUE(enabled)) {
+    if (second) options$comparisonQuadratic else options$quadratic
+  } else NULL
+  jamovi_glm_generalized_formula(options,data,terms,quadratic)
+}
+
 jamovi_glm_fit = function(formula, data, label) {
   model = tryCatch(stats::lm(formula, data=data, na.action=stats::na.fail),
                    error=function(error) stop(label, ": ", conditionMessage(error), call.=FALSE))
@@ -41,8 +51,8 @@ jamovi_glm_fit = function(formula, data, label) {
 }
 
 jamovi_glm_comparison = function(options, data) {
-  formula1 = jamovi_glm_formula(options$out, options$preds, options$modelTerms)
-  formula2 = jamovi_glm_formula(options$out, options$preds, options$comparisonTerms)
+  formula1 = jamovi_lm_formula(options,data)
+  formula2 = jamovi_lm_formula(options,data,second=TRUE)
   variables = union(all.vars(formula1), all.vars(formula2))
   eligible = data[stats::complete.cases(data[, variables, drop=FALSE]), , drop=FALSE]
   if (!nrow(eligible)) stop("No complete observations are available for both models.", call.=FALSE)
