@@ -240,15 +240,21 @@ linmod_jasp<- function(jaspResults, dataset, options) {
   if (model.type == "model" && length(terms) == 0) {
     # trick flexplot into plotting this
     new_data = linmod_results$model$model
+    new_data = new_data[is.finite(new_data[[options$dependent]]), , drop=FALSE]
     f = make.formula((options$dependent), "1")
     plot = ggplot(data = new_data,aes(y = !!sym(options$dependent), x=1)) +
       labs(x = "", y=decodeColNames(options$dependent)) + 
       geom_hline(yintercept=0, col='lightgray') +
       geom_jitterd(alpha=options$alpha, width=options$jitx, height=options$jity)+
       stat_summary(fun="mean", geom='point', size=3, position=position_dodge(width=.4), color = '#bf0303')+
-      stat_summary(geom='errorbar', 
-                   fun.min = function(z){mean(z)-1.96*(sd(z)/sqrt(length(z)-1))}, 
-                   fun.max = function(z){mean(z)+1.96*(sd(z)/sqrt(length(z)-1))}, 
+      # Match the intercept-only means table's two-sided 95% confidence interval.
+      stat_summary(geom='errorbar', na.rm=TRUE,
+                   fun.data = function(z) {
+                     center = mean(z)
+                     if (length(z) < 2L) return(data.frame(y=center, ymin=NA_real_, ymax=NA_real_))
+                     radius = stats::qt(.975, df=length(z)-1L) * stats::sd(z) / sqrt(length(z))
+                     data.frame(y=center, ymin=center-radius, ymax=center+radius)
+                   },
                    width=.2, linewidth = 1.25,
                    position=position_dodge(width=.4), color = '#bf0303') +
       coord_cartesian(xlim=c(.75, 1.25))+

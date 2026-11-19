@@ -25,7 +25,7 @@ Linear Modeling allows users to both statistically and visually model relationsh
 
 ### Results Displays
 - Plots:
-    - Model plot: Should the results display a visualization of the statistical model? Defaults to yes. These plots are created automatically in the background by flexplot. For more control of how the visuals are displayed, use the flexplot module. 
+    - Model plot: Should the results display a visualization of the statistical model? Defaults to yes. For intercept-only models, the error bar shows a two-sided 95% t confidence interval for the mean, using finite observations; an interval is unavailable with fewer than two observations. These plots are created automatically in the background by flexplot. For more control of how the visuals are displayed, use the flexplot module.
     - Univariate: Checking this box will show univariate distributions of all variables, both predictor and outcome. All numeric variables will be displayed as histograms, while all categorical variables as barcharts. 
     - Diagnostics: Checking this box will produce residual plots for diagnostics, including a histogram of the residuals to assess normality, a residual dependence plot (fitted versus observed) to assess linearity, and a scale-location (SL) plot to assess homoscedasticity. 
     - Added variable plot: Checking this box will display the relationship between the *last* variable entered the the outcome, after residualizing the effects of the other predictor variables entered. Note that the mean of the outcome variable will be added back to the residuals to retain the original scale of the data. 
