@@ -7,20 +7,31 @@ const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
     selections:['comparisonX','comparisonPanels'], exclusive:true, requireX:true,
     extra:['quadratic','comparisonQuadratic']}];
 const synchronize = function(ui, context, added, changed = null) {
-    const predictors = ui.preds.value() || [];
-    for (const [quadraticName, modelName, supplier] of [
-        ['quadratic','modelTerms','quadraticSupplier'],
-        ['comparisonQuadratic','comparisonTerms','comparisonQuadraticSupplier']]) {
-        const quadratic = (ui[quadraticName].value() || []).filter(name => predictors.includes(name));
-        if (JSON.stringify(ui[quadraticName].value()) !== JSON.stringify(quadratic)) ui[quadraticName].setValue(quadratic);
-        ui[supplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
-        if (changed === quadraticName) {
-            const terms = ui[modelName].value() || [];
-            const missing = quadratic.filter(name => !terms.some(term => term.length === 1 && term[0] === name));
-            if (missing.length) ui[modelName].setValue(terms.concat(missing.map(name => [name])));
+    // Host options arrive separately during restoration; do not prune partial state.
+    if (context.flags && context.flags.updating) return;
+    if (context.workspace.glmSynchronizing) return;
+    if (!added && !(ui.preds.value() || []).length) return;
+    context.workspace.glmSynchronizing = true;
+    ui.view.model.options.beginEdit();
+    try {
+        const predictors = ui.preds.value() || [];
+        for (const [quadraticName, modelName, supplier] of [
+            ['quadratic','modelTerms','quadraticSupplier'],
+            ['comparisonQuadratic','comparisonTerms','comparisonQuadraticSupplier']]) {
+            const quadratic = (ui[quadraticName].value() || []).filter(name => predictors.includes(name));
+            if (JSON.stringify(ui[quadraticName].value()) !== JSON.stringify(quadratic)) ui[quadraticName].setValue(quadratic);
+            ui[supplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
+            if (changed === quadraticName) {
+                const terms = ui[modelName].value() || [];
+                const missing = quadratic.filter(name => !terms.some(term => term.length === 1 && term[0] === name));
+                if (missing.length) ui[modelName].setValue(terms.concat(missing.map(name => [name])));
+            }
         }
+        updateTerms(ui, context, added, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
+    } finally {
+        try { ui.view.model.options.endEdit(); }
+        finally { context.workspace.glmSynchronizing = false; }
     }
-    updateTerms(ui, context, added, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
 };
 module.exports = {
     view_loaded: function(ui) { synchronize(ui, this, false); },

@@ -179,7 +179,7 @@ const {pathToFileURL} = require('node:url');
             } else fs.writeFileSync(output, '[]');
             return;
         }
-        if (analysis === 'glmbasic') {
+        if (analysis === 'glmbasic' || generalized) {
             // Saved terms can arrive before native predictor controls finish loading.
             const restored = [['supp'],['dose'],['supp','dose']];
             ui.preds.setValue([]); ui.modelTerms.setValue(restored);
@@ -320,6 +320,10 @@ const {pathToFileURL} = require('node:url');
         if (analysis === 'glmbasic') {
             const quadraticRecords = require('./jamovi-lm-quadratic.cjs')(ui,view,fire,assert);
             fs.writeFileSync(output+'.quadratic.json',JSON.stringify(quadraticRecords));
+        }
+        if (generalized && runtime) {
+            const restored = require('./jamovi-glm-restoration.cjs')(fs.readFileSync(runtime,'utf8'), compilerPath, view.handlers, FormatDef, utils, assert);
+            fs.writeFileSync(output+'.restored.json',JSON.stringify(restored));
         }
         fs.writeFileSync(output, records.join('\n') + '\n');
         console.log(runtime ? 'Used installed jamovi View.extend' : 'Used portable automatic-handler contract');
