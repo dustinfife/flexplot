@@ -51,7 +51,7 @@ flexplot_draw_prediction_layers = function(prediction, axis, data, given, draw, 
   if (use_magnet && any(prediction$prediction < 0 | prediction$prediction > 1)) {
     stop("Magnet prediction draws must be probabilities between zero and one.",call.=FALSE)
   }
-  path = tail(make.unique(c(names(prediction),".flexplot_draw_path")),1)
+  path = utils::tail(make.unique(c(names(prediction),".flexplot_draw_path")),1)
   prediction[[path]] = dplyr::group_indices(dplyr::group_by(prediction,dplyr::across(dplyr::all_of(keys))))
   mapping = ggplot2::aes(x=.data[[x]],y=.data$prediction,group=.data[[path]])
   position = ggplot2::position_identity()

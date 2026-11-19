@@ -28,13 +28,22 @@ flexplot is a set of tools designed to pair with statistical modeling and simpli
 * `visualize()` shows a visual representation of a fitted object
 * `compare_fits()` visually compares the fit of two different models
 
-`compare_fits()` now defaults to `prediction_method="observed"`: it averages
-predictions for actual, common eligible observations within displayed groups or
-numeric x bins. Use `prediction_method="reference"` for historical profiles,
-which hold omitted numeric predictors at their mean and categorical predictors
-at their mode. `compare.fits()` remains a supported alias. Neither method is
-automatically causal; observed averaging is not marginal standardization,
-partial dependence, or ALE.
+`compare_fits()` defaults to `prediction_method="marginal"`, using
+observation-weighted marginal standardization. At each plotted coordinate, it
+sets all displayed predictors and moderators to their displayed values, leaves
+undisplayed covariates at their observed values, and averages predictions over
+all common eligible estimation observations. Both models use the same reference
+population at every coordinate; the averaging does not sample reference rows.
+For GLMs, `pred.type="response"` (the default) averages response-scale
+predictions; use `pred.type="link"` to average predictions on the link scale.
+
+Use `prediction_method="observed"` to predict at actual eligible covariate
+combinations and summarize those predictions within displayed groups or numeric
+x bins. This is useful for evaluating model fit and differs from marginal
+standardization. Use `prediction_method="reference"` for profiles that hold
+omitted numeric predictors at their means and categorical predictors at their
+modes. `compare.fits()` remains a supported alias. None of these summaries is
+automatically a causal effect.
 
 * `estimates()` reports of effect sizes for statistical models
 * `model.comparison()` statistically compares the fits of two different models

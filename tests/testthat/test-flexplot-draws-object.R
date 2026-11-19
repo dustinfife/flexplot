@@ -176,3 +176,45 @@ test_that("unknown draw group levels fail before native positioning can lose row
   prediction$b[1] = "unobserved group"
   expect_error(flexplot_test_draw_plot(prepared,prediction),"observed display levels")
 })
+
+test_that("native draw layers work without utils attached in an isolated R process", {
+  # Serialize the real constructor and its real axis/facet helpers, so source
+  # tests do not accidentally exercise an older installed flexplot in the child.
+  scope = new.env(parent=globalenv())
+  for (name in c("flexplot_draw_prediction_layers", "flexplot_object_axis",
+                 "flexplot_magnet_display_given")) {
+    scope[[name]] = get(name,envir=asNamespace("flexplot"))
+    environment(scope[[name]]) = scope
+  }
+  data = data.frame(x=seq_len(5), y=seq_len(5))
+  prediction = data.frame(x=rep(data$x,3),prediction=rep(data$x,3)+rep(1:3,each=5),
+                          model="One model",draw=rep(1:3,each=5))
+  input = withr::local_tempfile(fileext=".rds")
+  output = withr::local_tempfile(fileext=".rds")
+  script = withr::local_tempfile(fileext=".R")
+  saveRDS(list(renderer=scope$flexplot_draw_prediction_layers,data=data,prediction=prediction),input)
+  writeLines(c(
+    'options(device=function(...) grDevices::pdf(file=NULL))',
+    'if ("package:utils" %in% search()) detach("package:utils",unload=FALSE)',
+    'stopifnot(!"package:utils" %in% search())',
+    'args = commandArgs(TRUE)',
+    'input = readRDS(args[1])',
+    'layers = input$renderer(input$prediction,"x",input$data,NULL,"draw",.2)',
+    'plot = ggplot2::ggplot(input$data,ggplot2::aes(x=x,y=y)) + layers',
+    'coordinates = ggplot2::ggplot_build(plot)$data[[1]]',
+    'invisible(ggplot2::ggplotGrob(plot))',
+    'stopifnot(!"package:utils" %in% search())',
+    'saveRDS(list(search=search(),coordinates=coordinates),args[2])'
+  ),script)
+  log = system2(file.path(R.home("bin"),"Rscript"),
+    shQuote(c("--vanilla",script,input,output)),stdout=TRUE,stderr=TRUE)
+  expect_null(attr(log,"status"),info=paste(log,collapse="\n"))
+  expect_true(file.exists(output))
+  if (!file.exists(output)) return(invisible(NULL))
+  actual = readRDS(output)
+  expect_false("package:utils" %in% actual$search)
+  expect_equal(actual$coordinates$x,prediction$x)
+  expect_equal(actual$coordinates$y,prediction$prediction)
+  expect_length(unique(actual$coordinates$group),3L)
+  expect_true(all(actual$coordinates$alpha==.2))
+})
