@@ -1,7 +1,7 @@
 ---
 title: Flexplot - Graphically Based Data Analysis
 name: flexplot
-version: 0.12.3
+version: 0.27.0
 jms: '1.0'
 authors:
   - Dustin Fife
