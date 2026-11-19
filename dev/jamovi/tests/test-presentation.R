@@ -1,5 +1,5 @@
 test_that("jamovi menu order preserves analysis identities and the Flexplot icon route", {
-  root = normalizePath(test_path("..",".."))
+  root = normalizePath(test_path("..","..",".."))
   module = yaml::read_yaml(file.path(root,"jamovi","0000.yaml"))
   expect_identical(vapply(module$analyses,`[[`,character(1),"name"),
     c("flexplota","glmbasic","glmgeneralized","mixedmodel"))

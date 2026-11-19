@@ -67,6 +67,11 @@ installation and fresh-document checks.
 | `.r.yaml` results tables | `ui` and `test` | `install --open`; inspect initial waiting state, columns, notes and errors |
 | Full package regression check | `Rscript --vanilla -e 'devtools::test()'` | Separate from module installation |
 
+Both `ui` and `test` first require the source-only menu-order, analysis-identity,
+and icon checks in `dev/jamovi/tests/test-presentation.R` to pass. These checks
+are separate from installed-package tests because the jamovi development
+definitions are intentionally excluded from the R source package.
+
 `ui` compiles into a temporary directory and runs the existing Linear Model and
 GLM UI-handler tests against the installed jamovi runtime. It does not launch,
 install into, or restart jamovi. `test` also does not install anything. GUI

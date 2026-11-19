@@ -102,6 +102,7 @@ test_that("literal quadratic names are safe and checkbox-off models ignore stale
 })
 
 test_that("compiled LM polynomial handlers drive the actual fitted formulas", {
+  skip_if_not_installed("jsonlite")
   skip_if_not_installed("jmvcore")
   node = Sys.which("node")
   skip_if(!nzchar(node),"Node unavailable for installed polynomial handlers")

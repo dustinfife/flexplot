@@ -144,6 +144,12 @@ jamovi_dev_main = function(args, root) {
   output = file.path(root,".jamovi-dev")
   dir.create(output,showWarnings=FALSE)
   if (command == "cleanup") return(jamovi_dev_cleanup(root))
+  if (command %in% c("ui","test")) {
+    for (package in c("testthat","yaml")) {
+      if (!requireNamespace(package,quietly=TRUE)) stop(package," is required for development validation")
+    }
+    testthat::test_file(file.path(root,"dev/jamovi/tests/test-presentation.R"),stop_on_failure=TRUE)
+  }
   if (command == "test") {
     if (!requireNamespace("devtools",quietly=TRUE)) stop("devtools is required for test mode")
     previous_path = Sys.getenv("PATH")
