@@ -287,3 +287,17 @@ failures in either plot produce a terminal error rather than a partial compariso
 or indefinite rendering state. Existing CAS restrictions (one grouping factor,
 untransformed numeric response, no offsets, required raw fixed-effect variables)
 continue to apply. Single-model CAS and other comparison modes are unchanged.
+
+### Detailed comparison estimates
+
+Comparison results show separate Model 1 and Model 2 fixed-effect and random-effect
+tables, followed by the shared comparison statistics and visualization. Both table
+sets reuse the common-sample fits with each model's requested ML/REML method; no
+additional fit is performed to report Model 2. Diagnostics identify the affected
+model. The shared Confidence intervals option controls the existing 95% normal-Wald
+intervals in both fixed-effect tables. Include p-values controls column visibility;
+coefficient p-values remain unavailable from lme4 without imposing a new inference
+method. Optional correlations use each model's own random-effect terms.
+
+Saved comparisons from earlier reporting revisions refresh when their controls
+initialize, adding Model 2 tables without changing the model specification.

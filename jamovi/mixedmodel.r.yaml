@@ -24,6 +24,10 @@ items:
     title: Model diagnostics
     type: Html
     visible: false
+  - name: model1Heading
+    title: ''
+    type: Html
+    visible: false
   - name: fixed
     title: Fixed-effect estimates
     type: Table
@@ -79,6 +83,65 @@ items:
       - name: term
         title: Random-effect term
         type: text
+  - name: model2Heading
+    title: ''
+    type: Html
+    visible: false
+  - name: fixed2
+    title: Fixed-effect estimates
+    type: Table
+    visible: false
+    columns:
+      - name: term
+        title: Term
+        type: text
+      - name: estimate
+        title: Estimate
+        type: number
+      - name: se
+        title: Standard error
+        type: number
+      - name: lower
+        title: Lower
+        superTitle: 95% Wald CI
+        type: number
+      - name: upper
+        title: Upper
+        superTitle: 95% Wald CI
+        type: number
+      - name: t
+        title: t
+        type: number
+      - name: p
+        title: p
+        type: number
+        visible: (includeP)
+        format: zto,pvalue
+  - name: random2
+    title: Random-effect estimates
+    type: Table
+    visible: false
+    columns:
+      - name: group
+        title: Grouping factor
+        type: text
+      - name: term
+        title: Random-effect term
+        type: text
+      - name: variance
+        title: Variance
+        type: number
+      - name: sd
+        title: Standard deviation
+        type: number
+  - name: correlations2
+    title: Random-effect correlations
+    type: Table
+    visible: false
+    columns:
+      - name: term
+        title: Random-effect term
+        type: text
   - name: plotExplanation
     title: Visualization guide
     type: Html
@@ -90,6 +153,10 @@ items:
     height: 450
     visible: false
     renderFun: .plot
+  - name: comparisonHeading
+    title: ''
+    type: Html
+    visible: false
   - name: comparison
     title: Mixed-model comparison (ML)
     type: Table

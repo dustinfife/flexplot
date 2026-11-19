@@ -47,10 +47,10 @@ module.exports = function(ui, view, fire, assert) {
     ui.modelTerms.setValue([['x']]);
     ui.comparisonFixed.setValue(['x','a']);
     ui.comparisonTerms.setValue([['x'],['a']]);
-    ui.samplePolicyVersion.setValue(0);
+    ui.samplePolicyVersion.setValue(1);
     ui.compare.setValue(true);
     fire('view','updated');
-    assert.equal(ui.samplePolicyVersion.value(), 1);
+    assert.equal(ui.samplePolicyVersion.value(), 2);
     assert.equal(JSON.stringify(ui.modelTerms.value()), '[["x"]]');
     assert.equal(JSON.stringify(ui.comparisonTerms.value()), '[["x"],["a"]]');
     let changes = 0;

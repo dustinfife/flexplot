@@ -295,13 +295,13 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
         assert.equal(manager._beginEdit,0);
     }
     ui.compare.setValue(false);
-    ui.samplePolicyVersion.setValue(0);
+    ui.samplePolicyVersion.setValue(1);
     const beforeMigration = JSON.stringify([ui.modelTerms.value(),ui.comparisonTerms.value(),
         ui.randomSlopes.value(),ui.comparisonRandomSlopes.value()]);
     const beforePackets = packets.length;
     ui.compare.setValue(true);
     assert.equal(packets.length,beforePackets+1);
-    assert.equal(ui.samplePolicyVersion.value(),1);
+    assert.equal(ui.samplePolicyVersion.value(),2);
     assert.ok(packets.at(-1).changed.includes('samplePolicyVersion'));
     assert.equal(JSON.stringify([ui.modelTerms.value(),ui.comparisonTerms.value(),
         ui.randomSlopes.value(),ui.comparisonRandomSlopes.value()]),beforeMigration);

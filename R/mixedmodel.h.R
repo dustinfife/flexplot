@@ -36,7 +36,8 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plotGroup = NULL,
             plotLabels = list(),
             plotLabelStore = list(),
-            samplePolicyVersion = 0, ...) {
+            samplePolicyVersion = 0,
+            includeCI = TRUE, ...) {
 
             super$initialize(
                 package="flexplot",
@@ -226,6 +227,10 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 samplePolicyVersion,
                 hidden=TRUE,
                 default=0)
+            private$..includeCI = jmvcore::OptionBool$new(
+                "includeCI",
+                includeCI,
+                default=TRUE)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -258,6 +263,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plotLabels)
             self$.addOption(private$..plotLabelStore)
             self$.addOption(private$..samplePolicyVersion)
+            self$.addOption(private$..includeCI)
         }),
     active = list(
         out = function() private$..out$value,
@@ -290,7 +296,8 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plotGroup = function() private$..plotGroup$value,
         plotLabels = function() private$..plotLabels$value,
         plotLabelStore = function() private$..plotLabelStore$value,
-        samplePolicyVersion = function() private$..samplePolicyVersion$value),
+        samplePolicyVersion = function() private$..samplePolicyVersion$value,
+        includeCI = function() private$..includeCI$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -322,7 +329,8 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plotGroup = NA,
         ..plotLabels = NA,
         ..plotLabelStore = NA,
-        ..samplePolicyVersion = NA)
+        ..samplePolicyVersion = NA,
+        ..includeCI = NA)
 )
 
 mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -334,11 +342,17 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         comparisonSpecification = function() private$.items[["comparisonSpecification"]],
         explanation = function() private$.items[["explanation"]],
         diagnostics = function() private$.items[["diagnostics"]],
+        model1Heading = function() private$.items[["model1Heading"]],
         fixed = function() private$.items[["fixed"]],
         random = function() private$.items[["random"]],
         correlations = function() private$.items[["correlations"]],
+        model2Heading = function() private$.items[["model2Heading"]],
+        fixed2 = function() private$.items[["fixed2"]],
+        random2 = function() private$.items[["random2"]],
+        correlations2 = function() private$.items[["correlations2"]],
         plotExplanation = function() private$.items[["plotExplanation"]],
         plot = function() private$.items[["plot"]],
+        comparisonHeading = function() private$.items[["comparisonHeading"]],
         comparison = function() private$.items[["comparison"]],
         comparisonplot = function() private$.items[["comparisonplot"]],
         comparisonPlotNote = function() private$.items[["comparisonPlotNote"]]),
@@ -376,6 +390,11 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="diagnostics",
                 title="Model diagnostics",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="model1Heading",
+                title="",
                 visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -449,6 +468,81 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="model2Heading",
+                title="",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="fixed2",
+                title="Fixed-effect estimates",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="term",
+                        `title`="Term",
+                        `type`="text"),
+                    list(
+                        `name`="estimate",
+                        `title`="Estimate",
+                        `type`="number"),
+                    list(
+                        `name`="se",
+                        `title`="Standard error",
+                        `type`="number"),
+                    list(
+                        `name`="lower",
+                        `title`="Lower",
+                        `superTitle`="95% Wald CI",
+                        `type`="number"),
+                    list(
+                        `name`="upper",
+                        `title`="Upper",
+                        `superTitle`="95% Wald CI",
+                        `type`="number"),
+                    list(
+                        `name`="t",
+                        `title`="t",
+                        `type`="number"),
+                    list(
+                        `name`="p",
+                        `title`="p",
+                        `type`="number",
+                        `visible`="(includeP)",
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="random2",
+                title="Random-effect estimates",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="group",
+                        `title`="Grouping factor",
+                        `type`="text"),
+                    list(
+                        `name`="term",
+                        `title`="Random-effect term",
+                        `type`="text"),
+                    list(
+                        `name`="variance",
+                        `title`="Variance",
+                        `type`="number"),
+                    list(
+                        `name`="sd",
+                        `title`="Standard deviation",
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="correlations2",
+                title="Random-effect correlations",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="term",
+                        `title`="Random-effect term",
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="plotExplanation",
                 title="Visualization guide",
                 visible=FALSE))
@@ -460,6 +554,11 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 visible=FALSE,
                 renderFun=".plot"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="comparisonHeading",
+                title="",
+                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparison",

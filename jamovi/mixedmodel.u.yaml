@@ -167,6 +167,8 @@ children:
   collapsed: true
   children:
   - type: CheckBox
+    name: includeCI
+  - type: CheckBox
     name: includeP
   - type: CheckBox
     name: showCorrelations

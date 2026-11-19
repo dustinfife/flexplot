@@ -133,7 +133,7 @@ jamovi_mixed_comparison_report = function(results, state, includeP=FALSE, inform
     "Singular ML comparison fit; interpret covariance estimates cautiously. BIC Bayes factors",
     if (isTRUE(p_column$visible) && !isTRUE(statistics$random_p_unavailable)) " and ordinary p-values are" else " are",
     " unavailable."))
-  warnings = unique(c(state$first$warnings,state$second$warnings,statistics$warnings))
+  warnings = statistics$warnings
   if (length(warnings)) results$comparison$setNote("warnings",paste(warnings,collapse="; "))
   content = character()
   for (i in seq_len(2)) {

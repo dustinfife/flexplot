@@ -76,7 +76,7 @@ jamovi_mixed_reset = function(results) {
   results$waiting$setVisible(TRUE)
 }
 
-jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE) {
+jamovi_mixed_tables = function(results, state, includeP, showCorrelations=FALSE, includeCI=TRUE, notes=TRUE) {
   coefficients = summary(state$model)$coefficients
   fixed = data.frame(term=rownames(coefficients), estimate=coefficients[,1], se=coefficients[,2],
     lower=coefficients[,1]-stats::qnorm(.975)*coefficients[,2],
@@ -84,8 +84,9 @@ jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE)
   column = results$fixed$getColumn("p")
   column$visible = includeP
   jamovi_glm_table_rows(results$fixed, fixed)
-  results$fixed$setNote("intervals", "95% normal-Wald confidence intervals for fixed effects: estimate +/- 1.96 SE. These are not prediction intervals.")
-  if (includeP) results$fixed$setNote("p", "P-values are unavailable from the current lme4 fit; no denominator degrees of freedom or p-value approximation is imposed.")
+  for (name in c("lower","upper")) results$fixed$getColumn(name)$setVisible(includeCI)
+  if (includeCI && notes) results$fixed$setNote("intervals", "95% normal-Wald confidence intervals for fixed effects: estimate +/- 1.96 SE. These are not prediction intervals.")
+  if (includeP && notes) results$fixed$setNote("p", "P-values are unavailable from the current lme4 fit; no denominator degrees of freedom or p-value approximation is imposed.")
   components = as.data.frame(lme4::VarCorr(state$model))
   components = components[is.na(components$var2), , drop=FALSE]
   random = data.frame(group=components$grp, term=components$var1,
@@ -95,7 +96,7 @@ jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE)
   for (column in results$correlations$columns) column$visible = identical(column$name, "term")
   correlation = attr(lme4::VarCorr(state$model)[[1]], "correlation")
   if (showCorrelations && nrow(correlation) > 1L) {
-    diag(correlation) = 1
+    diag(correlation)[is.finite(diag(correlation))] = 1
     for (i in seq_len(ncol(correlation))) {
       results$correlations$addColumn(paste0("c",i), title=colnames(correlation)[i], type="number")
     }
@@ -105,10 +106,19 @@ jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE)
     jamovi_glm_table_rows(results$correlations,values)
     results$correlations$setVisible(TRUE)
   }
+}
+
+jamovi_mixed_diagnostics = function(state) {
   diagnostics = character()
   if (isTRUE(state$singular)) diagnostics = c(diagnostics,
     "Singular fit detected. The estimated random-effects covariance matrix is rank-deficient. Interpret random-effect estimates cautiously.")
   if (length(state$warnings)) diagnostics = c(diagnostics, paste0("Convergence / fitting diagnostic: ",state$warnings))
+  diagnostics
+}
+
+jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE, includeCI=TRUE) {
+  jamovi_mixed_tables(results,state,includeP,showCorrelations,includeCI)
+  diagnostics = jamovi_mixed_diagnostics(state)
   if (length(diagnostics)) {
     results$diagnostics$setContent(paste0("<p><strong>",paste(jamovi_mixed_escape(diagnostics),collapse="</strong></p><p><strong>"),"</strong></p>"))
     results$diagnostics$setVisible(TRUE)
@@ -229,7 +239,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           self$results$plot$setError(conditionMessage(plot))
         }
       }
-      information = jamovi_mixed_report(self$results, state, self$options$includeP, self$options$showCorrelations)
+      information = jamovi_mixed_report(self$results, state, self$options$includeP, self$options$showCorrelations, self$options$includeCI)
       for (item in c("specification", "fixed", "random")) self$results[[item]]$setVisible(TRUE)
       private$.modelState = state
       self$results$plot$setState(if (plot_failed) NULL else state)
@@ -244,6 +254,22 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           " Up to ", self$options$clusters, " randomly selected clusters are displayed."),
         " No prediction confidence bands are calculated.</p>"))
       if (!self$options$compare) return(invisible(NULL))
+      jamovi_mixed_tables(list(fixed=self$results$fixed2,random=self$results$random2,
+        correlations=self$results$correlations2),comparison$second,self$options$includeP,
+        self$options$showCorrelations,self$options$includeCI,notes=FALSE)
+      for (name in c("fixed2","random2")) self$results[[name]]$setVisible(TRUE)
+      for (name in c("model1Heading","model2Heading","comparisonHeading")) {
+        label = switch(name,model1Heading="Model 1",model2Heading="Model 2",comparisonHeading="Model Comparison")
+        self$results[[name]]$setContent(paste0("<h3>",label,"</h3>"))
+        self$results[[name]]$setVisible(TRUE)
+      }
+      diagnostics = unlist(lapply(seq_len(2),function(i) {
+        messages = jamovi_mixed_diagnostics(comparison[[c("first","second")[i]]])
+        if (length(messages)) paste0("Model ",i,": ",messages) else character()
+      }))
+      self$results$diagnostics$setContent(if (length(diagnostics)) paste0("<p><strong>",
+        paste(jamovi_mixed_escape(diagnostics),collapse="</strong></p><p><strong>"),"</strong></p>") else "")
+      self$results$diagnostics$setVisible(length(diagnostics)>0L)
       jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP,information)
       self$results$comparisonplot$setSize(if (self$options$predictionType == "cas") 1100 else 700,450)
       comparison_plot_failed = FALSE

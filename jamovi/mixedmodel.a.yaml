@@ -167,4 +167,8 @@ options:
     hidden: true
     type: Integer
     default: 0
+  - name: includeCI
+    title: Confidence intervals
+    type: Bool
+    default: true
 ...
