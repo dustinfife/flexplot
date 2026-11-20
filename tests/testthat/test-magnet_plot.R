@@ -176,7 +176,8 @@ test_that("magnet ghosts copy the requested fitted curve to every panel", {
                    ghost.reference=list(b=reference))
     built = ggplot2::ggplot_build(p)
     lines = which(vapply(p$layers, function(layer) inherits(layer$geom, "GeomLine") &&
-      identical(layer$aes_params$colour, "red"), logical(1)))
+      identical(layer$aes_params$colour, "red") &&
+      ".ghost_x" %in% names(layer$data), logical(1)))
     expect_length(lines, 1)
     line = built$data[[lines]]
     points = built$data[[lines + 1L]]

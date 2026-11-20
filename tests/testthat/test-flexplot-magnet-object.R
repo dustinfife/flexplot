@@ -110,7 +110,7 @@ testthat::test_that("native magnet integration preserves stacks, counts, and fit
   expect_s3_class(p$layers[[3]]$geom, "GeomPoint")
   expect_s3_class(p$layers[[4]]$geom, "GeomText")
   expect_equal(built$data[[1]]$yintercept, .5)
-  expect_true(all(built$data[[3]]$colour == "blue"))
+  expect_true(all(built$data[[3]]$colour == "red"))
   expect_true(all(built$data[[2]]$alpha == .4))
 
   raw = p$layers[[2]]$data
@@ -144,7 +144,7 @@ testthat::test_that("native magnet integration preserves ordered x and condition
   expect_identical(levels(raw$a), levels(d$a))
   expect_equal(nrow(built$layout$layout), nlevels(d$b))
   expect_equal(nrow(fitted), nlevels(d$a) * nlevels(d$b))
-  expect_true(all(built$data[[3]]$colour == "blue"))
+  expect_true(all(built$data[[3]]$colour == "red"))
 
   expect_equal(unname(fitted$pred_prob), magnet_within_predictions(d, fitted, "b"),
                  tolerance=1e-7, scale=1)
@@ -371,7 +371,7 @@ test_that("binary magnets use observed factor levels in their original relative 
         expect_equal(raw$y_bin, expected_code)
         expect_equal(nrow(built$data[[2]]), nrow(d))
         expect_true(all(built$data[[2]]$shape == 1))
-        expect_true(all(built$data[[3]]$colour == "blue"))
+        expect_true(all(built$data[[3]]$colour == "red"))
         expect_equal(p$scales$get_scales("y")$labels, observed)
         xlevels = built$layout$panel_scales_x[[1]]$get_limits()
         newdata = data.frame(a=factor(xlevels, levels=levels(d$a)))

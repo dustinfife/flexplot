@@ -14,12 +14,13 @@
 #' @return A `ggplot` object showing:
 #'   - Stacked dots representing individual observations, scaled relative to the group with the maximum sample size.
 #'   - A dashed horizontal line at y = 0.5.
-#'   - Blue points indicating logistic regression predicted probabilities for each group.
-#'   - Sample size labels above each group.
+#'   - Red points indicating logistic regression predicted probabilities for each group.
+#'   - Sample size labels below each group.
 #'
-#' @details The Y-axis is bounded between 0 and 1, with dots for `Y = 0` stacking upward from 0 and dots for `Y = 1` stacking downward from 1.
+#' @details Outcome probabilities lie between 0 and 1, with dots for `Y = 0` stacking upward from 0 and dots for `Y = 1` stacking downward from 1.
 #' The height of each stack is proportional to both the proportion of 0/1 outcomes within each group and the total sample size of that group,
-#' relative to the group with the largest sample size.
+#' relative to the group with the largest sample size. Sample-size labels occupy a separate
+#' row below the probability range so they do not overlap fitted markers.
 #'
 #' The function assumes that `Y` is binary-coded as 0 and 1. If it is not, you should recode it prior to using this function.
 #'
@@ -284,14 +285,14 @@ magnet_plot = function(formula, data,
         x = X,
         y = pred_prob
       ),
-      color = "blue",
+      color = "red",
       size = 3
     ) +
     ggplot2::geom_text(
       data = df_summary,
       ggplot2::aes(
         x = .data[[xvar]],
-        y = 0.52,
+        y = -0.08,
         label = paste0("N=", n_total)
       ),
       vjust = 0,

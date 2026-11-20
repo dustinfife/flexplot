@@ -175,9 +175,10 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
     y=.data[["pred_prob"]]
   )
   
+  # A dedicated count row cannot overlap fitted probabilities in [0, 1].
   count_mapping = ggplot2::aes(
     x=.data[[xvar]],
-    y=0.52,
+    y=-0.08,
     label=paste0("N=", .data[["n_total"]])
   )
   
@@ -200,7 +201,7 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
     
     count_mapping = ggplot2::aes(
       x=.data[[xvar]],
-      y=0.52,
+      y=-0.08,
       label=paste0("N=", .data[["n_total"]]),
       color=.data[[group]],
       group=.data[[group]]
@@ -211,12 +212,12 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
     summary_position = flexplot_magnet_summary_position(data, group)
   }
   
-  # Keep blue fitted points when no second-axis grouping is present.
+  # Keep red fitted points when no second-axis grouping is present.
   fitted_layer = if (is.null(group)) {
     ggplot2::geom_point(
       data=df_pred,
       mapping=fitted_mapping,
-      color="blue",
+      color="red",
       size=3,
       position=summary_position
     )
@@ -288,7 +289,7 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
       data=line_data, mapping=line_mapping, position=summary_position,
       show.legend=FALSE
     )
-    if (is.null(group)) fitted_line$aes_params$colour = "blue"
+    if (is.null(group)) fitted_line$aes_params$colour = "red"
     p = p + fitted_line
   }
 

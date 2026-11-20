@@ -196,7 +196,7 @@ test_that("numeric-conditioned magnet markers and counts stay in their display p
   expect_magnet_full_group_counts(p, d, character(), "z_binned")
   expect_magnet_numeric_panel_data(p, d, "z", "z_binned")
   expect_equal(nrow(ggplot2::ggplot_build(p)$data[[3]]), 6)
-  expect_true(all(ggplot2::ggplot_build(p)$data[[3]]$colour == "blue"))
+  expect_true(all(ggplot2::ggplot_build(p)$data[[3]]$colour == "red"))
 })
 
 test_that("numeric-conditioned magnets preserve second-axis groups, orders, and custom bins", {
@@ -634,7 +634,7 @@ expect_magnet_comparison_panel_rows = function(p, group, facets=character()) {
       index = match(as.character(source[[group]]), group_levels)
       expected = data.frame(
         x=as.numeric(source$a) + .5 * ((index - .5) / length(group_levels) - .5),
-        y=if (layer == 2) source$y_scaled else rep(.52, nrow(source)),
+        y=if (layer == 2) source$y_scaled else rep(-.08, nrow(source)),
         colour=colors$map(source[[group]])
       )
       actual = data.frame(x=as.numeric(drawn$x), y=drawn$y, colour=drawn$colour)
