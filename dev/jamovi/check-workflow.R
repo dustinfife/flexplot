@@ -70,7 +70,14 @@ commands$jamovi_dev_main("cleanup",work)
 commands$jamovi_dev_stage = function(root) {
   path = tempfile("mock-install-");dir.create(path);dir.create(file.path(path,"build"));path
 }
-commands$jamovi_dev_confirm_install = function(stamp,log) stopifnot(startsWith(stamp,"dev-"))
+commands$jamovi_dev_confirm_install = function(stamp,log) stopifnot(startsWith(stamp,"source-sha256-"))
+# A fake source root supplies explicit identity/receipt stand-ins; no installed module is touched.
+dir.create(file.path(work,"dev/jamovi"),recursive=TRUE)
+writeLines(c(
+  'jamovi_dev_versions = function(root) list(package="0.27.0",module="0.27.0")',
+  'jamovi_dev_identity = function(root) list(fingerprint="mock-source")',
+  'jamovi_dev_record_install = function(root,archive,compiler,identity,versions,stamp,output) { stopifnot(identical(stamp,"source-sha256-mock-source")); invisible(NULL) }'
+),file.path(work,"dev/jamovi/build-identity.R"))
 for (running in c(FALSE,TRUE)) {
   record$running = running
   commands$jamovi_dev_main(c("install","--open","--file",original),work)

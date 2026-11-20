@@ -1,0 +1,319 @@
+{
+  "phase": "2A-follow-up",
+  "date": "2026-11-20",
+  "baseline_commit": "ce6b869d",
+  "overall": "blocked",
+  "commit_created": false,
+  "build": {
+    "status": "passed",
+    "expected": "0.27.0",
+    "installed": "0.27.0",
+    "source_sha256": "836ee4ab183d8bcb85a9155140fbfd8635b4d762b17b51524cbced0a60fb3da5",
+    "archive_sha256": "2829353efc2378fabd43b36e2b9b1e22fcd21bda8fb359abde6b230291e4a615",
+    "payload_sha256": "da50de62ade33753132465c8209fab252fd0ffd4e51597fc19fc613516d46bfe",
+    "build_hash": "source-sha256-836ee4ab183d8bcb85a9155140fbfd8635b4d762b17b51524cbced0a60fb3da5",
+    "running_gui_verified": true,
+    "verified_archive_files": 1097
+  },
+  "prior_report": "phase2a-pilot.json (legacy installed build; not current-build acceptance)",
+  "current_checkpoint_counts": {
+    "passed": 0,
+    "failed": 0,
+    "blocked": 13,
+    "not_executed": 15
+  },
+  "checkpoint_evidence": {
+    "GLM-08/2": {
+      "status": "blocked",
+      "unobserved": [
+        "visible option out",
+        "visible option preds",
+        "visible option family",
+        "visible option modelTerms",
+        "visible option quadratic",
+        "visible option plotX",
+        "visible option compare",
+        "visible option comparisonTerms",
+        "visible option comparisonQuadratic",
+        "visible option comparisonX",
+        "actual displayed image plot",
+        "actual displayed image comparisonplot"
+      ],
+      "numerical": {
+        "coefficients": {
+          "max_coefficient_error": 0.000453171127627966,
+          "tolerance": 0.00050001
+        }
+      },
+      "uncertainty": "All displayed coefficient standard errors and CI endpoints matched independent references within the harness tolerances."
+    },
+    "GLM-08/3": {
+      "status": "blocked",
+      "unobserved": [
+        "visible option out",
+        "visible option preds",
+        "visible option family",
+        "visible option modelTerms",
+        "visible option quadratic",
+        "visible option plotX",
+        "visible option compare",
+        "visible option comparisonTerms",
+        "visible option comparisonQuadratic",
+        "visible option comparisonX",
+        "actual displayed image plot",
+        "actual displayed image comparisonplot"
+      ],
+      "numerical": {
+        "coefficients": {
+          "max_coefficient_error": 0.000453171127627966,
+          "tolerance": 0.00050001
+        }
+      },
+      "uncertainty": "All displayed coefficient standard errors and CI endpoints matched independent references within the harness tolerances."
+    },
+    "GLM-08/4": {
+      "status": "blocked",
+      "unobserved": [
+        "visible option out",
+        "visible option preds",
+        "visible option family",
+        "visible option modelTerms",
+        "visible option quadratic",
+        "visible option plotX",
+        "visible option compare",
+        "visible option comparisonTerms",
+        "visible option comparisonQuadratic",
+        "visible option comparisonX",
+        "actual displayed image plot"
+      ],
+      "numerical": {
+        "coefficients": {
+          "max_coefficient_error": 0.000453171127627966,
+          "tolerance": 0.00050001
+        }
+      },
+      "uncertainty": "All displayed coefficient standard errors and CI endpoints matched independent references within the harness tolerances."
+    },
+    "GLM-08/5": {
+      "status": "blocked",
+      "unobserved": [
+        "visible option out",
+        "visible option preds",
+        "visible option family",
+        "visible option modelTerms",
+        "visible option quadratic",
+        "visible option plotX",
+        "visible option compare",
+        "visible option comparisonTerms",
+        "visible option comparisonQuadratic",
+        "visible option comparisonX",
+        "actual displayed image plot",
+        "actual displayed image comparisonplot"
+      ],
+      "numerical": {
+        "coefficients": {
+          "max_coefficient_error": 0.000453171127627966,
+          "tolerance": 0.00050001
+        }
+      },
+      "uncertainty": "All displayed coefficient standard errors and CI endpoints matched independent references within the harness tolerances."
+    },
+    "MM-11/1": {
+      "status": "blocked",
+      "unobserved": [
+        "visible option out",
+        "visible option preds",
+        "visible option cluster",
+        "visible option modelTerms",
+        "visible option plotX",
+        "visible option plotPanels",
+        "visible option compare",
+        "visible option predictionType",
+        "visible option comparisonFixed",
+        "visible option comparisonTerms",
+        "visible option randomSlopes",
+        "visible option casGhost",
+        "actual displayed image comparisonplot"
+      ],
+      "numerical": {
+        "fixed": {
+          "max_coefficient_error": 0,
+          "tolerance": 1e-05
+        },
+        "fixed2": {
+          "max_coefficient_error": 0,
+          "tolerance": 1e-05
+        }
+      },
+      "uncertainty": "All displayed coefficient standard errors and CI endpoints matched independent references within the harness tolerances."
+    },
+    "MM-11/2": {
+      "status": "blocked",
+      "unobserved": [
+        "visible option out",
+        "visible option preds",
+        "visible option cluster",
+        "visible option modelTerms",
+        "visible option plotX",
+        "visible option plotPanels",
+        "visible option compare",
+        "visible option predictionType",
+        "visible option comparisonFixed",
+        "visible option comparisonTerms",
+        "visible option randomSlopes",
+        "visible option casGhost",
+        "actual displayed image comparisonplot"
+      ],
+      "numerical": {
+        "fixed": {
+          "max_coefficient_error": 0,
+          "tolerance": 1e-05
+        },
+        "fixed2": {
+          "max_coefficient_error": 0,
+          "tolerance": 1e-05
+        }
+      },
+      "uncertainty": "All displayed coefficient standard errors and CI endpoints matched independent references within the harness tolerances."
+    },
+    "MM-11/3": {
+      "status": "blocked",
+      "unobserved": [
+        "visible option out",
+        "visible option preds",
+        "visible option cluster",
+        "visible option modelTerms",
+        "visible option plotX",
+        "visible option plotPanels",
+        "visible option compare",
+        "visible option predictionType",
+        "visible option comparisonFixed",
+        "visible option comparisonTerms",
+        "visible option randomSlopes",
+        "visible option casGhost",
+        "actual displayed image comparisonplot"
+      ],
+      "numerical": {
+        "fixed": {
+          "max_coefficient_error": 0,
+          "tolerance": 1e-05
+        },
+        "fixed2": {
+          "max_coefficient_error": 0,
+          "tolerance": 1e-05
+        }
+      },
+      "uncertainty": "All displayed coefficient standard errors and CI endpoints matched independent references within the harness tolerances."
+    }
+  },
+  "native_option_deltas": {
+    "GLM-08/2": {
+      "status": "passed",
+      "changed": "modelTerms",
+      "host_initializations": [
+        ".ppi",
+        "theme",
+        "palette",
+        "decSymbol",
+        ".lang"
+      ],
+      "unexpected": []
+    },
+    "GLM-08/3": {
+      "status": "passed",
+      "changed": "comparisonQuadratic",
+      "host_initializations": [],
+      "unexpected": []
+    },
+    "GLM-08/4": {
+      "status": "passed",
+      "changed": "compare",
+      "host_initializations": [],
+      "unexpected": []
+    },
+    "GLM-08/5": {
+      "status": "passed",
+      "changed": "compare",
+      "host_initializations": [],
+      "unexpected": []
+    },
+    "MM-11/2": {
+      "status": "passed",
+      "changed": "casGhost",
+      "host_initializations": [],
+      "unexpected": []
+    },
+    "MM-11/3": {
+      "status": "passed",
+      "changed": "casGhost",
+      "host_initializations": [],
+      "unexpected": []
+    }
+  },
+  "restoration": {
+    "status": "blocked",
+    "reason": "No supported same-window close/reopen route verified. Native Open on a nonempty document opens a new window; no such open was attempted."
+  },
+  "remaining_scenarios": {
+    "FP-03": "Not rerun on verified build",
+    "LM-03": "Not rerun on verified build",
+    "LM-09": "Not executed",
+    "MM-10": "Not opened; changing dataset safely requires unresolved document lifecycle"
+  },
+  "limitations": [
+    "Parent selectable rows and explicit Remove buttons work for observed term edits; offscreen AX section buttons/scrolling can act on the wrong location.",
+    "No standalone unattended CUA runner. Screenshot-grounded section/scroll actions were used conservatively; no guessed coordinates or destructive keys.",
+    "CAS Model 1 ghost visibly rendered; Model 2 was clipped horizontally, so full two-panel directional acceptance remains unobserved.",
+    "No numerical plot-coordinate validation or full comparison/supplementary-statistic validation. No complete scenario is passed."
+  ],
+  "desktop": {
+    "windows_created": 0,
+    "windows_moved": 0,
+    "rstudio_activated": false,
+    "unrelated_documents_modified": false
+  },
+  "validation": {
+    "focused_assertions": 559,
+    "focused_failures": 0,
+    "focused_warnings": 0,
+    "focused_skips": 0,
+    "ui_assertions": 1190,
+    "ui_failures": 0,
+    "ui_warnings": 0,
+    "ui_skips": 0,
+    "mocked_workflow": "passed; no GUI launched",
+    "failure_injection": "passed: option/numerical/missing/stale/waiting/restoration; wrong native rows and stale build checks",
+    "package_testthat_startup_notice": "Built under R 4.5.2; not a testthat test warning",
+    "jamovi_test_command": {
+      "command": "Rscript --vanilla dev/jamovi.R test",
+      "status": "passed",
+      "assertions": 3312,
+      "failures": 0,
+      "warnings": 1,
+      "skips": 0,
+      "warning": "ggplot2 element_line(size=...) deprecation attributed to jmvcore, test-jamovi-mixed-cas.R:36",
+      "console_diagnostics": "jmvcore printed oversized plot/comparisonplot state diagnostics (up to approximately 17 MB)."
+    },
+    "diff_check": "passed"
+  },
+  "changed_files": [
+    " M dev/jamovi.R",
+    " M dev/jamovi/check-workflow.R",
+    " M dev/jamovi/e2e/artifacts/inventory.json",
+    " M dev/jamovi/finalize-fixture.py",
+    "?? dev/jamovi/build-identity.R",
+    "?? dev/jamovi/build-identity.cjs",
+    "?? dev/jamovi/check-build-identity.cjs",
+    "?? dev/jamovi/e2e/PHASE-2A.md",
+    "?? dev/jamovi/e2e/build-pilot.R",
+    "?? dev/jamovi/e2e/check-cua-driver.cjs",
+    "?? dev/jamovi/e2e/check-inspector.py",
+    "?? dev/jamovi/e2e/cua-driver.js",
+    "?? dev/jamovi/e2e/harness.R",
+    "?? dev/jamovi/e2e/inspect-omv.py",
+    "?? dev/jamovi/e2e/phase2a-followup.json",
+    "?? dev/jamovi/e2e/phase2a-pilot.json",
+    "?? dev/jamovi/e2e/run.R",
+    "?? dev/jamovi/tests/test-e2e-harness.R"
+  ]
+}

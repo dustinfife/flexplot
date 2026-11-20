@@ -1,0 +1,184 @@
+{
+  "phase": "2A",
+  "baseline_commit": "ce6b869d",
+  "date": "2026-11-20",
+  "overall": "blocked",
+  "planned_scenarios": [
+    "FP-03",
+    "LM-03",
+    "LM-09",
+    "GLM-08",
+    "MM-10",
+    "MM-11"
+  ],
+  "checkpoint_counts": {
+    "blocked": 10,
+    "passed": 4,
+    "not_executed": 14
+  },
+  "checkpoints": [
+    {
+      "checkpoint": "FP-03/1",
+      "status": "blocked",
+      "reason": "Partial native observations; complete checkpoint evidence not captured."
+    },
+    {
+      "checkpoint": "FP-03/2",
+      "status": "passed",
+      "reason": "Native control/render observations and actual host-saved state verified."
+    },
+    {
+      "checkpoint": "FP-03/3",
+      "status": "passed",
+      "reason": "Native control/render observations and actual host-saved state verified."
+    },
+    {
+      "checkpoint": "FP-03/3/restored",
+      "status": "blocked",
+      "reason": "Same-window close/reopen path not validated safely."
+    },
+    {
+      "checkpoint": "LM-03/1",
+      "status": "blocked",
+      "reason": "Partial native observations; complete checkpoint evidence not captured."
+    },
+    {
+      "checkpoint": "LM-03/2",
+      "status": "passed",
+      "reason": "Native control/render observations and actual host-saved state verified."
+    },
+    {
+      "checkpoint": "LM-03/3",
+      "status": "passed",
+      "reason": "Native control/render observations and actual host-saved state verified."
+    },
+    {
+      "checkpoint": "LM-03/4",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "LM-03/4/restored",
+      "status": "blocked",
+      "reason": "Same-window close/reopen path not validated safely."
+    },
+    {
+      "checkpoint": "LM-09/1",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "LM-09/2",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "LM-09/2/restored",
+      "status": "blocked",
+      "reason": "Same-window close/reopen path not validated safely."
+    },
+    {
+      "checkpoint": "GLM-08/1",
+      "status": "blocked",
+      "reason": "Partial native observations; complete checkpoint evidence not captured."
+    },
+    {
+      "checkpoint": "GLM-08/2",
+      "status": "blocked",
+      "reason": "Native interaction target was not selected reliably; GUI actions stopped."
+    },
+    {
+      "checkpoint": "GLM-08/3",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "GLM-08/4",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "GLM-08/5",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "GLM-08/5/restored",
+      "status": "blocked",
+      "reason": "Same-window close/reopen path not validated safely."
+    },
+    {
+      "checkpoint": "MM-10/1",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "MM-10/2",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "MM-10/3",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "MM-10/4",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "MM-10/5",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "MM-10/5/restored",
+      "status": "blocked",
+      "reason": "Same-window close/reopen path not validated safely."
+    },
+    {
+      "checkpoint": "MM-11/1",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "MM-11/2",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "MM-11/3",
+      "status": "not_executed",
+      "reason": "Stopped before this native checkpoint."
+    },
+    {
+      "checkpoint": "MM-11/3/restored",
+      "status": "blocked",
+      "reason": "Same-window close/reopen path not validated safely."
+    }
+  ],
+  "evidence_root": ".jamovi-dev/e2e-runs/pilot-evidence",
+  "full_campaign_executed": false,
+  "production_changes": false,
+  "installed_module": {
+    "version": "0.12.3",
+    "build_hash": "dev-20261119180317-71156",
+    "expected_version": "0.27.0",
+    "current_build_verified": false
+  },
+  "checkpoint_scope": "Diagnostic observations on the installed module; no current-build acceptance.",
+  "headless_validation": {
+    "focused_assertions": 546,
+    "focused_failures": 0,
+    "focused_warnings": 0,
+    "focused_skips": 0,
+    "mandatory_ui_assertions": 1175,
+    "mandatory_ui_failures": 0,
+    "mandatory_ui_skips": 0,
+    "module_preflight_exit_status": 2,
+    "git_diff_check": "passed"
+  },
+  "git_commit_created": false,
+  "commit_withheld_reason": "Required current-build GUI pilot and save/reopen acceptance remain blocked."
+}

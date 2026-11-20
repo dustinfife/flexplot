@@ -32,7 +32,8 @@ with zipfile.ZipFile(archive) as source:
         response.ParseFromString(source.read(entry))
         response.options.CopyFrom(options.as_pb())
         assert options.get_value("out") == configuration["options"]["out"]
-        assert options.get_value("modelTerms")
+        if "modelTerms" in types:
+            assert options.get_value("modelTerms")
         replacements[entry] = response.SerializeToString()
     temporary = archive + ".updated"
     with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as target:

@@ -1,0 +1,100 @@
+{
+  "phase": "2A stabilization",
+  "date": "2026-11-20",
+  "baseline_commit": "ce6b869d",
+  "infrastructure_status": "passed",
+  "gui_pilot_status": "partial; not signed off",
+  "commit_scope": "development testing infrastructure only; partial implementation",
+  "build_identity": {
+    "status": "passed",
+    "expected": "0.27.0",
+    "installed": "0.27.0",
+    "source_sha256": "836ee4ab183d8bcb85a9155140fbfd8635b4d762b17b51524cbced0a60fb3da5",
+    "archive_sha256": "2829353efc2378fabd43b36e2b9b1e22fcd21bda8fb359abde6b230291e4a615",
+    "payload_sha256": "da50de62ade33753132465c8209fab252fd0ffd4e51597fc19fc613516d46bfe",
+    "build_hash": "source-sha256-836ee4ab183d8bcb85a9155140fbfd8635b4d762b17b51524cbced0a60fb3da5",
+    "running_gui_verified": true
+  },
+  "validation": {
+    "focused_harness_and_reference_tests": {
+      "assertions": 578,
+      "failures": 0,
+      "warnings": 0,
+      "skips": 0
+    },
+    "mandatory_ui_development_checks": {
+      "command": "Rscript --vanilla dev/jamovi.R ui",
+      "assertions": 1209,
+      "failures": 0,
+      "warnings": 0,
+      "skips": 0
+    },
+    "failure_injection": "passed: control/option mismatch, numerical mismatch, missing/stale results, persistent waiting/timeout, failed restoration, wrong native selection, stale/mismatched build",
+    "window_policy": "passed: second window only for restoration, max two, monitor confirmation, exact identity, refusal to close existing/unrelated documents, missing/mismatched registrations",
+    "workflow": "passed: mocked install/open/cleanup; no GUI launch",
+    "pilot_preservation": "passed: separate R process rejects silent overwrite and preserves prior document checksum",
+    "console_diagnostics": [
+      "testthat built under R 4.5.2 startup notice",
+      "jmvcore oversized plot-state messages (up to approximately 17 MB)"
+    ],
+    "package_suite": "not repeated for this development-only stabilization; prior jamovi suite result retained in phase2a-followup.json",
+    "diff_check": "passed",
+    "post_gui_focus_guard": "Passed direct Node regression tests for verified-focus Space, wrong-focus refusal, and renumbered controls; no GUI launch.",
+    "post_gui_restoration": "Six native host-saved states numerically verified; four intended-only live option deltas; actual GLM/MM restoration, CAS on/off and exact-window cleanup recorded in phase2a-restoration.json."
+  },
+  "targeted_restoration": {
+    "GLM": {
+      "status": "passed",
+      "reopened_in_gui": true,
+      "scope": "Native terms/quadratics, independent models, numerical results and subsequent edits",
+      "not_executed": [
+        "GLM model/compare plot display in this session"
+      ]
+    },
+    "Mixed Models": {
+      "status": "passed",
+      "reopened_in_gui": true,
+      "scope": "Native specifications, numerical results, CAS and directional ghost on/off, subsequent edits",
+      "not_executed": [
+        "Nonempty mixed interaction/quadratic restoration",
+        "Another reopen with ghost on"
+      ]
+    },
+    "evidence": "phase2a-restoration.json"
+  },
+  "window_management": {
+    "policy": "at most two registered disposable windows; second only for save/reopen",
+    "existing_test_document": "primary",
+    "observed_native_instance": "31e4f870-1f2d-432d-b7e8-a13174ff9f6e",
+    "created_windows": [
+      {
+        "title": "phase2a-restore-28cc94f8",
+        "native_instance_id": "4daa1ece-9b97-4126-90ac-59094c0ba1e0",
+        "document": ".jamovi-dev/e2e-runs/stabilization/phase2a-restore-28cc94f8.omv",
+        "purpose": "save_reopen",
+        "state": "closed after native ownership verification and save",
+        "source": "native File/Open/Browse; exact selected path verified",
+        "secondary_monitor_confirmation": "Explicit user reply before analysis interactions"
+      }
+    ],
+    "closed_windows": [
+      "phase2a-restore-28cc94f8"
+    ],
+    "moved_windows": [],
+    "rstudio_activated": false,
+    "unrelated_documents_changed": false,
+    "registry_evidence": "Exact title, native instance and document path recorded; user confirmed secondary monitor; cleanup authorization passed; native close returned to original primary instance."
+  },
+  "historical_evidence": [
+    "phase2a-pilot.json (old installation)",
+    "phase2a-followup.json (verified 0.27.0, partial native edits)"
+  ],
+  "remaining_limitations": [
+    "Offscreen accessibility clicks and immediate post-click observations can be unreliable.",
+    "A native controller and independent secondary-monitor confirmation are required; this is not a standalone unattended GUI runner.",
+    "GLM model/compare plot display was not checked during restoration; nonempty mixed interaction/quadratic restoration and a separate ghost-on reopen were not executed.",
+    "Numerical plot coordinates and all supplementary/comparison statistics are not yet automatically validated by the GUI harness."
+  ],
+  "full_70_scenario_campaign": "not executed",
+  "next_step": "Finish remaining native plot/term-targeting gaps in the six-scenario pilot, then execute the 30 high-risk scenarios in small manifest-prioritized batches."
+}

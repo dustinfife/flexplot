@@ -1,0 +1,343 @@
+{
+  "status": "passed",
+  "scope": "Two targeted native restoration checks with subsequent live edits; not full scenario or GUI campaign acceptance",
+  "restoration_path": "Copied actual host-saved document without changing its options, selected exact path through native File/Open/Browse, opened a second window, obtained user confirmation of secondary-monitor placement, inspected controls/results, edited, saved, and closed only the created window.",
+  "GLM": {
+    "status": "passed",
+    "native_checked": [
+      "Outcome binary_y; predictors x and z; binomial/logit",
+      "Model 1 x + z + x:z and square x",
+      "Model 2 z and independent square z",
+      "After reopening, removed Model 1 interaction while retaining its square and both Model 2 terms",
+      "Then removed Model 2 square while Model 1 stayed unchanged",
+      "Displayed updated coefficients/formula notes observed; actual host saves decoded"
+    ],
+    "not_executed": [
+      "GLM model/compare plot display checks during this restoration session"
+    ]
+  },
+  "Mixed Models": {
+    "status": "passed",
+    "native_checked": [
+      "Outcome mixed_y; fixed x/z/binary; cluster id; random intercept/slope x; REML",
+      "Independent Model 2 z/binary; random intercept with empty slope list; REML",
+      "Interaction/polynomial options off and no corresponding selections",
+      "CAS x with no panels/group",
+      "Ghost on/off through native controls; verified-focus Space when mouse clicks only focused checkbox",
+      "Model 1 solid curve plus dashed horizontal Model 2 ghost; ghost disappeared when disabled",
+      "Model 2 remained solid horizontal with no reciprocal ghost, inspected separately via results scrollbar"
+    ],
+    "not_executed": [
+      "Nonempty mixed-model interaction/quadratic restoration",
+      "A second reopen with the ghost already enabled"
+    ]
+  },
+  "data_bin_sha256": "4a46ff6a3bbbf8eea2841d3adbc31960de9c19701b6ae8bb1dabcd0d027394c9",
+  "data_unchanged": true,
+  "numerical_evidence": {
+    "records": {
+      "GLM-08/1": {
+        "full_checkpoint_status": "blocked",
+        "unobserved": [
+          "actual displayed image plot",
+          "actual displayed image comparisonplot"
+        ],
+        "numerical": {
+          "coefficients": {
+            "actual": [
+              -0.114,
+              0.899,
+              -0.441,
+              -0.01,
+              -0.174
+            ],
+            "expected": [
+              -0.113868936615788,
+              0.898904426156033,
+              -0.441340701594297,
+              -0.0099182607162376,
+              -0.173996542045666
+            ],
+            "tolerance": 0.00050001,
+            "max_coefficient_error": 0.0003407015942969993
+          }
+        },
+        "comparison_errors": [
+          0,
+          0
+        ],
+        "variance_errors": [],
+        "saved_sha256": "2e88b450da24a384f8797ff0f3e8b1bdd729ca9881da16f4cb59f18129000db2"
+      },
+      "GLM-08/2": {
+        "full_checkpoint_status": "blocked",
+        "unobserved": [
+          "actual displayed image plot",
+          "actual displayed image comparisonplot"
+        ],
+        "numerical": {
+          "coefficients": {
+            "actual": [
+              -0.1,
+              0.873,
+              -0.441,
+              -0.062
+            ],
+            "expected": [
+              -0.100329986402341,
+              0.872870103603559,
+              -0.441128424826034,
+              -0.062453171127628
+            ],
+            "tolerance": 0.00050001,
+            "max_coefficient_error": 0.00045317112762800066
+          }
+        },
+        "comparison_errors": [
+          0,
+          0
+        ],
+        "variance_errors": [],
+        "saved_sha256": "4dd8e599392f1f97c2aa8bc783d6a39405cda38b27028dec60264f69ca3113f6"
+      },
+      "GLM-08/3": {
+        "full_checkpoint_status": "blocked",
+        "unobserved": [
+          "actual displayed image plot",
+          "actual displayed image comparisonplot"
+        ],
+        "numerical": {
+          "coefficients": {
+            "actual": [
+              -0.1,
+              0.873,
+              -0.441,
+              -0.062
+            ],
+            "expected": [
+              -0.100329986402341,
+              0.872870103603559,
+              -0.441128424826034,
+              -0.062453171127628
+            ],
+            "tolerance": 0.00050001,
+            "max_coefficient_error": 0.00045317112762800066
+          }
+        },
+        "comparison_errors": [
+          0,
+          0
+        ],
+        "variance_errors": [],
+        "saved_sha256": "e944a027123ebe4a329b88605d381b85bbe75593ed43388f3fcff398f43f3bf5"
+      },
+      "MM-11/1": {
+        "full_checkpoint_status": "blocked",
+        "unobserved": "actual displayed image comparisonplot",
+        "numerical": {
+          "fixed": {
+            "actual": [
+              0.332052232323834,
+              0.739348356825506,
+              -0.486217492677651,
+              0.720343685257862
+            ],
+            "expected": [
+              0.332052232323834,
+              0.739348356825506,
+              -0.486217492677651,
+              0.720343685257862
+            ],
+            "tolerance": 1e-05,
+            "max_coefficient_error": 0.0
+          },
+          "fixed2": {
+            "actual": [
+              0.415630878013588,
+              -0.480448760546958,
+              0.585801605368032
+            ],
+            "expected": [
+              0.415630878013588,
+              -0.480448760546958,
+              0.585801605368032
+            ],
+            "tolerance": 1e-05,
+            "max_coefficient_error": 0.0
+          }
+        },
+        "comparison_errors": [
+          0,
+          0
+        ],
+        "variance_errors": [
+          2.77555756156289e-17,
+          0
+        ],
+        "saved_sha256": "2d151c18f608fa9f6185dfced0d343cf845615db54236b9d214577c443ba1424"
+      },
+      "MM-11/2": {
+        "full_checkpoint_status": "passed",
+        "unobserved": [],
+        "numerical": {
+          "fixed": {
+            "actual": [
+              0.332052232323834,
+              0.739348356825506,
+              -0.486217492677651,
+              0.720343685257862
+            ],
+            "expected": [
+              0.332052232323834,
+              0.739348356825506,
+              -0.486217492677651,
+              0.720343685257862
+            ],
+            "tolerance": 1e-05,
+            "max_coefficient_error": 0.0
+          },
+          "fixed2": {
+            "actual": [
+              0.415630878013588,
+              -0.480448760546958,
+              0.585801605368032
+            ],
+            "expected": [
+              0.415630878013588,
+              -0.480448760546958,
+              0.585801605368032
+            ],
+            "tolerance": 1e-05,
+            "max_coefficient_error": 0.0
+          }
+        },
+        "comparison_errors": [
+          0,
+          0
+        ],
+        "variance_errors": [
+          2.77555756156289e-17,
+          0
+        ],
+        "saved_sha256": "a15a6cbbe6e362c9ad4e6de3df3b35c3f69ed7fdec5b394b26a4bb6ad906fef7"
+      },
+      "MM-11/3": {
+        "full_checkpoint_status": "passed",
+        "unobserved": [],
+        "numerical": {
+          "fixed": {
+            "actual": [
+              0.332052232323834,
+              0.739348356825506,
+              -0.486217492677651,
+              0.720343685257862
+            ],
+            "expected": [
+              0.332052232323834,
+              0.739348356825506,
+              -0.486217492677651,
+              0.720343685257862
+            ],
+            "tolerance": 1e-05,
+            "max_coefficient_error": 0.0
+          },
+          "fixed2": {
+            "actual": [
+              0.415630878013588,
+              -0.480448760546958,
+              0.585801605368032
+            ],
+            "expected": [
+              0.415630878013588,
+              -0.480448760546958,
+              0.585801605368032
+            ],
+            "tolerance": 1e-05,
+            "max_coefficient_error": 0.0
+          }
+        },
+        "comparison_errors": [
+          0,
+          0
+        ],
+        "variance_errors": [
+          2.77555756156289e-17,
+          0
+        ],
+        "saved_sha256": "109e98fd21a6f90a05f576bab95b4b6854ba714e12d73df2d59564ee7cfa9561"
+      }
+    },
+    "option_deltas": {
+      "reopened-before-edits.omv -> glm-restored-after-interaction.omv": {
+        "status": "passed",
+        "changed": "modelTerms",
+        "host_initializations": [
+          ".ppi",
+          "theme",
+          "palette",
+          "decSymbol",
+          ".lang"
+        ],
+        "unexpected": []
+      },
+      "glm-restored-after-interaction.omv -> glm-restored-after-model2.omv": {
+        "status": "passed",
+        "changed": "comparisonQuadratic",
+        "host_initializations": [],
+        "unexpected": []
+      },
+      "mixed-restored-baseline.omv -> mixed-restored-ghost-on-verified.omv": {
+        "status": "passed",
+        "changed": "casGhost",
+        "host_initializations": [],
+        "unexpected": []
+      },
+      "mixed-restored-ghost-on-verified.omv -> mixed-restored-ghost-off.omv": {
+        "status": "passed",
+        "changed": "casGhost",
+        "host_initializations": [],
+        "unexpected": []
+      }
+    }
+  },
+  "numerical_reporting": "GLM coefficient and AIC/BIC comparisons respect the existing three-decimal reporting convention; SE/CI values and mixed-model values checked at harness precision. Mixed variances/SDs agree within 2.8e-17.",
+  "windows": [
+    {
+      "id": "31e4f870-1f2d-432d-b7e8-a13174ff9f6e",
+      "title": "primary",
+      "document": "/Users/dustinfife/Documents/R Packages/flexplot/.jamovi-dev/e2e-pilot/primary.omv",
+      "source": "native_gui",
+      "secondary_monitor": true,
+      "disposable": true,
+      "created_by_test": false,
+      "purpose": "existing_test",
+      "closed": false
+    },
+    {
+      "id": "4daa1ece-9b97-4126-90ac-59094c0ba1e0",
+      "title": "phase2a-restore-28cc94f8",
+      "document": "/Users/dustinfife/Documents/R Packages/flexplot/.jamovi-dev/e2e-runs/stabilization/phase2a-restore-28cc94f8.omv",
+      "source": "native_gui",
+      "secondary_monitor": true,
+      "disposable": true,
+      "created_by_test": true,
+      "purpose": "save_reopen",
+      "closed": true,
+      "closure_evidence": "Native exact-title/instance check, unique close button, then original primary window/instance observed."
+    }
+  ],
+  "native_limitations": [
+    "A completed action can initially return an old accessibility state; later native result observation distinguished this from an incorrect selection.",
+    "Some mouse clicks only established checkbox focus; an explicit Space action was used only after verifying exact checkbox focus.",
+    "Horizontal wheel scrolling did not expose Model 2; screenshot-identified native results scrollbar did.",
+    "No fully unattended GUI runner or full numerical curve-coordinate extraction is claimed."
+  ],
+  "desktop": {
+    "maximum_disposable_windows": 2,
+    "created_windows": 1,
+    "closed_created_windows": 1,
+    "unrelated_documents_changed": false,
+    "rstudio_activated": false,
+    "original_primary_observed_after_cleanup": true
+  }
+}
