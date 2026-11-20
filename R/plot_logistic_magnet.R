@@ -266,7 +266,7 @@ magnet_plot = function(formula, data,
   }
   
   p = p +
-    ggplot2::geom_point(
+    flexplot_magnet_observations(
       data = df_scaled,
       ggplot2::aes(
         x = .data[[xvar]],

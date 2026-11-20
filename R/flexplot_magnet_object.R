@@ -1,3 +1,15 @@
+# Bound observation ink at light gray, even at complete overlap. Keep mapped
+# colours through positioning: grouped magnet offsets depend on those values.
+flexplot_magnet_observations = function(...) {
+  layer = ggplot2::geom_point(...)
+  layer$geom = ggplot2::ggproto(NULL, ggplot2::GeomPoint,
+    draw_panel=function(data, panel_params, coord, na.rm=FALSE) {
+      data$colour = "grey65"
+      ggplot2::GeomPoint$draw_panel(data, panel_params, coord, na.rm=na.rm)
+    })
+  layer
+}
+
 flexplot_magnet_y_limits = function(limits) {
   range(c(0, 1, limits), na.rm=TRUE)
 }
@@ -223,7 +235,7 @@ flexplot_magnet_object = function(data, outcome, axis, given=NA,
       linetype="dashed",
       color="gray50"
     ) +
-    ggplot2::geom_point(
+    flexplot_magnet_observations(
       data=points_data,
       mapping=raw_mapping,
       alpha=raw.alph.func(raw.data, alpha),
