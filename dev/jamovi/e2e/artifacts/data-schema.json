@@ -1,0 +1,328 @@
+{
+  "primary": {
+    "row_id": {
+      "class": "integer",
+      "levels": null,
+      "missing": 0
+    },
+    "id": {
+      "class": "factor",
+      "levels": ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16", "C17", "C18", "C19", "C20", "C21", "C22", "C23", "C24"],
+      "missing": 0
+    },
+    "x": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "z": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "correlated": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "binary": {
+      "class": "factor",
+      "levels": ["No", "Yes"],
+      "missing": 0
+    },
+    "group": {
+      "class": "factor",
+      "levels": ["middle", "low", "high"],
+      "missing": 0
+    },
+    "ordered": {
+      "class": ["ordered", "factor"],
+      "levels": ["middle", "low", "high"],
+      "missing": 0
+    },
+    "y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "quadratic_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "interaction_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "binary_y": {
+      "class": "integer",
+      "levels": null,
+      "missing": 0
+    },
+    "factor_y": {
+      "class": "factor",
+      "levels": ["No", "Yes"],
+      "missing": 0
+    },
+    "ordered_y": {
+      "class": ["ordered", "factor"],
+      "levels": ["No", "Yes"],
+      "missing": 0
+    },
+    "count_y": {
+      "class": "integer",
+      "levels": null,
+      "missing": 0
+    },
+    "nb_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "gamma_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "gamma_inverse_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "random_intercept_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "mixed_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "category_y": {
+      "class": "factor",
+      "levels": ["Disagree", "Neutral", "Agree"],
+      "missing": 0
+    },
+    "x_missing": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 26
+    },
+    "z_missing": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 34
+    },
+    "y_missing": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 23
+    },
+    "binary_missing": {
+      "class": "integer",
+      "levels": null,
+      "missing": 19
+    },
+    "constant": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "x_duplicate": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "has space": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "a+b": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "tick`name": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "back\\slash": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "log(y)": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "1": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "stop('must not execute')": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    }
+  },
+  "common_sample": {
+    "id": {
+      "class": "factor",
+      "levels": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"],
+      "missing": 0
+    },
+    "x": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "z": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 60
+    },
+    "a": {
+      "class": ["ordered", "factor"],
+      "levels": ["middle", "low", "high"],
+      "missing": 0
+    },
+    "y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    }
+  },
+  "separation": {
+    "x": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "y": {
+      "class": "integer",
+      "levels": null,
+      "missing": 0
+    }
+  },
+  "rank_deficient": {
+    "y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "x": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "x_duplicate": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "constant": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    }
+  },
+  "sparse": {
+    "x": {
+      "class": "factor",
+      "levels": ["C", "A", "B", "unused"],
+      "missing": 0
+    },
+    "group": {
+      "class": "factor",
+      "levels": ["g1", "g2"],
+      "missing": 0
+    },
+    "y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "binary_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    }
+  },
+  "singular": {
+    "x": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "replicate": {
+      "class": "integer",
+      "levels": null,
+      "missing": 0
+    },
+    "id": {
+      "class": "factor",
+      "levels": ["1", "2", "3", "4", "5", "6", "7", "8"],
+      "missing": 0
+    },
+    "y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    }
+  },
+  "invalid": {
+    "x": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "nonbinary": {
+      "class": "integer",
+      "levels": null,
+      "missing": 0
+    },
+    "negative_count": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "noninteger_count": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "nonpositive_gamma": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "constant_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    },
+    "infinite_y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    }
+  },
+  "paired": {
+    "condition": {
+      "class": "factor",
+      "levels": ["Before", "After"],
+      "missing": 0
+    },
+    "y": {
+      "class": "numeric",
+      "levels": null,
+      "missing": 0
+    }
+  }
+}

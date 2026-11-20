@@ -1,0 +1,33 @@
+{
+  "generator": "dev/jamovi/e2e/fixtures.R",
+  "seed": 20261120,
+  "common_sample_seed": 925,
+  "versions": {
+    "R": "4.5.0",
+    "yaml": "2.3.10",
+    "jsonlite": "2.0.0",
+    "lme4": "2.1.0",
+    "MASS": "7.3.65"
+  },
+  "dimensions": {
+    "primary": [436, 34],
+    "common_sample": [240, 5],
+    "separation": [40, 2],
+    "rank_deficient": [60, 4],
+    "sparse": [4, 4],
+    "singular": [128, 4],
+    "invalid": [30, 7],
+    "paired": [60, 2]
+  },
+  "fixture_md5": {
+    "primary": "a8ceba3957f995bffe512186dea718e4",
+    "common_sample": "f1fd4ee10a9e6bad3fee664e5bed36d8",
+    "separation": "9c9c6ed95614d751ef32c5b4dc8452e5",
+    "rank_deficient": "3748027a7ea7e9e2dad753918b8ef8fa",
+    "sparse": "3503f211149e6d5c60ec606a42bedd5b",
+    "singular": "f968f677b74e11b12116c5231d936a09",
+    "invalid": "bea8140a450763bdb66bd7707df29b66",
+    "paired": "0ac31b3e58b89244a92a3e9077a6c4f0"
+  },
+  "prediction_contract": "references use all eligible rows at diagnostic x=-1,0,1; actual GUI grid/panel values require new predictions at captured coordinates"
+}
