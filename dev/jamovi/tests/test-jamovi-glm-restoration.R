@@ -1,15 +1,8 @@
 test_that("restored GLM native controls preserve both models through live edits", {
-  skip_if_not_installed("jmvcore")
-  skip_if_not_installed("jsonlite")
-  skip_if_not_installed("jmvtools")
   node = Sys.which("node")
-  skip_if(!nzchar(node), "Node is unavailable")
   compiler = system.file("node_modules", "jamovi-compiler", package="jmvtools")
   runtime = Sys.glob("/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/analysisui-*.js")
-  skip_if(!nzchar(compiler) || !length(runtime), "Installed jamovi UI runtime is unavailable")
-  root = normalizePath(test_path("..", ".."))
-  skip_if(!file.exists(file.path(root,"jamovi","glmgeneralized.u.yaml")),
-          "UI sources are excluded from the built R package; dev/jamovi.R ui enforces this check")
+  root = normalizePath(test_path("..", "..", ".."))
   output = tempfile(fileext=".tsv")
   withr::defer(unlink(c(output,paste0(output,c(".header.R",".restored.json")))))
   log = system2(node,shQuote(c(test_path("js","jamovi-glm-ui.cjs"),root,compiler,output,runtime[1],"glmgeneralized")),
@@ -58,9 +51,6 @@ test_that("restored GLM native controls preserve both models through live edits"
 })
 
 test_that("GLM saved option messages retain independent interactions and quadratics", {
-  skip_if_not_installed("jmvcore")
-  withr::local_libpaths(c(.libPaths(),"/Applications/jamovi.app/Contents/Resources/modules/base/R"))
-  skip_if_not_installed("RProtoBuf")
   jmvcore:::initProtoBuf()
   message = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
   # Use the same protocol encoder as the existing saved-analysis tests.

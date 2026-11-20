@@ -139,32 +139,6 @@ test_that("categorical interactions preserve ordered contrasts and supplied-mode
   expect_no_warning(ggplot2::ggplot_build(plot))
 })
 
-test_that("new generalized UI and headers survive compilation and initialize the original additive model", {
-  skip_if_not_installed("jmvcore")
-  node = Sys.which("node")
-  compiler = system.file("node_modules", "jamovi-compiler", package="jmvtools")
-  skip_if(!nzchar(node) || !nzchar(compiler), "Optional node/jamovi UI compiler unavailable")
-  root = normalizePath(test_path("..", ".."))
-  skip_if(!file.exists(file.path(root, "jamovi", "glmgeneralized.u.yaml")), "UI source is not installed with the R package")
-  runtime = Sys.glob("/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/analysisui-*.js")
-  output = tempfile(fileext=".tsv")
-  withr::defer(unlink(c(output, paste0(output, ".header.R"))))
-  args = c(test_path("js", "jamovi-glm-ui.cjs"), root, compiler, output,
-    if (length(runtime)) runtime[1] else "", "glmgeneralized")
-  log = system2(node, shQuote(args), stdout=TRUE, stderr=TRUE)
-  expect_null(attr(log, "status"), info=paste(log, collapse="\n"))
-  if (!file.exists(output)) return(invisible(NULL))
-  states = read.delim(output, stringsAsFactors=FALSE)
-  generated = new.env(parent=asNamespace("flexplot"))
-  sys.source(paste0(output, ".header.R"), generated)
-  sys.source(file.path(root, "R", "glmgeneralized.b.R"), generated)
-  row = states[states$stage == "add-dose", ]
-  terms = strsplit(strsplit(row$primary, ";", fixed=TRUE)[[1]], ":", fixed=TRUE)
-  options = generated$glmgeneralizedOptions$new(out="len", preds=c("supp", "dose"), modelTerms=terms)
-  analysis = generated$glmgeneralizedClass$new(options=options, data=ToothGrowth)
-  expect_true(analysis$run())
-  expect_equal(coef(analysis$results$plot$state$model), coef(glm(len ~ supp+dose, data=ToothGrowth)), tolerance=1e-12)
-})
 
 test_that("analysis-specific published references are attached to both existing analyses", {
   skip_if_not_installed("jmvcore")

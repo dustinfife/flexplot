@@ -1,16 +1,3 @@
-jamovi_mixed_cas_data = function() {
-  data = jamovi_mixed_test_data()[seq_len(120),]
-  data$continuous = data$x
-  data$group = data$a
-  data$mixed = data$y
-  data$count = rep(0:5,length.out=nrow(data))
-  data
-}
-
-jamovi_mixed_cas_resource = function(name, extension) {
-  list(rootPath=output_dir,relPath=paste0(name,".",extension))
-}
-
 test_that("the simplified CAS case renders real images with comparison on or off and cluster panels", {
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_cas_data()
@@ -71,32 +58,5 @@ test_that("CAS handles the original numeric moderator and cluster-panel layout",
     expect_true(all(c("mixed_binned","id") %in% names(plot$data)))
     expect_no_warning(ggplot2::ggplotGrob(plot))
     expect_gt(nrow(ggplot2::ggplot_build(plot)$layout$layout),1L)
-  }
-})
-
-test_that("failed CAS images serialize as errors rather than endless rendering", {
-  skip_if_not_installed("jmvcore")
-  withr::local_libpaths(c(.libPaths(),"/Applications/jamovi.app/Contents/Resources/modules/base/R"))
-  skip_if_not_installed("RProtoBuf")
-  jmvcore:::initProtoBuf()
-  data = jamovi_mixed_cas_data()
-  for (comparison in c(FALSE,TRUE)) {
-    analysis = jamovi_mixed_analysis(data,out="mixed",preds=c("continuous","group"),
-      graphic=TRUE,compare=comparison,predictionType="cas",plotX="id")
-    expect_true(analysis$run())
-    image = if (comparison) analysis$results$comparisonplot else analysis$results$plot
-    expect_identical(image$status,"error")
-    expect_match(image$.__enclos_env__$private$.error,"Use a model predictor on x")
-    expect_null(image$state)
-    expect_equal(image$asProtoBuf(status=3L,includeState=FALSE)$status,4L)
-    # Also exercise errors raised during drawing after successful plot preparation.
-    expect_true(jamovi_reporting_update(analysis,list(plotX="continuous")))
-    expect_false(is.null(image$state))
-    local_mocked_bindings(jamovi_mixed_apply_labels=function(...) stop("CAS render probe"))
-    callback = if (comparison) analysis$.__enclos_env__$private$.comparisonplot else analysis$.__enclos_env__$private$.plot
-    expect_false(callback(image))
-    expect_match(image$.__enclos_env__$private$.error,"CAS render probe")
-    expect_null(image$state)
-    expect_equal(image$asProtoBuf(status=3L,includeState=FALSE)$status,4L)
   }
 })

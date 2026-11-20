@@ -145,37 +145,38 @@ jamovi_dev_main = function(args, root) {
   dir.create(output,showWarnings=FALSE)
   if (command == "cleanup") return(jamovi_dev_cleanup(root))
   if (command %in% c("ui","test")) {
-    for (package in c("testthat","yaml")) {
-      if (!requireNamespace(package,quietly=TRUE)) stop(package," is required for development validation")
-    }
-    testthat::test_file(file.path(root,"dev/jamovi/tests/test-presentation.R"),stop_on_failure=TRUE)
-  }
-  if (command == "test") {
-    if (!requireNamespace("devtools",quietly=TRUE)) stop("devtools is required for test mode")
+    home = normalizePath(home,mustWork=TRUE)
+    previous_libs = .libPaths()
+    on.exit(.libPaths(previous_libs),add=TRUE)
+    .libPaths(c(.libPaths(),file.path(home,"Contents/Resources/modules/base/R")))
+    for (package in c("testthat","yaml","devtools","jmvtools","jsonlite","jmvcore","RProtoBuf"))
+      if (!requireNamespace(package,quietly=TRUE)) stop(package," is required for mandatory development validation")
     previous_path = Sys.getenv("PATH")
     on.exit(Sys.setenv(PATH=previous_path),add=TRUE)
-    Sys.setenv(PATH=paste(dirname(jamovi_dev_node()),previous_path,sep=.Platform$path.sep))
+    node = jamovi_dev_node()
+    Sys.setenv(PATH=paste(dirname(node),previous_path,sep=.Platform$path.sep))
+    compiler = system.file("node_modules/jamovi-compiler",package="jmvtools")
+    runtime = Sys.glob(file.path(home,"Contents/Resources/jamovi/client/dist/assets/analysisui-*.js"))
+    if (!nzchar(compiler) || !length(runtime)) stop("Installed jamovi compiler/UI runtime required for development validation")
+    source(file.path(root,"dev/jamovi/test-boundaries.R"),local=TRUE)
+    dependencies = jamovi_test_source_dependencies(root)
+    if (nrow(dependencies)) stop("Move source-dependent tests to dev/jamovi/tests:\n",
+      paste(capture.output(print(dependencies)),collapse="\n"))
+    work = tempfile("jamovi-ui-");dir.create(work)
+    on.exit(unlink(work,recursive=TRUE),add=TRUE)
+    jamovi_dev_run(node,c(file.path(root,"dev/jamovi/validate-ui.mjs"),root,compiler,work))
+    jmvcore:::initProtoBuf()
+    devtools::load_all(root,quiet=TRUE,helpers=FALSE)
+    integration = testthat::test_dir(file.path(root,"dev/jamovi/tests"),package="flexplot",stop_on_failure=TRUE)
+    if (any(as.data.frame(integration)$skipped)) stop("Mandatory development tests must not be skipped")
+    cat("PASS: mandatory source integration, installed UI handlers, and package-test boundaries.\n")
+    if (command == "ui") return(invisible(NULL))
     result = devtools::test(root,filter="jamovi",stop_on_failure=TRUE)
     if (any(as.data.frame(result)$error)) stop("Focused R6 tests reported an error")
     cat("PASS: focused jamovi tests; no module installed.\n")
     return(invisible(NULL))
   }
   home = normalizePath(home,mustWork=TRUE)
-  if (command == "ui") {
-    compiler = system.file("node_modules/jamovi-compiler",package="jmvtools")
-    if (!nzchar(compiler)) stop("jmvtools is required for UI compilation")
-    node = jamovi_dev_node()
-    work = tempfile("jamovi-ui-");dir.create(work)
-    on.exit(unlink(work,recursive=TRUE),add=TRUE)
-    jamovi_dev_run(node,c(file.path(root,"dev/jamovi/validate-ui.mjs"),root,compiler,work))
-    runtime = Sys.glob(file.path(home,"Contents/Resources/jamovi/client/dist/assets/analysisui-*.js"))
-    if (!length(runtime)) stop("Installed jamovi UI runtime not found; cannot verify handlers")
-    for (analysis in c("glmbasic","glmgeneralized","mixedmodel")) jamovi_dev_run(node,c(
-      file.path(root,"tests/testthat/js/jamovi-glm-ui.cjs"),root,compiler,
-      file.path(work,paste0(analysis,".tsv")),runtime[1],analysis))
-    cat("PASS: installed-UI handler tests; no module installed.\n")
-    return(invisible(NULL))
-  }
   operation_lock = jamovi_dev_lock(root)
   on.exit(unlink(operation_lock,recursive=TRUE),add=TRUE)
   if (custom_file && command != "fixture" && !file.exists(file)) stop("Saved .omv file does not exist: ",file)

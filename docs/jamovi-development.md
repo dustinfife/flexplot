@@ -219,3 +219,73 @@ References: [jamovi Getting Started](https://dev.jamovi.org/tutorial/tuts0101-ge
 and [Distributing Modules](https://dev.jamovi.org/tutorial/tuts0111-distributing-modules/).
 Installed desktop/server/compiler source was also inspected to distinguish file
 opening, module installation, engine refresh and saved-result caching.
+
+### Package tests versus development integration tests
+
+`tests/testthat/` is shipped in the R source package. Its tests must use only
+installed flexplot resources (`system.file()`), packaged test assets, temporary
+files, and available declared R dependencies. Keep numerical R6, prediction,
+reporting, and serialization tests that use only declared dependencies here. Do not discover dependencies by
+adding an absolute jamovi application library or a local development module to
+`.libPaths()`. Tests requiring jamovi's optional RProtoBuf protocol backend belong in development
+validation too; both commands explicitly supply that existing host library without
+adding it as a flexplot dependency.
+
+Put UI compilation, YAML/JavaScript inspection, native installed-renderer tests,
+and source-to-R6 integration tests in `dev/jamovi/tests/`. JavaScript integration
+helpers live in its `js/` subdirectory. These files deliberately require the
+checkout, `jmvtools`, Node, and the installed jamovi UI runtime. Both commands run
+all of them, with missing prerequisites or skipped integration tests treated as
+failures:
+
+```sh
+Rscript --vanilla dev/jamovi.R ui
+Rscript --vanilla dev/jamovi.R test
+```
+
+Both commands compile all four analyses and validate citations before running
+the source integration tests. `test` then runs the packaged jamovi R6 tests too.
+Neither command installs a module or opens a GUI window.
+
+The integration suite preserves the source-dependent assertions formerly mixed
+into packaged tests:
+
+| Integration coverage | Development test file |
+| --- | --- |
+| LM initialization and independent terms | `test-jamovi-glm-initialization.R` |
+| LM polynomial handlers and fitted formulas | `test-jamovi-lm-quadratic.R` |
+| GLM compiled headers and additive fitting | `test-jamovi-generalized.R` |
+| GLM restoration, independent interactions/quadratics, repeated live edits | `test-jamovi-glm-restoration.R` |
+| Mixed Model compilation and native server option batches | `test-jamovi-mixed.R` |
+| Model-formula paragraph rendering | `test-jamovi-glm-comparison.R` |
+| Menu identities and icons | `test-presentation.R` |
+
+`dev/jamovi/test-boundaries.R` statically inspects every packaged R test/helper
+and auxiliary JavaScript file. It rejects standard path constructions that reach
+excluded resources (using `.Rbuildignore`), paths escaping the packaged test tree,
+absolute checkout/host paths, raw checkout R sources, and the development UI
+compiler, and undeclared test dependencies. Its regression tests include rejected examples and legitimate packaged
+QML, SVG, temporary-file, and pure-JavaScript resources. This is a tripwire for
+common dependency patterns, not a proof about arbitrary dynamically constructed
+paths; an isolated built-package check remains required. Diagnostic messages
+mentioning developer commands are allowed because they do not access files.
+
+The old `a_testJASP_create_linmod.R` was an inactive fixture-loading script with
+no assertions. It now lives at `dev/jasp/inspect-linmod-fixture.R`; it is not an
+installed-package test or a substitute for JASP integration testing.
+
+The boundary audit covered all remaining packaged R test/helper files, including
+nonstandard filenames. Eleven absolute application-library fallbacks across eight
+test files were removed. The eleven associated host-protocol tests and their
+encoder now live in mandatory development validation; pure numerical assertions
+and shared R6 fixtures remain packaged. Installed datasets and QML are read through
+`system.file()`, SVG references remain packaged test assets, and isolated-process
+prediction tests use temporary input/output files. No packaged test requires a
+previously installed flexplot development module.
+
+The host-protocol coverage includes Flexplot standard-error output and two-panel
+restoration; independent GLM and LM polynomial saved options; CAS image-error
+serialization; mixed comparison restoration, p-column visibility and ghost notes;
+Model 2 table visibility; dynamic plot labels; and saved term-builder defaults.
+These eleven tests retain all 199 original assertions. Together with the seven
+UI/source tests, all 597 relocated assertions are mandatory in both commands.

@@ -1,37 +1,3 @@
-expect_mixed_tables = function(results, model, second=FALSE, correlations=TRUE) {
-  fixed = results[[if(second) "fixed2" else "fixed"]]
-  random = results[[if(second) "random2" else "random"]]
-  correlation = results[[if(second) "correlations2" else "correlations"]]
-  expected = summary(model)$coefficients
-  values = fixed$asDF
-  expect_true(fixed$visible)
-  expect_identical(values$term,rownames(expected))
-  expect_equal(values$estimate,unname(lme4::fixef(model)),tolerance=1e-10)
-  se = sqrt(diag(as.matrix(vcov(model))))
-  expect_equal(values$se,unname(se),tolerance=1e-10)
-  if (fixed$getColumn("lower")$visible) expect_equal(values$lower,unname(lme4::fixef(model)-qnorm(.975)*se),tolerance=1e-10)
-  if (fixed$getColumn("upper")$visible) expect_equal(values$upper,unname(lme4::fixef(model)+qnorm(.975)*se),tolerance=1e-10)
-  expect_true(all(is.na(values$p)))
-  components = as.data.frame(lme4::VarCorr(model))
-  components = components[is.na(components$var2),]
-  expected_terms = components$var1
-  expected_terms[components$grp=="Residual"] = "Residual"
-  expect_true(random$visible)
-  expect_identical(random$asDF$group,components$grp)
-  expect_identical(random$asDF$term,expected_terms)
-  expect_equal(random$asDF$variance,components$vcov,tolerance=1e-10)
-  expect_equal(random$asDF$sd,components$sdcor,tolerance=1e-10)
-  expected = attr(lme4::VarCorr(model)[[1]],"correlation")
-  expect_identical(correlation$visible,correlations && nrow(expected)>1L)
-  if (correlation$visible) {
-    expect_identical(correlation$asDF$term,rownames(expected))
-    visible = Filter(function(column)isTRUE(column$visible),correlation$columns)
-    expect_identical(unname(vapply(visible[-1],function(column)column$title,character(1))),colnames(expected))
-    expect_equal(unname(as.matrix(correlation$asDF[paste0("c",seq_len(ncol(expected)))])),
-      unname(expected),tolerance=1e-10)
-  }
-}
-
 test_that("both model tables use requested-method common-sample fits without extra fitting", {
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_test_data(); data$z[1:60] = NA_real_
@@ -141,32 +107,6 @@ test_that("model-specific singular and convergence diagnostics appear once above
   expect_equal(results$random2$asDF$variance,as.data.frame(lme4::VarCorr(state$model2))$vcov)
 })
 
-test_that("saved output options restore both model tables with serialized visibility", {
-  skip_if_not_installed("jmvcore")
-  withr::local_libpaths(c(.libPaths(),"/Applications/jamovi.app/Contents/Resources/modules/base/R"))
-  skip_if_not_installed("RProtoBuf")
-  jmvcore:::initProtoBuf()
-  saved = list(out="y",preds=c("x","z"),cluster="id",modelTerms=list("x"),compare=TRUE,
-    comparisonFixed=c("x","z"),comparisonTerms=list("x","z"),comparisonRandomSlopes="x",
-    includeCI=FALSE,includeP=TRUE,showCorrelations=TRUE,graphic=FALSE,samplePolicyVersion=1L)
-  message = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
-  template = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
-  message$names = names(saved)
-  message$options = lapply(saved,jamovi_mixed_saved_option,option_template=template,group_template=message)
-  options = flexplot:::mixedmodelOptions$new();options$fromProtoBuf(message)
-  restored = flexplot:::mixedmodelClass$new(options=options,data=jamovi_mixed_test_data())
-  expect_true(restored$run())
-  for(name in c("fixed","fixed2")) {
-    expect_true(restored$results[[name]]$visible)
-    columns = restored$results[[name]]$asProtoBuf()$table$columns
-    visibility = setNames(vapply(columns,function(column)column$visible,integer(1)),vapply(columns,function(column)column$name,character(1)))
-    enum = get("jamovi.coms.Visible",asNamespace("jmvcore"))
-    expect_equal(visibility[c("lower","upper","p")],c(lower=enum$NO,upper=enum$NO,p=enum$YES))
-  }
-  expect_mixed_tables(restored$results,restored$results$comparisonplot$state$model2,second=TRUE)
-  legacy = flexplot:::mixedmodelOptions$new()
-  expect_true(legacy$includeCI)
-})
 
 
 test_that("identical models agree and real Model 2-only singular fits are labeled correctly", {

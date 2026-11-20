@@ -1,8 +1,3 @@
-jamovi_comparison_analysis = function(data=small, ...) {
-  options = flexplot:::glmbasicOptions$new(out="y", preds=c("x", "z", "a", "b"),
-    compare=TRUE, graphic=FALSE, ...)
-  flexplot:::glmbasicClass$new(options=options, data=data)
-}
 
 jamovi_comparison_capture = function(state) {
   capture$plot = original(state)
@@ -263,18 +258,4 @@ test_that("interaction-only and intercept-only primary models retain valid compa
       expect_equal(analysis$results$glmcat$asDF$means, mean(small$y), tolerance=1e-12)
     }
   }
-})
-
-test_that("model specifications become separate paragraphs in the installed jamovi renderer", {
-  skip_if_not_installed("jmvcore")
-  node = Sys.which("node")
-  assets = "/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets"
-  skip_if(!nzchar(node) || !dir.exists(assets), "Installed jamovi renderer unavailable")
-  analysis = jamovi_comparison_analysis(modelTerms=list("x", "a"), comparisonTerms=list("x"))
-  expect_true(analysis$run())
-  file = tempfile(fileext=".txt")
-  withr::defer(unlink(file))
-  writeLines(analysis$results$comparison$notes$models$note, file)
-  log = system2(node, shQuote(c(test_path("js", "jamovi-note-layout.cjs"), assets, file)), stdout=TRUE, stderr=TRUE)
-  expect_null(attr(log, "status"), info=paste(log, collapse="\n"))
 })

@@ -77,3 +77,15 @@ jamovi_expect_lm_coefficients = function(analysis, model, includeP=FALSE) {
     expect_false("p" %in% names(table))
   invisible(table)
 }
+
+lm_quadratic_analysis = function(data=small, ...) {
+  options = do.call(flexplot:::glmbasicOptions$new,utils::modifyList(
+    list(out="y",preds=c("x","z","a"),graphic=FALSE),list(...),keep.null=TRUE))
+  flexplot:::glmbasicClass$new(options=options,data=data)
+}
+
+jamovi_comparison_analysis = function(data=small, ...) {
+  options = flexplot:::glmbasicOptions$new(out="y", preds=c("x", "z", "a", "b"),
+    compare=TRUE, graphic=FALSE, ...)
+  flexplot:::glmbasicClass$new(options=options, data=data)
+}

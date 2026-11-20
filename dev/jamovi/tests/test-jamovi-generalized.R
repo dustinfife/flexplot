@@ -1,0 +1,23 @@
+test_that("new generalized UI and headers survive compilation and initialize the original additive model", {
+  node = Sys.which("node")
+  compiler = system.file("node_modules", "jamovi-compiler", package="jmvtools")
+  root = normalizePath(test_path("..", "..", ".."))
+  runtime = Sys.glob("/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/analysisui-*.js")
+  output = tempfile(fileext=".tsv")
+  withr::defer(unlink(c(output, paste0(output, ".header.R"))))
+  args = c(test_path("js", "jamovi-glm-ui.cjs"), root, compiler, output,
+    if (length(runtime)) runtime[1] else "", "glmgeneralized")
+  log = system2(node, shQuote(args), stdout=TRUE, stderr=TRUE)
+  expect_null(attr(log, "status"), info=paste(log, collapse="\n"))
+  if (!file.exists(output)) return(invisible(NULL))
+  states = read.delim(output, stringsAsFactors=FALSE)
+  generated = new.env(parent=asNamespace("flexplot"))
+  sys.source(paste0(output, ".header.R"), generated)
+  sys.source(file.path(root, "R", "glmgeneralized.b.R"), generated)
+  row = states[states$stage == "add-dose", ]
+  terms = strsplit(strsplit(row$primary, ";", fixed=TRUE)[[1]], ":", fixed=TRUE)
+  options = generated$glmgeneralizedOptions$new(out="len", preds=c("supp", "dose"), modelTerms=terms)
+  analysis = generated$glmgeneralizedClass$new(options=options, data=ToothGrowth)
+  expect_true(analysis$run())
+  expect_equal(coef(analysis$results$plot$state$model), coef(glm(len ~ supp+dose, data=ToothGrowth)), tolerance=1e-12)
+})
