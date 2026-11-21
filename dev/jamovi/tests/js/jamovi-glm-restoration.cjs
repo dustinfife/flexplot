@@ -5,7 +5,7 @@ const EventEmitter = require('node:events');
 
 // Real installed Option setters, synchronous supplier events and View lifecycle.
 // Native DOM display and persisted .omv controls are also checked in jamovi.
-module.exports = function(source, compilerPath, handlers, FormatDef, utils, assert) {
+module.exports = function(source, compilerPath, handlers, FormatDef, utils, assert, analysis = 'glmgeneralized') {
     const acorn = require(require.resolve('acorn', {paths:[compilerPath]}));
     const extract = (marker, method = false) => {
         const start = source.indexOf(marker);
@@ -33,9 +33,13 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
         packets.push([...queued]); queued.clear();
     }};
     const ui = {view:{model:{options:manager}}};
-    const defaults = {out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
+    const defaults = {interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
         comparisonTerms:null,comparisonQuadratic:null,plotX:null,plotPanels:null,plotGroup:null,
         comparisonX:null,comparisonPanels:null,family:'binomial',includeP:false,graphic:true,se:true,plotStyle:'auto'};
+    if (analysis === 'glmbasic') {
+        delete defaults.family; delete defaults.plotStyle;
+        Object.assign(defaults,{polynomials:false,comparisonPolynomials:false,graphicassump:false,estimates:true,comparisonGroup:null});
+    }
     for (const [name,value] of Object.entries(defaults)) {
         const option = native[name] = new Option(value,{name});
         option.on('valuechanged',() => {
@@ -48,7 +52,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
             finally { manager.endEdit(); }
         }};
     }
-    for (const name of ['primarySupplier','comparisonSupplier','quadraticSupplier','comparisonQuadraticSupplier','plotSupplier','comparisonPlotSupplier']) {
+    for (const name of ['primaryMainSupplier','comparisonMainSupplier','primarySupplier','comparisonSupplier','quadraticSupplier','comparisonQuadraticSupplier','plotSupplier','comparisonPlotSupplier']) {
         let value = [];
         ui[name] = {value:() => value,setValue(updated) {
             if (JSON.stringify(value) === JSON.stringify(updated)) return;
@@ -63,6 +67,8 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
             assert.equal(JSON.stringify(ui[name].value()),JSON.stringify(options[name]));
         return {stage,options:JSON.parse(JSON.stringify(options))};
     };
+    manager.getOption = name => native[name];
+    manager.setOptionValue = (name,value) => ui[name].setValue(value);
     const records = [];
     handlers.view_loaded.call(view,ui);
     assert.equal(packets.length,0,'Fresh empty view must not write normalized defaults');
@@ -80,6 +86,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
         view.workspace = {};
         events.find(event => event.onEvent === 'view.data-initializing').execute.call(view,ui,{id:stage});
         const count = packets.length;
+        for (const [name,value] of Object.entries(defaults)) native[name].setValue(value);
         native.preds.setValue([]);
         for (const [name,value] of Object.entries(options)) native[name].setValue(value);
         handlers.view_loaded.call(view,ui);
@@ -93,6 +100,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     };
     const prepared = {out:'y',modelTerms:[['x'],['z'],['x','z']],quadratic:['x'],
         comparisonTerms:[['z']],comparisonQuadratic:['z'],compare:true,preds:['x','z']};
+    if (analysis === 'glmbasic') Object.assign(prepared,{polynomials:true,comparisonPolynomials:true});
     restore('prepared',prepared);
     // A later predictor-control update must not prune the still-loading terms.
     view.flags.updating = true;
@@ -122,5 +130,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     assert.equal(JSON.stringify(ui.modelTerms.value()),'[]');
     assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[]');
     console.log('PASS: GLM native restoration, independent terms/quadratics, live edits and server options.');
-    return records;
+    const baseline = records.slice();
+    baseline.interactions = require('./jamovi-interaction-controls.cjs')({ui,native,view,restore,snapshot,assert});
+    return baseline;
 };

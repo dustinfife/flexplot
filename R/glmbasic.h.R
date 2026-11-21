@@ -27,7 +27,12 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             polynomials = FALSE,
             quadratic = NULL,
             comparisonPolynomials = FALSE,
-            comparisonQuadratic = NULL, ...) {
+            comparisonQuadratic = NULL,
+            interactions = FALSE,
+            comparisonInteractions = FALSE,
+            mainEffects = NULL,
+            comparisonMainEffects = NULL,
+            interactionSpecVersion = 0, ...) {
 
             super$initialize(
                 package="flexplot",
@@ -129,6 +134,26 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "comparisonQuadratic",
                 comparisonQuadratic,
                 default=NULL)
+            private$..interactions = jmvcore::OptionBool$new(
+                "interactions",
+                interactions,
+                default=FALSE)
+            private$..comparisonInteractions = jmvcore::OptionBool$new(
+                "comparisonInteractions",
+                comparisonInteractions,
+                default=FALSE)
+            private$..mainEffects = jmvcore::OptionVariables$new(
+                "mainEffects",
+                mainEffects,
+                default=NULL)
+            private$..comparisonMainEffects = jmvcore::OptionVariables$new(
+                "comparisonMainEffects",
+                comparisonMainEffects,
+                default=NULL)
+            private$..interactionSpecVersion = jmvcore::OptionInteger$new(
+                "interactionSpecVersion",
+                interactionSpecVersion,
+                default=0)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -152,6 +177,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..quadratic)
             self$.addOption(private$..comparisonPolynomials)
             self$.addOption(private$..comparisonQuadratic)
+            self$.addOption(private$..interactions)
+            self$.addOption(private$..comparisonInteractions)
+            self$.addOption(private$..mainEffects)
+            self$.addOption(private$..comparisonMainEffects)
+            self$.addOption(private$..interactionSpecVersion)
         }),
     active = list(
         out = function() private$..out$value,
@@ -175,7 +205,12 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         polynomials = function() private$..polynomials$value,
         quadratic = function() private$..quadratic$value,
         comparisonPolynomials = function() private$..comparisonPolynomials$value,
-        comparisonQuadratic = function() private$..comparisonQuadratic$value),
+        comparisonQuadratic = function() private$..comparisonQuadratic$value,
+        interactions = function() private$..interactions$value,
+        comparisonInteractions = function() private$..comparisonInteractions$value,
+        mainEffects = function() private$..mainEffects$value,
+        comparisonMainEffects = function() private$..comparisonMainEffects$value,
+        interactionSpecVersion = function() private$..interactionSpecVersion$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -198,7 +233,12 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..polynomials = NA,
         ..quadratic = NA,
         ..comparisonPolynomials = NA,
-        ..comparisonQuadratic = NA)
+        ..comparisonQuadratic = NA,
+        ..interactions = NA,
+        ..comparisonInteractions = NA,
+        ..mainEffects = NA,
+        ..comparisonMainEffects = NA,
+        ..interactionSpecVersion = NA)
 )
 
 glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

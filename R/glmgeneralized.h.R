@@ -22,7 +22,12 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             plotGroup = NULL,
             plotStyle = "auto",
             se = TRUE,
-            includeP = FALSE, ...) {
+            includeP = FALSE,
+            interactions = FALSE,
+            comparisonInteractions = FALSE,
+            mainEffects = NULL,
+            comparisonMainEffects = NULL,
+            interactionSpecVersion = 0, ...) {
 
             super$initialize(
                 package="flexplot",
@@ -106,6 +111,26 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "includeP",
                 includeP,
                 default=FALSE)
+            private$..interactions = jmvcore::OptionBool$new(
+                "interactions",
+                interactions,
+                default=FALSE)
+            private$..comparisonInteractions = jmvcore::OptionBool$new(
+                "comparisonInteractions",
+                comparisonInteractions,
+                default=FALSE)
+            private$..mainEffects = jmvcore::OptionVariables$new(
+                "mainEffects",
+                mainEffects,
+                default=NULL)
+            private$..comparisonMainEffects = jmvcore::OptionVariables$new(
+                "comparisonMainEffects",
+                comparisonMainEffects,
+                default=NULL)
+            private$..interactionSpecVersion = jmvcore::OptionInteger$new(
+                "interactionSpecVersion",
+                interactionSpecVersion,
+                default=0)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -124,6 +149,11 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..plotStyle)
             self$.addOption(private$..se)
             self$.addOption(private$..includeP)
+            self$.addOption(private$..interactions)
+            self$.addOption(private$..comparisonInteractions)
+            self$.addOption(private$..mainEffects)
+            self$.addOption(private$..comparisonMainEffects)
+            self$.addOption(private$..interactionSpecVersion)
         }),
     active = list(
         out = function() private$..out$value,
@@ -142,7 +172,12 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plotGroup = function() private$..plotGroup$value,
         plotStyle = function() private$..plotStyle$value,
         se = function() private$..se$value,
-        includeP = function() private$..includeP$value),
+        includeP = function() private$..includeP$value,
+        interactions = function() private$..interactions$value,
+        comparisonInteractions = function() private$..comparisonInteractions$value,
+        mainEffects = function() private$..mainEffects$value,
+        comparisonMainEffects = function() private$..comparisonMainEffects$value,
+        interactionSpecVersion = function() private$..interactionSpecVersion$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -160,7 +195,12 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..plotGroup = NA,
         ..plotStyle = NA,
         ..se = NA,
-        ..includeP = NA)
+        ..includeP = NA,
+        ..interactions = NA,
+        ..comparisonInteractions = NA,
+        ..mainEffects = NA,
+        ..comparisonMainEffects = NA,
+        ..interactionSpecVersion = NA)
 )
 
 glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

@@ -8,12 +8,13 @@ const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
     extra:['quadratic','comparisonQuadratic']}];
 const synchronize = function(ui, context, added, changed = null) {
     // Host options arrive separately during restoration; do not prune partial state.
-    if (context.flags && context.flags.updating) return;
+    if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
     if (context.workspace.glmSynchronizing) return;
     if (!added && !(ui.preds.value() || []).length) return;
     context.workspace.glmSynchronizing = true;
     ui.view.model.options.beginEdit();
     try {
+        updateTerms.prepareInteractions(ui, changed);
         const predictors = ui.preds.value() || [];
         for (const [quadraticName, modelName, supplier] of [
             ['quadratic','modelTerms','quadraticSupplier'],
@@ -28,12 +29,20 @@ const synchronize = function(ui, context, added, changed = null) {
             }
         }
         updateTerms(ui, context, added, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
+        updateTerms.syncMainEffects(ui);
     } finally {
         try { ui.view.model.options.endEdit(); }
         finally { context.workspace.glmSynchronizing = false; }
     }
 };
 module.exports = {
+    interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },
+    comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },
+    mainEffects_changed: function(ui) { synchronize(ui, this, false, 'mainEffects'); },
+    comparisonMainEffects_changed: function(ui) { synchronize(ui, this, false, 'comparisonMainEffects'); },
+    primaryMainSupplier_updated: function(ui) { synchronize(ui, this, false); },
+    comparisonMainSupplier_updated: function(ui) { synchronize(ui, this, false); },
+    compare_changed: function(ui) { synchronize(ui, this, false); },
     view_loaded: function(ui) { synchronize(ui, this, false); },
     view_updated: function(ui) { synchronize(ui, this, false); },
     preds_changed: function(ui) { synchronize(ui, this, true); },

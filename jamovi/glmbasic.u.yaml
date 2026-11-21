@@ -22,8 +22,24 @@ children:
             name: preds
             isTarget: true
   - type: Supplier
+    name: primaryMainSupplier
+    label: Available main effects
+    format: variable
+    persistentItems: true
+    children:
+      - type: TargetLayoutBox
+        label: Model 1 main effects
+        children:
+          - type: VariablesListBox
+            name: mainEffects
+            isTarget: true
+  - type: CheckBox
+    name: interactions
+  - type: Supplier
     name: primarySupplier
-    label: Selected predictors
+    useSingleCell: true
+    contentLink: (interactions)
+    label: Interaction terms
     format: term
     persistentItems: true
     higherOrders: true
@@ -61,24 +77,44 @@ children:
     children:
       - type: CheckBox
         name: compare
-      - type: Supplier
-        name: comparisonSupplier
-        label: Selected predictors
-        format: term
-        persistentItems: true
-        higherOrders: true
+      - type: Label
+        label: Model 2 fixed effects
+        useSingleCell: true
+        contentLink: (compare)
         children:
-          - type: TargetLayoutBox
-            label: Second model terms
-            transferAction: interactions
+          - type: Supplier
+            name: comparisonMainSupplier
+            label: Available main effects
+            format: variable
+            persistentItems: true
             children:
-              - type: ListBox
-                name: comparisonTerms
-                isTarget: true
-                enable: (compare)
-                valueFilter: unique
-                template:
-                  type: TermLabel
+              - type: TargetLayoutBox
+                label: Model 2 main effects
+                children:
+                  - type: VariablesListBox
+                    name: comparisonMainEffects
+                    isTarget: true
+          - type: CheckBox
+            name: comparisonInteractions
+          - type: Supplier
+            name: comparisonSupplier
+            useSingleCell: true
+            contentLink: (comparisonInteractions)
+            label: Interaction terms
+            format: term
+            persistentItems: true
+            higherOrders: true
+            children:
+              - type: TargetLayoutBox
+                label: Second model terms
+                transferAction: interactions
+                children:
+                  - type: ListBox
+                    name: comparisonTerms
+                    isTarget: true
+                    valueFilter: unique
+                    template:
+                      type: TermLabel
       - type: Label
         label: Model 2 polynomial terms
         useSingleCell: true

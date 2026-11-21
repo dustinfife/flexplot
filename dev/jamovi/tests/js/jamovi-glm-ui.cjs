@@ -92,6 +92,35 @@ const {pathToFileURL} = require('node:url');
             if (!(name in ui)) ui[name] = control(name.endsWith('Supplier') ? [] : null);
         }
         const yaml = require(require.resolve('js-yaml',{paths:[compilerPath]}));
+        if (analysis === 'glmbasic' || generalized) {
+            for (const [name,value] of Object.entries({interactions:false,comparisonInteractions:false,interactionSpecVersion:0})) {
+                if (!ui[name]) ui[name] = control(value); else ui[name].setValue(value);
+            }
+            ui.view.model.options.getOption = name => ({getValue:ui[name].value});
+            ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
+        }
+
+        if (analysis === 'glmbasic' || generalized) {
+            const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.a.yaml'),'utf8'));
+            for (const name of ['interactions','comparisonInteractions']) {
+                assert.equal(definition.options.find(option => option.name === name).title,'Include Interactions');
+                assert.equal(definition.options.find(option => option.name === name).default,false);
+            }
+            assert.equal(definition.options.find(option => option.name === 'interactionSpecVersion').hidden,true);
+            const primary = compiled.view.layout.controls.find(control => control.name === 'primarySupplier');
+            const main = compiled.view.layout.controls.find(control => control.name === 'primaryMainSupplier');
+            assert.equal(main.contentLink,undefined,'Main effects must remain editable with interactions off');
+            assert.equal(primary.contentLink,'(interactions)');
+            assert.equal(primary.useSingleCell,true);
+            const comparison = compiled.view.layout.controls.find(control => control.label === 'Model Comparison');
+            const second = comparison.controls.find(control => control.label === 'Model 2 fixed effects');
+            assert.equal(second.contentLink,'(compare)');
+            const builder = second.controls.find(control => control.name === 'comparisonSupplier');
+            assert.equal(builder.contentLink,'(comparisonInteractions)');
+            assert.equal(second.controls.find(control => control.name === 'comparisonMainSupplier').contentLink,undefined);
+            if (runtime) for (const definition of [primary,builder,second])
+                require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),definition,null,compilerPath);
+        }
         if (analysis === 'mixedmodel' || analysis === 'glmgeneralized') {
             if (runtime) {
                 const resultsFile = fs.readdirSync(path.dirname(runtime)).find(name => /^resultsview-.*\.js$/.test(name));
@@ -337,8 +366,9 @@ const {pathToFileURL} = require('node:url');
             const quadraticRecords = require('./jamovi-lm-quadratic.cjs')(ui,view,fire,assert);
             fs.writeFileSync(output+'.quadratic.json',JSON.stringify(quadraticRecords));
         }
-        if (generalized && runtime) {
-            const restored = require('./jamovi-glm-restoration.cjs')(fs.readFileSync(runtime,'utf8'), compilerPath, view.handlers, FormatDef, utils, assert);
+        if ((generalized || analysis === 'glmbasic') && runtime) {
+            const restored = require('./jamovi-glm-restoration.cjs')(fs.readFileSync(runtime,'utf8'), compilerPath, view.handlers, FormatDef, utils, assert, analysis);
+            fs.writeFileSync(output+'.interactions.json',JSON.stringify(restored.interactions));
             fs.writeFileSync(output+'.restored.json',JSON.stringify(restored));
         }
         fs.writeFileSync(output, records.join('\n') + '\n');

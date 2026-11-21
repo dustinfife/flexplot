@@ -2215,6 +2215,19 @@
         "plotX": "x",
         "plotPanels": [
           "group"
+        ],
+        "interactions": false,
+        "comparisonInteractions": false,
+        "interactionSpecVersion": 1,
+        "mainEffects": [
+          "x",
+          "z",
+          "group"
+        ],
+        "comparisonMainEffects": [
+          "x",
+          "z",
+          "group"
         ]
       },
       "steps": [
@@ -2236,7 +2249,8 @@
                 "x",
                 "z"
               ]
-            ]
+            ],
+            "interactions": true
           },
           "expected_status": "complete",
           "expected_ui": {},
@@ -2272,7 +2286,13 @@
             "plotX": "x",
             "plotPanels": [
               "group"
-            ]
+            ],
+            "mainEffects": [
+              "x",
+              "z",
+              "group"
+            ],
+            "interactions": true
           },
           "verify_visible_against_saved_options": true
         },
@@ -2294,7 +2314,8 @@
                 "x",
                 "group"
               ]
-            ]
+            ],
+            "interactions": true
           },
           "expected_status": "complete",
           "expected_ui": {},
@@ -2330,7 +2351,13 @@
             "plotX": "x",
             "plotPanels": [
               "group"
-            ]
+            ],
+            "mainEffects": [
+              "x",
+              "z",
+              "group"
+            ],
+            "interactions": true
           },
           "verify_visible_against_saved_options": true
         },
@@ -2348,7 +2375,8 @@
               [
                 "group"
               ]
-            ]
+            ],
+            "interactions": false
           },
           "expected_status": "complete",
           "expected_ui": {},
@@ -2380,7 +2408,13 @@
             "plotX": "x",
             "plotPanels": [
               "group"
-            ]
+            ],
+            "mainEffects": [
+              "x",
+              "z",
+              "group"
+            ],
+            "interactions": false
           },
           "verify_visible_against_saved_options": true
         }
@@ -2389,7 +2423,8 @@
         "interface": [
           "visible controls equal expected_options",
           "result state completes or exposes the specified error; no persistent spinner",
-          "no stale/duplicate rows after edits"
+          "no stale/duplicate rows after edits",
+          "Inspect saved interactionSpecVersion separately; it is internal metadata, not a visible control."
         ],
         "statistical": [
           "all coef/SE/t CI/p; interaction delta R2, protected main effects blank, no bundled interaction contribution"
@@ -3090,6 +3125,18 @@
         "comparisonX": "x",
         "comparisonPanels": [
           "group"
+        ],
+        "interactions": false,
+        "comparisonInteractions": false,
+        "interactionSpecVersion": 1,
+        "mainEffects": [
+          "x",
+          "z",
+          "group"
+        ],
+        "comparisonMainEffects": [
+          "x",
+          "group"
         ]
       },
       "steps": [
@@ -3141,6 +3188,17 @@
             "comparisonX": "x",
             "comparisonPanels": [
               "group"
+            ],
+            "interactions": false,
+            "comparisonInteractions": false,
+            "mainEffects": [
+              "x",
+              "z",
+              "group"
+            ],
+            "comparisonMainEffects": [
+              "x",
+              "group"
             ]
           },
           "verify_visible_against_saved_options": true
@@ -3149,13 +3207,9 @@
           "action": "set_options_through_native_controls",
           "description": "Change only Model 2",
           "changes": {
-            "comparisonTerms": [
-              [
-                "z"
-              ],
-              [
-                "group"
-              ]
+            "comparisonMainEffects": [
+              "z",
+              "group"
             ]
           },
           "expected_status": "complete",
@@ -3201,6 +3255,17 @@
             ],
             "comparisonX": "x",
             "comparisonPanels": [
+              "group"
+            ],
+            "interactions": false,
+            "comparisonInteractions": false,
+            "mainEffects": [
+              "x",
+              "z",
+              "group"
+            ],
+            "comparisonMainEffects": [
+              "z",
               "group"
             ]
           },
@@ -3254,6 +3319,12 @@
             ],
             "comparisonX": "x",
             "comparisonPanels": [
+              "group"
+            ],
+            "interactions": false,
+            "mainEffects": [
+              "x",
+              "z",
               "group"
             ]
           },
@@ -3309,6 +3380,17 @@
             "comparisonX": "x",
             "comparisonPanels": [
               "group"
+            ],
+            "interactions": false,
+            "comparisonInteractions": false,
+            "mainEffects": [
+              "x",
+              "z",
+              "group"
+            ],
+            "comparisonMainEffects": [
+              "z",
+              "group"
             ]
           },
           "verify_visible_against_saved_options": true
@@ -3318,7 +3400,8 @@
         "interface": [
           "visible controls equal expected_options",
           "result state completes or exposes the specified error; no persistent spinner",
-          "no stale/duplicate rows after edits"
+          "no stale/duplicate rows after edits",
+          "Inspect saved interactionSpecVersion separately; it is internal metadata, not a visible control."
         ],
         "statistical": [
           "common rows, anova nested F, AIC/BIC, reciprocal BIC BF, second p cell blank; comparison p visibility recorded separately from coefficient checkbox"
@@ -6522,22 +6605,24 @@
             "comparisonQuadratic": [
               "z"
             ],
-            "comparisonX": "x"
+            "comparisonX": "x",
+            "interactions": true,
+            "comparisonInteractions": false,
+            "mainEffects": [
+              "x",
+              "z"
+            ],
+            "comparisonMainEffects": [
+              "z"
+            ]
           },
           "verify_visible_against_saved_options": true
         },
         {
           "action": "set_options_through_native_controls",
-          "description": "Remove Model 1 interaction after reopening",
+          "description": "Uncheck Include Interactions after reopening; preserve both main effects and quadratics",
           "changes": {
-            "modelTerms": [
-              [
-                "x"
-              ],
-              [
-                "z"
-              ]
-            ]
+            "interactions": false
           },
           "expected_status": "complete",
           "expected_ui": {},
@@ -6578,7 +6663,16 @@
             "comparisonQuadratic": [
               "z"
             ],
-            "comparisonX": "x"
+            "comparisonX": "x",
+            "interactions": false,
+            "comparisonInteractions": false,
+            "mainEffects": [
+              "x",
+              "z"
+            ],
+            "comparisonMainEffects": [
+              "z"
+            ]
           },
           "verify_visible_against_saved_options": true
         },
@@ -6625,7 +6719,16 @@
               ]
             ],
             "comparisonQuadratic": [],
-            "comparisonX": "x"
+            "comparisonX": "x",
+            "interactions": false,
+            "comparisonInteractions": false,
+            "mainEffects": [
+              "x",
+              "z"
+            ],
+            "comparisonMainEffects": [
+              "z"
+            ]
           },
           "verify_visible_against_saved_options": true
         },
@@ -6671,7 +6774,12 @@
               ]
             ],
             "comparisonQuadratic": [],
-            "comparisonX": "x"
+            "comparisonX": "x",
+            "interactions": false,
+            "mainEffects": [
+              "x",
+              "z"
+            ]
           },
           "verify_visible_against_saved_options": true
         },
@@ -6718,7 +6826,16 @@
               ]
             ],
             "comparisonQuadratic": [],
-            "comparisonX": "x"
+            "comparisonX": "x",
+            "interactions": false,
+            "comparisonInteractions": false,
+            "mainEffects": [
+              "x",
+              "z"
+            ],
+            "comparisonMainEffects": [
+              "z"
+            ]
           },
           "verify_visible_against_saved_options": true
         }
@@ -6727,7 +6844,8 @@
         "interface": [
           "visible controls equal expected_options",
           "result state completes or exposes the specified error; no persistent spinner",
-          "no stale/duplicate rows after edits"
+          "no stale/duplicate rows after edits",
+          "Inspect saved interactionSpecVersion separately; it is internal metadata, not a visible control."
         ],
         "statistical": [
           "compare any fitted model with independent realized-data reference; rendering alone is insufficient"
@@ -7375,6 +7493,16 @@
         "comparisonX": "x",
         "comparisonPanels": [
           "z_missing"
+        ],
+        "interactions": false,
+        "comparisonInteractions": false,
+        "interactionSpecVersion": 1,
+        "mainEffects": [
+          "x",
+          "z_missing"
+        ],
+        "comparisonMainEffects": [
+          "x"
         ]
       },
       "steps": [
@@ -7417,7 +7545,16 @@
             "comparisonX": "x",
             "comparisonPanels": [
               "z_missing"
-            ]
+            ],
+            "comparisonInteractions": false,
+            "mainEffects": [
+              "x",
+              "z_missing"
+            ],
+            "comparisonMainEffects": [
+              "x"
+            ],
+            "interactions": false
           },
           "verify_visible_against_saved_options": true
         },
@@ -7461,7 +7598,12 @@
             "comparisonX": "x",
             "comparisonPanels": [
               "z_missing"
-            ]
+            ],
+            "mainEffects": [
+              "x",
+              "z_missing"
+            ],
+            "interactions": false
           },
           "verify_visible_against_saved_options": true
         }
@@ -7470,7 +7612,8 @@
         "interface": [
           "visible controls equal expected_options",
           "result state completes or exposes the specified error; no persistent spinner",
-          "no stale/duplicate rows after edits"
+          "no stale/duplicate rows after edits",
+          "Inspect saved interactionSpecVersion separately; it is internal metadata, not a visible control."
         ],
         "statistical": [
           "same eligible row identities; independent logLik LR/df chi-square only nested; AIC/BIC reciprocal BF; NB theta estimated separately; no LM F test"

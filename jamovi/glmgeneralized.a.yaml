@@ -92,4 +92,25 @@ options:
     title: Include p-values
     type: Bool
     default: false
+  - name: interactions
+    title: Include Interactions
+    type: Bool
+    default: false
+  - name: comparisonInteractions
+    title: Include Interactions
+    type: Bool
+    default: false
+  - name: mainEffects
+    title: Model 1 main effects
+    type: Variables
+    default: null
+  - name: comparisonMainEffects
+    title: Model 2 main effects
+    type: Variables
+    default: null
+  - name: interactionSpecVersion
+    title: Interaction specification version
+    hidden: true
+    type: Integer
+    default: 0
 ...

@@ -56,4 +56,44 @@ const updateTerms = function(ui, context, addNew, models, suppliers, layouts = [
     context.workspace.glmPredictors = predictors.slice();
 };
 
+// Migration runs only after the host's complete option batch has arrived.
+// modelTerms remains authoritative; the main-effect controls are editable projections.
+updateTerms.prepareInteractions = function(ui, changed) {
+    const options = ui.view.model.options;
+    const models = [['modelTerms','interactions','mainEffects'],
+        ['comparisonTerms','comparisonInteractions','comparisonMainEffects']];
+    if (options.getOption('interactionSpecVersion').getValue() < 1) {
+        for (const [termsName, enabled] of models) {
+            if (changed === enabled) continue; // Respect an explicit user toggle.
+            const interacting = (ui[termsName].value() || []).some(term => term.length > 1);
+            if (interacting && ui[enabled].value() !== true) ui[enabled].setValue(true);
+        }
+        options.setOptionValue('interactionSpecVersion',1);
+    }
+    for (const [termsName, enabled, mainName] of models) {
+        let terms = ui[termsName].value();
+        if (changed === mainName) {
+            const selected = ui[mainName].value() || [];
+            const current = terms == null ? (ui.preds.value() || []).map(name => [name]) : terms;
+            terms = current.filter(term => term.length > 1 || selected.includes(term[0]));
+            terms = terms.concat(selected.filter(name => !terms.some(term =>
+                term.length === 1 && term[0] === name)).map(name => [name]));
+        }
+        if (terms != null && ui[enabled].value() === false) terms = terms.filter(term => term.length === 1);
+        if (JSON.stringify(terms) !== JSON.stringify(ui[termsName].value())) ui[termsName].setValue(terms);
+    }
+};
+
+updateTerms.syncMainEffects = function(ui) {
+    const predictors = ui.preds.value() || [];
+    for (const [termsName, mainName, supplier] of [
+        ['modelTerms','mainEffects','primaryMainSupplier'],
+        ['comparisonTerms','comparisonMainEffects','comparisonMainSupplier']]) {
+        const terms = ui[termsName].value();
+        const selected = terms == null ? predictors : terms.filter(term => term.length === 1).map(term => term[0]);
+        if (JSON.stringify(ui[mainName].value()) !== JSON.stringify(selected)) ui[mainName].setValue(selected);
+        ui[supplier].setValue(utils.valuesToItems(predictors.filter(name => !selected.includes(name)), FormatDef.variable));
+    }
+};
+
 module.exports = updateTerms;

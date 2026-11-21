@@ -4,12 +4,13 @@ const updateTerms = require('./model-terms');
 const layouts = [{"supplier": "plotSupplier", "models": ["modelTerms"], "selections": ["plotX", "plotPanels", "plotGroup"], "extra": "quadratic"}, {"supplier": "comparisonPlotSupplier", "models": ["modelTerms", "comparisonTerms"], "selections": ["comparisonX", "comparisonPanels", "comparisonGroup"], "extra": ["quadratic", "comparisonQuadratic"]}];
 const synchronize = (ui, context, added, changed = null) => {
     // Restore all host options before pruning dependent selections.
-    if (context.flags && context.flags.updating) return;
+    if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
     if (context.workspace.lmSynchronizing) return;
     if (!added && !(ui.preds.value() || []).length) return;
     context.workspace.lmSynchronizing = true;
     ui.view.model.options.beginEdit();
     try {
+        updateTerms.prepareInteractions(ui, changed);
         const predictors = ui.preds.value() || [];
         for (const [enabled, quadratic, termsName, supplier] of [
             ['polynomials','quadratic','modelTerms','quadraticSupplier'],
@@ -25,6 +26,7 @@ const synchronize = (ui, context, added, changed = null) => {
             }
         }
         updateTerms(ui, context, added, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
+        updateTerms.syncMainEffects(ui);
     } finally {
         try { ui.view.model.options.endEdit(); }
         finally { context.workspace.lmSynchronizing = false; }
@@ -32,6 +34,13 @@ const synchronize = (ui, context, added, changed = null) => {
 };
 
 module.exports = {
+    interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },
+    comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },
+    mainEffects_changed: function(ui) { synchronize(ui, this, false, 'mainEffects'); },
+    comparisonMainEffects_changed: function(ui) { synchronize(ui, this, false, 'comparisonMainEffects'); },
+    primaryMainSupplier_updated: function(ui) { synchronize(ui, this, false); },
+    comparisonMainSupplier_updated: function(ui) { synchronize(ui, this, false); },
+    compare_changed: function(ui) { synchronize(ui, this, false); },
     view_loaded: function(ui) { synchronize(ui, this, false); },
     view_updated: function(ui) { synchronize(ui, this, false); },
     polynomials_changed: function(ui) { synchronize(ui, this, false); },

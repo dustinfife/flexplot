@@ -16,7 +16,7 @@ test_that("restored GLM native controls preserve both models through live edits"
   analysis = NULL
   for (record in records) {
     values = record$options
-    for (name in c("preds","quadratic","comparisonQuadratic","plotPanels","comparisonPanels"))
+    for (name in c("preds","quadratic","comparisonQuadratic","plotPanels","comparisonPanels","mainEffects","comparisonMainEffects"))
       values[name] = list(unlist(values[[name]],use.names=FALSE))
     for (name in c("modelTerms","comparisonTerms"))
       values[name] = list(if (is.null(values[[name]])) NULL else lapply(values[[name]],unlist,use.names=FALSE))

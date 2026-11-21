@@ -73,6 +73,24 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
             updateDisplayValue:updateDisplay, setRootElement(value){this.el = value;},
             translate:value => value, getSourceValue:() => selection, setValue:value => {selection = value;}};
     };
+    if (['(interactions)','(comparisonInteractions)','(compare)'].includes(definition.contentLink)) {
+        assert.equal(definition.useSingleCell,true);
+        const name = definition.contentLink.slice(1,-1);
+        let enabled = false;
+        const control = create(true);
+        const grid = new Grid(); render.call(control,grid,0,0,{});
+        const engine = {_resources:{interactionBuilder:control,[name]:{value:()=>enabled}},actions:[],
+            addDirectAction(name,action){this.actions.push(action);}};
+        for (const signature of ['_nextNonWhiteChar(e,t){','_arrayUnique(e){','_resolveBindPart(e,t){',
+            '_resolveBinding(e,t){','bindActionParams(e,t,s){','bindingsToActions(){'])
+            engine[signature.slice(0,signature.indexOf('('))] = method(signature);
+        engine.bindingsToActions();
+        for (enabled of [false,true,false,true]) {
+            for (const action of engine.actions) action.execute(engine._resources);
+            assert.equal(control._cell.visible,enabled);
+        }
+        return;
+    }
     if (definition.name === 'casGhost') {
         const state = {compare:false,predictionType:'cluster'};
         const control = create(true);
