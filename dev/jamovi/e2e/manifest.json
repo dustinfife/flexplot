@@ -4574,7 +4574,8 @@
             ],
             "comparisonX": "x"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "fitting_error"
         }
       ],
       "verification": {
@@ -4731,7 +4732,8 @@
             "comparisonX": "x",
             "comparisonGroup": "group"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "rendering_error"
         },
         {
           "action": "set_options_through_native_controls",
@@ -6305,9 +6307,12 @@
           "expected_status": "waiting",
           "expected_ui": {},
           "reference": null,
-          "expected_warnings_or_errors": [],
+          "expected_warnings_or_errors": [
+            "Select an outcome and predictors"
+          ],
           "expected_options": {},
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "waiting"
         },
         {
           "action": "set_options_through_native_controls",
@@ -6452,7 +6457,9 @@
           "expected_status": "waiting",
           "expected_ui": {},
           "reference": null,
-          "expected_warnings_or_errors": [],
+          "expected_warnings_or_errors": [
+            "Select an outcome variable"
+          ],
           "expected_options": {
             "out": null,
             "preds": [
@@ -6471,7 +6478,8 @@
             "plotX": "x",
             "plotStyle": "raw"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "waiting"
         }
       ],
       "verification": {
@@ -8597,7 +8605,8 @@
             ],
             "family": "binomial"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "fitting_error"
         },
         {
           "action": "set_options_through_native_controls",
@@ -8624,7 +8633,8 @@
             ],
             "family": "poisson"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "fitting_error"
         },
         {
           "action": "set_options_through_native_controls",
@@ -8650,7 +8660,8 @@
             ],
             "family": "poisson"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "fitting_error"
         },
         {
           "action": "set_options_through_native_controls",
@@ -8677,7 +8688,8 @@
             ],
             "family": "gammaLog"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "fitting_error"
         },
         {
           "action": "set_options_through_native_controls",
@@ -8704,7 +8716,8 @@
             ],
             "family": "gaussian"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "fitting_error"
         },
         {
           "action": "set_options_through_native_controls",
@@ -8730,7 +8743,8 @@
             ],
             "family": "gaussian"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "fitting_error"
         }
       ],
       "verification": {
@@ -8800,9 +8814,7 @@
           "expected_status": "diagnostic",
           "expected_ui": {},
           "reference": null,
-          "expected_warnings_or_errors": [
-            "Record actual glm convergence and boundary warnings; never accept a spinner as an error"
-          ],
+          "expected_warnings_or_errors": [],
           "expected_options": {
             "out": "y",
             "preds": [
@@ -8816,7 +8828,17 @@
             ],
             "plotX": "x"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_text_any": [
+            "converge",
+            "boundary",
+            "separation",
+            "0 or 1"
+          ],
+          "expected_diagnostic_phase": [
+            "warning",
+            "fitting_error"
+          ]
         }
       ],
       "verification": {
@@ -8979,7 +9001,9 @@
           "expected_status": "waiting",
           "expected_ui": {},
           "reference": null,
-          "expected_warnings_or_errors": [],
+          "expected_warnings_or_errors": [
+            "No Model 1 terms are selected"
+          ],
           "expected_options": {
             "out": "count_y",
             "family": "poisson",
@@ -8993,7 +9017,8 @@
             "plotGroup": "group",
             "quadratic": []
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "waiting"
         },
         {
           "action": "set_options_through_native_controls",
@@ -9091,9 +9116,12 @@
           "expected_status": "waiting",
           "expected_ui": {},
           "reference": null,
-          "expected_warnings_or_errors": [],
+          "expected_warnings_or_errors": [
+            "Select a numeric outcome and one cluster variable"
+          ],
           "expected_options": {},
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "waiting"
         },
         {
           "action": "set_options_through_native_controls",
@@ -9167,7 +9195,9 @@
           "expected_status": "waiting",
           "expected_ui": {},
           "reference": null,
-          "expected_warnings_or_errors": [],
+          "expected_warnings_or_errors": [
+            "Select a numeric outcome and one cluster variable"
+          ],
           "expected_options": {
             "out": "random_intercept_y",
             "preds": [
@@ -9192,7 +9222,8 @@
               "id"
             ]
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "waiting"
         },
         {
           "action": "set_options_through_native_controls",
@@ -12496,7 +12527,8 @@
             ],
             "includeP": true
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "warning"
         }
       ],
       "verification": {
@@ -12609,7 +12641,8 @@
             "randomIntercept": false,
             "randomSlopes": []
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "fitting_error"
         },
         {
           "action": "set_options_through_native_controls",
@@ -12761,7 +12794,8 @@
             "plotX": "x",
             "plotPanels": []
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "rendering_error"
         },
         {
           "action": "set_options_through_native_controls",
@@ -12837,7 +12871,8 @@
             ],
             "plotGroup": "binary"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "rendering_error"
         },
         {
           "action": "set_options_through_native_controls",
@@ -13569,7 +13604,8 @@
             ],
             "plotX": "x"
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "fitting_error"
         }
       ],
       "verification": {

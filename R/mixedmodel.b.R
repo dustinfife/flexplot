@@ -218,8 +218,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         if (!inherits(state,"error")) state$samplePolicy = "standalone"
       }
       if (inherits(state, "error")) {
-        self$results$explanation$setVisible(TRUE)
-        self$results$explanation$setError(conditionMessage(state))
+        jamovi_diagnostic(self$results$explanation,
+          paste0("Mixed Model could not be fitted: ", conditionMessage(state)), error=TRUE)
         return(invisible(NULL))
       }
       state$fitOptions = fit_options

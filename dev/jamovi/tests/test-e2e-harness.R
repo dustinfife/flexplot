@@ -221,3 +221,66 @@ test_that("preparing a pilot never silently overwrites a prior document", {
   expect_match(paste(readLines(log),collapse="\n"),"documents already exist")
   expect_identical(tools::md5sum(output),before)
 })
+
+test_that("diagnostic checkpoints require observable text and reject error-only empty HTML", {
+  manifest = jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))
+  scenario = Filter(function(s)s$id=="GLM-18",manifest$scenarios)[[1]]
+  observation = e2e_synthetic_observation(scenario)
+  analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(out="y",preds="x",family="binomial",graphic=FALSE),jamovi_diagnostic_data())
+  expect_true(analysis$run())
+  item = analysis$results$explanation
+  message = item$.__enclos_env__$private$.error
+  observation$native_status = "error"
+  observation$saved$analyses[[1]]$results$children = list(list(name="explanation",type="html",status="ANALYSIS_ERROR",
+    error=message,content=item$content,visible="YES"))
+  observation$diagnostics = list(list(result="explanation",phase="fitting_error",visible=TRUE,text=message,source="renderer_dom"))
+  checked = e2e_checkpoint(scenario,1L,observation)
+  expect_identical(checked$status,"passed")
+  expect_identical(checked$diagnostic_phase,"fitting_error")
+  caught = observation;caught$native_status = "complete" # R computation completed; the fitted model did not.
+  expect_identical(e2e_checkpoint(scenario,1L,caught)$status,"passed")
+  expect_identical(e2e_checkpoint(scenario,1L,caught)$diagnostic_phase,"fitting_error")
+  alternate = scenario
+  alternate$steps[[1]]$expected_warnings_or_errors = list()
+  alternate$steps[[1]]$expected_diagnostic_text_any = c("unseen alternative","numeric 0/1")
+  expect_identical(e2e_checkpoint(alternate,1L,observation)$status,"passed")
+  alternate$steps[[1]]$expected_diagnostic_text_any = "unseen alternative"
+  expect_identical(e2e_checkpoint(alternate,1L,observation)$status,"failed")
+  bad = observation;bad$diagnostics = NULL
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"blocked")
+  # The saved error exists, but the installed HTML renderer added no visible text.
+  bad = observation;bad$saved$analyses[[1]]$results$children[[1]]$content = ""
+  bad$diagnostics[[1]]$text = "";bad$diagnostics[[1]]$visible = FALSE
+  checked = e2e_checkpoint(scenario,1L,bad)
+  expect_identical(checked$status,"failed")
+  expect_match(paste(checked$problems,collapse=";"),"not visibly rendered")
+  bad = observation;bad$diagnostics[[1]]$text = "An unrelated message"
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"failed")
+  bad = observation;bad$diagnostics[[1]]$source = "saved_gui_document"
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"blocked")
+  bad = observation;bad$diagnostics[[1]]$phase = "rendering_error"
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"failed")
+  render = observation
+  render$diagnostics[[1]]$phase = "rendering_error";render$diagnostics[[1]]$result = "plot"
+  render$saved$analyses[[1]]$results$children[[1]]$name = "plot"
+  render$saved$analyses[[1]]$results$children[[1]]$type = "image"
+  render_scenario = scenario;render_scenario$steps[[1]]$expected_diagnostic_phase = "rendering_error"
+  expect_identical(e2e_checkpoint(render_scenario,1L,render)$diagnostic_phase,"rendering_error")
+  expect_identical(e2e_checkpoint(render_scenario,1L,render)$status,"passed")
+  waiting = Filter(function(s)s$id=="GLM-07",manifest$scenarios)[[1]]
+  observation = e2e_synthetic_observation(waiting)
+  observation$native_status = "waiting"
+  observation$saved$analyses[[1]]$results$children = list(list(name="waiting",type="html",status="ANALYSIS_COMPLETE",
+    error="",visible="YES",content="<p>Select an outcome and predictors.</p>"))
+  observation$diagnostics = list(list(result="waiting",phase="waiting",visible=TRUE,
+    text="Select an outcome and predictors.",source="accessibility"))
+  expect_identical(e2e_checkpoint(waiting,1L,observation)$diagnostic_phase,"waiting")
+  expect_identical(e2e_checkpoint(waiting,1L,observation)$status,"passed")
+  warning = Filter(function(s)s$id=="MM-13",manifest$scenarios)[[1]]
+  observation = e2e_synthetic_observation(warning)
+  observation$saved$analyses[[1]]$results$children = list(list(name="diagnostics",type="html",status="ANALYSIS_COMPLETE",error="",visible="YES"))
+  observation$diagnostics = list(list(result="diagnostics",phase="warning",visible=TRUE,text="Singular fit detected",source="accessibility"))
+  expect_identical(e2e_checkpoint(warning,1L,observation)$status,"passed")
+  good = Filter(function(s)s$id=="FP-03",manifest$scenarios)[[1]]
+  expect_identical(e2e_checkpoint(good,1L,e2e_synthetic_observation(good))$diagnostic_phase,"success")
+})

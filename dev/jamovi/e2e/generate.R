@@ -59,6 +59,8 @@ e2e_validate_manifest = function(manifest, fixtures, root) {
     for (step in scenario$steps) {
       stopifnot(all(names(step$expected_options) %in% allowed),all(names(step$changes) %in% allowed),
         isTRUE(step$verify_visible_against_saved_options),step$expected_status %in% c("complete","waiting","error","diagnostic"))
+      phases = unlist(step$expected_diagnostic_phase, use.names=FALSE)
+      stopifnot(all(phases %in% c("waiting","warning","fitting_error","rendering_error")))
       for (definition in definitions) {
         value = step$expected_options[[definition$name]]
         if(is.null(value)) next

@@ -66,7 +66,12 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
   if(running || observation$native_status %in% c("running",if(checkpoint$expected_status!="waiting")"waiting"))
     return(list(status="running",reason="Observable analysis/result state has not completed",revision=analysis$revision))
   if(is.null(observation$native_status)) missing = c(missing,"native completion status")
-  if(!is.null(observation$native_status) && !identical(observation$native_status,checkpoint$expected_status) && checkpoint$expected_status!="diagnostic")
+  # A caught fitting error (or waiting instruction) can finish the R request
+  # successfully. Its visible, typed diagnostic below determines the outcome.
+  allowed_status = checkpoint$expected_status
+  if (checkpoint$expected_status == "error" || checkpoint$expected_status == "waiting" &&
+      length(checkpoint$expected_diagnostic_phase)) allowed_status = c(allowed_status,"complete")
+  if(!is.null(observation$native_status) && !observation$native_status %in% allowed_status && checkpoint$expected_status!="diagnostic")
     problems = c(problems,"Native analysis status differs from the requested state")
   if(checkpoint$expected_status=="complete") {
     if(!identical(analysis$status,"ANALYSIS_COMPLETE")) problems = c(problems,"Saved analysis not complete")
@@ -81,6 +86,55 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
       }
     }
   }
+  # Saved error metadata is not evidence that the user can see a diagnostic.
+  # Require a separately observed, analysis-scoped accessibility/DOM message.
+  patterns = unlist(checkpoint$expected_warnings_or_errors, use.names=FALSE)
+  alternatives = unlist(checkpoint$expected_diagnostic_text_any, use.names=FALSE)
+  needs_diagnostic = checkpoint$expected_status %in% c("error","diagnostic") || length(patterns) || length(alternatives) || length(checkpoint$expected_diagnostic_phase)
+  diagnostic_phase = if (checkpoint$expected_status == "complete") "success" else if (checkpoint$expected_status == "waiting") "waiting" else NULL
+  if (needs_diagnostic) {
+    diagnostics = observation$diagnostics
+    if (is.null(diagnostics)) {
+      missing = c(missing, "observable diagnostic text (saved metadata is insufficient)")
+    } else {
+      inspected = Filter(function(entry) is.list(entry) && length(entry$source) == 1L &&
+        entry$source %in% c("accessibility","renderer_dom") &&
+        length(entry$result) == 1L && entry$result %in% vapply(visible, `[[`, character(1), "name"), diagnostics)
+      if (length(inspected) != length(diagnostics)) missing = c(missing, "native diagnostic provenance and result scope")
+      shown = Filter(function(entry) isTRUE(entry$visible) && is.character(entry$text) &&
+        length(entry$text) == 1L && !is.na(entry$text) && nzchar(trimws(entry$text)), inspected)
+      if (!length(shown)) {
+        if (length(inspected) || !length(diagnostics)) problems = c(problems, "Expected diagnostic is not visibly rendered")
+      } else {
+        for (entry in shown) {
+          if (length(entry$phase) != 1L) next
+          node = visible[[match(entry$result,vapply(visible,`[[`,character(1),"name"))]]
+          if (identical(entry$phase,"rendering_error") && !identical(node$type,"image") ||
+              identical(entry$phase,"fitting_error") && identical(node$type,"image") ||
+              identical(entry$phase,"waiting") && !identical(entry$result,"waiting"))
+            problems = c(problems,"Diagnostic phase contradicts its saved result type")
+          if (entry$phase %in% c("fitting_error","rendering_error") && !nzchar(node$error) && !nzchar(analysis$error))
+            problems = c(problems,"Observed error diagnostic has no corresponding saved error")
+        }
+        phases = unlist(lapply(shown, `[[`, "phase"), use.names=FALSE)
+        allowed = unlist(checkpoint$expected_diagnostic_phase, use.names=FALSE)
+        if (!length(allowed)) allowed = switch(checkpoint$expected_status,
+          waiting="waiting", error=c("fitting_error","rendering_error"),
+          diagnostic=c("warning","fitting_error","rendering_error"), "warning")
+        selected = shown[vapply(shown, function(entry) length(entry$phase) == 1L && entry$phase %in% allowed, logical(1))]
+        if (!length(selected)) problems = c(problems, "Diagnostic phase does not match waiting, fitting error, rendering error, or warning expectation")
+        text = tolower(paste(vapply(selected, `[[`, character(1), "text"), collapse="\n"))
+        for (pattern in patterns) if (!grepl(tolower(pattern), text, fixed=TRUE))
+          problems = c(problems, paste("Missing visible diagnostic text:",pattern))
+        if (length(alternatives) && !any(vapply(alternatives, function(pattern) grepl(tolower(pattern),text,fixed=TRUE), logical(1))))
+          problems = c(problems, "None of the expected visible diagnostic alternatives appeared")
+        diagnostic_phase = unique(phases)
+      }
+    }
+  }
+  if (checkpoint$expected_status == "error" && !nzchar(analysis$error) &&
+      !any(vapply(visible,function(element)nzchar(element$error),logical(1))))
+    problems = c(problems,"Expected error is absent from saved result state")
   numerical = list()
   if(!is.null(reference) && checkpoint$expected_status=="complete" && scenario$analysis!="flexplota") {
     model_count = length(reference$models)
@@ -114,7 +168,7 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
   }
   list(status=if(length(problems))"failed" else if(length(missing))"blocked" else "passed",
     problems=unique(problems),unobserved=unique(missing),revision=analysis$revision,
-    saved_sha256=snapshot$sha256,saved_options=analysis$options,numerical=numerical)
+    saved_sha256=snapshot$sha256,saved_options=analysis$options,numerical=numerical,diagnostic_phase=diagnostic_phase)
 }
 
 e2e_run_scenario = function(scenario, driver, references, output, timeout=30, now=function()proc.time()[[3]],poll=function()Sys.sleep(.1)) {

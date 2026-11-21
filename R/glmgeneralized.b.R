@@ -20,7 +20,7 @@ jamovi_glm_generalized_data = function(data, formula, family) {
     return(data)
   }
   if (!is.numeric(response) || any(!is.finite(response))) {
-    stop("The selected family requires a finite numeric outcome.", call.=FALSE)
+    stop("The selected distribution requires a finite numeric outcome. For a two-level categorical outcome, choose Binomial / Logistic.", call.=FALSE)
   }
   if (family %in% c("poisson", "negativebinomial") && (any(response < 0 | response != floor(response)) || !any(response > 0))) {
     stop("Count regression requires nonnegative integer counts, including at least one positive count.", call.=FALSE)
@@ -60,7 +60,10 @@ jamovi_glm_generalized_fit = function(options, data, formula=jamovi_glm_generali
       warnings$messages = unique(c(warnings$messages, conditionMessage(warning)))
       invokeRestart("muffleWarning")
     })
-  if (!isTRUE(model$converged) || model$rank < length(stats::coef(model)) ||
+  if (model$rank < length(stats::coef(model))) {
+    stop("The model is not estimable because its terms are rank deficient. Remove redundant terms or check empty factor combinations.", call.=FALSE)
+  }
+  if (!isTRUE(model$converged) ||
       (options$family %in% c("gaussian", "Gamma", "gammaLog") && stats::df.residual(model) <= 0L) ||
       any(!is.finite(stats::coef(model)))) {
     stop("The model is not estimable or did not converge. Check redundant terms, sparse categories, separation, and the number of complete observations.", call.=FALSE)
@@ -114,8 +117,17 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     .init=function() jamovi_glm_reporting_reset(self$results),
     .run=function() {
       jamovi_glm_reporting_reset(self$results)
-      if (!length(self$options$out) || !length(self$options$preds) ||
-          (!is.null(self$options$modelTerms) && !length(self$options$modelTerms) && !length(self$options$quadratic))) {
+      if (!length(self$options$out)) {
+        jamovi_diagnostic(self$results$waiting, if (!length(self$options$preds))
+          "Select an outcome and predictors." else "Select an outcome variable.")
+        return(invisible(NULL))
+      }
+      if (!length(self$options$preds)) {
+        jamovi_diagnostic(self$results$waiting, "Select at least one predictor.")
+        return(invisible(NULL))
+      }
+      if (!is.null(self$options$modelTerms) && !length(self$options$modelTerms) && !length(self$options$quadratic)) {
+        jamovi_diagnostic(self$results$waiting, "No Model 1 terms are selected. Add a model term or a squared term.")
         return(invisible(NULL))
       }
       comparison = NULL
@@ -127,8 +139,9 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
       }, error=identity)
       if (inherits(state, "error")) {
         self$results$waiting$setVisible(FALSE)
-        self$results$explanation$setVisible(TRUE)
-        self$results$explanation$setError(conditionMessage(state))
+        jamovi_diagnostic(self$results$explanation, paste0(
+          if (self$options$compare) "Model comparison is unavailable: " else "Model 1 could not be fitted: ",
+          conditionMessage(state)), error=TRUE)
         return(invisible(NULL))
       }
       if (!is.null(comparison)) {

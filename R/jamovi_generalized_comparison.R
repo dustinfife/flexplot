@@ -1,12 +1,16 @@
 # GLM comparison is separate from the Linear Model adapter's F-test and R-squared.
 jamovi_glm_generalized_comparison = function(options, data) {
-  formulas = list(jamovi_glm_generalized_formula(options, data),
-    jamovi_glm_generalized_formula(options, data, options$comparisonTerms, options$comparisonQuadratic))
+  formulas = lapply(seq_len(2L), function(i) tryCatch(
+    if (i == 1L) jamovi_glm_generalized_formula(options, data) else
+      jamovi_glm_generalized_formula(options, data, options$comparisonTerms, options$comparisonQuadratic),
+    error=function(error) stop("Model ", i, " specification: ", conditionMessage(error), call.=FALSE)))
   variables = unique(unlist(lapply(formulas, all.vars)))
   eligible = data[stats::complete.cases(data[, variables, drop=FALSE]), , drop=FALSE]
   if (!nrow(eligible)) stop("No complete observations are available for both models.", call.=FALSE)
-  primary = jamovi_glm_generalized_fit(options, eligible, formulas[[1]])
-  secondary = jamovi_glm_generalized_fit(options, eligible, formulas[[2]])
+  primary = tryCatch(jamovi_glm_generalized_fit(options, eligible, formulas[[1]]),
+    error=function(error) stop("Model 1: ", conditionMessage(error), call.=FALSE))
+  secondary = tryCatch(jamovi_glm_generalized_fit(options, eligible, formulas[[2]]),
+    error=function(error) stop("Model 2: ", conditionMessage(error), call.=FALSE))
   model1 = primary$model
   model2 = secondary$model
   layout = jamovi_model_layout(list(model1, model2), primary$data,

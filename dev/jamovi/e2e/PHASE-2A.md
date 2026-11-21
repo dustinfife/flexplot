@@ -417,3 +417,44 @@ that commit is not release or full GUI coverage sign-off.
 Post-restoration focused checks passed again: 578 assertions, no failures/warnings/
 skips. The final mandatory UI/development check result is recorded in the
 stabilization report. This work does not claim complete GUI scenario coverage.
+
+## Observable diagnostic checkpoints
+
+A saved `error` field is not proof that jamovi displayed a message. For checkpoints
+with expected errors, warnings, diagnostic text, or an explicit diagnostic phase,
+provide a separate analysis-scoped `diagnostics` array from fresh native inspection:
+
+```json
+"diagnostics": [{
+  "result": "explanation",
+  "phase": "fitting_error",
+  "visible": true,
+  "text": "Model 1 could not be fitted: Logistic regression requires a numeric 0/1 outcome...",
+  "source": "accessibility"
+}]
+```
+
+Supported sources are `accessibility` and `renderer_dom`. Do not synthesize these
+records from the manifest, R6 reconstruction, or saved HTML/error metadata.
+`result` must identify a visible result in the captured analysis. Error phases
+must agree with saved error metadata and result type: `rendering_error` is an
+image; `fitting_error` is a non-image result. Other phases are `waiting` and
+`warning`; successful checkpoints report `success`.
+
+Absent inspection is **blocked**. An inspected diagnostic with no visible text,
+the wrong phase, or missing expected text is **failed**. All strings in
+`expected_warnings_or_errors` must appear as case-insensitive literal substrings;
+`expected_diagnostic_text_any` explicitly allows alternatives. These fields must
+contain actual message fragments, not instructions to the operator. The existing
+GLM separation scenario now records convergence/boundary alternatives instead of
+an instruction sentence. Non-error waiting checkpoints require text when their
+manifest explicitly declares it; this does not invent waiting messages for analyses
+that do not yet supply them. These are validator changes, not evidence that any
+GUI campaign has been executed.
+
+A completed R request is not necessarily a successfully fitted model. A caught
+fit error may have native computation status `complete` but a visible result
+error. Such checkpoints must still supply the fitting/rendering diagnostic and
+matching saved error state; the report records that diagnostic phase rather
+than calling it successful model completion. Explicit waiting diagnostics are
+handled similarly. Running/rendering states are never accepted as completed.

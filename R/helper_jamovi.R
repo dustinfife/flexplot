@@ -38,3 +38,13 @@ ifelse_null = function(object, statement, true_option=object, false_option=NULL)
   if (statement) return(true_option)
   return(false_option)
 }
+
+# Html results do not render setError() metadata in jamovi 2.7.41. Keep the
+# metadata for inspection, and publish escaped text as actual visible content.
+jamovi_diagnostic = function(result, message, error=FALSE) {
+  result$setContent(paste0("<p>", jamovi_mixed_escape(message), "</p>"))
+  result$setError(if (error) message else "")
+  if (!error) result$setStatus("complete")
+  result$setVisible(TRUE)
+  invisible(NULL)
+}
