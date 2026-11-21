@@ -59,7 +59,7 @@ test_that("a single family-aware estimates table has optional p-values", {
       expected = values[[name]]
       if(is.numeric(expected)) expected[!is.finite(expected)] = NA_real_
       expect_equal(results$coefficients$asDF[[name]],expected)
-      expect_identical(results$coefficients$getColumn(name)$title,name)
+      expect_identical(results$coefficients$getColumn(name)$name,name)
     }
     original = results$coefficients$asDF
     expect_true(jamovi_reporting_update(analysis,list(includeP=TRUE)))

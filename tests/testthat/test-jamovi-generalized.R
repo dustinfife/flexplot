@@ -92,7 +92,7 @@ test_that("generalized models handle eligible rows and binary coding consistentl
     expect_equal(fitted(model), fitted(expected), tolerance=1e-12)
     if (categorical) {
       expect_identical(levels(model$model$y), c("1", "0"))
-      expect_identical(analysis$results$coefficients$notes$success$note, "Success event: 0")
+      expect_match(analysis$results$coefficients$notes$model$note, "Success event: 0", fixed=TRUE)
     }
   }
 })

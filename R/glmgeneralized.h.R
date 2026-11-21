@@ -303,15 +303,15 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 columns=list(
                     list(
                         `name`="variable",
-                        `title`="variable",
+                        `title`="Predictor",
                         `type`="text"),
                     list(
                         `name`="instantaneous_slope",
-                        `title`="instantaneous_slope",
+                        `title`="Slope (p = .5)",
                         `type`="number"),
                     list(
                         `name`="intercept_threshold",
-                        `title`="intercept_threshold",
+                        `title`="Threshold (p = .5)",
                         `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,

@@ -270,3 +270,19 @@ GLM comparison plots use 1.2-width fitted curves and lightly shaded confidence
 bands (alpha 0.13). Model 1 remains solid and Model 2 dashed, with the existing
 model colors and prediction scales. Model 2 specifications appear under
 **Model 2 effects**.
+
+## Reading the compact estimates tables
+
+Column labels use **Coefficient**, **1/OR**, **Std. OR**, **1/Std. OR**,
+**Multiplier** and **Reciprocal** while retaining the saved result-column IDs.
+Confidence-interval headings identify the distribution and level; t-based
+intervals retain only a residual-df note. SE and confidence limits remain on the
+raw coefficient scale, including when ratios are shown alongside them.
+
+Notes identify the family/link and binary success event once, on the first visible
+summary table. Odds-ratio, standardization, prediction-difference and fitted-contrast
+explanations appear only where relevant. IRT headings identify p = .5; notes retain
+predictor units, conditioning and the distinction from average marginal effects.
+Marginal probabilities retain their averaging interpretation. Hidden and empty
+tables have no note rows. Fitting warnings appear in the independent diagnostic
+element, even when all optional estimates sections are hidden.

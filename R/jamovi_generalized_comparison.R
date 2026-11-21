@@ -59,13 +59,11 @@ jamovi_glm_generalized_comparison_table = function(table, state) {
     paste(deparse(stats::formula(model)), collapse=" "), character(1))
   table$setNote("models", paste(paste("Model 1:", formulas[1]), paste("Model 2:", formulas[2]), sep="\n\n"))
   table$setNote("population", "Same complete observations for both models.")
-  table$setNote("bayes", paste("Approximate Bayes factors derived from BIC:",
-    "Model 1's value favors Model 1 over Model 2; Model 2's value favors Model 2 over Model 1."))
+  table$setNote("bayes", paste("Approximate BIC Bayes factors favor the model on each row over the other model."))
   test_note = if (is.finite(state$p)) "Nested-model likelihood-ratio test (asymptotic chi-square)." else
     "Likelihood-ratio test unavailable: nonnested/equivalent models or invalid likelihood comparison."
   if (inherits(state$model1, "negbin")) test_note = paste(test_note, "Size estimated separately per model.")
   table$setNote("test", test_note)
-  if (length(state$warnings)) table$setNote("warnings", paste(state$warnings, collapse="; "))
 }
 
 # GLM-only presentation: retain data, scales and model legend mappings.

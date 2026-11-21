@@ -22,13 +22,13 @@ items:
     visible: false
     columns:
       - name: variable
-        title: variable
+        title: Predictor
         type: text
       - name: instantaneous_slope
-        title: instantaneous_slope
+        title: Slope (p = .5)
         type: number
       - name: intercept_threshold
-        title: intercept_threshold
+        title: Threshold (p = .5)
         type: number
   - name: probabilities
     title: Marginal predicted probabilities

@@ -89,15 +89,17 @@ test_that("GLM table notes identify unchanged family-specific coefficient interv
     expect_equal(table$upper, unname(fit[,1]+critical*fit[,2]), tolerance=1e-12)
     expect_identical(results$coefficients$getColumn("lower")$superTitle,
       if (is_t) "95% t CI" else "95% normal Wald CI")
-    if (is_t) expect_match(results$coefficients$notes$intervals$note,"95% t confidence intervals.*residual df") else
+    if (is_t) expect_match(results$coefficients$notes$intervals$note,"Residual df:") else
       expect_null(results$coefficients$notes$intervals)
-    expect_false(results$explanation$visible)
-    expect_identical(results$explanation$content, "")
+    warnings = results$plot$state$warnings
+    expect_identical(results$explanation$visible,length(warnings)>0L)
+    expect_identical(results$explanation$content,if (length(warnings))
+      paste0("<p>",paste(warnings,collapse="; "),"</p>") else "")
     expect_false(grepl("estimates.glm",results$coefficients$notes$interpretation$note,fixed=TRUE))
     expect_length(results$coefficients$getRefs(), 0L)
     expect_setequal(results$getRefs(), c("flexplot","graphicalAnalysis"))
     if (family == "binomial") {
-      expect_match(results$coefficients$notes$success$note, "Success event")
+      expect_match(results$coefficients$notes$model$note, "Success event")
       expect_match(results$irt$notes$conditioning$note, "conditional")
       expect_match(results$irt$notes$interpretation$note, "not average marginal effects")
       expect_match(results$probabilities$notes$averaging$note, "eligible observations")

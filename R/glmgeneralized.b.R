@@ -173,6 +173,10 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
       self$results$coefficients$setVisible(self$options$showEstimates)
       self$results$irt$setVisible(self$options$showIRT && self$results$irt$rowCount > 0L)
       self$results$probabilities$setVisible(self$options$showProbabilities && self$results$probabilities$rowCount > 0L)
+      jamovi_glm_visible_notes(self$results)
+      warnings = unique(c(state$warnings,comparison$warnings))
+      if (length(warnings)) jamovi_diagnostic(self$results$explanation,
+        paste(warnings,collapse="; "))
       self$results$plot$setVisible(self$options$graphic)
       if (self$options$graphic) {
         guide = tryCatch(jamovi_glm_plot_guide(state, self$options$plotX,
