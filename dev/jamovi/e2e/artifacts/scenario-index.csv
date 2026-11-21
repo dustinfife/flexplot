@@ -31,7 +31,7 @@
 "LM-14","glmbasic","Rank deficiency: valid primary coefficients, unavailable comparisons","rank_deficient","P1","medium",2,1,"fresh;saved_reopen","not_run"
 "LM-15","glmbasic","Visualization restrictions and reassignment","primary","P0","medium",3,1,"fresh;saved_reopen","not_run"
 "GLM-01","glmgeneralized","gaussian fitting, reporting and response predictions","primary","P0","medium",4,4,"fresh;saved_reopen","not_run"
-"GLM-02","glmgeneralized","binomial fitting, reporting and response predictions","primary","P0","medium",4,4,"fresh;saved_reopen","not_run"
+"GLM-02","glmgeneralized","binomial fitting, reporting and response predictions","primary","P0","medium",8,5,"fresh;saved_reopen","not_run"
 "GLM-03","glmgeneralized","poisson fitting, reporting and response predictions","primary","P0","medium",4,4,"fresh;saved_reopen","not_run"
 "GLM-04","glmgeneralized","gammaLog fitting, reporting and response predictions","primary","P0","medium",4,4,"fresh;saved_reopen","not_run"
 "GLM-05","glmgeneralized","Gamma fitting, reporting and response predictions","primary","P0","medium",4,4,"fresh;saved_reopen","not_run"

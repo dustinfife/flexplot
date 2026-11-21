@@ -100,11 +100,24 @@ preserved. Supplementary statistics unavailable for quadratic/non-binomial
 formulas are identified explicitly; raw coefficients, uncertainty and model
 predictions remain available without inventing supplementary values.
 
-**Output Options** contains one statistical checkbox, **Include p-values**, off
-by default. The checkbox controls p-value columns only; all effect estimates,
-standard errors and confidence intervals remain automatic. Existing visualization
-controls are unchanged. P-values supplied by `estimates.glm()` retain that method's
+**Output Options** has three default-checked sections: **Estimates**,
+**IRT Estimates**, and **Marginal Predicted Probabilities**. Each checkbox controls
+only its corresponding table. IRT and probability controls appear for Binomial
+models; their tables also require applicable continuous and categorical summaries,
+respectively. Empty tables remain hidden. Output preferences persist across family
+and comparison changes and in saved analyses; older analyses default to showing
+all applicable sections. **Include p-values** remains off by default and controls
+p-value columns only. P-values supplied by `estimates.glm()` retain that method's
 precision; otherwise they come from the fitted model summary.
+
+**Distribution and link** follows the initial outcome and predictor selectors,
+before interaction, polynomial and comparison controls. **Model Comparison
+Visualization**, inside Model Comparison, selects the comparison x and panel
+variables separately from ordinary Model visualization.
+
+Output selections do not change the model specification or any estimates or
+predictions. The adapter currently recomputes on presentation changes; avoiding
+that would require a separate fit-cache and invalidation design.
 
 Long explanations remain separate HTML blocks. Research references are attached
 to the coefficient table rather than the plot. The stable `coefficients` result
@@ -239,7 +252,7 @@ image. Observed-bin and marginal-standardization explanations follow their
 respective plot and are hidden when irrelevant.
 
 The primary predictor selector initializes main effects. As in Mixed Models,
-the optional **Fixed effects and interactions** builder edits the complete term
+the optional **Effects and interactions** builder edits the complete term
 list, including deliberate interaction-only models. The squared-term builder
 adds the linear term by default; it can subsequently be removed in the complete
 term builder for a deliberate square-only specification. Model 2 remains
@@ -252,3 +265,8 @@ coefficients, odds ratios and their reciprocals, standardized odds ratios,
 prediction differences, standard errors and confidence limits. Interval methods
 remain identified in column headings; success-event and IRT qualifications are
 retained.
+
+GLM comparison plots use 1.2-width fitted curves and lightly shaded confidence
+bands (alpha 0.13). Model 1 remains solid and Model 2 dashed, with the existing
+model colors and prediction scales. Model 2 specifications appear under
+**Model 2 effects**.

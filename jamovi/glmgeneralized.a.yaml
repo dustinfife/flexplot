@@ -88,6 +88,18 @@ options:
     title: Confidence intervals
     type: Bool
     default: true
+  - name: showEstimates
+    title: Estimates
+    type: Bool
+    default: true
+  - name: showIRT
+    title: IRT Estimates
+    type: Bool
+    default: true
+  - name: showProbabilities
+    title: Marginal Predicted Probabilities
+    type: Bool
+    default: true
   - name: includeP
     title: Include p-values
     type: Bool

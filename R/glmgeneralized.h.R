@@ -22,6 +22,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             plotGroup = NULL,
             plotStyle = "auto",
             se = TRUE,
+            showEstimates = TRUE,
+            showIRT = TRUE,
+            showProbabilities = TRUE,
             includeP = FALSE,
             interactions = FALSE,
             comparisonInteractions = FALSE,
@@ -110,6 +113,18 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "se",
                 se,
                 default=TRUE)
+            private$..showEstimates = jmvcore::OptionBool$new(
+                "showEstimates",
+                showEstimates,
+                default=TRUE)
+            private$..showIRT = jmvcore::OptionBool$new(
+                "showIRT",
+                showIRT,
+                default=TRUE)
+            private$..showProbabilities = jmvcore::OptionBool$new(
+                "showProbabilities",
+                showProbabilities,
+                default=TRUE)
             private$..includeP = jmvcore::OptionBool$new(
                 "includeP",
                 includeP,
@@ -168,6 +183,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..plotGroup)
             self$.addOption(private$..plotStyle)
             self$.addOption(private$..se)
+            self$.addOption(private$..showEstimates)
+            self$.addOption(private$..showIRT)
+            self$.addOption(private$..showProbabilities)
             self$.addOption(private$..includeP)
             self$.addOption(private$..interactions)
             self$.addOption(private$..comparisonInteractions)
@@ -195,6 +213,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plotGroup = function() private$..plotGroup$value,
         plotStyle = function() private$..plotStyle$value,
         se = function() private$..se$value,
+        showEstimates = function() private$..showEstimates$value,
+        showIRT = function() private$..showIRT$value,
+        showProbabilities = function() private$..showProbabilities$value,
         includeP = function() private$..includeP$value,
         interactions = function() private$..interactions$value,
         comparisonInteractions = function() private$..comparisonInteractions$value,
@@ -221,6 +242,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..plotGroup = NA,
         ..plotStyle = NA,
         ..se = NA,
+        ..showEstimates = NA,
+        ..showIRT = NA,
+        ..showProbabilities = NA,
         ..includeP = NA,
         ..interactions = NA,
         ..comparisonInteractions = NA,

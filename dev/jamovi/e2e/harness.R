@@ -61,6 +61,15 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
     problems = c(problems,"Stale saved result after live edit")
   elements = e2e_elements(analysis$results)
   visible = Filter(function(e)!e$visible %in% c("NO","DEFAULT_NO"),elements)
+  for (name in names(checkpoint$expected_result_visibility)) {
+    matches = Filter(function(element) identical(element$name,name),elements)
+    if (length(matches) != 1L) {
+      problems = c(problems,paste("Missing or duplicated output section:",name))
+    } else if (!identical(!matches[[1]]$visible %in% c("NO","DEFAULT_NO"),
+        checkpoint$expected_result_visibility[[name]])) {
+      problems = c(problems,paste("Incorrect output-section visibility:",name))
+    }
+  }
   running = analysis$status %in% c("ANALYSIS_NONE","ANALYSIS_INITED","ANALYSIS_RUNNING","ANALYSIS_RENDERING") ||
     any(vapply(visible,function(e)e$status %in% c("ANALYSIS_RUNNING","ANALYSIS_RENDERING"),logical(1)))
   if(running || observation$native_status %in% c("running",if(checkpoint$expected_status!="waiting")"waiting"))

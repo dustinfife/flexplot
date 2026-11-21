@@ -284,3 +284,17 @@ test_that("diagnostic checkpoints require observable text and reject error-only 
   good = Filter(function(s)s$id=="FP-03",manifest$scenarios)[[1]]
   expect_identical(e2e_checkpoint(good,1L,e2e_synthetic_observation(good))$diagnostic_phase,"success")
 })
+
+test_that("GLM output checkpoints reject missing or incorrectly visible sections", {
+  manifest = jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))
+  scenario = Filter(function(s)s$id=="GLM-02",manifest$scenarios)[[1]]
+  observation = e2e_synthetic_observation(scenario,7L)
+  for (name in c("coefficients","irt","probabilities"))
+    observation$saved$analyses[[1]]$results$children[[length(observation$saved$analyses[[1]]$results$children)+1L]] =
+      list(name=name,type="table",status="ANALYSIS_COMPLETE",error="",visible="NO")
+  expect_identical(e2e_checkpoint(scenario,7L,observation)$status,"passed")
+  bad = observation;bad$saved$analyses[[1]]$results$children[[2]]$visible = "YES"
+  expect_identical(e2e_checkpoint(scenario,7L,bad)$status,"failed")
+  bad = observation;bad$saved$analyses[[1]]$results$children[[2]] = NULL
+  expect_identical(e2e_checkpoint(scenario,7L,bad)$status,"failed")
+})

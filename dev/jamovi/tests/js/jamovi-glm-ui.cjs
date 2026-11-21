@@ -122,10 +122,15 @@ const {pathToFileURL} = require('node:url');
                     assert.equal(definition.options.find(option => option.name === name).title,'Include Polynomial Terms');
                 }
                 const comparison = compiled.view.layout.controls.find(control => control.label === 'Model Comparison');
-                const second = comparison.controls.find(control => control.label === 'Model 2 fixed effects');
+                const second = comparison.controls.find(control => control.label === (generalized ? 'Model 2 effects' : 'Model 2 fixed effects'));
                 const primarySquare = compiled.view.layout.controls.find(control => control.name === 'quadraticSupplier');
                 const secondSquare = second.controls.find(control => control.name === 'comparisonQuadraticSupplier');
-                const comparisonPlot = comparison.controls.find(control => control.name === 'comparisonPlotSupplier');
+                const comparisonVisualization = comparison.controls.find(control => control.label === 'Model Comparison Visualization');
+                assert.equal(comparisonVisualization.contentLink,'(compare)');
+                const comparisonPlot = comparisonVisualization.controls.find(control => control.name === 'comparisonPlotSupplier');
+                assert.equal(comparisonPlot.label,'Available predictors for comparison plot');
+                assert.equal(comparisonPlot.controls[0].label,'Comparison x variable');
+                assert.equal(comparisonPlot.controls[1].label,'Comparison panel variables (up to two)');
                 assert.equal(primarySquare.contentLink,'(polynomials)');
                 assert.equal(secondSquare.contentLink,'(comparisonPolynomials)');
                 assert.equal(comparisonPlot.contentLink,'(compare)');
@@ -142,12 +147,12 @@ const {pathToFileURL} = require('node:url');
             if (generalized) {
                 assert.equal(main,undefined,'No redundant Model 1 selector');
                 assert.equal(controls.has('mainEffects'),false);
-                assert.equal(primary.label,'Fixed effects and interactions');
+                assert.equal(primary.label,'Effects and interactions');
             } else assert.equal(main.contentLink,undefined,'Main effects must remain editable with interactions off');
             assert.equal(primary.contentLink,'(interactions)');
             assert.equal(primary.useSingleCell,true);
             const comparison = compiled.view.layout.controls.find(control => control.label === 'Model Comparison');
-            const second = comparison.controls.find(control => control.label === 'Model 2 fixed effects');
+            const second = comparison.controls.find(control => control.label === (generalized ? 'Model 2 effects' : 'Model 2 fixed effects'));
             assert.equal(second.contentLink,'(compare)');
             const builder = second.controls.find(control => control.name === 'comparisonSupplier');
             assert.equal(builder.contentLink,'(comparisonInteractions)');
@@ -378,7 +383,26 @@ const {pathToFileURL} = require('node:url');
             assert.equal(scale.contentLink,'(family:binomial)');
             const visualization = compiled.view.layout.controls.find(c => c.label === 'Model visualization').controls;
             assert.equal(visualization.findIndex(c => c.name === 'plotScale'),visualization.findIndex(c => c.name === 'plotStyle')+1);
+            const top = compiled.view.layout.controls;
+            assert.equal(top[0].type,'VariableSupplier');
+            assert.equal(top[1].name,'family');
+            assert.equal(top[2].name,'interactions');
+            assert.ok(top.findIndex(c => c.name === 'polynomials') < top.findIndex(c => c.label === 'Model Comparison'));
+            assert.ok(top.findIndex(c => c.label === 'Model Comparison') < top.findIndex(c => c.label === 'Output Options'));
+            assert.ok(top.findIndex(c => c.label === 'Output Options') < top.findIndex(c => c.label === 'Model visualization'));
+            const outputControls = top.find(c => c.label === 'Output Options').controls;
+            assert.equal(JSON.stringify(outputControls.map(c => c.name)),JSON.stringify(['showEstimates','showIRT','showProbabilities','includeP']));
+            assert.equal(outputControls[0].contentLink,undefined);
+            for (const cell of outputControls.slice(1,3)) {
+                assert.equal(cell.contentLink,'(family:binomial)');
+                assert.equal(cell.useSingleCell,true);
+            }
             const a = yaml.load(fs.readFileSync(path.join(root,'jamovi/glmgeneralized.a.yaml'),'utf8'));
+            for (const name of ['showEstimates','showIRT','showProbabilities']) {
+                assert.equal(a.options.find(o => o.name === name).default,true);
+                ui[name].setValue(false); fire('view','updated');
+                assert.equal(ui[name].value(),false,'Synchronization must not reset output preferences');
+            }
             assert.equal(a.options.find(o => o.name === 'plotScale').default,'probability');
             assert.equal(a.options.find(o => o.name === 'se').title,'Confidence intervals');
             if (runtime) {

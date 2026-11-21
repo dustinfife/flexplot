@@ -5253,13 +5253,193 @@
             "se": true
           },
           "verify_visible_against_saved_options": true
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Hide Estimates while retaining IRT and marginal probabilities",
+          "changes": {
+            "showEstimates": false
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "binary"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "binary"
+              ]
+            ],
+            "plotX": "x",
+            "includeP": false,
+            "se": true,
+            "showEstimates": false
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_result_visibility": {
+            "coefficients": false,
+            "irt": true,
+            "probabilities": true
+          }
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Hide IRT Estimates independently",
+          "changes": {
+            "showIRT": false
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "binary"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "binary"
+              ]
+            ],
+            "plotX": "x",
+            "includeP": false,
+            "se": true,
+            "showEstimates": false,
+            "showIRT": false
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_result_visibility": {
+            "coefficients": false,
+            "irt": false,
+            "probabilities": true
+          }
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Hide Marginal Predicted Probabilities independently",
+          "changes": {
+            "showProbabilities": false
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "binary"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "binary"
+              ]
+            ],
+            "plotX": "x",
+            "includeP": false,
+            "se": true,
+            "showEstimates": false,
+            "showIRT": false,
+            "showProbabilities": false
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_result_visibility": {
+            "coefficients": false,
+            "irt": false,
+            "probabilities": false
+          }
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Restore all eligible output tables without altering the model",
+          "changes": {
+            "showEstimates": true,
+            "showIRT": true,
+            "showProbabilities": true
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": {
+            "formulas": [
+              "binary_y ~ x + z + binary"
+            ],
+            "engine": "glm",
+            "family": "binomial"
+          },
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "binary"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "binary"
+              ]
+            ],
+            "plotX": "x",
+            "includeP": false,
+            "se": true,
+            "showEstimates": true,
+            "showIRT": true,
+            "showProbabilities": true
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_result_visibility": {
+            "coefficients": true,
+            "irt": true,
+            "probabilities": true
+          }
         }
       ],
       "verification": {
         "interface": [
           "visible controls equal expected_options",
           "result state completes or exposes the specified error; no persistent spinner",
-          "no stale/duplicate rows after edits"
+          "no stale/duplicate rows after edits",
+          "Distribution and Link directly follows the primary variable selectors",
+          "Model Comparison Visualization has its own labeled predictor supplier",
+          "Three default-on output controls hide only their respective eligible tables"
         ],
         "statistical": [
           "direct glm/glm.nb coef, vcov, family-appropriate CI, likelihood and response predictions",
@@ -5272,11 +5452,12 @@
       },
       "save_reopen": {
         "required": true,
-        "after_step": 4,
+        "after_step": 7,
         "verify": [
           "saved options and factor metadata",
           "recalculated formulas, sample, estimates and plots",
-          "edit restored analysis and verify the next option batch"
+          "edit restored analysis and verify the next option batch",
+          "unchecked Estimates, IRT and marginal-probability options persist, then reappear after live edits"
         ]
       },
       "gui_execution_required": true,
@@ -5286,7 +5467,8 @@
         "test-jamovi-glm-reporting.R",
         "test-jamovi-generalized-comparison.R",
         "test-jamovi-glm-restoration.R",
-        "test-jamovi-expansion.R"
+        "test-jamovi-expansion.R",
+        "test-jamovi-glm-output-options.R"
       ],
       "coverage_level": "headless R6/renderer and/or installed-handler tests; actual GUI campaign pending",
       "priority": "P0",

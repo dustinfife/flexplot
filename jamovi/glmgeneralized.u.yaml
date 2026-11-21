@@ -21,13 +21,15 @@ children:
           - type: VariablesListBox
             name: preds
             isTarget: true
+  - type: ComboBox
+    name: family
   - type: CheckBox
     name: interactions
   - type: Supplier
     name: primarySupplier
     useSingleCell: true
     contentLink: (interactions)
-    label: Fixed effects and interactions
+    label: Effects and interactions
     format: term
     persistentItems: true
     children:
@@ -65,7 +67,7 @@ children:
       - type: CheckBox
         name: compare
       - type: Label
-        label: Model 2 fixed effects
+        label: Model 2 effects
         useSingleCell: true
         contentLink: (compare)
         children:
@@ -118,36 +120,49 @@ children:
                     name: comparisonQuadratic
                     isTarget: true
                     permitted: [numeric]
-      - type: Supplier
-        name: comparisonPlotSupplier
+      - type: Label
+        label: Model Comparison Visualization
         useSingleCell: true
         contentLink: (compare)
-        label: Predictors in either model
-        format: variable
-        persistentItems: false
         children:
-          - type: TargetLayoutBox
-            label: Comparison x variable
+          - type: Supplier
+            name: comparisonPlotSupplier
+            useSingleCell: true
+            contentLink: (compare)
+            label: Available predictors for comparison plot
+            format: variable
+            persistentItems: false
             children:
-              - type: VariablesListBox
-                name: comparisonX
-                maxItemCount: 1
-                isTarget: true
-                enable: (compare)
-          - type: TargetLayoutBox
-            label: Comparison panel variables (up to two)
-            children:
-              - type: VariablesListBox
-                name: comparisonPanels
-                maxItemCount: 2
-                isTarget: true
-                enable: (compare)
-  - type: ComboBox
-    name: family
+              - type: TargetLayoutBox
+                label: Comparison x variable
+                children:
+                  - type: VariablesListBox
+                    name: comparisonX
+                    maxItemCount: 1
+                    isTarget: true
+                    enable: (compare)
+              - type: TargetLayoutBox
+                label: Comparison panel variables (up to two)
+                children:
+                  - type: VariablesListBox
+                    name: comparisonPanels
+                    maxItemCount: 2
+                    isTarget: true
+                    enable: (compare)
   - type: CollapseBox
     label: Output Options
     collapsed: false
     children:
+      - type: CheckBox
+        name: showEstimates
+      - type: CheckBox
+        name: showIRT
+        useSingleCell: true
+        contentLink: (family:binomial)
+      - type: CheckBox
+        name: showProbabilities
+        useSingleCell: true
+        contentLink: (family:binomial)
       - type: CheckBox
         name: includeP
   - type: CollapseBox

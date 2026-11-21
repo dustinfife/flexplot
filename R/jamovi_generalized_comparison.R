@@ -68,6 +68,16 @@ jamovi_glm_generalized_comparison_table = function(table, state) {
   if (length(state$warnings)) table$setNote("warnings", paste(state$warnings, collapse="; "))
 }
 
+# GLM-only presentation: retain data, scales and model legend mappings.
+jamovi_glm_comparison_emphasis = function(plot) {
+  for (layer in plot$layers) {
+    if (!is.data.frame(layer$data) || !all(c("prediction","model") %in% names(layer$data))) next
+    if (inherits(layer$geom,"GeomLine")) layer$aes_params$linewidth = 1.2
+    if (inherits(layer$geom,"GeomRibbon")) layer$aes_params$alpha = .13
+  }
+  plot
+}
+
 jamovi_glm_generalized_comparison_plot = function(state, se=TRUE, style="auto", scale="probability") {
   model1 = state$model1
   model2 = state$model2
@@ -92,7 +102,7 @@ jamovi_glm_generalized_comparison_plot = function(state, se=TRUE, style="auto", 
       }
     }
   }
-  plot = jamovi_comparison_style(plot)
+  plot = jamovi_glm_comparison_emphasis(jamovi_comparison_style(plot))
   if (!overlay) return(plot)
   summary = convert_formula_to_logistic_bins(state$formula, plot$data, n_bins=10)$summary_data
   if (logit) {
