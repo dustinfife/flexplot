@@ -100,8 +100,25 @@ const {pathToFileURL} = require('node:url');
             ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
         }
 
+        if (generalized) { ui.polynomials.setValue(false); ui.comparisonPolynomials.setValue(false); }
         if (analysis === 'glmbasic' || generalized) {
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.a.yaml'),'utf8'));
+            if (generalized) {
+                for (const name of ['polynomials','comparisonPolynomials']) {
+                    assert.equal(definition.options.find(option => option.name === name).default,false);
+                    assert.equal(definition.options.find(option => option.name === name).title,'Include Polynomial Terms');
+                }
+                const comparison = compiled.view.layout.controls.find(control => control.label === 'Model Comparison');
+                const second = comparison.controls.find(control => control.label === 'Model 2 fixed effects');
+                const primarySquare = compiled.view.layout.controls.find(control => control.name === 'quadraticSupplier');
+                const secondSquare = second.controls.find(control => control.name === 'comparisonQuadraticSupplier');
+                const comparisonPlot = comparison.controls.find(control => control.name === 'comparisonPlotSupplier');
+                assert.equal(primarySquare.contentLink,'(polynomials)');
+                assert.equal(secondSquare.contentLink,'(comparisonPolynomials)');
+                assert.equal(comparisonPlot.contentLink,'(compare)');
+                if (runtime) for (const cell of [primarySquare,secondSquare,comparisonPlot])
+                    require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),cell,null,compilerPath);
+            }
             for (const name of ['interactions','comparisonInteractions']) {
                 assert.equal(definition.options.find(option => option.name === name).title,'Include Interactions');
                 assert.equal(definition.options.find(option => option.name === name).default,false);
@@ -313,6 +330,7 @@ const {pathToFileURL} = require('node:url');
             ui.plotX.setValue(null); ui.plotPanels.setValue(['dose']);
             fire('plotX', 'changed');
             assert.equal(ui.plotX.value(), 'supp');
+            ui.polynomials.setValue(true); fire('polynomials','changed');
             ui.quadratic.setValue(['dose']); ui.modelTerms.setValue([['supp']]);
             fire('quadratic', 'changed');
             assert.equal(encode(ui.modelTerms.value()), 'supp;dose');
@@ -324,6 +342,7 @@ const {pathToFileURL} = require('node:url');
             assert.equal(ui.plotPanels.value().length, 0);
             ui.preds.setValue(['supp','dose']); fire('preds', 'changed');
             ui.comparisonTerms.setValue([['supp']]);
+            ui.comparisonPolynomials.setValue(true); fire('comparisonPolynomials','changed');
             ui.comparisonQuadratic.setValue(['dose']); fire('comparisonQuadratic', 'changed');
             assert.equal(encode(ui.comparisonTerms.value()), 'supp;dose');
             ui.comparisonTerms.setValue([['supp']]); fire('view', 'updated');
@@ -368,6 +387,7 @@ const {pathToFileURL} = require('node:url');
         }
         if ((generalized || analysis === 'glmbasic') && runtime) {
             const restored = require('./jamovi-glm-restoration.cjs')(fs.readFileSync(runtime,'utf8'), compilerPath, view.handlers, FormatDef, utils, assert, analysis);
+            if (generalized) fs.writeFileSync(output+'.polynomials.json',JSON.stringify(restored.polynomials));
             fs.writeFileSync(output+'.interactions.json',JSON.stringify(restored.interactions));
             fs.writeFileSync(output+'.restored.json',JSON.stringify(restored));
         }

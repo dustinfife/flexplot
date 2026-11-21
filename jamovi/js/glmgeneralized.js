@@ -15,11 +15,22 @@ const synchronize = function(ui, context, added, changed = null) {
     ui.view.model.options.beginEdit();
     try {
         updateTerms.prepareInteractions(ui, changed);
+        // Version 2 adds polynomial switches; restore legacy squares before pruning.
+        const options = ui.view.model.options;
+        if (options.getOption('interactionSpecVersion').getValue() < 2) {
+            for (const [enabled, quadratic] of [
+                ['polynomials','quadratic'], ['comparisonPolynomials','comparisonQuadratic']]) {
+                if (changed !== enabled && (ui[quadratic].value() || []).length)
+                    ui[enabled].setValue(true);
+            }
+            options.setOptionValue('interactionSpecVersion',2);
+        }
         const predictors = ui.preds.value() || [];
-        for (const [quadraticName, modelName, supplier] of [
-            ['quadratic','modelTerms','quadraticSupplier'],
-            ['comparisonQuadratic','comparisonTerms','comparisonQuadraticSupplier']]) {
-            const quadratic = (ui[quadraticName].value() || []).filter(name => predictors.includes(name));
+        for (const [enabled, quadraticName, modelName, supplier] of [
+            ['polynomials','quadratic','modelTerms','quadraticSupplier'],
+            ['comparisonPolynomials','comparisonQuadratic','comparisonTerms','comparisonQuadraticSupplier']]) {
+            const quadratic = ui[enabled].value() === true ?
+                (ui[quadraticName].value() || []).filter(name => predictors.includes(name)) : [];
             if (JSON.stringify(ui[quadraticName].value()) !== JSON.stringify(quadratic)) ui[quadraticName].setValue(quadratic);
             ui[supplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
             if (changed === quadraticName) {
@@ -47,6 +58,8 @@ module.exports = {
     view_updated: function(ui) { synchronize(ui, this, false); },
     preds_changed: function(ui) { synchronize(ui, this, true); },
     modelTerms_changed: function(ui) { synchronize(ui, this, false); },
+    polynomials_changed: function(ui) { synchronize(ui, this, false, 'polynomials'); },
+    comparisonPolynomials_changed: function(ui) { synchronize(ui, this, false, 'comparisonPolynomials'); },
     quadratic_changed: function(ui) { synchronize(ui, this, false, 'quadratic'); },
     quadraticSupplier_updated: function(ui) { synchronize(ui, this, false); },
     primarySupplier_updated: function(ui) { synchronize(ui, this, false); },

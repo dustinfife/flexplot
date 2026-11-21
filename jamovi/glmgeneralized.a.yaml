@@ -113,4 +113,12 @@ options:
     hidden: true
     type: Integer
     default: 0
+  - name: polynomials
+    title: Include Polynomial Terms
+    type: Bool
+    default: false
+  - name: comparisonPolynomials
+    title: Include Polynomial Terms
+    type: Bool
+    default: false
 ...

@@ -27,7 +27,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             comparisonInteractions = FALSE,
             mainEffects = NULL,
             comparisonMainEffects = NULL,
-            interactionSpecVersion = 0, ...) {
+            interactionSpecVersion = 0,
+            polynomials = FALSE,
+            comparisonPolynomials = FALSE, ...) {
 
             super$initialize(
                 package="flexplot",
@@ -130,7 +132,16 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..interactionSpecVersion = jmvcore::OptionInteger$new(
                 "interactionSpecVersion",
                 interactionSpecVersion,
+                hidden=TRUE,
                 default=0)
+            private$..polynomials = jmvcore::OptionBool$new(
+                "polynomials",
+                polynomials,
+                default=FALSE)
+            private$..comparisonPolynomials = jmvcore::OptionBool$new(
+                "comparisonPolynomials",
+                comparisonPolynomials,
+                default=FALSE)
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -154,6 +165,8 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..mainEffects)
             self$.addOption(private$..comparisonMainEffects)
             self$.addOption(private$..interactionSpecVersion)
+            self$.addOption(private$..polynomials)
+            self$.addOption(private$..comparisonPolynomials)
         }),
     active = list(
         out = function() private$..out$value,
@@ -177,7 +190,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         comparisonInteractions = function() private$..comparisonInteractions$value,
         mainEffects = function() private$..mainEffects$value,
         comparisonMainEffects = function() private$..comparisonMainEffects$value,
-        interactionSpecVersion = function() private$..interactionSpecVersion$value),
+        interactionSpecVersion = function() private$..interactionSpecVersion$value,
+        polynomials = function() private$..polynomials$value,
+        comparisonPolynomials = function() private$..comparisonPolynomials$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -200,7 +215,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..comparisonInteractions = NA,
         ..mainEffects = NA,
         ..comparisonMainEffects = NA,
-        ..interactionSpecVersion = NA)
+        ..interactionSpecVersion = NA,
+        ..polynomials = NA,
+        ..comparisonPolynomials = NA)
 )
 
 glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

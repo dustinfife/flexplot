@@ -73,7 +73,7 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
             updateDisplayValue:updateDisplay, setRootElement(value){this.el = value;},
             translate:value => value, getSourceValue:() => selection, setValue:value => {selection = value;}};
     };
-    if (['(interactions)','(comparisonInteractions)','(compare)'].includes(definition.contentLink)) {
+    if (['(interactions)','(comparisonInteractions)','(compare)','(polynomials)','(comparisonPolynomials)'].includes(definition.contentLink)) {
         assert.equal(definition.useSingleCell,true);
         const name = definition.contentLink.slice(1,-1);
         let enabled = false;

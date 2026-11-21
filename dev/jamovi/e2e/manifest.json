@@ -6845,7 +6845,8 @@
           "visible controls equal expected_options",
           "result state completes or exposes the specified error; no persistent spinner",
           "no stale/duplicate rows after edits",
-          "Inspect saved interactionSpecVersion separately; it is internal metadata, not a visible control."
+          "Inspect saved interactionSpecVersion separately; it is internal metadata, not a visible control.",
+          "Legacy quadratics migrate to independent enabled polynomial switches before any pruning; no missing linear terms are added."
         ],
         "statistical": [
           "compare any fitted model with independent realized-data reference; rendering alone is insufficient"
@@ -7295,13 +7296,17 @@
             "binary"
           ]
         ],
-        "plotX": "x"
+        "plotX": "x",
+        "polynomials": false,
+        "comparisonPolynomials": false,
+        "interactionSpecVersion": 2
       },
       "steps": [
         {
           "action": "set_options_through_native_controls",
           "description": "Add numeric square",
           "changes": {
+            "polynomials": true,
             "quadratic": [
               "x"
             ]
@@ -7334,7 +7339,8 @@
             "plotX": "x",
             "quadratic": [
               "x"
-            ]
+            ],
+            "polynomials": true
           },
           "verify_visible_against_saved_options": true
         },
@@ -7376,7 +7382,8 @@
               "x"
             ],
             "plotPanels": [],
-            "plotGroup": null
+            "plotGroup": null,
+            "polynomials": true
           },
           "verify_visible_against_saved_options": true
         },
@@ -7418,7 +7425,8 @@
             "plotX": "binary",
             "quadratic": [],
             "plotPanels": [],
-            "plotGroup": null
+            "plotGroup": null,
+            "polynomials": true
           },
           "verify_visible_against_saved_options": true
         }

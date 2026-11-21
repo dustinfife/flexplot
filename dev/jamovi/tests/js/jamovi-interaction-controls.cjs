@@ -1,13 +1,13 @@
 'use strict';
 // Exercise the installed Option/View lifecycle through the bundled analysis handlers.
-module.exports = function({ui,native,view,restore,snapshot,assert}) {
+module.exports = function({ui,native,view,restore,snapshot,assert,analysis}) {
     const records = [];
     const equal = (actual,expected) => assert.equal(JSON.stringify(actual),JSON.stringify(expected));
     const save = stage => records.push(snapshot(stage));
     const additive = [['x'],['z']];
     const interacting = additive.concat([['x','z']]);
     restore('interaction-fresh',{out:'y',preds:['x','z']});
-    assert.equal(native.interactionSpecVersion.getValue(),1);
+    assert.equal(native.interactionSpecVersion.getValue(),analysis === 'glmgeneralized' ? 2 : 1);
     assert.equal(ui.interactions.value(),false);
     assert.equal(ui.comparisonInteractions.value(),false);
     equal(ui.mainEffects.value(),['x','z']);
@@ -39,7 +39,7 @@ module.exports = function({ui,native,view,restore,snapshot,assert}) {
         ui.modelTerms.setValue(interacting);
         ui.interactions.setValue(false);
         equal(ui.modelTerms.value(),additive);
-        assert.equal(native.interactionSpecVersion.getValue(),1);
+        assert.equal(native.interactionSpecVersion.getValue(),analysis === 'glmgeneralized' ? 2 : 1);
     }
     save('repeated-edits');
     ui.comparisonInteractions.setValue(false);
