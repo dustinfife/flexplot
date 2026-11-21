@@ -5,7 +5,7 @@ const EventEmitter = require('node:events');
 
 // Real installed Option setters, synchronous supplier events and View lifecycle.
 // Native DOM display and persisted .omv controls are also checked in jamovi.
-module.exports = function(source, compilerPath, handlers, FormatDef, utils, assert, analysis = 'glmgeneralized') {
+module.exports = async function(source, compilerPath, handlers, FormatDef, utils, assert, analysis = 'glmgeneralized') {
     const acorn = require(require.resolve('acorn', {paths:[compilerPath]}));
     const extract = (marker, method = false) => {
         const start = source.indexOf(marker);
@@ -57,7 +57,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
         ui[name] = {value:() => value,setValue(updated) {
             if (JSON.stringify(value) === JSON.stringify(updated)) return;
             value = updated;
-            handlers[name+'_updated'].call(view,ui);
+            if (handlers[name+'_updated']) handlers[name+'_updated'].call(view,ui);
         }};
     }
     const snapshot = stage => {
@@ -133,5 +133,6 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     const baseline = records.slice();
     baseline.interactions = require('./jamovi-interaction-controls.cjs')({ui,native,view,restore,snapshot,assert,analysis});
     if (analysis === 'glmgeneralized') baseline.polynomials = require('./jamovi-glm-polynomials.cjs')({ui,native,view,restore,snapshot,assert});
+    if (analysis === 'glmgeneralized') await require('./jamovi-glm-visualization.cjs')({ui,view,handlers,restore,snapshot,assert,extract});
     return baseline;
 };

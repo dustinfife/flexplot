@@ -17,6 +17,8 @@ test_that("saved GLM scale options and live callbacks preserve statistical resul
   d$z[1:7] = NA_real_
   analysis = jamovi_reporting_host(reopened,d)
   expect_true(analysis$run())
+  expect_true(analysis$results$comparisonPlotExplanation$visible)
+  expect_match(analysis$results$comparisonPlotExplanation$content,"logits")
   initial = analysis$results$plot$state
   table = analysis$results$comparison$asDF
   capture = new.env(parent=emptyenv())
@@ -40,8 +42,9 @@ test_that("saved GLM scale options and live callbacks preserve statistical resul
     if (scale=="logit") expect_equal(capture$primary$scales$get_scales("y")$name,"Logit (log odds)")
   }
   expect_true(jamovi_reporting_update(analysis,list(plotStyle="raw")))
-  expect_false(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
-  expect_match(analysis$results$plot$.__enclos_env__$private$.error,"Raw binary")
+  expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
+  expect_false(identical(capture$primary$scales$get_scales("y")$name,"Logit (log odds)"))
+  expect_match(analysis$results$plotExplanation$content,"Probability scale is used")
   expect_true(jamovi_reporting_update(analysis,list(plotStyle="auto")))
   expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
   expect_true(jamovi_reporting_update(analysis,list(family="gaussian")))

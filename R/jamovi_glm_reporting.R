@@ -4,6 +4,7 @@ jamovi_glm_reporting_reset = function(results) {
     item$setVisible(FALSE)
     item$setError("")
     item$setStatus("complete")
+    if (inherits(item, "Image")) item$.setPath(NULL)
     if (inherits(item, "Table")) {
       item$deleteRows()
       for (key in names(item$notes)) item$setNote(key, NULL)
@@ -48,11 +49,10 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
   t_intervals = colnames(coefficients)[3] == "t value"
   interval_title = if (t_intervals) "95% t CI" else "95% normal Wald CI"
   results$coefficients$setNote("intervals", if (t_intervals)
-    paste0("95% t confidence intervals for raw coefficients; residual df = ", stats::df.residual(model), ".") else
-    "95% normal Wald confidence intervals for raw coefficients.")
-  description = "Estimates follow estimates.glm()."
+    paste0("95% t confidence intervals for raw coefficients; residual df = ", stats::df.residual(model), ".") else NULL)
+  description = ""
   if (unavailable) description = paste0(description,
-    " Additional estimates.glm summaries are unavailable for this model specification. Raw coefficients, standard errors, confidence intervals and predictions remain available.")
+    " Supplementary effect summaries are unavailable for this model specification. Raw coefficients, standard errors, confidence intervals and predictions remain available.")
   irt = attr(values, "irt")
   probabilities = attr(values, "marginal_probabilities")
   # IRT and marginal probabilities have predictor-level rows, not coefficient rows.
@@ -82,7 +82,10 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
     if (name %in% c("lower", "upper")) column$setSuperTitle(interval_title)
   }
   jamovi_glm_table_rows(results$coefficients, reported)
-  results$coefficients$setNote("model", paste("Family:", model$family$family, " Link:", model$family$link))
+  results$coefficients$setNote("uncertainty", "SE describes uncertainty in raw coefficients; confidence limits use the same coefficient scale.")
+  if (any(grepl("Prediction Difference", names(reported), fixed=TRUE)))
+    results$coefficients$setNote("differences", "Prediction differences compare expected outcomes at mean +/- one SD for numeric predictors or fitted factor contrasts, with other predictors at their reference profile.")
+  results$coefficients$setNote("model", paste0("Family: ", model$family$family, "; Link: ", model$family$link))
   if (state$omitted > 0L) results$coefficients$setNote("missing",
     paste(state$omitted, "observations omitted because model variables were missing."))
   if (length(state$warnings)) results$coefficients$setNote("warnings", paste(state$warnings, collapse="; "))
@@ -92,10 +95,10 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
       inverse="Reciprocal coefficients describe the inverse-mean scale; they are not response ratios.",
       identity="Raw coefficients are in outcome units.")
     description = paste0(description, " ", interpretation,
-      " Prediction differences follow the existing conditional mean +/- one-SD or categorical-contrast convention. Interaction coefficients are conditional.")
+      " Interaction coefficients are conditional on the other predictors.")
     if (inherits(model, "negbin")) description = paste0(description,
       " Negative Binomial uncertainty conditions on estimated size (theta).")
-    results$coefficients$setNote("interpretation", description)
+    results$coefficients$setNote("interpretation", trimws(description))
     return(invisible(NULL))
   }
   response = stats::model.response(stats::model.frame(model))
@@ -117,26 +120,33 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
     results$probabilities$setVisible(nrow(probabilities) > 0L)
     results$probabilities$setNote("averaging", "Each category is set across eligible observations; response-scale probabilities are averaged over other observed predictors.")
   }
-  description = paste0(description, " OR and inverse.OR describe fitted coefficient contrasts. Standardized odds ratios use predictor SDs without standardizing the binary outcome. Estimates retain estimates.glm() display precision.")
-  results$coefficients$setNote("interpretation", description)
+  description = paste0(description,
+    "Raw coefficients are on the log-odds scale. OR gives the odds multiplier for the fitted contrast; inverse.OR gives its reciprocal.",
+    " Standardized odds ratios use a one-SD predictor change; inverse standardized odds ratios reverse that contrast.")
+  results$coefficients$setNote("interpretation", trimws(description))
   invisible(NULL)
 }
 
 jamovi_glm_plot_guide = function(state, x=NULL, panels=NULL, group=NULL, style="auto", scale="probability") {
-  formula = jamovi_model_layout(list(state$model), state$data, x, panels, group)
-  hidden = setdiff(all.vars(stats::formula(state$model))[-1], all.vars(formula)[-1])
+  models = if (is.null(state$models)) list(state$model) else state$models
+  formula = jamovi_model_layout(models, state$data, x, panels, group)
+  predictors = unique(unlist(lapply(models, function(model) all.vars(stats::formula(model))[-1])))
+  hidden = setdiff(predictors, all.vars(formula)[-1])
   x = flexplot_axis_given(formula)$axis[1]
-  overlay = state$model$family$family == "binomial" && style == "auto" &&
-    length(x) && x %in% names(state$data) && is.numeric(state$data[[x]]) &&
-    length(unique(state$data[[x]])) >= 10L
-  guide = if (overlay) "Dots show observed bin proportions; curves show fitted-model probabilities." else
-    "Model predictions are on the response scale."
-  if (length(hidden)) guide = paste0(guide,
-    " Unshown predictors are averaged over eligible observations.",
-    if (overlay) " Curves are adjusted marginal predictions, not bin-matched predictions." else "")
-  if (state$model$family$family == "binomial" && scale == "logit") guide = paste(
-    "Curves show logit of marginal predicted probabilities, not average linear predictors.",
-    "Observed-bin proportions use the existing half-observation bounds before taking logits.",
-    "Exact zero/one model probabilities or confidence limits have infinite logits and appear at plot edges; model probabilities are not clipped.")
+  display = jamovi_glm_visualization(state$data, x, state$model$family$family == "binomial", style, scale)
+  guide = display$note
+  if (display$overlay) {
+    guide = paste(guide, if (display$scale == "logit")
+      "Dots show observed-bin logits (half-observation bounds); curves show logits of fitted probabilities." else
+      "Dots show observed-bin success proportions; curves show fitted-model probabilities.")
+    if (display$scale == "logit") guide = paste(guide,
+      "Exact zero/one probabilities and confidence limits have infinite logits; model probabilities are not clipped.")
+  }
+  if (length(hidden)) guide = paste(guide, "Unshown predictors are averaged over eligible observations.",
+    if (display$overlay) "Curves are adjusted marginal predictions, not bin-matched predictions." else "")
+  if (display$overlay && display$scale == "logit" && length(hidden)) guide = paste(guide,
+    "Curves transform averaged probabilities, not average linear predictors.")
+  guide = trimws(guide)
+  if (!nzchar(guide)) return("")
   paste0("<p>", guide, "</p>")
 }

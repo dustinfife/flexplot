@@ -101,6 +101,7 @@ options:
     type: Bool
     default: false
   - name: mainEffects
+    hidden: true
     title: Model 1 main effects
     type: Variables
     default: null

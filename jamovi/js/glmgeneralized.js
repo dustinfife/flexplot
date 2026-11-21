@@ -40,19 +40,56 @@ const synchronize = function(ui, context, added, changed = null) {
             }
         }
         updateTerms(ui, context, added, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
-        updateTerms.syncMainEffects(ui);
+        // Keep the old option as a saved-state projection, without a duplicate UI.
+        const main = (ui.modelTerms.value() || []).filter(term => term.length === 1).map(term => term[0]);
+        if (JSON.stringify(options.getOption('mainEffects').getValue()) !== JSON.stringify(main))
+            options.setOptionValue('mainEffects', main);
+        const second = (ui.comparisonTerms.value() || []).filter(term => term.length === 1).map(term => term[0]);
+        if (JSON.stringify(ui.comparisonMainEffects.value()) !== JSON.stringify(second)) ui.comparisonMainEffects.setValue(second);
+        ui.comparisonMainSupplier.setValue(utils.valuesToItems(predictors.filter(name => !second.includes(name)), FormatDef.variable));
     } finally {
         try { ui.view.model.options.endEdit(); }
         finally { context.workspace.glmSynchronizing = false; }
     }
+    updatePlotControls(ui, context);
+};
+// Use the host's column metadata, not the spelling/storage type of a variable.
+// A response for a previous selection must never change the current controls.
+const updatePlotControls = function(ui, context) {
+    if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
+    if (typeof context.requestData !== 'function') return;
+    const token = {};
+    context.workspace.glmPlotRequest = token;
+    const names = [ui.plotX.value()];
+    if (ui.compare.value()) names.push(ui.comparisonX.value());
+    const binomial = ui.family.value() === 'binomial';
+    ui.plotStyle.setPropertyValue('enable', false);
+    ui.plotScale.setPropertyValue('enable', false);
+    if (!binomial) return;
+    return Promise.all(names.map(columnName => columnName ? context.requestData('column',
+        {columnName, properties:['measureType','dataType']}) : Promise.resolve(null))).then(columns => {
+        if (token !== context.workspace.glmPlotRequest) return;
+        const continuous = columns.every(column => column && column.columnFound && column.measureType === 'continuous' &&
+            ['decimal','integer'].includes(column.dataType));
+        ui.plotStyle.setPropertyValue('enable', continuous);
+        const logit = continuous && ui.plotStyle.value() === 'auto';
+        ui.plotScale.setPropertyValue('enable', logit);
+        if (!logit && ui.plotScale.value() !== 'probability') ui.plotScale.setValue('probability');
+    }).catch(() => {
+        // Leave controls disabled if metadata is unavailable; R independently
+        // validates the actual fitted data and safely resolves legacy options.
+        if (token === context.workspace.glmPlotRequest && ui.plotScale.value() !== 'probability')
+            ui.plotScale.setValue('probability');
+    });
 };
 module.exports = {
     interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },
     comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },
-    mainEffects_changed: function(ui) { synchronize(ui, this, false, 'mainEffects'); },
     comparisonMainEffects_changed: function(ui) { synchronize(ui, this, false, 'comparisonMainEffects'); },
-    primaryMainSupplier_updated: function(ui) { synchronize(ui, this, false); },
     comparisonMainSupplier_updated: function(ui) { synchronize(ui, this, false); },
+    family_changed: function(ui) { updatePlotControls(ui, this); },
+    plotStyle_changed: function(ui) { updatePlotControls(ui, this); },
+    plotScale_changed: function(ui) { updatePlotControls(ui, this); },
     compare_changed: function(ui) { synchronize(ui, this, false); },
     view_loaded: function(ui) { synchronize(ui, this, false); },
     view_updated: function(ui) { synchronize(ui, this, false); },

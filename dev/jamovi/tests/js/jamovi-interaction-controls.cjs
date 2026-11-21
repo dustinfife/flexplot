@@ -4,6 +4,10 @@ module.exports = function({ui,native,view,restore,snapshot,assert,analysis}) {
     const records = [];
     const equal = (actual,expected) => assert.equal(JSON.stringify(actual),JSON.stringify(expected));
     const save = stage => records.push(snapshot(stage));
+    const selectMain = value => {
+        if (analysis === 'glmgeneralized') ui.modelTerms.setValue((ui.modelTerms.value() || []).filter(term => term.length > 1).concat(value.map(name => [name])));
+        else ui.mainEffects.setValue(value);
+    };
     const additive = [['x'],['z']];
     const interacting = additive.concat([['x','z']]);
     restore('interaction-fresh',{out:'y',preds:['x','z']});
@@ -15,9 +19,9 @@ module.exports = function({ui,native,view,restore,snapshot,assert,analysis}) {
     save('fresh');
     ui.interactions.setValue(true);
     equal(ui.modelTerms.value(),additive);save('enabled-empty');
-    ui.mainEffects.setValue(['x']);
+    selectMain(['x']);
     equal(ui.modelTerms.value(),[['x']]);save('main-effects-edited');
-    ui.mainEffects.setValue(['x','z']);
+    selectMain(['x','z']);
     ui.modelTerms.setValue(interacting);
     equal(ui.mainEffects.value(),['x','z']);save('interaction');
     ui.compare.setValue(true);
@@ -51,7 +55,7 @@ module.exports = function({ui,native,view,restore,snapshot,assert,analysis}) {
     ui.interactions.setValue(true);ui.modelTerms.setValue([['x','z']]);
     equal(ui.mainEffects.value(),[]);save('interaction-only');
     // Removing an ordinary main effect must not remove an allowed interaction.
-    ui.mainEffects.setValue(['x']);ui.mainEffects.setValue([]);
+    selectMain(['x']);selectMain([]);
     equal(ui.modelTerms.value(),[['x','z']]);
     const legacy = {out:'y',preds:['x','z'],modelTerms:interacting,
         comparisonTerms:[['z'],['x','z']],compare:false};

@@ -13,8 +13,8 @@ module.exports = function({ui,native,view,restore,snapshot,assert}) {
     ui.polynomials.setValue(true);
     equal(ui.quadratic.value(),[]);equal(ui.modelTerms.value(),additive);save('enabled-empty');
     ui.quadratic.setValue(['x']);equal(ui.modelTerms.value(),additive);save('quadratic');
-    ui.mainEffects.setValue(['z']);equal(ui.quadratic.value(),['x']);
-    ui.mainEffects.setValue(['x','z']);ui.modelTerms.setValue([['z']]);
+    ui.modelTerms.setValue([['z']]);equal(ui.quadratic.value(),['x']);
+    ui.modelTerms.setValue([['x'],['z']]);ui.modelTerms.setValue([['z']]);
     equal(ui.quadratic.value(),['x']);save('square-only');
     ui.quadratic.setValue(['x','z']);equal(ui.modelTerms.value(),[['z'],['x']]);save('two-squares');
     ui.interactions.setValue(true);ui.modelTerms.setValue([['x'],['z'],['x','z']]);save('interaction-squares');

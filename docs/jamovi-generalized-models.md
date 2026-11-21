@@ -225,3 +225,30 @@ proportions beside both model curves; these proportions are not bin-matched
 adjusted predictions. The Raw option retains jittered binary observations.
 Single-model estimates, optional p-values and visualization controls are
 unchanged when comparison is disabled.
+
+## Visualization compatibility and compact help
+
+Raw-observation plots and categorical (including low-cardinality numeric) x axes
+use Probability scale. The interface disables irrelevant binomial controls and
+resets an incompatible Logit selection to Probability. Returning to a continuous
+x permits selecting Logit again. When comparing models, the shared scale must
+be supported by both displayed x predictors. The R adapter also resolves old
+saved combinations safely, without refitting or changing model specifications.
+Plots that cannot be drawn show a completed diagnostic rather than an unfilled
+image. Observed-bin and marginal-standardization explanations follow their
+respective plot and are hidden when irrelevant.
+
+The primary predictor selector initializes main effects. As in Mixed Models,
+the optional **Fixed effects and interactions** builder edits the complete term
+list, including deliberate interaction-only models. The squared-term builder
+adds the linear term by default; it can subsequently be removed in the complete
+term builder for a deliberate square-only specification. Model 2 remains
+independent. Existing saved term lists remain authoritative; the old Model 1
+main-effects option is retained internally for compatibility.
+
+Jamovi 2.7.41 does not expose per-column tooltip/help metadata in its results
+schema or `jmvcore::Column` API. Concise native table notes therefore explain raw
+coefficients, odds ratios and their reciprocals, standardized odds ratios,
+prediction differences, standard errors and confidence limits. Interval methods
+remain identified in column headings; success-event and IRT qualifications are
+retained.

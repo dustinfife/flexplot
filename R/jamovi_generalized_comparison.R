@@ -68,11 +68,9 @@ jamovi_glm_generalized_comparison_plot = function(state, se=TRUE, style="auto", 
   model1 = state$model1
   model2 = state$model2
   x = flexplot_axis_given(state$formula)$axis[1]
-  overlay = model1$family$family == "binomial" && style == "auto" &&
-    is.numeric(state$data[[x]]) && length(unique(state$data[[x]])) >= 10L
-  scale = match.arg(scale,c("probability","logit"))
-  logit = model1$family$family == "binomial" && scale == "logit"
-  if (logit && !overlay) stop("Logit visualization requires Automatic binomial visualization and a continuous numeric x predictor with at least 10 distinct values. Raw binary observations and categorical-x logit overlays are not supported.",call.=FALSE)
+  display = jamovi_glm_visualization(state$data, x, model1$family$family == "binomial", style, scale)
+  overlay = display$overlay
+  logit = model1$family$family == "binomial" && display$scale == "logit"
   plot = compare_fits(state$formula, state$data, model1=model1, model2=model2,
     pred.type="response", report.se=se, raw.data=!overlay)
   if (se) {

@@ -93,13 +93,13 @@ test_that("GLM comparison curves and endpoints use the selected display scale wi
   expect_identical(state,before)
 })
 
-test_that("logit displays reject unsupported layouts and preserve extreme limits without clipping", {
+test_that("logit displays resolve unsupported layouts and preserve extreme limits without clipping", {
   skip_if_not_installed("jmvcore")
   d = small_logistic;d$y = d$y_numb;d$a = factor(rep(c("one","two"),length.out=nrow(d)))
   analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","a"),family="binomial",graphic=FALSE),d)
   expect_true(analysis$run());state = analysis$results$plot$state
-  expect_error(flexplot:::jamovi_glm_generalized_plot(state,x="a",scale="logit"),"continuous numeric")
-  expect_error(flexplot:::jamovi_glm_generalized_plot(state,x="x",style="raw",scale="logit"),"Raw binary")
+  expect_no_warning(ggplot2::ggplotGrob(flexplot:::jamovi_glm_generalized_plot(state,x="a",scale="logit")))
+  expect_no_warning(ggplot2::ggplotGrob(flexplot:::jamovi_glm_generalized_plot(state,x="x",style="raw",scale="logit")))
   p = ggplot2::ggplot()+ggplot2::geom_ribbon(data=data.frame(x=1:3,prediction=c(0,.5,1),
     prediction.lwr=c(0,0,.5),prediction.upr=c(.5,1,1)),ggplot2::aes(x=x,y=prediction,ymin=prediction.lwr,ymax=prediction.upr))
   l = flexplot:::jamovi_glm_logit_display(p,"y")

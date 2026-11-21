@@ -18,7 +18,7 @@ test_that("visualization roles are validated against fitted terms in R", {
     options = do.call(flexplot:::glmgeneralizedOptions$new, values)
     analysis = flexplot:::glmgeneralizedClass$new(options=options, data=small)
     expect_true(analysis$run())
-    expect_false(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
+    expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
     expect_match(analysis$results$plot$.__enclos_env__$private$.error, "must be predictors")
     options = do.call(flexplot:::glmbasicOptions$new, values)
     analysis = flexplot:::glmbasicClass$new(options=options, data=small)
@@ -230,6 +230,6 @@ test_that("Gamma inverse-link extrapolation is rejected instead of plotting inva
   model=analysis$results$plot$state$model
   profiles=expand.grid(x=range(data$x),a=levels(data$a))
   expect_true(any(predict(model,profiles,type="response")<0))
-  expect_warning(expect_false(analysis$.__enclos_env__$private$.plot(analysis$results$plot)), "beyond the range")
+  expect_warning(expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot)), "beyond the range")
   expect_match(analysis$results$plot$.__enclos_env__$private$.error,"positive domain")
 })

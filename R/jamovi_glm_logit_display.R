@@ -34,3 +34,24 @@ jamovi_glm_logit_display = function(plot, outcome, transform=TRUE) {
   plot$coordinates$limits$y = NULL
   plot + ggplot2::scale_y_continuous(name="Logit (log odds)")
 }
+
+# Resolve stale saved/UI display options against the actual estimation data.
+jamovi_glm_visualization = function(data, x, binomial, style, scale) {
+  scale = match.arg(scale, c("probability", "logit"))
+  continuous = length(x) == 1L && !is.na(x) && x %in% names(data) &&
+    is.numeric(data[[x]]) && length(unique(data[[x]][!is.na(data[[x]])])) >= 10L
+  overlay = binomial && continuous && style == "auto"
+  fallback = binomial && scale == "logit" && !overlay
+  list(overlay=overlay, scale=if (fallback) "probability" else scale,
+    note=if (fallback) "Probability scale is used because Logit requires an automatic overlay with a continuous x predictor." else "")
+}
+
+# Returning FALSE leaves jmvcore without an image path. Render a diagnostic
+# while retaining the explicit error state, so errors cannot look like loading.
+jamovi_glm_plot_error = function(image, error) {
+  image$setError(conditionMessage(error))
+  grid::grid.newpage()
+  grid::grid.text(paste(strwrap(conditionMessage(error), width=75), collapse="\n"),
+    gp=grid::gpar(col="grey30", fontsize=12))
+  TRUE
+}

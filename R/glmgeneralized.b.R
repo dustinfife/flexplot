@@ -78,14 +78,9 @@ jamovi_glm_generalized_plot = function(state, x=NULL, panels=NULL, group=NULL, s
     stop("Choose exactly one fitted-model predictor for the plot x variable; this model has no predictors.", call.=FALSE)
   }
   xvar = flexplot_axis_given(formula)$axis[1]
-  continuous = !is.na(xvar) && xvar %in% names(state$data) && is.numeric(state$data[[xvar]]) &&
-    length(unique(state$data[[xvar]][!is.na(state$data[[xvar]])])) >= 10L
-  scale = match.arg(scale,c("probability","logit"))
-  logit = model$family$family == "binomial" && scale == "logit"
-  if (logit && (!continuous || style != "auto")) {
-    stop("Logit visualization requires Automatic binomial visualization and a continuous numeric x predictor with at least 10 distinct values. Raw binary observations and categorical-x logit overlays are not supported.",call.=FALSE)
-  }
-  if (model$family$family == "binomial" && continuous && style == "auto") {
+  display = jamovi_glm_visualization(state$data, xvar, model$family$family == "binomial", style, scale)
+  logit = model$family$family == "binomial" && display$scale == "logit"
+  if (display$overlay) {
     plot = visualize_binomial_model(model, formula, state$data, n_bins=10, overlay_type="dot", se=se, scale=if(logit) "logit" else "probability")
     return(if(logit) jamovi_glm_logit_display(plot,all.vars(formula)[1],transform=FALSE) else plot)
   }
@@ -141,6 +136,13 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         jamovi_glm_generalized_comparison_table(self$results$comparison, comparison)
         self$results$comparisonplot$setState(comparison)
         self$results$comparisonplot$setVisible(self$options$graphic)
+        if (self$options$graphic) {
+          roles = flexplot_axis_given(comparison$formula)
+          guide = jamovi_glm_plot_guide(list(model=comparison$model1, models=list(comparison$model1, comparison$model2), data=comparison$data),
+            roles$axis[1], roles$given[!is.na(roles$given)], style=self$options$plotStyle, scale=self$options$plotScale)
+          self$results$comparisonPlotExplanation$setContent(guide)
+          self$results$comparisonPlotExplanation$setVisible(nzchar(guide))
+        }
       }
       model = state$model
       summary = summary(model)
@@ -170,8 +172,7 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         print(jamovi_glm_generalized_comparison_plot(image$state, self$options$se, self$options$plotStyle, self$options$plotScale))
         TRUE
       }, error=function(error) {
-        image$setError(conditionMessage(error))
-        FALSE
+        jamovi_glm_plot_error(image, error)
       })
     },
     .plot=function(image, ...) {
@@ -182,8 +183,7 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         print(plot)
         TRUE
       }, error=function(error) {
-        image$setError(conditionMessage(error))
-        FALSE
+        jamovi_glm_plot_error(image, error)
       })
     }
   ))

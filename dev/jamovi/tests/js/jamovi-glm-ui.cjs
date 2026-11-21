@@ -100,6 +100,7 @@ const {pathToFileURL} = require('node:url');
             ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
         }
 
+        if (generalized) ui.mainEffects = control(null); // Legacy saved option; no visible control.
         if (generalized) { ui.polynomials.setValue(false); ui.comparisonPolynomials.setValue(false); }
         if (analysis === 'glmbasic') {
             assert.ok(controls.has('se'));
@@ -138,7 +139,11 @@ const {pathToFileURL} = require('node:url');
             assert.equal(definition.options.find(option => option.name === 'interactionSpecVersion').hidden,true);
             const primary = compiled.view.layout.controls.find(control => control.name === 'primarySupplier');
             const main = compiled.view.layout.controls.find(control => control.name === 'primaryMainSupplier');
-            assert.equal(main.contentLink,undefined,'Main effects must remain editable with interactions off');
+            if (generalized) {
+                assert.equal(main,undefined,'No redundant Model 1 selector');
+                assert.equal(controls.has('mainEffects'),false);
+                assert.equal(primary.label,'Fixed effects and interactions');
+            } else assert.equal(main.contentLink,undefined,'Main effects must remain editable with interactions off');
             assert.equal(primary.contentLink,'(interactions)');
             assert.equal(primary.useSingleCell,true);
             const comparison = compiled.view.layout.controls.find(control => control.label === 'Model Comparison');
@@ -406,7 +411,7 @@ const {pathToFileURL} = require('node:url');
             fs.writeFileSync(output+'.quadratic.json',JSON.stringify(quadraticRecords));
         }
         if ((generalized || analysis === 'glmbasic') && runtime) {
-            const restored = require('./jamovi-glm-restoration.cjs')(fs.readFileSync(runtime,'utf8'), compilerPath, view.handlers, FormatDef, utils, assert, analysis);
+            const restored = await require('./jamovi-glm-restoration.cjs')(fs.readFileSync(runtime,'utf8'), compilerPath, view.handlers, FormatDef, utils, assert, analysis);
             if (generalized) fs.writeFileSync(output+'.polynomials.json',JSON.stringify(restored.polynomials));
             fs.writeFileSync(output+'.interactions.json',JSON.stringify(restored.interactions));
             fs.writeFileSync(output+'.restored.json',JSON.stringify(restored));

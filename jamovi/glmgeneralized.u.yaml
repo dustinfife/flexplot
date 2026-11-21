@@ -21,25 +21,13 @@ children:
           - type: VariablesListBox
             name: preds
             isTarget: true
-  - type: Supplier
-    name: primaryMainSupplier
-    label: Available main effects
-    format: variable
-    persistentItems: true
-    children:
-      - type: TargetLayoutBox
-        label: Model 1 main effects
-        children:
-          - type: VariablesListBox
-            name: mainEffects
-            isTarget: true
   - type: CheckBox
     name: interactions
   - type: Supplier
     name: primarySupplier
     useSingleCell: true
     contentLink: (interactions)
-    label: Interaction terms
+    label: Fixed effects and interactions
     format: term
     persistentItems: true
     children:

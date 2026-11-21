@@ -95,7 +95,7 @@ test_that("quadratic terms preserve linear defaults, predictions, and intercept-
     expected_means=vapply(curve$x,function(x) {profile=d;profile$x=x;mean(predict(expected,profile,type="response"))},numeric(1))
     expect_equal(curve$prediction,expected_means,tolerance=1e-10)
     expect_no_warning(ggplot2::ggplotGrob(plot))
-    if(family!="binomial") expect_match(analysis$results$coefficients$notes$interpretation$note,"Additional estimates.glm summaries are unavailable")
+    if(family!="binomial") expect_match(analysis$results$coefficients$notes$interpretation$note,"Supplementary effect summaries are unavailable")
     if(family=="binomial") expect_true(is.na(analysis$results$irt$asDF$intercept_threshold[analysis$results$irt$asDF$variable=="x"]))
   }
   options=flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","z"),modelTerms=list(),plotX=NULL)
