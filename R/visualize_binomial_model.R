@@ -48,8 +48,11 @@ visualize_binomial_model = function(object, formula, data, n_bins, overlay_type,
       # Invisible probability observations/anchors must not train a log-odds axis.
       if (inherits(layer$geom, c("GeomPoint", "GeomBlank")) && outcome %in% names(curve)) {
         layer$data = curve[FALSE, , drop=FALSE]
-      } else if (inherits(layer$geom, "GeomLine") && "y" %in% names(curve)) {
-        layer$data$y = stats::qlogis(curve$y)
+      } else if (inherits(layer$geom, "GeomLine")) {
+        # Supplied prediction ghosts have collision-safe coordinate names, not y.
+        axes = attr(curve,"ghost_axes")
+        y = if (length(axes) == 2L) axes[2] else "y"
+        if (y %in% names(curve)) layer$data[[y]] = stats::qlogis(curve[[y]])
       }
       next
     }

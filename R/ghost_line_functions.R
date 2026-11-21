@@ -2,6 +2,15 @@
 # expect_error(with(vars, create_ghost_reference(data = data, given=given, axis=axis, bins=bins, labels=labels, breaks=breaks)))  # no formula
 # bv = create_ghost_reference(weight.loss~motivation|therapy.type, data=exercise_data) # with formula, null ghost reference
 # expect_identical(bv[[1]], "cog")
+# Retain the historical rounded half-length choice (including ties-to-even),
+# but select the only level for singletons. Use prepared factor/bin ordering.
+flexplot_ghost_reference_level = function(values) {
+  choices = levels(values)
+  if (is.null(choices)) choices = as.character(flexplot_sampling_levels(values))
+  if (!length(choices)) stop("No observed levels are available for the ghost reference.",call.=FALSE)
+  choices[max(1L,round(length(choices)/2))]
+}
+
 create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.reference=NULL, axis=NULL, bins=3, labels=NULL, breaks=NULL){
 
   if (is.null(formula)){
@@ -44,7 +53,7 @@ create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.referen
       if (is.null(ghost.reference[[to.ghost[i]]])){
         l = data[,binned.name]
         
-        middle = levels(l); middle = middle[round((length(middle))/2)]
+        middle = flexplot_ghost_reference_level(l)
         ghost.reference[[to.ghost[i]]] = middle
         
         message(paste0("Hey-yo: You didn't choose ghost.reference values for ", to.ghost[i], ", which means I get to chose it. That shows a lot of trust. I appreciate that. I won't let you down.\n"))
@@ -84,7 +93,7 @@ create_ghost_reference= function(formula = NULL, data, given=NULL, ghost.referen
       
       ### format given as a binned variable
       l = factor(data[,given.bin])
-      middle = levels(l); middle = middle[round((length(middle))/2)]
+      middle = flexplot_ghost_reference_level(l)
       ghost.reference[[to.bin[b]]]=middle
     }
 
