@@ -91,11 +91,8 @@ const {pathToFileURL} = require('node:url');
         for (const name of controls) {
             if (!(name in ui)) ui[name] = control(name.endsWith('Supplier') ? [] : null);
         }
-        if (analysis === 'mixedmodel') {
-            ui.samplePolicyVersion = control(0);
-            ui.view.model.options.getOption = name => ({getValue:ui[name].value});
-            ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
-            const yaml = require(require.resolve('js-yaml',{paths:[compilerPath]}));
+        const yaml = require(require.resolve('js-yaml',{paths:[compilerPath]}));
+        if (analysis === 'mixedmodel' || analysis === 'glmgeneralized') {
             if (runtime) {
                 const resultsFile = fs.readdirSync(path.dirname(runtime)).find(name => /^resultsview-.*\.js$/.test(name));
                 assert.ok(resultsFile,'Installed results renderer is required for citation checks');
@@ -114,8 +111,8 @@ const {pathToFileURL} = require('node:url');
                 references.setTable({mode:'all',table:{flexplot:3,graphicalAnalysis:4},addEventListener(){}});
                 references.setRefs(['flexplot','graphicalAnalysis']);
                 assert.ok(references._body.innerHTML.includes('[3]') && references._body.innerHTML.includes('[4]'));
-                const results = yaml.load(fs.readFileSync(path.join(root,'jamovi/mixedmodel.r.yaml'),'utf8'));
-                for (const name of ['fixed','random','correlations']) {
+                const results = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.r.yaml'),'utf8'));
+                for (const name of (analysis === 'mixedmodel' ? ['fixed','random','correlations'] : ['coefficients','irt','probabilities'])) {
                     references.setRefs(results.items.find(item=>item.name===name).refs || []);
                     assert.equal(references.count(),0);
                     assert.equal(references._body.innerHTML,'');
@@ -124,6 +121,25 @@ const {pathToFileURL} = require('node:url');
                 references.setRefs(results.refs);
                 assert.equal(references.hasVisibleContent(),true,'Retain analysis-level research references');
             }
+
+        }
+        const resultDefinition = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.r.yaml'),'utf8'));
+        if (analysis === 'glmbasic') {
+            for (const name of ['factorMeans','diff'])
+                assert.equal(resultDefinition.items.find(item => item.name === name).visible,false);
+        }
+        if (analysis === 'glmgeneralized') {
+            assert.deepEqual(resultDefinition.refs,['flexplot','graphicalAnalysis']);
+            assert.equal(resultDefinition.items.find(item => item.name === 'plotExplanation').title,'');
+            for (const name of ['explanation','plotExplanation','plot','comparisonplot'])
+                assert.equal(resultDefinition.items.find(item => item.name === name).visible,false);
+            for (const name of ['plot','comparisonplot'])
+                assert.equal(resultDefinition.items.find(item => item.name === name).height,450);
+        }
+        if (analysis === 'mixedmodel') {
+            ui.samplePolicyVersion = control(0);
+            ui.view.model.options.getOption = name => ({getValue:ui[name].value});
+            ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
 
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi/mixedmodel.a.yaml'),'utf8'));
             assert.equal(definition.options.find(option => option.name === "casGhost").default,false);

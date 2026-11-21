@@ -56,6 +56,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (key in names(table$notes)) table$setNote(key,NULL)
           }
           self$results$factorMeans$setVisible(FALSE)
+          self$results$diff$setVisible(FALSE)
           if (!length(self$options$out) || !length(self$options$preds)) return(invisible(NULL))
           data = self$data
           if (self$options$compare) {
@@ -166,14 +167,16 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			
 			.diff = function(l){
 				
-				table <- self$results$diff
+				table = self$results$diff
+        if (!is.data.frame(l) || !nrow(l)) return(invisible(NULL))
+        table$setVisible(self$options$estimates)
         adjustments = attr(l, "adjustments")
         table$setNote("intervals", paste0("95% confidence intervals: ",
           paste(paste(names(adjustments), adjustments, sep=": "), collapse="; "),
           ". Adjusted intervals cover the estimable pairwise family within each factor. Other numeric predictors are held at their means and categorical predictors at their modes."))
 
 
-				for (i in 1:(nrow(l))){
+				for (i in seq_len(nrow(l))){
 						row = list('variables' = l$variables[i], 
 								'comparison' = l$comparison[i], 
 								'diff' = round(l$difference[i], digits=2), 

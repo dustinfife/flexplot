@@ -45,9 +45,14 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
   } else {
     class(values) = "data.frame"
   }
-  description = "<p>Estimates follow estimates.glm(). Confidence intervals are 95% Wald intervals for raw coefficients.</p>"
+  t_intervals = colnames(coefficients)[3] == "t value"
+  interval_title = if (t_intervals) "95% t CI" else "95% normal Wald CI"
+  results$coefficients$setNote("intervals", if (t_intervals)
+    paste0("95% t confidence intervals for raw coefficients; residual df = ", stats::df.residual(model), ".") else
+    "95% normal Wald confidence intervals for raw coefficients.")
+  description = "Estimates follow estimates.glm()."
   if (unavailable) description = paste0(description,
-    "<p>Additional estimates.glm summaries are unavailable for this model specification. Raw coefficients, standard errors, confidence intervals and predictions remain available.</p>")
+    " Additional estimates.glm summaries are unavailable for this model specification. Raw coefficients, standard errors, confidence intervals and predictions remain available.")
   irt = attr(values, "irt")
   probabilities = attr(values, "marginal_probabilities")
   # IRT and marginal probabilities have predictor-level rows, not coefficient rows.
@@ -69,11 +74,12 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
     numeric = is.numeric(reported[[name]])
     if (!name %in% names(results$coefficients$columns)) {
       results$coefficients$addColumn(name, title=name, type=if (numeric) "number" else "text",
-        superTitle=if (name %in% c("lower", "upper")) "95% Wald CI" else NULL,
+        superTitle=if (name %in% c("lower", "upper")) interval_title else NULL,
         format=if (name %in% c(p_names, "p")) "zto,pvalue" else "")
     }
     column = results$coefficients$getColumn(name)
     column$visible = TRUE
+    if (name %in% c("lower", "upper")) column$setSuperTitle(interval_title)
   }
   jamovi_glm_table_rows(results$coefficients, reported)
   results$coefficients$setNote("model", paste("Family:", model$family$family, " Link:", model$family$link))
@@ -85,11 +91,11 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
       log="Log-link multiplicative coefficients describe changes in the response mean. Standardized multipliers use a one-SD predictor change.",
       inverse="Reciprocal coefficients describe the inverse-mean scale; they are not response ratios.",
       identity="Raw coefficients are in outcome units.")
-    description = paste0(description, "<p>", interpretation,
-      " Prediction differences follow the existing conditional mean +/- one-SD or categorical-contrast convention. Interaction coefficients are conditional.</p>")
+    description = paste0(description, " ", interpretation,
+      " Prediction differences follow the existing conditional mean +/- one-SD or categorical-contrast convention. Interaction coefficients are conditional.")
     if (inherits(model, "negbin")) description = paste0(description,
-      "<p>Negative Binomial uncertainty conditions on estimated size (theta).</p>")
-    results$explanation$setContent(description)
+      " Negative Binomial uncertainty conditions on estimated size (theta).")
+    results$coefficients$setNote("interpretation", description)
     return(invisible(NULL))
   }
   response = stats::model.response(stats::model.frame(model))
@@ -111,8 +117,8 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
     results$probabilities$setVisible(nrow(probabilities) > 0L)
     results$probabilities$setNote("averaging", "Each category is set across eligible observations; response-scale probabilities are averaged over other observed predictors.")
   }
-  description = paste0(description, "<p>OR and inverse.OR describe fitted coefficient contrasts. Standardized odds ratios use predictor SDs without standardizing the binary outcome. Estimates retain estimates.glm() display precision.</p>")
-  results$explanation$setContent(description)
+  description = paste0(description, " OR and inverse.OR describe fitted coefficient contrasts. Standardized odds ratios use predictor SDs without standardizing the binary outcome. Estimates retain estimates.glm() display precision.")
+  results$coefficients$setNote("interpretation", description)
   invisible(NULL)
 }
 
@@ -123,10 +129,10 @@ jamovi_glm_plot_guide = function(state, x=NULL, panels=NULL, group=NULL, style="
   overlay = state$model$family$family == "binomial" && style == "auto" &&
     length(x) && x %in% names(state$data) && is.numeric(state$data[[x]]) &&
     length(unique(state$data[[x]])) >= 10L
-  guide = if (overlay) "<p>Dots show observed bin proportions; curves show fitted-model probabilities.</p>" else
-    "<p>Model predictions are on the response scale.</p>"
+  guide = if (overlay) "Dots show observed bin proportions; curves show fitted-model probabilities." else
+    "Model predictions are on the response scale."
   if (length(hidden)) guide = paste0(guide,
-    "<p>Unshown predictors are averaged over eligible observations.",
-    if (overlay) " Curves are adjusted marginal predictions, not bin-matched predictions." else "", "</p>")
-  guide
+    " Unshown predictors are averaged over eligible observations.",
+    if (overlay) " Curves are adjusted marginal predictions, not bin-matched predictions." else "")
+  paste0("<p>", guide, "</p>")
 }

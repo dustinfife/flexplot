@@ -309,7 +309,7 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Upper", 
                         `superTitle`="95% Confidence Interval", 
                         `type`="number")),
-                visible="(estimates)"))
+                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="diff",
@@ -341,7 +341,7 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="cohensd", 
                         `title`="Cohen's d", 
                         `type`="number")),
-                visible="(estimates)"))
+                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rsq",

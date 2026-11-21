@@ -27,7 +27,8 @@ test_that("jamovi generalized models reproduce glm coefficients, uncertainty and
       as.numeric(logLik(expected)), AIC(expected), BIC(expected), summary(expected)$dispersion)
     expect_equal(unname(fit[c("N", "Residual df", "Deviance", "Null deviance", "Log likelihood", "AIC", "BIC", "Dispersion")]), values, tolerance=1e-12)
     expect_identical(state$model$family$link, switch(family, gaussian="identity", binomial="logit", poisson="log"))
-    expect_setequal(analysis$results$coefficients$getRefs(), c("flexplot", "graphicalAnalysis"))
+    expect_length(analysis$results$coefficients$getRefs(), 0L)
+    expect_setequal(analysis$results$getRefs(), c("flexplot", "graphicalAnalysis"))
   }
 })
 

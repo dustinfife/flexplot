@@ -182,7 +182,10 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="Generalized Linear Model")
+                title="Generalized Linear Model",
+                refs=list(
+                    "flexplot",
+                    "graphicalAnalysis"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="waiting",
@@ -193,9 +196,6 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="coefficients",
                 title="Estimates",
                 visible=FALSE,
-                refs=list(
-                    "flexplot",
-                    "graphicalAnalysis"),
                 columns=list(
                     list(
                         `name`="term",
@@ -245,7 +245,7 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Html$new(
                 options=options,
                 name="plotExplanation",
-                title="Visualization guide",
+                title="",
                 visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,

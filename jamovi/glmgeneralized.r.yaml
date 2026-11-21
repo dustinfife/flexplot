@@ -2,6 +2,7 @@
 name: glmgeneralized
 title: Generalized Linear Model
 jrs: '1.1'
+refs: [flexplot, graphicalAnalysis]
 items:
   - name: waiting
     title: ''
@@ -11,7 +12,6 @@ items:
     title: Estimates
     type: Table
     visible: false
-    refs: [flexplot, graphicalAnalysis]
     columns:
       - name: term
         title: Term
@@ -49,7 +49,7 @@ items:
     type: Html
     visible: false
   - name: plotExplanation
-    title: Visualization guide
+    title: ''
     type: Html
     visible: false
   - name: plot

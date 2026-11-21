@@ -151,13 +151,12 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
       jamovi_glm_estimates(self$results, state, includeP=self$options$includeP)
       self$results$waiting$setVisible(FALSE)
       self$results$coefficients$setVisible(TRUE)
-      self$results$explanation$setVisible(TRUE)
       self$results$plot$setVisible(self$options$graphic)
-      self$results$plotExplanation$setVisible(self$options$graphic)
       if (self$options$graphic) {
         guide = tryCatch(jamovi_glm_plot_guide(state, self$options$plotX,
           self$options$plotPanels, self$options$plotGroup, self$options$plotStyle), error=function(error) "")
         self$results$plotExplanation$setContent(guide)
+        self$results$plotExplanation$setVisible(nzchar(trimws(guide)))
       }
     },
     .comparisonplot=function(image, ...) {

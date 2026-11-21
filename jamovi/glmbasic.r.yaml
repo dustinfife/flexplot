@@ -78,7 +78,7 @@ items:
           title: 'Upper'
           superTitle: '95% Confidence Interval'
           type: number
-      visible: (estimates)
+      visible: false
       
     - name:  diff
       title: Difference between factor levels for categorical predictors
@@ -104,7 +104,7 @@ items:
         - name: cohensd
           title: "Cohen's d"
           type: number
-      visible: (estimates)      
+      visible: false
           
     - name:  rsq
       title: R² and semi-partial R² estimates
