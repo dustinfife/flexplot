@@ -101,6 +101,18 @@ const {pathToFileURL} = require('node:url');
         }
 
         if (generalized) { ui.polynomials.setValue(false); ui.comparisonPolynomials.setValue(false); }
+        if (analysis === 'glmbasic') {
+            assert.ok(controls.has('se'));
+            assert.equal(controls.has('line'),false,'Generic smoothers must not appear in the LM UI');
+            assert.equal(controls.has('center'),false,'Observed center/spread summaries must not appear in the LM UI');
+            const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.a.yaml'),'utf8'));
+            assert.equal(definition.options.find(option => option.name === 'se').title,'95% confidence intervals (Model 1 plot)');
+            for (const name of ['line','center']) assert.ok(definition.options.some(option => option.name === name),'Retain saved option: '+name);
+            const graphic = compiled.view.layout.controls.flatMap(c => c.controls || [])
+                .flatMap(c => c.controls || []).find(c => c.label && c.label.trim() === 'Graphic Options');
+            assert.ok(graphic);
+            assert.equal(JSON.stringify(graphic.controls.map(c => c.name)),JSON.stringify(['se']));
+        }
         if (analysis === 'glmbasic' || generalized) {
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.a.yaml'),'utf8'));
             if (generalized) {

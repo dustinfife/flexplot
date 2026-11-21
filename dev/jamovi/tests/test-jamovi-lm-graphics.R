@@ -1,0 +1,30 @@
+test_that("removed LM graphic controls retain saved options without affecting restored fits", {
+  jmvcore:::initProtoBuf()
+  message = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
+  template = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
+  saved = list(out="y",preds=c("x","a"),modelTerms=list("x","a",c("x","a")),
+    quadratic="x",polynomials=TRUE,interactions=TRUE,interactionSpecVersion=1,
+    compare=TRUE,comparisonTerms=list("x","a"),comparisonX="x",comparisonPanels="a",
+    line="Logistic",center="Mean + stdev",se=TRUE,plotX="x",plotPanels="a")
+  message$names = names(saved)
+  message$options = lapply(saved,jamovi_mixed_saved_option,option_template=template,group_template=message)
+  original = flexplot:::glmbasicOptions$new();original$fromProtoBuf(message)
+  restored = flexplot:::glmbasicOptions$new();restored$fromProtoBuf(original$asProtoBuf())
+  for (name in names(saved)) expect_equal(restored[[name]],saved[[name]])
+  analysis = flexplot:::glmbasicClass$new(options=restored,data=small)
+  expect_true(analysis$run())
+  independent = lm(y~x*a+I(x^2),small)
+  jamovi_expect_lm_coefficients(analysis,independent)
+  expect_equal(coef(analysis$results$comparisonplot$state$model1),coef(independent),tolerance=1e-12)
+  expect_equal(coef(analysis$results$comparisonplot$state$model2),coef(lm(y~x+a,small)),tolerance=1e-12)
+  capture = new.env(parent=emptyenv())
+  local_mocked_bindings(jamovi_glm_model_plot=jamovi_model_plot_recorder(capture))
+  withr::local_options(device=function(...)grDevices::pdf(file=NULL))
+  previous_theme = ggplot2::theme_get();withr::defer(ggplot2::theme_set(previous_theme))
+  expect_warning(expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot)),"beyond the range")
+  curve = Filter(function(layer) is.data.frame(layer$data) && "prediction" %in% names(layer$data),capture$plot$layers)[[1]]$data
+  expected = predict(independent,newdata=curve,interval="confidence")
+  expect_equal(curve$prediction,unname(expected[,"fit"]),tolerance=1e-10)
+  expect_equal(curve$prediction.lwr,unname(expected[,"lwr"]),tolerance=1e-10)
+  expect_equal(curve$prediction.upr,unname(expected[,"upr"]),tolerance=1e-10)
+})

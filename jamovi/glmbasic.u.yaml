@@ -234,8 +234,4 @@ children:
             label: Graphic Options    
             children:
               - type: CheckBox
-                name: se            
-              - type: ComboBox
-                name: line
-              - type: ComboBox
-                name: center
+                name: se

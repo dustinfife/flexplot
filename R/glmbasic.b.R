@@ -116,14 +116,10 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             print(plot)
             TRUE
         },
-		.plot = function(image, ...){
-			if (self$options$line=="Loess"){line="loess"}
-			if (self$options$line=="Regression"){line ="lm"}
-			if (self$options$line=="Logistic"){line ="logistic"}
-						
-            if (is.null(image$state))
-                return(FALSE)
-            se.type = unlist(strsplit(self$options$center," + ", fixed=T))[2]			
+        .plot = function(image, ...){
+            if (is.null(image$state)) return(FALSE)
+            # Legacy line/center options remain readable but do not select a
+            # second smoother or observed-group summary for a fitted model.
 			formula = image$state$formula
 			data = image$state$data
             mod = lm(formula, data=data)
@@ -137,8 +133,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               image$setError(conditionMessage(layout))
               return(FALSE)
             }
-            plot = jamovi_glm_model_plot(mod, se=self$options$se, formula=layout, data=data,
-                                         method=line, spread=se.type)
+            plot = jamovi_glm_model_plot(mod, se=self$options$se, formula=layout, data=data)
 			print(plot)
 			TRUE
 			},

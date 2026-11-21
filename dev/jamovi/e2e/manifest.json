@@ -3974,7 +3974,9 @@
         "plotX": "x",
         "plotPanels": [
           "group"
-        ]
+        ],
+        "line": "Regression",
+        "center": "Mean + sterr"
       },
       "steps": [
         {
@@ -4109,9 +4111,7 @@
           "changes": {
             "estimates": true,
             "se": true,
-            "includeP": false,
-            "center": "Mean + sterr",
-            "line": "Regression"
+            "includeP": false
           },
           "expected_status": "complete",
           "expected_ui": {},
@@ -4147,9 +4147,7 @@
             "includeP": false,
             "graphicassump": true,
             "estimates": true,
-            "se": true,
-            "center": "Mean + sterr",
-            "line": "Regression"
+            "se": true
           },
           "verify_visible_against_saved_options": true
         },
@@ -4195,8 +4193,6 @@
             "graphicassump": false,
             "estimates": true,
             "se": true,
-            "center": "Mean + sterr",
-            "line": "Regression",
             "graphic": false
           },
           "verify_visible_against_saved_options": true
@@ -4206,7 +4202,8 @@
         "interface": [
           "visible controls equal expected_options",
           "result state completes or exposes the specified error; no persistent spinner",
-          "no stale/duplicate rows after edits"
+          "no stale/duplicate rows after edits",
+          "Graphic Options contains only the 95% confidence intervals (Model 1 plot) checkbox. Legacy line/center values are retained in saved options, not exposed as native controls."
         ],
         "statistical": [
           "compare any fitted model with independent realized-data reference; rendering alone is insufficient"

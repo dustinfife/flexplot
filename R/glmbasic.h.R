@@ -69,6 +69,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..line <- jmvcore::OptionList$new(
                 "line",
                 line,
+                hidden=TRUE,
                 options=list(
                     "Loess",
                     "Regression",
@@ -77,6 +78,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..center <- jmvcore::OptionList$new(
                 "center",
                 center,
+                hidden=TRUE,
                 options=list(
                     "Median + quartiles",
                     "Mean + sterr",

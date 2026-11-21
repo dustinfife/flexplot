@@ -41,11 +41,14 @@ options:
       description: Include coefficient t-test p-values in the estimates table.
 
     - name: se
-      title: Standard errors
+      title: 95% confidence intervals (Model 1 plot)
       type: Bool
+      description: Show 95% confidence intervals in the Model 1 plot; comparison and diagnostic plots are unchanged.
       default: true           
        
+    # Retained for saved-analysis compatibility; not used by model visualization.
     - name: line
+      hidden: true
       title: Fitted line (for scatterplots)
       type: List
       options:
@@ -54,7 +57,9 @@ options:
         - "Logistic"
       default: "Loess"           
       
+    # Retained for saved-analysis compatibility; not used by model visualization.
     - name: center
+      hidden: true
       title: Center/spread (for dot plots)
       type: List
       options:
