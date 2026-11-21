@@ -7085,7 +7085,8 @@
         "plotPanels": [
           "binary"
         ],
-        "plotStyle": "auto"
+        "plotStyle": "auto",
+        "plotScale": "probability"
       },
       "steps": [
         {
@@ -7230,16 +7231,114 @@
             "plotGroup": "binary"
           },
           "verify_visible_against_saved_options": true
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Display existing marginal predictions on logit scale",
+          "changes": {
+            "plotScale": "logit"
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": {
+            "formulas": [
+              "binary_missing ~ x + z + binary + x:binary"
+            ],
+            "engine": "glm",
+            "family": "binomial"
+          },
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_missing",
+            "preds": [
+              "x",
+              "z",
+              "binary",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "binary"
+              ],
+              [
+                "x",
+                "binary"
+              ]
+            ],
+            "plotX": "x",
+            "plotPanels": [],
+            "plotStyle": "auto",
+            "plotGroup": "binary",
+            "plotScale": "logit"
+          },
+          "verify_visible_against_saved_options": true
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Display existing marginal predictions on probability scale",
+          "changes": {
+            "plotScale": "probability"
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": {
+            "formulas": [
+              "binary_missing ~ x + z + binary + x:binary"
+            ],
+            "engine": "glm",
+            "family": "binomial"
+          },
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_missing",
+            "preds": [
+              "x",
+              "z",
+              "binary",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "binary"
+              ],
+              [
+                "x",
+                "binary"
+              ]
+            ],
+            "plotX": "x",
+            "plotPanels": [],
+            "plotStyle": "auto",
+            "plotGroup": "binary",
+            "plotScale": "probability"
+          },
+          "verify_visible_against_saved_options": true
         }
       ],
       "verification": {
         "interface": [
           "visible controls equal expected_options",
           "result state completes or exposes the specified error; no persistent spinner",
-          "no stale/duplicate rows after edits"
+          "no stale/duplicate rows after edits",
+          "Visualization scale is visible only for Binomial and retains its saved selection across family switches. Confidence intervals remains visible for every family."
         ],
         "statistical": [
-          "predictions from original fit; observed bin proportions on correct coding; adjusted predictions not falsely called bin-matched; no jitter on fitted curves"
+          "predictions from original fit; observed bin proportions on correct coding; adjusted predictions not falsely called bin-matched; no jitter on fitted curves",
+          "Logit curve and interval coordinates equal qlogis of the same marginal probabilities and limits; fitted-model statistics stay unchanged."
         ],
         "visual": [
           "plot completes when enabled",
@@ -7681,7 +7780,8 @@
             "x"
           ]
         ],
-        "comparisonX": "x"
+        "comparisonX": "x",
+        "plotScale": "probability"
       },
       "steps": [
         {
@@ -7721,6 +7821,92 @@
               ]
             ],
             "comparisonX": "x"
+          },
+          "verify_visible_against_saved_options": true
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Display existing marginal predictions on logit scale",
+          "changes": {
+            "plotScale": "logit"
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": {
+            "formulas": [
+              "binary_y ~ x + z_missing",
+              "binary_y ~ x"
+            ],
+            "engine": "glm",
+            "family": "binomial"
+          },
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z_missing"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z_missing"
+              ]
+            ],
+            "compare": true,
+            "comparisonTerms": [
+              [
+                "x"
+              ]
+            ],
+            "comparisonX": "x",
+            "plotScale": "logit"
+          },
+          "verify_visible_against_saved_options": true
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Display existing marginal predictions on probability scale",
+          "changes": {
+            "plotScale": "probability"
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": {
+            "formulas": [
+              "binary_y ~ x + z_missing",
+              "binary_y ~ x"
+            ],
+            "engine": "glm",
+            "family": "binomial"
+          },
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z_missing"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z_missing"
+              ]
+            ],
+            "compare": true,
+            "comparisonTerms": [
+              [
+                "x"
+              ]
+            ],
+            "comparisonX": "x",
+            "plotScale": "probability"
           },
           "verify_visible_against_saved_options": true
         },
@@ -7770,10 +7956,12 @@
         "interface": [
           "visible controls equal expected_options",
           "result state completes or exposes the specified error; no persistent spinner",
-          "no stale/duplicate rows after edits"
+          "no stale/duplicate rows after edits",
+          "Visualization scale is visible only for Binomial and retains its saved selection across family switches. Confidence intervals remains visible for every family."
         ],
         "statistical": [
-          "same eligible row identities; independent logLik LR/df chi-square only nested; AIC/BIC reciprocal BF; NB theta estimated separately; no LM F test"
+          "same eligible row identities; independent logLik LR/df chi-square only nested; AIC/BIC reciprocal BF; NB theta estimated separately; no LM F test",
+          "Logit curve and interval coordinates equal qlogis of the same marginal probabilities and limits; fitted-model statistics stay unchanged."
         ],
         "visual": [
           "plot completes when enabled",

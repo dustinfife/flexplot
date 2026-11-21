@@ -35,9 +35,9 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     const ui = {view:{model:{options:manager}}};
     const defaults = {polynomials:false,comparisonPolynomials:false,interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
         comparisonTerms:null,comparisonQuadratic:null,plotX:null,plotPanels:null,plotGroup:null,
-        comparisonX:null,comparisonPanels:null,family:'binomial',includeP:false,graphic:true,se:true,plotStyle:'auto'};
+        comparisonX:null,comparisonPanels:null,family:'binomial',includeP:false,graphic:true,se:true,plotStyle:'auto',plotScale:'probability'};
     if (analysis === 'glmbasic') {
-        delete defaults.family; delete defaults.plotStyle;
+        delete defaults.family; delete defaults.plotStyle; delete defaults.plotScale;
         Object.assign(defaults,{polynomials:false,comparisonPolynomials:false,graphicassump:false,estimates:true,comparisonGroup:null});
     }
     for (const [name,value] of Object.entries(defaults)) {

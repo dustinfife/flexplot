@@ -199,5 +199,9 @@ children:
         name: plotStyle
         useSingleCell: true
         contentLink: (family:binomial)
+      - type: ComboBox
+        name: plotScale
+        useSingleCell: true
+        contentLink: (family:binomial)
       - type: CheckBox
         name: se

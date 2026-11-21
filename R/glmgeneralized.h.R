@@ -29,7 +29,8 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             comparisonMainEffects = NULL,
             interactionSpecVersion = 0,
             polynomials = FALSE,
-            comparisonPolynomials = FALSE, ...) {
+            comparisonPolynomials = FALSE,
+            plotScale = "probability", ...) {
 
             super$initialize(
                 package="flexplot",
@@ -142,6 +143,13 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "comparisonPolynomials",
                 comparisonPolynomials,
                 default=FALSE)
+            private$..plotScale = jmvcore::OptionList$new(
+                "plotScale",
+                plotScale,
+                options=list(
+                    "probability",
+                    "logit"),
+                default="probability")
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -167,6 +175,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..interactionSpecVersion)
             self$.addOption(private$..polynomials)
             self$.addOption(private$..comparisonPolynomials)
+            self$.addOption(private$..plotScale)
         }),
     active = list(
         out = function() private$..out$value,
@@ -192,7 +201,8 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         comparisonMainEffects = function() private$..comparisonMainEffects$value,
         interactionSpecVersion = function() private$..interactionSpecVersion$value,
         polynomials = function() private$..polynomials$value,
-        comparisonPolynomials = function() private$..comparisonPolynomials$value),
+        comparisonPolynomials = function() private$..comparisonPolynomials$value,
+        plotScale = function() private$..plotScale$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -217,7 +227,8 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..comparisonMainEffects = NA,
         ..interactionSpecVersion = NA,
         ..polynomials = NA,
-        ..comparisonPolynomials = NA)
+        ..comparisonPolynomials = NA,
+        ..plotScale = NA)
 )
 
 glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

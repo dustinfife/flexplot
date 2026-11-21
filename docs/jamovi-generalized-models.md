@@ -124,7 +124,7 @@ continues to mean Gamma/inverse, so existing analyses retain their fitted link.
 
 ## Predictions, overlays and uncertainty
 
-All model curves are response-scale predictions from the actual fitted model:
+By default, model curves are response-scale predictions from the actual fitted model:
 outcome units, success probabilities or expected counts/positive outcomes.
 Undisplayed covariates are averaged over eligible observations using the existing
 `compare_fits()` marginal prediction method, preserving their interactions.
@@ -138,7 +138,7 @@ distinction. **Raw observations and model predictions** retains the jittered
 binary data instead. Categorical and low-cardinality x variables keep native
 categorical/magnet plots, and non-binomial families keep their native plots. The explanatory guide is a separate results block rather than a long plot caption. Averaging text appears only when fitted-model predictors are actually undisplayed.
 
-Prediction confidence intervals can be disabled. With all model predictors
+Confidence intervals can be disabled. With all model predictors
 displayed, the intervals agree with link-scale `predict.glm(..., se.fit=TRUE)`
 intervals transformed to the response scale. For marginal means, the existing
 average-gradient covariance calculation supplies the response-scale standard
@@ -151,6 +151,28 @@ ordered correctly, and an interval reaching zero on the link scale has an
 unbounded upper response limit. Prediction profiles outside the positive Gamma
 mean domain are rejected rather than plotted as invalid negative means. Such
 extrapolation can occur when crossing predictors in unobserved combinations.
+
+### Binomial visualization scale
+
+The binomial-only **Visualization scale** selector defaults to **Probability**.
+**Logit** displays `qlogis(mean(predict(model, reference, type="response")))`
+at each plotting coordinate, using the same eligible reference observations,
+moderators, and fitted model as Probability. It does not average linear predictors.
+Confidence-interval endpoints receive the same logit transformation. The
+**Confidence intervals** checkbox retains its existing saved option and calculations.
+Both comparison curves use the selected scale; fitting and comparison statistics
+are unchanged. The selection is retained when switching to another family.
+
+Logit display requires Automatic visualization and a continuous numeric x predictor
+with at least ten distinct values. Raw 0/1 observations have infinite logits;
+raw-observation and categorical-x logit combinations therefore show an informative
+plot error rather than a misleading substitute. Observed bins retain the existing
+half-observation convention: proportions are bounded by `0.5/n` and `1-0.5/n`
+only for display before taking logits. Model probabilities are never clipped.
+Exact model probabilities or interval limits of zero/one have infinite logits and
+are drawn at plot edges. A grid without finite logits, or undefined saturated
+confidence limits, reports an error; disabling intervals can display a curve whose
+intervals are undefined. Empty bins are not drawn.
 
 ## References, notes and installation
 

@@ -85,7 +85,7 @@ options:
         title: Raw observations and model predictions
     default: auto
   - name: se
-    title: Prediction confidence intervals
+    title: Confidence intervals
     type: Bool
     default: true
   - name: includeP
@@ -121,4 +121,13 @@ options:
     title: Include Polynomial Terms
     type: Bool
     default: false
+  - name: plotScale
+    title: Visualization scale
+    type: List
+    options:
+      - name: probability
+        title: Probability
+      - name: logit
+        title: Logit
+    default: probability
 ...

@@ -369,6 +369,13 @@ const {pathToFileURL} = require('node:url');
             assert.ok(supplier && supplier.persistentItems === false);
             const style = compiled.view.layout.controls.flatMap(c => c.controls || []).find(c => c.name === 'plotStyle');
             assert.ok(style && style.contentLink === '(family:binomial)');
+            const scale = compiled.view.layout.controls.flatMap(c => c.controls || []).find(c => c.name === 'plotScale');
+            assert.equal(scale.contentLink,'(family:binomial)');
+            const visualization = compiled.view.layout.controls.find(c => c.label === 'Model visualization').controls;
+            assert.equal(visualization.findIndex(c => c.name === 'plotScale'),visualization.findIndex(c => c.name === 'plotStyle')+1);
+            const a = yaml.load(fs.readFileSync(path.join(root,'jamovi/glmgeneralized.a.yaml'),'utf8'));
+            assert.equal(a.options.find(o => o.name === 'plotScale').default,'probability');
+            assert.equal(a.options.find(o => o.name === 'se').title,'Confidence intervals');
             if (runtime) {
                 const installed = fs.readFileSync(runtime, 'utf8');
                 const start = installed.indexOf('filterSuppliersList(e=!1){');
@@ -390,6 +397,7 @@ const {pathToFileURL} = require('node:url');
                 assert.equal(JSON.stringify(visible), '[true,true]');
                 const se = compiled.view.layout.controls.flatMap(c => c.controls || []).find(c => c.name === 'se');
                 require('./jamovi-binomial-visibility.cjs')(installed, style, se, compilerPath);
+                require('./jamovi-binomial-visibility.cjs')(installed, scale, se, compilerPath);
 
             }
         }

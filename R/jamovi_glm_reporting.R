@@ -122,7 +122,7 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
   invisible(NULL)
 }
 
-jamovi_glm_plot_guide = function(state, x=NULL, panels=NULL, group=NULL, style="auto") {
+jamovi_glm_plot_guide = function(state, x=NULL, panels=NULL, group=NULL, style="auto", scale="probability") {
   formula = jamovi_model_layout(list(state$model), state$data, x, panels, group)
   hidden = setdiff(all.vars(stats::formula(state$model))[-1], all.vars(formula)[-1])
   x = flexplot_axis_given(formula)$axis[1]
@@ -134,5 +134,9 @@ jamovi_glm_plot_guide = function(state, x=NULL, panels=NULL, group=NULL, style="
   if (length(hidden)) guide = paste0(guide,
     " Unshown predictors are averaged over eligible observations.",
     if (overlay) " Curves are adjusted marginal predictions, not bin-matched predictions." else "")
+  if (state$model$family$family == "binomial" && scale == "logit") guide = paste(
+    "Curves show logit of marginal predicted probabilities, not average linear predictors.",
+    "Observed-bin proportions use the existing half-observation bounds before taking logits.",
+    "Exact zero/one model probabilities or confidence limits have infinite logits and appear at plot edges; model probabilities are not clipped.")
   paste0("<p>", guide, "</p>")
 }

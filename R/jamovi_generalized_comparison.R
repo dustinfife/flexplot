@@ -64,12 +64,15 @@ jamovi_glm_generalized_comparison_table = function(table, state) {
   if (length(state$warnings)) table$setNote("warnings", paste(state$warnings, collapse="; "))
 }
 
-jamovi_glm_generalized_comparison_plot = function(state, se=TRUE, style="auto") {
+jamovi_glm_generalized_comparison_plot = function(state, se=TRUE, style="auto", scale="probability") {
   model1 = state$model1
   model2 = state$model2
   x = flexplot_axis_given(state$formula)$axis[1]
   overlay = model1$family$family == "binomial" && style == "auto" &&
     is.numeric(state$data[[x]]) && length(unique(state$data[[x]])) >= 10L
+  scale = match.arg(scale,c("probability","logit"))
+  logit = model1$family$family == "binomial" && scale == "logit"
+  if (logit && !overlay) stop("Logit visualization requires Automatic binomial visualization and a continuous numeric x predictor with at least 10 distinct values. Raw binary observations and categorical-x logit overlays are not supported.",call.=FALSE)
   plot = compare_fits(state$formula, state$data, model1=model1, model2=model2,
     pred.type="response", report.se=se, raw.data=!overlay)
   if (se) {
@@ -90,5 +93,14 @@ jamovi_glm_generalized_comparison_plot = function(state, se=TRUE, style="auto") 
   plot = jamovi_comparison_style(plot)
   if (!overlay) return(plot)
   summary = convert_formula_to_logistic_bins(state$formula, plot$data, n_bins=10)$summary_data
-  add_logistic_overlay_layers(plot, summary, "dot", "probability")
+  if (logit) {
+    plot = jamovi_glm_logit_display(plot,all.vars(state$formula)[1])
+    corrected = pmax(.5/summary$count,pmin((summary$count-.5)/summary$count,summary$proportion))
+    summary$proportion = stats::qlogis(corrected)
+    for (aesthetic in c("colour","linetype")) {
+      scale_object = plot$scales$get_scales(aesthetic)
+      if (!is.null(scale_object)) scale_object$name = "Model (logit scale)"
+    }
+  }
+  add_logistic_overlay_layers(plot, summary, "dot", if(logit) "logit" else "probability")
 }

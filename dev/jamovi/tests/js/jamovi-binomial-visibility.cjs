@@ -53,10 +53,10 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
     assert.ok(source.includes(changeBranch));
     const changed = vm.runInNewContext('(function(e){' + changeBranch + '})');
     const create = wrapped => {
-        let selection = 'raw';
+        let selection = definition.name === 'plotScale' ? 'probability' : 'raw';
         const values = {useSingleCell:wrapped, contentLink:null, margin:'normal',
             label:'Binomial visualization', minWidth:-1, maxWidth:-1, minHeight:-1, maxHeight:-1,
-            options:[{name:'auto',title:'Automatic'},{name:'raw',title:'Raw observations'}]};
+            options:definition.name === 'plotScale' ? [{name:'probability',title:'Probability'},{name:'logit',title:'Logit'}] : [{name:'auto',title:'Automatic'},{name:'raw',title:'Raw observations'}]};
         const properties = {};
         for (const [name, value] of Object.entries(values)) {
             const property = {value};
@@ -114,7 +114,7 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
     }
     let family = 'gaussian';
     const attach = control => {
-        const engine = {_resources:{family:{value:() => family},plotStyle:control}, actions:[],
+        const engine = {_resources:{family:{value:() => family},[definition.name]:control}, actions:[],
             addDirectAction(name, action){ this.actions.push(action); }};
         for (const signature of ['_nextNonWhiteChar(e,t){','_arrayUnique(e){','_resolveBindPart(e,t){',
             '_resolveBinding(e,t){','bindActionParams(e,t,s){','bindingsToActions(){']) {
@@ -140,7 +140,7 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
     assert.equal(grid.cells.length, 1);
     assert.equal(control._cell.content.cells.length, 2, 'Label and dropdown must share the wrapper');
     assert.equal(control._cell.visible, false);
-    for (const [selection, index] of [['auto',0],['raw',1]]) {
+    for (const [selection, index] of (definition.name === 'plotScale' ? [['probability',0],['logit',1]] : [['auto',0],['raw',1]])) {
         control.setValue(selection);
         control.updateDisplayValue();
         for (family of ['binomial','gaussian','poisson','gammaLog','Gamma','negativebinomial','binomial']) {
@@ -151,6 +151,6 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
         }
     }
     assert.ok(seDefinition && seDefinition.contentLink === undefined && seDefinition.enable === undefined,
-        'Prediction confidence intervals must not depend on the distribution');
+        'Confidence intervals must not depend on the distribution');
     console.log('Installed renderer and binding handlers hide/show the wrapped binomial dropdown; selection is retained.');
 };
