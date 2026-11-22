@@ -21,24 +21,6 @@ jamovi_glm_style_ghosts = function(plot) {
   ghosts = which(vapply(plot$layers,function(layer)
     !is.null(attr(layer$data,"ghost_axes")),logical(1)))
   if (!length(ghosts)) return(plot)
-  curves = which(vapply(plot$layers,function(layer)
-    inherits(layer$geom,c("GeomLine","GeomSmooth")) && is.data.frame(layer$data) &&
-      "prediction" %in% names(layer$data),logical(1)))
-  color = "gray40"
-  if (length(curves)) {
-    curve = plot$layers[[curves[1]]]
-    mapped = !is.null(curve$mapping$colour) ||
-      (isTRUE(curve$inherit.aes) && !is.null(plot$mapping$colour))
-    colors = curve$aes_params$colour
-    if (mapped || !length(colors)) {
-      # Resolve theme/scale colors using only the supplied fitted curve: no
-      # observation jitter or smoothing calculation is needed for this lookup.
-      reference = plot
-      reference$layers = plot$layers[curves[1]]
-      colors = unique(ggplot2::ggplot_build(reference)$data[[1]]$colour)
-    }
-    if (is.character(colors) && length(colors)==1L && !is.na(colors)) color = colors
-  }
   for (i in ghosts) {
     layer = local({
       original = plot$layers[[i]]
@@ -46,7 +28,7 @@ jamovi_glm_style_ghosts = function(plot) {
     })
     layer$mapping$colour = layer$mapping$linetype = layer$mapping$alpha = layer$mapping$linewidth = NULL
     layer$aes_params = utils::modifyList(layer$aes_params,
-      list(colour=color,linewidth=1.2,alpha=.85,linetype="dashed"))
+      list(colour="#707070",linewidth=1.2,alpha=.85,linetype="dashed"))
     plot$layers[[i]] = layer
   }
   plot$layers = c(plot$layers[-ghosts],plot$layers[ghosts])

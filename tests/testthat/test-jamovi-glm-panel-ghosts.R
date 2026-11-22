@@ -196,9 +196,7 @@ test_that("GLM panel ghosts are distinct and above unchanged confidence bands", 
         bands = which(vapply(styled$layers,function(layer)inherits(layer$geom,c("GeomSmooth","GeomRibbon")),logical(1)))
         expect_true(all(new>bands))
         built = ggplot2::ggplot_build(styled)
-        curve = which(vapply(styled$layers,function(layer)is.data.frame(layer$data) &&
-          "prediction" %in% names(layer$data) && inherits(layer$geom,c("GeomLine","GeomSmooth")),logical(1)))[1]
-        expect_equal(unique(built$data[[new]]$colour),unique(built$data[[curve]]$colour))
+        expect_equal(unique(built$data[[new]]$colour),"#707070")
         expect_equal(unique(built$data[[new]]$linewidth),1.2)
         expect_equal(unique(built$data[[new]]$alpha),.85)
         expect_equal(unique(built$data[[new]]$linetype),"dashed")
