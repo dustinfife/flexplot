@@ -177,3 +177,115 @@ test_that("comparison uncertainty uses each model's existing family-specific lin
     expect_no_warning(ggplot2::ggplot_build(plot))
   }
 })
+
+test_that("GLM comparisons count omissions from the original analysis input without changing fits", {
+  skip_if_not_installed("jmvcore")
+  withr::local_seed(752)
+  input = data.frame(x=rnorm(120),z=rnorm(120),unused=NA_real_)
+  input$y = 1+.3*input$x-.2*input$z+rnorm(120)
+  rownames(input) = paste0("source_",31:150)
+  cases = list(none=list(),primary=list(x=1:10),secondary=list(z=1:30),outcome=list(y=1:5),
+    overlap=list(x=1:20,z=11:30,y=21:35))
+  captured = new.env(parent=emptyenv());original = flexplot:::jamovi_glm_generalized_fit
+  local_mocked_bindings(jamovi_glm_generalized_fit=function(...) {
+    state = original(...);captured$fits = c(captured$fits,list(state));state
+  },.package="flexplot")
+  for (missing in cases) {
+    data = input
+    for (name in names(missing)) data[missing[[name]],name] = NA_real_
+    mask = stats::complete.cases(data[c("y","x","z")])
+    eligible = data[mask,,drop=FALSE]
+    options = flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","z","unused"),family="gaussian",
+      compare=TRUE,modelTerms=list("x"),comparisonTerms=list("x","z"),comparisonX="x",graphic=FALSE)
+    captured$fits = list()
+    analysis = jamovi_reporting_host(options,data)
+    expect_true(analysis$run())
+    comparison = analysis$results$comparisonplot$state
+    state = analysis$results$plot$state
+    expect_equal(state$omitted,sum(!mask))
+    expect_equal(comparison$primary$omitted,sum(!mask))
+    expect_identical(rownames(state$data),rownames(eligible))
+    expect_equal(analysis$results$comparison$asDF$n,rep(sum(mask),2))
+    expect_length(captured$fits,2L)
+    expect_identical(captured$fits[[1]]$omitted,0L)
+    for (i in 1:2) {
+      model = comparison[[paste0("model",i)]]
+      independent = stats::glm(if (i==1L) y~x else y~x+z,data=eligible,family=gaussian())
+      expect_identical(model,captured$fits[[i]]$model)
+      expect_identical(state$data,captured$fits[[i]]$data)
+      expect_identical(rownames(stats::model.frame(model)),rownames(eligible))
+      expect_equal(stats::coef(model),stats::coef(independent),tolerance=1e-12)
+      expect_equal(stats::vcov(model),stats::vcov(independent),tolerance=1e-12)
+      expect_equal(summary(model)$coefficients[,2],summary(independent)$coefficients[,2],tolerance=1e-12)
+      expect_equal(as.numeric(stats::logLik(model)),as.numeric(stats::logLik(independent)),tolerance=1e-12)
+      expect_equal(stats::AIC(model),stats::AIC(independent),tolerance=1e-12)
+      expect_equal(stats::BIC(model),stats::BIC(independent),tolerance=1e-12)
+      expect_equal(stats::predict(model,newdata=eligible,type="response"),stats::predict(independent,newdata=eligible,type="response"),tolerance=1e-12)
+    }
+    independent1 = stats::glm(y~x,data=eligible,family=gaussian())
+    critical = stats::qt(.975,stats::df.residual(independent1))
+    radius = critical*sqrt(diag(stats::vcov(independent1)))
+    expect_equal(analysis$results$coefficients$asDF$lower,unname(stats::coef(independent1)-radius),tolerance=1e-12)
+    expect_equal(analysis$results$coefficients$asDF$upper,unname(stats::coef(independent1)+radius),tolerance=1e-12)
+    model1 = comparison$model1;model2 = comparison$model2
+    expected = model.comparison(model1,model2)$statistics
+    expect_identical(comparison$statistics,expected)
+    lr = 2*as.numeric(stats::logLik(comparison$model2)-stats::logLik(comparison$model1))
+    df = attr(stats::logLik(comparison$model2),"df")-attr(stats::logLik(comparison$model1),"df")
+    expect_equal(comparison$lr,lr,tolerance=1e-12)
+    expect_equal(comparison$df,df)
+    expect_equal(comparison$p,stats::pchisq(lr,df,lower.tail=FALSE),tolerance=1e-12)
+    note = analysis$results$coefficients$notes$missing
+    if (any(!mask)) expect_identical(note$note,paste(sum(!mask),"observations omitted because model variables were missing.")) else expect_null(note)
+  }
+})
+
+test_that("omission notes follow comparison toggles and preserve standalone behavior", {
+  skip_if_not_installed("jmvcore")
+  withr::local_seed(753)
+  data = data.frame(x=rnorm(120),z=rnorm(120),a=factor(rep(c("A","B"),60)))
+  data$y = .4+.2*data$x+.1*data$z+rnorm(120)
+  data$z[1:30] = NA_real_
+  analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","z","a"),family="gaussian",
+    modelTerms=list("x"),comparisonTerms=list("x","z"),comparisonX="x",compare=FALSE,graphic=FALSE),data)
+  expect_true(analysis$run())
+  expect_equal(analysis$results$plot$state$omitted,0)
+  expect_equal(stats::nobs(analysis$results$plot$state$model),120)
+  expect_null(analysis$results$coefficients$notes$missing)
+  for (enabled in c(TRUE,FALSE,TRUE)) {
+    expect_true(jamovi_reporting_update(analysis,list(compare=enabled)))
+    expect_equal(analysis$results$plot$state$omitted,if(enabled)30 else 0)
+    expect_equal(stats::nobs(analysis$results$plot$state$model),if(enabled)90 else 120)
+    if (enabled) expect_identical(analysis$results$coefficients$notes$missing$note,
+      "30 observations omitted because model variables were missing.") else expect_null(analysis$results$coefficients$notes$missing)
+  }
+  # Model 1 now needs z, an interaction and a square; Model 2 needs different predictors.
+  expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("x","z",c("x","z")),quadratic="x",
+    polynomials=TRUE,interactions=TRUE,comparisonTerms=list("x","a"))))
+  expect_equal(analysis$results$plot$state$omitted,30)
+  expect_identical(analysis$results$coefficients$notes$missing$note,
+    "30 observations omitted because model variables were missing.")
+  expect_true(jamovi_reporting_update(analysis,list(compare=FALSE)))
+  expect_equal(analysis$results$plot$state$omitted,30)
+  expect_equal(stats::coef(analysis$results$plot$state$model),stats::coef(stats::glm(y~x+z+x:z+I(x^2),data=data)),tolerance=1e-12)
+})
+
+test_that("common-sample omission notes and numerical results are correct for every GLM family", {
+  skip_if_not_installed("jmvcore")
+  withr::local_seed(754)
+  for (family in c("gaussian","binomial","poisson","gammaLog","Gamma","negativebinomial")) {
+    data = jamovi_generalized_comparison_data(family)
+    data$x[1:10] = NA_real_;data$z[6:20] = NA_real_;data$y[16:25] = NA_real_
+    analysis = jamovi_generalized_comparison_analysis(data,family,graphic=FALSE,
+      modelTerms=list("x","a"),comparisonTerms=list("x","z","a"))
+    expect_true(analysis$run())
+    state = analysis$results$plot$state
+    expect_equal(state$omitted,25)
+    expect_identical(analysis$results$coefficients$notes$missing$note,
+      "25 observations omitted because model variables were missing.")
+    independent = jamovi_generalized_independent(y~x+a,state$data,family)
+    expect_equal(stats::coef(state$model),stats::coef(independent),tolerance=1e-12)
+    expect_equal(stats::vcov(state$model),stats::vcov(independent),tolerance=1e-12)
+    expect_equal(stats::predict(state$model,type="response"),stats::predict(independent,type="response"),tolerance=1e-12)
+  }
+})

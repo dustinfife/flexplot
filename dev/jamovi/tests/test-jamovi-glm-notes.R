@@ -26,6 +26,30 @@ test_that("serialized GLM notes render compactly through the installed native ta
       add(analysis$results[[name]],paste(family,"hidden",name))
     }
   }
+  original = withr::with_seed(755, {
+    data = data.frame(x=rnorm(120),z=rnorm(120),y=rnorm(120))
+    data
+  })
+  missing_note = "30 observations omitted because model variables were missing."
+  for (variable in c("x","z","y")) {
+    data = original;data[1:30,variable] = NA_real_
+    analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","z"),
+      family="gaussian",graphic=FALSE,compare=TRUE,comparisonX="x",modelTerms=list("x"),comparisonTerms=list("x","z")),data)
+    expect_true(analysis$run())
+    add(analysis$results$coefficients,paste("comparison omissions",variable),missing_note)
+    expect_true(jamovi_reporting_update(analysis,list(compare=FALSE)))
+    add(analysis$results$coefficients,paste("standalone omissions",variable),
+      expected=if(variable!="z") missing_note else character(),
+      forbidden=if(variable=="z") missing_note else character())
+  }
+  data = original;data$y = rep(0:1,60);data$a = factor(rep(c("A","B","C"),40));data$z[1:30] = NA_real_
+  analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","a","z"),
+    family="binomial",graphic=FALSE,compare=TRUE,comparisonX="x",modelTerms=list("x","a"),
+    comparisonTerms=list("x","a","z"),showEstimates=FALSE),data)
+  expect_true(analysis$run())
+  add(analysis$results$irt,"omissions with estimates hidden",missing_note)
+  expect_true(jamovi_reporting_update(analysis,list(showIRT=FALSE)))
+  add(analysis$results$probabilities,"omissions with estimates and IRT hidden",missing_note)
   data = small
   event = "<img src=x onerror=probe()> & success"
   data$response = factor(data$y_bin,levels=c(0,1),labels=c("no",event))
@@ -38,4 +62,33 @@ test_that("serialized GLM notes render compactly through the installed native ta
     "/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets",file)),stdout=TRUE,stderr=TRUE)
   expect_null(attr(output,"status"),info=paste(output,collapse="\n"))
   expect_match(paste(output,collapse="\n"),"installed native table-footer code rendered",fixed=TRUE)
+})
+
+test_that("saved GLM comparison options recalculate omissions from current analysis data", {
+  jmvcore:::initProtoBuf()
+  withr::local_seed(756)
+  data = data.frame(x=rnorm(120),z=rnorm(120),y=rnorm(120))
+  data$z[1:30] = NA_real_
+  message = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
+  template = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
+  values = list(out="y",preds=c("x","z"),family="gaussian",modelTerms=list("x"),
+    comparisonTerms=list("x","z"),comparisonX="x",compare=TRUE,graphic=FALSE)
+  message$names = names(values)
+  message$options = lapply(values,jamovi_mixed_saved_option,option_template=template,group_template=message)
+  options = flexplot:::glmgeneralizedOptions$new();options$fromProtoBuf(message)
+  reopened = flexplot:::glmgeneralizedOptions$new();reopened$fromProtoBuf(options$asProtoBuf())
+  analysis = jamovi_reporting_host(reopened,data)
+  expect_true(analysis$run())
+  expect_true(reopened$compare)
+  expect_identical(reopened$modelTerms,list("x"))
+  expect_identical(reopened$comparisonTerms,list("x","z"))
+  expect_equal(analysis$results$plot$state$omitted,30)
+  expect_identical(analysis$results$coefficients$notes$missing$note,
+    "30 observations omitted because model variables were missing.")
+  expect_true(jamovi_reporting_update(analysis,list(compare=FALSE)))
+  expect_equal(analysis$results$plot$state$omitted,0)
+  expect_null(analysis$results$coefficients$notes$missing)
+  expect_true(jamovi_reporting_update(analysis,list(compare=TRUE)))
+  expect_equal(analysis$results$plot$state$omitted,30)
+  expect_equal(analysis$results$comparison$asDF$n,c(90,90))
 })

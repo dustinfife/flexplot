@@ -11,6 +11,8 @@ jamovi_glm_generalized_comparison = function(options, data) {
     error=function(error) stop("Model 1: ", conditionMessage(error), call.=FALSE))
   secondary = tryCatch(jamovi_glm_generalized_fit(options, eligible, formulas[[2]]),
     error=function(error) stop("Model 2: ", conditionMessage(error), call.=FALSE))
+  # Fit helpers receive the common sample; reporting refers to the original input.
+  primary$omitted = nrow(data)-nrow(primary$data)
   model1 = primary$model
   model2 = secondary$model
   layout = jamovi_model_layout(list(model1, model2), primary$data,
