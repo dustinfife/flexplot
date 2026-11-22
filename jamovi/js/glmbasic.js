@@ -39,15 +39,8 @@ const synchronize = (ui, context, added, changed = null) => {
         for (const [enabled, quadratic, termsName, supplier] of [
             ['polynomials','quadratic','modelTerms','quadraticSupplier'],
             ['comparisonPolynomials','comparisonQuadratic','comparisonTerms','comparisonQuadraticSupplier']]) {
-            const selected = ui[enabled].value() === true ?
-                (ui[quadratic].value() || []).filter(name => predictors.includes(name)) : [];
-            if (JSON.stringify(ui[quadratic].value()) !== JSON.stringify(selected)) ui[quadratic].setValue(selected);
-            ui[supplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
-            if (changed === quadratic) {
-                const terms = ui[termsName].value() || [];
-                const missing = selected.filter(name => !terms.some(term => term.length === 1 && term[0] === name));
-                if (missing.length) ui[termsName].setValue(terms.concat(missing.map(name => [name])));
-            }
+            if (ui[enabled].value() !== true && (ui[quadratic].value() || []).length) ui[quadratic].setValue([]);
+            updateTerms.syncQuadratic(ui, predictors, quadratic, termsName, supplier, changed === quadratic);
         }
         const empty = added && (context.workspace.glmPredictors || []).length ?
             ['modelTerms','comparisonTerms'].filter(name => ui[name].value() != null && !ui[name].value().length) : [];

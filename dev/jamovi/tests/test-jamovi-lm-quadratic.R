@@ -1,3 +1,9 @@
+test_that("shared quadratic synchronization has a module-neutral contract", {
+  output = system2(Sys.which("node"),shQuote(c(test_path("js","jamovi-quadratic-sync.cjs"),root)),stdout=TRUE,stderr=TRUE)
+  expect_null(attr(output,"status"),info=paste(output,collapse="\n"))
+  expect_match(paste(output,collapse="\n"),"PASS: shared quadratic filtering",fixed=TRUE)
+})
+
 test_that("compiled LM polynomial handlers drive the actual fitted formulas", {
   node = Sys.which("node")
   compiler = system.file("node_modules/jamovi-compiler",package="jmvtools")

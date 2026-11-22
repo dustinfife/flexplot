@@ -84,6 +84,19 @@ updateTerms.prepareInteractions = function(ui, changed) {
     }
 };
 
+// Synchronize one model's quadratic selection from an explicit predictor pool.
+// Adapters own checkbox/migration policy and request linear terms only on edits.
+updateTerms.syncQuadratic = function(ui, predictors, quadratic, termsName, supplier, addLinear) {
+    const selected = (ui[quadratic].value() || []).filter(name => predictors.includes(name));
+    if (JSON.stringify(ui[quadratic].value()) !== JSON.stringify(selected)) ui[quadratic].setValue(selected);
+    ui[supplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
+    if (addLinear) {
+        const terms = ui[termsName].value() || [];
+        const missing = selected.filter(name => !terms.some(term => term.length === 1 && term[0] === name));
+        if (missing.length) ui[termsName].setValue(terms.concat(missing.map(name => [name])));
+    }
+};
+
 updateTerms.syncMainEffects = function(ui) {
     const predictors = ui.preds.value() || [];
     for (const [termsName, mainName, supplier] of [

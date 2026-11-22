@@ -34,16 +34,9 @@ jamovi_glm_generalized_data = function(data, formula, family) {
   data
 }
 
+# Compatibility entry point retained for existing GLM callers.
 jamovi_glm_generalized_formula = function(options, data, terms=options$modelTerms, quadratic=options$quadratic) {
-  formula = jamovi_glm_formula(options$out, options$preds, terms)
-  if (is.null(quadratic)) quadratic = character()
-  for (variable in quadratic) {
-    if (!variable %in% options$preds || !is.numeric(data[[variable]])) {
-      stop("Quadratic terms require selected numeric predictors.", call.=FALSE)
-    }
-    formula[[3]] = call("+", formula[[3]], call("I", call("^", as.name(variable), 2)))
-  }
-  formula
+  jamovi_fixed_formula(options, data, terms, quadratic)
 }
 
 jamovi_glm_generalized_fit = function(options, data, formula=jamovi_glm_generalized_formula(options, data)) {

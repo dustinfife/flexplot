@@ -18,7 +18,7 @@ jamovi_mixed_formula = function(options, data) {
   terms = options$modelTerms
   if (identical(options$interactions, FALSE) && !is.null(terms)) terms = terms[lengths(terms) == 1L]
   quadratic = if (identical(options$polynomials, FALSE)) NULL else options$quadratic
-  fixed = jamovi_glm_generalized_formula(options, data, terms=terms, quadratic=quadratic)
+  fixed = jamovi_fixed_formula(options, data, terms=terms, quadratic=quadratic)
   random = if (options$randomIntercept) 1 else 0
   for (variable in slopes) random = call("+", random, as.name(variable))
   formula = fixed

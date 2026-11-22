@@ -33,15 +33,8 @@ const synchronize = function(ui, context, added, changed = null) {
         for (const [enabled, quadraticName, modelName, supplier] of [
             ['polynomials','quadratic','modelTerms','quadraticSupplier'],
             ['comparisonPolynomials','comparisonQuadratic','comparisonTerms','comparisonQuadraticSupplier']]) {
-            const quadratic = ui[enabled].value() === true ?
-                (ui[quadraticName].value() || []).filter(name => predictors.includes(name)) : [];
-            if (JSON.stringify(ui[quadraticName].value()) !== JSON.stringify(quadratic)) ui[quadraticName].setValue(quadratic);
-            ui[supplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
-            if (changed === quadraticName) {
-                const terms = ui[modelName].value() || [];
-                const missing = quadratic.filter(name => !terms.some(term => term.length === 1 && term[0] === name));
-                if (missing.length) ui[modelName].setValue(terms.concat(missing.map(name => [name])));
-            }
+            if (ui[enabled].value() !== true && (ui[quadraticName].value() || []).length) ui[quadraticName].setValue([]);
+            updateTerms.syncQuadratic(ui, predictors, quadraticName, modelName, supplier, changed === quadraticName);
         }
         updateTerms(ui, context, added, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
         // Keep the old option as a saved-state projection, without a duplicate UI.

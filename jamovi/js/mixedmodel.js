@@ -49,18 +49,10 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
             if (ui[polynomialName].value() === false && (ui[quadraticName].value() || []).length)
                 ui[quadraticName].setValue([]);
             const modelPredictors = termsName === 'comparisonTerms' ? (secondPredictors || []) : predictors;
-            for (const name of [quadraticName,slopesName]) {
-                const eligible = name === slopesName ? predictors : modelPredictors;
-                const value = (ui[name].value() || []).filter(variable => eligible.includes(variable));
-                if (JSON.stringify(ui[name].value()) !== JSON.stringify(value)) ui[name].setValue(value);
-            }
-            ui[supplier].setValue(utils.valuesToItems(modelPredictors, FormatDef.variable));
+            updateTerms.syncQuadratic(ui, modelPredictors, quadraticName, termsName, supplier, quadraticChanged === quadraticName);
+            const slopes = (ui[slopesName].value() || []).filter(variable => predictors.includes(variable));
+            if (JSON.stringify(ui[slopesName].value()) !== JSON.stringify(slopes)) ui[slopesName].setValue(slopes);
             ui[randomSupplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
-            if (quadraticChanged === quadraticName) {
-                const terms = ui[termsName].value() || [];
-                const missing = (ui[quadraticName].value() || []).filter(name => !terms.some(term => term.length === 1 && term[0] === name));
-                if (missing.length) ui[termsName].setValue(terms.concat(missing.map(name => [name])));
-            }
         }
         const cluster = ui.cluster.value();
         const cas = ui.predictionType.value() === 'cas';

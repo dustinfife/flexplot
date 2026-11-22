@@ -23,7 +23,9 @@ test_that("visualization roles are validated against fitted terms in R", {
     options = do.call(flexplot:::glmbasicOptions$new, values)
     analysis = flexplot:::glmbasicClass$new(options=options, data=small)
     expect_true(analysis$run())
-    expect_false(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
+    expect_true(analysis$.__enclos_env__$private$.plot(analysis$results$plot))
+    expect_identical(analysis$results$plot$status,"error")
+    expect_null(analysis$results$plot$state)
     expect_match(analysis$results$plot$.__enclos_env__$private$.error, "must be predictors")
   }
   model1 = lm(y ~ x+a, small)
