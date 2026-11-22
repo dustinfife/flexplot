@@ -92,3 +92,42 @@ test_that("saved GLM comparison options recalculate omissions from current analy
   expect_equal(analysis$results$plot$state$omitted,30)
   expect_equal(analysis$results$comparison$asDF$n,c(90,90))
 })
+
+test_that("native table serialization preserves literal text and blank numeric cells across analyses", {
+  jmvcore:::initProtoBuf()
+  lm = flexplot:::glmbasicClass$new(options=flexplot:::glmbasicOptions$new(),data=small)
+  glm = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(),small)
+  mixed = jamovi_mixed_analysis()
+  tables = list(list(table=lm$results$factorMeans,text="levels",number="means"),
+    list(table=glm$results$probabilities,text="Level",number="Probability"),
+    list(table=mixed$results$random,text="group",number="variance"),
+    list(table=mixed$results$comparison,text="model",number="p"))
+  labels = c("NA","NaN","Inf","-Inf","",NA_character_)
+  for (entry in tables) {
+    table = entry$table
+    before = table$asProtoBuf()
+    values = data.frame(text=factor(labels,levels=labels[!is.na(labels)]),
+      number=c(NA_real_,NaN,Inf,-Inf,0,.123456789))
+    names(values) = c(entry$text,entry$number)
+    flexplot:::jamovi_glm_table_rows(table,values)
+    output = table$asProtoBuf()
+    columns = output$table$columns
+    expect_identical(vapply(columns,function(column)column$name,character(1)),
+      vapply(before$table$columns,function(column)column$name,character(1)))
+    for (i in seq_along(columns)) {
+      expect_identical(columns[[i]]$format,before$table$columns[[i]]$format)
+      expect_identical(columns[[i]]$type,before$table$columns[[i]]$type)
+    }
+    text = columns[[match(entry$text,names(table$columns))]]$cells
+    number = columns[[match(entry$number,names(table$columns))]]$cells
+    for (i in 1:5) {
+      expect_true(RProtoBuf::has(text[[i]],"s"))
+      expect_identical(text[[i]]$s,labels[i])
+    }
+    expect_identical(text[[6]]$o,0L) # Native MISSING cell, distinct from literal "NA".
+    expect_true(RProtoBuf::has(text[[6]],"o"))
+    for (i in 1:4) expect_true(RProtoBuf::has(number[[i]],"o"))
+    expect_identical(number[[5]]$d,0)
+    expect_identical(number[[6]]$d,.123456789)
+  }
+})

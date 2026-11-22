@@ -21,15 +21,14 @@ jamovi_glm_reporting_reset = function(results) {
   invisible(NULL)
 }
 
-# Omit undefined cells so the results renderer shows blanks, not NaN/NA text.
+# Omit undefined values, preserving literal text and displayed factor labels.
 jamovi_glm_table_rows = function(table, values) {
   for (i in seq_len(nrow(values))) {
     row = as.list(values[i, , drop=FALSE])
     for (name in names(row)) {
       value = row[[name]]
-      if (is.na(value) || (is.numeric(value) && !is.finite(value)) ||
-          (is.character(value) && !name %in% c("term", "Variable", "Level", "variable") &&
-           value %in% c("NA", "NaN"))) row[[name]] = NULL
+      if (is.factor(value)) row[[name]] = value = as.character(value)
+      if (is.na(value) || (is.numeric(value) && !is.finite(value))) row[[name]] = NULL
     }
     table$addRow(rowKey=i, values=row)
   }
