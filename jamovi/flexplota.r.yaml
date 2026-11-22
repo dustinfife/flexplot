@@ -5,6 +5,14 @@ jrs:   '1.1'
 refs: [flexplot, graphicalAnalysis]
 
 items:      
+    - name: waiting
+      title: ''
+      type: Html
+      visible: false
+    - name: explanation
+      title: ''
+      type: Html
+      visible: false
     - name: plot
       title: Analysis Plot
       type: Image

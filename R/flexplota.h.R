@@ -173,6 +173,8 @@ flexplotaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "flexplotaResults",
     inherit = jmvcore::Group,
     active = list(
+        waiting = function() private$.items[["waiting"]],
+        explanation = function() private$.items[["explanation"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
@@ -184,6 +186,16 @@ flexplotaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "flexplot",
                     "graphicalAnalysis"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="waiting",
+                title="",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanation",
+                title="",
+                visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -235,6 +247,8 @@ flexplotaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param bins .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$waiting} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'

@@ -151,6 +151,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..mainEffects = jmvcore::OptionVariables$new(
                 "mainEffects",
                 mainEffects,
+                hidden=TRUE,
                 default=NULL)
             private$..comparisonMainEffects = jmvcore::OptionVariables$new(
                 "comparisonMainEffects",
@@ -374,6 +375,8 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "glmbasicResults",
     inherit = jmvcore::Group,
     active = list(
+        waiting = function() private$.items[["waiting"]],
+        explanation = function() private$.items[["explanation"]],
         assumpplot = function() private$.items[["assumpplot"]],
         plot = function() private$.items[["plot"]],
         glmcat = function() private$.items[["glmcat"]],
@@ -392,6 +395,16 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "flexplot",
                     "graphicalAnalysis"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="waiting",
+                title="",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanation",
+                title="",
+                visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="assumpplot",

@@ -65,7 +65,10 @@ test_that("Linear Model renders chosen single-model grouping and preserves compa
     modelTerms=list("x", "a"), comparisonTerms=list("z"), comparisonX="x", comparisonGroup="a")
   analysis = flexplot:::glmbasicClass$new(options=options, data=small)
   expect_true(analysis$run())
-  expect_false(analysis$.__enclos_env__$private$.comparisonplot(analysis$results$comparisonplot))
+  # TRUE completes the diagnostic image; the unsupported layout is still an error.
+  expect_true(analysis$.__enclos_env__$private$.comparisonplot(analysis$results$comparisonplot))
+  expect_identical(analysis$results$comparisonplot$status,"error")
+  expect_null(analysis$results$comparisonplot$state)
   expect_match(analysis$results$comparisonplot$.__enclos_env__$private$.error, "panels")
 })
 

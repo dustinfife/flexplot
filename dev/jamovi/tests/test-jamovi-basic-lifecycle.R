@@ -1,0 +1,57 @@
+test_that("old LM and Flexplot result trees restore, clear cached images and complete native rendering", {
+  jmvcore:::initProtoBuf()
+  records = list()
+  old_theme = ggplot2::theme_get();withr::defer(ggplot2::theme_set(old_theme))
+  output = withr::local_tempdir()
+  for (name in c("glmbasic","flexplota")) {
+    factory = get(paste0(name,"Options"),asNamespace("flexplot"))
+    class = get(paste0(name,"Class"),asNamespace("flexplot"))
+    values = list(out="y",preds="x")
+    if (name=="flexplota") values = c(values,list(ghost=FALSE,suppr=TRUE))
+    message = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
+    template = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
+    message$names = names(values)
+    message$options = lapply(values,jamovi_mixed_saved_option,option_template=template,group_template=message)
+    options = factory$new();options$fromProtoBuf(message)
+    restored = factory$new();restored$fromProtoBuf(options$asProtoBuf())
+    analysis = class$new(options=restored,data=NULL)
+    reader = jamovi_reporting_read;environment(reader)=list2env(list(data=small),parent=environment(reader))
+    analysis$.setReadDatasetSource(reader);analysis$.setReadDatasetHeaderSource(reader)
+    analysis$.setResourcesPathSource(function(name,ext)list(rootPath=output,relPath=paste0(name,".",ext)))
+    expect_true(analysis$run())
+    expect_true(suppressWarnings(analysis$.createImage(".plot",analysis$results$plot,noThrow=TRUE)))
+    pb = analysis$results$asProtoBuf(status=3L,includeState=FALSE)
+    pb$group$elements = Filter(function(item)!item$name %in% c("waiting","explanation"),pb$group$elements)
+    reopened = class$new(options=restored,data=NULL)
+    reopened$.setReadDatasetSource(reader);reopened$.setReadDatasetHeaderSource(reader)
+    reopened$results$fromProtoBuf(pb,character(),character())
+    expect_false(is.null(reopened$results$plot$filePath))
+    reopened$.setResourcesPathSource(function(name,ext)list(rootPath=output,relPath=paste0(name,".",ext)))
+    expect_true(reopened$run())
+    expect_null(reopened$results$plot$filePath)
+    expect_false(reopened$results$waiting$visible)
+    expect_identical(reopened$results$explanation$content,"")
+    if (name=="glmbasic") {
+      expect_true(jamovi_reporting_update(reopened,list(plotX="x",plotGroup="x")))
+    } else {
+      expect_true(jamovi_reporting_update(reopened,list(out="b",preds=c("a","x"))))
+    }
+    for (error in c(TRUE,FALSE)) {
+      if(!error) expect_true(jamovi_reporting_update(reopened,if(name=="glmbasic")list(plotGroup=NULL) else list(out="y",preds="x")))
+      image = reopened$results$plot
+      expect_true(suppressWarnings(reopened$.createImage(".plot",image,noThrow=TRUE)))
+      expect_identical(image$status,if(error)"error" else "complete")
+      proto = image$asProtoBuf(status=3L,includeState=FALSE)
+      expect_gt(file.info(file.path(output,image$filePath))$size,1000)
+      records[[length(records)+1L]] = list(status=proto$status,
+        image=list(path=proto$image$path,width=proto$image$width,height=proto$image$height))
+    }
+    if(name=="glmbasic")jamovi_expect_lm_coefficients(reopened,lm(y~x,small))
+  }
+  file = withr::local_tempfile(fileext=".json")
+  jsonlite::write_json(records,file,auto_unbox=TRUE)
+  runtime = Sys.glob("/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/resultsview-*.js")
+  log = system2(Sys.which("node"),shQuote(c(test_path("js","jamovi-lm-image-renderer.cjs"),runtime,file)),stdout=TRUE,stderr=TRUE)
+  expect_null(attr(log,"status"),info=paste(log,collapse="\n"))
+  expect_match(paste(log,collapse="\n"),"without a running indicator",fixed=TRUE)
+})

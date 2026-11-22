@@ -27,12 +27,14 @@ jamovi_glm_comparison = function(options, data) {
   model1 = jamovi_glm_fit(formula1, eligible, "Model 1")
   model2 = jamovi_glm_fit(formula2, eligible, "Model 2")
 
-  plot_formula = jamovi_model_layout(list(model1, model2), eligible, options$comparisonX,
-                                    options$comparisonPanels, options$comparisonGroup)
+  plot_formula = tryCatch(jamovi_model_layout(list(model1, model2), eligible, options$comparisonX,
+                                    options$comparisonPanels, options$comparisonGroup),error=identity)
+  plot_error = if (inherits(plot_formula,"error")) conditionMessage(plot_formula) else NULL
+  if (!is.null(plot_error)) plot_formula = NULL
   comparison = model.comparison(model1, model2)
   # Keep the F-test numeric: model.comparison formats its rounded p-value as text.
   p = get_p_value(model1, model2, check_nested(model1, model2))
-  list(model1=model1, model2=model2, formula=plot_formula, data=eligible,
+  list(model1=model1, model2=model2, formula=plot_formula, plotError=plot_error, data=eligible,
        statistics=comparison$statistics, p=if (length(p)) p[1] else NA_real_)
 }
 
@@ -60,6 +62,7 @@ jamovi_glm_comparison_table = function(table, state) {
 }
 
 jamovi_glm_comparison_plot = function(state) {
+  if (!is.null(state$plotError)) stop(state$plotError,call.=FALSE)
   model1 = state$model1
   model2 = state$model2
   jamovi_comparison_style(compare_fits(state$formula, data=state$data, model1=model1, model2=model2))

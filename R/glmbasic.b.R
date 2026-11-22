@@ -55,37 +55,46 @@ jamovi_lm_coefficients = function(table, model, includeP=FALSE) {
   jamovi_glm_table_rows(table,values)
 }
 
-glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+jamovi_lm_reset = function(results) {
+  for (item in results$items) {
+    item$setVisible(FALSE)
+    jamovi_result_clear(item)
+    if (inherits(item,"Image")) item$.setPath(NULL)
+  }
+  jamovi_plot_clear_states(results,c("plot","assumpplot","comparisonplot"))
+  jamovi_diagnostic(results$waiting,"Select an outcome and predictors.")
+}
+
+glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
     "glmbasicClass",
     inherit = glmbasicBase,
     private = list(
+        .init = function() jamovi_lm_reset(self$results),
       
         .run = function() {
           jamovi_plot_sync_labels(self$options)
           jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
-          jamovi_result_reset_status(self$results$plot)
-          self$results$plot$.setPath(NULL)
-          self$results$plot$setState(NULL)
-          self$results$plot$setVisible(FALSE)
-          self$results$comparison$deleteRows()
-          # Replace rows on every model change, including failed specifications.
-          for (name in c("glmcat","factorMeans","diff","rsq")) {
-            table = self$results[[name]]
-            jamovi_result_clear(table)
+          jamovi_lm_reset(self$results)
+          if (!length(self$options$out) || !length(self$options$preds)) {
+            jamovi_diagnostic(self$results$waiting,if (!length(self$options$out))
+              if (!length(self$options$preds)) "Select an outcome and predictors." else "Select an outcome variable." else
+                "Select at least one predictor.")
+            return(invisible(NULL))
           }
-          self$results$factorMeans$setVisible(FALSE)
-          self$results$diff$setVisible(FALSE)
-          if (!length(self$options$out) || !length(self$options$preds)) return(invisible(NULL))
+          self$results$waiting$setVisible(FALSE)
           data = self$data
           if (self$options$compare) {
             comparison = tryCatch(jamovi_glm_comparison(self$options,data),error=identity)
             if (inherits(comparison,"error")) {
               self$results$comparison$setError(conditionMessage(comparison))
               self$results$comparisonplot$setError(conditionMessage(comparison))
+              jamovi_diagnostic(self$results$explanation,paste("Model comparison is unavailable:",conditionMessage(comparison)),error=TRUE)
               return(invisible(NULL))
             }
             self$results$comparisonplot$setState(comparison)
             jamovi_glm_comparison_table(self$results$comparison,comparison)
+            self$results$comparison$setVisible(TRUE)
+            self$results$comparisonplot$setVisible(TRUE)
             model = comparison$model1
             formula = stats::formula(model)
             data = comparison$data
@@ -93,19 +102,23 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             formula = tryCatch(jamovi_lm_formula(self$options,data),error=identity)
             if (inherits(formula,"error")) {
               self$results$glmcat$setError(conditionMessage(formula))
+              jamovi_diagnostic(self$results$explanation,conditionMessage(formula),error=TRUE)
               return(invisible(NULL))
             }
             model = tryCatch(stats::lm(formula,data=data),error=identity)
             if (inherits(model,"error")) {
               self$results$glmcat$setError(paste("The primary model could not be fitted:",conditionMessage(model)))
+              jamovi_diagnostic(self$results$explanation,paste("The primary model could not be fitted:",conditionMessage(model)),error=TRUE)
               return(invisible(NULL))
             }
           }
           jamovi_lm_coefficients(self$results$glmcat,model,self$options$includeP)
+          self$results$glmcat$setVisible(self$options$estimates)
           output = list(formula=formula,data=data)
           self$results$plot$setState(output)
           self$results$plot$setVisible(self$options$graphic)
           self$results$assumpplot$setState(output)
+          self$results$assumpplot$setVisible(self$options$graphicassump)
           if (self$options$graphic) {
             previous_theme = theme_set(theme_bw(base_size=16))
             plot = suppressWarnings(tryCatch(jamovi_lm_display(model,data,self$options),
@@ -132,6 +145,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (is.data.frame(results)) return(invisible(NULL))
           private$.rsq(list(rsq=results$r.squared,semi.p=results$semi.p,
             correlation=results$correlation),preds=self$options$preds)
+          self$results$rsq$setVisible(self$options$estimates && self$results$rsq$rowCount > 0L)
           if (!is.data.frame(results$factor.summary) || !nrow(results$factor.summary)) return(invisible(NULL))
           values = results$factor.summary
           jamovi_glm_table_rows(self$results$factorMeans,data.frame(
@@ -144,14 +158,15 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         .comparisonplot = function(image, ...) {
             if (is.null(image$state)) return(FALSE)
-            plot = tryCatch(jamovi_glm_comparison_plot(image$state), error=identity)
-            if (inherits(plot, "error")) {
-              image$setError(conditionMessage(plot))
-              return(FALSE)
-            }
-            info = jamovi_lm_label_info(image$state$model1,self$options,TRUE,image$state$formula)
-            print(jamovi_plot_apply_labels(plot,self$options$comparisonPlotLabels,info$context,info$layout))
-            TRUE
+            tryCatch({
+                plot = jamovi_glm_comparison_plot(image$state)
+                info = jamovi_lm_label_info(image$state$model1,self$options,TRUE,image$state$formula)
+                print(jamovi_plot_apply_labels(plot,self$options$comparisonPlotLabels,info$context,info$layout))
+                TRUE
+            },error=function(error) {
+                image$setState(NULL)
+                jamovi_glm_plot_error(image,error)
+            })
         },
         .plot = function(image, ...){
             if (is.null(image$state)) return(FALSE)
@@ -176,6 +191,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(image$state))
                 return(FALSE)
                 
+            tryCatch({
 			formula = image$state$formula
 			data = image$state$data
 			# plot = plot(data$motivation, data$income, main=as.character(formula))
@@ -191,6 +207,10 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             		panel.border = element_blank())
             print(plot)
             TRUE
+            },error=function(error) {
+                image$setState(NULL)
+                jamovi_glm_plot_error(image,error)
+            })
             },		
             					
 			

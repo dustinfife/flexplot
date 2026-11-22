@@ -26,6 +26,25 @@ test_that("actual R6 diagnostics render through the installed jamovi HTML method
   expect_identical(mixed$results$explanation$status,"complete")
   fixtures[[length(fixtures)+1L]] = list(name="cleared-and-reused",content=mixed$results$explanation$content,
     error=mixed$results$explanation$.__enclos_env__$private$.error,expected="Select variable",literal=literal)
+  lm = flexplot:::glmbasicClass$new(options=flexplot:::glmbasicOptions$new(estimates=FALSE),data=NULL)
+  fp = flexplot:::flexplotaClass$new(options=flexplot:::flexplotaOptions$new(),data=NULL)
+  for (name in c("LM","Flexplot")) {
+    analysis = if(name=="LM") lm else fp
+    reader = jamovi_reporting_read;environment(reader)=list2env(list(data=small),parent=environment(reader))
+    analysis$.setReadDatasetSource(reader);analysis$.setReadDatasetHeaderSource(reader)
+    expect_true(analysis$run())
+    fixtures[[length(fixtures)+1L]] = list(name=paste(name,"waiting"),content=analysis$results$waiting$content,
+      error="",expected="Select an outcome")
+  }
+  local_mocked_bindings(jamovi_lm_formula=function(...)stop(paste("Cannot fit",literal)))
+  expect_true(jamovi_reporting_update(lm,list(out="y",preds="x")))
+  fixtures[[length(fixtures)+1L]] = list(name="LM fitting error",content=lm$results$explanation$content,
+    error=lm$results$explanation$.__enclos_env__$private$.error,expected="Cannot fit",literal=literal)
+  data = small;data$y[] = NA_real_
+  fp = flexplot:::flexplotaClass$new(options=flexplot:::flexplotaOptions$new(out="y"),data=data)
+  expect_true(fp$run())
+  fixtures[[length(fixtures)+1L]] = list(name="Flexplot no observations",content=fp$results$explanation$content,
+    error=fp$results$explanation$.__enclos_env__$private$.error,expected="No complete observations")
   file = withr::local_tempfile(fileext=".json")
   jsonlite::write_json(fixtures,file,auto_unbox=TRUE)
   runtime = Sys.glob("/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/resultsview-*.js")

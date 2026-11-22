@@ -1,14 +1,37 @@
-flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
+jamovi_flexplot_reset = function(results) {
+  for (item in results$items) {
+    item$setVisible(FALSE)
+    jamovi_result_clear(item)
+    if (inherits(item,"Image")) item$.setPath(NULL)
+  }
+  jamovi_plot_clear_states(results,"plot")
+  jamovi_diagnostic(results$waiting,"Select an outcome variable to create a plot.")
+}
+
+flexplotaClass = if (requireNamespace('jmvcore')) R6::R6Class(
     "flexplotaClass",
     inherit = flexplotaBase,
     private = list(
+  .init = function() jamovi_flexplot_reset(self$results),
   
   .run = function() {
+    jamovi_flexplot_reset(self$results)
     if (length(self$options$out)>0){
+      self$results$waiting$setVisible(FALSE)
+      output = tryCatch({
       formula = jamovi_formula(self$options$out, self$options$preds, self$options$given)
-      output = list(formula=formula, data=self$data)
-      image <- self$results$plot
+      data = self$data
+      if (!any(stats::complete.cases(data[,all.vars(formula),drop=FALSE])))
+        stop("No complete observations are available for the selected plot variables.",call.=FALSE)
+      list(formula=formula, data=data)
+      },error=identity)
+      if (inherits(output,"error")) {
+        jamovi_diagnostic(self$results$explanation,conditionMessage(output),error=TRUE)
+        return(invisible(NULL))
+      }
+      image = self$results$plot
       image$setState(output)
+      image$setVisible(TRUE)
     }
 	}, 
 			
@@ -18,6 +41,7 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 	  if (is.null(image$state)) return(FALSE)		  
 	  
 	  # return the jamovi plot
+    tryCatch({
     p = jamovi_plots(image$state$formula, image$state$data, self$options)
 
 		#### modify geoms (if they choose to)
@@ -43,6 +67,10 @@ flexplotaClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 		print(p)
 		TRUE
+    },error=function(error) {
+      image$setState(NULL)
+      jamovi_glm_plot_error(image,error)
+    })
 }
 		
 				
