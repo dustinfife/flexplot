@@ -147,4 +147,37 @@ options:
       - name: logit
         title: Logit
     default: probability
+  - name: plotLabels
+    type: Array
+    default: []
+    template: &plotLabel
+      type: Group
+      elements:
+        - name: key
+          type: String
+        - name: role
+          type: String
+        - name: variable
+          type: String
+        - name: value
+          type: String
+        - name: display
+          type: String
+        - name: label
+          type: String
+          default: ''
+  - name: plotLabelStore
+    type: Array
+    default: []
+    hidden: true
+    template: *plotLabel
+  - name: comparisonPlotLabels
+    type: Array
+    default: []
+    template: *plotLabel
+  - name: comparisonPlotLabelStore
+    type: Array
+    default: []
+    hidden: true
+    template: *plotLabel
 ...

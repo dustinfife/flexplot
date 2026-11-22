@@ -315,3 +315,17 @@ GLM panel ghosts use neutral dark gray (`#707070`), a dashed line
 (width 1.2, opacity 0.85), and are drawn above confidence bands. This styling is
 specific to the GLM adapter; ordinary fitted curves and other Flexplot ghosts
 retain their existing appearance.
+
+## Editing plot labels
+
+Each GLM visualization has its own **Plot Labels** editor: one under ordinary
+Model visualization and one under Model Comparison. Edit titles, subtitles,
+axis titles, and applicable legend/facet titles and categories. Blank cells keep
+the automatic text, including interpretation subtitles. Categorical axis tick
+labels are not edited by this control.
+
+Edits affect display text only. They do not rename data, change predictions,
+confidence limits, panel membership, reference ghosts, colors or line patterns.
+Ordinary/comparison outputs and probability/logit displays retain separate edits.
+Temporarily unavailable elements keep their edits in a hidden saved store, ready
+when that configuration returns. Older saved analyses retain automatic labels.

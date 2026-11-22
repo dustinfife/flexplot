@@ -16,6 +16,21 @@ jamovi_glm_model_plot = function(model, se, formula=NULL, data=model$model, ...)
 }
 
 # Coefficients are model-matrix quantities, independent of predictor summaries.
+jamovi_lm_display = function(model, data, options) {
+  layout = NULL
+  if (length(c(options$plotX,options$plotPanels,options$plotGroup)))
+    layout = jamovi_model_layout(list(model),data,options$plotX,options$plotPanels,options$plotGroup)
+  jamovi_glm_model_plot(model,se=options$se,formula=layout,data=data)
+}
+
+jamovi_lm_label_info = function(model, options, comparison=FALSE, formula=NULL) {
+  explicit = length(c(options$plotX,options$plotPanels,options$plotGroup))>0L
+  added = !comparison && !explicit && length(all.vars(stats::formula(model))[-1])>4L
+  list(context=list(output=if (comparison) "comparison" else "model",outcome=all.vars(stats::formula(model))[1],
+    meaning=if (added) "added-variable" else "response"),
+    layout=if (comparison) list(x=flexplot_axis_given(formula)$axis[1]) else list(x=options$plotX))
+}
+
 jamovi_lm_coefficients = function(table, model, includeP=FALSE) {
   table$deleteRows()
   table$setError("")
@@ -47,6 +62,9 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
       
         .run = function() {
+          jamovi_plot_sync_labels(self$options)
+          jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
+          self$results$comparison$deleteRows()
           # Replace rows on every model change, including failed specifications.
           for (name in c("glmcat","factorMeans","diff","rsq")) {
             table = self$results[[name]]
@@ -87,6 +105,23 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           output = list(formula=formula,data=data)
           self$results$plot$setState(output)
           self$results$assumpplot$setState(output)
+          if (self$options$graphic) {
+            previous_theme = theme_set(theme_bw(base_size=16))
+            plot = suppressWarnings(tryCatch(jamovi_lm_display(model,data,self$options),
+              error=function(error) NULL,finally=theme_set(previous_theme)))
+            if (!is.null(plot)) {
+              info = jamovi_lm_label_info(model,self$options)
+              jamovi_plot_sync_labels(self$options,plot,info$layout,info$context)
+            }
+          }
+          if (self$options$compare) {
+            plot = suppressWarnings(tryCatch(jamovi_glm_comparison_plot(comparison),error=function(error) NULL))
+            if (!is.null(plot)) {
+              info = jamovi_lm_label_info(model,self$options,TRUE,comparison$formula)
+              jamovi_plot_sync_labels(self$options,plot,info$layout,info$context,
+                rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
+            }
+          }
           # A failed supplementary summary must not remove valid coefficients.
           results = tryCatch(estimates.lm(model,mc=FALSE),error=identity)
           if (inherits(results,"error")) {
@@ -113,7 +148,8 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               image$setError(conditionMessage(plot))
               return(FALSE)
             }
-            print(plot)
+            info = jamovi_lm_label_info(image$state$model1,self$options,TRUE,image$state$formula)
+            print(jamovi_plot_apply_labels(plot,self$options$comparisonPlotLabels,info$context,info$layout))
             TRUE
         },
         .plot = function(image, ...){
@@ -124,17 +160,13 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 			data = image$state$data
             mod = lm(formula, data=data)
             theme_set(theme_bw(base_size = 16))
-            layout = NULL
-            if (length(c(self$options$plotX, self$options$plotPanels, self$options$plotGroup))) {
-              layout = tryCatch(jamovi_model_layout(list(mod), data, self$options$plotX,
-                self$options$plotPanels, self$options$plotGroup), error=identity)
-            }
-            if (inherits(layout, "error")) {
-              image$setError(conditionMessage(layout))
+            plot = tryCatch(jamovi_lm_display(mod,data,self$options),error=identity)
+            if (inherits(plot, "error")) {
+              image$setError(conditionMessage(plot))
               return(FALSE)
             }
-            plot = jamovi_glm_model_plot(mod, se=self$options$se, formula=layout, data=data)
-			print(plot)
+            info = jamovi_lm_label_info(mod,self$options)
+			print(jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout))
 			TRUE
 			},
 

@@ -34,7 +34,11 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             interactionSpecVersion = 0,
             polynomials = FALSE,
             comparisonPolynomials = FALSE,
-            plotScale = "probability", ...) {
+            plotScale = "probability",
+            plotLabels = list(),
+            plotLabelStore = list(),
+            comparisonPlotLabels = list(),
+            comparisonPlotLabelStore = list(), ...) {
 
             super$initialize(
                 package="flexplot",
@@ -171,6 +175,116 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "probability",
                     "logit"),
                 default="probability")
+            private$..plotLabels = jmvcore::OptionArray$new(
+                "plotLabels",
+                plotLabels,
+                default=list(),
+                template=jmvcore::OptionGroup$new(
+                    "plotLabels",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
+            private$..plotLabelStore = jmvcore::OptionArray$new(
+                "plotLabelStore",
+                plotLabelStore,
+                default=list(),
+                hidden=TRUE,
+                template=jmvcore::OptionGroup$new(
+                    "plotLabelStore",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
+            private$..comparisonPlotLabels = jmvcore::OptionArray$new(
+                "comparisonPlotLabels",
+                comparisonPlotLabels,
+                default=list(),
+                template=jmvcore::OptionGroup$new(
+                    "comparisonPlotLabels",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
+            private$..comparisonPlotLabelStore = jmvcore::OptionArray$new(
+                "comparisonPlotLabelStore",
+                comparisonPlotLabelStore,
+                default=list(),
+                hidden=TRUE,
+                template=jmvcore::OptionGroup$new(
+                    "comparisonPlotLabelStore",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -201,6 +315,10 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..polynomials)
             self$.addOption(private$..comparisonPolynomials)
             self$.addOption(private$..plotScale)
+            self$.addOption(private$..plotLabels)
+            self$.addOption(private$..plotLabelStore)
+            self$.addOption(private$..comparisonPlotLabels)
+            self$.addOption(private$..comparisonPlotLabelStore)
         }),
     active = list(
         out = function() private$..out$value,
@@ -231,7 +349,11 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         interactionSpecVersion = function() private$..interactionSpecVersion$value,
         polynomials = function() private$..polynomials$value,
         comparisonPolynomials = function() private$..comparisonPolynomials$value,
-        plotScale = function() private$..plotScale$value),
+        plotScale = function() private$..plotScale$value,
+        plotLabels = function() private$..plotLabels$value,
+        plotLabelStore = function() private$..plotLabelStore$value,
+        comparisonPlotLabels = function() private$..comparisonPlotLabels$value,
+        comparisonPlotLabelStore = function() private$..comparisonPlotLabelStore$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -261,7 +383,11 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..interactionSpecVersion = NA,
         ..polynomials = NA,
         ..comparisonPolynomials = NA,
-        ..plotScale = NA)
+        ..plotScale = NA,
+        ..plotLabels = NA,
+        ..plotLabelStore = NA,
+        ..comparisonPlotLabels = NA,
+        ..comparisonPlotLabelStore = NA)
 )
 
 glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

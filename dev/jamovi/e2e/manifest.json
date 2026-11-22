@@ -14554,6 +14554,332 @@
         "fresh",
         "saved_reopen"
       ]
+    },
+    {
+      "id": "LM-16",
+      "analysis": "glmbasic",
+      "title": "Independent plot-label editors and restoration",
+      "dataset": "primary",
+      "initial_options": {},
+      "steps": [
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Initialize both plots with automatic labels",
+          "changes": {
+            "out": "y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "comparisonTerms": [
+              [
+                "x"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "compare": true,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "comparisonX": "x",
+            "comparisonPanels": [
+              "group"
+            ],
+            "graphic": true
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "comparisonTerms": [
+              [
+                "x"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "compare": true,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "comparisonX": "x",
+            "comparisonPanels": [
+              "group"
+            ],
+            "graphic": true
+          },
+          "verify_visible_against_saved_options": true
+        },
+        {
+          "action": "edit_generated_plot_label_rows",
+          "label_option": "plotLabels",
+          "description": "Edit the title row in plotLabels; preserve the other output",
+          "changes": {},
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {},
+          "expected_plot_labels": [
+            "Primary custom title"
+          ],
+          "label_edits": {
+            "title": "Primary custom title"
+          },
+          "verify_visible_against_saved_options": true
+        },
+        {
+          "action": "edit_generated_plot_label_rows",
+          "label_option": "comparisonPlotLabels",
+          "description": "Edit the title row in comparisonPlotLabels; preserve the other output",
+          "changes": {},
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {},
+          "expected_plot_labels": [
+            "Comparison custom title"
+          ],
+          "label_edits": {
+            "title": "Comparison custom title"
+          },
+          "verify_visible_against_saved_options": true
+        }
+      ],
+      "verification": {
+        "interface": [
+          "Native label rows and independently saved stores",
+          "Unavailable controls retain edits"
+        ],
+        "statistical": [
+          "Labels do not alter fitted estimates or predictions"
+        ],
+        "visual": [
+          "Actual title text in each rendered plot; no geometry changes"
+        ]
+      },
+      "save_reopen": {
+        "required": true,
+        "after_step": 3,
+        "verify": [
+          "Both titles and independent options restore",
+          "Subsequent live edits recalculate"
+        ]
+      },
+      "gui_execution_required": true,
+      "existing_coverage": [
+        "test-jamovi-plot-labels.R"
+      ],
+      "coverage_level": "planned; not GUI verified",
+      "priority": "P1",
+      "risk": "Saved labels or scales leaking between outputs",
+      "notes": [
+        "Use dynamically generated row keys; do not fabricate keys or edit hidden stores. Native rendering evidence is required."
+      ],
+      "launch_paths": [
+        "fresh",
+        "saved_reopen"
+      ]
+    },
+    {
+      "id": "GLM-23",
+      "analysis": "glmgeneralized",
+      "title": "Independent plot-label editors and restoration",
+      "dataset": "primary",
+      "initial_options": {},
+      "steps": [
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Initialize both plots with automatic labels",
+          "changes": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "comparisonTerms": [
+              [
+                "x"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "compare": true,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "comparisonX": "x",
+            "comparisonPanels": [
+              "group"
+            ],
+            "graphic": true,
+            "family": "binomial"
+          },
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "comparisonTerms": [
+              [
+                "x"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "compare": true,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "comparisonX": "x",
+            "comparisonPanels": [
+              "group"
+            ],
+            "graphic": true,
+            "family": "binomial"
+          },
+          "verify_visible_against_saved_options": true
+        },
+        {
+          "action": "edit_generated_plot_label_rows",
+          "label_option": "plotLabels",
+          "description": "Edit the title row in plotLabels; preserve the other output",
+          "changes": {},
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {},
+          "expected_plot_labels": [
+            "Primary custom title"
+          ],
+          "label_edits": {
+            "title": "Primary custom title"
+          },
+          "verify_visible_against_saved_options": true
+        },
+        {
+          "action": "edit_generated_plot_label_rows",
+          "label_option": "comparisonPlotLabels",
+          "description": "Edit the title row in comparisonPlotLabels; preserve the other output",
+          "changes": {},
+          "expected_status": "complete",
+          "expected_ui": {},
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {},
+          "expected_plot_labels": [
+            "Comparison custom title"
+          ],
+          "label_edits": {
+            "title": "Comparison custom title"
+          },
+          "verify_visible_against_saved_options": true
+        }
+      ],
+      "verification": {
+        "interface": [
+          "Native label rows and independently saved stores",
+          "Unavailable controls retain edits"
+        ],
+        "statistical": [
+          "Labels do not alter fitted estimates or predictions"
+        ],
+        "visual": [
+          "Actual title text in each rendered plot; no geometry changes"
+        ]
+      },
+      "save_reopen": {
+        "required": true,
+        "after_step": 3,
+        "verify": [
+          "Both titles and independent options restore",
+          "Subsequent live edits recalculate"
+        ]
+      },
+      "gui_execution_required": true,
+      "existing_coverage": [
+        "test-jamovi-plot-labels.R"
+      ],
+      "coverage_level": "planned; not GUI verified",
+      "priority": "P1",
+      "risk": "Saved labels or scales leaking between outputs",
+      "notes": [
+        "Use dynamically generated row keys; do not fabricate keys or edit hidden stores. Native rendering evidence is required."
+      ],
+      "launch_paths": [
+        "fresh",
+        "saved_reopen"
+      ]
     }
   ]
 }

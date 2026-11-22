@@ -29,9 +29,14 @@ e2e_inventory = function(root, manifest) {
     selected = Filter(function(s) s$analysis==analysis,manifest$scenarios)
     options = lapply(definition$options,function(option) {
       covered = Filter(function(s) any(vapply(s$steps,function(step) option$name %in%
-        c(names(s$initial_options),names(step$changes),if(step$action=="edit_generated_plot_label_rows")"plotLabels"),logical(1))),selected)
-      if(option$name %in% c("data","plotLabelStore","samplePolicyVersion")) covered =
-        if(option$name=="plotLabelStore") Filter(function(s)s$id=="MM-12",selected) else selected
+        c(names(s$initial_options),names(step$changes),if(step$action=="edit_generated_plot_label_rows") { if(is.null(step$label_option)) "plotLabels" else step$label_option }),logical(1))),selected)
+      if(option$name %in% c("plotLabelStore","comparisonPlotLabelStore")) {
+        visible = sub("LabelStore$","Labels",option$name)
+        covered = Filter(function(s)any(vapply(s$steps,function(step)
+          identical(step$action,"edit_generated_plot_label_rows") &&
+          identical(if(is.null(step$label_option)) "plotLabels" else step$label_option,visible),logical(1))),selected)
+      }
+      if(option$name %in% c("data","samplePolicyVersion")) covered = selected
       list(id=paste(analysis,option$name,sep="."),definition=option,
         scenarios=vapply(covered,`[[`,character(1),"id"),
         coverage=if(length(covered)) "planned GUI checkpoint; not yet GUI verified" else "gap: no planned option transition")

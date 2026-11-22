@@ -317,3 +317,16 @@ test_that("panel-ghost checkpoints cannot pass from saved options alone", {
   bad=observation;bad$panel_ghosts$scale="logit"
   expect_identical(e2e_checkpoint(scenario,2L,bad)$status,"failed")
 })
+
+test_that("custom label checkpoints require rendered text rather than saved options alone", {
+  manifest = jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))
+  scenario = Filter(function(s)s$id=="LM-16",manifest$scenarios)[[1]]
+  observation = e2e_synthetic_observation(scenario,2L)
+  expect_identical(e2e_checkpoint(scenario,2L,observation)$status,"blocked")
+  observation$plot_labels = list(source="native_gui_review",evidence="synthetic validator fixture; not GUI evidence",text="Wrong title")
+  expect_identical(e2e_checkpoint(scenario,2L,observation)$status,"failed")
+  observation$plot_labels$text = "Primary custom title"
+  expect_identical(e2e_checkpoint(scenario,2L,observation)$status,"passed")
+  observation$plot_labels$evidence = NULL
+  expect_identical(e2e_checkpoint(scenario,2L,observation)$status,"blocked")
+})

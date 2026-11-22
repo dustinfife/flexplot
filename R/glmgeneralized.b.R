@@ -111,11 +111,24 @@ jamovi_glm_generalized_render = function(state, x=NULL, panels=NULL, group=NULL,
   jamovi_model_intervals(plot, se=se, model=model)
 }
 
+jamovi_glm_label_info = function(state, options, comparison=FALSE) {
+  model = if (comparison) state$model1 else state$model
+  formula = if (comparison) state$formula else jamovi_model_layout(list(model),state$data,
+    options$plotX,options$plotPanels,options$plotGroup)
+  display = jamovi_glm_visualization(state$data,flexplot_axis_given(formula)$axis[1],
+    model$family$family=="binomial",options$plotStyle,options$plotScale)
+  meaning = paste(model$family$family,model$family$link,
+    if (model$family$family=="binomial") display$scale else "response",display$overlay,sep=":")
+  jamovi_plot_label_context(model,formula,if (comparison) "comparison" else "model",meaning)
+}
+
 glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
   "glmgeneralizedClass", inherit=glmgeneralizedBase,
   private=list(
     .init=function() jamovi_glm_reporting_reset(self$results),
     .run=function() {
+      jamovi_plot_sync_labels(self$options)
+      jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
       jamovi_glm_reporting_reset(self$results)
       if (!length(self$options$out)) {
         jamovi_diagnostic(self$results$waiting, if (!length(self$options$preds))
@@ -183,12 +196,32 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
           self$options$plotPanels, self$options$plotGroup, self$options$plotStyle, self$options$plotScale), error=function(error) "")
         self$results$plotExplanation$setContent(guide)
         self$results$plotExplanation$setVisible(nzchar(trimws(guide)))
+        # Publish actual plot elements in the host options response. Rendering
+        # remains in the existing callbacks; this introduces no fit cache.
+        plot = suppressWarnings(tryCatch(jamovi_glm_generalized_plot(state,self$options$plotX,self$options$plotPanels,
+          self$options$plotGroup,self$options$plotStyle,self$options$se,self$options$plotScale,
+          ghostLines=self$options$ghostLines),error=function(error) NULL))
+        if (!is.null(plot)) {
+          info = jamovi_glm_label_info(state,self$options)
+          jamovi_plot_sync_labels(self$options,plot,info$layout,info$context)
+        }
+        if (!is.null(comparison)) {
+          plot = suppressWarnings(tryCatch(jamovi_glm_generalized_comparison_plot(comparison,self$options$se,
+            self$options$plotStyle,self$options$plotScale),error=function(error) NULL))
+          if (!is.null(plot)) {
+            info = jamovi_glm_label_info(comparison,self$options,TRUE)
+            jamovi_plot_sync_labels(self$options,plot,info$layout,info$context,
+              rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
+          }
+        }
       }
     },
     .comparisonplot=function(image, ...) {
       if (is.null(image$state)) return(FALSE)
       tryCatch({
-        print(jamovi_glm_generalized_comparison_plot(image$state, self$options$se, self$options$plotStyle, self$options$plotScale))
+        plot = jamovi_glm_generalized_comparison_plot(image$state, self$options$se, self$options$plotStyle, self$options$plotScale)
+        info = jamovi_glm_label_info(image$state,self$options,TRUE)
+        print(jamovi_plot_apply_labels(plot,self$options$comparisonPlotLabels,info$context,info$layout))
         TRUE
       }, error=function(error) {
         jamovi_glm_plot_error(image, error)
@@ -206,7 +239,8 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         if (length(note)) guide = paste0(guide,"<p>",jamovi_mixed_escape(note),"</p>")
         self$results$plotExplanation$setContent(guide)
         self$results$plotExplanation$setVisible(nzchar(guide))
-        print(plot)
+        info = jamovi_glm_label_info(image$state,self$options)
+        print(jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout))
         TRUE
       }, error=function(error) {
         jamovi_glm_plot_error(image, error)

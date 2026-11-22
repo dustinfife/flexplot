@@ -33,7 +33,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         packets.push([...queued]); queued.clear();
     }};
     const ui = {view:{model:{options:manager}}};
-    const defaults = {polynomials:false,comparisonPolynomials:false,interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
+    const defaults = {plotLabels:[],plotLabelStore:[],comparisonPlotLabels:[],comparisonPlotLabelStore:[],polynomials:false,comparisonPolynomials:false,interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
         comparisonTerms:null,comparisonQuadratic:null,plotX:null,plotPanels:null,plotGroup:null,
         comparisonX:null,comparisonPanels:null,family:'binomial',includeP:false,graphic:true,se:true,plotStyle:'auto',plotScale:'probability'};
     if (analysis === 'glmbasic') {
@@ -131,6 +131,18 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
     assert.equal(JSON.stringify(ui.modelTerms.value()),'[]');
     assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[]');
     console.log('PASS: GLM native restoration, independent terms/quadratics, live edits and server options.');
+
+    const labelRows = [{key:'saved:key',role:'title',variable:'plot',value:'',display:'Plot title',label:'Saved title'}];
+    const labelOptions = Object.assign({},snapshot('before-label-edit').options,prepared,
+        {interactions:true,comparisonInteractions:false,polynomials:true,comparisonPolynomials:true,
+            mainEffects:['x','z'],comparisonMainEffects:['z']});
+    for (const name of ['plotLabels','plotLabelStore','comparisonPlotLabels','comparisonPlotLabelStore'])
+        labelOptions[name] = labelRows;
+    restore('label-restoration',JSON.parse(JSON.stringify(labelOptions)));
+    for (const name of ['plotLabels','plotLabelStore','comparisonPlotLabels','comparisonPlotLabelStore'])
+        assert.equal(JSON.stringify(ui[name].value()),JSON.stringify(labelRows));
+    ui.plotLabels.setValue([]);
+    assert.equal(JSON.stringify(ui.comparisonPlotLabels.value()),JSON.stringify(labelRows));
     const baseline = records.slice();
     baseline.interactions = require('./jamovi-interaction-controls.cjs')({ui,native,view,restore,snapshot,assert,analysis});
     if (analysis === 'glmgeneralized') baseline.polynomials = require('./jamovi-glm-polynomials.cjs')({ui,native,view,restore,snapshot,assert});

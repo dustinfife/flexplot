@@ -120,6 +120,18 @@ const {pathToFileURL} = require('node:url');
         }
         if (analysis === 'glmbasic' || generalized) {
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.a.yaml'),'utf8'));
+            const descendants = controls => controls.flatMap(control => [control,...descendants(control.controls || [])]);
+            const editors = descendants(compiled.view.layout.controls);
+            for (const name of ['plotLabels','comparisonPlotLabels']) {
+                const editor = editors.find(control => control.name === name);
+                assert.ok(editor && editor.columns.some(column => column.name === 'label'));
+                for (const optionName of [name,name.replace('Labels','LabelStore')]) {
+                    const option = definition.options.find(option => option.name === optionName);
+                    assert.equal(option.type,'Array');
+                    assert.equal(JSON.stringify(option.default),'[]');
+                }
+            }
+
             if (generalized) {
                 for (const name of ['polynomials','comparisonPolynomials']) {
                     assert.equal(definition.options.find(option => option.name === name).default,false);

@@ -167,6 +167,25 @@ children:
                 maxItemCount: 1
                 isTarget: true
                 enable: (compare)
+      - type: CollapseBox
+        label: Plot Labels
+        useSingleCell: true
+        contentLink: (compare)
+        collapsed: true
+        children:
+          - type: ListBox
+            name: comparisonPlotLabels
+            stretchFactor: 1
+            columns:
+              - name: display
+                label: Plot element
+                template:
+                  type: Label
+              - name: label
+                label: Custom label (blank = automatic)
+                template:
+                  type: TextBox
+                  format: string
   - type: CollapseBox
     label: Model visualization layout
     collapsed: true
@@ -198,6 +217,25 @@ children:
                 name: plotGroup
                 maxItemCount: 1
                 isTarget: true
+      - type: CollapseBox
+        label: Plot Labels
+        useSingleCell: true
+        contentLink: (graphic)
+        collapsed: true
+        children:
+          - type: ListBox
+            name: plotLabels
+            stretchFactor: 1
+            columns:
+              - name: display
+                label: Plot element
+                template:
+                  type: Label
+              - name: label
+                label: Custom label (blank = automatic)
+                template:
+                  type: TextBox
+                  format: string
   - type: LayoutBox
     margin: large
     stretchFactor: 1

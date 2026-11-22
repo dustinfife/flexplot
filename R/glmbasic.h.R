@@ -32,7 +32,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             comparisonInteractions = FALSE,
             mainEffects = NULL,
             comparisonMainEffects = NULL,
-            interactionSpecVersion = 0, ...) {
+            interactionSpecVersion = 0,
+            plotLabels = list(),
+            plotLabelStore = list(),
+            comparisonPlotLabels = list(),
+            comparisonPlotLabelStore = list(), ...) {
 
             super$initialize(
                 package="flexplot",
@@ -155,7 +159,118 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..interactionSpecVersion = jmvcore::OptionInteger$new(
                 "interactionSpecVersion",
                 interactionSpecVersion,
+                hidden=TRUE,
                 default=0)
+            private$..plotLabels = jmvcore::OptionArray$new(
+                "plotLabels",
+                plotLabels,
+                default=list(),
+                template=jmvcore::OptionGroup$new(
+                    "plotLabels",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
+            private$..plotLabelStore = jmvcore::OptionArray$new(
+                "plotLabelStore",
+                plotLabelStore,
+                default=list(),
+                hidden=TRUE,
+                template=jmvcore::OptionGroup$new(
+                    "plotLabelStore",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
+            private$..comparisonPlotLabels = jmvcore::OptionArray$new(
+                "comparisonPlotLabels",
+                comparisonPlotLabels,
+                default=list(),
+                template=jmvcore::OptionGroup$new(
+                    "comparisonPlotLabels",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
+            private$..comparisonPlotLabelStore = jmvcore::OptionArray$new(
+                "comparisonPlotLabelStore",
+                comparisonPlotLabelStore,
+                default=list(),
+                hidden=TRUE,
+                template=jmvcore::OptionGroup$new(
+                    "comparisonPlotLabelStore",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
 
             self$.addOption(private$..out)
             self$.addOption(private$..preds)
@@ -184,6 +299,10 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..mainEffects)
             self$.addOption(private$..comparisonMainEffects)
             self$.addOption(private$..interactionSpecVersion)
+            self$.addOption(private$..plotLabels)
+            self$.addOption(private$..plotLabelStore)
+            self$.addOption(private$..comparisonPlotLabels)
+            self$.addOption(private$..comparisonPlotLabelStore)
         }),
     active = list(
         out = function() private$..out$value,
@@ -212,7 +331,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         comparisonInteractions = function() private$..comparisonInteractions$value,
         mainEffects = function() private$..mainEffects$value,
         comparisonMainEffects = function() private$..comparisonMainEffects$value,
-        interactionSpecVersion = function() private$..interactionSpecVersion$value),
+        interactionSpecVersion = function() private$..interactionSpecVersion$value,
+        plotLabels = function() private$..plotLabels$value,
+        plotLabelStore = function() private$..plotLabelStore$value,
+        comparisonPlotLabels = function() private$..comparisonPlotLabels$value,
+        comparisonPlotLabelStore = function() private$..comparisonPlotLabelStore$value),
     private = list(
         ..out = NA,
         ..preds = NA,
@@ -240,7 +363,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..comparisonInteractions = NA,
         ..mainEffects = NA,
         ..comparisonMainEffects = NA,
-        ..interactionSpecVersion = NA)
+        ..interactionSpecVersion = NA,
+        ..plotLabels = NA,
+        ..plotLabelStore = NA,
+        ..comparisonPlotLabels = NA,
+        ..comparisonPlotLabelStore = NA)
 )
 
 glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

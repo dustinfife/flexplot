@@ -70,6 +70,14 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
       problems = c(problems,paste("Incorrect output-section visibility:",name))
     }
   }
+  if (length(checkpoint$expected_plot_labels)) {
+    review = observation$plot_labels
+    if (is.null(review) || !identical(review$source,"native_gui_review") ||
+        !is.character(review$evidence) || length(review$evidence)!=1L || !nzchar(review$evidence))
+      missing = c(missing,"native rendered label review") else
+      if (!all(unlist(checkpoint$expected_plot_labels) %in% unlist(review$text)))
+        problems = c(problems,"Expected custom labels are not visibly rendered")
+  }
   if (!is.null(checkpoint$expected_panel_ghosts)) {
     review = observation$panel_ghosts
     if (is.null(review) || !identical(review$source,"native_gui_review") ||

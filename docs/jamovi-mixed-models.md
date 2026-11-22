@@ -301,3 +301,7 @@ method. Optional correlations use each model's own random-effect terms.
 
 Saved comparisons from earlier reporting revisions refresh when their controls
 initialize, adding Model 2 tables without changing the model specification.
+
+The editor now delegates to the shared modeling label helpers. Existing saved
+keys, option identifiers, supported labels, fit reuse, and CAS composition remain
+unchanged; see `docs/jamovi-plot-labels.md` for the shared implementation contract.

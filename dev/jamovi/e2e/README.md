@@ -384,7 +384,7 @@ snapshot without bypassing native controls, retain any real legacy `.omv` files
 available, and confirm the single registered window is on the secondary monitor.
 No statistical design decisions or new dependencies are required for Phase 1.
 
-GLM-22 adds reference-panel ghosts to the original 70 scenarios (71 total).
+GLM-22 adds reference-panel ghosts; LM-16 and GLM-23 add independent label editors (73 scenarios total).
 Existing numerical reference files remain unchanged. This scenario requires a
 separate `panel_ghosts` native GUI review with `source: "native_gui_review"`, a
 nonempty `evidence` identifier, observed `visible` and `scale`, and (when enabled)
@@ -392,3 +392,11 @@ explicit `source_preserved`, `no_source_duplicate`, `destinations_verified`, and
 `source_coordinates_verified` checks. Saved options or reconstructed R6 plots
 alone cannot pass it; absent native review is blocked. These are planned GUI
 checkpoints, not evidence of completed GUI verification.
+
+LM-16 and GLM-23 are planned native label-edit/restoration checks. The selected
+`label_option` identifies the ordinary or comparison editor. A checkpoint with
+`expected_plot_labels` requires `plot_labels` evidence from `native_gui_review`,
+a nonempty evidence identifier and the actual rendered `text` values. Without
+that observation, the checkpoint is blocked. Hidden stores are checked through
+saved options, never edited as user controls. Existing numerical references are
+unchanged.

@@ -61,7 +61,7 @@ test_that("E2E manifest covers every actual option and has valid resource refere
   expect_identical(jsonlite::fromJSON(jsonlite::toJSON(inventory,auto_unbox=TRUE,null="null"),simplifyVector=FALSE),
     jsonlite::read_json(file.path(root,"dev/jamovi/e2e/artifacts/inventory.json"),simplifyVector=FALSE))
   ids = unlist(lapply(manifest$scenarios,`[[`,"id"))
-  expect_equal(length(ids),71)
+  expect_equal(length(ids),73)
   expect_false(anyDuplicated(ids)>0)
   for(analysis in inventory$analyses) for(option in analysis$options) expect_true(length(option$scenarios)>0,info=option$id)
   expect_true(all(vapply(manifest$scenarios,function(s)length(s$verification$interface)>0 &&
