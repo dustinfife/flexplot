@@ -16,6 +16,7 @@ const {pathToFileURL} = require('node:url');
             fs.copyFileSync(path.join(root, 'jamovi', analysis + '.' + suffix), path.join(temp, analysis + '.' + suffix));
         fs.copyFileSync(path.join(root, 'jamovi/js/' + analysis + '.js'), path.join(temp, analysis + '.js'));
         fs.copyFileSync(path.join(root, 'jamovi/js/model-terms.js'), path.join(temp, 'model-terms.js'));
+        if (analysis === 'glmgeneralized') fs.copyFileSync(path.join(root,'jamovi/js/glm-ghosts.js'),path.join(temp,'glm-ghosts.js'));
         const {default: compileR} = await import(pathToFileURL(path.join(compilerPath, 'compiler.js')));
         compileR('flexplot', path.join(temp, analysis + '.a.yaml'), path.join(temp, analysis + '.r.yaml'),
             path.join(compilerPath, 'header.template'), output + '.header.R');
@@ -71,7 +72,10 @@ const {pathToFileURL} = require('node:url');
         walk(compiled.view.layout);
         const dual = controls.has('comparisonTerms');
         const generalized = analysis === 'glmgeneralized';
-        if (generalized) assert.ok(controls.has('includeP'), 'Missing Include p-values control');
+        if (generalized) {
+            assert.ok(controls.has('includeP'), 'Missing Include p-values control');
+            assert.ok(controls.has('ghostLines'),'Missing ordinary panel-ghost control');
+        }
         for (const name of (dual ? ['preds','modelTerms','comparisonTerms','primarySupplier','comparisonSupplier'] : ['preds','modelTerms','primarySupplier']))
             assert.ok(controls.has(name), 'Missing compiled control: ' + name);
         const fire = (name, event) => {
@@ -405,6 +409,10 @@ const {pathToFileURL} = require('node:url');
             }
             assert.equal(a.options.find(o => o.name === 'plotScale').default,'probability');
             assert.equal(a.options.find(o => o.name === 'se').title,'Confidence intervals');
+            assert.equal(a.options.find(o => o.name === 'ghostLines').title,'Show ghost lines');
+            assert.equal(a.options.find(o => o.name === 'ghostLines').default,false);
+            assert.equal(visualization.find(c => c.name === 'ghostLines').enable,undefined);
+            assert.ok(visualization.findIndex(c => c.name === 'ghostLines') < visualization.findIndex(c => c.name === 'plotStyle'));
             if (runtime) {
                 const installed = fs.readFileSync(runtime, 'utf8');
                 const start = installed.indexOf('filterSuppliersList(e=!1){');

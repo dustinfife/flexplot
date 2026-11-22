@@ -1,6 +1,7 @@
 'use strict';
 
 const updateTerms = require('./model-terms');
+const updateGhostControls = require('./glm-ghosts');
 const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
     selections:['plotX', 'plotPanels', 'plotGroup'], exclusive:true, requireX:true, extra:'quadratic'},
     {supplier:'comparisonPlotSupplier', models:['modelTerms','comparisonTerms'],
@@ -10,7 +11,10 @@ const synchronize = function(ui, context, added, changed = null) {
     // Host options arrive separately during restoration; do not prune partial state.
     if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
     if (context.workspace.glmSynchronizing) return;
-    if (!added && !(ui.preds.value() || []).length) return;
+    if (!added && !(ui.preds.value() || []).length) {
+        updatePlotControls(ui, context);
+        return;
+    }
     context.workspace.glmSynchronizing = true;
     ui.view.model.options.beginEdit();
     try {
@@ -57,6 +61,7 @@ const synchronize = function(ui, context, added, changed = null) {
 // A response for a previous selection must never change the current controls.
 const updatePlotControls = function(ui, context) {
     if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
+    updateGhostControls(ui, context);
     if (typeof context.requestData !== 'function') return;
     const token = {};
     context.workspace.glmPlotRequest = token;
@@ -87,6 +92,9 @@ module.exports = {
     comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },
     comparisonMainEffects_changed: function(ui) { synchronize(ui, this, false, 'comparisonMainEffects'); },
     comparisonMainSupplier_updated: function(ui) { synchronize(ui, this, false); },
+    out_changed: function(ui) { updatePlotControls(ui, this); },
+    ghostLines_changed: function(ui) { updatePlotControls(ui, this); },
+    graphic_changed: function(ui) { updatePlotControls(ui, this); },
     family_changed: function(ui) { updatePlotControls(ui, this); },
     plotStyle_changed: function(ui) { updatePlotControls(ui, this); },
     plotScale_changed: function(ui) { updatePlotControls(ui, this); },

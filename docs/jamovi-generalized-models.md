@@ -286,3 +286,27 @@ predictor units, conditioning and the distinction from average marginal effects.
 Marginal probabilities retain their averaging interpretation. Hidden and empty
 tables have no note rows. Fitting warnings appear in the independent diagnostic
 element, even when all optional estimates sections are hidden.
+
+## Reference-panel ghost lines
+
+**Show ghost lines** is off by default and belongs to ordinary **Model
+Visualization**, independently of model comparison. With a continuous numeric x
+and at least two prepared panels, it copies the core-selected reference curve to
+the other panels without adding a duplicate in its source panel. One or two
+categorical/numeric panel variables are supported; numeric panels use existing
+bins. The checkbox's preference survives temporarily unavailable layouts and
+saved analyses. Older analyses default to off.
+
+Color/symbol grouping and categorical x layouts are not supported by this control;
+ordinary plots, including magnet plots, remain available. UI metadata determines
+potential eligibility; the fitted prediction grid is checked in R. An unavailable
+reference or nonfinite curve leaves the ordinary plot and a short explanation
+below it. No new reference-selection algorithm or GUI editor is introduced; core
+R ghost-reference overrides remain supported.
+
+Probability plots copy reference probabilities. Logit overlays transform those
+same marginal probabilities, including the ghost coordinates. Neither the
+reference nor destination panel causes a model refit during prediction rendering.
+Rendering an enabled request prepares the ordinary plot first for validation,
+then uses the existing core ghost path with the same fitted model. It does not
+change comparison overlays or Mixed Models CAS ghosts.

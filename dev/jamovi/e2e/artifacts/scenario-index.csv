@@ -69,3 +69,4 @@
 "GLM-21","glmgeneralized","Gamma inverse nested comparison and link-domain protection","primary","P1","medium",1,1,"fresh;saved_reopen","not_run"
 "MM-17","mixedmodel","Mixed ML/REML original fits remain independent","primary","P1","medium",2,2,"fresh;saved_reopen","not_run"
 "MM-18","mixedmodel","Invalid single-level grouping is rejected without stale output","rank_deficient","P1","medium",1,0,"fresh;saved_reopen","not_run"
+"GLM-22","glmgeneralized","Single-model reference-panel ghosts, scales and restoration","primary","P0","high",11,0,"fresh;saved_reopen","not_run"

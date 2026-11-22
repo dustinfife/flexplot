@@ -70,6 +70,24 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
       problems = c(problems,paste("Incorrect output-section visibility:",name))
     }
   }
+  if (!is.null(checkpoint$expected_panel_ghosts)) {
+    review = observation$panel_ghosts
+    if (is.null(review) || !identical(review$source,"native_gui_review") ||
+        !is.character(review$evidence) || length(review$evidence)!=1L || !nzchar(review$evidence)) {
+      missing = c(missing,"native rendered panel-ghost review (saved options are insufficient)")
+    } else {
+      if (!identical(review$visible,checkpoint$expected_panel_ghosts))
+        problems = c(problems,"Incorrect native panel-ghost visibility")
+      if (isTRUE(checkpoint$expected_panel_ghosts)) {
+        for (key in c("source_preserved","no_source_duplicate","destinations_verified","source_coordinates_verified")) {
+          if (is.null(review[[key]])) missing = c(missing,paste("native ghost review",key)) else
+            if (!isTRUE(review[[key]])) problems = c(problems,paste("Incorrect native panel ghosts:",key))
+        }
+        if (!identical(review$scale,checkpoint$expected_ghost_scale))
+          problems = c(problems,"Incorrect native panel-ghost scale")
+      }
+    }
+  }
   running = analysis$status %in% c("ANALYSIS_NONE","ANALYSIS_INITED","ANALYSIS_RUNNING","ANALYSIS_RENDERING") ||
     any(vapply(visible,function(e)e$status %in% c("ANALYSIS_RUNNING","ANALYSIS_RENDERING"),logical(1)))
   if(running || observation$native_status %in% c("running",if(checkpoint$expected_status!="waiting")"waiting"))

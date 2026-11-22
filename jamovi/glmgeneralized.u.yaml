@@ -198,6 +198,8 @@ children:
                 name: plotGroup
                 maxItemCount: 1
                 isTarget: true
+      - type: CheckBox
+        name: ghostLines
       - type: ComboBox
         name: plotStyle
         useSingleCell: true

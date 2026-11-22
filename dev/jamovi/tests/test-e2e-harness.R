@@ -298,3 +298,22 @@ test_that("GLM output checkpoints reject missing or incorrectly visible sections
   bad = observation;bad$saved$analyses[[1]]$results$children[[2]] = NULL
   expect_identical(e2e_checkpoint(scenario,7L,bad)$status,"failed")
 })
+
+test_that("panel-ghost checkpoints cannot pass from saved options alone", {
+  manifest = jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))
+  scenario = Filter(function(s)s$id=="GLM-22",manifest$scenarios)[[1]]
+  observation = e2e_synthetic_observation(scenario,2L)
+  expect_identical(e2e_checkpoint(scenario,2L,observation)$status,"blocked")
+  # Controlled review inputs test the validator; these are not GUI evidence.
+  observation$panel_ghosts = list(source="native_gui_review",evidence="Controlled validator fixture, not a real GUI review",visible=TRUE,
+    source_preserved=TRUE,no_source_duplicate=TRUE,destinations_verified=TRUE,source_coordinates_verified=TRUE,scale="probability")
+  expect_identical(e2e_checkpoint(scenario,2L,observation)$status,"passed")
+  for (key in c("source_preserved","no_source_duplicate","destinations_verified","source_coordinates_verified")) {
+    bad=observation;bad$panel_ghosts[[key]]=FALSE
+    expect_identical(e2e_checkpoint(scenario,2L,bad)$status,"failed")
+  }
+  bad=observation;bad$panel_ghosts$source="reconstructed_R6"
+  expect_identical(e2e_checkpoint(scenario,2L,bad)$status,"blocked")
+  bad=observation;bad$panel_ghosts$scale="logit"
+  expect_identical(e2e_checkpoint(scenario,2L,bad)$status,"failed")
+})

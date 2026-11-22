@@ -20,6 +20,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             plotX = NULL,
             plotPanels = NULL,
             plotGroup = NULL,
+            ghostLines = FALSE,
             plotStyle = "auto",
             se = TRUE,
             showEstimates = TRUE,
@@ -102,6 +103,10 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "plotGroup",
                 plotGroup,
                 default=NULL)
+            private$..ghostLines = jmvcore::OptionBool$new(
+                "ghostLines",
+                ghostLines,
+                default=FALSE)
             private$..plotStyle = jmvcore::OptionList$new(
                 "plotStyle",
                 plotStyle,
@@ -181,6 +186,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..plotX)
             self$.addOption(private$..plotPanels)
             self$.addOption(private$..plotGroup)
+            self$.addOption(private$..ghostLines)
             self$.addOption(private$..plotStyle)
             self$.addOption(private$..se)
             self$.addOption(private$..showEstimates)
@@ -211,6 +217,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         plotX = function() private$..plotX$value,
         plotPanels = function() private$..plotPanels$value,
         plotGroup = function() private$..plotGroup$value,
+        ghostLines = function() private$..ghostLines$value,
         plotStyle = function() private$..plotStyle$value,
         se = function() private$..se$value,
         showEstimates = function() private$..showEstimates$value,
@@ -240,6 +247,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..plotX = NA,
         ..plotPanels = NA,
         ..plotGroup = NA,
+        ..ghostLines = NA,
         ..plotStyle = NA,
         ..se = NA,
         ..showEstimates = NA,

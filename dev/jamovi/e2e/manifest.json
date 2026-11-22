@@ -13830,6 +13830,730 @@
         "fresh",
         "saved_reopen"
       ]
+    },
+    {
+      "id": "GLM-22",
+      "analysis": "glmgeneralized",
+      "title": "Single-model reference-panel ghosts, scales and restoration",
+      "dataset": "primary",
+      "initial_options": {
+        "out": "binary_y",
+        "preds": [
+          "x",
+          "z",
+          "group"
+        ],
+        "family": "binomial",
+        "modelTerms": [
+          [
+            "x"
+          ],
+          [
+            "z"
+          ],
+          [
+            "group"
+          ],
+          [
+            "x",
+            "group"
+          ]
+        ],
+        "quadratic": [
+          "x"
+        ],
+        "interactions": true,
+        "polynomials": true,
+        "interactionSpecVersion": 2,
+        "plotX": "x",
+        "plotPanels": [
+          "group"
+        ],
+        "compare": false
+      },
+      "steps": [
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Default ghosts off in a valid single-model faceted plot",
+          "changes": {},
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": false
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "compare": false,
+            "ghostLines": false
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": false
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Enable one reference-panel ghost without model comparison",
+          "changes": {
+            "ghostLines": true
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": true
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "compare": false,
+            "ghostLines": true
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": true,
+          "expected_ghost_scale": "probability"
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Transform ordinary and reference curves to logits",
+          "changes": {
+            "plotScale": "logit"
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": true
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "compare": false,
+            "ghostLines": true,
+            "plotScale": "logit"
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": true,
+          "expected_ghost_scale": "logit"
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Add a numeric conditioning variable using prepared bins",
+          "changes": {
+            "plotPanels": [
+              "group",
+              "z"
+            ]
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": true
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "group",
+              "z"
+            ],
+            "compare": false,
+            "ghostLines": true,
+            "plotScale": "logit"
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": true,
+          "expected_ghost_scale": "logit"
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Grouped layout disables ghosts but retains the saved preference",
+          "changes": {
+            "plotPanels": [
+              "z"
+            ],
+            "plotGroup": "group",
+            "plotScale": "probability"
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": false
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [
+            "Use panels instead of a color / symbol variable"
+          ],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "z"
+            ],
+            "compare": false,
+            "ghostLines": true,
+            "plotScale": "probability",
+            "plotGroup": "group"
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": false,
+          "expected_diagnostic_phase": "warning"
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Restore eligible panels and probability scale",
+          "changes": {
+            "plotGroup": null,
+            "plotPanels": [
+              "group"
+            ],
+            "plotScale": "probability"
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": true
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "compare": false,
+            "ghostLines": true,
+            "plotScale": "probability",
+            "plotGroup": null
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": true,
+          "expected_ghost_scale": "probability"
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Disable ghosts without changing ordinary predictions",
+          "changes": {
+            "ghostLines": false
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": false
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "compare": false,
+            "ghostLines": false,
+            "plotScale": "probability",
+            "plotGroup": null
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": false
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Restore ghosts before saving and reopening",
+          "changes": {
+            "ghostLines": true
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": true
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "group"
+            ],
+            "compare": false,
+            "ghostLines": true,
+            "plotScale": "probability",
+            "plotGroup": null
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": true,
+          "expected_ghost_scale": "probability"
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Edit numeric panels after restoration",
+          "changes": {
+            "plotPanels": [
+              "z"
+            ],
+            "plotStyle": "raw"
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": true
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "z"
+            ],
+            "compare": false,
+            "ghostLines": true,
+            "plotScale": "probability",
+            "plotGroup": null,
+            "plotStyle": "raw"
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": true,
+          "expected_ghost_scale": "probability"
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Comparison stays independent of ordinary panel ghosts",
+          "changes": {
+            "compare": true,
+            "comparisonTerms": [
+              [
+                "x"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "comparisonX": "x",
+            "comparisonPanels": [
+              "group"
+            ]
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": true
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [
+              "z"
+            ],
+            "compare": true,
+            "ghostLines": true,
+            "plotScale": "probability",
+            "plotGroup": null,
+            "plotStyle": "raw",
+            "comparisonTerms": [
+              [
+                "x"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "comparisonX": "x",
+            "comparisonPanels": [
+              "group"
+            ]
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": true,
+          "expected_ghost_scale": "probability"
+        },
+        {
+          "action": "set_options_through_native_controls",
+          "description": "Remove panels without clearing the ghost preference",
+          "changes": {
+            "compare": false,
+            "plotPanels": []
+          },
+          "expected_status": "complete",
+          "expected_ui": {
+            "ghostLines.enabled": false
+          },
+          "reference": null,
+          "expected_warnings_or_errors": [
+            "Select at least one panel variable"
+          ],
+          "expected_options": {
+            "out": "binary_y",
+            "preds": [
+              "x",
+              "z",
+              "group"
+            ],
+            "family": "binomial",
+            "modelTerms": [
+              [
+                "x"
+              ],
+              [
+                "z"
+              ],
+              [
+                "group"
+              ],
+              [
+                "x",
+                "group"
+              ]
+            ],
+            "quadratic": [
+              "x"
+            ],
+            "interactions": true,
+            "polynomials": true,
+            "interactionSpecVersion": 2,
+            "plotX": "x",
+            "plotPanels": [],
+            "compare": false,
+            "ghostLines": true,
+            "plotScale": "probability",
+            "plotGroup": null,
+            "plotStyle": "raw",
+            "comparisonTerms": [
+              [
+                "x"
+              ],
+              [
+                "group"
+              ]
+            ],
+            "comparisonX": "x",
+            "comparisonPanels": [
+              "group"
+            ]
+          },
+          "verify_visible_against_saved_options": true,
+          "expected_panel_ghosts": false,
+          "expected_diagnostic_phase": "warning"
+        }
+      ],
+      "verification": {
+        "interface": [
+          "Checkbox availability follows actual controls and panel metadata; preference survives unavailable layouts",
+          "Comparison and ordinary Model Visualization remain independent"
+        ],
+        "statistical": [
+          "Compare saved coefficients and fitted model specifications before/after presentation changes; existing numerical reference files are unchanged",
+          "Verify reference curves use fitted marginal probabilities, followed by the requested display transformation"
+        ],
+        "visual": [
+          "Capture native plot evidence for the one source panel and all destinations; no duplicate source ghost",
+          "Compare ordinary curves and uncertainty limits with ghosts off/on; ghosts copy source coordinates",
+          "No unsupported layout leaves a blank plot or persistent waiting state"
+        ]
+      },
+      "save_reopen": {
+        "required": true,
+        "after_step": 8,
+        "verify": [
+          "ghostLines stays enabled",
+          "interaction and quadratic terms and visualization scale restore",
+          "source/destination curves render, then numeric-panel live edit completes"
+        ]
+      },
+      "gui_execution_required": true,
+      "existing_coverage": [
+        "test-jamovi-glm-panel-ghosts.R",
+        "test-ghost-reference-regressions.R",
+        "test-jamovi-glm-restoration.R"
+      ],
+      "coverage_level": "headless R6/native-handler tests; native panel-ghost GUI review required and not yet executed",
+      "priority": "P0",
+      "risk": "high",
+      "notes": [
+        "Reference selection delegates to core; no new comparison ghost semantics. Numeric references remain the existing prepared bins."
+      ],
+      "launch_paths": [
+        "fresh",
+        "saved_reopen"
+      ]
     }
   ]
 }

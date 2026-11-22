@@ -75,6 +75,10 @@ options:
     title: Color / symbol variable
     type: Variable
     default: null
+  - name: ghostLines
+    title: Show ghost lines
+    type: Bool
+    default: false
   - name: plotStyle
     title: Binomial visualization
     type: List

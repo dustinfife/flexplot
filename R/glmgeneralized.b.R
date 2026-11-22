@@ -74,7 +74,7 @@ jamovi_glm_generalized_fit = function(options, data, formula=jamovi_glm_generali
   list(model=model, data=eligible, warnings=warnings$messages, omitted=nrow(data)-nrow(eligible))
 }
 
-jamovi_glm_generalized_plot = function(state, x=NULL, panels=NULL, group=NULL, style="auto", se=TRUE, scale="probability") {
+jamovi_glm_generalized_render = function(state, x=NULL, panels=NULL, group=NULL, style="auto", se=TRUE, scale="probability", ghost.line=NULL, ghost.reference=NULL) {
   model = state$model
   formula = jamovi_model_layout(list(model), state$data, x, panels, group)
   if (!length(all.vars(formula)[-1])) {
@@ -84,10 +84,10 @@ jamovi_glm_generalized_plot = function(state, x=NULL, panels=NULL, group=NULL, s
   display = jamovi_glm_visualization(state$data, xvar, model$family$family == "binomial", style, scale)
   logit = model$family$family == "binomial" && display$scale == "logit"
   if (display$overlay) {
-    plot = visualize_binomial_model(model, formula, state$data, n_bins=10, overlay_type="dot", se=se, scale=if(logit) "logit" else "probability")
+    plot = visualize_binomial_model(model, formula, state$data, n_bins=10, overlay_type="dot", se=se, scale=if(logit) "logit" else "probability", ghost.line=ghost.line, ghost.reference=ghost.reference)
     return(if(logit) jamovi_glm_logit_display(plot,all.vars(formula)[1],transform=FALSE) else plot)
   }
-  plot = compare_fits(formula, state$data, model1=model, pred.type="response", report.se=se)
+  plot = compare_fits(formula, state$data, model1=model, pred.type="response", report.se=se, ghost.line=ghost.line, ghost.reference=ghost.reference)
   if (model$family$family == "Gamma" && model$family$link == "inverse") {
     for (layer in plot$layers) {
       if (!is.data.frame(layer$data) || !"prediction" %in% names(layer$data)) next
@@ -198,7 +198,14 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
       if (is.null(image$state)) return(FALSE)
       tryCatch({
         plot = jamovi_glm_generalized_plot(image$state, self$options$plotX, self$options$plotPanels,
-          self$options$plotGroup, self$options$plotStyle, self$options$se, self$options$plotScale)
+          self$options$plotGroup, self$options$plotStyle, self$options$se, self$options$plotScale,
+          ghostLines=self$options$ghostLines)
+        guide = jamovi_glm_plot_guide(image$state,self$options$plotX,self$options$plotPanels,
+          self$options$plotGroup,self$options$plotStyle,self$options$plotScale)
+        note = attr(plot,"jamovi_ghost_note")
+        if (length(note)) guide = paste0(guide,"<p>",jamovi_mixed_escape(note),"</p>")
+        self$results$plotExplanation$setContent(guide)
+        self$results$plotExplanation$setVisible(nzchar(guide))
         print(plot)
         TRUE
       }, error=function(error) {

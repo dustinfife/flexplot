@@ -383,3 +383,12 @@ Before automation starts, decide how to obtain a trustworthy live option/result
 snapshot without bypassing native controls, retain any real legacy `.omv` files
 available, and confirm the single registered window is on the secondary monitor.
 No statistical design decisions or new dependencies are required for Phase 1.
+
+GLM-22 adds reference-panel ghosts to the original 70 scenarios (71 total).
+Existing numerical reference files remain unchanged. This scenario requires a
+separate `panel_ghosts` native GUI review with `source: "native_gui_review"`, a
+nonempty `evidence` identifier, observed `visible` and `scale`, and (when enabled)
+explicit `source_preserved`, `no_source_duplicate`, `destinations_verified`, and
+`source_coordinates_verified` checks. Saved options or reconstructed R6 plots
+alone cannot pass it; absent native review is blocked. These are planned GUI
+checkpoints, not evidence of completed GUI verification.
