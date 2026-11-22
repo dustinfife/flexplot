@@ -16,6 +16,43 @@ jamovi_glm_ghost_reason = function(plot, formula) {
   NULL
 }
 
+# Style only adapter-owned ghosts, after interval layers have been constructed.
+jamovi_glm_style_ghosts = function(plot) {
+  ghosts = which(vapply(plot$layers,function(layer)
+    !is.null(attr(layer$data,"ghost_axes")),logical(1)))
+  if (!length(ghosts)) return(plot)
+  curves = which(vapply(plot$layers,function(layer)
+    inherits(layer$geom,c("GeomLine","GeomSmooth")) && is.data.frame(layer$data) &&
+      "prediction" %in% names(layer$data),logical(1)))
+  color = "gray40"
+  if (length(curves)) {
+    curve = plot$layers[[curves[1]]]
+    mapped = !is.null(curve$mapping$colour) ||
+      (isTRUE(curve$inherit.aes) && !is.null(plot$mapping$colour))
+    colors = curve$aes_params$colour
+    if (mapped || !length(colors)) {
+      # Resolve theme/scale colors using only the supplied fitted curve: no
+      # observation jitter or smoothing calculation is needed for this lookup.
+      reference = plot
+      reference$layers = plot$layers[curves[1]]
+      colors = unique(ggplot2::ggplot_build(reference)$data[[1]]$colour)
+    }
+    if (is.character(colors) && length(colors)==1L && !is.na(colors)) color = colors
+  }
+  for (i in ghosts) {
+    layer = local({
+      original = plot$layers[[i]]
+      ggplot2::ggproto(NULL,original)
+    })
+    layer$mapping$colour = layer$mapping$linetype = layer$mapping$alpha = layer$mapping$linewidth = NULL
+    layer$aes_params = utils::modifyList(layer$aes_params,
+      list(colour=color,linewidth=1.2,alpha=.85,linetype="dashed"))
+    plot$layers[[i]] = layer
+  }
+  plot$layers = c(plot$layers[-ghosts],plot$layers[ghosts])
+  plot
+}
+
 # Reuse the normal renderer and its core supplied-prediction ghosts. The ordinary
 # plot is retained if the requested reference/layout cannot produce a ghost.
 jamovi_glm_generalized_plot = function(state, x=NULL, panels=NULL, group=NULL, style="auto",
@@ -38,7 +75,7 @@ jamovi_glm_generalized_plot = function(state, x=NULL, panels=NULL, group=NULL, s
         finite = is.finite(values[[axes[1]]]) & is.finite(values[[axes[2]]])
         length(unique(values[[axes[1]]][finite]))>=2L
       },logical(1))
-      if (any(valid)) return(ghost)
+      if (any(valid)) return(jamovi_glm_style_ghosts(ghost))
       reason = "The reference panel has no finite prediction curve to copy."
     }
   }

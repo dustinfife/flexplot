@@ -310,3 +310,8 @@ reference nor destination panel causes a model refit during prediction rendering
 Rendering an enabled request prepares the ordinary plot first for validation,
 then uses the existing core ghost path with the same fitted model. It does not
 change comparison overlays or Mixed Models CAS ghosts.
+
+GLM panel ghosts use the fitted curve's color where available, a dashed line
+(width 1.2, opacity 0.85), and are drawn above confidence bands. This styling is
+specific to the GLM adapter; ordinary fitted curves and other Flexplot ghosts
+retain their existing appearance.

@@ -168,3 +168,70 @@ test_that("adapter logit ghosts respect collision-safe coordinate names", {
   expect_equal(ghost[[axes[2]]],source$prediction[match(ghost[[axes[1]]],source$.ghost_y)],tolerance=1e-12)
   expect_no_warning(ggplot2::ggplotGrob(plot))
 })
+
+test_that("GLM panel ghosts are distinct and above unchanged confidence bands", {
+  skip_if_not_installed("jmvcore")
+  withr::local_seed(757)
+  for (family in c("binomial","gaussian","poisson","gammaLog","Gamma","negativebinomial")) {
+    data = glm_panel_ghost_fixture(family)
+    analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","a","b","z"),family=family,
+      modelTerms=list("x","a","b","z",c("x","a")),quadratic="x",graphic=FALSE),data)
+    expect_true(analysis$run())
+    state = analysis$results$plot$state
+    for (scale in if (family=="binomial") c("probability","logit") else "probability") {
+      for (panels in list("a",c("a","b"))) {
+        original = flexplot:::jamovi_glm_generalized_render(state,x="x",panels=panels,scale=scale,ghost.line="gray")
+        styled = flexplot:::jamovi_glm_generalized_plot(state,x="x",panels=panels,scale=scale,ghostLines=TRUE)
+        isghost = function(plot)vapply(plot$layers,function(layer)!is.null(attr(layer$data,"ghost_axes")),logical(1))
+        old = which(isghost(original));new = which(isghost(styled))
+        expect_length(new,1L)
+        expect_equal(styled$layers[[new]]$data,original$layers[[old]]$data,tolerance=0)
+        expect_equal(lapply(styled$layers[!isghost(styled)],function(layer)list(data=layer$data,mapping=layer$mapping,aes=layer$aes_params)),
+          lapply(original$layers[!isghost(original)],function(layer)list(data=layer$data,mapping=layer$mapping,aes=layer$aes_params)),tolerance=0)
+        ghost = styled$layers[[new]]
+        expect_identical(ghost$aes_params$linewidth,1.2)
+        expect_identical(ghost$aes_params$alpha,.85)
+        expect_identical(ghost$aes_params$linetype,"dashed")
+        expect_false(ghost$show.legend)
+        bands = which(vapply(styled$layers,function(layer)inherits(layer$geom,c("GeomSmooth","GeomRibbon")),logical(1)))
+        expect_true(all(new>bands))
+        built = ggplot2::ggplot_build(styled)
+        curve = which(vapply(styled$layers,function(layer)is.data.frame(layer$data) &&
+          "prediction" %in% names(layer$data) && inherits(layer$geom,c("GeomLine","GeomSmooth")),logical(1)))[1]
+        expect_equal(unique(built$data[[new]]$colour),unique(built$data[[curve]]$colour))
+        expect_equal(unique(built$data[[new]]$linewidth),1.2)
+        expect_equal(unique(built$data[[new]]$alpha),.85)
+        expect_equal(unique(built$data[[new]]$linetype),"dashed")
+        expect_no_warning(ggplot2::ggplotGrob(styled))
+      }
+    }
+  }
+})
+
+test_that("ghost prominence is local to enabled GLM ghosts", {
+  skip_if_not_installed("jmvcore")
+  withr::local_seed(758)
+  data = glm_panel_ghost_fixture("binomial")
+  analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(out="y",preds=c("x","a"),family="binomial",
+    modelTerms=list("x","a"),graphic=FALSE),data)
+  expect_true(analysis$run())
+  state = analysis$results$plot$state
+  ordinary = withr::with_seed(759,flexplot:::jamovi_glm_generalized_render(state,x="x",panels="a"))
+  off = withr::with_seed(759,flexplot:::jamovi_glm_generalized_plot(state,x="x",panels="a",ghostLines=FALSE))
+  expect_equal(withr::with_seed(759,ggplot2::ggplot_build(off)$data),
+    withr::with_seed(759,ggplot2::ggplot_build(ordinary)$data),tolerance=0)
+  core = compare_fits(y~x|a,data,model1=state$model,report.se=TRUE,ghost.line="gray")
+  index = which(vapply(core$layers,function(layer)!is.null(attr(layer$data,"ghost_axes")),logical(1)))
+  original = core$layers[[index]]$aes_params
+  styled = flexplot:::jamovi_glm_style_ghosts(core)
+  expect_identical(core$layers[[index]]$aes_params,original)
+  expect_identical(original$colour,"gray")
+  expect_null(original$linewidth)
+  expect_null(original$alpha)
+  expect_null(original$linetype)
+  before = ggplot2::ggplot_build(core)$data[[index]]
+  expect_equal(unique(before$linewidth),.5)
+  expect_true(all(is.na(before$alpha)))
+  expect_equal(unique(before$linetype),"solid")
+  expect_identical(styled$layers[[length(styled$layers)]]$aes_params$linetype,"dashed")
+})
