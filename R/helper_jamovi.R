@@ -39,10 +39,38 @@ ifelse_null = function(object, statement, true_option=object, false_option=NULL)
   return(false_option)
 }
 
+# Reset content without choosing visibility, columns, waiting text or plot paths.
+jamovi_result_reset_status = function(result) {
+  result$setError("")
+  result$setStatus("complete")
+  invisible(NULL)
+}
+
+jamovi_result_clear = function(result) {
+  jamovi_result_reset_status(result)
+  if (inherits(result, "Table")) {
+    result$deleteRows()
+    for (key in names(result$notes)) result$setNote(key, NULL)
+  }
+  if (inherits(result, "Html")) result$setContent("")
+  invisible(NULL)
+}
+
+jamovi_plot_clear_states = function(results, names) {
+  for (name in names) results[[name]]$setState(NULL)
+  invisible(NULL)
+}
+
+jamovi_html_escape = function(text) {
+  text = gsub("&", "&amp;", text, fixed=TRUE)
+  text = gsub("<", "&lt;", text, fixed=TRUE)
+  gsub(">", "&gt;", text, fixed=TRUE)
+}
+
 # Html results do not render setError() metadata in jamovi 2.7.41. Keep the
 # metadata for inspection, and publish escaped text as actual visible content.
 jamovi_diagnostic = function(result, message, error=FALSE) {
-  result$setContent(paste0("<p>", jamovi_mixed_escape(message), "</p>"))
+  result$setContent(paste0("<p>", jamovi_html_escape(message), "</p>"))
   result$setError(if (error) message else "")
   if (!error) result$setStatus("complete")
   result$setVisible(TRUE)

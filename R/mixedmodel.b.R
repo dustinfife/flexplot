@@ -1,7 +1,5 @@
 jamovi_mixed_escape = function(text) {
-  text = gsub("&", "&amp;", text, fixed=TRUE)
-  text = gsub("<", "&lt;", text, fixed=TRUE)
-  gsub(">", "&gt;", text, fixed=TRUE)
+  jamovi_html_escape(text)
 }
 
 # jamovi's one-group Gaussian mixed-model adapter. Formulas use literal symbols.
@@ -62,16 +60,9 @@ jamovi_mixed_fit = function(options, data) {
 jamovi_mixed_reset = function(results) {
   for (item in results$items) {
     item$setVisible(FALSE)
-    item$setError("")
-    item$setStatus("complete")
-    if (inherits(item, "Table")) {
-      item$deleteRows()
-      for (key in names(item$notes)) item$setNote(key, NULL)
-    }
-    if (inherits(item, "Html")) item$setContent("")
+    jamovi_result_clear(item)
   }
-  results$plot$setState(NULL)
-  results$comparisonplot$setState(NULL)
+  jamovi_plot_clear_states(results, c("plot", "comparisonplot"))
   results$waiting$setContent("<p>Select a numeric outcome and one cluster variable.</p>")
   results$waiting$setVisible(TRUE)
 }

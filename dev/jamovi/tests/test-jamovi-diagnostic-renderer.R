@@ -13,10 +13,19 @@ test_that("actual R6 diagnostics render through the installed jamovi HTML method
   expect_true(mixed$run())
   fixtures[[length(fixtures)+1L]] = list(name="mixed-fit",content=mixed$results$explanation$content,
     error=mixed$results$explanation$.__enclos_env__$private$.error,expected="random intercept")
+  flexplot:::jamovi_result_clear(mixed$results$explanation)
+  expect_identical(mixed$results$explanation$content,"")
+  expect_identical(mixed$results$explanation$status,"complete")
+  expect_identical(mixed$results$explanation$.__enclos_env__$private$.error,"")
   literal = "<script>stop('untrusted')</script> & <img onerror=probe()>"
   flexplot:::jamovi_diagnostic(mixed$results$explanation,paste("Cannot fit variable",literal),error=TRUE)
   fixtures[[length(fixtures)+1L]] = list(name="escaped-variable",content=mixed$results$explanation$content,
     error=mixed$results$explanation$.__enclos_env__$private$.error,expected="Cannot fit variable",literal=literal)
+  flexplot:::jamovi_result_clear(mixed$results$explanation)
+  flexplot:::jamovi_diagnostic(mixed$results$explanation,paste("Select variable",literal))
+  expect_identical(mixed$results$explanation$status,"complete")
+  fixtures[[length(fixtures)+1L]] = list(name="cleared-and-reused",content=mixed$results$explanation$content,
+    error=mixed$results$explanation$.__enclos_env__$private$.error,expected="Select variable",literal=literal)
   file = withr::local_tempfile(fileext=".json")
   jsonlite::write_json(fixtures,file,auto_unbox=TRUE)
   runtime = Sys.glob("/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/resultsview-*.js")

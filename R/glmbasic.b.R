@@ -33,8 +33,7 @@ jamovi_lm_label_info = function(model, options, comparison=FALSE, formula=NULL) 
 
 jamovi_lm_coefficients = function(table, model, includeP=FALSE) {
   table$deleteRows()
-  table$setError("")
-  table$setStatus("complete")
+  jamovi_result_reset_status(table)
   coefficients = stats::coef(model)
   inference = summary(model)$coefficients
   index = match(names(coefficients), rownames(inference))
@@ -68,10 +67,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # Replace rows on every model change, including failed specifications.
           for (name in c("glmcat","factorMeans","diff","rsq")) {
             table = self$results[[name]]
-            table$deleteRows()
-            table$setError("")
-            table$setStatus("complete")
-            for (key in names(table$notes)) table$setNote(key,NULL)
+            jamovi_result_clear(table)
           }
           self$results$factorMeans$setVisible(FALSE)
           self$results$diff$setVisible(FALSE)

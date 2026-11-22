@@ -2,20 +2,15 @@
 jamovi_glm_reporting_reset = function(results) {
   for (item in results$items) {
     item$setVisible(FALSE)
-    item$setError("")
-    item$setStatus("complete")
+    jamovi_result_clear(item)
     if (inherits(item, "Image")) item$.setPath(NULL)
     if (inherits(item, "Table")) {
-      item$deleteRows()
-      for (key in names(item$notes)) item$setNote(key, NULL)
       if (item$name == "coefficients") {
         for (column in item$columns) column$visible = identical(column$name, "term")
       }
     }
-    if (inherits(item, "Html")) item$setContent("")
   }
-  results$plot$setState(NULL)
-  results$comparisonplot$setState(NULL)
+  jamovi_plot_clear_states(results, c("plot", "comparisonplot"))
   results$waiting$setContent("<p>Select an outcome and predictors, and specify at least one model term.</p>")
   results$waiting$setVisible(TRUE)
   invisible(NULL)
