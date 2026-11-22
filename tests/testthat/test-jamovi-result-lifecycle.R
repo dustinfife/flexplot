@@ -83,7 +83,7 @@ test_that("GLM and Mixed Model resets retain their distinct image and column pol
   }
 })
 
-test_that("LM valid-invalid-valid transitions clear table content without changing its lifecycle policy", {
+test_that("LM valid-invalid-valid transitions clear stale table and plot content", {
   skip_if_not_installed("jmvcore")
   analysis = flexplot:::glmbasicClass$new(options=flexplot:::glmbasicOptions$new(
     out="y",preds=c("x","a"),graphic=FALSE,includeP=TRUE),data=NULL)
@@ -94,7 +94,6 @@ test_that("LM valid-invalid-valid transitions clear table content without changi
   schema = analysis$results$itemNames
   expected = lapply(c("glmcat","factorMeans","diff","rsq"),function(name)analysis$results[[name]]$asDF)
   for (i in 1:2) {
-    plot = analysis$results$plot$state
     expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("z"))))
     expect_identical(analysis$results$glmcat$status,"error")
     for (name in c("glmcat","factorMeans","diff","rsq")) {
@@ -103,8 +102,8 @@ test_that("LM valid-invalid-valid transitions clear table content without changi
     }
     expect_false(analysis$results$factorMeans$visible)
     expect_false(analysis$results$diff$visible)
-    # LM's existing image-state policy is deliberately outside this extraction.
-    expect_identical(analysis$results$plot$state,plot)
+    expect_null(analysis$results$plot$state)
+    expect_null(analysis$results$plot$filePath)
     expect_true(jamovi_reporting_update(analysis,list(modelTerms=NULL)))
     expect_identical(analysis$results$itemNames,schema)
     expect_equal(lapply(c("glmcat","factorMeans","diff","rsq"),function(name)analysis$results[[name]]$asDF),expected)

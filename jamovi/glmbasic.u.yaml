@@ -21,18 +21,22 @@ children:
           - type: VariablesListBox
             name: preds
             isTarget: true
-  - type: Supplier
-    name: primaryMainSupplier
-    label: Available main effects
-    format: variable
-    persistentItems: true
+  - type: CollapseBox
+    label: Advanced main effects
+    collapsed: true
     children:
-      - type: TargetLayoutBox
-        label: Model 1 main effects
+      - type: Supplier
+        name: primaryMainSupplier
+        label: Available main effects
+        format: variable
+        persistentItems: true
         children:
-          - type: VariablesListBox
-            name: mainEffects
-            isTarget: true
+          - type: TargetLayoutBox
+            label: Model 1 main effects
+            children:
+              - type: VariablesListBox
+                name: mainEffects
+                isTarget: true
   - type: CheckBox
     name: interactions
   - type: Supplier
@@ -194,7 +198,7 @@ children:
         name: plotSupplier
         label: Predictors in the model
         format: variable
-        persistentItems: true
+        persistentItems: false
         children:
           - type: TargetLayoutBox
             label: Plot x variable (automatic if empty)

@@ -147,5 +147,50 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
     baseline.interactions = require('./jamovi-interaction-controls.cjs')({ui,native,view,restore,snapshot,assert,analysis});
     if (analysis === 'glmgeneralized') baseline.polynomials = require('./jamovi-glm-polynomials.cjs')({ui,native,view,restore,snapshot,assert});
     if (analysis === 'glmgeneralized') await require('./jamovi-glm-visualization.cjs')({ui,view,handlers,restore,snapshot,assert,extract});
+    if (analysis === 'glmbasic') {
+        // Execute the installed control setter: cancellation must occur before
+        // a native option changes, rather than repairing it after selection.
+        const setter = vm.runInNewContext('('+extract('setSourceValue(e,t=[],s=!1)',true)+')');
+        const transfer = (name,value,key=[],insert=false) => {
+            let committed = false;
+            const control = {
+                emit(event,args) { assert.equal(event,'changing'); handlers[name+'_changing'].call(view,ui,args); },
+                getFullKey:key=>key,runInEditScope:fn=>fn(),getOption:()=>({
+                    runInEditScope:fn=>fn(),setValue(value,key) {
+                        committed=true;
+                        if(key.length) {const next=(ui[name].value() || []).slice();next[key[0]]=value;ui[name].setValue(next);}
+                        else ui[name].setValue(value);
+                    },insertValueAt(value,key) {
+                        committed=true;const next=(ui[name].value() || []).slice();next.splice(key[0],0,value);ui[name].setValue(next);
+                    }
+                })
+            };
+            setter.call(control,value,key,insert);
+            return committed;
+        };
+        restore('lm-roles',{out:'y',preds:['x','z'],plotPanels:['z']});
+        assert.equal(transfer('plotGroup','x'),false,'Reserve a free automatic x predictor');
+        assert.equal(ui.plotGroup.value(),null);
+        assert.equal(transfer('plotX','x'),true);
+        assert.equal(transfer('plotGroup','x'),false,'Reject conflicting explicit roles');
+        assert.equal(transfer('plotPanels','x',[1],true),false,'Reject an incremental conflicting panel transfer');
+        assert.equal(transfer('plotPanels',[]),true,'Always allow removing panels');
+        assert.equal(transfer('plotGroup','z'),true,'Numeric grouping is not categorically disabled');
+        restore('lm-invalid-saved-roles',{out:'y',preds:['x','z'],plotPanels:['z'],plotGroup:'x'});
+        assert.equal(ui.plotGroup.value(),'x','Saved invalid layouts must reach server validation unchanged');
+        assert.equal(ui.plotX.value(),null,'Automatic x remains supported');
+        assert.equal(transfer('plotGroup',null),true,'Invalid saved layouts can be corrected');
+        restore('lm-conflicting-saved-roles',{out:'y',preds:['x','z'],plotX:'x',plotGroup:'x'});
+        assert.equal(ui.plotGroup.value(),'x','Do not silently reinterpret conflicting saved roles');
+        assert.equal(transfer('plotGroup',null),true);
+        restore('lm-empty-predictor-edit',{out:'y',preds:['x','z'],modelTerms:[],comparisonTerms:[['x']]});
+        ui.preds.setValue(['x','z','group']);
+        assert.equal(JSON.stringify(ui.modelTerms.value()),'[]','Predictor additions must not repopulate deliberately empty terms');
+        assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"],["group"]]','The other model remains independent');
+        ui.preds.setValue(['x','z']);
+        assert.equal(JSON.stringify(ui.modelTerms.value()),'[]');
+        assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"]]');
+        console.log('PASS: installed native changing events reject invalid LM role transfers and preserve restoration.');
+    }
     return baseline;
 };

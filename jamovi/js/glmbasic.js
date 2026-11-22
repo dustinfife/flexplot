@@ -2,6 +2,30 @@
 
 const updateTerms = require('./model-terms');
 const layouts = [{"supplier": "plotSupplier", "models": ["modelTerms"], "selections": ["plotX", "plotPanels", "plotGroup"], "extra": "quadratic"}, {"supplier": "comparisonPlotSupplier", "models": ["modelTerms", "comparisonTerms"], "selections": ["comparisonX", "comparisonPanels", "comparisonGroup"], "extra": ["quadratic", "comparisonQuadratic"]}];
+// Native `changing` events can reject a transfer before it changes an option.
+// Restored options bypass this guard and remain subject to R's layout validation.
+const plotRoleChanging = (ui, context, name, event) => {
+    if (context.workspace.lmSynchronizing || (context.flags &&
+        (context.flags.updating || context.flags.loaded === false))) return;
+    let value = event.value;
+    if ((event.key || []).length) {
+        value = (ui[name].value() || []).slice();
+        if (event.insert) value.splice(event.key[0], 0, event.value);
+        else value[event.key[0]] = event.value;
+    }
+    const items = value => [].concat(value || []).filter(Boolean);
+    if (!items(value).some(item => !items(ui[name].value()).includes(item))) return;
+    const roles = Object.fromEntries(['plotX','plotPanels','plotGroup'].map(role =>
+        [role, items(role === name ? value : ui[role].value())]));
+    const terms = ui.modelTerms.value();
+    const available = [...new Set((terms == null ? ui.preds.value() || [] : terms.flat())
+        .concat(ui.quadratic.value() || []))];
+    const selected = Object.values(roles).flat();
+    if (selected.some(item => !available.includes(item)) ||
+        new Set(selected).size !== selected.length || roles.plotX.length > 1 ||
+        roles.plotPanels.length > 2 || roles.plotGroup.length > 1 ||
+        (!roles.plotX.length && !available.some(item => !selected.includes(item)))) event.cancel = true;
+};
 const synchronize = (ui, context, added, changed = null) => {
     // Restore all host options before pruning dependent selections.
     if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
@@ -25,7 +49,13 @@ const synchronize = (ui, context, added, changed = null) => {
                 if (missing.length) ui[termsName].setValue(terms.concat(missing.map(name => [name])));
             }
         }
+        const empty = added && (context.workspace.glmPredictors || []).length ?
+            ['modelTerms','comparisonTerms'].filter(name => ui[name].value() != null && !ui[name].value().length) : [];
         updateTerms(ui, context, added, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
+        if (empty.length) {
+            for (const name of empty) ui[name].setValue([]);
+            updateTerms(ui, context, false, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
+        }
         updateTerms.syncMainEffects(ui);
     } finally {
         try { ui.view.model.options.endEdit(); }
@@ -34,6 +64,9 @@ const synchronize = (ui, context, added, changed = null) => {
 };
 
 module.exports = {
+    plotX_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotX', event); },
+    plotPanels_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotPanels', event); },
+    plotGroup_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotGroup', event); },
     interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },
     comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },
     mainEffects_changed: function(ui) { synchronize(ui, this, false, 'mainEffects'); },

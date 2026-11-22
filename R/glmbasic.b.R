@@ -63,6 +63,10 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
           jamovi_plot_sync_labels(self$options)
           jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
+          jamovi_result_reset_status(self$results$plot)
+          self$results$plot$.setPath(NULL)
+          self$results$plot$setState(NULL)
+          self$results$plot$setVisible(FALSE)
           self$results$comparison$deleteRows()
           # Replace rows on every model change, including failed specifications.
           for (name in c("glmcat","factorMeans","diff","rsq")) {
@@ -100,6 +104,7 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           jamovi_lm_coefficients(self$results$glmcat,model,self$options$includeP)
           output = list(formula=formula,data=data)
           self$results$plot$setState(output)
+          self$results$plot$setVisible(self$options$graphic)
           self$results$assumpplot$setState(output)
           if (self$options$graphic) {
             previous_theme = theme_set(theme_bw(base_size=16))
@@ -152,18 +157,19 @@ glmbasicClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(image$state)) return(FALSE)
             # Legacy line/center options remain readable but do not select a
             # second smoother or observed-group summary for a fitted model.
-			formula = image$state$formula
-			data = image$state$data
-            mod = lm(formula, data=data)
-            theme_set(theme_bw(base_size = 16))
-            plot = tryCatch(jamovi_lm_display(mod,data,self$options),error=identity)
-            if (inherits(plot, "error")) {
-              image$setError(conditionMessage(plot))
-              return(FALSE)
-            }
-            info = jamovi_lm_label_info(mod,self$options)
-			print(jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout))
-			TRUE
+            tryCatch({
+                formula = image$state$formula
+                data = image$state$data
+                mod = lm(formula, data=data)
+                theme_set(theme_bw(base_size = 16))
+                plot = jamovi_lm_display(mod,data,self$options)
+                info = jamovi_lm_label_info(mod,self$options)
+                print(jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout))
+                TRUE
+            }, error=function(error) {
+                image$setState(NULL)
+                jamovi_glm_plot_error(image,error)
+            })
 			},
 
 		.assumpplot = function(image, ...){

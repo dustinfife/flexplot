@@ -164,7 +164,13 @@ const {pathToFileURL} = require('node:url');
                 assert.equal(main,undefined,'No redundant Model 1 selector');
                 assert.equal(controls.has('mainEffects'),false);
                 assert.equal(primary.label,'Effects and interactions');
-            } else assert.equal(main.contentLink,undefined,'Main effects must remain editable with interactions off');
+            } else {
+                assert.equal(main,undefined,'No redundant top-level main-effects supplier');
+                const advanced = compiled.view.layout.controls.find(control => control.label === 'Advanced main effects');
+                assert.equal(advanced.collapsed,true);
+                assert.equal(advanced.controls.find(control => control.name === 'primaryMainSupplier').contentLink,undefined,
+                    'Advanced main effects remain editable independently of interactions');
+            }
             assert.equal(primary.contentLink,'(interactions)');
             assert.equal(primary.useSingleCell,true);
             const comparison = compiled.view.layout.controls.find(control => control.label === 'Model Comparison');
