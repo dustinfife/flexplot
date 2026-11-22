@@ -125,7 +125,7 @@ visualize.lm = function(object, plot=c("all", "residuals", "model"), formula = N
     if (length(predictors)>4){
       message("Note: to visualize more than four variables, I'm going to do an 'added variable plot.'")
       
-      f = object$call[[2]]
+      f = stats::formula(object)
       step3 = added.plot(f, data=d, ...) + labs(title="Analysis Plot")
       class(step3) <- c("flexplot", class(step3))
       return(step3)
