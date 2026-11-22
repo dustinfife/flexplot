@@ -104,7 +104,7 @@ const {pathToFileURL} = require('node:url');
             ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
         }
 
-        if (generalized) ui.mainEffects = control(null); // Legacy saved option; no visible control.
+        if (generalized || analysis === 'glmbasic') ui.mainEffects = control(null); // Legacy saved option; no visible control.
         if (generalized) { ui.polynomials.setValue(false); ui.comparisonPolynomials.setValue(false); }
         if (analysis === 'glmbasic') {
             assert.ok(controls.has('se'));
@@ -165,11 +165,12 @@ const {pathToFileURL} = require('node:url');
                 assert.equal(controls.has('mainEffects'),false);
                 assert.equal(primary.label,'Effects and interactions');
             } else {
-                assert.equal(main,undefined,'No redundant top-level main-effects supplier');
+                assert.equal(main,undefined,'No redundant main-effects supplier');
+                assert.equal(definition.options.find(option => option.name === 'mainEffects').hidden,true,
+                    'Retain the legacy option without automatic compiler-generated controls');
+                assert.equal(controls.has('mainEffects'),false,'Saved mainEffects option has no visible control');
                 const advanced = compiled.view.layout.controls.find(control => control.label === 'Advanced main effects');
-                assert.equal(advanced.collapsed,true);
-                assert.equal(advanced.controls.find(control => control.name === 'primaryMainSupplier').contentLink,undefined,
-                    'Advanced main effects remain editable independently of interactions');
+                assert.equal(advanced,undefined,'No replacement advanced section');
             }
             assert.equal(primary.contentLink,'(interactions)');
             assert.equal(primary.useSingleCell,true);
@@ -463,6 +464,7 @@ const {pathToFileURL} = require('node:url');
         if ((generalized || analysis === 'glmbasic') && runtime) {
             const restored = await require('./jamovi-glm-restoration.cjs')(fs.readFileSync(runtime,'utf8'), compilerPath, view.handlers, FormatDef, utils, assert, analysis);
             if (generalized) fs.writeFileSync(output+'.polynomials.json',JSON.stringify(restored.polynomials));
+            if (analysis === 'glmbasic') fs.writeFileSync(output+'.main-effects.json',JSON.stringify(restored.lmMainEffects));
             fs.writeFileSync(output+'.interactions.json',JSON.stringify(restored.interactions));
             fs.writeFileSync(output+'.restored.json',JSON.stringify(restored));
         }

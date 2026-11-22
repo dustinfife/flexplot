@@ -49,7 +49,14 @@ const synchronize = (ui, context, added, changed = null) => {
             for (const name of empty) ui[name].setValue([]);
             updateTerms(ui, context, false, ['modelTerms','comparisonTerms'], ['primarySupplier','comparisonSupplier'], layouts);
         }
-        updateTerms.syncMainEffects(ui);
+        // Legacy Model 1 option remains a projection, without a duplicate control.
+        const main = (ui.modelTerms.value() || []).filter(term => term.length === 1).map(term => term[0]);
+        const options = ui.view.model.options;
+        if (JSON.stringify(options.getOption('mainEffects').getValue()) !== JSON.stringify(main))
+            options.setOptionValue('mainEffects', main);
+        const second = (ui.comparisonTerms.value() || []).filter(term => term.length === 1).map(term => term[0]);
+        if (JSON.stringify(ui.comparisonMainEffects.value()) !== JSON.stringify(second)) ui.comparisonMainEffects.setValue(second);
+        ui.comparisonMainSupplier.setValue(utils.valuesToItems(predictors.filter(name => !second.includes(name)), FormatDef.variable));
     } finally {
         try { ui.view.model.options.endEdit(); }
         finally { context.workspace.lmSynchronizing = false; }
@@ -62,9 +69,7 @@ module.exports = {
     plotGroup_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotGroup', event); },
     interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },
     comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },
-    mainEffects_changed: function(ui) { synchronize(ui, this, false, 'mainEffects'); },
     comparisonMainEffects_changed: function(ui) { synchronize(ui, this, false, 'comparisonMainEffects'); },
-    primaryMainSupplier_updated: function(ui) { synchronize(ui, this, false); },
     comparisonMainSupplier_updated: function(ui) { synchronize(ui, this, false); },
     compare_changed: function(ui) { synchronize(ui, this, false); },
     view_loaded: function(ui) { synchronize(ui, this, false); },

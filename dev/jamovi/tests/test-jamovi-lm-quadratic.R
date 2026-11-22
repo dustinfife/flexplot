@@ -61,3 +61,46 @@ test_that("saved polynomial options and public LM calls retain independent speci
     polynomials=TRUE,quadratic="x",graphic=FALSE)
   expect_equal(results$glmcat$asDF$means,unname(coef(lm(y~x+z+I(x^2),small))),tolerance=1e-12)
 })
+
+test_that("simplified LM native controls and protobuf restoration preserve both fitted formulas", {
+  jmvcore:::initProtoBuf()
+  compiler = system.file("node_modules/jamovi-compiler",package="jmvtools")
+  runtime = Sys.glob("/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/analysisui-*.js")[1]
+  output = withr::local_tempfile()
+  withr::defer(unlink(paste0(output,c(".header.R",".quadratic.json",".restored.json",".interactions.json",".main-effects.json"))))
+  log = system2(Sys.which("node"),shQuote(c(test_path("js","jamovi-glm-ui.cjs"),root,compiler,output,runtime)),stdout=TRUE,stderr=TRUE)
+  expect_null(attr(log,"status"),info=paste(log,collapse="\n"))
+  records = jsonlite::read_json(paste0(output,".main-effects.json"),simplifyVector=FALSE)
+  message = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
+  template = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
+  for (record in records) {
+    values = record$options
+    for (name in c("preds","quadratic","comparisonQuadratic","mainEffects","comparisonMainEffects","plotPanels","comparisonPanels"))
+      values[name] = list(unlist(values[[name]],use.names=FALSE))
+    for (name in c("modelTerms","comparisonTerms")) values[name] = list(lapply(values[[name]],unlist,use.names=FALSE))
+    values$graphic = FALSE
+    message$names = names(values)
+    message$options = lapply(values,jamovi_mixed_saved_option,option_template=template,group_template=message)
+    saved = flexplot:::glmbasicOptions$new();saved$fromProtoBuf(message)
+    restored = flexplot:::glmbasicOptions$new();restored$fromProtoBuf(saved$asProtoBuf())
+    expect_equal(restored$modelTerms,values$modelTerms,info=record$stage)
+    expect_equal(restored$comparisonTerms,values$comparisonTerms,info=record$stage)
+    expect_equal(restored$quadratic,values$quadratic,info=record$stage)
+    first = if (startsWith(record$stage,"legacy-subset")) y~z else
+      if (startsWith(record$stage,"legacy-interaction")) y~x:z else
+      if (startsWith(record$stage,"legacy-square")) y~I(x^2) else
+      if (startsWith(record$stage,"legacy-empty")) y~1 else
+      switch(record$stage,fresh=y~x,add=y~x+z,remove=y~z,y~z+x)
+    analysis = flexplot:::glmbasicClass$new(options=restored,data=small)
+    expect_true(analysis$run(),info=record$stage)
+    jamovi_expect_lm_coefficients(analysis,lm(first,small))
+    if (isTRUE(values$compare)) {
+      second = if (startsWith(record$stage,"legacy-")) y~z else
+        if(record$stage=="second-interaction-only") y~x:z else y~I(x^2)
+      model = analysis$results$comparisonplot$state$model2
+      expect_identical(attr(terms(model),"term.labels"),attr(terms(second),"term.labels"))
+      expect_equal(coef(model),coef(lm(second,small)),tolerance=1e-12)
+      expect_equal(predict(model,newdata=small),predict(lm(second,small),newdata=small),tolerance=1e-12)
+    }
+  }
+})

@@ -5,8 +5,7 @@ module.exports = function({ui,native,view,restore,snapshot,assert,analysis}) {
     const equal = (actual,expected) => assert.equal(JSON.stringify(actual),JSON.stringify(expected));
     const save = stage => records.push(snapshot(stage));
     const selectMain = value => {
-        if (analysis === 'glmgeneralized') ui.modelTerms.setValue((ui.modelTerms.value() || []).filter(term => term.length > 1).concat(value.map(name => [name])));
-        else ui.mainEffects.setValue(value);
+        ui.modelTerms.setValue((ui.modelTerms.value() || []).filter(term => term.length > 1).concat(value.map(name => [name])));
     };
     const additive = [['x'],['z']];
     const interacting = additive.concat([['x','z']]);

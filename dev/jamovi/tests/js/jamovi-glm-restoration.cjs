@@ -191,6 +191,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         assert.equal(JSON.stringify(ui.modelTerms.value()),'[]');
         assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"]]');
         console.log('PASS: installed native changing events reject invalid LM role transfers and preserve restoration.');
+        baseline.lmMainEffects=require('./jamovi-lm-main-effects.cjs')({ui,restore,snapshot,assert});
     }
     return baseline;
 };
