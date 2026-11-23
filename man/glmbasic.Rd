@@ -27,7 +27,9 @@ glmbasic(
   polynomials = FALSE,
   quadratic = NULL,
   comparisonPolynomials = FALSE,
-  comparisonQuadratic = NULL
+  comparisonQuadratic = NULL,
+  comparisonGraphic = TRUE,
+  comparisonStatistics = TRUE
 )
 }
 \arguments{
@@ -42,6 +44,8 @@ glmbasic(
 \item{graphicassump}{.}
 
 \item{estimates}{.}
+
+\item{comparisonGraphic, comparisonStatistics}{Show the comparison plot and statistics independently.}
 
 \item{se}{.}
 

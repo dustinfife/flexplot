@@ -38,8 +38,17 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             plotLabels = list(),
             plotLabelStore = list(),
             comparisonPlotLabels = list(),
-            comparisonPlotLabelStore = list(), ...) {
+            comparisonPlotLabelStore = list(),
+            comparisonGraphic = TRUE,
+            comparisonStatistics = TRUE,
+            outputOptionsVersion = 0, ...) {
 
+            private$..comparisonGraphic = jmvcore::OptionBool$new(
+                "comparisonGraphic", comparisonGraphic, default=TRUE)
+            private$..comparisonStatistics = jmvcore::OptionBool$new(
+                "comparisonStatistics", comparisonStatistics, default=TRUE)
+            private$..outputOptionsVersion = jmvcore::OptionInteger$new(
+                "outputOptionsVersion", outputOptionsVersion, default=0, hidden=TRUE)
             super$initialize(
                 package="flexplot",
                 name="glmgeneralized",
@@ -287,6 +296,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                             default=""))))
 
             self$.addOption(private$..out)
+            self$.addOption(private$..comparisonGraphic)
+            self$.addOption(private$..comparisonStatistics)
+            self$.addOption(private$..outputOptionsVersion)
             self$.addOption(private$..preds)
             self$.addOption(private$..family)
             self$.addOption(private$..modelTerms)
@@ -321,6 +333,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..comparisonPlotLabelStore)
         }),
     active = list(
+        comparisonGraphic = function() private$..comparisonGraphic$value,
+        comparisonStatistics = function() private$..comparisonStatistics$value,
+        outputOptionsVersion = function() private$..outputOptionsVersion$value,
         out = function() private$..out$value,
         preds = function() private$..preds$value,
         family = function() private$..family$value,
@@ -355,6 +370,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         comparisonPlotLabels = function() private$..comparisonPlotLabels$value,
         comparisonPlotLabelStore = function() private$..comparisonPlotLabelStore$value),
     private = list(
+        ..comparisonGraphic = NA,
+        ..comparisonStatistics = NA,
+        ..outputOptionsVersion = NA,
         ..out = NA,
         ..preds = NA,
         ..family = NA,

@@ -11,8 +11,10 @@ jamovi_mixed_test_data = function() {
 }
 
 jamovi_mixed_analysis = function(data=jamovi_mixed_test_data(), ...) {
-  options = do.call(flexplot:::mixedmodelOptions$new, utils::modifyList(
-    list(out="y",preds=c("x","z","a"),cluster="id",graphic=FALSE),list(...),keep.null=TRUE))
+  supplied = list(...)
+  defaults = list(out="y",preds=c("x","z","a"),cluster="id",graphic=FALSE,
+    comparisonGraphic=if (is.null(supplied$graphic)) FALSE else supplied$graphic)
+  options = do.call(flexplot:::mixedmodelOptions$new, utils::modifyList(defaults,supplied,keep.null=TRUE))
   flexplot:::mixedmodelClass$new(options=options,data=data)
 }
 
@@ -33,6 +35,8 @@ jamovi_mixed_comparison_analysis = function(data=jamovi_mixed_test_data(), ...) 
     modelTerms=list("x","a","z",c("x","a")),interactions=TRUE,polynomials=TRUE,quadratic="x",
     randomSlopes="x",comparisonTerms=list("x","a","z"),comparisonRandomSlopes="x")
   supplied = list(...)
+  # Existing statistical fixtures suppress previews unless explicitly requested.
+  values$comparisonGraphic = if (is.null(supplied$graphic)) FALSE else supplied$graphic
   for (name in names(supplied)) values[name] = supplied[name]
   options = do.call(flexplot:::mixedmodelOptions$new,values)
   flexplot:::mixedmodelClass$new(options=options,data=data)

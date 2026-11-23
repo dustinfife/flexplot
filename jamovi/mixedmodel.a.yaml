@@ -171,4 +171,21 @@ options:
     title: Confidence intervals
     type: Bool
     default: true
+  - name: estimates
+    title: Estimates
+    type: Bool
+    default: true
+  - name: comparisonGraphic
+    title: Model comparison plot
+    type: Bool
+    default: true
+  - name: comparisonStatistics
+    title: Model comparison statistics
+    type: Bool
+    default: true
+  - name: outputOptionsVersion
+    title: Internal output options revision
+    type: Integer
+    default: 0
+    hidden: true
 ...

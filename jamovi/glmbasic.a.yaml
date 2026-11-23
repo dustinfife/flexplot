@@ -20,17 +20,17 @@ options:
       type: Variables
 
     - name: graphic
-      title: Analysis graphs
+      title: Model visualization
       type: Bool
       default: true
       
     - name: graphicassump
-      title: Diagnostics
+      title: Residual diagnostics
       type: Bool
       default: false      
      
     - name: estimates
-      title: Estimates and effect eizes
+      title: Estimates
       type: Bool
       default: true 
       
@@ -195,4 +195,17 @@ options:
       default: []
       hidden: true
       template: *plotLabel
+    - name: comparisonGraphic
+      title: Model comparison plot
+      type: Bool
+      default: true
+    - name: comparisonStatistics
+      title: Model comparison statistics
+      type: Bool
+      default: true
+    - name: outputOptionsVersion
+      title: Internal output options revision
+      type: Integer
+      default: 0
+      hidden: true
 ...

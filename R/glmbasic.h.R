@@ -37,8 +37,17 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plotLabels = list(),
             plotLabelStore = list(),
             comparisonPlotLabels = list(),
-            comparisonPlotLabelStore = list(), ...) {
+            comparisonPlotLabelStore = list(),
+            comparisonGraphic = TRUE,
+            comparisonStatistics = TRUE,
+            outputOptionsVersion = 0, ...) {
 
+            private$..comparisonGraphic = jmvcore::OptionBool$new(
+                "comparisonGraphic", comparisonGraphic, default=TRUE)
+            private$..comparisonStatistics = jmvcore::OptionBool$new(
+                "comparisonStatistics", comparisonStatistics, default=TRUE)
+            private$..outputOptionsVersion = jmvcore::OptionInteger$new(
+                "outputOptionsVersion", outputOptionsVersion, default=0, hidden=TRUE)
             super$initialize(
                 package="flexplot",
                 name="glmbasic",
@@ -280,6 +289,9 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             default=""))))
 
             self$.addOption(private$..out)
+            self$.addOption(private$..comparisonGraphic)
+            self$.addOption(private$..comparisonStatistics)
+            self$.addOption(private$..outputOptionsVersion)
             self$.addOption(private$..preds)
             self$.addOption(private$..graphic)
             self$.addOption(private$..graphicassump)
@@ -313,6 +325,9 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..comparisonPlotLabelStore)
         }),
     active = list(
+        comparisonGraphic = function() private$..comparisonGraphic$value,
+        comparisonStatistics = function() private$..comparisonStatistics$value,
+        outputOptionsVersion = function() private$..outputOptionsVersion$value,
         out = function() private$..out$value,
         preds = function() private$..preds$value,
         graphic = function() private$..graphic$value,
@@ -346,6 +361,9 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         comparisonPlotLabels = function() private$..comparisonPlotLabels$value,
         comparisonPlotLabelStore = function() private$..comparisonPlotLabelStore$value),
     private = list(
+        ..comparisonGraphic = NA,
+        ..comparisonStatistics = NA,
+        ..outputOptionsVersion = NA,
         ..out = NA,
         ..preds = NA,
         ..graphic = NA,
@@ -551,12 +569,12 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=700,
                 height=450,
                 renderFun=".comparisonplot",
-                visible="(compare)"))
+                visible="(compare && comparisonGraphic)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="comparison",
                 title="Model comparison statistics",
-                visible="(compare)",
+                visible="(compare && comparisonStatistics)",
                 columns=list(
                     list(
                         `name`="model",

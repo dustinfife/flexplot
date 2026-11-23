@@ -121,11 +121,11 @@ items:
       width: 700
       height: 450
       renderFun: .comparisonplot
-      visible: (compare)
+      visible: (compare && comparisonGraphic)
     - name: comparison
       title: Model comparison statistics
       type: Table
-      visible: (compare)
+      visible: (compare && comparisonStatistics)
       columns:
         - name: model
           title: Model

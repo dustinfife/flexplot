@@ -338,3 +338,49 @@ retain estimates/statistics and show a terminal diagnostic; CAS directional ghos
 are unchanged. Validated fallback plots reuse their cached cluster selection.
 These restrictions do not add independent Mixed visualization settings or change
 core prediction geometry, confidence limits, plot-label stores, or result order.
+
+### Output visibility and saved preferences
+
+The modeling adapters retain `graphic` for the Model 1 visualization and add
+`comparisonGraphic` and `comparisonStatistics` (both checked by default). Mixed
+Models also adds `estimates`, controlling both models' fixed- and random-effect
+tables; `showCorrelations` remains independent. Mixed still displays only its
+existing active visualization mode: `graphic` applies outside comparison mode,
+while `comparisonGraphic` applies inside it; its dormant main-plot checkbox is
+hidden during comparison. These options do not enter fit or
+common-sample keys. Existing result identifiers, table schemas, order, label
+stores, supplementary GLM preferences and eligibility rules are retained.
+
+Output Options follows result order: visualization, estimates, applicable
+supplementary tables, comparison plot, comparison statistics, then LM residual
+diagnostics. Comparison checkboxes are conditional on `compare`; collapsing a
+section does not change result visibility. CI and p-value modifiers remain.
+
+The hidden `outputOptionsVersion` follows the existing versioned option-migration
+pattern. Revision zero restores the previous effective comparison-plot visibility:
+LM retains an enabled comparison plot independently of `graphic`; GLM and Mixed
+inherit their old shared `graphic` value, even when comparison is currently off.
+Revision one preserves explicit independent choices. The complete native UI
+restoration batch is migrated before synchronization; R also migrates native
+protobufs without requiring the options pane to open, and publishes the revised
+values back into the protobuf. Plain R constructors are new analyses and use the
+new checked defaults. Migration uses an explicit revision and restoration context,
+not a guess based on default-valued options. Comparison on/off transitions never
+reset the preferences. Tables are reset and repopulated on each run; image paths
+are cleared before current-state rendering, including Mixed Models.
+
+The Stage 2 loading placeholder was reproduced in jamovi 2.7.41 and traced through
+the live interface console to `TargetLayoutBox.onRenderToGrid`: a single-cell
+wrapper supplied a generic grid lacking the supplier's named `aux` column, so its
+transfer toolbar dereferenced a null cell (`setVerticalAlign`). Built-in
+Descriptives rendered in the same session. Conditional grouping now wraps its
+Supplier, preserving the named target grid, grouping eligibility and transfer
+handlers. Compiled-handler checks reject single-cell target wrappers and require
+an update handler for every Supplier. No installed jamovi code or CSS is changed.
+
+Live verification of the installed Stage 3 build confirmed that all three options
+panes render. In desktop jamovi 2.7.41, LM and GLM main/comparison plots and
+comparison statistics were toggled independently; Mixed estimates and comparison
+plots were toggled with comparison statistics retained. Collapsing Mixed Output
+Options retained results. Test preferences were restored and only the disposable
+review window was closed. Secondary-monitor placement could not be confirmed.

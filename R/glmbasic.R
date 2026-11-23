@@ -9,6 +9,7 @@
 #' @param graphicassump .
 #' @param estimates .
 #' @param includeP Include coefficient t-test p-values; defaults to FALSE.
+#' @param comparisonGraphic,comparisonStatistics Show the comparison plot and statistics independently.
 #' @param se .
 #' @param line .
 #' @param center .
@@ -81,7 +82,9 @@ glmbasic = function(
     polynomials = FALSE,
     quadratic = NULL,
     comparisonPolynomials = FALSE,
-    comparisonQuadratic = NULL) {
+    comparisonQuadratic = NULL,
+    comparisonGraphic = TRUE,
+    comparisonStatistics = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("glmbasic requires jmvcore to be installed (restart may be required)")
@@ -133,7 +136,9 @@ glmbasic = function(
         polynomials = polynomials,
         quadratic = quadratic,
         comparisonPolynomials = comparisonPolynomials,
-        comparisonQuadratic = comparisonQuadratic)
+        comparisonQuadratic = comparisonQuadratic,
+        comparisonGraphic = comparisonGraphic,
+        comparisonStatistics = comparisonStatistics)
 
     analysis = glmbasicClass$new(
         options = options,

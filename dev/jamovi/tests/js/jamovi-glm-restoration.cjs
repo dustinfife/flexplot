@@ -33,7 +33,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         packets.push([...queued]); queued.clear();
     }};
     const ui = {view:{model:{options:manager}}};
-    const defaults = {plotLabels:[],plotLabelStore:[],comparisonPlotLabels:[],comparisonPlotLabelStore:[],polynomials:false,comparisonPolynomials:false,interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
+    const defaults = {outputOptionsVersion:0,comparisonGraphic:true,comparisonStatistics:true,plotLabels:[],plotLabelStore:[],comparisonPlotLabels:[],comparisonPlotLabelStore:[],polynomials:false,comparisonPolynomials:false,interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
         comparisonTerms:null,comparisonQuadratic:null,plotX:null,plotPanels:null,plotGroup:null,
         comparisonX:null,comparisonPanels:null,family:'binomial',includeP:false,graphic:true,se:true,plotStyle:'auto',plotScale:'probability'};
     if (analysis === 'glmbasic') {
@@ -53,7 +53,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
             finally { manager.endEdit(); }
         }};
     }
-    for (const name of ['primaryMainSupplier','comparisonMainSupplier','primarySupplier','comparisonSupplier','quadraticSupplier','comparisonQuadraticSupplier','plotSupplier','comparisonPlotSupplier']) {
+    for (const name of ['primaryMainSupplier','comparisonMainSupplier','primarySupplier','comparisonSupplier','quadraticSupplier','comparisonQuadraticSupplier','plotSupplier','comparisonPlotSupplier','comparisonGroupingLayout']) {
         let value = [];
         ui[name] = {value:() => value,setValue(updated) {
             if (JSON.stringify(value) === JSON.stringify(updated)) return;
@@ -72,7 +72,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
     manager.setOptionValue = (name,value) => ui[name].setValue(value);
     const records = [];
     handlers.view_loaded.call(view,ui);
-    assert.equal(packets.length,0,'Fresh empty view must not write normalized defaults');
+    assert.deepEqual(packets,[['outputOptionsVersion']],'Fresh view only initializes its presentation revision');
     records.push(snapshot('empty'));
     ui.out.setValue('y');ui.preds.setValue(['x','z']);
     assert.equal(JSON.stringify(ui.modelTerms.value()),'[["x"],["z"]]');
@@ -205,5 +205,16 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         console.log('PASS: installed native changing events reject invalid LM role transfers and preserve restoration.');
         baseline.lmMainEffects=require('./jamovi-lm-main-effects.cjs')({ui,restore,snapshot,assert});
     }
+    for (const graphic of [false,true]) {
+        restore('legacy-output',{out:'y',preds:['x','z'],graphic,outputOptionsVersion:0});
+        assert.equal(ui.comparisonGraphic.value(),analysis==='glmbasic' || graphic);
+        assert.equal(ui.outputOptionsVersion.value(),1);
+        ui.comparisonGraphic.setValue(!graphic);ui.comparisonStatistics.setValue(false);
+        ui.compare.setValue(false);ui.compare.setValue(true);handlers.view_updated.call(view,ui);
+        assert.equal(ui.comparisonGraphic.value(),!graphic);assert.equal(ui.comparisonStatistics.value(),false);
+        restore('current-output',{out:'y',preds:['x','z'],graphic,comparisonGraphic:!graphic,comparisonStatistics:false,outputOptionsVersion:1});
+        assert.equal(ui.comparisonGraphic.value(),!graphic);assert.equal(ui.comparisonStatistics.value(),false);
+    }
+    console.log('PASS: installed option setters and complete restoration preserve versioned independent outputs.');
     return baseline;
 };

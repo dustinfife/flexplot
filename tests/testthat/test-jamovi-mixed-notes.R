@@ -16,12 +16,12 @@ test_that("CAS ghost notes follow actual directional lines and clear on option c
   items = vapply(analysis$results$items,function(item)item$name,character(1))
   expect_identical(match("comparisonPlotNote",items),match("comparisonplot",items)+1L)
   for (change in list(list(casGhost=FALSE),list(casGhost=TRUE,predictionType="population"),
-      list(predictionType="cas",compare=FALSE),list(compare=TRUE,graphic=FALSE))) {
+      list(predictionType="cas",compare=FALSE),list(compare=TRUE,comparisonGraphic=FALSE))) {
     expect_true(jamovi_reporting_update(analysis,change))
     expect_false(note$visible)
     expect_identical(note$content,"")
   }
-  expect_true(jamovi_reporting_update(analysis,list(graphic=TRUE)))
+  expect_true(jamovi_reporting_update(analysis,list(comparisonGraphic=TRUE)))
   expect_true(note$visible)
   local_mocked_bindings(jamovi_mixed_apply_labels=function(...)stop("render note probe"))
   expect_false(analysis$.__enclos_env__$private$.comparisonplot(analysis$results$comparisonplot))

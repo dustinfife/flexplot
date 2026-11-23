@@ -16,6 +16,7 @@ const {pathToFileURL} = require('node:url');
             fs.copyFileSync(path.join(root, 'jamovi', analysis + '.' + suffix), path.join(temp, analysis + '.' + suffix));
         fs.copyFileSync(path.join(root, 'jamovi/js/' + analysis + '.js'), path.join(temp, analysis + '.js'));
         fs.copyFileSync(path.join(root, 'jamovi/js/model-terms.js'), path.join(temp, 'model-terms.js'));
+        fs.copyFileSync(path.join(root,'jamovi/js/output-options.js'),path.join(temp,'output-options.js'));
         if (analysis === 'glmgeneralized') fs.copyFileSync(path.join(root,'jamovi/js/glm-ghosts.js'),path.join(temp,'glm-ghosts.js'));
         const {default: compileR} = await import(pathToFileURL(path.join(compilerPath, 'compiler.js')));
         compileR('flexplot', path.join(temp, analysis + '.a.yaml'), path.join(temp, analysis + '.r.yaml'),
@@ -63,7 +64,7 @@ const {pathToFileURL} = require('node:url');
         assert.equal(view.valuesToItems, undefined);
         const controls = new Set(['view']);
         const walk = control => {
-            if (analysis === 'mixedmodel' && control.type === 'Supplier')
+            if (control.type === 'Supplier')
                 assert.equal(typeof view.handlers[control.name + '_updated'],'function',
                     'Native Supplier requires an updated handler: ' + control.name);
             if (control.name) controls.add(control.name);
@@ -106,6 +107,7 @@ const {pathToFileURL} = require('node:url');
             ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
         }
 
+        ui.outputOptionsVersion = control(0);
         if (analysis === 'glmbasic') ui.comparisonMagnet = control(false);
         if (generalized || analysis === 'glmbasic') ui.mainEffects = control(null); // Legacy saved option; no visible control.
         if (generalized) { ui.polynomials.setValue(false); ui.comparisonPolynomials.setValue(false); }
@@ -188,8 +190,16 @@ const {pathToFileURL} = require('node:url');
         }
         if (analysis === 'glmbasic' || analysis === 'mixedmodel') {
             const descend = items => items.flatMap(item=>[item,...descend(item.controls || [])]);
-            const groupName = analysis === 'glmbasic' ? 'comparisonGroup' : 'plotGroup';
-            const target = descend(compiled.view.layout.controls).find(item=>(item.controls || []).some(child=>child.name===groupName));
+            const all = descend(compiled.view.layout.controls);
+            assert.ok(all.filter(item=>item.type==='TargetLayoutBox').every(item=>item.useSingleCell!==true),
+                'Native target grids require the supplier aux column; never wrap a target in a generic single cell');
+            const target = all.find(item=>item.name===(analysis==='glmbasic' ? 'comparisonGroupingLayout' : 'plotGroupingLayout'));
+            if (analysis === 'mixedmodel') {
+                const main = all.find(item=>item.name==='graphic');
+                assert.equal(main.contentLink,'(!compare)');
+                if (runtime) require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),main,null,compilerPath);
+            }
+            assert.equal(target.type,'Supplier');
             assert.equal(target.useSingleCell,true);
             assert.equal(target.contentLink,analysis === 'glmbasic' ? '(compare)' : '(!compare || predictionType:cas)');
             if (runtime) require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),target,null,compilerPath);
@@ -286,7 +296,7 @@ const {pathToFileURL} = require('node:url');
             assert.equal(definition.options.find(option => option.name === 'polynomials').default,false);
             const visualization = compiled.view.layout.controls.find(control => control.label === 'Model visualization');
             const editor = visualization.controls.find(control => control.label === 'Plot Labels');
-            assert.equal(editor.contentLink,'(graphic)');
+            assert.equal(editor.contentLink,'((!compare && graphic) || (compare && comparisonGraphic))');
             assert.ok(editor.controls.find(control => control.name === 'plotLabels').columns.some(column => column.name === 'label'));
 
             for (const [name, option] of [['primarySupplier','interactions'], ['quadraticSupplier','polynomials']]) {
@@ -436,9 +446,9 @@ const {pathToFileURL} = require('node:url');
             assert.ok(top.findIndex(c => c.label === 'Model Comparison') < top.findIndex(c => c.label === 'Output Options'));
             assert.ok(top.findIndex(c => c.label === 'Output Options') < top.findIndex(c => c.label === 'Model visualization'));
             const outputControls = top.find(c => c.label === 'Output Options').controls;
-            assert.equal(JSON.stringify(outputControls.map(c => c.name)),JSON.stringify(['showEstimates','showIRT','showProbabilities','includeP']));
+            assert.equal(JSON.stringify(outputControls.map(c => c.name)),JSON.stringify(['graphic','showEstimates','showIRT','showProbabilities','comparisonGraphic','comparisonStatistics','includeP']));
             assert.equal(outputControls[0].contentLink,undefined);
-            for (const cell of outputControls.slice(1,3)) {
+            for (const cell of outputControls.slice(2,4)) {
                 assert.equal(cell.contentLink,'(family:binomial)');
                 assert.equal(cell.useSingleCell,true);
             }

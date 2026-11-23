@@ -97,11 +97,11 @@ options:
     type: Bool
     default: true
   - name: showIRT
-    title: IRT Estimates
+    title: IRT estimates
     type: Bool
     default: true
   - name: showProbabilities
-    title: Marginal Predicted Probabilities
+    title: Marginal predicted probabilities
     type: Bool
     default: true
   - name: includeP
@@ -180,4 +180,17 @@ options:
     default: []
     hidden: true
     template: *plotLabel
+  - name: comparisonGraphic
+    title: Model comparison plot
+    type: Bool
+    default: true
+  - name: comparisonStatistics
+    title: Model comparison statistics
+    type: Bool
+    default: true
+  - name: outputOptionsVersion
+    title: Internal output options revision
+    type: Integer
+    default: 0
+    hidden: true
 ...

@@ -167,17 +167,29 @@ children:
   collapsed: true
   children:
   - type: CheckBox
+    name: graphic
+    useSingleCell: true
+    contentLink: (!compare)
+  - type: CheckBox
+    name: estimates
+  - type: CheckBox
+    name: showCorrelations
+  - type: CheckBox
+    name: comparisonGraphic
+    useSingleCell: true
+    contentLink: (compare)
+  - type: CheckBox
+    name: comparisonStatistics
+    useSingleCell: true
+    contentLink: (compare)
+  - type: CheckBox
     name: includeCI
   - type: CheckBox
     name: includeP
-  - type: CheckBox
-    name: showCorrelations
 - type: CollapseBox
   label: Model visualization
   collapsed: true
   children:
-  - type: CheckBox
-    name: graphic
   - type: ComboBox
     name: predictionType
   - type: CheckBox
@@ -208,10 +220,16 @@ children:
         name: plotPanels
         maxItemCount: 2
         isTarget: true
+  - type: Supplier
+    name: plotGroupingLayout
+    label: Predictors for grouping
+    format: variable
+    persistentItems: false
+    useSingleCell: true
+    contentLink: (!compare || predictionType:cas)
+    children:
     - type: TargetLayoutBox
       label: Color / symbol variable
-      useSingleCell: true
-      contentLink: (!compare || predictionType:cas)
       children:
       - type: VariablesListBox
         name: plotGroup
@@ -222,7 +240,7 @@ children:
   - type: CollapseBox
     label: Plot Labels
     useSingleCell: true
-    contentLink: (graphic)
+    contentLink: ((!compare && graphic) || (compare && comparisonGraphic))
     collapsed: true
     children:
     - type: ListBox

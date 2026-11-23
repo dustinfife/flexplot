@@ -147,11 +147,16 @@ children:
                 maxItemCount: 2
                 isTarget: true
                 enable: (compare)
+      - type: Supplier
+        name: comparisonGroupingLayout
+        label: Predictors for magnet grouping
+        format: variable
+        persistentItems: false
+        useSingleCell: true
+        contentLink: (compare)
+        children:
           - type: TargetLayoutBox
-            name: comparisonGroupingLayout
             label: Magnet comparison grouping
-            useSingleCell: true
-            contentLink: (compare)
             children:
               - type: VariablesListBox
                 name: comparisonGroup
@@ -244,9 +249,17 @@ children:
               - type: CheckBox
                 name: graphic
               - type: CheckBox
-                name: graphicassump
-              - type: CheckBox
                 name: estimates
+              - type: CheckBox
+                name: comparisonGraphic
+                useSingleCell: true
+                contentLink: (compare)
+              - type: CheckBox
+                name: comparisonStatistics
+                useSingleCell: true
+                contentLink: (compare)
+              - type: CheckBox
+                name: graphicassump
               - type: CheckBox
                 name: includeP
   - type: LayoutBox

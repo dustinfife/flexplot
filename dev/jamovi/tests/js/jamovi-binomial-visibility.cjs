@@ -73,9 +73,10 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
             updateDisplayValue:updateDisplay, setRootElement(value){this.el = value;},
             translate:value => value, getSourceValue:() => selection, setValue:value => {selection = value;}};
     };
-    if (['(interactions)','(comparisonInteractions)','(compare)','(polynomials)','(comparisonPolynomials)'].includes(definition.contentLink)) {
+    if (['(interactions)','(comparisonInteractions)','(compare)','(!compare)','(polynomials)','(comparisonPolynomials)'].includes(definition.contentLink)) {
         assert.equal(definition.useSingleCell,true);
-        const name = definition.contentLink.slice(1,-1);
+        const inverted = definition.contentLink === '(!compare)';
+        const name = inverted ? 'compare' : definition.contentLink.slice(1,-1);
         let enabled = false;
         const control = create(true);
         const grid = new Grid(); render.call(control,grid,0,0,{});
@@ -93,7 +94,7 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
         engine.bindingsToActions();
         for (enabled of [false,true,false,true]) {
             for (const action of engine.actions) action.execute(engine._resources);
-            assert.equal(control._cell.visible,enabled);
+            assert.equal(control._cell.visible,inverted ? !enabled : enabled);
         }
         return;
     }

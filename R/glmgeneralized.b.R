@@ -120,6 +120,7 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
   private=list(
     .init=function() jamovi_glm_reporting_reset(self$results),
     .run=function() {
+      jamovi_output_migrate(self$options, "glmgeneralized")
       jamovi_plot_sync_labels(self$options)
       jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
       jamovi_glm_reporting_reset(self$results)
@@ -153,11 +154,11 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
       jamovi_model_specification(self$results$specification,
         if (is.null(comparison)) list(state$model) else list(comparison$model1, comparison$model2))
       if (!is.null(comparison)) {
-        self$results$comparison$setVisible(TRUE)
+        self$results$comparison$setVisible(self$options$comparisonStatistics)
         jamovi_glm_generalized_comparison_table(self$results$comparison, comparison)
         self$results$comparisonplot$setState(comparison)
-        self$results$comparisonplot$setVisible(self$options$graphic)
-        if (self$options$graphic) {
+        self$results$comparisonplot$setVisible(self$options$comparisonGraphic)
+        if (self$options$comparisonGraphic) {
           roles = flexplot_axis_given(comparison$formula)
           guide = jamovi_glm_plot_guide(list(model=comparison$model1, models=list(comparison$model1, comparison$model2), data=comparison$data),
             roles$axis[1], roles$given[!is.na(roles$given)], style=self$options$plotStyle, scale=self$options$plotScale)
@@ -200,14 +201,14 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
           info = jamovi_glm_label_info(state,self$options)
           jamovi_plot_sync_labels(self$options,plot,info$layout,info$context)
         }
-        if (!is.null(comparison)) {
-          plot = suppressWarnings(tryCatch(jamovi_glm_generalized_comparison_plot(comparison,self$options$se,
-            self$options$plotStyle,self$options$plotScale),error=function(error) NULL))
-          if (!is.null(plot)) {
-            info = jamovi_glm_label_info(comparison,self$options,TRUE)
-            jamovi_plot_sync_labels(self$options,plot,info$layout,info$context,
-              rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
-          }
+      }
+      if (!is.null(comparison) && self$options$comparisonGraphic) {
+        plot = suppressWarnings(tryCatch(jamovi_glm_generalized_comparison_plot(comparison,self$options$se,
+          self$options$plotStyle,self$options$plotScale),error=function(error) NULL))
+        if (!is.null(plot)) {
+          info = jamovi_glm_label_info(comparison,self$options,TRUE)
+          jamovi_plot_sync_labels(self$options,plot,info$layout,info$context,
+            rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
         }
       }
     },

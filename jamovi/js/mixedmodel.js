@@ -1,10 +1,12 @@
 'use strict';
 
 const updateTerms = require('./model-terms');
+const migrateOutput = require('./output-options');
 const synchronize = function(ui, context, added, quadraticChanged = null) {
     // Native setters synchronously invoke other handlers while an option edit is
     // still in progress. Synchronize once, and send the complete option batch.
     if (context.flags && context.flags.updating) return;
+    migrateOutput(ui, context, 'mixedmodel');
     if (context.workspace.mixedSynchronizing) return;
     context.workspace.mixedSynchronizing = true;
     const options = ui.view.model.options;
@@ -61,6 +63,7 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
             reserved:comparing && !cas ? [].concat(ui.plotGroup.value() || []) : [],
             extra:comparing ? ['quadratic','randomSlopes','comparisonQuadratic','comparisonRandomSlopes','cluster'] : ['quadratic','randomSlopes','cluster'],
             include:'cluster', exclude:cas && cluster ? [cluster] : []}];
+        layouts.push(Object.assign({},layouts[0],{supplier:'plotGroupingLayout',selections:[],requireX:false}));
         // A new grouping selection defaults to panels; do not overwrite a saved layout.
         if (cluster !== context.workspace.mixedCluster) {
             const previous = context.workspace.mixedCluster;
@@ -87,6 +90,7 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
     }
 };
 module.exports = {
+    plotGroupingLayout_updated: function(ui) { synchronize(ui,this,false); },
     plotGroup_changing: function(ui, event) {
         updateTerms.groupChanging(ui.compare.value() !== true || ui.predictionType.value() === 'cas',event);
     },

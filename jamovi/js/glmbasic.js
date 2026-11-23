@@ -1,9 +1,12 @@
 'use strict';
 
 const updateTerms = require('./model-terms');
+const migrateOutput = require('./output-options');
 const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
     selections:['plotX','plotPanels','plotGroup'], extra:'quadratic'},
-    updateTerms.comparisonLayout('comparisonPlotSupplier',['quadratic','comparisonQuadratic'],false)];
+    updateTerms.comparisonLayout('comparisonPlotSupplier',['quadratic','comparisonQuadratic'],false),
+    {supplier:'comparisonGroupingLayout',models:['modelTerms','comparisonTerms'],selections:[],
+        extra:['quadratic','comparisonQuadratic']}];
 // Native `changing` events can reject a transfer before it changes an option.
 // Restored options bypass this guard and remain subject to R's layout validation.
 const plotRoleChanging = (ui, context, name, event) => {
@@ -31,6 +34,7 @@ const plotRoleChanging = (ui, context, name, event) => {
 const synchronize = (ui, context, added, changed = null) => {
     // Restore all host options before pruning dependent selections.
     if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
+    migrateOutput(ui, context, 'glmbasic');
     if (context.workspace.lmSynchronizing) return;
     if (!added && !(ui.preds.value() || []).length) return;
     context.workspace.lmSynchronizing = true;
@@ -67,6 +71,7 @@ const synchronize = (ui, context, added, changed = null) => {
 };
 
 module.exports = {
+    comparisonGroupingLayout_updated: function(ui) { synchronize(ui, this, false); },
     out_changed: function(ui) { synchronize(ui, this, false); },
     comparisonGroup_changing: function(ui, event) {
         updateTerms.groupChanging(ui.compare.value() === true &&

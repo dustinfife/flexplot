@@ -36,7 +36,7 @@ e2e_inventory = function(root, manifest) {
           identical(step$action,"edit_generated_plot_label_rows") &&
           identical(if(is.null(step$label_option)) "plotLabels" else step$label_option,visible),logical(1))),selected)
       }
-      if(option$name %in% c("data","samplePolicyVersion","comparisonMagnet")) covered = selected
+      if(option$name %in% c("data","samplePolicyVersion","comparisonMagnet","outputOptionsVersion")) covered = selected
       list(id=paste(analysis,option$name,sep="."),definition=option,
         scenarios=vapply(covered,`[[`,character(1),"id"),
         coverage=if(length(covered)) "planned GUI checkpoint; not yet GUI verified" else "gap: no planned option transition")

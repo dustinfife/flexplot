@@ -37,8 +37,20 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plotLabels = list(),
             plotLabelStore = list(),
             samplePolicyVersion = 0,
-            includeCI = TRUE, ...) {
+            includeCI = TRUE,
+            estimates = TRUE,
+            comparisonGraphic = TRUE,
+            comparisonStatistics = TRUE,
+            outputOptionsVersion = 0, ...) {
 
+            private$..estimates = jmvcore::OptionBool$new(
+                "estimates", estimates, default=TRUE)
+            private$..comparisonGraphic = jmvcore::OptionBool$new(
+                "comparisonGraphic", comparisonGraphic, default=TRUE)
+            private$..comparisonStatistics = jmvcore::OptionBool$new(
+                "comparisonStatistics", comparisonStatistics, default=TRUE)
+            private$..outputOptionsVersion = jmvcore::OptionInteger$new(
+                "outputOptionsVersion", outputOptionsVersion, default=0, hidden=TRUE)
             super$initialize(
                 package="flexplot",
                 name="mixedmodel",
@@ -233,6 +245,10 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=TRUE)
 
             self$.addOption(private$..out)
+            self$.addOption(private$..estimates)
+            self$.addOption(private$..comparisonGraphic)
+            self$.addOption(private$..comparisonStatistics)
+            self$.addOption(private$..outputOptionsVersion)
             self$.addOption(private$..preds)
             self$.addOption(private$..interactions)
             self$.addOption(private$..polynomials)
@@ -266,6 +282,10 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..includeCI)
         }),
     active = list(
+        estimates = function() private$..estimates$value,
+        comparisonGraphic = function() private$..comparisonGraphic$value,
+        comparisonStatistics = function() private$..comparisonStatistics$value,
+        outputOptionsVersion = function() private$..outputOptionsVersion$value,
         out = function() private$..out$value,
         preds = function() private$..preds$value,
         interactions = function() private$..interactions$value,
@@ -299,6 +319,10 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         samplePolicyVersion = function() private$..samplePolicyVersion$value,
         includeCI = function() private$..includeCI$value),
     private = list(
+        ..estimates = NA,
+        ..comparisonGraphic = NA,
+        ..comparisonStatistics = NA,
+        ..outputOptionsVersion = NA,
         ..out = NA,
         ..preds = NA,
         ..interactions = NA,

@@ -72,6 +72,7 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
         .init = function() jamovi_lm_reset(self$results),
       
         .run = function() {
+          jamovi_output_migrate(self$options, "glmbasic")
           jamovi_plot_sync_labels(self$options)
           jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
           jamovi_lm_reset(self$results)
@@ -94,8 +95,8 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
             }
             self$results$comparisonplot$setState(comparison)
             jamovi_glm_comparison_table(self$results$comparison,comparison)
-            self$results$comparison$setVisible(TRUE)
-            self$results$comparisonplot$setVisible(TRUE)
+            self$results$comparison$setVisible(self$options$comparisonStatistics)
+            self$results$comparisonplot$setVisible(self$options$comparisonGraphic)
             if (!is.null(comparison$formula)) {
               jamovi_comparison_publish_magnet(self$options, jamovi_comparison_magnet(comparison$data,
                 self$options$out, flexplot_axis_given(comparison$formula)$axis[1]))
@@ -137,7 +138,7 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
               jamovi_plot_sync_labels(self$options,plot,info$layout,info$context)
             }
           }
-          if (self$options$compare) {
+          if (self$options$compare && self$options$comparisonGraphic) {
             plot = suppressWarnings(tryCatch(jamovi_glm_comparison_plot(comparison),error=function(error) NULL))
             if (!is.null(plot)) {
               info = jamovi_lm_label_info(model,self$options,TRUE,comparison$formula)

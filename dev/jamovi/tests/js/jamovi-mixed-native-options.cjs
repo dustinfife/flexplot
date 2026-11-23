@@ -54,7 +54,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     const beginEdit = vm.runInNewContext('('+extract('beginEdit(){',true)+')');
     const endEdit = vm.runInNewContext('('+extract('endEdit(){',true)+')');
     const view = {workspace:{}};
-    const defaults = {samplePolicyVersion:0,casGhost:false,compare:false,comparisonFixed:null,comparisonTerms:null,comparisonInteractions:false,comparisonPolynomials:false,comparisonQuadratic:null,comparisonRandomIntercept:true,comparisonRandomSlopes:null,comparisonEstimation:"REML",interactions:false,polynomials:false,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
+    const defaults = {outputOptionsVersion:0,comparisonGraphic:true,comparisonStatistics:true,estimates:true,samplePolicyVersion:0,casGhost:false,compare:false,comparisonFixed:null,comparisonTerms:null,comparisonInteractions:false,comparisonPolynomials:false,comparisonQuadratic:null,comparisonRandomIntercept:true,comparisonRandomSlopes:null,comparisonEstimation:"REML",interactions:false,polynomials:false,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
         randomIntercept:true,estimation:'REML',includeP:false,graphic:true,predictionType:'cluster',
         clusters:3,plotX:null,plotPanels:null,plotGroup:null};
     const native = {}, packets = [], queued = new Set();
@@ -81,7 +81,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     }
     manager.getOption = name => native[name];
     manager.setOptionValue = (name,value) => ui[name].setValue(value);
-    for (const name of ['quadraticSupplier','randomSupplier','primarySupplier','plotSupplier','comparisonFixedSupplier','comparisonSupplier','comparisonQuadraticSupplier','comparisonRandomSupplier']) {
+    for (const name of ['quadraticSupplier','randomSupplier','primarySupplier','plotSupplier','plotGroupingLayout','comparisonFixedSupplier','comparisonSupplier','comparisonQuadraticSupplier','comparisonRandomSupplier']) {
         let value = [];
         ui[name] = {value:() => value,setValue(updated) {
             if (JSON.stringify(value) === JSON.stringify(updated)) return;

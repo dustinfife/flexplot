@@ -61,6 +61,7 @@ jamovi_mixed_reset = function(results) {
   for (item in results$items) {
     item$setVisible(FALSE)
     jamovi_result_clear(item)
+    if (inherits(item, "Image")) item$.setPath(NULL)
   }
   jamovi_plot_clear_states(results, c("plot", "comparisonplot"))
   results$waiting$setContent("<p>Select a numeric outcome and one cluster variable.</p>")
@@ -174,6 +175,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       jamovi_mixed_reset(self$results)
     },
     .run=function() {
+      jamovi_output_migrate(self$options, "mixedmodel")
       previous = private$.modelState
       private$.modelState = NULL
       jamovi_mixed_sync_labels(self$options)
@@ -231,7 +233,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         }
       }
       information = jamovi_mixed_report(self$results, state, self$options$includeP, self$options$showCorrelations, self$options$includeCI)
-      for (item in c("specification", "fixed", "random")) self$results[[item]]$setVisible(TRUE)
+      self$results$specification$setVisible(TRUE)
+      jamovi_output_visible(self$results, c("fixed", "random"), self$options$estimates)
       private$.modelState = state
       self$results$plot$setState(if (plot_failed) NULL else state)
       self$results$plot$setVisible(self$options$graphic && !self$options$compare)
@@ -248,11 +251,13 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       jamovi_mixed_tables(list(fixed=self$results$fixed2,random=self$results$random2,
         correlations=self$results$correlations2),comparison$second,self$options$includeP,
         self$options$showCorrelations,self$options$includeCI,notes=FALSE)
-      for (name in c("fixed2","random2")) self$results[[name]]$setVisible(TRUE)
+      jamovi_output_visible(self$results, c("fixed2", "random2"), self$options$estimates)
       for (name in c("model1Heading","model2Heading","comparisonHeading")) {
         label = switch(name,model1Heading="Model 1",model2Heading="Model 2",comparisonHeading="Model Comparison")
         self$results[[name]]$setContent(paste0("<h3>",label,"</h3>"))
-        self$results[[name]]$setVisible(TRUE)
+        self$results[[name]]$setVisible(if (name=="comparisonHeading")
+          self$options$comparisonGraphic || self$options$comparisonStatistics else
+          self$options$estimates || self$results[[if (name=="model1Heading") "correlations" else "correlations2"]]$visible)
       }
       diagnostics = unlist(lapply(seq_len(2),function(i) {
         messages = jamovi_mixed_diagnostics(comparison[[c("first","second")[i]]])
@@ -262,9 +267,10 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         paste(jamovi_mixed_escape(diagnostics),collapse="</strong></p><p><strong>"),"</strong></p>") else "")
       self$results$diagnostics$setVisible(length(diagnostics)>0L)
       jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP,information)
+      self$results$comparison$setVisible(self$options$comparisonStatistics)
       self$results$comparisonplot$setSize(if (self$options$predictionType == "cas") 1100 else 700,450)
       comparison_plot_failed = FALSE
-      if (self$options$graphic) {
+      if (self$options$comparisonGraphic) {
         layout = list(x=self$options$plotX,panels=self$options$plotPanels,group=self$options$plotGroup,
           type=self$options$predictionType,clusters=self$options$clusters,casGhost=self$options$casGhost)
         plot = tryCatch(do.call(jamovi_mixed_comparison_plot,c(list(state=comparison),layout)),error=identity)
@@ -284,8 +290,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       }
       private$.comparisonState = comparison
       self$results$comparisonplot$setState(if (comparison_plot_failed) NULL else comparison)
-      self$results$comparisonplot$setVisible(self$options$graphic)
-      if (self$options$graphic && !comparison_plot_failed &&
+      self$results$comparisonplot$setVisible(self$options$comparisonGraphic)
+      if (self$options$comparisonGraphic && !comparison_plot_failed &&
           self$options$predictionType == "cas" && self$options$casGhost &&
           isTRUE(attr(comparison$displayPlot,"jamovi_cas_ghost"))) {
         self$results$comparisonPlotNote$setContent("<p>Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions.</p>")
