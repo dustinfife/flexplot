@@ -3,6 +3,7 @@
 const updateTerms = require('./model-terms');
 const migrateOutput = require('./output-options');
 const updateGhostControls = require('./glm-ghosts');
+const updateEligibility = require('./glm-plot-controls');
 const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
     selections:['plotX', 'plotPanels', 'plotGroup'], exclusive:true, requireX:true, extra:'quadratic'},
     updateTerms.comparisonLayout('comparisonPlotSupplier',['quadratic','comparisonQuadratic'])];
@@ -50,35 +51,11 @@ const synchronize = function(ui, context, added, changed = null) {
     }
     updatePlotControls(ui, context);
 };
-// Use the host's column metadata, not the spelling/storage type of a variable.
-// A response for a previous selection must never change the current controls.
+// Ghosts remain exclusive to the ordinary plot. Display eligibility is per output.
 const updatePlotControls = function(ui, context) {
     if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
     updateGhostControls(ui, context);
-    if (typeof context.requestData !== 'function') return;
-    const token = {};
-    context.workspace.glmPlotRequest = token;
-    const names = [ui.plotX.value()];
-    if (ui.compare.value()) names.push(ui.comparisonX.value());
-    const binomial = ui.family.value() === 'binomial';
-    ui.plotStyle.setPropertyValue('enable', false);
-    ui.plotScale.setPropertyValue('enable', false);
-    if (!binomial) return;
-    return Promise.all(names.map(columnName => columnName ? context.requestData('column',
-        {columnName, properties:['measureType','dataType']}) : Promise.resolve(null))).then(columns => {
-        if (token !== context.workspace.glmPlotRequest) return;
-        const continuous = columns.every(column => column && column.columnFound && column.measureType === 'continuous' &&
-            ['decimal','integer'].includes(column.dataType));
-        ui.plotStyle.setPropertyValue('enable', continuous);
-        const logit = continuous && ui.plotStyle.value() === 'auto';
-        ui.plotScale.setPropertyValue('enable', logit);
-        if (!logit && ui.plotScale.value() !== 'probability') ui.plotScale.setValue('probability');
-    }).catch(() => {
-        // Leave controls disabled if metadata is unavailable; R independently
-        // validates the actual fitted data and safely resolves legacy options.
-        if (token === context.workspace.glmPlotRequest && ui.plotScale.value() !== 'probability')
-            ui.plotScale.setValue('probability');
-    });
+    return updateEligibility(ui, context);
 };
 module.exports = {
     interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },
@@ -89,6 +66,8 @@ module.exports = {
     ghostLines_changed: function(ui) { updatePlotControls(ui, this); },
     graphic_changed: function(ui) { updatePlotControls(ui, this); },
     family_changed: function(ui) { updatePlotControls(ui, this); },
+    comparisonPlotStyle_changed: function(ui) { updatePlotControls(ui, this); },
+    comparisonPlotScale_changed: function(ui) { updatePlotControls(ui, this); },
     plotStyle_changed: function(ui) { updatePlotControls(ui, this); },
     plotScale_changed: function(ui) { updatePlotControls(ui, this); },
     compare_changed: function(ui) { synchronize(ui, this, false); },

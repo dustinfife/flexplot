@@ -40,7 +40,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         delete defaults.family; delete defaults.plotStyle; delete defaults.plotScale;
         Object.assign(defaults,{polynomials:false,comparisonPolynomials:false,graphicassump:false,estimates:true,comparisonGroup:null,comparisonMagnet:false});
     }
-    if (analysis === 'glmgeneralized') defaults.ghostLines = false;
+    if (analysis === 'glmgeneralized') Object.assign(defaults,{ghostLines:false,comparisonSe:true,comparisonPlotStyle:'auto',comparisonPlotScale:'probability'});
     for (const [name,value] of Object.entries(defaults)) {
         const option = native[name] = new Option(value,{name});
         option.on('valuechanged',() => {
@@ -208,7 +208,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
     for (const graphic of [false,true]) {
         restore('legacy-output',{out:'y',preds:['x','z'],graphic,outputOptionsVersion:0});
         assert.equal(ui.comparisonGraphic.value(),analysis==='glmbasic' || graphic);
-        assert.equal(ui.outputOptionsVersion.value(),1);
+        assert.equal(ui.outputOptionsVersion.value(),analysis==='glmgeneralized' ? 2 : 1);
         ui.comparisonGraphic.setValue(!graphic);ui.comparisonStatistics.setValue(false);
         ui.compare.setValue(false);ui.compare.setValue(true);handlers.view_updated.call(view,ui);
         assert.equal(ui.comparisonGraphic.value(),!graphic);assert.equal(ui.comparisonStatistics.value(),false);

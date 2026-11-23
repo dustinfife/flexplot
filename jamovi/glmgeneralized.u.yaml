@@ -149,6 +149,16 @@ children:
                     maxItemCount: 2
                     isTarget: true
                     enable: (compare)
+          - type: ComboBox
+            name: comparisonPlotStyle
+            useSingleCell: true
+            contentLink: (family:binomial)
+          - type: ComboBox
+            name: comparisonPlotScale
+            useSingleCell: true
+            contentLink: (family:binomial)
+          - type: CheckBox
+            name: comparisonSe
       - type: CollapseBox
         label: Plot Labels
         useSingleCell: true

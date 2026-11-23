@@ -24,11 +24,11 @@ test_that("native saved output revisions preserve old effective visibility and e
       expect_true(analysis$run())
       expected = if (current) !graphic else module=="glmbasic" || graphic
       expect_identical(options$comparisonGraphic,expected)
-      expect_equal(options$outputOptionsVersion,1L)
+      expect_equal(options$outputOptionsVersion,if(module=="glmgeneralized") 2L else 1L)
       reopened = get(paste0(module,"Options"),asNamespace("flexplot"))$new()
       reopened$fromProtoBuf(options$asProtoBuf())
       expect_identical(reopened$comparisonGraphic,expected)
-      expect_equal(reopened$outputOptionsVersion,1L)
+      expect_equal(reopened$outputOptionsVersion,if(module=="glmgeneralized") 2L else 1L)
       expect_identical(reopened$graphic,graphic)
       expect_identical(reopened$comparisonStatistics,!current)
       expect_true(jamovi_reporting_update(analysis,list(compare=TRUE)))

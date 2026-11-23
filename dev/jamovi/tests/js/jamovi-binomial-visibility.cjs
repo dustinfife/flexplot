@@ -53,10 +53,10 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
     assert.ok(source.includes(changeBranch));
     const changed = vm.runInNewContext('(function(e){' + changeBranch + '})');
     const create = wrapped => {
-        let selection = definition.name === 'plotScale' ? 'probability' : 'raw';
+        let selection = /Scale$/.test(definition.name) ? 'probability' : 'raw';
         const values = {useSingleCell:wrapped, contentLink:null, margin:'normal',
             label:'Binomial visualization', minWidth:-1, maxWidth:-1, minHeight:-1, maxHeight:-1,
-            options:definition.name === 'plotScale' ? [{name:'probability',title:'Probability'},{name:'logit',title:'Logit'}] : [{name:'auto',title:'Automatic'},{name:'raw',title:'Raw observations'}]};
+            options:/Scale$/.test(definition.name) ? [{name:'probability',title:'Probability'},{name:'logit',title:'Logit'}] : [{name:'auto',title:'Automatic'},{name:'raw',title:'Raw observations'}]};
         const properties = {};
         for (const [name, value] of Object.entries(values)) {
             const property = {value};
@@ -163,7 +163,7 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
     assert.equal(grid.cells.length, 1);
     assert.equal(control._cell.content.cells.length, 2, 'Label and dropdown must share the wrapper');
     assert.equal(control._cell.visible, false);
-    for (const [selection, index] of (definition.name === 'plotScale' ? [['probability',0],['logit',1]] : [['auto',0],['raw',1]])) {
+    for (const [selection, index] of (/Scale$/.test(definition.name) ? [['probability',0],['logit',1]] : [['auto',0],['raw',1]])) {
         control.setValue(selection);
         control.updateDisplayValue();
         for (family of ['binomial','gaussian','poisson','gammaLog','Gamma','negativebinomial','binomial']) {

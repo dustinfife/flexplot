@@ -384,3 +384,24 @@ comparison statistics were toggled independently; Mixed estimates and comparison
 plots were toggled with comparison statistics retained. Collapsing Mixed Output
 Options retained results. Test preferences were restored and only the disposable
 review window was closed. Secondary-monitor placement could not be confirmed.
+
+### Independent GLM display settings
+
+Stage 4 retains ordinary `se`, `plotStyle`, and `plotScale`, and adds
+`comparisonSe`, `comparisonPlotStyle`, and `comparisonPlotScale`. Comparison
+preview, renderer, explanation and label context consume only the comparison
+settings. Existing plot-label stores, visibility, x/panel roles and result names
+remain in place. Core prediction, interval and comparison implementations are
+unchanged. `glm-plot-controls.js` shares eligibility logic with separate output
+keys and asynchronous request identities, including restoration-workspace guards.
+An edit to one output neither repeats nor cancels the other output's request.
+Stored unavailable preferences survive; the established R probability fallback
+resolves raw/categorical logit requests without changing the saved choice.
+
+GLM `outputOptionsVersion` revision 2 copies previous shared display values once
+for native documents at revision 0 or 1, including documents with comparison off.
+Revision 1 visibility preferences remain intact. New R constructors use independent
+defaults; current native documents retain all explicit comparison values. Native
+protobuf publication includes strings as well as the existing booleans/revisions.
+See `dev/jamovi/DEVELOPMENT-HANDOFF.md` for the remaining roadmap and portable
+continuation instructions.

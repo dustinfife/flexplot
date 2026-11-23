@@ -17,6 +17,7 @@ const {pathToFileURL} = require('node:url');
         fs.copyFileSync(path.join(root, 'jamovi/js/' + analysis + '.js'), path.join(temp, analysis + '.js'));
         fs.copyFileSync(path.join(root, 'jamovi/js/model-terms.js'), path.join(temp, 'model-terms.js'));
         fs.copyFileSync(path.join(root,'jamovi/js/output-options.js'),path.join(temp,'output-options.js'));
+        if (analysis === 'glmgeneralized') fs.copyFileSync(path.join(root,'jamovi/js/glm-plot-controls.js'),path.join(temp,'glm-plot-controls.js'));
         if (analysis === 'glmgeneralized') fs.copyFileSync(path.join(root,'jamovi/js/glm-ghosts.js'),path.join(temp,'glm-ghosts.js'));
         const {default: compileR} = await import(pathToFileURL(path.join(compilerPath, 'compiler.js')));
         compileR('flexplot', path.join(temp, analysis + '.a.yaml'), path.join(temp, analysis + '.r.yaml'),
@@ -437,6 +438,14 @@ const {pathToFileURL} = require('node:url');
             const scale = compiled.view.layout.controls.flatMap(c => c.controls || []).find(c => c.name === 'plotScale');
             assert.equal(scale.contentLink,'(family:binomial)');
             const visualization = compiled.view.layout.controls.find(c => c.label === 'Model visualization').controls;
+            const descendants = items => items.flatMap(item=>[item,...descendants(item.controls || [])]);
+            const comparisonSection = descendants(compiled.view.layout.controls).find(c=>c.label==='Model Comparison Visualization').controls;
+            assert.equal(JSON.stringify(comparisonSection.filter(c=>c.name && ['comparisonPlotStyle','comparisonPlotScale','comparisonSe'].includes(c.name)).map(c=>c.name)),JSON.stringify(['comparisonPlotStyle','comparisonPlotScale','comparisonSe']));
+            assert.ok(!descendants(comparisonSection).some(c=>['se','plotStyle','plotScale'].includes(c.name)));
+            assert.ok(!descendants(visualization).some(c=>['comparisonSe','comparisonPlotStyle','comparisonPlotScale'].includes(c.name)));
+            if (runtime) for (const control of comparisonSection.filter(c=>c.name==='comparisonPlotStyle' || c.name==='comparisonPlotScale'))
+                require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),control,comparisonSection.find(c=>c.name==='comparisonSe'),compilerPath);
+
             assert.equal(visualization.findIndex(c => c.name === 'plotScale'),visualization.findIndex(c => c.name === 'plotStyle')+1);
             const top = compiled.view.layout.controls;
             assert.equal(top[0].type,'VariableSupplier');

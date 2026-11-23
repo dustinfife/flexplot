@@ -41,7 +41,10 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             comparisonPlotLabelStore = list(),
             comparisonGraphic = TRUE,
             comparisonStatistics = TRUE,
-            outputOptionsVersion = 0, ...) {
+            outputOptionsVersion = 0,
+            comparisonSe = TRUE,
+            comparisonPlotStyle = "auto",
+            comparisonPlotScale = "probability", ...) {
 
             private$..comparisonGraphic = jmvcore::OptionBool$new(
                 "comparisonGraphic", comparisonGraphic, default=TRUE)
@@ -49,6 +52,12 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "comparisonStatistics", comparisonStatistics, default=TRUE)
             private$..outputOptionsVersion = jmvcore::OptionInteger$new(
                 "outputOptionsVersion", outputOptionsVersion, default=0, hidden=TRUE)
+            private$..comparisonSe = jmvcore::OptionBool$new(
+                "comparisonSe", comparisonSe, default=TRUE)
+            private$..comparisonPlotStyle = jmvcore::OptionList$new(
+                "comparisonPlotStyle", comparisonPlotStyle, options=list("auto", "raw"), default="auto")
+            private$..comparisonPlotScale = jmvcore::OptionList$new(
+                "comparisonPlotScale", comparisonPlotScale, options=list("probability", "logit"), default="probability")
             super$initialize(
                 package="flexplot",
                 name="glmgeneralized",
@@ -299,6 +308,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..comparisonGraphic)
             self$.addOption(private$..comparisonStatistics)
             self$.addOption(private$..outputOptionsVersion)
+            self$.addOption(private$..comparisonSe)
+            self$.addOption(private$..comparisonPlotStyle)
+            self$.addOption(private$..comparisonPlotScale)
             self$.addOption(private$..preds)
             self$.addOption(private$..family)
             self$.addOption(private$..modelTerms)
@@ -333,6 +345,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..comparisonPlotLabelStore)
         }),
     active = list(
+        comparisonSe = function() private$..comparisonSe$value,
+        comparisonPlotStyle = function() private$..comparisonPlotStyle$value,
+        comparisonPlotScale = function() private$..comparisonPlotScale$value,
         comparisonGraphic = function() private$..comparisonGraphic$value,
         comparisonStatistics = function() private$..comparisonStatistics$value,
         outputOptionsVersion = function() private$..outputOptionsVersion$value,
@@ -370,6 +385,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         comparisonPlotLabels = function() private$..comparisonPlotLabels$value,
         comparisonPlotLabelStore = function() private$..comparisonPlotLabelStore$value),
     private = list(
+        ..comparisonSe = NA,
+        ..comparisonPlotStyle = NA,
+        ..comparisonPlotScale = NA,
         ..comparisonGraphic = NA,
         ..comparisonStatistics = NA,
         ..outputOptionsVersion = NA,

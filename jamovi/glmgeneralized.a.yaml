@@ -193,4 +193,26 @@ options:
     type: Integer
     default: 0
     hidden: true
+  - name: comparisonSe
+    title: Confidence intervals
+    type: Bool
+    default: true
+  - name: comparisonPlotStyle
+    title: Binomial visualization
+    type: List
+    options:
+      - name: auto
+        title: Automatic (logistic overlay for continuous x)
+      - name: raw
+        title: Raw observations and model predictions
+    default: auto
+  - name: comparisonPlotScale
+    title: Visualization scale
+    type: List
+    options:
+      - name: probability
+        title: Probability
+      - name: logit
+        title: Logit
+    default: probability
 ...

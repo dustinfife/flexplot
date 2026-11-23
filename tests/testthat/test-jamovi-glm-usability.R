@@ -106,7 +106,7 @@ test_that("GLM table help and plot explanations are concise and mode-specific", 
 test_that("comparison explanations disappear on live removal", {
   skip_if_not_installed("jmvcore")
   options = flexplot:::glmgeneralizedOptions$new(out="y_bin",preds=c("x","z","a"),family="binomial",
-    compare=TRUE,plotX="x",comparisonX="x",plotScale="logit",se=TRUE)
+    compare=TRUE,plotX="x",comparisonX="x",plotScale="logit",comparisonPlotScale="logit",se=TRUE)
   analysis = jamovi_reporting_host(options,small)
   expect_true(analysis$run())
   expect_match(analysis$results$comparisonPlotExplanation$content,"logits")
