@@ -57,7 +57,8 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
         const cluster = ui.cluster.value();
         const cas = ui.predictionType.value() === 'cas';
         const layouts = [{supplier:'plotSupplier', models:comparing ? ['modelTerms','comparisonTerms'] : ['modelTerms'],
-            selections:['plotX','plotPanels','plotGroup'], exclusive:true, requireX:true,
+            selections:comparing && !cas ? ['plotX','plotPanels'] : ['plotX','plotPanels','plotGroup'], exclusive:true, requireX:true,
+            reserved:comparing && !cas ? [].concat(ui.plotGroup.value() || []) : [],
             extra:comparing ? ['quadratic','randomSlopes','comparisonQuadratic','comparisonRandomSlopes','cluster'] : ['quadratic','randomSlopes','cluster'],
             include:'cluster', exclude:cas && cluster ? [cluster] : []}];
         // A new grouping selection defaults to panels; do not overwrite a saved layout.
@@ -86,6 +87,9 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
     }
 };
 module.exports = {
+    plotGroup_changing: function(ui, event) {
+        updateTerms.groupChanging(ui.compare.value() !== true || ui.predictionType.value() === 'cas',event);
+    },
     // loaded precedes host option initialization; ready/view_updated is the
     // first safe point for defaults or synchronization of a saved analysis.
     view_loaded: function() {},

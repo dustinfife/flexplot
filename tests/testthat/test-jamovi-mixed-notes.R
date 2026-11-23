@@ -25,8 +25,9 @@ test_that("CAS ghost notes follow actual directional lines and clear on option c
   expect_true(note$visible)
   local_mocked_bindings(jamovi_mixed_apply_labels=function(...)stop("render note probe"))
   expect_false(analysis$.__enclos_env__$private$.comparisonplot(analysis$results$comparisonplot))
-  expect_false(note$visible)
-  expect_identical(note$content,"")
+  expect_true(note$visible)
+  expect_identical(note$content,"<p>Comparison plot unavailable: render note probe</p>")
+  expect_false(grepl("Dashed line",note$content,fixed=TRUE))
 })
 
 test_that("an enabled ghost option does not advertise a singleton prediction as a dashed line", {

@@ -1,7 +1,8 @@
 # Display roles are constrained by fitted formulas, never the variable-selection pool.
-jamovi_model_layout = function(models, data, x=NULL, panels=NULL, group=NULL) {
+jamovi_model_layout = function(models, data, x=NULL, panels=NULL, group=NULL,
+                                comparison=FALSE, allow_magnet=FALSE) {
   predictors = unique(unlist(lapply(models, function(model) all.vars(stats::formula(model))[-1])))
-  requested = c(x, panels, group)
+  requested = c(x, panels, if (!comparison) group)
   if (any(!requested %in% predictors) || any(!requested %in% names(data))) {
     stop("Visualization variables must be predictors in the fitted model (either fitted model for comparisons).", call.=FALSE)
   }
@@ -12,6 +13,16 @@ jamovi_model_layout = function(models, data, x=NULL, panels=NULL, group=NULL) {
     numeric = available[vapply(data[available], is.numeric, logical(1))]
     x = if (length(numeric)) numeric[1] else available[1]
   }
+  note = NULL
+  if (comparison && length(group) && length(x)==1L && !is.na(x) &&
+      !(allow_magnet && jamovi_comparison_magnet(data, outcome, x) &&
+        all(group %in% predictors) && all(group %in% names(data)) &&
+        length(group)==1L && !anyDuplicated(c(x, panels, group)))) {
+    note = paste0("Comparison grouping (", paste(group, collapse=", "),
+      ") is not applied to this comparison layout. Colors, line types and symbols identify the models. ",
+      "The plot uses x and panels only; the saved grouping choice is retained for supported visualizations.")
+    group = NULL
+  }
   if (length(x) != 1L || is.na(x) || length(group) > 1L || length(panels) > 2L ||
       anyDuplicated(c(x, group, panels))) {
     stop("Choose different model predictors for one x variable, one optional group, and up to two panels.", call.=FALSE)
@@ -19,7 +30,40 @@ jamovi_model_layout = function(models, data, x=NULL, panels=NULL, group=NULL) {
   rhs = as.name(x)
   if (length(group)) rhs = call("+", rhs, as.name(group))
   if (length(panels)) rhs = call("|", rhs, formula_component(lapply(panels, as.name)))
-  make.formula(as.name(outcome), rhs)
+  formula = make.formula(as.name(outcome), rhs)
+  if (!is.null(note)) attr(formula, "jamovi_comparison_note") = note
+  formula
+}
+
+# Native magnets distinguish models in facets, so category grouping is safe there.
+jamovi_comparison_magnet = function(data, outcome, x) {
+  length(x)==1L && x %in% names(data) && outcome %in% names(data) &&
+    is_binary(data[[outcome]]) && check.non.number(data[[x]])
+}
+
+jamovi_comparison_layout = function(models, data, x=NULL, panels=NULL, group=NULL, allow_magnet=FALSE) {
+  jamovi_model_layout(models, data, x, panels, group, comparison=TRUE, allow_magnet=allow_magnet)
+}
+
+# Publish a derived UI capability from the actual fitted common sample, including
+# numeric 0/1 outcomes whose continuous-column metadata has no categorical levels.
+jamovi_comparison_publish_magnet = function(options, available=FALSE) {
+  option = options$option("comparisonMagnet")
+  option$value = isTRUE(available)
+  pb = options$asProtoBuf()
+  if (is.null(pb)) return(invisible(NULL))
+  values = pb$options
+  if (!length(values)) return(invisible(NULL))
+  index = match("comparisonMagnet", pb$names)
+  if (is.na(index)) {
+    index = length(values)+1L
+    pb$names = c(pb$names, "comparisonMagnet")
+  }
+  item = values[[1]]$clone(); item$clear()
+  item$o = if (isTRUE(available)) 1L else 0L
+  values[[index]] = item
+  pb$options = values
+  invisible(NULL)
 }
 
 # Reuse prediction data and positions; glm bounds are transformed from the link scale.

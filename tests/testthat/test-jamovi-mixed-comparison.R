@@ -176,7 +176,9 @@ test_that("Mixed comparison plots use actual original-model predictions and pres
     expect_equal(capture$plot$labels$x,"Time")
     cas = flexplot:::jamovi_mixed_comparison_plot(state,"x","id",type="cas")
     expect_identical(vapply(attr(cas,"jamovi_cas_children"),function(p) p$labels$title,character(1)),c("Model 1","Model 2"))
-    expect_error(flexplot:::jamovi_mixed_comparison_plot(state,"x","id",group="a",type=type),"panels instead")
+    fallback = flexplot:::jamovi_mixed_comparison_plot(state,"x","id",group="a",type=type)
+    expect_match(attr(fallback,"jamovi_comparison_note"),"x and panels only",fixed=TRUE)
+    expect_setequal(ggplot2::ggplot_build(fallback)$plot$scales$get_scales("colour")$get_labels(),c("Model 1","Model 2"))
   }
 })
 

@@ -15,7 +15,7 @@ jamovi_glm_generalized_comparison = function(options, data) {
   primary$omitted = nrow(data)-nrow(primary$data)
   model1 = primary$model
   model2 = secondary$model
-  layout = jamovi_model_layout(list(model1, model2), primary$data,
+  layout = jamovi_comparison_layout(list(model1, model2), primary$data,
     options$comparisonX, options$comparisonPanels)
   # model.comparison supplies the established AIC/BIC/Bayes-factor presentation.
   comparison = model.comparison(model1, model2)

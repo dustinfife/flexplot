@@ -272,9 +272,13 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           comparison$displayPlot = NULL
           comparison_plot_failed = TRUE
           self$results$comparisonplot$setError(conditionMessage(plot))
+          jamovi_diagnostic(self$results$comparisonPlotNote,
+            paste("Comparison plot unavailable:", conditionMessage(plot)))
         } else {
           comparison$displayPlot = plot
           comparison$displayLayout = layout
+          note = attr(plot,"jamovi_comparison_note")
+          if (!is.null(note)) jamovi_diagnostic(self$results$comparisonPlotNote,note)
           jamovi_mixed_sync_labels(self$options,plot,layout)
         }
       }
@@ -295,14 +299,16 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       tryCatch({
         plot = jamovi_mixed_comparison_plot(image$state,self$options$plotX,self$options$plotPanels,
           self$options$plotGroup,self$options$predictionType,self$options$clusters,self$options$casGhost)
+        note = attr(plot,"jamovi_comparison_note")
+        if (!is.null(note)) jamovi_diagnostic(self$results$comparisonPlotNote,note)
         print(jamovi_mixed_apply_labels(plot,self$options$plotLabels))
         TRUE
       },error=function(error) {
         # jmvcore otherwise labels a failed image with non-null state as rendering.
         image$setState(NULL)
         image$setError(conditionMessage(error))
-        self$results$comparisonPlotNote$setVisible(FALSE)
-        self$results$comparisonPlotNote$setContent("")
+        jamovi_diagnostic(self$results$comparisonPlotNote,
+          paste("Comparison plot unavailable:",conditionMessage(error)))
         FALSE
       })
     },

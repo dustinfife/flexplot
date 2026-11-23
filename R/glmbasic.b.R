@@ -75,6 +75,7 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
           jamovi_plot_sync_labels(self$options)
           jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
           jamovi_lm_reset(self$results)
+          jamovi_comparison_publish_magnet(self$options)
           if (!length(self$options$out) || !length(self$options$preds)) {
             jamovi_diagnostic(self$results$waiting,if (!length(self$options$out))
               if (!length(self$options$preds)) "Select an outcome and predictors." else "Select an outcome variable." else
@@ -95,6 +96,12 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
             jamovi_glm_comparison_table(self$results$comparison,comparison)
             self$results$comparison$setVisible(TRUE)
             self$results$comparisonplot$setVisible(TRUE)
+            if (!is.null(comparison$formula)) {
+              jamovi_comparison_publish_magnet(self$options, jamovi_comparison_magnet(comparison$data,
+                self$options$out, flexplot_axis_given(comparison$formula)$axis[1]))
+              note = attr(comparison$formula, "jamovi_comparison_note")
+              if (!is.null(note)) jamovi_diagnostic(self$results$explanation, note)
+            }
             model = comparison$model1
             formula = stats::formula(model)
             data = comparison$data
@@ -162,6 +169,8 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(image$state)) return(FALSE)
             tryCatch({
                 plot = jamovi_glm_comparison_plot(image$state)
+                note = attr(plot, "jamovi_comparison_note")
+                if (!is.null(note)) jamovi_diagnostic(self$results$explanation, note)
                 info = jamovi_lm_label_info(image$state$model1,self$options,TRUE,image$state$formula)
                 print(jamovi_plot_apply_labels(plot,self$options$comparisonPlotLabels,info$context,info$layout))
                 TRUE

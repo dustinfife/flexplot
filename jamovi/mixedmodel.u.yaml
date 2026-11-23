@@ -210,11 +210,14 @@ children:
         isTarget: true
     - type: TargetLayoutBox
       label: Color / symbol variable
+      useSingleCell: true
+      contentLink: (!compare || predictionType:cas)
       children:
       - type: VariablesListBox
         name: plotGroup
         maxItemCount: 1
         isTarget: true
+        enable: (!compare || predictionType:cas)
 
   - type: CollapseBox
     label: Plot Labels

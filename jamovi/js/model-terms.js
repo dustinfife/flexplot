@@ -39,7 +39,8 @@ const updateTerms = function(ui, context, addNew, models, suppliers, layouts = [
                 if (JSON.stringify(value) !== JSON.stringify(filtered)) ui[name].setValue(filtered);
             }
             if (layout.requireX && !ui[layout.selections[0]].value()) {
-                const x = available.find(name => !assigned.has(name)) || available[0];
+                const candidates = available.filter(name => !(layout.reserved || []).includes(name));
+                const x = candidates.find(name => !assigned.has(name)) || candidates[0];
                 if (x) {
                     ui[layout.selections[0]].setValue(x);
                     for (const name of layout.selections.slice(1)) {
@@ -54,6 +55,36 @@ const updateTerms = function(ui, context, addNew, models, suppliers, layouts = [
         ui.view.model.options.endEdit();
     }
     context.workspace.glmPredictors = predictors.slice();
+};
+
+// Ordinary comparisons reserve aesthetics for model identity. Group values are
+// deliberately omitted from synchronization, retaining saved/standalone choices.
+updateTerms.comparisonLayout = function(supplier, extra, requireX=true) {
+    return {supplier, models:['modelTerms','comparisonTerms'],
+        selections:['comparisonX','comparisonPanels'], exclusive:true, requireX, extra};
+};
+updateTerms.groupChanging = function(allowed, event) {
+    const values = [].concat(event.value || []).filter(Boolean);
+    if (!allowed && values.length) event.cancel = true;
+};
+updateTerms.invalidateComparisonMagnet = function(ui, context) {
+    const options = ui.view.model.options;
+    const key = JSON.stringify(['out','preds','modelTerms','comparisonTerms','quadratic',
+        'comparisonQuadratic','compare','comparisonX','comparisonPanels','comparisonGroup']
+        .map(name=>ui[name].value()));
+    if (context.workspace.comparisonRoleKey !== key) {
+        context.workspace.comparisonRoleKey = key;
+        const capability = options.getOption('comparisonMagnet');
+        if (capability && capability.getValue() === true)
+            options.setOptionValue('comparisonMagnet',false);
+    }
+    // Binding expressions resolve controls, not hidden options. Drive the whole
+    // target's visibility through the native property API instead.
+    const target = ui.comparisonGroupingLayout;
+    const capability = options.getOption('comparisonMagnet');
+    if (target && typeof target.setPropertyValue === 'function')
+        target.setPropertyValue('contentLink',ui.compare.value() === true &&
+            !!capability && capability.getValue() === true);
 };
 
 // Migration runs only after the host's complete option batch has arrived.

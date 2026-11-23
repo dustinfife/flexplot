@@ -23,6 +23,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plotX = NULL,
             plotPanels = NULL,
             plotGroup = NULL,
+            comparisonMagnet = FALSE,
             comparisonGroup = NULL,
             polynomials = FALSE,
             quadratic = NULL,
@@ -120,6 +121,11 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "plotGroup",
                 plotGroup,
                 default=NULL)
+            private$..comparisonMagnet = jmvcore::OptionBool$new(
+                "comparisonMagnet",
+                comparisonMagnet,
+                hidden=TRUE,
+                default=FALSE)
             private$..comparisonGroup <- jmvcore::OptionVariable$new(
                 "comparisonGroup",
                 comparisonGroup,
@@ -290,6 +296,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plotX)
             self$.addOption(private$..plotPanels)
             self$.addOption(private$..plotGroup)
+            self$.addOption(private$..comparisonMagnet)
             self$.addOption(private$..comparisonGroup)
             self$.addOption(private$..polynomials)
             self$.addOption(private$..quadratic)
@@ -323,6 +330,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plotX = function() private$..plotX$value,
         plotPanels = function() private$..plotPanels$value,
         plotGroup = function() private$..plotGroup$value,
+        comparisonMagnet = function() private$..comparisonMagnet$value,
         comparisonGroup = function() private$..comparisonGroup$value,
         polynomials = function() private$..polynomials$value,
         quadratic = function() private$..quadratic$value,
@@ -355,6 +363,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plotX = NA,
         ..plotPanels = NA,
         ..plotGroup = NA,
+        ..comparisonMagnet = NA,
         ..comparisonGroup = NA,
         ..polynomials = NA,
         ..quadratic = NA,

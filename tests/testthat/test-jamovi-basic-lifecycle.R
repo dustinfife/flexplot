@@ -53,7 +53,11 @@ test_that("LM comparison layouts and residual draw errors preserve fitted result
     expect_true(jamovi_reporting_update(analysis,list(comparisonGroup=if(is.na(group)) NULL else group)))
     image = analysis$results$comparisonplot
     expect_true(suppressWarnings(analysis$.createImage(".comparisonplot",image,noThrow=TRUE)))
-    expect_identical(image$status,if(is.na(group)) "complete" else "error")
+    expect_identical(image$status,"complete")
+    if (!is.na(group)) {
+      expect_identical(analysis$options$comparisonGroup,group)
+      expect_match(analysis$results$explanation$content,"saved grouping choice is retained",fixed=TRUE)
+    }
     expect_gt(file.info(file.path(output,image$filePath))$size,1000)
     expect_equal(analysis$results$comparison$asDF,expected)
     jamovi_expect_lm_coefficients(analysis,lm(y~x+a,small))

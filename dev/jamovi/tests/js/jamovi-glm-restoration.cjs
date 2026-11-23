@@ -38,7 +38,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         comparisonX:null,comparisonPanels:null,family:'binomial',includeP:false,graphic:true,se:true,plotStyle:'auto',plotScale:'probability'};
     if (analysis === 'glmbasic') {
         delete defaults.family; delete defaults.plotStyle; delete defaults.plotScale;
-        Object.assign(defaults,{polynomials:false,comparisonPolynomials:false,graphicassump:false,estimates:true,comparisonGroup:null});
+        Object.assign(defaults,{polynomials:false,comparisonPolynomials:false,graphicassump:false,estimates:true,comparisonGroup:null,comparisonMagnet:false});
     }
     if (analysis === 'glmgeneralized') defaults.ghostLines = false;
     for (const [name,value] of Object.entries(defaults)) {
@@ -190,6 +190,18 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         ui.preds.setValue(['x','z']);
         assert.equal(JSON.stringify(ui.modelTerms.value()),'[]');
         assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"]]');
+        restore('comparison-group-retained',{out:'y',preds:['x','z'],compare:true,
+            modelTerms:[['x'],['z']],comparisonTerms:[['x']],comparisonX:'x',comparisonGroup:'z'});
+        assert.equal(ui.comparisonGroup.value(),'z');
+        assert.equal(transfer('comparisonGroup',null),true);
+        assert.equal(transfer('comparisonGroup','z'),false);
+        ui.comparisonMagnet.setValue(true);
+        assert.equal(transfer('comparisonGroup','z'),true);
+        ui.comparisonMagnet.setValue(true); // Simulate the confirmed server capability.
+        handlers.view_updated.call(view,ui);assert.equal(ui.comparisonMagnet.value(),true,'Server capability must survive passive view updates');
+        ui.comparisonX.setValue('z');assert.equal(ui.comparisonMagnet.value(),false,'A changed layout invalidates the old capability');
+        assert.equal(ui.comparisonGroup.value(),'z','Never silently clear a saved group');
+        ui.compare.setValue(false);ui.plotGroup.setValue('z');assert.equal(ui.plotGroup.value(),'z');
         console.log('PASS: installed native changing events reject invalid LM role transfers and preserve restoration.');
         baseline.lmMainEffects=require('./jamovi-lm-main-effects.cjs')({ui,restore,snapshot,assert});
     }

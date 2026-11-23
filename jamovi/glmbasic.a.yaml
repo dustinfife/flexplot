@@ -114,6 +114,11 @@ options:
       type: Variable
       default: null
       description: Visualization variables must occur in the fitted model terms (either model for comparisons).
+    - name: comparisonMagnet
+      title: Internal comparison grouping capability
+      type: Bool
+      hidden: true
+      default: false
     - name: comparisonGroup
       title: Comparison grouping variable (magnet plots only)
       type: Variable

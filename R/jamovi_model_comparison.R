@@ -27,8 +27,8 @@ jamovi_glm_comparison = function(options, data) {
   model1 = jamovi_glm_fit(formula1, eligible, "Model 1")
   model2 = jamovi_glm_fit(formula2, eligible, "Model 2")
 
-  plot_formula = tryCatch(jamovi_model_layout(list(model1, model2), eligible, options$comparisonX,
-                                    options$comparisonPanels, options$comparisonGroup),error=identity)
+  plot_formula = tryCatch(jamovi_comparison_layout(list(model1, model2), eligible, options$comparisonX,
+                                    options$comparisonPanels, options$comparisonGroup, allow_magnet=TRUE),error=identity)
   plot_error = if (inherits(plot_formula,"error")) conditionMessage(plot_formula) else NULL
   if (!is.null(plot_error)) plot_formula = NULL
   comparison = model.comparison(model1, model2)
@@ -61,5 +61,12 @@ jamovi_glm_comparison_plot = function(state) {
   if (!is.null(state$plotError)) stop(state$plotError,call.=FALSE)
   model1 = state$model1
   model2 = state$model2
-  jamovi_comparison_style(compare_fits(state$formula, data=state$data, model1=model1, model2=model2))
+  roles = flexplot_axis_given(state$formula)
+  formula = jamovi_comparison_layout(list(model1, model2), state$data, roles$axis[1],
+    roles$given[!is.na(roles$given)], roles$axis[-1], allow_magnet=TRUE)
+  plot = jamovi_comparison_style(compare_fits(formula, data=state$data, model1=model1, model2=model2))
+  note = attr(formula, "jamovi_comparison_note")
+  if (is.null(note)) note = attr(state$formula, "jamovi_comparison_note")
+  attr(plot, "jamovi_comparison_note") = note
+  plot
 }

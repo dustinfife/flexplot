@@ -148,7 +148,10 @@ children:
                 isTarget: true
                 enable: (compare)
           - type: TargetLayoutBox
-            label: Grouping (magnet plots only; otherwise use panels)
+            name: comparisonGroupingLayout
+            label: Magnet comparison grouping
+            useSingleCell: true
+            contentLink: (compare)
             children:
               - type: VariablesListBox
                 name: comparisonGroup

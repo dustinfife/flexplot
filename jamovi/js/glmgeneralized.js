@@ -4,9 +4,7 @@ const updateTerms = require('./model-terms');
 const updateGhostControls = require('./glm-ghosts');
 const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
     selections:['plotX', 'plotPanels', 'plotGroup'], exclusive:true, requireX:true, extra:'quadratic'},
-    {supplier:'comparisonPlotSupplier', models:['modelTerms','comparisonTerms'],
-    selections:['comparisonX','comparisonPanels'], exclusive:true, requireX:true,
-    extra:['quadratic','comparisonQuadratic']}];
+    updateTerms.comparisonLayout('comparisonPlotSupplier',['quadratic','comparisonQuadratic'])];
 const synchronize = function(ui, context, added, changed = null) {
     // Host options arrive separately during restoration; do not prune partial state.
     if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;

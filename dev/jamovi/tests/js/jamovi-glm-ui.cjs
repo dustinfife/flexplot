@@ -86,7 +86,9 @@ const {pathToFileURL} = require('node:url');
         };
         const control = initial => {
             let value = initial;
-            return {value: () => value, setValue: updated => {value = updated;}};
+            const properties={};
+            return {value: () => value, setValue: updated => {value = updated;},
+                setPropertyValue:(name,value)=>{properties[name]=value;},getPropertyValue:name=>properties[name]};
         };
         let depth = 0;
         const ui = {preds:control([]), modelTerms:control(null), comparisonTerms:control(null),
@@ -104,6 +106,7 @@ const {pathToFileURL} = require('node:url');
             ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
         }
 
+        if (analysis === 'glmbasic') ui.comparisonMagnet = control(false);
         if (generalized || analysis === 'glmbasic') ui.mainEffects = control(null); // Legacy saved option; no visible control.
         if (generalized) { ui.polynomials.setValue(false); ui.comparisonPolynomials.setValue(false); }
         if (analysis === 'glmbasic') {
@@ -182,6 +185,25 @@ const {pathToFileURL} = require('node:url');
             assert.equal(second.controls.find(control => control.name === 'comparisonMainSupplier').contentLink,undefined);
             if (runtime) for (const definition of [primary,builder,second])
                 require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),definition,null,compilerPath);
+        }
+        if (analysis === 'glmbasic' || analysis === 'mixedmodel') {
+            const descend = items => items.flatMap(item=>[item,...descend(item.controls || [])]);
+            const groupName = analysis === 'glmbasic' ? 'comparisonGroup' : 'plotGroup';
+            const target = descend(compiled.view.layout.controls).find(item=>(item.controls || []).some(child=>child.name===groupName));
+            assert.equal(target.useSingleCell,true);
+            assert.equal(target.contentLink,analysis === 'glmbasic' ? '(compare)' : '(!compare || predictionType:cas)');
+            if (runtime) require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),target,null,compilerPath);
+        }
+        if (analysis === 'glmbasic') {
+            ui.preds.setValue(['x','z']);ui.out.setValue('binary');ui.compare.setValue(true);
+            ui.modelTerms.setValue([['x'],['z']]);ui.comparisonTerms.setValue([['x']]);
+            fire('view','updated');
+            assert.equal(ui.comparisonGroupingLayout.getPropertyValue('contentLink'),false);
+            ui.comparisonMagnet.setValue(true);fire('view','updated');
+            assert.equal(ui.comparisonGroupingLayout.getPropertyValue('contentLink'),true);
+            ui.compare.setValue(false);fire('compare','changed');
+            assert.equal(ui.comparisonGroupingLayout.getPropertyValue('contentLink'),false);
+            ui.preds.setValue([]);ui.modelTerms.setValue(null);ui.comparisonTerms.setValue(null);ui.interactionSpecVersion.setValue(0);view.workspace={};
         }
         if (analysis === 'mixedmodel' || analysis === 'glmgeneralized') {
             if (runtime) {

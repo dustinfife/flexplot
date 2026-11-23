@@ -314,3 +314,27 @@ presentation until recalculated; this change does not rewrite saved documents
 or introduce a migration framework. The focused presentation tests exercise
 restored options, reordered cached records and the installed group/Html rendering
 methods, including preservation of annotation addresses.
+
+### Comparison visualization roles
+
+LM and GLM use the shared JavaScript comparison-layout descriptor for x/panel
+eligibility. Ordinary comparisons reserve colour, line type and symbol roles for
+model identity. R independently resolves these layouts through
+`jamovi_comparison_layout()`. Unsupported saved grouping choices are retained:
+the comparison uses x and explicitly selected panels only, accompanied by a
+visible explanation. No grouping choice is implicitly moved into panels.
+
+LM retains category grouping for native magnet comparisons (observed binary
+outcome and categorical x), where models occupy separate facets. Its hidden
+`comparisonMagnet` capability is recomputed from the fitted common sample and
+published through native options; a stored capability never authorizes a layout
+on the server. This also supports numeric 0/1 outcomes without relying on
+categorical column metadata. The whole magnet-group target is hidden otherwise.
+
+Mixed Models hides its shared grouping target for population/cluster comparison
+overlays, while retaining grouping for standalone and CAS views. Cluster-specific
+comparisons require the cluster variable explicitly in panels. Invalid layouts
+retain estimates/statistics and show a terminal diagnostic; CAS directional ghosts
+are unchanged. Validated fallback plots reuse their cached cluster selection.
+These restrictions do not add independent Mixed visualization settings or change
+core prediction geometry, confidence limits, plot-label stores, or result order.

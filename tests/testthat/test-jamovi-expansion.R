@@ -65,11 +65,11 @@ test_that("Linear Model renders chosen single-model grouping and preserves compa
     modelTerms=list("x", "a"), comparisonTerms=list("z"), comparisonX="x", comparisonGroup="a")
   analysis = flexplot:::glmbasicClass$new(options=options, data=small)
   expect_true(analysis$run())
-  # TRUE completes the diagnostic image; the unsupported layout is still an error.
+  # Unsupported legacy grouping uses an explicitly explained ungrouped layout.
   expect_true(analysis$.__enclos_env__$private$.comparisonplot(analysis$results$comparisonplot))
-  expect_identical(analysis$results$comparisonplot$status,"error")
-  expect_null(analysis$results$comparisonplot$state)
-  expect_match(analysis$results$comparisonplot$.__enclos_env__$private$.error, "panels")
+  expect_identical(analysis$results$comparisonplot$status,"complete")
+  expect_identical(analysis$options$comparisonGroup,"a")
+  expect_match(analysis$results$explanation$content,"x and panels only",fixed=TRUE)
 })
 
 test_that("Gamma and Negative Binomial tables and plotted intervals use the actual fitted model", {

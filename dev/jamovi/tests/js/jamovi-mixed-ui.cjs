@@ -58,5 +58,15 @@ module.exports = function(ui, view, fire, assert) {
     ui.samplePolicyVersion.setValue = value => { changes++; setRevision(value); };
     fire('view','updated');
     assert.equal(changes, 0, 'A current saved comparison must not request another recalculation');
+    ui.preds.setValue(['x','a']); ui.modelTerms.setValue([['x'],['a']]);
+    ui.plotX.setValue('x'); ui.plotGroup.setValue('a'); ui.compare.setValue(true);
+    for (const type of ['population','cluster','cas']) {
+        ui.predictionType.setValue(type);fire('predictionType','changed');
+        assert.equal(ui.plotGroup.value(),'a','Retain the shared standalone/CAS group');
+        const event={value:'a'};view.handlers.plotGroup_changing.call(view,ui,event);
+        assert.equal(event.cancel,type==='cas' ? undefined : true);
+    }
+    ui.compare.setValue(false);fire('compare','changed');
+    const event={value:'a'};view.handlers.plotGroup_changing.call(view,ui,event);assert.equal(event.cancel,undefined);
     console.log('PASS: Mixed Model initialization, independent random slopes, quadratics, role synchronization and restored layouts.');
 };

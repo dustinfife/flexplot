@@ -1,7 +1,9 @@
 'use strict';
 
 const updateTerms = require('./model-terms');
-const layouts = [{"supplier": "plotSupplier", "models": ["modelTerms"], "selections": ["plotX", "plotPanels", "plotGroup"], "extra": "quadratic"}, {"supplier": "comparisonPlotSupplier", "models": ["modelTerms", "comparisonTerms"], "selections": ["comparisonX", "comparisonPanels", "comparisonGroup"], "extra": ["quadratic", "comparisonQuadratic"]}];
+const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
+    selections:['plotX','plotPanels','plotGroup'], extra:'quadratic'},
+    updateTerms.comparisonLayout('comparisonPlotSupplier',['quadratic','comparisonQuadratic'],false)];
 // Native `changing` events can reject a transfer before it changes an option.
 // Restored options bypass this guard and remain subject to R's layout validation.
 const plotRoleChanging = (ui, context, name, event) => {
@@ -57,6 +59,7 @@ const synchronize = (ui, context, added, changed = null) => {
         const second = (ui.comparisonTerms.value() || []).filter(term => term.length === 1).map(term => term[0]);
         if (JSON.stringify(ui.comparisonMainEffects.value()) !== JSON.stringify(second)) ui.comparisonMainEffects.setValue(second);
         ui.comparisonMainSupplier.setValue(utils.valuesToItems(predictors.filter(name => !second.includes(name)), FormatDef.variable));
+        updateTerms.invalidateComparisonMagnet(ui, context);
     } finally {
         try { ui.view.model.options.endEdit(); }
         finally { context.workspace.lmSynchronizing = false; }
@@ -64,6 +67,12 @@ const synchronize = (ui, context, added, changed = null) => {
 };
 
 module.exports = {
+    out_changed: function(ui) { synchronize(ui, this, false); },
+    comparisonGroup_changing: function(ui, event) {
+        updateTerms.groupChanging(ui.compare.value() === true &&
+            !!ui.view.model.options.getOption('comparisonMagnet') &&
+            ui.view.model.options.getOption('comparisonMagnet').getValue() === true, event);
+    },
     plotX_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotX', event); },
     plotPanels_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotPanels', event); },
     plotGroup_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotGroup', event); },

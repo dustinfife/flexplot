@@ -79,6 +79,12 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
         let enabled = false;
         const control = create(true);
         const grid = new Grid(); render.call(control,grid,0,0,{});
+        if (definition.name === 'comparisonGroupingLayout') {
+            for (const available of [false,true,false,true]) {
+                control.setPropertyValue('contentLink',available);
+                assert.equal(control._cell.visible,available,'Server capability must hide/show the entire native target');
+            }
+        }
         const engine = {_resources:{interactionBuilder:control,[name]:{value:()=>enabled}},actions:[],
             addDirectAction(name,action){this.actions.push(action);}};
         for (const signature of ['_nextNonWhiteChar(e,t){','_arrayUnique(e){','_resolveBindPart(e,t){',
@@ -88,6 +94,22 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
         for (enabled of [false,true,false,true]) {
             for (const action of engine.actions) action.execute(engine._resources);
             assert.equal(control._cell.visible,enabled);
+        }
+        return;
+    }
+    if (['(compare && comparisonMagnet)','(!compare || predictionType:cas)'].includes(definition.contentLink)) {
+        const state={compare:false,comparisonMagnet:false,predictionType:'cluster'};
+        const control=create(true),grid=new Grid();render.call(control,grid,0,0,{});
+        const engine={_resources:{comparisonGrouping:control,...Object.fromEntries(Object.keys(state).map(name=>[name,{value:()=>state[name]}]))},actions:[],
+            addDirectAction(name,action){this.actions.push(action);}};
+        for (const signature of ['_nextNonWhiteChar(e,t){','_arrayUnique(e){','_resolveBindPart(e,t){',
+            '_resolveBinding(e,t){','bindActionParams(e,t,s){','bindingsToActions(){'])
+            engine[signature.slice(0,signature.indexOf('('))]=method(signature);
+        engine.bindingsToActions();
+        for (const compare of [false,true]) for (const magnet of [false,true]) for (const type of ['population','cluster','cas']) {
+            Object.assign(state,{compare,comparisonMagnet:magnet,predictionType:type});
+            for (const action of engine.actions) action.execute(engine._resources);
+            assert.equal(control._cell.visible,definition.contentLink.includes('comparisonMagnet') ? compare && magnet : !compare || type==='cas');
         }
         return;
     }

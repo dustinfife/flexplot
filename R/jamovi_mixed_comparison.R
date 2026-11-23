@@ -151,7 +151,11 @@ jamovi_mixed_comparison_report = function(results, state, includeP=FALSE, inform
 
 jamovi_mixed_comparison_plot = function(state, x=NULL, panels=NULL, group=NULL, type="cluster", clusters=3, casGhost=FALSE) {
   layout = list(x=x,panels=panels,group=group,type=type,clusters=clusters,casGhost=casGhost)
-  if (!is.null(state$displayPlot) && identical(state$displayLayout,layout)) return(state$displayPlot)
+  # Validate legacy grouped caches once; reuse validated fallbacks so rendering
+  # preserves the same selected clusters as the analysis preview.
+  validated = !is.null(attr(state$displayPlot,"jamovi_comparison_note"))
+  if ((!length(group) || type=="cas" || validated) && !is.null(state$displayPlot) &&
+      identical(state$displayLayout,layout)) return(state$displayPlot)
   if (type == "cas") {
     return(jamovi_mixed_cas_comparison(state,x,panels,group,casGhost))
   }
@@ -163,16 +167,17 @@ jamovi_mixed_comparison_plot = function(state, x=NULL, panels=NULL, group=NULL, 
   if (!identical(extract_random_term(state$model1),state$cluster) || !identical(extract_random_term(state$model2),state$cluster))
     stop("The existing mixed-model visualization requires a simple shared grouping-variable name.",call.=FALSE)
   if (identical(x,state$cluster)) stop("Use a predictor on x; place the grouping variable in panels.",call.=FALSE)
-  if (type == "cluster" && !state$cluster %in% c(panels,group)) {
+  if (type == "cluster" && !state$cluster %in% panels) {
     stop("For cluster-specific comparisons, place the shared grouping variable in panels.",call.=FALSE)
   }
-  formula = jamovi_model_layout(list(state$model1,state$model2),state$data,x,panels,group)
+  formula = jamovi_comparison_layout(list(state$model1,state$model2),state$data,x,panels,group)
   model1 = state$model1; model2 = state$model2
   plot = compare_fits(formula,state$data,model1=model1,model2=model2,re=type=="cluster",
     clusters=clusters,report.se=FALSE,pred.type="response")
   plot = jamovi_comparison_style(plot)
   plot = plot + ggplot2::labs(subtitle=if (type == "cluster")
     "Model 1 vs Model 2: cluster-specific predictions" else "Model 1 vs Model 2: population-level predictions")
+  attr(plot,"jamovi_comparison_note") = attr(formula,"jamovi_comparison_note")
   attr(plot,"jamovi_mixed_comparison") = TRUE
   plot
 }
