@@ -289,3 +289,28 @@ serialization; mixed comparison restoration, p-column visibility and ghost notes
 Model 2 table visibility; dynamic plot labels; and saved term-builder defaults.
 These eleven tests retain all 199 original assertions. Together with the seven
 UI/source tests, all 597 relocated assertions are mandatory in both commands.
+
+### Modeling result specifications and ordering
+
+LM and GLM render a top-level `specification` Html result from the fitted model
+objects, including both formulas during comparison. GLM also identifies the
+fitted family/link and binomial success event. Mixed Models retains its existing
+single/comparison specification results, including random terms and estimation
+methods; only one specification is visible at a time.
+
+The declared sequence is specification and fitting warnings, main image and its
+existing explanation, estimates, comparison image and its existing explanation,
+comparison statistics, then optional LM residual diagnostics. Mixed Models still
+uses its existing mutually exclusive standalone/comparison visualization modes.
+Result names, options, table schemas, image sizes and plot calculations are
+preserved. Only the redundant LM/GLM comparison-table formula notes have moved
+to the top-level specification.
+
+Native `Group$fromProtoBuf()` restores elements by name, and the installed
+results renderer uses named result paths for annotation addresses. Reordering
+therefore preserves the existing result and annotation identities. Dynamic
+tables are rebuilt on recalculation. Cached saved output may retain its previous
+presentation until recalculated; this change does not rewrite saved documents
+or introduce a migration framework. The focused presentation tests exercise
+restored options, reordered cached records and the installed group/Html rendering
+methods, including preservation of annotation addresses.

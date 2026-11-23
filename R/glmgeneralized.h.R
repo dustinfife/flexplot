@@ -395,15 +395,16 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         waiting = function() private$.items[["waiting"]],
-        coefficients = function() private$.items[["coefficients"]],
-        irt = function() private$.items[["irt"]],
-        probabilities = function() private$.items[["probabilities"]],
+        specification = function() private$.items[["specification"]],
         explanation = function() private$.items[["explanation"]],
         plot = function() private$.items[["plot"]],
         plotExplanation = function() private$.items[["plotExplanation"]],
-        comparison = function() private$.items[["comparison"]],
+        coefficients = function() private$.items[["coefficients"]],
+        irt = function() private$.items[["irt"]],
+        probabilities = function() private$.items[["probabilities"]],
         comparisonplot = function() private$.items[["comparisonplot"]],
-        comparisonPlotExplanation = function() private$.items[["comparisonPlotExplanation"]]),
+        comparisonPlotExplanation = function() private$.items[["comparisonPlotExplanation"]],
+        comparison = function() private$.items[["comparison"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -419,6 +420,29 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="waiting",
                 title="",
                 content="<p>Select an outcome and predictors, and specify at least one model term.</p>"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="specification",
+                title="Model specification",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanation",
+                title="Interpretation",
+                visible=FALSE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Model visualization",
+                width=700,
+                height=450,
+                visible=FALSE,
+                renderFun=".plot"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="plotExplanation",
+                title="",
+                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="coefficients",
@@ -465,22 +489,17 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="Probability",
                         `title`="Probability",
                         `type`="number"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="explanation",
-                title="Interpretation",
-                visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
-                title="Model visualization",
+                name="comparisonplot",
+                title="Model comparison plot",
                 width=700,
                 height=450,
                 visible=FALSE,
-                renderFun=".plot"))
+                renderFun=".comparisonplot"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="plotExplanation",
+                name="comparisonPlotExplanation",
                 title="",
                 visible=FALSE))
             self$add(jmvcore::Table$new(
@@ -521,20 +540,7 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="p",
                         `title`="p (nested LRT)",
                         `type`="number",
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="comparisonplot",
-                title="Model comparison plot",
-                width=700,
-                height=450,
-                visible=FALSE,
-                renderFun=".comparisonplot"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="comparisonPlotExplanation",
-                title="",
-                visible=FALSE))}))
+                        `format`="zto,pvalue"))))}))
 
 glmgeneralizedBase = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "glmgeneralizedBase",

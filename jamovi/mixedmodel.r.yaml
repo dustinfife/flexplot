@@ -24,6 +24,17 @@ items:
     title: Model diagnostics
     type: Html
     visible: false
+  - name: plot
+    title: Model visualization
+    type: Image
+    width: 700
+    height: 450
+    visible: false
+    renderFun: .plot
+  - name: plotExplanation
+    title: Visualization guide
+    type: Html
+    visible: false
   - name: model1Heading
     title: ''
     type: Html
@@ -142,18 +153,18 @@ items:
       - name: term
         title: Random-effect term
         type: text
-  - name: plotExplanation
-    title: Visualization guide
+  - name: comparisonHeading
+    title: ''
     type: Html
     visible: false
-  - name: plot
-    title: Model visualization
+  - name: comparisonplot
+    title: Mixed-model comparison
     type: Image
     width: 700
     height: 450
     visible: false
-    renderFun: .plot
-  - name: comparisonHeading
+    renderFun: .comparisonplot
+  - name: comparisonPlotNote
     title: ''
     type: Html
     visible: false
@@ -188,15 +199,4 @@ items:
         type: number
         format: zto,pvalue
         visible: (includeP)
-  - name: comparisonplot
-    title: Mixed-model comparison
-    type: Image
-    width: 700
-    height: 450
-    visible: false
-    renderFun: .comparisonplot
-  - name: comparisonPlotNote
-    title: ''
-    type: Html
-    visible: false
 ...

@@ -57,9 +57,6 @@ jamovi_glm_generalized_comparison_table = function(table, state) {
     }
     table$addRow(rowKey=i, values=row)
   }
-  formulas = vapply(list(state$model1, state$model2), function(model)
-    paste(deparse(stats::formula(model)), collapse=" "), character(1))
-  table$setNote("models", paste(paste("Model 1:", formulas[1]), paste("Model 2:", formulas[2]), sep="\n\n"))
   table$setNote("population", "Same complete observations for both models.")
   table$setNote("bayes", paste("Approximate BIC Bayes factors favor the model on each row over the other model."))
   test_note = if (is.finite(state$p)) "Nested-model likelihood-ratio test (asymptotic chi-square)." else

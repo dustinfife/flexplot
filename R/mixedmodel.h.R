@@ -342,6 +342,8 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         comparisonSpecification = function() private$.items[["comparisonSpecification"]],
         explanation = function() private$.items[["explanation"]],
         diagnostics = function() private$.items[["diagnostics"]],
+        plot = function() private$.items[["plot"]],
+        plotExplanation = function() private$.items[["plotExplanation"]],
         model1Heading = function() private$.items[["model1Heading"]],
         fixed = function() private$.items[["fixed"]],
         random = function() private$.items[["random"]],
@@ -350,12 +352,10 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         fixed2 = function() private$.items[["fixed2"]],
         random2 = function() private$.items[["random2"]],
         correlations2 = function() private$.items[["correlations2"]],
-        plotExplanation = function() private$.items[["plotExplanation"]],
-        plot = function() private$.items[["plot"]],
         comparisonHeading = function() private$.items[["comparisonHeading"]],
-        comparison = function() private$.items[["comparison"]],
         comparisonplot = function() private$.items[["comparisonplot"]],
-        comparisonPlotNote = function() private$.items[["comparisonPlotNote"]]),
+        comparisonPlotNote = function() private$.items[["comparisonPlotNote"]],
+        comparison = function() private$.items[["comparison"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -390,6 +390,19 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="diagnostics",
                 title="Model diagnostics",
+                visible=FALSE))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Model visualization",
+                width=700,
+                height=450,
+                visible=FALSE,
+                renderFun=".plot"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="plotExplanation",
+                title="Visualization guide",
                 visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -543,20 +556,20 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="plotExplanation",
-                title="Visualization guide",
+                name="comparisonHeading",
+                title="",
                 visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
-                title="Model visualization",
+                name="comparisonplot",
+                title="Mixed-model comparison",
                 width=700,
                 height=450,
                 visible=FALSE,
-                renderFun=".plot"))
+                renderFun=".comparisonplot"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="comparisonHeading",
+                name="comparisonPlotNote",
                 title="",
                 visible=FALSE))
             self$add(jmvcore::Table$new(
@@ -598,20 +611,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="p (fixed-effect LRT)",
                         `type`="number",
                         `format`="zto,pvalue",
-                        `visible`="(includeP)"))))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="comparisonplot",
-                title="Mixed-model comparison",
-                width=700,
-                height=450,
-                visible=FALSE,
-                renderFun=".comparisonplot"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="comparisonPlotNote",
-                title="",
-                visible=FALSE))}))
+                        `visible`="(includeP)"))))}))
 
 mixedmodelBase = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "mixedmodelBase",

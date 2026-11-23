@@ -112,6 +112,8 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
               return(invisible(NULL))
             }
           }
+          jamovi_model_specification(self$results$specification,
+            if (self$options$compare) list(comparison$model1, comparison$model2) else list(model))
           jamovi_lm_coefficients(self$results$glmcat,model,self$options$includeP)
           self$results$glmcat$setVisible(self$options$estimates)
           output = list(formula=formula,data=data)

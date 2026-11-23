@@ -49,10 +49,6 @@ jamovi_glm_comparison_table = function(table, state) {
     if (i == 1L && !is.na(state$p)) row$p = state$p
     table$addRow(rowKey=i, values=row)
   }
-  formulas = vapply(list(state$model1, state$model2), function(model)
-    paste(deparse(stats::formula(model)), collapse=" "), character(1))
-  table$setNote("models", paste(paste("Model 1:", formulas[1]),
-                                paste("Model 2:", formulas[2]), sep="\n\n"))
   table$addFootnote(rowNo=1, col="n", note="Both models use the same complete observations across their combined variables.")
   table$addFootnote(rowNo=1, col="bayes.factor", note=paste(
     "These are approximate Bayes factors derived from BIC.",

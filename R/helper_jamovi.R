@@ -39,6 +39,28 @@ ifelse_null = function(object, statement, true_option=object, false_option=NULL)
   return(false_option)
 }
 
+# Report fitted formulas as display-only text; never reconstruct from UI selections.
+jamovi_model_specification = function(result, models) {
+  paragraphs = vapply(seq_along(models), function(i) {
+    model = models[[i]]
+    formula = paste(deparse(stats::formula(model), backtick=TRUE, width.cutoff=500L), collapse=" ")
+    details = ""
+    if (inherits(model, "glm")) {
+      details = paste0("; Family: ", model$family$family, "; Link: ", model$family$link)
+      if (identical(model$family$family, "binomial")) {
+        response = stats::model.response(stats::model.frame(model))
+        success = if (is.factor(response)) levels(response)[2] else "1"
+        details = paste0(details, "; Success event: ", success)
+      }
+    }
+    paste0("<p><strong>Model ", i, ":</strong> ", jamovi_html_escape(formula),
+      jamovi_html_escape(details), "</p>")
+  }, character(1))
+  result$setContent(paste0(paragraphs, collapse=""))
+  result$setVisible(TRUE)
+  invisible(NULL)
+}
+
 # Reset content without choosing visibility, columns, waiting text or plot paths.
 jamovi_result_reset_status = function(result) {
   result$setError("")

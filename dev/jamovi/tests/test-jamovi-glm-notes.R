@@ -19,7 +19,7 @@ test_that("serialized GLM notes render compactly through the installed native ta
     add(analysis$results$irt,paste(family,"IRT"))
     add(analysis$results$probabilities,paste(family,"probabilities"))
     add(analysis$results$comparison,paste(family,"comparison"),
-      c("Model 1:","Model 2:","Approximate BIC Bayes factors","each row over the other model"))
+      c("Approximate BIC Bayes factors","each row over the other model"), forbidden=c("Model 1:","Model 2:"))
     expect_true(jamovi_reporting_update(analysis,list(showEstimates=FALSE,showIRT=FALSE,showProbabilities=FALSE)))
     for (name in c("coefficients","irt","probabilities")) {
       expect_length(analysis$results[[name]]$notes,0L)

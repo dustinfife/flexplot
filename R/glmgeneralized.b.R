@@ -150,6 +150,8 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
           conditionMessage(state)), error=TRUE)
         return(invisible(NULL))
       }
+      jamovi_model_specification(self$results$specification,
+        if (is.null(comparison)) list(state$model) else list(comparison$model1, comparison$model2))
       if (!is.null(comparison)) {
         self$results$comparison$setVisible(TRUE)
         jamovi_glm_generalized_comparison_table(self$results$comparison, comparison)

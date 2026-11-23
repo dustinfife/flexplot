@@ -19,7 +19,8 @@ test_that("jamovi comparison legends distinguish models without changing predict
     expect_equal(sort(built$data[[line]]$y), sort(plot$layers[[line]]$data$prediction))
     expect_no_warning(ggplot2::ggplotGrob(plot))
     notes = analysis$results$comparison$notes
-    expect_match(notes$models$note, "\n\nModel 2:")
+    expect_null(notes$models)
+    expect_match(analysis$results$specification$content, "<strong>Model 2:</strong>", fixed=TRUE)
     expect_match(notes$bayes$note, "BIC")
   }
   options = flexplot:::glmbasicOptions$new(out="y",preds=c("x","a"),compare=TRUE,

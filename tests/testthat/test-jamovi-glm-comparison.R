@@ -49,9 +49,9 @@ test_that("jamovi comparison p-value cells are numeric or genuinely blank and Ba
     expect_identical(values, as.numeric(state$statistics$bayes.factor))
     bic = c(BIC(state$model1), BIC(state$model2))
     expect_equal(values, round(exp(c(bic[2]-bic[1], bic[1]-bic[2])/2), 3))
-    models = table$notes$models$note
-    expect_length(strsplit(models, "\n\n", fixed=TRUE)[[1]], 2L)
-    expect_match(models, "^Model 1:.*\n\nModel 2:")
+    expect_null(table$notes$models)
+    expect_match(analysis$results$specification$content, "<strong>Model 1:</strong>", fixed=TRUE)
+    expect_match(analysis$results$specification$content, "</p><p><strong>Model 2:</strong>", fixed=TRUE)
     notes = table$footnotes
     bayes = notes[grepl("Bayes factors", notes, fixed=TRUE)]
     expect_length(bayes, 1L)

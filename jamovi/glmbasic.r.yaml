@@ -9,18 +9,14 @@ items:
       title: ''
       type: Html
       visible: false
+    - name: specification
+      title: Model specification
+      type: Html
+      visible: false
     - name: explanation
       title: ''
       type: Html
       visible: false
-    - name: assumpplot
-      title: Residual (diagnostic) plots
-      type: Image
-      width:  600
-      height: 400
-      renderFun: .assumpplot       
-      visible: (graphicassump)
-      
     - name: plot
       title: Analysis plot
       type: Image
@@ -28,8 +24,6 @@ items:
       height: 400
       renderFun: .plot 
       visible: (graphic)
-      
-      
     - name: glmcat
       title: Coefficient estimates
       type: Table
@@ -64,7 +58,6 @@ items:
           title: Status
           type: text
           visible: false
-
     - name: factorMeans
       title: Conditional factor means
       type: Table
@@ -87,7 +80,6 @@ items:
           superTitle: '95% Confidence Interval'
           type: number
       visible: false
-      
     - name:  diff
       title: Difference between factor levels for categorical predictors
       type: Table
@@ -113,7 +105,6 @@ items:
           title: "Cohen's d"
           type: number
       visible: false
-          
     - name:  rsq
       title: R² and semi-partial R² estimates
       type: Table
@@ -123,7 +114,7 @@ items:
           type: text                     
         - name: Estimate
           type: number                                                          
-      visible: (estimates)   
+      visible: (estimates)
     - name: comparisonplot
       title: Model comparison plot
       type: Image
@@ -131,7 +122,6 @@ items:
       height: 450
       renderFun: .comparisonplot
       visible: (compare)
-
     - name: comparison
       title: Model comparison statistics
       type: Table
@@ -162,4 +152,11 @@ items:
         - name: adj.rsq
           title: Adjusted R-squared
           type: number
+    - name: assumpplot
+      title: Residual (diagnostic) plots
+      type: Image
+      width:  600
+      height: 400
+      renderFun: .assumpplot
+      visible: (graphicassump)
 ...

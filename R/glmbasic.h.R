@@ -376,15 +376,16 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         waiting = function() private$.items[["waiting"]],
+        specification = function() private$.items[["specification"]],
         explanation = function() private$.items[["explanation"]],
-        assumpplot = function() private$.items[["assumpplot"]],
         plot = function() private$.items[["plot"]],
         glmcat = function() private$.items[["glmcat"]],
         factorMeans = function() private$.items[["factorMeans"]],
         diff = function() private$.items[["diff"]],
         rsq = function() private$.items[["rsq"]],
         comparisonplot = function() private$.items[["comparisonplot"]],
-        comparison = function() private$.items[["comparison"]]),
+        comparison = function() private$.items[["comparison"]],
+        assumpplot = function() private$.items[["assumpplot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -402,17 +403,14 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="specification",
+                title="Model specification",
+                visible=FALSE))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="explanation",
                 title="",
                 visible=FALSE))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="assumpplot",
-                title="Residual (diagnostic) plots",
-                width=600,
-                height=400,
-                renderFun=".assumpplot",
-                visible="(graphicassump)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -470,26 +468,26 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Conditional factor means",
                 columns=list(
                     list(
-                        `name`="var", 
-                        `title`="Variable", 
+                        `name`="var",
+                        `title`="Variable",
                         `type`="text"),
                     list(
-                        `name`="levels", 
-                        `title`="Level", 
+                        `name`="levels",
+                        `title`="Level",
                         `type`="text"),
                     list(
-                        `name`="means", 
-                        `title`="Estimate", 
+                        `name`="means",
+                        `title`="Estimate",
                         `type`="number"),
                     list(
-                        `name`="lower", 
-                        `title`="Lower", 
-                        `superTitle`="95% Confidence Interval", 
+                        `name`="lower",
+                        `title`="Lower",
+                        `superTitle`="95% Confidence Interval",
                         `type`="number"),
                     list(
-                        `name`="upper", 
-                        `title`="Upper", 
-                        `superTitle`="95% Confidence Interval", 
+                        `name`="upper",
+                        `title`="Upper",
+                        `superTitle`="95% Confidence Interval",
                         `type`="number")),
                 visible=FALSE))
             self$add(jmvcore::Table$new(
@@ -498,30 +496,30 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Difference between factor levels for categorical predictors",
                 columns=list(
                     list(
-                        `name`="variables", 
-                        `title`="Variable", 
+                        `name`="variables",
+                        `title`="Variable",
                         `type`="text"),
                     list(
-                        `name`="comparison", 
-                        `title`="Comparison", 
+                        `name`="comparison",
+                        `title`="Comparison",
                         `type`="text"),
                     list(
-                        `name`="diff", 
-                        `title`="Difference", 
+                        `name`="diff",
+                        `title`="Difference",
                         `type`="number"),
                     list(
-                        `name`="lower", 
-                        `title`="Lower", 
-                        `superTitle`="95% Confidence Interval", 
+                        `name`="lower",
+                        `title`="Lower",
+                        `superTitle`="95% Confidence Interval",
                         `type`="number"),
                     list(
-                        `name`="upper", 
-                        `title`="Upper", 
-                        `superTitle`="95% Confidence Interval", 
+                        `name`="upper",
+                        `title`="Upper",
+                        `superTitle`="95% Confidence Interval",
                         `type`="number"),
                     list(
-                        `name`="cohensd", 
-                        `title`="Cohen's d", 
+                        `name`="cohensd",
+                        `title`="Cohen's d",
                         `type`="number")),
                 visible=FALSE))
             self$add(jmvcore::Table$new(
@@ -530,11 +528,11 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="R\u00B2 and semi-partial R\u00B2 estimates",
                 columns=list(
                     list(
-                        `name`="var", 
-                        `title`="Source", 
+                        `name`="var",
+                        `title`="Source",
                         `type`="text"),
                     list(
-                        `name`="Estimate", 
+                        `name`="Estimate",
                         `type`="number")),
                 visible="(estimates)"))
             self$add(jmvcore::Image$new(
@@ -552,38 +550,46 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(compare)",
                 columns=list(
                     list(
-                        `name`="model", 
-                        `title`="Model", 
+                        `name`="model",
+                        `title`="Model",
                         `type`="text"),
                     list(
-                        `name`="n", 
-                        `title`="N", 
+                        `name`="n",
+                        `title`="N",
                         `type`="integer"),
                     list(
-                        `name`="aic", 
-                        `title`="AIC", 
+                        `name`="aic",
+                        `title`="AIC",
                         `type`="number"),
                     list(
-                        `name`="bic", 
-                        `title`="BIC", 
+                        `name`="bic",
+                        `title`="BIC",
                         `type`="number"),
                     list(
-                        `name`="bayes.factor", 
-                        `title`="BIC Bayes factor", 
+                        `name`="bayes.factor",
+                        `title`="BIC Bayes factor",
                         `type`="number"),
                     list(
-                        `name`="p", 
-                        `title`="p (nested F-test)", 
-                        `type`="number", 
+                        `name`="p",
+                        `title`="p (nested F-test)",
+                        `type`="number",
                         `format`="zto,pvalue"),
                     list(
-                        `name`="rsq", 
-                        `title`="R-squared", 
+                        `name`="rsq",
+                        `title`="R-squared",
                         `type`="number"),
                     list(
-                        `name`="adj.rsq", 
-                        `title`="Adjusted R-squared", 
-                        `type`="number"))))}))
+                        `name`="adj.rsq",
+                        `title`="Adjusted R-squared",
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="assumpplot",
+                title="Residual (diagnostic) plots",
+                width=600,
+                height=400,
+                renderFun=".assumpplot",
+                visible="(graphicassump)"))}))
 
 glmbasicBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "glmbasicBase",
