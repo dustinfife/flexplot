@@ -25,6 +25,10 @@ model_ghost_expect_copy = function(plot, baseline, formula) {
   is_source = rep(TRUE,nrow(ghost$data))
   for (name in given) is_source = is_source & as.character(ghost$data[[name]])==as.character(source[[name]][1])
   expect_false(any(is_source))
+  metadata = attr(plot,"ghost_reference")
+  expect_true(metadata$drawable)
+  expect_identical(metadata$levels,lapply(given,function(name)unique(as.character(source[[name]]))))
+  expect_match(flexplot:::jamovi_model_ghost_note(plot),"Dashed gray lines",fixed=TRUE)
   expect_no_warning(ggplot2::ggplotGrob(plot))
 }
 

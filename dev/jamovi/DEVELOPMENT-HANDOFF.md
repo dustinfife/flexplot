@@ -16,16 +16,16 @@ inspection. Keep stages small and preserve statistical behavior.
 | 5 | Plot-control organization, Modify Plot Labels checkboxes, taller editors, readable dynamic legend descriptions | Complete: `a306b18f` |
 | 5B | Shared ordinary reference-panel ghost lines | Complete: `07a2ed5d` |
 | 6 | Mixed Models estimates, confidence-interval controls, removal of permanently empty fixed-effect p-value columns | Complete: `dedf2a57` |
-| 7 | Compact table notes, targeted native footnotes, conditional comparison-test explanations | Complete; implementation commit resolved below |
-| 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Remaining |
+| 7 | Compact table notes, targeted native footnotes, conditional comparison-test explanations | Complete: `f4cae51a` |
+| 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Complete; implementation commit resolved below |
 | 9 | Independent Mixed Models main/comparison visualizations and label editors | Remaining |
 | 10 | Automatic Binomial/logit selection for eligible binary outcomes, preserving explicit family choices | Remaining |
 | 11 | Final shared-infrastructure review, GUI testing, release preparation | Remaining |
 
-Resolve the Stage 7 implementation commit:
+Resolve the Stage 8 implementation commit:
 
 ```sh
-git log -1 --format='%H %s' --grep='Standardize comparison notes and targeted statistical footnotes'
+git log -1 --format='%H %s' --grep='Explain ghost reference panels and compact plot notes'
 ```
 
 ## Architecture and compatibility
@@ -219,6 +219,68 @@ not every family/invalid/restored configuration; native/R6 checks cover those
 paths. Secondary-monitor placement was unconfirmed. At the user's request all
 review windows were closed, saving pending Stage 1, Stage 2 and scale-check edits.
 The broader GUI, stale E2E inventory and JASP requirements remain outstanding.
+
+## Stage 8 architecture and verification
+
+- Core ghost construction captures `ghost_reference` display metadata from the
+  resolved **source** before replication into destination facets. It records
+  original variable names, prepared display columns, categorical/bin labels,
+  drawable-path status and styling. LM/Mixed supplied-prediction ghosts use the
+  same source metadata helper. Neither pathway infers the source from destination
+  ghost-layer facets. Reference selection and manual overrides are unchanged.
+- Shared notes call the displayed plot's actual facet labeller after saved label
+  edits, then escape its output for HTML. One/two panels, numeric bin labels and
+  customized panel titles/levels therefore agree with the strips. A success note
+  requires two finite distinct x coordinates in the same ghost path; unsupported,
+  missing-reference and empty paths retain the existing failure explanation.
+- Ordinary LM, GLM probability/logit and Mixed population/cluster plots share
+  the concise dashed-gray reference explanation and existing #707070/dashed/
+  1.2/.85 styling. Mixed conditional curves still include their original random
+  effects. Directional CAS retains its separate Model 2 fixed-effects-on-Model 1
+  explanation, gated by the actual directional overlay; ordinary CAS remains
+  deferred to Stage 9.
+- LM adds only `plotExplanation`, immediately after `plot`, and moves its ordinary
+  ghost failure message there without duplication. Existing result/option IDs,
+  table schemas and specifications are retained. GLM/Mixed reuse their existing
+  adjacent explanation results. Hidden plots hide their notes. Named native
+  restoration reuses result objects even when old cached LM output lacks the new
+  Html result; annotation addresses and the Stage 1 order remain stable.
+- Explanation paragraphs use module-owned inline `margin:0 0 4px 0`. Ordinary
+  GLM/Mixed guides and the CAS success note use the same compact paragraphs.
+  Installed native CSS still supplies 12px HTML bottom padding, and host editable
+  annotation/result spacing remains. Image dimensions (LM 600x400; GLM/Mixed
+  existing dimensions), aspect ratios, coordinates, plot margins and global CSS
+  are unchanged. This reduces paragraph whitespace; it does not eliminate all
+  host or image whitespace.
+
+Focused verification passed the existing 446-assertion ordinary model/GLM ghost
+checks and 2,373 core ghost, presentation/restoration and Mixed CAS assertions.
+Additional checks cover source metadata versus actual fitted source curves,
+explicit categorical/prepared-bin references, custom categorical/numeric facet
+labels, same-path finite coordinates, hidden/off/unavailable ghosts, repeated
+valid/invalid/valid changes, and conditional CAS notes (143 assertions in the
+final focused note run; 111 in the updated shared ordinary-ghost checks). The final installed module
+passed 278 native/protobuf/renderer assertions; all three UI definitions compiled
+and passed their installed native automatic-handler/restoration checks. Native
+HTML rendering retains the compact inline margins and literal escaped text.
+Six complete numerical table comparisons against `f4cae51a` matched exactly;
+comparison predictions/intervals, ordinary ghost coordinates, and Mixed
+population/cluster/CAS plot data also matched. Existing source-curve tests compare
+all base-layer data, supplied intervals, ghost coordinates and facet assignments.
+No full package suite was run and no statistical behavior changed.
+
+The final module was built/installed with source fingerprint
+`9666cbc0c749e8596478a6cfdf0b064995b64337df4e3b7fa6a8be335dae9452`.
+Live jamovi 2.7.41 review used one temporary saved workspace at normal results-pane
+size: LM/GLM/Mixed two-panel notes displayed their actual prepared reference bins,
+notes followed images above estimates, and LM ghost off/on and a custom reference
+facet label updated correctly. GLM's probability explanation and Mixed population
+semantics remained readable. Paragraph gaps were reduced; native padding and
+annotation gaps remain visible. The temporary workspace was saved and closed.
+Secondary-monitor placement could not be confirmed. Live coverage did not include
+every family, cluster/logit/CAS mode or restoration transition; focused native/R6
+checks cover those paths. Stages 9–11, broader GUI coverage, the stale E2E inventory
+and JASP host verification remain outstanding.
 
 ## Verification and outstanding issues
 

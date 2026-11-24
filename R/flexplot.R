@@ -363,6 +363,8 @@ flexplot = function(formula, data=NULL, related=F,
       axis=if (categorical_ghost) NULL else axis
     )
     
+    ghost_metadata = flexplot_ghost_reference_metadata(reference_data,given)
+
     if (use_magnet && is.null(prediction)) {
       
       ghost_data = flexplot_ghost_magnet_data(
@@ -462,6 +464,12 @@ flexplot = function(formula, data=NULL, related=F,
   final = flexplot_sampling_structure(final, data, outcome, axis, sample, related, use_magnet)
 
   final$formula = formula
+
+  if (exists("ghost_metadata",inherits=FALSE)) {
+    ghost_metadata$drawable = flexplot_ghost_drawable(ghost_data,ghost_metadata$columns)
+    ghost_metadata$style = list(colour=ghost.line)
+    attr(final,"ghost_reference") = ghost_metadata
+  }
 
   if (return_data) return(data)
   return(final)

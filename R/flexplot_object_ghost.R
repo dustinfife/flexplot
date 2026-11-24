@@ -226,3 +226,21 @@ flexplot_ghost_smooth_data = function(reference_data,
   # named group (or already uses our internal grouping name).
   flexplot_ghost_coordinates(d_smooth, reference_data)
 }
+
+# Display-only source identity, captured before curves are replicated into facets.
+flexplot_ghost_reference_metadata = function(source, given) {
+  variables = given[!is.na(given)]
+  columns = flexplot_magnet_display_given(source, variables)
+  list(variables=variables, columns=columns,
+    levels=lapply(columns,function(column) unique(as.character(source[[column]]))))
+}
+
+flexplot_ghost_drawable = function(data, panels=character()) {
+  axes = attr(data,"ghost_axes")
+  if (is.null(axes)) axes = c("x","y")
+  if (!all(axes %in% names(data))) return(FALSE)
+  finite = is.finite(data[[axes[1]]]) & is.finite(data[[axes[2]]])
+  groups = intersect(c(panels,attr(data,"ghost_group")),names(data))
+  paths = if (length(groups)) interaction(data[groups],drop=TRUE) else rep(1L,nrow(data))
+  any(vapply(split(data[[axes[1]]][finite],paths[finite]),function(x) length(unique(x))>=2L,logical(1)))
+}

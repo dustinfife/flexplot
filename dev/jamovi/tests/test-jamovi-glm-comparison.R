@@ -32,7 +32,7 @@ test_that("installed native renderers preserve named ordering and annotation add
       reopened$.setReadDatasetSource(reader)
       reopened$.setReadDatasetHeaderSource(reader)
       old = analysis$results$asProtoBuf(status=4L, includeState=FALSE)
-      old$group$elements = Filter(function(item) name=="mixedmodel" || item$name!="specification", rev(old$group$elements))
+      old$group$elements = Filter(function(item) name=="mixedmodel" || !item$name %in% c("specification","plotExplanation"), rev(old$group$elements))
       objects = reopened$results$items
       reopened$results$fromProtoBuf(old, character(), character())
       expect_identical(reopened$results$items, objects)

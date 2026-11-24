@@ -48,8 +48,11 @@ jamovi_model_reference_ghosts = function(plot, formula, ghostLines=FALSE,
     reference = create_ghost_reference(data=as.data.frame(plot$data),given=roles$given,axis=roles$axis,
       ghost.reference=ghost.reference)
     source = flexplot_ghost_reference_data(curves[[1]]$data,roles$given,reference,roles$axis)
+    metadata = flexplot_ghost_reference_metadata(source,roles$given)
     coordinates = flexplot_ghost_prediction_data(source,roles$axis,roles$given,plot$data)
-    plot + flexplot_ghost_layer(coordinates,"gray")
+    result = plot + flexplot_ghost_layer(coordinates,"gray")
+    attr(result,"ghost_reference") = metadata
+    result
   }
   reason = jamovi_model_ghost_reason(plot,formula)
   if (is.null(reason)) {
@@ -59,15 +62,50 @@ jamovi_model_reference_ghosts = function(plot, formula, ghostLines=FALSE,
     } else {
       layers = Filter(function(layer)!is.null(attr(layer$data,"ghost_axes")),ghost$layers)
       valid = vapply(layers,function(layer) {
-        axes = attr(layer$data,"ghost_axes")
-        values = layer$data
-        finite = is.finite(values[[axes[1]]]) & is.finite(values[[axes[2]]])
-        length(unique(values[[axes[1]]][finite]))>=2L
+        flexplot_ghost_drawable(layer$data,flexplot_magnet_display_given(ghost$data,
+          flexplot_axis_given(formula)$given))
       },logical(1))
-      if (any(valid)) return(jamovi_model_style_ghosts(ghost))
+      if (any(valid)) {
+        metadata = attr(ghost,"ghost_reference")
+        metadata$drawable = TRUE
+        metadata$style = list(colour="#707070",linewidth=1.2,alpha=.85,linetype="dashed")
+        ghost = jamovi_model_style_ghosts(ghost)
+        attr(ghost,"ghost_reference") = metadata
+        return(ghost)
+      }
       reason = "The reference panel has no finite prediction curve to copy."
     }
   }
   attr(plot,"jamovi_ghost_note") = paste("Ghost lines unavailable.",reason)
   plot
+}
+
+# Use the same labeller as the displayed facets, after saved label edits apply.
+jamovi_model_ghost_note = function(plot) {
+  failure = attr(plot,"jamovi_ghost_note")
+  if (length(failure)) return(jamovi_plot_note_paragraph(failure))
+  reference = attr(plot,"ghost_reference")
+  if (!isTRUE(reference$drawable) || !length(reference$columns)) return("")
+  labels = as.data.frame(setNames(reference$levels,reference$columns),check.names=FALSE)
+  labeller = plot$facet$params$labeller
+  if (is.null(labeller)) labeller = custom.labeler
+  rendered = labeller(labels)
+  text = vapply(rendered,function(value) paste(gsub("\n"," ",as.character(value)),collapse=", "),character(1))
+  jamovi_plot_note_paragraph(paste0("Dashed gray lines show the fitted curve from the ",
+    paste(text,collapse="; ")," panel."))
+}
+
+jamovi_plot_note_paragraph = function(text) {
+  paste0('<p style="margin:0 0 4px 0;">',jamovi_html_escape(text),"</p>")
+}
+
+jamovi_plot_compact_notes = function(html) {
+  gsub("<p>",'<p style="margin:0 0 4px 0;">',html,fixed=TRUE)
+}
+
+jamovi_model_publish_ghost_note = function(result,plot,visible=TRUE,guide="") {
+  content = paste0(jamovi_plot_compact_notes(guide),jamovi_model_ghost_note(plot))
+  result$setContent(content)
+  result$setVisible(isTRUE(visible) && nzchar(content))
+  invisible(NULL)
 }

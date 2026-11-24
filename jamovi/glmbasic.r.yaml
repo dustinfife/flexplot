@@ -24,6 +24,10 @@ items:
       height: 400
       renderFun: .plot 
       visible: (graphic)
+    - name: plotExplanation
+      title: ''
+      type: Html
+      visible: false
     - name: glmcat
       title: Coefficient estimates
       type: Table

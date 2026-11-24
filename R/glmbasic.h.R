@@ -430,6 +430,7 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         specification = function() private$.items[["specification"]],
         explanation = function() private$.items[["explanation"]],
         plot = function() private$.items[["plot"]],
+        plotExplanation = function() private$.items[["plotExplanation"]],
         glmcat = function() private$.items[["glmcat"]],
         factorMeans = function() private$.items[["factorMeans"]],
         diff = function() private$.items[["diff"]],
@@ -470,6 +471,11 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=400,
                 renderFun=".plot",
                 visible="(graphic)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="plotExplanation",
+                title="",
+                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="glmcat",

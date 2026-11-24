@@ -133,19 +133,17 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
           self$results$plot$setVisible(self$options$graphic)
           self$results$assumpplot$setState(output)
           self$results$assumpplot$setVisible(self$options$graphicassump)
+          self$results$plotExplanation$setVisible(FALSE)
+          self$results$plotExplanation$setContent("")
           if (self$options$graphic) {
             previous_theme = theme_set(theme_bw(base_size=16))
             plot = suppressWarnings(tryCatch(jamovi_lm_display(model,data,self$options),
               error=function(error) NULL,finally=theme_set(previous_theme)))
             if (!is.null(plot)) {
-              note = attr(plot,"jamovi_ghost_note")
-              if (length(note)) {
-                self$results$explanation$setContent(paste0(self$results$explanation$content,
-                  "<p>",jamovi_html_escape(note),"</p>"))
-                self$results$explanation$setVisible(TRUE)
-              }
               info = jamovi_lm_label_info(model,self$options)
               jamovi_plot_sync_labels(self$options,plot,info$layout,info$context)
+              jamovi_model_publish_ghost_note(self$results$plotExplanation,
+                jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout),self$options$graphic)
             }
           }
           if (self$options$compare && self$options$comparisonGraphic) {
@@ -201,7 +199,9 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
                 theme_set(theme_bw(base_size = 16))
                 plot = jamovi_lm_display(mod,data,self$options)
                 info = jamovi_lm_label_info(mod,self$options)
-                print(jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout))
+                plot = jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout)
+                jamovi_model_publish_ghost_note(self$results$plotExplanation,plot,self$options$graphic)
+                print(plot)
                 TRUE
             }, error=function(error) {
                 image$setState(NULL)

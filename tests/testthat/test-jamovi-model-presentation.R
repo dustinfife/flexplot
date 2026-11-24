@@ -85,7 +85,7 @@ test_that("result objects retain order, values and restored content through disp
       modelTerms=list("x", "a"), comparisonTerms=list("x")), small),
     mixed=jamovi_mixed_comparison_analysis())
   orders = list(
-    lm=c("waiting", "specification", "explanation", "plot", "glmcat", "factorMeans", "diff", "rsq", "comparisonplot", "comparison", "assumpplot"),
+    lm=c("waiting", "specification", "explanation", "plot", "plotExplanation", "glmcat", "factorMeans", "diff", "rsq", "comparisonplot", "comparison", "assumpplot"),
     glm=c("waiting", "specification", "explanation", "plot", "plotExplanation", "coefficients", "irt", "probabilities", "comparisonplot", "comparisonPlotExplanation", "comparison"),
     mixed=c("waiting", "specification", "comparisonSpecification", "explanation", "diagnostics", "plot", "plotExplanation", "model1Heading", "fixed", "random", "correlations", "model2Heading", "fixed2", "random2", "correlations2", "comparisonHeading", "comparisonplot", "comparisonPlotNote", "comparison"))
   for (name in names(analyses)) {

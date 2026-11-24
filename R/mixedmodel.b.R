@@ -268,8 +268,9 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           " Curves use the existing marginal prediction method; undisplayed covariates retain the full eligible reference population.",
           " Up to ", self$options$clusters, " randomly selected clusters are displayed."),
         " No prediction confidence bands are calculated.</p>",
-        if (exists("display",inherits=FALSE) && length(attr(display,"jamovi_ghost_note")))
-          paste0("<p>",jamovi_mixed_escape(attr(display,"jamovi_ghost_note")),"</p>")))
+        if (exists("display",inherits=FALSE))
+          jamovi_model_ghost_note(jamovi_mixed_apply_labels(display,self$options$plotLabels))))
+      self$results$plotExplanation$setContent(jamovi_plot_compact_notes(self$results$plotExplanation$content))
       if (!self$options$compare) return(invisible(NULL))
       jamovi_mixed_tables(list(fixed=self$results$fixed2,random=self$results$random2,
         correlations=self$results$correlations2),comparison$second,self$options$includeP,
@@ -317,7 +318,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       if (self$options$comparisonGraphic && !comparison_plot_failed &&
           self$options$predictionType == "cas" && self$options$casGhost &&
           isTRUE(attr(comparison$displayPlot,"jamovi_cas_ghost"))) {
-        self$results$comparisonPlotNote$setContent("<p>Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions.</p>")
+        self$results$comparisonPlotNote$setContent(jamovi_plot_note_paragraph("Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions."))
         self$results$comparisonPlotNote$setVisible(TRUE)
       }
       self$results$plotExplanation$setContent("")
@@ -345,7 +346,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       if (is.null(image$state)) return(FALSE)
       tryCatch({
         plot = jamovi_mixed_display(image$state,self$options)
-        print(jamovi_mixed_apply_labels(plot,self$options$plotLabels))
+        plot = jamovi_mixed_apply_labels(plot,self$options$plotLabels)
+        print(plot)
         TRUE
       }, error=function(error) {
         # jmvcore otherwise labels a failed image with non-null state as rendering.

@@ -25,6 +25,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
         const output=await render(fixture.content,fixture.error);
         assert.ok(text(output).includes(fixture.expected),fixture.name+': diagnostic must be rendered, not only stored in error metadata');
         assert.equal(/<(script|img|svg)\b/i.test(output),false,'Untrusted markup must remain escaped');
+        if(fixture.compact){assert.ok(output.includes('style="margin:0 0 4px 0;"'));assert.equal(output.includes("<p>"),false);}
         if(fixture.literal)assert.ok(text(output).includes(fixture.literal),'Literal variable name must survive HTML escaping');
     }
     const old=await render('','Invalid binomial outcome');

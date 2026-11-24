@@ -4,7 +4,7 @@ test_that("CAS ghost notes follow actual directional lines and clear on option c
     modelTerms=list("x","z"),comparisonTerms=list("z"),casGhost=TRUE)
   expect_true(analysis$run())
   note = analysis$results$comparisonPlotNote
-  expected = "<p>Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions.</p>"
+  expected = flexplot:::jamovi_plot_note_paragraph("Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions.")
   expect_true(note$visible)
   expect_identical(note$content,expected)
   plot = analysis$results$comparisonplot$state$displayPlot

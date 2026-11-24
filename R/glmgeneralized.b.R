@@ -165,7 +165,7 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
           roles = flexplot_axis_given(comparison$formula)
           guide = jamovi_glm_plot_guide(list(model=comparison$model1, models=list(comparison$model1, comparison$model2), data=comparison$data),
             roles$axis[1], roles$given[!is.na(roles$given)], style=self$options$comparisonPlotStyle, scale=self$options$comparisonPlotScale)
-          self$results$comparisonPlotExplanation$setContent(guide)
+          self$results$comparisonPlotExplanation$setContent(jamovi_plot_compact_notes(guide))
           self$results$comparisonPlotExplanation$setVisible(nzchar(guide))
         }
       }
@@ -193,7 +193,7 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
       if (self$options$graphic) {
         guide = tryCatch(jamovi_glm_plot_guide(state, self$options$plotX,
           self$options$plotPanels, self$options$plotGroup, self$options$plotStyle, self$options$plotScale), error=function(error) "")
-        self$results$plotExplanation$setContent(guide)
+        self$results$plotExplanation$setContent(jamovi_plot_compact_notes(guide))
         self$results$plotExplanation$setVisible(nzchar(trimws(guide)))
         # Publish actual plot elements in the host options response. Rendering
         # remains in the existing callbacks; this introduces no fit cache.
@@ -203,6 +203,8 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         if (!is.null(plot)) {
           info = jamovi_glm_label_info(state,self$options)
           jamovi_plot_sync_labels(self$options,plot,info$layout,info$context)
+          jamovi_model_publish_ghost_note(self$results$plotExplanation,
+            jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout),self$options$graphic,guide)
         }
       }
       if (!is.null(comparison) && self$options$comparisonGraphic) {
@@ -234,12 +236,10 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
           ghostLines=self$options$ghostLines)
         guide = jamovi_glm_plot_guide(image$state,self$options$plotX,self$options$plotPanels,
           self$options$plotGroup,self$options$plotStyle,self$options$plotScale)
-        note = attr(plot,"jamovi_ghost_note")
-        if (length(note)) guide = paste0(guide,"<p>",jamovi_mixed_escape(note),"</p>")
-        self$results$plotExplanation$setContent(guide)
-        self$results$plotExplanation$setVisible(nzchar(guide))
         info = jamovi_glm_label_info(image$state,self$options)
-        print(jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout))
+        plot = jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout)
+        jamovi_model_publish_ghost_note(self$results$plotExplanation,plot,self$options$graphic,guide)
+        print(plot)
         TRUE
       }, error=function(error) {
         jamovi_glm_plot_error(image, error)
