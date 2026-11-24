@@ -546,3 +546,9 @@ command compiles all UI definitions and runs source integrations; the known stal
 E2E inventory snapshot can fail that aggregate command and is not a Stage 4 fix.
 Review diffs, run `git diff --check`, commit only the focused stage, and push the
 current branch only when authorized. Verify the remote commit after pushing.
+
+## Stage 11A readiness audit
+
+See [RELEASE-READINESS-AUDIT.md](RELEASE-READINESS-AUDIT.md) for the Stage 10
+baseline on Intel macOS, module build verification, failure triage, and proposed
+GUI and JASP validation. Stage 11A changed development documentation only.
