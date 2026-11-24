@@ -201,4 +201,8 @@ options:
     type: Integer
     default: 0
     hidden: true
+  - name: ghostLines
+    title: Show ghost lines
+    type: Bool
+    default: false
 ...

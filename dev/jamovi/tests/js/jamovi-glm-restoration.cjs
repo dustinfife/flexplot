@@ -33,7 +33,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         packets.push([...queued]); queued.clear();
     }};
     const ui = {view:{model:{options:manager}}};
-    const defaults = {plotLabelEditorVersion:0,modifyPlotLabels:false,modifyComparisonPlotLabels:false,outputOptionsVersion:0,comparisonGraphic:true,comparisonStatistics:true,plotLabels:[],plotLabelStore:[],comparisonPlotLabels:[],comparisonPlotLabelStore:[],polynomials:false,comparisonPolynomials:false,interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
+    const defaults = {ghostLines:false,plotLabelEditorVersion:0,modifyPlotLabels:false,modifyComparisonPlotLabels:false,outputOptionsVersion:0,comparisonGraphic:true,comparisonStatistics:true,plotLabels:[],plotLabelStore:[],comparisonPlotLabels:[],comparisonPlotLabelStore:[],polynomials:false,comparisonPolynomials:false,interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
         comparisonTerms:null,comparisonQuadratic:null,plotX:null,plotPanels:null,plotGroup:null,
         comparisonX:null,comparisonPanels:null,family:'binomial',includeP:false,graphic:true,se:true,plotStyle:'auto',plotScale:'probability'};
     if (analysis === 'glmbasic') {

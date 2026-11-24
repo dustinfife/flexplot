@@ -372,7 +372,11 @@ test_that("Mixed Model plot-label edits preserve coordinates, fitted model and i
     expect_true(any(grepl("Custom columnTitle",rendered)))
     # Changes unrelated to plot variables retain custom entries and selected clusters.
     expect_true(jamovi_reporting_update(analysis,list(includeP=TRUE)))
-    expect_identical(options$plotLabels,catalog)
+    # Stage 5 refreshes displayed descriptions after a committed legend edit.
+    # Saved keys, original values, and custom text remain stable.
+    saved_fields = function(rows) lapply(rows,function(row) row[names(row)!="display"])
+    expect_identical(saved_fields(options$plotLabels),saved_fields(catalog))
+    expect_true("Legend title: Custom legend" %in% vapply(options$plotLabels,`[[`,character(1),"display"))
     # Removing a role hides its editor rows; its labels survive reintroduction.
     expect_true(jamovi_reporting_update(analysis,list(plotGroup=NULL)))
     expect_false(any(vapply(options$plotLabels,`[[`,character(1),"role") == "legend"))

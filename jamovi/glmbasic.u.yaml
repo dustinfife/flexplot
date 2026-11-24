@@ -187,6 +187,8 @@ children:
                 maxItemCount: 1
                 isTarget: true
       - type: CheckBox
+        name: ghostLines
+      - type: CheckBox
         name: se
       - type: CheckBox
         name: modifyPlotLabels

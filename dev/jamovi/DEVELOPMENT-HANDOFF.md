@@ -13,7 +13,8 @@ inspection. Keep stages small and preserve statistical behavior.
 | 2 | Comparison visualization restrictions | Complete: `b14032b9` |
 | 3 | Consistent Output Options | Complete: `c36f4b06` |
 | 4 | Independent GLM visualization settings | Complete: `9bab9cc0` |
-| 5 | Plot-control organization, Modify Plot Labels checkboxes, taller editors, readable dynamic legend descriptions | Complete; implementation commit resolved below |
+| 5 | Plot-control organization, Modify Plot Labels checkboxes, taller editors, readable dynamic legend descriptions | Complete: `a306b18f` |
+| 5B | Shared ordinary reference-panel ghost lines | Complete; implementation commit resolved below |
 | 6 | Mixed Models estimates, confidence-interval controls, removal of permanently empty fixed-effect p-value columns | Remaining |
 | 7 | Compact table notes, targeted native footnotes, conditional comparison-test explanations | Remaining |
 | 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Remaining |
@@ -21,10 +22,10 @@ inspection. Keep stages small and preserve statistical behavior.
 | 10 | Automatic Binomial/logit selection for eligible binary outcomes, preserving explicit family choices | Remaining |
 | 11 | Final shared-infrastructure review, GUI testing, release preparation | Remaining |
 
-Resolve the Stage 5 implementation commit:
+Resolve the Stage 5B implementation commit:
 
 ```sh
-git log -1 --format='%H %s' --grep='Standardize modeling visualization sections and plot-label editors'
+git log -1 --format='%H %s' --grep='Share modeling reference ghosts across LM GLM and Mixed Models'
 ```
 
 ## Architecture and compatibility
@@ -73,6 +74,52 @@ git log -1 --format='%H %s' --grep='Standardize modeling visualization sections 
   titles for disambiguation. Native TextBox change/blur/Enter drives recalculation;
   no per-keystroke rebuilding is introduced. Legacy Mixed legend discovery
   preserves RNG state. See `docs/jamovi-plot-labels.md`.
+
+## Stage 5B architecture and verification
+
+- `R/jamovi_model_ghosts.R` shares prepared-layout validation, supplied-coordinate
+  copying, and styling. LM and standalone Mixed population/cluster plots reuse
+  core reference selection and ghost construction without refitting at destination
+  panels. Mixed wraps cached streams without changing the selected clusters or RNG.
+- GLM keeps its renderer and probability/logit transform path; its old R/JS entry
+  points forward to shared mechanics. `jamovi/js/model-ghosts.js` shares metadata
+  eligibility and stale-request rejection. Server prepared-data validation remains
+  authoritative. Unsupported grouping, categorical x, one prepared panel, absent
+  reference combinations and unavailable finite curves retain an ordinary plot.
+- All three ordinary controls use Show ghost lines, default unchecked, immediately
+  after selectors. Automatic continuous x is supported; Mixed retains its existing
+  first-predictor convention. Disabled contexts retain the preference. LM/Mixed
+  legacy documents default off; GLM option identifiers/values are unchanged.
+- Styling is #707070, width 1.2, opacity 0.85, dashed, above confidence bands. Core
+  exploratory styling and directional Model 2 CAS ghosts remain unchanged.
+- Ordinary CAS reference ghosts are deferred to Stage 9: adjusted observations
+  and the separate fixed-effects curve lack the supplied prediction stream needed
+  by this path. Equivalent reference coordinates require deliberate CAS geometry
+  work. Mixed comparison modes continue their existing overlays with ordinary
+  reference ghosts unavailable. Stage 8 reference explanations/spacing remain open.
+- See `docs/jamovi-model-ghosts.md`. No result identifiers, table schemas, label
+  stores, comparison display controls, dependencies or fitting/inference changed.
+
+Stage 5B passed 359 existing GLM ghost assertions and 270 focused model-ghost,
+independent-GLM-display and Mixed-note assertions. The native-handler/protobuf run
+passed 308 assertions. After the final comparison-label routing review, the
+affected native subset passed 243 assertions and installed-package real protobuf
+restoration/rendering passed 105. Mixed/CAS/label regressions passed 674 assertions
+(with the known jmvcore theme deprecation silenced in that test process).
+Six standalone/comparison numerical table comparisons matched
+Stage 5 exactly, as did tested GLM prediction/interval/ghost coordinates and Mixed
+population/cluster/CAS geometry. Full package testing was not run.
+
+Desktop jamovi 2.7.41 showed the LM checkbox after selectors with automatic x
+left blank, working on/off ghosts and unchanged confidence bands. GLM probability
+output retained its dashed gray reference curve. Mixed population and cluster
+plots rendered reference ghosts, while CAS disabled the checkbox, retained the
+preference and showed the unsupported-path diagnostic. The disposable review
+was closed without saving; existing documents were preserved. Secondary-monitor
+placement could not be confirmed. Live GUI checks did not cover every family,
+layout or saved-document transition; focused renderer/native/protobuf tests cover
+those paths. A stale Mixed-label test expectation was reproduced on Stage 5 and
+updated to allow committed description refresh while checking stable saved fields.
 
 ## Verification and outstanding issues
 

@@ -44,7 +44,8 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             outputOptionsVersion = 0,
             modifyPlotLabels = FALSE,
             modifyComparisonPlotLabels = FALSE,
-            plotLabelEditorVersion = 0, ...) {
+            plotLabelEditorVersion = 0,
+            ghostLines = FALSE, ...) {
 
             private$..estimates = jmvcore::OptionBool$new(
                 "estimates", estimates, default=TRUE)
@@ -60,6 +61,8 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "modifyComparisonPlotLabels", modifyComparisonPlotLabels, default=FALSE)
             private$..plotLabelEditorVersion = jmvcore::OptionInteger$new(
                 "plotLabelEditorVersion", plotLabelEditorVersion, default=0, hidden=TRUE)
+            private$..ghostLines = jmvcore::OptionBool$new(
+                "ghostLines", ghostLines, default=FALSE)
             super$initialize(
                 package="flexplot",
                 name="mixedmodel",
@@ -261,6 +264,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..modifyPlotLabels)
             self$.addOption(private$..modifyComparisonPlotLabels)
             self$.addOption(private$..plotLabelEditorVersion)
+            self$.addOption(private$..ghostLines)
             self$.addOption(private$..preds)
             self$.addOption(private$..interactions)
             self$.addOption(private$..polynomials)
@@ -294,6 +298,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..includeCI)
         }),
     active = list(
+        ghostLines = function() private$..ghostLines$value,
         modifyPlotLabels = function() private$..modifyPlotLabels$value,
         modifyComparisonPlotLabels = function() private$..modifyComparisonPlotLabels$value,
         plotLabelEditorVersion = function() private$..plotLabelEditorVersion$value,
@@ -334,6 +339,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         samplePolicyVersion = function() private$..samplePolicyVersion$value,
         includeCI = function() private$..includeCI$value),
     private = list(
+        ..ghostLines = NA,
         ..modifyPlotLabels = NA,
         ..modifyComparisonPlotLabels = NA,
         ..plotLabelEditorVersion = NA,

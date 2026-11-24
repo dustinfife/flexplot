@@ -20,7 +20,10 @@ jamovi_lm_display = function(model, data, options) {
   layout = NULL
   if (length(c(options$plotX,options$plotPanels,options$plotGroup)))
     layout = jamovi_model_layout(list(model),data,options$plotX,options$plotPanels,options$plotGroup)
-  jamovi_glm_model_plot(model,se=options$se,formula=layout,data=data)
+  plot = jamovi_glm_model_plot(model,se=options$se,formula=layout,data=data)
+  if (!isTRUE(options$ghostLines)) return(plot)
+  formula = if (is.null(layout)) jamovi_model_layout(list(model),data) else layout
+  jamovi_model_reference_ghosts(plot,formula,TRUE)
 }
 
 jamovi_lm_label_info = function(model, options, comparison=FALSE, formula=NULL) {
@@ -135,6 +138,12 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
             plot = suppressWarnings(tryCatch(jamovi_lm_display(model,data,self$options),
               error=function(error) NULL,finally=theme_set(previous_theme)))
             if (!is.null(plot)) {
+              note = attr(plot,"jamovi_ghost_note")
+              if (length(note)) {
+                self$results$explanation$setContent(paste0(self$results$explanation$content,
+                  "<p>",jamovi_html_escape(note),"</p>"))
+                self$results$explanation$setVisible(TRUE)
+              }
               info = jamovi_lm_label_info(model,self$options)
               jamovi_plot_sync_labels(self$options,plot,info$layout,info$context)
             }

@@ -305,3 +305,12 @@ initialize, adding Model 2 tables without changing the model specification.
 The editor now delegates to the shared modeling label helpers. Existing saved
 keys, option identifiers, supported labels, fit reuse, and CAS composition remain
 unchanged; see `docs/jamovi-plot-labels.md` for the shared implementation contract.
+
+## Ordinary reference-panel ghosts
+
+Stage 5B adds a default-off **Show ghost lines** preference for eligible standalone
+population and cluster prediction plots. It copies the existing reference-panel
+curve without resampling clusters or changing predictions. This is separate from
+the directional CAS comparison option above. Ordinary CAS reference ghosts are
+deferred to Stage 9 because CAS has a separate adjusted-observation/fixed-curve
+path. See [Modeling reference-panel ghost lines](jamovi-model-ghosts.md).

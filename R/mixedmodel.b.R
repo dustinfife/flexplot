@@ -166,6 +166,23 @@ jamovi_mixed_plot = function(state, x=NULL, panels=NULL, group=NULL, type="clust
   plot + ggplot2::labs(subtitle=label)
 }
 
+# Keep cached plots and sampled clusters intact; ordinary ghosts copy that stream.
+jamovi_mixed_display = function(state, options) {
+  plot = jamovi_mixed_plot(state,options$plotX,options$plotPanels,options$plotGroup,
+    options$predictionType,options$clusters)
+  if (!isTRUE(options$ghostLines)) return(plot)
+  if (options$predictionType=="cas") {
+    attr(plot,"jamovi_ghost_note") = "Ghost lines unavailable. CAS uses adjusted observations and a separate fixed-effects curve; ordinary supplied-prediction ghosts are not supported."
+    return(plot)
+  }
+  predictors = setdiff(all.vars(stats::formula(state$model))[-1],state$cluster)
+  x = if (length(options$plotX)) options$plotX else predictors[1]
+  panels = options$plotPanels
+  if (options$predictionType=="cluster" && is.null(panels) && is.null(options$plotGroup)) panels = state$cluster
+  formula = jamovi_model_layout(list(state$model),state$data,x,panels,options$plotGroup)
+  jamovi_model_reference_ghosts(plot,formula,TRUE)
+}
+
 mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
   "mixedmodelClass", inherit=mixedmodelBase, private=list(
     .modelState=NULL,
@@ -226,6 +243,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         if (!inherits(plot,"error")) {
           state$displayPlot = plot
           state$displayLayout = layout
+          display = jamovi_mixed_display(state,self$options)
           jamovi_mixed_sync_labels(self$options,plot,layout)
         } else {
           state$displayPlot = NULL
@@ -247,7 +265,9 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             "Population-level predictions exclude random effects.",
           " Curves use the existing marginal prediction method; undisplayed covariates retain the full eligible reference population.",
           " Up to ", self$options$clusters, " randomly selected clusters are displayed."),
-        " No prediction confidence bands are calculated.</p>"))
+        " No prediction confidence bands are calculated.</p>",
+        if (exists("display",inherits=FALSE) && length(attr(display,"jamovi_ghost_note")))
+          paste0("<p>",jamovi_mixed_escape(attr(display,"jamovi_ghost_note")),"</p>")))
       if (!self$options$compare) return(invisible(NULL))
       jamovi_mixed_tables(list(fixed=self$results$fixed2,random=self$results$random2,
         correlations=self$results$correlations2),comparison$second,self$options$includeP,
@@ -322,8 +342,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     .plot=function(image, ...) {
       if (is.null(image$state)) return(FALSE)
       tryCatch({
-        plot = jamovi_mixed_plot(image$state, self$options$plotX, self$options$plotPanels,
-          self$options$plotGroup, self$options$predictionType, self$options$clusters)
+        plot = jamovi_mixed_display(image$state,self$options)
         print(jamovi_mixed_apply_labels(plot,self$options$plotLabels))
         TRUE
       }, error=function(error) {

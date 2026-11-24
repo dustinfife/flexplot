@@ -239,6 +239,8 @@ children:
         enable: (!compare || predictionType:cas)
 
   - type: CheckBox
+    name: ghostLines
+  - type: CheckBox
     name: modifyPlotLabels
     useSingleCell: true
     contentLink: (!compare)

@@ -43,7 +43,8 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             outputOptionsVersion = 0,
             modifyPlotLabels = FALSE,
             modifyComparisonPlotLabels = FALSE,
-            plotLabelEditorVersion = 0, ...) {
+            plotLabelEditorVersion = 0,
+            ghostLines = FALSE, ...) {
 
             private$..comparisonGraphic = jmvcore::OptionBool$new(
                 "comparisonGraphic", comparisonGraphic, default=TRUE)
@@ -57,6 +58,8 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "modifyComparisonPlotLabels", modifyComparisonPlotLabels, default=FALSE)
             private$..plotLabelEditorVersion = jmvcore::OptionInteger$new(
                 "plotLabelEditorVersion", plotLabelEditorVersion, default=0, hidden=TRUE)
+            private$..ghostLines = jmvcore::OptionBool$new(
+                "ghostLines", ghostLines, default=FALSE)
             super$initialize(
                 package="flexplot",
                 name="glmbasic",
@@ -304,6 +307,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..modifyPlotLabels)
             self$.addOption(private$..modifyComparisonPlotLabels)
             self$.addOption(private$..plotLabelEditorVersion)
+            self$.addOption(private$..ghostLines)
             self$.addOption(private$..preds)
             self$.addOption(private$..graphic)
             self$.addOption(private$..graphicassump)
@@ -337,6 +341,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..comparisonPlotLabelStore)
         }),
     active = list(
+        ghostLines = function() private$..ghostLines$value,
         modifyPlotLabels = function() private$..modifyPlotLabels$value,
         modifyComparisonPlotLabels = function() private$..modifyComparisonPlotLabels$value,
         plotLabelEditorVersion = function() private$..plotLabelEditorVersion$value,
@@ -376,6 +381,7 @@ glmbasicOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         comparisonPlotLabels = function() private$..comparisonPlotLabels$value,
         comparisonPlotLabelStore = function() private$..comparisonPlotLabelStore$value),
     private = list(
+        ..ghostLines = NA,
         ..modifyPlotLabels = NA,
         ..modifyComparisonPlotLabels = NA,
         ..plotLabelEditorVersion = NA,

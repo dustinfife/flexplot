@@ -3,6 +3,7 @@
 const updateTerms = require('./model-terms');
 const migrateOutput = require('./output-options');
 const updateEditors = require('./plot-label-editors');
+const updateGhostControls = require('./model-ghosts');
 const synchronize = function(ui, context, added, quadraticChanged = null) {
     // Native setters synchronously invoke other handlers while an option edit is
     // still in progress. Synchronize once, and send the complete option batch.
@@ -90,8 +91,11 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
         try { options.endEdit(); }
         finally { context.workspace.mixedSynchronizing = false; }
     }
+    updateGhostControls(ui, context, 'mixedmodel');
 };
 module.exports = {
+    graphic_changed: function(ui) { updateGhostControls(ui, this, 'mixedmodel'); },
+    ghostLines_changed: function(ui) { updateGhostControls(ui, this, 'mixedmodel'); },
     plotGroupingLayout_updated: function(ui) { synchronize(ui,this,false); },
     plotGroup_changing: function(ui, event) {
         updateTerms.groupChanging(ui.compare.value() !== true || ui.predictionType.value() === 'cas',event);

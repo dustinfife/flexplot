@@ -19,6 +19,7 @@ const {pathToFileURL} = require('node:url');
         fs.copyFileSync(path.join(root,'jamovi/js/output-options.js'),path.join(temp,'output-options.js'));
         fs.copyFileSync(path.join(root,'jamovi/js/plot-label-editors.js'),path.join(temp,'plot-label-editors.js'));
         if (analysis === 'glmgeneralized') fs.copyFileSync(path.join(root,'jamovi/js/glm-plot-controls.js'),path.join(temp,'glm-plot-controls.js'));
+        fs.copyFileSync(path.join(root,'jamovi/js/model-ghosts.js'),path.join(temp,'model-ghosts.js'));
         if (analysis === 'glmgeneralized') fs.copyFileSync(path.join(root,'jamovi/js/glm-ghosts.js'),path.join(temp,'glm-ghosts.js'));
         const {default: compileR} = await import(pathToFileURL(path.join(compilerPath, 'compiler.js')));
         compileR('flexplot', path.join(temp, analysis + '.a.yaml'), path.join(temp, analysis + '.r.yaml'),
@@ -77,6 +78,7 @@ const {pathToFileURL} = require('node:url');
         const nodes = flatten(compiled.view.layout.controls);
         const mainSection = compiled.view.layout.controls.find(item=>item.label===(analysis==='mixedmodel' ? 'Model Visualization / Model Comparison Visualization' : 'Model Visualization'));
         assert.ok(mainSection,'Missing main visualization section');
+        assert.equal(mainSection.controls.findIndex(c=>c.name==='ghostLines'),mainSection.controls.findIndex(c=>c.name===(analysis==='mixedmodel'?'plotGroupingLayout':'plotSupplier'))+1,'Ghost checkbox follows selectors');
         const compSection = analysis==='mixedmodel' ? mainSection : compiled.view.layout.controls.find(item=>item.label==='Model Comparison Visualization');
         assert.ok(compSection,'Missing distinct comparison visualization section');
         const modelSpec = compiled.view.layout.controls.find(item=>item.label==='Model Comparison');
@@ -528,6 +530,7 @@ const {pathToFileURL} = require('node:url');
             fs.writeFileSync(output+'.interactions.json',JSON.stringify(restored.interactions));
             fs.writeFileSync(output+'.restored.json',JSON.stringify(restored));
         }
+        await require('./jamovi-model-ghosts.cjs')(ui,view,fire,assert,analysis);
         fs.writeFileSync(output, records.join('\n') + '\n');
         console.log(runtime ? 'Used installed jamovi View.extend' : 'Used portable automatic-handler contract');
     } finally {

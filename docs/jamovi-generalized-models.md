@@ -313,8 +313,8 @@ change comparison overlays or Mixed Models CAS ghosts.
 
 GLM panel ghosts use neutral dark gray (`#707070`), a dashed line
 (width 1.2, opacity 0.85), and are drawn above confidence bands. This styling is
-specific to the GLM adapter; ordinary fitted curves and other Flexplot ghosts
-retain their existing appearance.
+shared by the ordinary modeling adapters; ordinary fitted curves and exploratory
+Flexplot ghosts retain their existing appearance.
 
 ## Editing plot labels
 
@@ -329,3 +329,7 @@ confidence limits, panel membership, reference ghosts, colors or line patterns.
 Ordinary/comparison outputs and probability/logit displays retain separate edits.
 Temporarily unavailable elements keep their edits in a hidden saved store, ready
 when that configuration returns. Older saved analyses retain automatic labels.
+
+Stage 5B shares reference-panel ghost styling and eligibility with LM and eligible
+Mixed Models visualizations, including automatic continuous x selection. See
+[Modeling reference-panel ghost lines](jamovi-model-ghosts.md).

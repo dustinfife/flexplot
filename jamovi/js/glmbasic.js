@@ -3,6 +3,7 @@
 const updateTerms = require('./model-terms');
 const migrateOutput = require('./output-options');
 const updateEditors = require('./plot-label-editors');
+const updateGhostControls = require('./model-ghosts');
 const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
     selections:['plotX','plotPanels','plotGroup'], extra:'quadratic'},
     updateTerms.comparisonLayout('comparisonPlotSupplier',['quadratic','comparisonQuadratic'],false),
@@ -38,7 +39,7 @@ const synchronize = (ui, context, added, changed = null) => {
     migrateOutput(ui, context, 'glmbasic');
     updateEditors(ui, context, 'glmbasic');
     if (context.workspace.lmSynchronizing) return;
-    if (!added && !(ui.preds.value() || []).length) return;
+    if (!added && !(ui.preds.value() || []).length) { updateGhostControls(ui, context, 'glmbasic'); return; }
     context.workspace.lmSynchronizing = true;
     ui.view.model.options.beginEdit();
     try {
@@ -70,9 +71,12 @@ const synchronize = (ui, context, added, changed = null) => {
         try { ui.view.model.options.endEdit(); }
         finally { context.workspace.lmSynchronizing = false; }
     }
+    updateGhostControls(ui, context, 'glmbasic');
 };
 
 module.exports = {
+    graphic_changed: function(ui) { updateGhostControls(ui, this, 'glmbasic'); },
+    ghostLines_changed: function(ui) { updateGhostControls(ui, this, 'glmbasic'); },
     comparisonGroupingLayout_updated: function(ui) { synchronize(ui, this, false); },
     out_changed: function(ui) { synchronize(ui, this, false); },
     comparisonGroup_changing: function(ui, event) {
