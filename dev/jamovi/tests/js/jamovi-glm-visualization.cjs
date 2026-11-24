@@ -119,5 +119,29 @@ module.exports = async function({ui,view,handlers,restore,snapshot,assert,extrac
     view.flags.updating=true;ui.preds.setValue([]);ui.out.setValue(null);view.flags.updating=false;
     handlers.view_updated.call(view,ui);await settle();
     assert.equal(enabled('ghostLines'),false);assert.equal(ui.ghostLines.value(),true);
+    // Family provenance is the explicit selector value, not callback timing.
+    restore('automatic-family',{out:'binary',preds:['x','z'],family:'auto',automaticFamily:'binomial',
+        automaticFamilyOutcome:'binary',plotX:'x',comparisonX:'z',compare:true,outputOptionsVersion:2});
+    view.requestData=(type,query)=>Promise.resolve(column(query.columnName));
+    handlers.view_updated.call(view,ui);await settle();
+    assert.equal(ui.family.value(),'auto');assert.equal(enabled('plotScale'),true);
+    const provenance=JSON.parse(JSON.stringify(snapshot('automatic-family-saved').options));
+    restore('automatic-family-reopened',provenance);await settle();assert.equal(ui.family.value(),'auto');
+    const pending=[];view.requestData=(type,query)=>new Promise(resolve=>pending.push(()=>resolve(column(query.columnName))));
+    ui.plotX.setValue('z');ui.family.setValue('gaussian');
+    for(const reply of pending)reply();await settle();
+    assert.equal(ui.family.value(),'gaussian');assert.equal(enabled('plotScale'),false);
+    ui.out.setValue('another');ui.automaticFamily.setValue('binomial');ui.automaticFamilyOutcome.setValue('binary');
+    await settle();assert.equal(ui.family.value(),'gaussian');
+    ui.family.setValue('auto');await settle();assert.equal(enabled('plotScale'),false,'Old outcome result cannot enable a newer layout');
+    ui.out.setValue('binary');ui.out.setValue('another');ui.family.setValue('poisson');
+    ui.automaticFamilyOutcome.setValue('another');for(const reply of pending)reply();await settle();
+    assert.equal(ui.family.value(),'poisson');assert.equal(enabled('plotScale'),false);
+    view.requestData=(type,query)=>Promise.resolve(column(query.columnName));
+    for(const family of ['gaussian','binomial','poisson','gammaLog','Gamma','negativebinomial']) {
+        restore('manual-family-'+family,{out:'binary',preds:['x'],family,automaticFamily:'binomial',automaticFamilyOutcome:'binary',plotX:'x'});
+        ui.out.setValue('another');await settle();assert.equal(ui.family.value(),family);
+    }
+    console.log('PASS: explicit Automatic/native family choices survive restoration, outcome edits and delayed metadata; handlers never overwrite the selector.');
     console.log('PASS: independent native GLM display constraints, versioned restoration, stale host replies and independent model terms.');
 };

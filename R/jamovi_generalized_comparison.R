@@ -4,12 +4,13 @@ jamovi_glm_generalized_comparison = function(options, data) {
     if (i == 1L) jamovi_glm_generalized_formula(options, data) else
       jamovi_glm_generalized_formula(options, data, options$comparisonTerms, options$comparisonQuadratic),
     error=function(error) stop("Model ", i, " specification: ", conditionMessage(error), call.=FALSE)))
+  family_name = jamovi_glm_family(options,data)
   variables = unique(unlist(lapply(formulas, all.vars)))
   eligible = data[stats::complete.cases(data[, variables, drop=FALSE]), , drop=FALSE]
   if (!nrow(eligible)) stop("No complete observations are available for both models.", call.=FALSE)
-  primary = tryCatch(jamovi_glm_generalized_fit(options, eligible, formulas[[1]]),
+  primary = tryCatch(jamovi_glm_generalized_fit(options, eligible, formulas[[1]],family_name=family_name),
     error=function(error) stop("Model 1: ", conditionMessage(error), call.=FALSE))
-  secondary = tryCatch(jamovi_glm_generalized_fit(options, eligible, formulas[[2]]),
+  secondary = tryCatch(jamovi_glm_generalized_fit(options, eligible, formulas[[2]],family_name=family_name),
     error=function(error) stop("Model 2: ", conditionMessage(error), call.=FALSE))
   # Fit helpers receive the common sample; reporting refers to the original input.
   primary$omitted = nrow(data)-nrow(primary$data)

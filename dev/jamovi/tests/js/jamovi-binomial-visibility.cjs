@@ -137,9 +137,9 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
         console.log('Installed native visibility bindings restrict CAS ghosts to CAS comparisons and retain the saved choice.');
         return;
     }
-    let family = 'gaussian';
+    let family = 'gaussian', automaticFamily = 'gaussian';
     const attach = control => {
-        const engine = {_resources:{family:{value:() => family},[definition.name]:control}, actions:[],
+        const engine = {_resources:{family:{value:() => family},automaticFamily:{value:()=>automaticFamily},[definition.name]:control}, actions:[],
             addDirectAction(name, action){ this.actions.push(action); }};
         for (const signature of ['_nextNonWhiteChar(e,t){','_arrayUnique(e){','_resolveBindPart(e,t){',
             '_resolveBinding(e,t){','bindActionParams(e,t,s){','bindingsToActions(){']) {
@@ -174,6 +174,11 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
             assert.equal(control.getSourceValue(), selection, 'Hiding the dropdown changed the saved choice');
             assert.equal(control.input.selectedIndex, index);
         }
+    }
+    for (const [selected,detected] of [['auto','binomial'],['auto','gaussian'],['gaussian','binomial'],['binomial','gaussian']]) {
+        family=selected;automaticFamily=detected;
+        for (const action of engine.actions) action.execute(engine._resources);
+        assert.equal(control._cell.visible,selected==='binomial' || selected==='auto' && detected==='binomial');
     }
     assert.ok(seDefinition && seDefinition.contentLink === undefined && seDefinition.enable === undefined,
         'Confidence intervals must not depend on the distribution');

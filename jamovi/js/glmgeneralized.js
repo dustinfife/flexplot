@@ -68,6 +68,8 @@ module.exports = {
     ghostLines_changed: function(ui) { updatePlotControls(ui, this); },
     graphic_changed: function(ui) { updatePlotControls(ui, this); },
     family_changed: function(ui) { updatePlotControls(ui, this); },
+    automaticFamily_changed: function(ui) { updatePlotControls(ui, this); },
+    automaticFamilyOutcome_changed: function(ui) { updatePlotControls(ui, this); },
     comparisonPlotStyle_changed: function(ui) { updatePlotControls(ui, this); },
     comparisonPlotScale_changed: function(ui) { updatePlotControls(ui, this); },
     plotStyle_changed: function(ui) { updatePlotControls(ui, this); },

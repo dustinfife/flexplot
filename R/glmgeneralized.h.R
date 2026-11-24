@@ -8,7 +8,9 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         initialize = function(
             out = NULL,
             preds = NULL,
-            family = "gaussian",
+            family = "auto",
+            automaticFamily = "gaussian",
+            automaticFamilyOutcome = "",
             modelTerms = NULL,
             quadratic = NULL,
             compare = FALSE,
@@ -83,13 +85,31 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "family",
                 family,
                 options=list(
+                    "auto",
                     "gaussian",
                     "binomial",
                     "poisson",
                     "gammaLog",
                     "Gamma",
                     "negativebinomial"),
-                default="gaussian")
+                default="auto")
+            private$..automaticFamily = jmvcore::OptionList$new(
+                "automaticFamily",
+                automaticFamily,
+                options=list(
+                    "gaussian",
+                    "binomial",
+                    "poisson",
+                    "gammaLog",
+                    "Gamma",
+                    "negativebinomial"),
+                default="gaussian",
+                hidden=TRUE)
+            private$..automaticFamilyOutcome = jmvcore::OptionString$new(
+                "automaticFamilyOutcome",
+                automaticFamilyOutcome,
+                default="",
+                hidden=TRUE)
             private$..modelTerms = jmvcore::OptionTerms$new(
                 "modelTerms",
                 modelTerms,
@@ -325,6 +345,8 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..comparisonPlotScale)
             self$.addOption(private$..preds)
             self$.addOption(private$..family)
+            self$.addOption(private$..automaticFamily)
+            self$.addOption(private$..automaticFamilyOutcome)
             self$.addOption(private$..modelTerms)
             self$.addOption(private$..quadratic)
             self$.addOption(private$..compare)
@@ -369,6 +391,8 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         out = function() private$..out$value,
         preds = function() private$..preds$value,
         family = function() private$..family$value,
+        automaticFamily = function() private$..automaticFamily$value,
+        automaticFamilyOutcome = function() private$..automaticFamilyOutcome$value,
         modelTerms = function() private$..modelTerms$value,
         quadratic = function() private$..quadratic$value,
         compare = function() private$..compare$value,
@@ -412,6 +436,8 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..out = NA,
         ..preds = NA,
         ..family = NA,
+        ..automaticFamily = NA,
+        ..automaticFamilyOutcome = NA,
         ..modelTerms = NA,
         ..quadratic = NA,
         ..compare = NA,

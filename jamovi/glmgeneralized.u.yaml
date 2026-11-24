@@ -23,6 +23,8 @@ children:
             isTarget: true
   - type: ComboBox
     name: family
+  - type: Label
+    label: Automatic selects Binomial / Logistic for binary outcomes, otherwise Gaussian.
   - type: CheckBox
     name: interactions
   - type: Supplier
@@ -131,11 +133,11 @@ children:
       - type: CheckBox
         name: showIRT
         useSingleCell: true
-        contentLink: (family:binomial)
+        contentLink: (family:binomial || (family:auto && automaticFamily:binomial))
       - type: CheckBox
         name: showProbabilities
         useSingleCell: true
-        contentLink: (family:binomial)
+        contentLink: (family:binomial || (family:auto && automaticFamily:binomial))
       - type: CheckBox
         name: comparisonGraphic
         useSingleCell: true
@@ -182,11 +184,11 @@ children:
       - type: ComboBox
         name: plotStyle
         useSingleCell: true
-        contentLink: (family:binomial)
+        contentLink: (family:binomial || (family:auto && automaticFamily:binomial))
       - type: ComboBox
         name: plotScale
         useSingleCell: true
-        contentLink: (family:binomial)
+        contentLink: (family:binomial || (family:auto && automaticFamily:binomial))
       - type: CheckBox
         name: se
       - type: CheckBox
@@ -240,11 +242,11 @@ children:
       - type: ComboBox
         name: comparisonPlotStyle
         useSingleCell: true
-        contentLink: (family:binomial)
+        contentLink: (family:binomial || (family:auto && automaticFamily:binomial))
       - type: ComboBox
         name: comparisonPlotScale
         useSingleCell: true
-        contentLink: (family:binomial)
+        contentLink: (family:binomial || (family:auto && automaticFamily:binomial))
       - type: CheckBox
         name: comparisonSe
       - type: CheckBox

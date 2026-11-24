@@ -18,14 +18,14 @@ inspection. Keep stages small and preserve statistical behavior.
 | 6 | Mixed Models estimates, confidence-interval controls, removal of permanently empty fixed-effect p-value columns | Complete: `dedf2a57` |
 | 7 | Compact table notes, targeted native footnotes, conditional comparison-test explanations | Complete: `f4cae51a` |
 | 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Complete: `843a1269` |
-| 9 | Independent Mixed Models main/comparison visualizations and label editors | Complete; implementation commit resolved below |
-| 10 | Automatic Binomial/logit selection for eligible binary outcomes, preserving explicit family choices | Remaining |
+| 9 | Independent Mixed Models main/comparison visualizations and label editors | Complete: `9481f993` |
+| 10 | Automatic Binomial/logit selection for eligible binary outcomes, preserving explicit family choices | Complete; implementation commit resolved below |
 | 11 | Final shared-infrastructure review, GUI testing, release preparation | Remaining |
 
-Resolve the Stage 9 implementation commit:
+Resolve the Stage 10 implementation commit:
 
 ```sh
-git log -1 --format='%H %s' --grep='Separate Mixed Models main and comparison visualizations'
+git log -1 --format='%H %s' --grep='Select GLM distributions automatically for binary outcomes'
 ```
 
 ## Architecture and compatibility
@@ -378,8 +378,79 @@ labels, settings and notes; a further main cluster-mode edit still left comparis
 CAS unchanged. Saving remained responsive (compressed review file under 1MB).
 The review was saved and closed. Secondary-monitor placement was unconfirmed.
 Full GUI coverage of every mode/layout/family, the stale E2E inventory, JASP host
-verification and remaining release work stay open for Stage 11. Stage 10 automatic
-Binomial/logit selection is not implemented here.
+verification and remaining release work stay open for Stage 11. Automatic
+distribution selection was subsequently added at Stage 10 below.
+
+## Stage 10 architecture and verification
+
+- `family` now includes explicit `auto` (Automatic), the default for new analyses.
+  Every named family is a durable manual choice, including Gaussian; selecting
+  Automatic again resumes detection. There is no timing-based manual-change flag
+  and no automatic setter that rewrites `family` to Binomial. Thus backend updates
+  cannot accidentally convert an automatic choice into a manual one. Existing
+  family identifiers, links and mathematical implementations are unchanged.
+- `R/jamovi_glm_family.R` resolves from actual nonmissing outcome observations,
+  before predictor/common-sample omissions. It accepts exactly two observed
+  categorical/ordered/character levels, logical TRUE/FALSE, or plain integer/double
+  0/1. Numeric 3/7, singleton/all-missing, unsupported types, and unavailable data
+  do not select Binomial. Unused declared factor levels do not count. Detection
+  does not recode or reorder the response; existing Binomial encoding and fitted
+  sample validation remain authoritative.
+- A comparison resolves once from the full outcome and passes that family to both
+  existing fit paths after common-sample selection. Losing one response level in
+  the fitted sample still raises the existing Binomial error, rather than falling
+  back to Gaussian. Reporting, event orientation, IRT, odds ratios, marginal
+  probabilities, intervals, likelihood inference and plot geometry are unchanged.
+- R publishes derived `automaticFamily` and `automaticFamilyOutcome` through the
+  existing native options response, even before predictors are selected. These
+  fields enable the established Binomial-only controls; they do not control user
+  provenance. Plot metadata request keys include the current selector, effective
+  family and outcome. Automatic display eligibility requires the derived outcome
+  to match the current outcome, so stale replies cannot enable a newer layout.
+  Manual selection bypasses derived metadata. The family resolver itself performs
+  no asynchronous metadata requests; no delayed callback can overwrite `family`.
+- Legacy named-family protobufs/.omv files retain their exact selection, including
+  Gaussian on binary data. A legacy protobuf omitting the selector is conservatively
+  assigned its historical Gaussian default once; the existing option publisher
+  writes it back. No provenance migration framework or new revision is necessary:
+  the new `auto` selector value is explicit, idempotent and persisted as-is. Native
+  lifecycle guards preserve partially restored options. All plot preferences,
+  ordinary/comparison settings, label editors and ghost options remain independent.
+
+Focused R6 regression checks passed 1,122 assertions; the final expanded
+Automatic/manual equivalence check passed 207 assertions, including missing
+responses, predictor omissions, reversed/ordered event levels and common samples.
+All coefficients, SE/CI, OR/IRT/marginal tables, fitted probabilities, comparisons,
+probability/logit plot coordinates and ghost layers matched manual Binomial exactly
+(tolerance zero). Existing named-family numerical/reference tests passed. Source
+native-handler/protobuf/renderer/restoration checks passed 1,388 assertions;
+installed handlers/restoration passed 1,316 and installed automatic numerical tests
+passed 207. Native installed Option setters, real lifecycle restoration and delayed
+plot metadata checks cover manual families, return to Automatic, rapid outcome/
+family edits, stale replies, partial restoration and repeated save/reopen cycles.
+
+The full package suite completed with 23,244 passing assertions and the same 16
+pre-existing failures documented at Stage 9. Failure locations and counts match
+that baseline exactly: 12 GLM comparison-note/visibility expectations, one LM
+mocked-label render exception, two reset-image path expectations, and one GLM
+table-note expectation. No new failures were introduced, no baseline failures were
+repaired in this stage, and no approved visual baselines were changed. The separate
+stale Mixed native table assertions and E2E inventory remain Stage 11 work.
+
+The module was built/installed with source fingerprint
+`c2c163c61c318af7371cf4d95d048524c96b44661e8312b00df1fec35af05f5f`.
+Live jamovi 2.7.41 used one disposable workspace. A pre-Stage-10 Gaussian analysis
+on numeric binary data retained Gaussian. A newly created GLM defaulted to
+Automatic; a categorical binary outcome fitted Binomial/logit with success event
+Yes, and enabled IRT/marginal and logistic probability/logit controls. Explicit
+Gaussian persisted through changing the outcome to numeric 0/1; returning to
+Automatic fitted Binomial with event 1. An actual .omv save/close/application-
+relaunch/reopen preserved Automatic versus legacy Gaussian separately. A further
+outcome change from numeric 0/1 to continuous data retained Automatic and resolved
+Gaussian. The workspace was saved and closed. Live coverage was representative;
+headless/native tests cover the remaining edge cases. No unrelated review windows
+were opened. Stage 11's comprehensive GUI/JASP/release work and stale E2E inventory
+remain outstanding; no approved visual baselines were changed.
 
 ## Verification and outstanding issues
 

@@ -18,6 +18,8 @@ options:
     title: Distribution and link
     type: List
     options:
+      - name: auto
+        title: Automatic
       - name: gaussian
         title: Gaussian (identity)
       - name: binomial
@@ -30,7 +32,16 @@ options:
         title: Gamma (inverse)
       - name: negativebinomial
         title: Negative Binomial (log)
+    default: auto
+  - name: automaticFamily
+    type: List
+    options: [gaussian, binomial, poisson, gammaLog, Gamma, negativebinomial]
     default: gaussian
+    hidden: true
+  - name: automaticFamilyOutcome
+    type: String
+    default: ''
+    hidden: true
   - name: modelTerms
     title: Model terms
     type: Terms

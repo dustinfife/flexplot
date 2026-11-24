@@ -29,9 +29,27 @@ Linear-model comparisons use the union of the two fitted models' predictors and
 their shared complete-case dataset. The original `comparisonX` and
 `comparisonPanels` options remain supported. Two-model second-axis grouping is
 supported only for magnet plots; use panels for numeric-outcome comparisons.
-Generalized-model comparison is not implemented.
+Generalized-model comparisons are described below.
 
 ## Families and coefficient tables
+
+New analyses start with **Distribution and link: Automatic**. Automatic uses
+**Binomial / Logistic (logit)** for exactly two observed, nonmissing categorical
+or ordered values, logical TRUE/FALSE, or numeric 0/1. Other outcomes use Gaussian;
+for example numeric 3/7 is not treated as a binomial outcome. Declared but unused
+factor levels do not count as observations. No outcome is recoded for detection.
+
+Selecting any named distribution, including Gaussian, establishes a manual choice
+that survives outcome changes and save/reopen. Select **Automatic** again to resume
+detection. Older saved named-family choices remain manual; they are never upgraded
+from Gaussian to Automatic just because their outcome is binary. A legacy request
+omitting the selector retains the historical Gaussian default.
+
+Detection uses the full observed outcome before predictor/common-sample omissions.
+The existing fitted-sample validation still applies: a binary full outcome whose
+complete-case sample loses a level produces the usual Binomial error. The model
+specification reports the actual fitted family, link and success event. Detection
+does not reverse event levels, alter comparison methods, or reset plot settings.
 
 The supported families match the active JASP GLM adapter; Gamma additionally offers a log link. JASP's
 custom-link control is commented out; custom links are not exposed here.

@@ -39,15 +39,16 @@ jamovi_glm_generalized_formula = function(options, data, terms=options$modelTerm
   jamovi_fixed_formula(options, data, terms, quadratic)
 }
 
-jamovi_glm_generalized_fit = function(options, data, formula=jamovi_glm_generalized_formula(options, data)) {
-  eligible = jamovi_glm_generalized_data(data, formula, options$family)
-  family = switch(options$family, gaussian=stats::gaussian(link="identity"),
+jamovi_glm_generalized_fit = function(options, data, formula=jamovi_glm_generalized_formula(options, data),
+                                        family_name=jamovi_glm_family(options,data)) {
+  eligible = jamovi_glm_generalized_data(data, formula, family_name)
+  family = switch(family_name, gaussian=stats::gaussian(link="identity"),
     binomial=stats::binomial(link="logit"), poisson=stats::poisson(link="log"),
     gammaLog=stats::Gamma(link="log"), Gamma=stats::Gamma(link="inverse"))
   warnings = new.env(parent=emptyenv())
   warnings$messages = character()
   model = withCallingHandlers(
-    if (options$family == "negativebinomial") MASS::glm.nb(formula, data=eligible, link=log, na.action=stats::na.fail) else
+    if (family_name == "negativebinomial") MASS::glm.nb(formula, data=eligible, link=log, na.action=stats::na.fail) else
       stats::glm(formula, data=eligible, family=family, na.action=stats::na.fail),
     warning=function(warning) {
       warnings$messages = unique(c(warnings$messages, conditionMessage(warning)))
@@ -57,7 +58,7 @@ jamovi_glm_generalized_fit = function(options, data, formula=jamovi_glm_generali
     stop("The model is not estimable because its terms are rank deficient. Remove redundant terms or check empty factor combinations.", call.=FALSE)
   }
   if (!isTRUE(model$converged) ||
-      (options$family %in% c("gaussian", "Gamma", "gammaLog") && stats::df.residual(model) <= 0L) ||
+      (family_name %in% c("gaussian", "Gamma", "gammaLog") && stats::df.residual(model) <= 0L) ||
       any(!is.finite(stats::coef(model)))) {
     stop("The model is not estimable or did not converge. Check redundant terms, sparse categories, separation, and the number of complete observations.", call.=FALSE)
   }
@@ -122,16 +123,19 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
   private=list(
     .init=function() jamovi_glm_reporting_reset(self$results),
     .run=function() {
+      jamovi_glm_family_restore(self$options)
       jamovi_output_migrate(self$options, "glmgeneralized")
       jamovi_plot_editor_migrate(self$options, "glmgeneralized")
       jamovi_plot_sync_labels(self$options)
       jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
       jamovi_glm_reporting_reset(self$results)
+      jamovi_glm_family_publish(self$options)
       if (!length(self$options$out)) {
         jamovi_diagnostic(self$results$waiting, if (!length(self$options$preds))
           "Select an outcome and predictors." else "Select an outcome variable.")
         return(invisible(NULL))
       }
+      jamovi_glm_family_publish(self$options,self$data)
       if (!length(self$options$preds)) {
         jamovi_diagnostic(self$results$waiting, "Select at least one predictor.")
         return(invisible(NULL))

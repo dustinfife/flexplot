@@ -11,9 +11,17 @@ module.exports = function(ui, context) {
     if (typeof context.requestData !== 'function') return;
     const states = context.workspace.glmPlotControls || (context.workspace.glmPlotControls = {});
     return Promise.all(Object.entries(outputs).map(([output,names]) => {
-        const family = ui.family.value(), x = ui[names.x].value(), style = ui[names.style].value();
+        const selected = ui.family.value();
+        let family = selected;
+        if (selected === 'auto') {
+            const options = ui.view.model.options;
+            const detected = options.getOption('automaticFamily');
+            const inspected = options.getOption('automaticFamilyOutcome');
+            family = inspected && inspected.getValue() === ui.out.value() && detected ? detected.getValue() : null;
+        }
+        const x = ui[names.x].value(), style = ui[names.style].value();
         const active = output !== 'comparison' || ui.compare.value() === true;
-        const key = JSON.stringify([family,x,style,active]);
+        const key = JSON.stringify([selected,family,ui.out.value(),x,style,active]);
         if (states[output] && states[output].key === key) return states[output].pending;
         const state = {key};
         states[output] = state;
