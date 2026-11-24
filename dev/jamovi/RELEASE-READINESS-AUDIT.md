@@ -2,7 +2,7 @@
 
 Audited Stage 10 (`96a2152bdd2be40dbd36e74dd0d2cbe3a4579445`) on `ggplot-objects`, 2026-11-24, with desktop completion against the laptop handoff commit `9e14c0326d258085635cdd7b4dd6c2344187b68e`. The [development handoff](DEVELOPMENT-HANDOFF.md) records the historical test and live-GUI evidence.
 
-**Stage 11A complete.** The desktop completed the interrupted full-package investigation from a clean source export, verified the existing development environment and installed payload, and classified the remaining failures. The full suite was not green and this was not release approval. The two confirmed implementation defects were assigned to Stage 11B; see the Stage 11B.1 continuation below for their corrections. Stale validation gates, repository artifacts, comprehensive GUI coverage and JASP compatibility remain release work. Stage 11A changed no production source, tests or visual baselines.
+**Stage 11A complete.** The desktop completed the interrupted full-package investigation from a clean source export, verified the existing development environment and installed payload, and classified the remaining failures. The full suite was not green and this was not release approval. The two confirmed implementation defects were assigned to Stage 11B; see the Stage 11B.1 continuation below for their corrections. At audit completion, stale validation gates, repository artifacts, comprehensive GUI coverage and JASP compatibility remained open. Stage 11A changed no production source, tests or visual baselines. The latest package baseline and completed artifact retirement are recorded in Stage 11B.2 below; E2E and host-level release gates remain open.
 
 ## Laptop environment and test method
 
@@ -68,7 +68,7 @@ No new GUI campaign or JASP host verification was performed on the desktop. Exis
 
 Focused runs reproduced all 16 historical package failures at their original assertion sites. The other assertions in those files passed. The comparison terms, coefficient and likelihood checks pass despite the two stale expectations per GLM family.
 
-This table records Stage 11A triage. Stage 11B.1 below resolves the LM preview error and the separately probed GLM layout defect; unrelated stale assertions remain unchanged.
+This table records Stage 11A triage. Stage 11B.1 below resolves the LM preview error and the separately probed GLM layout defect; Stage 11B.2 corrects the stale package/native expectations and retires the unapproved repository artifacts. E2E coverage and host-validation requirements remain open.
 
 | Location | Expected and actual | Root cause and disposition | Correction and risk |
 | --- | --- | --- | --- |
@@ -159,3 +159,78 @@ The final full run used a fresh source export with the task changes over `21e571
 | Visual regression | **140/140 approved comparisons pass**, with no skipped or failed SVG comparison. All 140 approved files remain byte-identical in the export. All 166 repository SVG files are unchanged. As in Stage 11A, testthat removed exactly the 26 unused artifacts from the disposable export during final cleanup; the repository copies remain preserved. |
 
 The original LM recovery file now passes all 179 assertions; the four new package cases pass 505. The final full run also passes the revised GLM layout-contract case and the existing family-specific predictions, intervals, common-sample and numerical checks; its unrelated reporting assertions still fail as listed. `git diff --check` passes. The complete laptop native audit's 42 classified failures remain historical release work; this stage ran the relevant 606-assertion desktop selection rather than repeating that full audit or repairing its unrelated expectations. Next address verified stale reporting/lifecycle and portability expectations, repository SVG hygiene and E2E transitions/derived coverage in their own stages, then rerun the release gates and complete the comprehensive GUI and JASP campaigns.
+
+
+## Stage 11B.2 — Test contracts, portability and repository hygiene
+
+Completed 2026-11-24, starting from `ba5d76e1` on `ggplot-objects`. Production R/JS/YAML, model calculations, saved option/result identifiers and the approved visual references are unchanged.
+
+- GLM comparison tests now require the concise likelihood-ratio table note, including the negative-binomial size qualification, and verify independent main/comparison image visibility. Explicit comparison hiding leaves the main output and statistics available; numerical tables remain exactly equal through toggles. Existing independent likelihood, coefficient, common-sample and prediction checks remain. Native legacy saved-visibility tests continue to exercise omitted revisions and explicit current preferences.
+- Both Mixed image reset paths now require cleared state and paths. A new real-PNG lifecycle case renders both valid plots, invalidates the outcome, verifies that invalid/hidden outputs cannot create stale images, and recovers all four independent visibility combinations while preserving fixed-effect and comparison tables.
+- GLM reporting tests inspect native SE/lower/upper cell footnotes for raw-coefficient uncertainty, t-reference residual df and negative-binomial estimated-size qualifications. They also check IRT predictor conditioning, slope interpretation, threshold units and marginal-averaging cells. Previously unreachable generic-note assertions were replaced with these positive cell checks. Existing full-precision confidence-limit tests remain, and SE checks retain the established Gaussian three-decimal presentation. Hidden and empty tables must clear notes/footnotes; populated numerical tables survive hide/show exactly. The desktop jmvcore dataframe exporter cannot export some empty tables, so empty-state assertions use native row counts and notes rather than requesting an empty `asDF`.
+- Native Mixed fixed-effect p columns retain identifier `p` but serialize as hidden. A separate nested-model fixture independently calculates the ordinary ML likelihood-ratio p-value and verifies the comparison p column's independent toggle. Current Mixed output revision is 2. A revision-1 migration fixture copies legacy shared settings once, then preserves divergent axes/panels, prediction types, cluster counts, label arrays/stores and retained preferences through two further real-protobuf reopen/migration cycles. Numeric revision value is checked across protobuf integer/double storage.
+- Only the independent forest boundary oracle receives a floating-point tolerance: sorted numeric probabilities must equal 0 and 1 within `1e-14`, covering the laptop's `1 - 2.22e-16` result. The tapply array is compared by its numeric values, retaining the former set assertion's intent. Oracle probabilities also have a tight range check. All three public prediction comparisons keep their existing independent predictions and `1e-10` tolerance; no unrelated tolerance or production calculation changes.
+
+### Exact artifact retirement
+
+The 26 tracked SVG paths listed below were verified to be outside the 140-reference inventory. Their original bytes were copied and hash-verified under ignored `.jamovi-dev/unapproved-svg-artifacts/`, preserving the relative paths below. `git rm --cached` untracked them; the copies in the active `_snaps` directory were then removed so strict inventory checks see only approved references. Exact-path ignore rules follow the existing approved-SVG exception, preventing these legacy outputs from returning as untracked release candidates without broadly ignoring legitimate reference SVGs. The root `.DS_Store` was also untracked, retained in place and ignored. Both unrelated development `.DS_Store` files retain their original hashes.
+
+```text
+tests/testthat/_snaps/testcompare_fits/compare-fits-where-listwise-deletion-causes-change-in-levels.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-glm.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-labels-breaks.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-loglink.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-many-vars-and-polynomial-v2.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-many-vars-and-polynomial.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-mixed-models-and-re-t.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-mixed-models.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-one-model.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-polr.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-rf.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-rlm.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-rpart-categorical.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-rpart-numeric.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-strong-interaction.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-tibbles.svg
+tests/testthat/_snaps/testcompare_fits/compare-fits-with-two-glms.svg
+tests/testthat/_snaps/testcompare_fits/compare-interaction-vs-me.svg
+tests/testthat/_snaps/testflexplot_unconventional/association-plot.svg
+tests/testthat/_snaps/testflexplot_unconventional/paneled-association-plot.svg
+tests/testthat/_snaps/testpartial_residual_plots/partial-residual-plot-with-formula-term.svg
+tests/testthat/_snaps/testpartial_residual_plots/partial-residual-plot-with-one-variable.svg
+tests/testthat/_snaps/testpartial_residual_plots/partial-residual-plot-with-two-variables.svg
+tests/testthat/_snaps/testpartial_residual_plots/partial-residual-with-interaction-specified-backward.svg
+tests/testthat/_snaps/testpartial_residual_plots/prp-with-no-added-term-argument-specified.svg
+tests/testthat/_snaps/testvisualize_mixed/mixed-old-error.svg
+.DS_Store
+```
+
+The preservation manifest and approved-reference hashes are recorded locally in `.jamovi-dev/stage11b2-artifacts.json`. Ignore-rule validation confirms that precisely the 26 retired SVG paths and Finder metadata are ignored, while all 140 approved SVG paths remain eligible for tracking. This is repository hygiene; no reference SVG was regenerated or approved, and no E2E inventory or scenario manifest was updated.
+
+### Native validation and remaining Stage 11C gates
+
+The corrected focused package selection passes **1,817 assertions**, and the relevant native/protobuf/restoration selection passes **648**, with zero failures, errors, skips or testthat warnings. The complete desktop native suite finishes at **4,609 passed, 29 failed assertions, 0 errors, 0 testthat warnings and 0 skips**. Every failure is in `dev/jamovi/tests/test-e2e-design.R`; none is in the corrected p-column, revision, restoration or visibility tests. The existing large Mixed image-state advisories remain outside testthat warning counts.
+
+| Deferred E2E gate | Failures | Disposition |
+| --- | ---: | --- |
+| Checked-in source inventory differs from current definitions/results/test metadata | 1 | Stage 11C: update the scenario transitions and derived-state mapping before reviewing regenerated inventory. |
+| Options lack scenario coverage | 27 | Stage 11C: 5 LM, 9 GLM and 13 Mixed options listed below; preserve the existing coverage requirement. |
+| Derived `coverage.csv` differs | 1 | Stage 11C: stale option/scenario metadata, not a model calculation change. Do not replace it without completing the coverage mapping. |
+
+Uncovered option identifiers are:
+
+- LM: `comparisonGraphic`, `comparisonStatistics`, `modifyPlotLabels`, `modifyComparisonPlotLabels`, `ghostLines`.
+- GLM: `automaticFamily`, `automaticFamilyOutcome`, `comparisonGraphic`, `comparisonStatistics`, `comparisonSe`, `comparisonPlotStyle`, `comparisonPlotScale`, `modifyPlotLabels`, `modifyComparisonPlotLabels`. The two Automatic fields require observations of derived state rather than direct user edits.
+- Mixed: `comparisonX`, `comparisonPanels`, `comparisonGroup`, `comparisonPredictionType`, `comparisonClusters`, `comparisonPlotLabels`, `comparisonPlotLabelStore`, `estimates`, `comparisonGraphic`, `comparisonStatistics`, `modifyPlotLabels`, `modifyComparisonPlotLabels`, `ghostLines`.
+
+All nine other fixture CSVs match byte for byte on the desktop, including `primary.csv`, `common_sample.csv` and `invalid.csv`, which had numerical spelling differences on the laptop. Fixture RDS and numerical reference checks also pass. Thus the laptop's three numerical CSV reproducibility failures do not recur here; no CSV, fixture, tolerance or E2E source was changed to obtain that result. The remaining 29 assertions are the already classified E2E inventory/coverage debt, not newly discovered implementation defects. No checked-in inventory or scenario matrix was regenerated or weakened. Local native evidence is `.jamovi-dev/stage11b2-native-focused-final*` and `stage11b2-native-all*`.
+
+Additional investigation reproduced an existing desktop development-harness limitation against the unchanged Stage 11B.1 source: after Binomial → Poisson, `jmvcore` 2.6.3's `asDF` export of now-empty IRT/probability tables raises `invalid 'row.names' length`. Both native tables have zero rows, are hidden and have no table notes. A fresh empty table exports successfully; the issue concerns exporting a table after its populated state is cleared. This is why the corrected tests inspect native empty-state counts/notes and reserve dataframe equality for populated tables. No model, inference or displayed-result defect was found, and no dependency or production workaround was introduced. The baseline probe is retained locally as `.jamovi-dev/stage11b2-empty-export-probe-final.log`; any dataframe-export follow-up belongs with the development harness/dependency compatibility work.
+
+### Final package baseline and scope review
+
+The final clean source export (`.jamovi-dev/stage11b2-final-source`) contains exactly the 140 approved SVG references and excludes the untracked Finder metadata. The full package suite finishes with **24,504 passed, 0 failed assertions, 0 errors, 0 testthat warnings and 0 skips**, across 797 test cases in about 16 minutes 14 seconds. Stage 11B.1 was 23,767 passed / 15 failed assertions / 1 error. All 16 unsuccessful checks are now resolved; the 737 additional passes include their corrected assertions and new or previously unreachable checks. The focused corrected files account for the entire count difference; unchanged package tests retain their prior results. Logs and structured results are `.jamovi-dev/stage11b2-focused-final*` and `stage11b2-full*`.
+
+All **140/140 approved visual comparisons have recorded successful expectations**, with no skipped or failed comparison. Strict inventory validation passes. Post-run hashes confirm all approved files are byte-identical in both the working tree and clean export; the 26 retired local copies and all three local Finder files also retain their original hashes. Review of the Git index confirms exactly 27 intended removals (the listed 26 SVGs plus root `.DS_Store`) and all 140 approved references still tracked. `git diff --check` passes.
+
+No production source, numerical calculations, dependency versions, checked-in E2E artifacts or scenario files were changed. The build-input fingerprint remains Stage 11B.1's `68964d65afd6f88cbf4697301d09edc4d32412ad773ddcb1298cd965fb317550`; no module rebuild or new GUI campaign was needed for this test/hygiene stage. No new modeling implementation defect was found. The empty-after-populated dataframe-export limitation above is recorded separately, not hidden by a numerical tolerance change. Stage 11C must address the 29 E2E gates by updating actual transitions and derived-state observations before regenerating inventory/coverage. The comprehensive live GUI campaign, isolated built-package release checks and actual-host JASP compatibility still remain release requirements.

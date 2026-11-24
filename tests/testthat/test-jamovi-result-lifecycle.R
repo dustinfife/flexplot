@@ -73,13 +73,57 @@ test_that("GLM and Mixed Model resets retain their distinct image and column pol
     }
     for (plot in c("plot","comparisonplot")) {
       expect_null(results[[plot]]$state)
-      expect_identical(results[[plot]]$filePath,if(name=="glm") NULL else "previous-plot.png")
+      expect_null(results[[plot]]$filePath)
     }
     expect_identical(results$waiting$content,if(name=="glm")
       "<p>Select an outcome and predictors, and specify at least one model term.</p>" else
       "<p>Select a numeric outcome and one cluster variable.</p>")
     if (name=="glm") for (column in results$coefficients$columns)
       expect_identical(column$visible,column$name=="term")
+  }
+})
+
+test_that("Mixed invalid and hidden outputs clear image paths before independent recovery", {
+  skip_if_not_installed("jmvcore")
+  previous = ggplot2::theme_get(); withr::defer(ggplot2::theme_set(previous))
+  withr::local_options(device=function(...) grDevices::pdf(file=NULL))
+  data = jamovi_mixed_test_data()
+  options = flexplot:::mixedmodelOptions$new(out="y",preds=c("x","z"),cluster="id",
+    modelTerms=list("x","z"),compare=TRUE,comparisonTerms=list("x"),
+    graphic=TRUE,comparisonGraphic=TRUE,plotX="x",comparisonX="x",
+    predictionType="population",comparisonPredictionType="population")
+  analysis = flexplot:::mixedmodelClass$new(options=options,data=NULL)
+  reader = jamovi_reporting_read
+  environment(reader) = list2env(list(data=data),parent=environment(reader))
+  analysis$.setReadDatasetSource(reader); analysis$.setReadDatasetHeaderSource(reader)
+  output = isolation_resources(analysis); withr::defer(unlink(output,recursive=TRUE))
+  expect_true(analysis$run())
+  fixed = analysis$results$fixed$asDF
+  comparison = analysis$results$comparison$asDF
+  for (name in c("plot","comparisonplot")) isolation_image(analysis,name,output)
+  expect_true(jamovi_reporting_update(analysis,list(out=NULL)))
+  for (name in c("plot","comparisonplot")) {
+    image = analysis$results[[name]]
+    expect_null(image$filePath)
+    expect_null(image$state)
+    expect_false(image$visible)
+    expect_false(analysis$.createImage(paste0(".",name),image,noThrow=TRUE))
+    expect_null(image$filePath)
+  }
+  for (visibility in list(c(FALSE,FALSE),c(TRUE,FALSE),c(FALSE,TRUE),c(TRUE,TRUE))) {
+    expect_true(jamovi_reporting_update(analysis,list(out="y",graphic=visibility[1],comparisonGraphic=visibility[2])))
+    expect_equal(analysis$results$fixed$asDF,fixed,tolerance=0)
+    expect_equal(analysis$results$comparison$asDF,comparison,tolerance=0)
+    for (i in seq_along(visibility)) {
+      name = c("plot","comparisonplot")[i]
+      image = analysis$results[[name]]
+      expect_identical(image$visible,visibility[i])
+      expect_null(image$filePath)
+      if (visibility[i]) isolation_image(analysis,name,output) else {
+        expect_false(analysis$.createImage(paste0(".",name),image,noThrow=TRUE))
+        expect_null(image$filePath)
+      }
+    }
   }
 })
 

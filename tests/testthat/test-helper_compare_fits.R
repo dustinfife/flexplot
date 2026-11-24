@@ -34,7 +34,9 @@ test_that("public forest comparisons preserve zero and one success probabilities
   probabilities = do.call(rbind, predict(forest, newdata=d, type="prob", OOB=FALSE))
   # Compare with the actual probability column, never recoded class predictions.
   expected = tapply(probabilities[, "binary.1"], d$a, mean)
-  expect_setequal(unname(expected), c(0, 1))
+  # Independent tree averages may differ from a boundary by machine rounding.
+  expect_equal(sort(as.numeric(expected)), c(0, 1), tolerance=1e-14)
+  expect_true(all(probabilities >= -1e-14 & probabilities <= 1+1e-14))
   for (method in c("marginal", "observed", "reference")) {
     actual = compare_fits(binary ~ a, d, forest, return.preds=TRUE,
                             prediction_method=method)

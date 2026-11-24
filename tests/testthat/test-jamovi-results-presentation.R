@@ -73,7 +73,7 @@ test_that("restored Linear Model result records cannot keep empty factor tables 
   }
 })
 
-test_that("GLM table notes identify unchanged family-specific coefficient intervals", {
+test_that("GLM native cell footnotes identify unchanged family-specific coefficient intervals", {
   skip_if_not_installed("jmvcore")
   analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(), small)
   for (family in c("gaussian","binomial","poisson","gammaLog","Gamma","negativebinomial","gaussian")) {
@@ -85,26 +85,61 @@ test_that("GLM table notes identify unchanged family-specific coefficient interv
     is_t = colnames(fit)[3] == "t value"
     critical = if (is_t) qt(.975, df.residual(model)) else qnorm(.975)
     table = results$coefficients$asDF
+    expect_equal(jamovi_reported_se(table),unname(if (family=="gaussian") round(fit[,2],3) else fit[,2]),tolerance=1e-12)
     expect_equal(table$lower, unname(fit[,1]-critical*fit[,2]), tolerance=1e-12)
     expect_equal(table$upper, unname(fit[,1]+critical*fit[,2]), tolerance=1e-12)
     expect_identical(results$coefficients$getColumn("lower")$superTitle,
       if (is_t) "95% t CI" else "95% normal Wald CI")
-    if (is_t) expect_match(results$coefficients$notes$intervals$note,"Residual df:") else
-      expect_null(results$coefficients$notes$intervals)
+    expect_null(results$coefficients$notes$intervals)
+    se_columns = intersect(c("SE","Std..Error","Std. Error"),names(results$coefficients$columns))
+    se_columns = Filter(function(name)results$coefficients$getColumn(name)$visible,se_columns)
+    expect_length(se_columns,1L)
+    for (column in c(se_columns,"lower","upper")) {
+      note = paste(results$coefficients$getCell(column,rowNo=1)$footnotes,collapse=" ")
+      expect_match(note,"SE and confidence limits refer to raw coefficients.",fixed=TRUE)
+      if (is_t) expect_match(note,paste("t reference with",df.residual(model),"residual df."),fixed=TRUE) else
+        expect_false(grepl("t reference",note,fixed=TRUE))
+      if (family=="negativebinomial") expect_match(note,"Uncertainty conditions on estimated size (theta).",fixed=TRUE) else
+        expect_false(grepl("estimated size",note,fixed=TRUE))
+    }
     warnings = results$plot$state$warnings
     expect_identical(results$explanation$visible,length(warnings)>0L)
     expect_identical(results$explanation$content,if (length(warnings))
       paste0("<p>",paste(warnings,collapse="; "),"</p>") else "")
-    expect_false(grepl("estimates.glm",results$coefficients$notes$interpretation$note,fixed=TRUE))
+    expect_null(results$coefficients$notes$interpretation)
     expect_length(results$coefficients$getRefs(), 0L)
     expect_setequal(results$getRefs(), c("flexplot","graphicalAnalysis"))
     if (family == "binomial") {
       expect_match(results$coefficients$notes$model$note, "Success event")
-      expect_match(results$irt$notes$conditioning$note, "conditional")
-      expect_match(results$irt$notes$interpretation$note, "not average marginal effects")
-      expect_match(results$probabilities$notes$averaging$note, "eligible observations")
+      expect_match(paste(results$irt$getCell("variable",rowNo=1)$footnotes,collapse=" "),"Estimates are conditional",fixed=TRUE)
+      expect_match(paste(results$irt$getCell("instantaneous_slope",rowNo=1)$footnotes,collapse=" "),"not average marginal effects",fixed=TRUE)
+      expect_match(paste(results$irt$getCell("intercept_threshold",rowNo=1)$footnotes,collapse=" "),"Thresholds are in predictor units.",fixed=TRUE)
+      expect_match(paste(results$probabilities$getCell("Probability",rowNo=1)$footnotes,collapse=" "),
+        "probabilities are averaged over the other observed predictors.",fixed=TRUE)
+      expect_length(results$irt$notes,0L)
+      expect_length(results$probabilities$notes,0L)
+    } else for (name in c("irt","probabilities")) {
+      expect_false(results[[name]]$visible)
+      expect_equal(results[[name]]$rowCount,0L)
+      expect_length(jamovi_test_table_notes(results[[name]]),0L)
     }
-    if (family == "negativebinomial") expect_match(results$coefficients$notes$interpretation$note, "estimated size")
+    populated = c("coefficients","irt","probabilities")
+    populated = populated[vapply(populated,function(name)results[[name]]$rowCount>0L,logical(1))]
+    numbers = lapply(populated,function(name)results[[name]]$asDF)
+    expect_true(jamovi_reporting_update(analysis,list(showEstimates=FALSE,showIRT=FALSE,showProbabilities=FALSE)))
+    for (name in c("coefficients","irt","probabilities")) {
+      expect_false(results[[name]]$visible)
+      expect_length(results[[name]]$notes,0L)
+      for (column in results[[name]]$columns) for (row in seq_len(results[[name]]$rowCount))
+        expect_length(column$getCell(row)$footnotes,0L)
+    }
+    expect_true(jamovi_reporting_update(analysis,list(showEstimates=TRUE,showIRT=TRUE,showProbabilities=TRUE)))
+    expect_equal(lapply(populated,function(name)results[[name]]$asDF),numbers,tolerance=0)
+  }
+  expect_true(jamovi_reporting_update(analysis,list(out=NULL)))
+  for (name in c("coefficients","irt","probabilities")) {
+    expect_equal(analysis$results[[name]]$rowCount,0L)
+    expect_length(jamovi_test_table_notes(analysis$results[[name]]),0L)
   }
 })
 

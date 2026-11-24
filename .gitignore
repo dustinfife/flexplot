@@ -25,3 +25,32 @@ Rplots.pdf
 *.Rout.fail
 
 .jamovi-dev/
+
+# Finder metadata and explicitly retired, unapproved snapshot output
+.DS_Store
+/tests/testthat/_snaps/testcompare_fits/compare-fits-where-listwise-deletion-causes-change-in-levels.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-glm.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-labels-breaks.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-loglink.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-many-vars-and-polynomial-v2.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-many-vars-and-polynomial.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-mixed-models-and-re-t.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-mixed-models.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-one-model.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-polr.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-rf.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-rlm.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-rpart-categorical.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-rpart-numeric.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-strong-interaction.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-tibbles.svg
+/tests/testthat/_snaps/testcompare_fits/compare-fits-with-two-glms.svg
+/tests/testthat/_snaps/testcompare_fits/compare-interaction-vs-me.svg
+/tests/testthat/_snaps/testflexplot_unconventional/association-plot.svg
+/tests/testthat/_snaps/testflexplot_unconventional/paneled-association-plot.svg
+/tests/testthat/_snaps/testpartial_residual_plots/partial-residual-plot-with-formula-term.svg
+/tests/testthat/_snaps/testpartial_residual_plots/partial-residual-plot-with-one-variable.svg
+/tests/testthat/_snaps/testpartial_residual_plots/partial-residual-plot-with-two-variables.svg
+/tests/testthat/_snaps/testpartial_residual_plots/partial-residual-with-interaction-specified-backward.svg
+/tests/testthat/_snaps/testpartial_residual_plots/prp-with-no-added-term-argument-specified.svg
+/tests/testthat/_snaps/testvisualize_mixed/mixed-old-error.svg

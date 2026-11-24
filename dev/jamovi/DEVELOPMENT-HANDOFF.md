@@ -632,3 +632,57 @@ table-note error. The complete laptop native audit's 42 classified failures
 remain separate from this stage's passing 606-assertion selection. Next stages
 should address the verified stale tests, portable oracles and repository/E2E
 hygiene before rerunning release gates and the broader GUI/JASP campaigns.
+
+## Stage 11B.2 test contracts and repository hygiene
+
+Completed 2026-11-24 from `ba5d76e1` on `ggplot-objects`. Production source,
+calculations, option/result identifiers and the installed module's build-input
+fingerprint remain unchanged (`68964d65afd6f88cbf4697301d09edc4d32412ad773ddcb1298cd965fb317550`).
+
+GLM tests now assert concise likelihood-ratio notes, independent plot visibility
+and exact numerical preservation through toggles. Reporting tests inspect actual
+SE/CI, residual-df, IRT, marginal-averaging and negative-binomial cell footnotes,
+including removal on hidden/empty output and recovery. Mixed lifecycle tests
+require cleared paths/state and render real PNGs after invalidation across all
+four visibility combinations. Native checks retain hidden fixed-effect p column
+identifiers, independently test comparison likelihood p-values, and preserve
+revision-2 divergent settings and label stores across repeated protobuf reopen.
+The forest oracle alone uses `1e-14` for floating-point boundary probabilities;
+its independent public prediction comparisons keep the existing `1e-10` tolerance.
+
+Exactly 26 unapproved SVG artifacts were untracked and moved out of the active
+snapshot directory after hash-verified copies were preserved in ignored
+`.jamovi-dev/unapproved-svg-artifacts/`. Exact-path ignore rules prevent these
+legacy outputs from becoming untracked release candidates. Root `.DS_Store` was
+untracked but remains locally present; unrelated development Finder files are
+also preserved and ignored. The audit lists every retired path. All 140 approved
+reference hashes remain unchanged, and the strict inventory sees exactly 140.
+
+The corrected focused package selection passes 1,817 assertions and the relevant
+native/restoration selection passes 648, with no failures, errors, skips or
+testthat warnings. No checked-in E2E inventory/scenario metadata was regenerated. Full-suite
+and remaining Stage 11C results are recorded in the audit's Stage 11B.2 section.
+
+The complete native desktop suite has **4,609 passed and 29 failed assertions**,
+with no errors, skips or testthat warnings. All 29 are deferred Stage 11C E2E
+checks: one inventory snapshot, 27 uncovered-option checks (5 LM / 9 GLM / 13
+Mixed) and one derived coverage CSV mismatch. The other nine CSV files and all
+numerical fixture/reference checks pass; the laptop's three numerical CSV
+spelling failures do not recur on this host. The audit lists all uncovered
+options, including Automatic's two derived fields. Keep those coverage gates
+intact and update actual E2E transitions before regenerating derived metadata.
+
+The full package suite is now **24,504 passed, 0 failures, 0 errors, 0 testthat
+warnings and 0 skips** across 797 cases, versus Stage 11B.1's 23,767/15/1.
+All 140 approved visual comparisons pass and their hashes are unchanged in the
+working tree and clean export. Strict SVG inventory validation passes. Deletion
+review confirms exactly the listed 26 unapproved SVGs plus root `.DS_Store` were
+untracked; no approved reference was removed, regenerated or approved.
+
+No new modeling defect was uncovered. An existing desktop jmvcore 2.6.3 `asDF`
+limitation for empty IRT/probability tables after a family transition reproduces
+on unchanged Stage 11B.1 source; native empty-state counts/visibility/notes remain
+correct. It is documented as a separate development-harness compatibility
+follow-up. No production workaround was added. Complete the deferred E2E work in
+Stage 11C, then the comprehensive GUI, isolated built-package release checks and
+actual-host JASP validation before claiming release readiness.
