@@ -17,6 +17,7 @@ const {pathToFileURL} = require('node:url');
         fs.copyFileSync(path.join(root, 'jamovi/js/' + analysis + '.js'), path.join(temp, analysis + '.js'));
         fs.copyFileSync(path.join(root, 'jamovi/js/model-terms.js'), path.join(temp, 'model-terms.js'));
         fs.copyFileSync(path.join(root,'jamovi/js/output-options.js'),path.join(temp,'output-options.js'));
+        fs.copyFileSync(path.join(root,'jamovi/js/plot-label-editors.js'),path.join(temp,'plot-label-editors.js'));
         if (analysis === 'glmgeneralized') fs.copyFileSync(path.join(root,'jamovi/js/glm-plot-controls.js'),path.join(temp,'glm-plot-controls.js'));
         if (analysis === 'glmgeneralized') fs.copyFileSync(path.join(root,'jamovi/js/glm-ghosts.js'),path.join(temp,'glm-ghosts.js'));
         const {default: compileR} = await import(pathToFileURL(path.join(compilerPath, 'compiler.js')));
@@ -72,6 +73,22 @@ const {pathToFileURL} = require('node:url');
             for (const child of control.controls || []) walk(child);
         };
         walk(compiled.view.layout);
+        const flatten = items => items.flatMap(item=>[item,...flatten(item.controls || [])]);
+        const nodes = flatten(compiled.view.layout.controls);
+        const mainSection = compiled.view.layout.controls.find(item=>item.label===(analysis==='mixedmodel' ? 'Model Visualization / Model Comparison Visualization' : 'Model Visualization'));
+        assert.ok(mainSection,'Missing main visualization section');
+        const compSection = analysis==='mixedmodel' ? mainSection : compiled.view.layout.controls.find(item=>item.label==='Model Comparison Visualization');
+        assert.ok(compSection,'Missing distinct comparison visualization section');
+        const modelSpec = compiled.view.layout.controls.find(item=>item.label==='Model Comparison');
+        assert.ok(!flatten(modelSpec.controls).some(item=>['plotX','comparisonX','plotLabels','comparisonPlotLabels'].includes(item.name)),
+            'Model specifications must not contain visualization controls');
+        for (const name of analysis==='mixedmodel' ? ['plotLabels'] : ['plotLabels','comparisonPlotLabels']) {
+            const editor = nodes.find(item=>item.name===name);
+            assert.equal(editor.height,'large');assert.equal(editor.type,'ListBox');
+            assert.ok(editor.contentLink.includes(name==='comparisonPlotLabels' ? 'modifyComparisonPlotLabels' : 'modifyPlotLabels'));
+            if (runtime && analysis!=='mixedmodel') require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),editor,null,compilerPath);
+        }
+
         const dual = controls.has('comparisonTerms');
         const generalized = analysis === 'glmgeneralized';
         if (generalized) {
@@ -109,6 +126,8 @@ const {pathToFileURL} = require('node:url');
         }
 
         ui.outputOptionsVersion = control(0);
+        ui.plotLabelEditorVersion = control(0);
+        ui.plotLabelStore = control([]);ui.comparisonPlotLabelStore = control([]);
         if (analysis === 'glmbasic') ui.comparisonMagnet = control(false);
         if (generalized || analysis === 'glmbasic') ui.mainEffects = control(null); // Legacy saved option; no visible control.
         if (generalized) { ui.polynomials.setValue(false); ui.comparisonPolynomials.setValue(false); }
@@ -119,10 +138,9 @@ const {pathToFileURL} = require('node:url');
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.a.yaml'),'utf8'));
             assert.equal(definition.options.find(option => option.name === 'se').title,'95% confidence intervals (Model 1 plot)');
             for (const name of ['line','center']) assert.ok(definition.options.some(option => option.name === name),'Retain saved option: '+name);
-            const graphic = compiled.view.layout.controls.flatMap(c => c.controls || [])
-                .flatMap(c => c.controls || []).find(c => c.label && c.label.trim() === 'Graphic Options');
-            assert.ok(graphic);
-            assert.equal(JSON.stringify(graphic.controls.map(c => c.name)),JSON.stringify(['se']));
+            const main = compiled.view.layout.controls.find(c=>c.label==='Model Visualization');
+            assert.ok(main.controls.some(c=>c.name==='se'));
+            assert.ok(!JSON.stringify(compiled.view.layout).includes('Graphic Options'));
         }
         if (analysis === 'glmbasic' || generalized) {
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.a.yaml'),'utf8'));
@@ -147,7 +165,7 @@ const {pathToFileURL} = require('node:url');
                 const second = comparison.controls.find(control => control.label === (generalized ? 'Model 2 effects' : 'Model 2 fixed effects'));
                 const primarySquare = compiled.view.layout.controls.find(control => control.name === 'quadraticSupplier');
                 const secondSquare = second.controls.find(control => control.name === 'comparisonQuadraticSupplier');
-                const comparisonVisualization = comparison.controls.find(control => control.label === 'Model Comparison Visualization');
+                const comparisonVisualization = compiled.view.layout.controls.find(control => control.label === 'Model Comparison Visualization');
                 assert.equal(comparisonVisualization.contentLink,'(compare)');
                 const comparisonPlot = comparisonVisualization.controls.find(control => control.name === 'comparisonPlotSupplier');
                 assert.equal(comparisonPlot.label,'Available predictors for comparison plot');
@@ -268,7 +286,7 @@ const {pathToFileURL} = require('node:url');
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi/mixedmodel.a.yaml'),'utf8'));
             assert.equal(definition.options.find(option => option.name === "casGhost").default,false);
             assert.equal(definition.options.find(option => option.name === "casGhost").title,"Add ghost line");
-            const casVisualization = compiled.view.layout.controls.find(control => control.label === "Model visualization");
+            const casVisualization = compiled.view.layout.controls.find(control => control.name === "modelVisualizationSection");
             const ghost = casVisualization.controls.find(control => control.name === "casGhost");
             assert.equal(ghost.contentLink,"(compare && predictionType:cas)");
             assert.equal(ghost.useSingleCell,true);
@@ -295,10 +313,11 @@ const {pathToFileURL} = require('node:url');
 
             assert.equal(definition.options.find(option => option.name === 'interactions').default,false);
             assert.equal(definition.options.find(option => option.name === 'polynomials').default,false);
-            const visualization = compiled.view.layout.controls.find(control => control.label === 'Model visualization');
-            const editor = visualization.controls.find(control => control.label === 'Plot Labels');
-            assert.equal(editor.contentLink,'((!compare && graphic) || (compare && comparisonGraphic))');
-            assert.ok(editor.controls.find(control => control.name === 'plotLabels').columns.some(column => column.name === 'label'));
+            const visualization = compiled.view.layout.controls.find(control => control.name === 'modelVisualizationSection');
+            const editor = visualization.controls.find(control => control.name === 'plotLabels');
+            assert.equal(editor.contentLink,'((!compare && modifyPlotLabels) || (compare && modifyComparisonPlotLabels))');
+            assert.equal(editor.height,'large');
+            assert.ok(editor.columns.some(column => column.name === 'label'));
 
             for (const [name, option] of [['primarySupplier','interactions'], ['quadraticSupplier','polynomials']]) {
                 const definition = compiled.view.layout.controls.find(control => control.name === name);
@@ -437,9 +456,9 @@ const {pathToFileURL} = require('node:url');
             assert.ok(style && style.contentLink === '(family:binomial)');
             const scale = compiled.view.layout.controls.flatMap(c => c.controls || []).find(c => c.name === 'plotScale');
             assert.equal(scale.contentLink,'(family:binomial)');
-            const visualization = compiled.view.layout.controls.find(c => c.label === 'Model visualization').controls;
+            const visualization = compiled.view.layout.controls.find(c => c.label === 'Model Visualization').controls;
             const descendants = items => items.flatMap(item=>[item,...descendants(item.controls || [])]);
-            const comparisonSection = descendants(compiled.view.layout.controls).find(c=>c.label==='Model Comparison Visualization').controls;
+            const comparisonSection = compiled.view.layout.controls.find(c=>c.label==='Model Comparison Visualization').controls;
             assert.equal(JSON.stringify(comparisonSection.filter(c=>c.name && ['comparisonPlotStyle','comparisonPlotScale','comparisonSe'].includes(c.name)).map(c=>c.name)),JSON.stringify(['comparisonPlotStyle','comparisonPlotScale','comparisonSe']));
             assert.ok(!descendants(comparisonSection).some(c=>['se','plotStyle','plotScale'].includes(c.name)));
             assert.ok(!descendants(visualization).some(c=>['comparisonSe','comparisonPlotStyle','comparisonPlotScale'].includes(c.name)));
@@ -453,7 +472,7 @@ const {pathToFileURL} = require('node:url');
             assert.equal(top[2].name,'interactions');
             assert.ok(top.findIndex(c => c.name === 'polynomials') < top.findIndex(c => c.label === 'Model Comparison'));
             assert.ok(top.findIndex(c => c.label === 'Model Comparison') < top.findIndex(c => c.label === 'Output Options'));
-            assert.ok(top.findIndex(c => c.label === 'Output Options') < top.findIndex(c => c.label === 'Model visualization'));
+            assert.ok(top.findIndex(c => c.label === 'Output Options') < top.findIndex(c => c.label === 'Model Visualization'));
             const outputControls = top.find(c => c.label === 'Output Options').controls;
             assert.equal(JSON.stringify(outputControls.map(c => c.name)),JSON.stringify(['graphic','showEstimates','showIRT','showProbabilities','comparisonGraphic','comparisonStatistics','includeP']));
             assert.equal(outputControls[0].contentLink,undefined);

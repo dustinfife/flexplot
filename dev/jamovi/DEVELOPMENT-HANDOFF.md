@@ -12,8 +12,8 @@ inspection. Keep stages small and preserve statistical behavior.
 | 1 | Model formulas and result ordering | Complete: `6d728b06` |
 | 2 | Comparison visualization restrictions | Complete: `b14032b9` |
 | 3 | Consistent Output Options | Complete: `c36f4b06` |
-| 4 | Independent GLM visualization settings | Complete; implementation commit resolved below |
-| 5 | Plot-control organization, Modify Plot Labels checkboxes, taller editors, readable dynamic legend descriptions | Remaining |
+| 4 | Independent GLM visualization settings | Complete: `9bab9cc0` |
+| 5 | Plot-control organization, Modify Plot Labels checkboxes, taller editors, readable dynamic legend descriptions | Complete; implementation commit resolved below |
 | 6 | Mixed Models estimates, confidence-interval controls, removal of permanently empty fixed-effect p-value columns | Remaining |
 | 7 | Compact table notes, targeted native footnotes, conditional comparison-test explanations | Remaining |
 | 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Remaining |
@@ -21,10 +21,10 @@ inspection. Keep stages small and preserve statistical behavior.
 | 10 | Automatic Binomial/logit selection for eligible binary outcomes, preserving explicit family choices | Remaining |
 | 11 | Final shared-infrastructure review, GUI testing, release preparation | Remaining |
 
-Resolve the Stage 4 implementation commit:
+Resolve the Stage 5 implementation commit:
 
 ```sh
-git log -1 --format='%H %s' --grep='Separate GLM ordinary and comparison visualization settings'
+git log -1 --format='%H %s' --grep='Standardize modeling visualization sections and plot-label editors'
 ```
 
 ## Architecture and compatibility
@@ -54,7 +54,48 @@ git log -1 --format='%H %s' --grep='Separate GLM ordinary and comparison visuali
   Supplier loses the named `aux` grid column and caused the Stage 2 loading
   placeholder. Stage 3 fixed this; never modify installed jamovi code or CSS.
 
+## Stage 5 architecture
+
+- LM/GLM have separate Model Visualization and Model Comparison Visualization
+  sections, independent default-off Modify Plot Labels preferences, and native
+  `height: large` editors. Model specifications stay in Model Comparison.
+- Mixed retains one active visualization and shared label store. Its combined
+  Model Visualization / Model Comparison Visualization section has one native
+  editor and a visibility preference per mode. The combined heading is deliberate:
+  jamovi 2.7.41 CollapseBox labels do not update after creation. Do not use custom
+  DOM/CSS updates or duplicate the shared controls to simulate Stage 9.
+- `plot-label-editors.js` and `jamovi_plot_editor_migrate` use revision 1 of
+  `plotLabelEditorVersion` to reveal legacy nonblank saved edits once, including
+  temporarily unavailable retained rows. Current explicit hidden preferences
+  survive. Result visibility never depends on editor visibility or collapse.
+- Shared legend catalogs use displayed scale labels; committed custom text updates
+  descriptions without changing keys or break values. Multiple guides include
+  titles for disambiguation. Native TextBox change/blur/Enter drives recalculation;
+  no per-keystroke rebuilding is introduced. Legacy Mixed legend discovery
+  preserves RNG state. See `docs/jamovi-plot-labels.md`.
+
 ## Verification and outstanding issues
+
+Stage 5 passed 628 focused R6 assertions and 286 native assertions before the
+final heading adjustment; the final compiled-UI/protobuf subset passed 107
+assertions afterward; installed-package protobuf restoration passed another 72.
+All six standalone/comparison numerical table comparisons
+matched Stage 4 (`9bab9cc0`) exactly. Comparison predictions/intervals, reference
+panel ghost coordinates, and Mixed population/cluster/CAS geometry also matched.
+No full package suite was run for this presentation-only stage.
+
+The final module was built and installed in jamovi 2.7.41. Desktop checks verified
+LM/GLM section separation, default-off checkboxes, large editors, the LM title's
+ordinary-output routing, retained title after hiding the editor, stable cell focus
+while typing, Model 1/Model 2 legend descriptions, and description refresh after
+a committed custom entry. GLM main/comparison editors opened independently and
+comparison logit descriptions remained correct. Mixed retained a shared axis edit
+when comparison was enabled, revealed its comparison checkbox independently, and
+preserved its checkbox through collapse/reopen. The final combined Mixed heading
+was verified after reinstalling. Disposable review windows were closed without
+saving; existing documents were preserved. Secondary-monitor placement could not
+be confirmed. Full GUI coverage of every scale/layout/restoration path remains open;
+focused native/R6/renderer checks cover those paths without claiming live coverage.
 
 Stage 4 focused checks cover R6 callbacks, rendered band/style/scale properties,
 independent eligibility, rapid/out-of-order metadata, protobuf restoration, labels,
@@ -115,11 +156,12 @@ Do not commit build artifacts, credentials, private fixtures or `.DS_Store` file
 Focused R6 checks (with jamovi's host R libraries available):
 
 ```sh
-Rscript --vanilla -e 'devtools::test(filter="jamovi-(glm-(independent-display|scale|panel-ghosts|output-options)$|plot-labels$|model-presentation$)", stop_on_failure=TRUE)'
+Rscript --vanilla -e 'devtools::test(filter="jamovi-(label-editors$|plot-labels$|glm-independent-display$|mixed-notes$|model-presentation$|comparison-roles$)", stop_on_failure=TRUE)'
 ```
 
 Native source-integration tests are under `dev/jamovi/tests`; initialize jmvcore's
-protobuf types before a filtered run. The Stage 4 native subset is
+protobuf types before a filtered run. The Stage 5 native subset adds `glm-initialization`, `mixed`, and `label-editors`;
+the Stage 4 native subset is
 `generalized`, `glm-independent-display`, `glm-restoration`, `glm-scale`,
 `glm-panel-ghosts`, and `output-visibility`. The broader `Rscript dev/jamovi.R ui`
 command compiles all UI definitions and runs source integrations; the known stale

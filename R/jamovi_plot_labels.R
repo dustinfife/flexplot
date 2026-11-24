@@ -12,18 +12,33 @@ jamovi_plot_label_catalog = function(plot, layout, context=NULL) {
   rows = list(jamovi_plot_label_row("x", paste(x,collapse=""), display="X-axis label"),
     jamovi_plot_label_row("y", jamovi_plot_axis_key(plot,"y"), display="Y-axis label"))
   group = layout$group
+  guides = if (length(group) || isTRUE(layout$comparison))
+    jamovi_plot_label_guides(plot,jamovi_plot_build_legend_metadata(plot)) else list()
+  guide_for = function(variable) {
+    selected = Filter(function(guide) identical(guide$variable,variable),guides)
+    if (length(selected)) selected[[1]] else NULL
+  }
   if (isTRUE(layout$comparison)) {
-    rows = c(rows,list(jamovi_plot_label_row("legend","model",display="Model legend title")))
+    guide = guide_for("model")
+    title = if (is.null(guide)) "Model" else guide$title
+    rows = c(rows,list(jamovi_plot_label_row("legend","model",display=paste0("Legend title: ",title))))
     models = unique(unlist(lapply(plot$layers,jamovi_plot_layer_models)))
-    for (i in seq_along(models)) rows = c(rows,list(jamovi_plot_label_row("legendLevel","model",models[i],paste0("Legend: Model ",i))))
+    for (i in seq_along(models)) {
+      label = if (is.null(guide)) paste("Model",i) else guide$labels[match(models[i],guide$values)]
+      rows = c(rows,list(jamovi_plot_label_row("legendLevel","model",models[i],paste0("Legend entry: ",label))))
+    }
   }
   if (length(group) && !identical(plot$theme$legend.position, "none")) {
     column = if (paste0(group,"_binned") %in% names(plot$data)) paste0(group,"_binned") else group
-    rows = c(rows,list(jamovi_plot_label_row("legend",column,display=paste0("Color / line / symbol title: ",group))))
+    guide = guide_for(column)
+    title = if (is.null(guide)) group else guide$title
+    rows = c(rows,list(jamovi_plot_label_row("legend",column,display=paste0("Legend title: ",title))))
     values = plot$data[[column]]
     levels = if (is.factor(values)) levels(values)[levels(values) %in% as.character(values)] else unique(as.character(values[!is.na(values)]))
-    for (level in levels) rows = c(rows,list(jamovi_plot_label_row("legendLevel",column,level,
-      paste0("Legend: ",group," = ",level))))
+    for (level in levels) {
+      label = if (is.null(guide)) level else guide$labels[match(level,guide$values)]
+      rows = c(rows,list(jamovi_plot_label_row("legendLevel",column,level,paste0("Legend entry: ",label))))
+    }
   }
   for (direction in c("rows","cols")) {
     for (variable in names(plot$facet$params[[direction]])) {
@@ -59,6 +74,7 @@ jamovi_plot_sync_labels = function(options, plot=NULL, layout=NULL, context=NULL
     index = match(catalog[[i]]$key,keys)
     if (!is.na(index)) catalog[[i]]$label = store[[index]]$label
   }
+  catalog = jamovi_plot_describe_legends(catalog)
   jamovi_plot_publish_labels(options,retained,jamovi_plot_remember_labels(store,catalog))
   jamovi_plot_publish_labels(options,rows,catalog)
   invisible(NULL)
@@ -221,9 +237,12 @@ jamovi_plot_label_guides = function(plot, built) {
     id = expressions[1]
     if (is.null(guides[[id]])) {
       title = scale$name
+      if (inherits(title,"waiver")) title = built$plot$labels[[aesthetic]]
+      if (is.null(title)) title = ""
       if (!is.character(title) || length(title)!=1L) title = id
+      breaks = if (scale$is_discrete()) scale$get_breaks() else character()
       guides[[id]] = list(variable=id,aesthetics=character(),title=title,
-        values=if (scale$is_discrete()) as.character(scale$get_breaks()) else character())
+        values=as.character(breaks),labels=as.character(scale$get_labels(breaks)))
     }
     guides[[id]]$aesthetics = union(guides[[id]]$aesthetics,aesthetic)
   }
@@ -239,8 +258,8 @@ jamovi_plot_scoped_catalog = function(plot, layout, context) {
   built = suppressWarnings(ggplot2::ggplot_build(plot))
   for (guide in jamovi_plot_label_guides(plot,built)) {
     rows = c(rows,list(row("legend",guide$variable,display=paste0("Legend title: ",guide$title))))
-    for (value in guide$values[!is.na(guide$values)]) rows = c(rows,list(
-      row("legendLevel",guide$variable,value,paste0("Legend: ",guide$title," = ",value))))
+    for (i in which(!is.na(guide$values))) rows = c(rows,list(
+      row("legendLevel",guide$variable,guide$values[i],paste0("Legend entry: ",guide$labels[i]))))
   }
   for (direction in c("rows","cols")) for (variable in names(plot$facet$params[[direction]])) {
     title = sub("_binned$","",variable)
@@ -299,4 +318,52 @@ jamovi_plot_apply_scoped_labels = function(plot, entries, layout, context) {
     plot$facet$params$labeller = labeller
   }
   plot
+}
+
+# Old saved edits should remain discoverable, including temporarily absent rows.
+# Plain R constructors and current documents retain explicit editor preferences.
+jamovi_plot_editor_migrate = function(options, module) {
+  if (options$plotLabelEditorVersion >= 1L) return(invisible(NULL))
+  if (!is.null(options$asProtoBuf())) {
+    customized = function(names) any(vapply(unlist(lapply(names,function(name) options[[name]]),
+      recursive=FALSE),jamovi_plot_nonblank_label,logical(1)))
+    main = customized(c("plotLabels","plotLabelStore"))
+    comparison = if (module=="mixedmodel") main else
+      customized(c("comparisonPlotLabels","comparisonPlotLabelStore"))
+    jamovi_output_option(options,"modifyPlotLabels",main)
+    jamovi_output_option(options,"modifyComparisonPlotLabels",comparison)
+  }
+  jamovi_output_option(options,"plotLabelEditorVersion",1L)
+  invisible(NULL)
+}
+
+# Descriptions reflect displayed text; keys and original scale breaks never change.
+jamovi_plot_describe_legends = function(rows) {
+  titles = Filter(function(row) row$role=="legend",rows)
+  multiple = length(titles)>1L
+  for (title in titles) {
+    name = if (jamovi_plot_nonblank_label(title)) title$label else sub("^Legend title: ","",title$display)
+    for (i in seq_along(rows)) {
+      row = rows[[i]]
+      if (!identical(row$variable,title$variable)) next
+      if (row$role=="legend") rows[[i]]$display = paste0("Legend title: ",name)
+      if (row$role=="legendLevel") {
+        value = if (jamovi_plot_nonblank_label(row)) row$label else sub("^Legend entry: ","",row$display)
+        rows[[i]]$display = paste0("Legend entry: ",
+          if (multiple || jamovi_plot_nonblank_label(title)) paste0(name," = ") else "",value)
+      }
+    }
+  }
+  rows
+}
+
+# Metadata discovery must not consume randomness used by subsequent plot rendering.
+jamovi_plot_build_legend_metadata = function(plot) {
+  had_seed = exists(".Random.seed",envir=.GlobalEnv,inherits=FALSE)
+  if (had_seed) seed = get(".Random.seed",envir=.GlobalEnv)
+  on.exit({
+    if (had_seed) assign(".Random.seed",seed,envir=.GlobalEnv) else
+      if (exists(".Random.seed",envir=.GlobalEnv,inherits=FALSE)) rm(".Random.seed",envir=.GlobalEnv)
+  })
+  suppressWarnings(ggplot2::ggplot_build(plot))
 }

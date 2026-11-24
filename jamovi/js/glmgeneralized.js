@@ -2,6 +2,7 @@
 
 const updateTerms = require('./model-terms');
 const migrateOutput = require('./output-options');
+const updateEditors = require('./plot-label-editors');
 const updateGhostControls = require('./glm-ghosts');
 const updateEligibility = require('./glm-plot-controls');
 const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
@@ -11,6 +12,7 @@ const synchronize = function(ui, context, added, changed = null) {
     // Host options arrive separately during restoration; do not prune partial state.
     if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
     migrateOutput(ui, context, 'glmgeneralized');
+    updateEditors(ui, context, 'glmgeneralized');
     if (context.workspace.glmSynchronizing) return;
     if (!added && !(ui.preds.value() || []).length) {
         updatePlotControls(ui, context);

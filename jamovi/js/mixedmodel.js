@@ -2,11 +2,13 @@
 
 const updateTerms = require('./model-terms');
 const migrateOutput = require('./output-options');
+const updateEditors = require('./plot-label-editors');
 const synchronize = function(ui, context, added, quadraticChanged = null) {
     // Native setters synchronously invoke other handlers while an option edit is
     // still in progress. Synchronize once, and send the complete option batch.
     if (context.flags && context.flags.updating) return;
     migrateOutput(ui, context, 'mixedmodel');
+    updateEditors(ui, context, 'mixedmodel');
     if (context.workspace.mixedSynchronizing) return;
     context.workspace.mixedSynchronizing = true;
     const options = ui.view.model.options;

@@ -73,7 +73,7 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
             updateDisplayValue:updateDisplay, setRootElement(value){this.el = value;},
             translate:value => value, getSourceValue:() => selection, setValue:value => {selection = value;}};
     };
-    if (['(interactions)','(comparisonInteractions)','(compare)','(!compare)','(polynomials)','(comparisonPolynomials)'].includes(definition.contentLink)) {
+    if (['(interactions)','(comparisonInteractions)','(compare)','(!compare)','(polynomials)','(comparisonPolynomials)','(modifyPlotLabels)','(modifyComparisonPlotLabels)'].includes(definition.contentLink)) {
         assert.equal(definition.useSingleCell,true);
         const inverted = definition.contentLink === '(!compare)';
         const name = inverted ? 'compare' : definition.contentLink.slice(1,-1);

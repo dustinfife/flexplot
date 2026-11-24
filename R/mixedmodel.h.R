@@ -41,7 +41,10 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             estimates = TRUE,
             comparisonGraphic = TRUE,
             comparisonStatistics = TRUE,
-            outputOptionsVersion = 0, ...) {
+            outputOptionsVersion = 0,
+            modifyPlotLabels = FALSE,
+            modifyComparisonPlotLabels = FALSE,
+            plotLabelEditorVersion = 0, ...) {
 
             private$..estimates = jmvcore::OptionBool$new(
                 "estimates", estimates, default=TRUE)
@@ -51,6 +54,12 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "comparisonStatistics", comparisonStatistics, default=TRUE)
             private$..outputOptionsVersion = jmvcore::OptionInteger$new(
                 "outputOptionsVersion", outputOptionsVersion, default=0, hidden=TRUE)
+            private$..modifyPlotLabels = jmvcore::OptionBool$new(
+                "modifyPlotLabels", modifyPlotLabels, default=FALSE)
+            private$..modifyComparisonPlotLabels = jmvcore::OptionBool$new(
+                "modifyComparisonPlotLabels", modifyComparisonPlotLabels, default=FALSE)
+            private$..plotLabelEditorVersion = jmvcore::OptionInteger$new(
+                "plotLabelEditorVersion", plotLabelEditorVersion, default=0, hidden=TRUE)
             super$initialize(
                 package="flexplot",
                 name="mixedmodel",
@@ -249,6 +258,9 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..comparisonGraphic)
             self$.addOption(private$..comparisonStatistics)
             self$.addOption(private$..outputOptionsVersion)
+            self$.addOption(private$..modifyPlotLabels)
+            self$.addOption(private$..modifyComparisonPlotLabels)
+            self$.addOption(private$..plotLabelEditorVersion)
             self$.addOption(private$..preds)
             self$.addOption(private$..interactions)
             self$.addOption(private$..polynomials)
@@ -282,6 +294,9 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..includeCI)
         }),
     active = list(
+        modifyPlotLabels = function() private$..modifyPlotLabels$value,
+        modifyComparisonPlotLabels = function() private$..modifyComparisonPlotLabels$value,
+        plotLabelEditorVersion = function() private$..plotLabelEditorVersion$value,
         estimates = function() private$..estimates$value,
         comparisonGraphic = function() private$..comparisonGraphic$value,
         comparisonStatistics = function() private$..comparisonStatistics$value,
@@ -319,6 +334,9 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         samplePolicyVersion = function() private$..samplePolicyVersion$value,
         includeCI = function() private$..includeCI$value),
     private = list(
+        ..modifyPlotLabels = NA,
+        ..modifyComparisonPlotLabels = NA,
+        ..plotLabelEditorVersion = NA,
         ..estimates = NA,
         ..comparisonGraphic = NA,
         ..comparisonStatistics = NA,

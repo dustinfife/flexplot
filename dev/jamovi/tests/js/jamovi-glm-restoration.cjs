@@ -33,7 +33,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         packets.push([...queued]); queued.clear();
     }};
     const ui = {view:{model:{options:manager}}};
-    const defaults = {outputOptionsVersion:0,comparisonGraphic:true,comparisonStatistics:true,plotLabels:[],plotLabelStore:[],comparisonPlotLabels:[],comparisonPlotLabelStore:[],polynomials:false,comparisonPolynomials:false,interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
+    const defaults = {plotLabelEditorVersion:0,modifyPlotLabels:false,modifyComparisonPlotLabels:false,outputOptionsVersion:0,comparisonGraphic:true,comparisonStatistics:true,plotLabels:[],plotLabelStore:[],comparisonPlotLabels:[],comparisonPlotLabelStore:[],polynomials:false,comparisonPolynomials:false,interactions:false,comparisonInteractions:false,mainEffects:null,comparisonMainEffects:null,interactionSpecVersion:0,out:null,preds:[],modelTerms:null,quadratic:null,compare:false,
         comparisonTerms:null,comparisonQuadratic:null,plotX:null,plotPanels:null,plotGroup:null,
         comparisonX:null,comparisonPanels:null,family:'binomial',includeP:false,graphic:true,se:true,plotStyle:'auto',plotScale:'probability'};
     if (analysis === 'glmbasic') {
@@ -72,7 +72,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
     manager.setOptionValue = (name,value) => ui[name].setValue(value);
     const records = [];
     handlers.view_loaded.call(view,ui);
-    assert.deepEqual(packets,[['outputOptionsVersion']],'Fresh view only initializes its presentation revision');
+    assert.deepEqual(packets,[['outputOptionsVersion'],['plotLabelEditorVersion']],'Fresh view only initializes its presentation revisions');
     records.push(snapshot('empty'));
     ui.out.setValue('y');ui.preds.setValue(['x','z']);
     assert.equal(JSON.stringify(ui.modelTerms.value()),'[["x"],["z"]]');
@@ -215,6 +215,18 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         restore('current-output',{out:'y',preds:['x','z'],graphic,comparisonGraphic:!graphic,comparisonStatistics:false,outputOptionsVersion:1});
         assert.equal(ui.comparisonGraphic.value(),!graphic);assert.equal(ui.comparisonStatistics.value(),false);
     }
+
+    const legacyLabel = [{key:'temporarily unavailable',role:'legendLevel',variable:'model',value:'model1 (lm)',display:'Old',label:'Preferred'}];
+    restore('legacy-editor-labels',{out:'y',preds:['x','z'],plotLabelStore:legacyLabel,comparisonPlotLabelStore:legacyLabel});
+    assert.equal(ui.modifyPlotLabels.value(),true);assert.equal(ui.modifyComparisonPlotLabels.value(),true);
+    ui.modifyPlotLabels.setValue(false);handlers.view_updated.call(view,ui);
+    assert.equal(ui.modifyPlotLabels.value(),false);assert.equal(ui.modifyComparisonPlotLabels.value(),true);
+    assert.equal(ui.plotLabelStore.value()[0].label,'Preferred');
+    restore('current-editor-hidden',{out:'y',preds:['x','z'],plotLabelStore:legacyLabel,comparisonPlotLabelStore:legacyLabel,
+        plotLabelEditorVersion:1,modifyPlotLabels:false,modifyComparisonPlotLabels:false});
+    assert.equal(ui.modifyPlotLabels.value(),false);assert.equal(ui.modifyComparisonPlotLabels.value(),false);
+    ui.compare.setValue(true);ui.compare.setValue(false);
+    assert.equal(ui.plotLabelStore.value()[0].label,'Preferred');
     console.log('PASS: installed option setters and complete restoration preserve versioned independent outputs.');
     return baseline;
 };

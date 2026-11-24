@@ -187,7 +187,8 @@ children:
   - type: CheckBox
     name: includeP
 - type: CollapseBox
-  label: Model visualization
+  name: modelVisualizationSection
+  label: Model Visualization / Model Comparison Visualization
   collapsed: true
   children:
   - type: ComboBox
@@ -237,16 +238,21 @@ children:
         isTarget: true
         enable: (!compare || predictionType:cas)
 
-  - type: CollapseBox
-    label: Plot Labels
+  - type: CheckBox
+    name: modifyPlotLabels
     useSingleCell: true
-    contentLink: ((!compare && graphic) || (compare && comparisonGraphic))
-    collapsed: true
-    children:
-    - type: ListBox
-      name: plotLabels
-      stretchFactor: 1
-      columns:
+    contentLink: (!compare)
+  - type: CheckBox
+    name: modifyComparisonPlotLabels
+    useSingleCell: true
+    contentLink: (compare)
+  - type: ListBox
+    name: plotLabels
+    height: large
+    useSingleCell: true
+    contentLink: ((!compare && modifyPlotLabels) || (compare && modifyComparisonPlotLabels))
+    stretchFactor: 1
+    columns:
       - name: display
         label: Plot element
         template:

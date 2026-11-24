@@ -123,6 +123,7 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     .init=function() jamovi_glm_reporting_reset(self$results),
     .run=function() {
       jamovi_output_migrate(self$options, "glmgeneralized")
+      jamovi_plot_editor_migrate(self$options, "glmgeneralized")
       jamovi_plot_sync_labels(self$options)
       jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
       jamovi_glm_reporting_reset(self$results)

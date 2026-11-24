@@ -73,6 +73,7 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
       
         .run = function() {
           jamovi_output_migrate(self$options, "glmbasic")
+          jamovi_plot_editor_migrate(self$options, "glmbasic")
           jamovi_plot_sync_labels(self$options)
           jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
           jamovi_lm_reset(self$results)

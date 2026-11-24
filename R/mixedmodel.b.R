@@ -176,6 +176,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     },
     .run=function() {
       jamovi_output_migrate(self$options, "mixedmodel")
+      jamovi_plot_editor_migrate(self$options, "mixedmodel")
       previous = private$.modelState
       private$.modelState = NULL
       jamovi_mixed_sync_labels(self$options)

@@ -120,64 +120,6 @@ children:
                     name: comparisonQuadratic
                     isTarget: true
                     permitted: [numeric]
-      - type: Label
-        label: Model Comparison Visualization
-        useSingleCell: true
-        contentLink: (compare)
-        children:
-          - type: Supplier
-            name: comparisonPlotSupplier
-            useSingleCell: true
-            contentLink: (compare)
-            label: Available predictors for comparison plot
-            format: variable
-            persistentItems: false
-            children:
-              - type: TargetLayoutBox
-                label: Comparison x variable
-                children:
-                  - type: VariablesListBox
-                    name: comparisonX
-                    maxItemCount: 1
-                    isTarget: true
-                    enable: (compare)
-              - type: TargetLayoutBox
-                label: Comparison panel variables (up to two)
-                children:
-                  - type: VariablesListBox
-                    name: comparisonPanels
-                    maxItemCount: 2
-                    isTarget: true
-                    enable: (compare)
-          - type: ComboBox
-            name: comparisonPlotStyle
-            useSingleCell: true
-            contentLink: (family:binomial)
-          - type: ComboBox
-            name: comparisonPlotScale
-            useSingleCell: true
-            contentLink: (family:binomial)
-          - type: CheckBox
-            name: comparisonSe
-      - type: CollapseBox
-        label: Plot Labels
-        useSingleCell: true
-        contentLink: (compare)
-        collapsed: true
-        children:
-          - type: ListBox
-            name: comparisonPlotLabels
-            stretchFactor: 1
-            columns:
-              - name: display
-                label: Plot element
-                template:
-                  type: Label
-              - name: label
-                label: Custom label (blank = automatic)
-                template:
-                  type: TextBox
-                  format: string
   - type: CollapseBox
     label: Output Options
     collapsed: false
@@ -205,7 +147,7 @@ children:
       - type: CheckBox
         name: includeP
   - type: CollapseBox
-    label: Model visualization
+    label: Model Visualization
     collapsed: true
     children:
       - type: Supplier
@@ -247,22 +189,79 @@ children:
         contentLink: (family:binomial)
       - type: CheckBox
         name: se
-      - type: CollapseBox
-        label: Plot Labels
+      - type: CheckBox
+        name: modifyPlotLabels
+      - type: ListBox
+        name: plotLabels
+        height: large
         useSingleCell: true
-        contentLink: (graphic)
-        collapsed: true
+        contentLink: (modifyPlotLabels)
+        stretchFactor: 1
+        columns:
+          - name: display
+            label: Plot element
+            template:
+              type: Label
+          - name: label
+            label: Custom label (blank = automatic)
+            template:
+              type: TextBox
+              format: string
+  - type: CollapseBox
+    label: Model Comparison Visualization
+    useSingleCell: true
+    contentLink: (compare)
+    collapsed: true
+    children:
+      - type: Supplier
+        name: comparisonPlotSupplier
+        useSingleCell: true
+        contentLink: (compare)
+        label: Available predictors for comparison plot
+        format: variable
+        persistentItems: false
         children:
-          - type: ListBox
-            name: plotLabels
-            stretchFactor: 1
-            columns:
-              - name: display
-                label: Plot element
-                template:
-                  type: Label
-              - name: label
-                label: Custom label (blank = automatic)
-                template:
-                  type: TextBox
-                  format: string
+          - type: TargetLayoutBox
+            label: Comparison x variable
+            children:
+              - type: VariablesListBox
+                name: comparisonX
+                maxItemCount: 1
+                isTarget: true
+                enable: (compare)
+          - type: TargetLayoutBox
+            label: Comparison panel variables (up to two)
+            children:
+              - type: VariablesListBox
+                name: comparisonPanels
+                maxItemCount: 2
+                isTarget: true
+                enable: (compare)
+      - type: ComboBox
+        name: comparisonPlotStyle
+        useSingleCell: true
+        contentLink: (family:binomial)
+      - type: ComboBox
+        name: comparisonPlotScale
+        useSingleCell: true
+        contentLink: (family:binomial)
+      - type: CheckBox
+        name: comparisonSe
+      - type: CheckBox
+        name: modifyComparisonPlotLabels
+      - type: ListBox
+        name: comparisonPlotLabels
+        height: large
+        useSingleCell: true
+        contentLink: (modifyComparisonPlotLabels)
+        stretchFactor: 1
+        columns:
+          - name: display
+            label: Plot element
+            template:
+              type: Label
+          - name: label
+            label: Custom label (blank = automatic)
+            template:
+              type: TextBox
+              format: string

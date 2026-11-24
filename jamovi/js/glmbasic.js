@@ -2,6 +2,7 @@
 
 const updateTerms = require('./model-terms');
 const migrateOutput = require('./output-options');
+const updateEditors = require('./plot-label-editors');
 const layouts = [{supplier:'plotSupplier', models:['modelTerms'],
     selections:['plotX','plotPanels','plotGroup'], extra:'quadratic'},
     updateTerms.comparisonLayout('comparisonPlotSupplier',['quadratic','comparisonQuadratic'],false),
@@ -35,6 +36,7 @@ const synchronize = (ui, context, added, changed = null) => {
     // Restore all host options before pruning dependent selections.
     if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
     migrateOutput(ui, context, 'glmbasic');
+    updateEditors(ui, context, 'glmbasic');
     if (context.workspace.lmSynchronizing) return;
     if (!added && !(ui.preds.value() || []).length) return;
     context.workspace.lmSynchronizing = true;

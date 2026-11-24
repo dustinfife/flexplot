@@ -188,4 +188,17 @@ options:
     type: Integer
     default: 0
     hidden: true
+  - name: modifyPlotLabels
+    title: Modify Plot Labels
+    type: Bool
+    default: false
+  - name: modifyComparisonPlotLabels
+    title: Modify Plot Labels
+    type: Bool
+    default: false
+  - name: plotLabelEditorVersion
+    title: Internal plot-label editor revision
+    type: Integer
+    default: 0
+    hidden: true
 ...

@@ -125,6 +125,93 @@ children:
                     name: comparisonQuadratic
                     isTarget: true
                     permitted: [numeric]
+  - type: LayoutBox
+    margin: large
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        cell:
+          column: 0
+          row: 0
+        children:
+          - type: Label
+            label: Output Options
+            children:
+              - type: CheckBox
+                name: graphic
+              - type: CheckBox
+                name: estimates
+              - type: CheckBox
+                name: comparisonGraphic
+                useSingleCell: true
+                contentLink: (compare)
+              - type: CheckBox
+                name: comparisonStatistics
+                useSingleCell: true
+                contentLink: (compare)
+              - type: CheckBox
+                name: graphicassump
+              - type: CheckBox
+                name: includeP
+  - type: CollapseBox
+    label: Model Visualization
+    collapsed: true
+    children:
+      - type: Supplier
+        name: plotSupplier
+        label: Predictors in the model
+        format: variable
+        persistentItems: false
+        children:
+          - type: TargetLayoutBox
+            label: Plot x variable (automatic if empty)
+            children:
+              - type: VariablesListBox
+                name: plotX
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Panel variables
+            children:
+              - type: VariablesListBox
+                name: plotPanels
+                maxItemCount: 2
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Grouping variable
+            children:
+              - type: VariablesListBox
+                name: plotGroup
+                maxItemCount: 1
+                isTarget: true
+      - type: CheckBox
+        name: se
+      - type: CheckBox
+        name: modifyPlotLabels
+      - type: ListBox
+        name: plotLabels
+        height: large
+        useSingleCell: true
+        contentLink: (modifyPlotLabels)
+        stretchFactor: 1
+        columns:
+          - name: display
+            label: Plot element
+            template:
+              type: Label
+          - name: label
+            label: Custom label (blank = automatic)
+            template:
+              type: TextBox
+              format: string
+  - type: CollapseBox
+    label: Model Comparison Visualization
+    useSingleCell: true
+    contentLink: (compare)
+    collapsed: true
+    children:
       - type: Supplier
         name: comparisonPlotSupplier
         label: Predictors in either model
@@ -163,117 +250,21 @@ children:
                 maxItemCount: 1
                 isTarget: true
                 enable: (compare)
-      - type: CollapseBox
-        label: Plot Labels
+      - type: CheckBox
+        name: modifyComparisonPlotLabels
+      - type: ListBox
+        name: comparisonPlotLabels
+        height: large
         useSingleCell: true
-        contentLink: (compare)
-        collapsed: true
-        children:
-          - type: ListBox
-            name: comparisonPlotLabels
-            stretchFactor: 1
-            columns:
-              - name: display
-                label: Plot element
-                template:
-                  type: Label
-              - name: label
-                label: Custom label (blank = automatic)
-                template:
-                  type: TextBox
-                  format: string
-  - type: CollapseBox
-    label: Model visualization layout
-    collapsed: true
-    children:
-      - type: Supplier
-        name: plotSupplier
-        label: Predictors in the model
-        format: variable
-        persistentItems: false
-        children:
-          - type: TargetLayoutBox
-            label: Plot x variable (automatic if empty)
-            children:
-              - type: VariablesListBox
-                name: plotX
-                maxItemCount: 1
-                isTarget: true
-          - type: TargetLayoutBox
-            label: Panel variables
-            children:
-              - type: VariablesListBox
-                name: plotPanels
-                maxItemCount: 2
-                isTarget: true
-          - type: TargetLayoutBox
-            label: Grouping variable
-            children:
-              - type: VariablesListBox
-                name: plotGroup
-                maxItemCount: 1
-                isTarget: true
-      - type: CollapseBox
-        label: Plot Labels
-        useSingleCell: true
-        contentLink: (graphic)
-        collapsed: true
-        children:
-          - type: ListBox
-            name: plotLabels
-            stretchFactor: 1
-            columns:
-              - name: display
-                label: Plot element
-                template:
-                  type: Label
-              - name: label
-                label: Custom label (blank = automatic)
-                template:
-                  type: TextBox
-                  format: string
-  - type: LayoutBox
-    margin: large
-    stretchFactor: 1
-    children:
-      - type: LayoutBox
-        margin: large
+        contentLink: (modifyComparisonPlotLabels)
         stretchFactor: 1
-        cell:
-          column: 0
-          row: 0
-        children:
-          - type: Label
-            label: Output Options
-            children:
-              - type: CheckBox
-                name: graphic
-              - type: CheckBox
-                name: estimates
-              - type: CheckBox
-                name: comparisonGraphic
-                useSingleCell: true
-                contentLink: (compare)
-              - type: CheckBox
-                name: comparisonStatistics
-                useSingleCell: true
-                contentLink: (compare)
-              - type: CheckBox
-                name: graphicassump
-              - type: CheckBox
-                name: includeP
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: LayoutBox
-        margin: large
-        stretchFactor: 1
-        cell:
-          column: 0
-          row: 0
-        children:
-          - type: Label
-            label: Graphic Options    
-            children:
-              - type: CheckBox
-                name: se
+        columns:
+          - name: display
+            label: Plot element
+            template:
+              type: Label
+          - name: label
+            label: Custom label (blank = automatic)
+            template:
+              type: TextBox
+              format: string
