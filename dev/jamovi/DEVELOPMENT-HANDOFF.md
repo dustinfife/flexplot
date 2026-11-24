@@ -549,6 +549,27 @@ current branch only when authorized. Verify the remote commit after pushing.
 
 ## Stage 11A readiness audit
 
-See [RELEASE-READINESS-AUDIT.md](RELEASE-READINESS-AUDIT.md) for the Stage 10
-baseline on Intel macOS, module build verification, failure triage, and proposed
-GUI and JASP validation. Stage 11A changed development documentation only.
+Stage 11A is complete as of 2026-11-24. See
+[RELEASE-READINESS-AUDIT.md](RELEASE-READINESS-AUDIT.md) for the Intel laptop
+findings and completed ARM64 desktop baseline against `9e14c032`.
+
+The clean desktop full suite completed with **23,253 passed, 15 failed assertions,
+2 errors, zero testthat warnings and zero skips**. All 16 historical unsuccessful
+checks recur; the one additional failure is the strict inventory check for the
+26 unapproved SVG artifacts tracked by the laptop commit. All **140 active SVG
+comparisons pass** on the approved ARM64/R 4.5.0/vdiffr 1.0.8/ggplot2 4.0.3
+environment. The laptop's forest rounding failure does not recur on this host.
+All four UIs compile, a focused desktop native/protobuf smoke passes 533
+assertions, and the existing installed Stage 10 module's source fingerprint and
+archive/payload hashes match. Existing dependencies and caches were reused.
+
+This completes the audit, not release validation. Stage 11B should first isolate
+GLM comparison-layout errors from valid estimates/statistics and guard LM label
+preview exceptions locally. Then correct verified stale assertions and portable
+oracles, resolve the unapproved SVG inventory, update E2E transitions before
+regenerating derived coverage, and rerun the package/native gates. The laptop's
+complete native baseline remains 4,494 passed and 42 classified failures.
+Comprehensive live jamovi coverage, isolated built-package checks and actual-host
+JASP compatibility remain release requirements. No new desktop GUI or JASP
+campaign was performed, and no production source, test expectations or approved
+visual baselines were changed in this continuation.
