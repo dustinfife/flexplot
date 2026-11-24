@@ -49,9 +49,16 @@ coefficient intervals are `estimate +/- qnorm(.975)*SE`. They are asymptotic mea
 coefficient uncertainty, not prediction intervals; small numbers of clusters can
 make this approximation unreliable.
 
-**Include p-values** defaults off. If enabled, the p-value column is blank with
-an explanation: ordinary lme4 fits do not provide denominator degrees of freedom
-or the corresponding p-values. No approximation or new dependency is added.
+The current adapter does not calculate fixed-effect p-values. Their existing
+result-column identifiers are retained but always hidden for both models.
+**Include p-values** defaults off and appears only during Model Comparison,
+controlling the comparison p-value column under its existing safeguards. No
+fixed-effect inference approximation or new dependency is added.
+
+Fixed-effect confidence intervals are reported automatically for new analyses.
+The former `includeCI` preference is hidden and still honors FALSE in older saved
+analyses. The native method note is "95% normal-Wald confidence intervals." and
+is absent when those intervals are hidden.
 
 The main random-effect table reports grouping factor, term, variance and SD,
 including residual variance and SD, directly from `VarCorr()` on the original
@@ -294,10 +301,10 @@ Comparison results show separate Model 1 and Model 2 fixed-effect and random-eff
 tables, followed by the shared comparison statistics and visualization. Both table
 sets reuse the common-sample fits with each model's requested ML/REML method; no
 additional fit is performed to report Model 2. Diagnostics identify the affected
-model. The shared Confidence intervals option controls the existing 95% normal-Wald
-intervals in both fixed-effect tables. Include p-values controls column visibility;
-coefficient p-values remain unavailable from lme4 without imposing a new inference
-method. Optional correlations use each model's own random-effect terms.
+model. Both fixed-effect tables report the existing 95% normal-Wald intervals by
+default, respecting the hidden saved `includeCI` preference. Include p-values
+controls only comparison p-value visibility; unsupported coefficient p columns
+remain hidden. Optional correlations use each model's own random-effect terms.
 
 Saved comparisons from earlier reporting revisions refresh when their controls
 initialize, adding Model 2 tables without changing the model specification.
@@ -314,3 +321,11 @@ curve without resampling clusters or changing predictions. This is separate from
 the directional CAS comparison option above. Ordinary CAS reference ghosts are
 deferred to Stage 9 because CAS has a separate adjusted-observation/fixed-curve
 path. See [Modeling reference-panel ghost lines](jamovi-model-ghosts.md).
+
+### Stage 6 random-table spacing check
+
+Native jamovi 2.7.41 standalone/comparison output showed no random-effect table
+notes or unnecessary adjacent adapter HTML. The trailing blank editable Annotation
+region and spacing before a model heading/reference block belong to jamovi's
+renderer. That native space is preserved. Old empty notes are cleared by the
+existing result reset on recalculation; no installed CSS is modified.

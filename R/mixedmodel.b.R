@@ -61,6 +61,7 @@ jamovi_mixed_reset = function(results) {
   for (item in results$items) {
     item$setVisible(FALSE)
     jamovi_result_clear(item)
+    if (item$name %in% c("fixed","fixed2")) item$getColumn("p")$setVisible(FALSE)
     if (inherits(item, "Image")) item$.setPath(NULL)
   }
   jamovi_plot_clear_states(results, c("plot", "comparisonplot"))
@@ -74,11 +75,12 @@ jamovi_mixed_tables = function(results, state, includeP, showCorrelations=FALSE,
     lower=coefficients[,1]-stats::qnorm(.975)*coefficients[,2],
     upper=coefficients[,1]+stats::qnorm(.975)*coefficients[,2], t=coefficients[,3], row.names=NULL)
   column = results$fixed$getColumn("p")
-  column$visible = includeP
+  column$setVisible(FALSE)
   jamovi_glm_table_rows(results$fixed, fixed)
   for (name in c("lower","upper")) results$fixed$getColumn(name)$setVisible(includeCI)
-  if (includeCI && notes) results$fixed$setNote("intervals", "95% normal-Wald confidence intervals for fixed effects: estimate +/- 1.96 SE. These are not prediction intervals.")
-  if (includeP && notes) results$fixed$setNote("p", "P-values are unavailable from the current lme4 fit; no denominator degrees of freedom or p-value approximation is imposed.")
+  results$fixed$setNote("intervals",NULL)
+  if (includeCI && notes) results$fixed$setNote("intervals", "95% normal-Wald confidence intervals.")
+  results$fixed$setNote("p",NULL)
   components = as.data.frame(lme4::VarCorr(state$model))
   components = components[is.na(components$var2), , drop=FALSE]
   random = data.frame(group=components$grp, term=components$var1,

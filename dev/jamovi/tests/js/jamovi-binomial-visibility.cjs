@@ -80,6 +80,7 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
         let enabled = false;
         const control = create(true);
         const grid = new Grid(); render.call(control,grid,0,0,{});
+        if(definition.name==='includeP')control.setValue(true);
         if (definition.name === 'comparisonGroupingLayout') {
             for (const available of [false,true,false,true]) {
                 control.setPropertyValue('contentLink',available);
@@ -95,6 +96,7 @@ module.exports = function(source, definition, seDefinition, compilerPath) {
         for (enabled of [false,true,false,true]) {
             for (const action of engine.actions) action.execute(engine._resources);
             assert.equal(control._cell.visible,inverted ? !enabled : enabled);
+            if(definition.name==='includeP')assert.equal(control.getSourceValue(),true,'Comparison toggles retain p-value preference');
         }
         return;
     }

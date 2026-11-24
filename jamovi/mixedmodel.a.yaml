@@ -169,6 +169,7 @@ options:
     default: 0
   - name: includeCI
     title: Confidence intervals
+    hidden: true
     type: Bool
     default: true
   - name: estimates

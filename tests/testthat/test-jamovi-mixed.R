@@ -56,9 +56,10 @@ test_that("Mixed Model uses complete cases only for variables needed by its form
   expect_identical(rownames(state$data),rownames(eligible))
   expect_identical(state$omitted,3L)
   expect_equal(lme4::fixef(state$model),lme4::fixef(independent))
-  expect_true("p" %in% names(analysis$results$fixed$asDF))
+  expect_true("p" %in% vapply(analysis$results$fixed$columns,function(column)column$name,character(1)))
   for (row in seq_len(length(lme4::fixef(independent)))) expect_null(analysis$results$fixed$getCell("p",rowNo=row)$value)
-  expect_match(analysis$results$fixed$notes$p$note,"unavailable")
+  expect_false(analysis$results$fixed$getColumn("p")$visible)
+  expect_null(analysis$results$fixed$notes$p)
 })
 
 test_that("Mixed Model rejects invalid specifications and reports singular fits without simplification", {
@@ -183,7 +184,7 @@ test_that("Mixed Model results return to the waiting state when required selecti
   expect_null(analysis$results$plot$state)
   expect_equal(analysis$results$fixed$rowCount,0L)
   expect_true(jamovi_reporting_update(analysis,list(cluster="id",includeP=TRUE)))
-  expect_true("p" %in% names(analysis$results$fixed$asDF))
+  expect_true("p" %in% vapply(analysis$results$fixed$columns,function(column)column$name,character(1)))
   expect_true(jamovi_reporting_update(analysis,list(out=NULL)))
   expect_true(analysis$results$waiting$visible)
   expect_false(analysis$results$fixed$visible)

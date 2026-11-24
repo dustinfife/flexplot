@@ -183,9 +183,9 @@ children:
     useSingleCell: true
     contentLink: (compare)
   - type: CheckBox
-    name: includeCI
-  - type: CheckBox
     name: includeP
+    useSingleCell: true
+    contentLink: (compare)
 - type: CollapseBox
   name: modelVisualizationSection
   label: Model Visualization / Model Comparison Visualization

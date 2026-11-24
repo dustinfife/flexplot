@@ -53,8 +53,10 @@ test_that("shared output options and live Model 2 changes clear stale tables and
   original = analysis$results$comparisonplot$state
   for (enabled in c(FALSE,TRUE,FALSE)) {
     expect_true(jamovi_reporting_update(analysis,list(includeCI=enabled,includeP=enabled,showCorrelations=enabled)))
-    for(name in c("fixed","fixed2")) for(column in c("lower","upper","p"))
+    for(name in c("fixed","fixed2")) for(column in c("lower","upper"))
       expect_identical(analysis$results[[name]]$getColumn(column)$visible,enabled)
+    for(name in c("fixed","fixed2")) expect_false(analysis$results[[name]]$getColumn("p")$visible)
+    expect_identical(analysis$results$comparison$getColumn("p")$visible,enabled)
     for(name in c("correlations","correlations2")) expect_identical(analysis$results[[name]]$visible,enabled)
     expect_identical(analysis$results$comparisonplot$state$model2,original$model2)
   }

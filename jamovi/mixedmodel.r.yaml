@@ -67,7 +67,7 @@ items:
       - name: p
         title: p
         type: number
-        visible: (includeP)
+        visible: false
         format: zto,pvalue
   - name: random
     title: Random-effect estimates
@@ -126,7 +126,7 @@ items:
       - name: p
         title: p
         type: number
-        visible: (includeP)
+        visible: false
         format: zto,pvalue
   - name: random2
     title: Random-effect estimates

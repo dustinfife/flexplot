@@ -14,18 +14,18 @@ inspection. Keep stages small and preserve statistical behavior.
 | 3 | Consistent Output Options | Complete: `c36f4b06` |
 | 4 | Independent GLM visualization settings | Complete: `9bab9cc0` |
 | 5 | Plot-control organization, Modify Plot Labels checkboxes, taller editors, readable dynamic legend descriptions | Complete: `a306b18f` |
-| 5B | Shared ordinary reference-panel ghost lines | Complete; implementation commit resolved below |
-| 6 | Mixed Models estimates, confidence-interval controls, removal of permanently empty fixed-effect p-value columns | Remaining |
+| 5B | Shared ordinary reference-panel ghost lines | Complete: `07a2ed5d` |
+| 6 | Mixed Models estimates, confidence-interval controls, removal of permanently empty fixed-effect p-value columns | Complete; implementation commit resolved below |
 | 7 | Compact table notes, targeted native footnotes, conditional comparison-test explanations | Remaining |
 | 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Remaining |
 | 9 | Independent Mixed Models main/comparison visualizations and label editors | Remaining |
 | 10 | Automatic Binomial/logit selection for eligible binary outcomes, preserving explicit family choices | Remaining |
 | 11 | Final shared-infrastructure review, GUI testing, release preparation | Remaining |
 
-Resolve the Stage 5B implementation commit:
+Resolve the Stage 6 implementation commit:
 
 ```sh
-git log -1 --format='%H %s' --grep='Share modeling reference ghosts across LM GLM and Mixed Models'
+git log -1 --format='%H %s' --grep='Simplify Mixed Models estimates and inference controls'
 ```
 
 ## Architecture and compatibility
@@ -120,6 +120,53 @@ placement could not be confirmed. Live GUI checks did not cover every family,
 layout or saved-document transition; focused renderer/native/protobuf tests cover
 those paths. A stale Mixed-label test expectation was reproduced on Stage 5 and
 updated to allow committed description refresh while checking stable saved fields.
+
+## Stage 6 architecture and verification
+
+- Mixed fixed/fixed2 retain the `p` column identifiers and types for compatibility,
+  but declarations and R reporting/reset always hide them. The current adapter
+  does not calculate fixed-effect p-values; this is not a general inference claim.
+  No new denominator-df or p-value method is introduced.
+- Include p-values remains in its established Output Options position and appears
+  only with Model Comparison enabled. It controls the existing comparison column;
+  toggling comparison retains its preference. All LRT/nesting/random-structure,
+  convergence/singularity and boundary safeguards remain unchanged.
+- The CI checkbox is removed. `includeCI` is hidden, still defaults TRUE, and
+  continues to honor explicit FALSE in old saved documents. Both models use the
+  unchanged normal-Wald limits. The fixed-effect note is now exactly
+  "95% normal-Wald confidence intervals." and absent when intervals are hidden.
+  Model 2 retains the existing omission of duplicate method notes. Obsolete fixed
+  p-value notes are cleared without altering necessary diagnostics.
+- Fresh native standalone/comparison output has no notes attached to random or
+  random2. AX output shows jamovi's empty editable Annotation region after each
+  table; screenshots show ordinary trailing space and the next model heading or
+  reference block. No unnecessary adapter HTML was visible. The user's historical
+  note could not be reproduced. Remaining native annotation/heading spacing is
+  preserved; no CSS or fragile renderer workaround was added. Existing reset also
+  removes legacy empty table notes on recalculation, covered by restoration tests.
+
+Stage 6 focused checks passed 620 R6 assertions and 240 native assertions,
+including installed handler/render-to-grid visibility, Model 1/2 table schemas,
+real protobuf option restoration, legacy cached-column/note cleanup, default and
+explicit CI preferences, comparison p-values, fit caching and diagnostics.
+Six standalone/comparison numerical table comparisons matched Stage 5B exactly
+apart from the intentionally hidden empty fixed-effect p columns. Comparison
+p-values were included in that check. Tested prediction/interval/ghost coordinates
+and Mixed population/cluster/CAS geometry also matched. Full package testing was
+not run for this presentation-only change. Mixed/model-ghost regressions passed
+542 assertions. The final installed-package protobuf options/results restoration
+subset passed 108 assertions, including reuse of restored result objects.
+
+The module was built and installed in jamovi 2.7.41. Live standalone Output Options
+contained neither inference checkbox; fixed estimates showed normal-Wald limits,
+the shortened note and no p column. Comparison Output Options showed Include
+p-values and no CI checkbox. Both fixed-effect tables lacked p columns; toggling
+the comparison checkbox hid/restored its actual p-value column and an unchecked
+preference survived comparison off/on. Random tables had no explanatory notes.
+The disposable review was closed without saving and existing documents preserved.
+Secondary-monitor placement was unconfirmed. Legacy CI-off restoration was checked
+through protobuf/R6 rather than a separate live saved-file scenario. Broader GUI,
+stale E2E inventory and JASP verification remain outstanding as described below.
 
 ## Verification and outstanding issues
 

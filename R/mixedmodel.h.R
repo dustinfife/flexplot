@@ -254,6 +254,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..includeCI = jmvcore::OptionBool$new(
                 "includeCI",
                 includeCI,
+                hidden=TRUE,
                 default=TRUE)
 
             self$.addOption(private$..out)
@@ -493,7 +494,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="p",
                         `title`="p",
                         `type`="number",
-                        `visible`="(includeP)",
+                        `visible`=FALSE,
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -568,7 +569,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="p",
                         `title`="p",
                         `type`="number",
-                        `visible`="(includeP)",
+                        `visible`=FALSE,
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
