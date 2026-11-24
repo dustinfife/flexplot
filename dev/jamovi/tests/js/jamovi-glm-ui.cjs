@@ -76,15 +76,15 @@ const {pathToFileURL} = require('node:url');
         walk(compiled.view.layout);
         const flatten = items => items.flatMap(item=>[item,...flatten(item.controls || [])]);
         const nodes = flatten(compiled.view.layout.controls);
-        const mainSection = compiled.view.layout.controls.find(item=>item.label===(analysis==='mixedmodel' ? 'Model Visualization / Model Comparison Visualization' : 'Model Visualization'));
+        const mainSection = compiled.view.layout.controls.find(item=>item.label==='Model Visualization');
         assert.ok(mainSection,'Missing main visualization section');
         assert.equal(mainSection.controls.findIndex(c=>c.name==='ghostLines'),mainSection.controls.findIndex(c=>c.name===(analysis==='mixedmodel'?'plotGroupingLayout':'plotSupplier'))+1,'Ghost checkbox follows selectors');
-        const compSection = analysis==='mixedmodel' ? mainSection : compiled.view.layout.controls.find(item=>item.label==='Model Comparison Visualization');
+        const compSection = compiled.view.layout.controls.find(item=>item.label==='Model Comparison Visualization');
         assert.ok(compSection,'Missing distinct comparison visualization section');
         const modelSpec = compiled.view.layout.controls.find(item=>item.label==='Model Comparison');
         assert.ok(!flatten(modelSpec.controls).some(item=>['plotX','comparisonX','plotLabels','comparisonPlotLabels'].includes(item.name)),
             'Model specifications must not contain visualization controls');
-        for (const name of analysis==='mixedmodel' ? ['plotLabels'] : ['plotLabels','comparisonPlotLabels']) {
+        for (const name of ['plotLabels','comparisonPlotLabels']) {
             const editor = nodes.find(item=>item.name===name);
             assert.equal(editor.height,'large');assert.equal(editor.type,'ListBox');
             assert.ok(editor.contentLink.includes(name==='comparisonPlotLabels' ? 'modifyComparisonPlotLabels' : 'modifyPlotLabels'));
@@ -217,13 +217,12 @@ const {pathToFileURL} = require('node:url');
             const target = all.find(item=>item.name===(analysis==='glmbasic' ? 'comparisonGroupingLayout' : 'plotGroupingLayout'));
             if (analysis === 'mixedmodel') {
                 const main = all.find(item=>item.name==='graphic');
-                assert.equal(main.contentLink,'(!compare)');
-                if (runtime) require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),main,null,compilerPath);
+                assert.equal(main.contentLink,undefined);
             }
             assert.equal(target.type,'Supplier');
             assert.equal(target.useSingleCell,true);
-            assert.equal(target.contentLink,analysis === 'glmbasic' ? '(compare)' : '(!compare || predictionType:cas)');
-            if (runtime) require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),target,null,compilerPath);
+            assert.equal(target.contentLink,analysis === 'glmbasic' ? '(compare)' : undefined);
+            if (runtime && analysis === 'glmbasic') require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),target,null,compilerPath);
         }
         if (analysis === 'glmbasic') {
             ui.preds.setValue(['x','z']);ui.out.setValue('binary');ui.compare.setValue(true);
@@ -288,9 +287,9 @@ const {pathToFileURL} = require('node:url');
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi/mixedmodel.a.yaml'),'utf8'));
             assert.equal(definition.options.find(option => option.name === "casGhost").default,false);
             assert.equal(definition.options.find(option => option.name === "casGhost").title,"Add ghost line");
-            const casVisualization = compiled.view.layout.controls.find(control => control.name === "modelVisualizationSection");
+            const casVisualization = compiled.view.layout.controls.find(control => control.name === "comparisonVisualizationSection");
             const ghost = casVisualization.controls.find(control => control.name === "casGhost");
-            assert.equal(ghost.contentLink,"(compare && predictionType:cas)");
+            assert.equal(ghost.contentLink,"(comparisonPredictionType:cas)");
             assert.equal(ghost.useSingleCell,true);
             if (runtime) require("./jamovi-binomial-visibility.cjs")(fs.readFileSync(runtime,"utf8"),ghost,null,compilerPath);
             assert.equal(definition.options.find(option => option.name === 'interactions').title,'Include Interaction Terms');
@@ -328,7 +327,7 @@ const {pathToFileURL} = require('node:url');
             assert.equal(definition.options.find(option => option.name === 'polynomials').default,false);
             const visualization = compiled.view.layout.controls.find(control => control.name === 'modelVisualizationSection');
             const editor = visualization.controls.find(control => control.name === 'plotLabels');
-            assert.equal(editor.contentLink,'((!compare && modifyPlotLabels) || (compare && modifyComparisonPlotLabels))');
+            assert.equal(editor.contentLink,'(modifyPlotLabels)');
             assert.equal(editor.height,'large');
             assert.ok(editor.columns.some(column => column.name === 'label'));
 
@@ -349,6 +348,7 @@ const {pathToFileURL} = require('node:url');
                     ...names.map(name => encodeValue(name,record.options[name]))].join('\t'));
                 fs.writeFileSync(output, ['stage\tchanged\t'+names.join('\t'),...rows].join('\n'));
             } else fs.writeFileSync(output, '[]');
+            await require('./jamovi-model-ghosts.cjs')(ui,view,fire,assert,analysis);
             return;
         }
         if (analysis === 'glmbasic' || generalized) {

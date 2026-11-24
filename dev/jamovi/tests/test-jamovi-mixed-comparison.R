@@ -100,7 +100,7 @@ test_that("saved CAS ghost settings restore the same note and serialized result 
     expect_identical(restored$results$comparisonPlotNote$visible,enabled)
     note = restored$results$comparisonPlotNote$asProtoBuf()
     expect_identical(note$html$content,if (enabled)
-      "<p>Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions.</p>" else "")
+      flexplot:::jamovi_plot_note_paragraph("Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions.") else "")
     message = restored$results$asProtoBuf(status=3L)
     items = vapply(message$group$elements,function(item)item$name,character(1))
     specification = message$group$elements[[match("comparisonSpecification",items)]]

@@ -2,6 +2,8 @@
 
 // Runs through the compiled view's installed automatic event bindings.
 module.exports = function(ui, view, fire, assert) {
+    ui.predictionType.setValue('cluster');
+    ui.comparisonPredictionType.setValue('cluster');
     fire('view','loaded');
     ui.casGhost.setValue(true);
     ui.cluster.setValue('id'); fire('cluster','changed');
@@ -64,7 +66,10 @@ module.exports = function(ui, view, fire, assert) {
         ui.predictionType.setValue(type);fire('predictionType','changed');
         assert.equal(ui.plotGroup.value(),'a','Retain the shared standalone/CAS group');
         const event={value:'a'};view.handlers.plotGroup_changing.call(view,ui,event);
-        assert.equal(event.cancel,type==='cas' ? undefined : true);
+        assert.equal(event.cancel,undefined);
+        ui.comparisonPredictionType.setValue(type);
+        const comparisonEvent={value:'a'};view.handlers.comparisonGroup_changing.call(view,ui,comparisonEvent);
+        assert.equal(comparisonEvent.cancel,type==='cas' ? undefined : true);
     }
     ui.compare.setValue(false);fire('compare','changed');
     const event={value:'a'};view.handlers.plotGroup_changing.call(view,ui,event);assert.equal(event.cancel,undefined);

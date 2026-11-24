@@ -22,9 +22,9 @@ module.exports = async function(ui,view,fire,assert,module) {
     const replies=[];view.requestData=(type,query)=>new Promise(resolve=>replies.push(()=>resolve(column(query.columnName))));
     fire('ghostLines','changed');ui.plotPanels.setValue([]);fire('ghostLines','changed');replies.reverse().forEach(reply=>reply());await settle();assert.equal(enabled(),false);
     view.requestData=(type,query)=>Promise.resolve(column(query.columnName));ui.plotPanels.setValue(['a']);
-    ui.compare.setValue(true);fire('ghostLines','changed');await settle();assert.equal(enabled(),module!=='mixedmodel');
+    ui.compare.setValue(true);fire('ghostLines','changed');await settle();assert.equal(enabled(),true);
     if(module==='mixedmodel') {
-        ui.compare.setValue(false);ui.predictionType.setValue('cas');fire('ghostLines','changed');await settle();assert.equal(enabled(),false);
+        ui.compare.setValue(false);ui.predictionType.setValue('cas');fire('ghostLines','changed');await settle();assert.equal(enabled(),true);
         ui.predictionType.setValue('cluster');ui.plotPanels.setValue([]);fire('ghostLines','changed');await settle();assert.equal(enabled(),true);
         ui.plotX.setValue(null);ui.modelTerms.setValue([['a'],['x']]);fire('ghostLines','changed');await settle();assert.equal(enabled(),false,'Mixed automatic x keeps the first-predictor convention');
     }

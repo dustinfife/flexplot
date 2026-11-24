@@ -162,6 +162,42 @@ options:
     hidden: true
     default: []
     template: *plotLabel
+  - name: comparisonX
+    type: Variable
+    default: null
+  - name: comparisonPanels
+    type: Variables
+    default: null
+  - name: comparisonGroup
+    type: Variable
+    default: null
+  - name: comparisonPredictionType
+    title: Comparison predictions
+    type: List
+    options:
+      - name: population
+        title: Population-level (exclude random effects)
+      - name: cas
+        title: Cluster-adjusted scatterplot (remove estimated random effects)
+      - name: cluster
+        title: Cluster-specific (include estimated random effects)
+    default: cluster
+  - name: comparisonClusters
+    title: Number of displayed clusters
+    type: Integer
+    default: 3
+    min: 1
+    max: 20
+  - name: comparisonPlotLabels
+    title: Plot Labels
+    type: Array
+    default: []
+    template: *plotLabel
+  - name: comparisonPlotLabelStore
+    type: Array
+    hidden: true
+    default: []
+    template: *plotLabel
   - name: samplePolicyVersion
     title: Internal calculation revision
     hidden: true

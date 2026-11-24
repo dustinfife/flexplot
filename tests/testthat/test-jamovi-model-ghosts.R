@@ -73,8 +73,9 @@ test_that("Mixed population and cluster ghosts reuse cached streams without samp
     expect_equal(model_ghost_signature(state$displayPlot$layers),model_ghost_signature(baseline$layers),tolerance=0)
     option = options$option("predictionType");option$value="cas"
     plot = flexplot:::jamovi_mixed_display(state,options)
-    expect_match(attr(plot,"jamovi_ghost_note"),"CAS uses adjusted observations",fixed=TRUE)
-    expect_false(any(model_ghost_layers(plot)))
+    expect_null(attr(plot,"jamovi_ghost_note"))
+    expect_true(attr(plot,"ghost_reference")$drawable)
+    expect_true(any(model_ghost_layers(plot)))
   }
 })
 

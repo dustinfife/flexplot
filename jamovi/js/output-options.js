@@ -6,7 +6,7 @@ module.exports = function(ui, context, module) {
     if (context.flags && (context.flags.updating || context.flags.loaded === false)) return;
     const options = ui.view.model.options;
     const version = options.getOption('outputOptionsVersion');
-    const target = module === 'glmgeneralized' ? 2 : 1;
+    const target = ['glmgeneralized','mixedmodel'].includes(module) ? 2 : 1;
     if (!version || version.getValue() >= target) return;
     const revision = version.getValue();
     options.beginEdit();
@@ -22,6 +22,13 @@ module.exports = function(ui, context, module) {
                 const value = options.getOption(source).getValue();
                 if (options.getOption(destination).getValue() !== value)
                     options.setOptionValue(destination,value);
+            }
+        if (module === 'mixedmodel' && revision < 2)
+            for (const [destination,source] of [['comparisonX','plotX'],['comparisonPanels','plotPanels'],
+                ['comparisonGroup','plotGroup'],['comparisonPredictionType','predictionType'],['comparisonClusters','clusters'],
+                ['comparisonPlotLabels','plotLabels'],['comparisonPlotLabelStore','plotLabelStore']]) {
+                const value = options.getOption(source).getValue();
+                options.setOptionValue(destination,JSON.parse(JSON.stringify(value)));
             }
     } finally { options.endEdit(); }
 };

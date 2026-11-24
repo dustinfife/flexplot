@@ -17,15 +17,15 @@ inspection. Keep stages small and preserve statistical behavior.
 | 5B | Shared ordinary reference-panel ghost lines | Complete: `07a2ed5d` |
 | 6 | Mixed Models estimates, confidence-interval controls, removal of permanently empty fixed-effect p-value columns | Complete: `dedf2a57` |
 | 7 | Compact table notes, targeted native footnotes, conditional comparison-test explanations | Complete: `f4cae51a` |
-| 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Complete; implementation commit resolved below |
-| 9 | Independent Mixed Models main/comparison visualizations and label editors | Remaining |
+| 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Complete: `843a1269` |
+| 9 | Independent Mixed Models main/comparison visualizations and label editors | Complete; implementation commit resolved below |
 | 10 | Automatic Binomial/logit selection for eligible binary outcomes, preserving explicit family choices | Remaining |
 | 11 | Final shared-infrastructure review, GUI testing, release preparation | Remaining |
 
-Resolve the Stage 8 implementation commit:
+Resolve the Stage 9 implementation commit:
 
 ```sh
-git log -1 --format='%H %s' --grep='Explain ghost reference panels and compact plot notes'
+git log -1 --format='%H %s' --grep='Separate Mixed Models main and comparison visualizations'
 ```
 
 ## Architecture and compatibility
@@ -47,10 +47,12 @@ git log -1 --format='%H %s' --grep='Explain ghost reference panels and compact p
 - `output-options.js` and `R/jamovi_output_options.R` use the existing versioned
   option-migration pattern. Revision 1 preserves Stage 3 visibility; GLM revision
   2 copies legacy shared display settings once, even with comparison disabled.
-  Current revision 2 choices are independent. Plain R constructors use new defaults.
+  Mixed revision 2 copies legacy layout/prediction/cluster settings and both label
+  arrays once. Current revision 2 choices are independent. Plain R constructors
+  use new defaults.
 - `jamovi_plot_*` helpers maintain independent GLM label stores. Keep all existing
-  result names, schemas and Stage 1 ordering. Mixed still uses its existing mutually
-  exclusive visualization modes; simultaneous plots belong to Stage 9.
+  result names, schemas and Stage 1 ordering. Stage 9 separates Mixed main and
+  comparison visualization settings and label arrays, retaining its legacy keys.
 - Keep conditional Supplier wrappers. A single-cell TargetLayoutBox inside a
   Supplier loses the named `aux` grid column and caused the Stage 2 loading
   placeholder. Stage 3 fixed this; never modify installed jamovi code or CSS.
@@ -60,11 +62,9 @@ git log -1 --format='%H %s' --grep='Explain ghost reference panels and compact p
 - LM/GLM have separate Model Visualization and Model Comparison Visualization
   sections, independent default-off Modify Plot Labels preferences, and native
   `height: large` editors. Model specifications stay in Model Comparison.
-- Mixed retains one active visualization and shared label store. Its combined
-  Model Visualization / Model Comparison Visualization section has one native
-  editor and a visibility preference per mode. The combined heading is deliberate:
-  jamovi 2.7.41 CollapseBox labels do not update after creation. Do not use custom
-  DOM/CSS updates or duplicate the shared controls to simulate Stage 9.
+- At Stage 5, Mixed retained one active visualization and a shared label store.
+  Stage 9 supersedes that combined section with independent controls and stores,
+  preserving the saved main keys through the versioned migration described below.
 - `plot-label-editors.js` and `jamovi_plot_editor_migrate` use revision 1 of
   `plotLabelEditorVersion` to reveal legacy nonblank saved edits once, including
   temporarily unavailable retained rows. Current explicit hidden preferences
@@ -281,6 +281,105 @@ Secondary-monitor placement could not be confirmed. Live coverage did not includ
 every family, cluster/logit/CAS mode or restoration transition; focused native/R6
 checks cover those paths. Stages 9–11, broader GUI coverage, the stale E2E inventory
 and JASP host verification remain outstanding.
+
+## Stage 9 architecture and verification
+
+- Mixed main and comparison visualization sections now have independent x/panels,
+  grouping where supported, prediction type, cluster count, editor checkbox,
+  visible label catalog and retained label store. Main retains `plotX`,
+  `plotPanels`, `plotGroup`, `predictionType`, `clusters`, `plotLabels` and
+  `plotLabelStore`. Comparison uses `comparisonX`, `comparisonPanels`,
+  `comparisonGroup`, `comparisonPredictionType`, `comparisonClusters`,
+  `comparisonPlotLabels` and `comparisonPlotLabelStore`. `casGhost` remains the
+  directional CAS comparison preference; `ghostLines` remains main-only.
+- Both existing image results can be visible simultaneously. Neither output's
+  visibility affects comparison statistics or common-sample fitting. Existing
+  result IDs/schemas/order/dimensions are retained. Each explanation stays adjacent
+  to its image. Main failures hide stale explanatory content; comparison errors
+  retain the established diagnostic. Collapsing UI sections is presentation only.
+- With comparison enabled, main uses `comparison$first`, the requested-method
+  Model 1 fit on the common sample. Comparison plots use requested-method
+  `model1`/`model2`; only statistics use their existing ML copies. Fixed/random
+  calculations, intervals, inference safeguards and common-sample policy are
+  unchanged. Population, conditional and model-specific CAS adjustments retain
+  their existing prediction functions and geometry.
+- Separate main/comparison fit and plot state reuse keeps label-only changes from
+  refitting or resampling. Common-sample main plot reuse checks the primary fit
+  options and actual estimation data rather than serialized model environment
+  identity. Restored native image states initialize both private caches. A change
+  to one layout rebuilds only that plot; model/sample changes invalidate affected
+  fits. Existing sampled clusters survive label edits and cached restoration.
+- Output-options revision 2 initializes comparison layout, prediction type,
+  cluster count and both label arrays from legacy effective shared values exactly
+  once, in R and native JS handlers. Revision 1 independent visibility choices,
+  model options, ordinary/directional ghosts and all retained label rows survive.
+  Existing main keys stay unchanged. Current revision 2 settings are independent;
+  direct new R constructors keep explicit comparison settings. Native migration is
+  guarded against synchronous re-entry so Model 2-only legacy x/panel selections
+  copy before the main controls normalize their narrower predictor roles. The shared label
+  engine publishes each array through its own native options response.
+- Main roles use only Model 1 predictors/random slopes and its cluster variable;
+  comparison roles use the model union. Ordinary comparison grouping stays reserved
+  for model identity; unsupported saved grouping is retained with the existing
+  explanation/fallback. CAS comparison grouping remains legitimate. Native
+  restoration does not append a cluster panel to an explicit saved layout;
+  cluster-specific defaults add the cluster only where no saved panel/group
+  selection supplies a layout.
+- Ordinary CAS ghosts now reuse its existing single fitted-coordinate stream via
+  the shared reference copier. No core CAS adjustment/prediction changes were
+  needed. Continuous x, one/two prepared panels, dark-gray dashed styling and Stage
+  8 source metadata/custom-label notes are supported. Second-axis grouping,
+  categorical x, singleton/missing reference curves and other shared unsupported
+  layouts retain failure notes. Directional CAS still uses the separate Model 2
+  fixed curve and explanation, only when actually drawn.
+
+Stage 9 focused checks passed 537 R6 assertions for independent fits/plots, role
+restrictions and visibility; the final independent-output/cluster-selection run
+passed 109 assertions (including its additional simultaneous conditional check). The installed module passed 698 native-handler,
+protobuf, renderer, cache-restoration and migration assertions, including real
+serialized fitted/plot states. Existing Mixed regression fixtures now specify the
+intended comparison output explicitly; no visual baselines were changed. Six
+numerical-table comparisons against `843a1269` matched exactly. Tested population,
+cluster and CAS prediction/adjustment coordinates, comparison intervals and ghost
+coordinates also matched; new common-sample ML/REML checks matched independently
+fitted `lmer` models. Main CAS ghost checks preserve every base layer and adjusted
+observation while copying the actual source curve without a source-panel duplicate.
+
+The full package suite ran to completion: 23,030 assertions passed, with 24
+failures in that run. Eight were old shared-layout assertions in comparison-role
+fixtures; these were updated for the intended comparison output and passed the
+final focused run. The remaining 16 failures were reproduced unchanged using the
+Stage 8 source (`843a1269`) in an isolated baseline copy: 12 GLM comparison-note /
+visibility expectations, one LM mocked-label render exception, two reset-image
+path expectations, and one GLM table-note expectation. They remain documented
+rather than changing unrelated LM/GLM behavior or approving new visual baselines.
+A broader native Mixed integration run also exposed two pre-existing assertions
+expecting visible fixed-effect p columns in `test-jamovi-mixed-tables.R:18`; the
+same two failures reproduce against Stage 8. Stage 6's hidden columns remain
+correct and unchanged. The final Stage 9 installed native selection excludes
+that separately documented stale test. No E2E inventory snapshots were repaired.
+
+The module is built/installed with source fingerprint
+`964bbaf93cfdb0fe4144e2f740dae2707f4d86d1ebf85439c02ddeddb2aa44ec`.
+A 240-observation/16-cluster random-slope/interaction/quadratic example prepared
+both conditional-main/CAS-comparison plots in 6.65s; a label-only update took 0.48s
+and state serialization 1.27s in this session. Its cached image states serialized
+about 24.8MB and still produced the known size advisory. This alone was not treated
+as a defect or used to justify a caching redesign.
+
+Live jamovi 2.7.41 used one disposable 120-observation random-slope comparison
+workspace at normal results-pane size. Both plots appeared; each visibility toggle
+left the other output available. Separate sections and label editors retained
+"Main time" versus "Comparison time". Population, ordinary CAS with reference
+notes, cluster-specific main curves with selected cluster panels, and a directional
+CAS comparison were observed. Main mode/panel edits left comparison CAS/labels
+unchanged. An actual .omv save/close/application-relaunch/reopen restored both plots,
+labels, settings and notes; a further main cluster-mode edit still left comparison
+CAS unchanged. Saving remained responsive (compressed review file under 1MB).
+The review was saved and closed. Secondary-monitor placement was unconfirmed.
+Full GUI coverage of every mode/layout/family, the stale E2E inventory, JASP host
+verification and remaining release work stay open for Stage 11. Stage 10 automatic
+Binomial/logit selection is not implemented here.
 
 ## Verification and outstanding issues
 

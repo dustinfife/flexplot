@@ -47,17 +47,17 @@ test_that("native UI server option batches rerun Mixed Model and clear stale res
     `disable-polynomials`=y~x+a+(0+x|id),`enable-polynomials`=y~x+a+(0+x|id),`restore-intercept`=y~a+(1|id),
     `change-group`=y~a+(1|school),`restore-outcome`=y~a+(1|school),`restore-group`=y~a+(1|id))
   capture = new.env(parent=emptyenv())
-  local_mocked_bindings(jamovi_mixed_plot=jamovi_mixed_recorder(capture))
+  local_mocked_bindings(jamovi_mixed_plot=jamovi_mixed_recorder(capture),.package="flexplot")
   for (i in seq_len(nrow(packets))) {
     changed = strsplit(packets$changed[i],";",fixed=TRUE)[[1]]
     for (name in changed) {
       value = as.character(packets[[name]][i])
       if (value == "__NULL__") value = NULL else if (name %in% c("modelTerms","comparisonTerms")) {
         value = if (value == "__EMPTY__") list() else strsplit(strsplit(value,";",fixed=TRUE)[[1]],":",fixed=TRUE)
-      } else if (name %in% c("preds","quadratic","randomSlopes","plotPanels","comparisonFixed","comparisonQuadratic","comparisonRandomSlopes")) {
+      } else if (name %in% c("preds","quadratic","randomSlopes","plotPanels","comparisonPanels","comparisonFixed","comparisonQuadratic","comparisonRandomSlopes")) {
         value = if (value == "__EMPTY__") character() else strsplit(value,";",fixed=TRUE)[[1]]
       } else if (name %in% c("randomIntercept","includeP","graphic","interactions","polynomials","compare","comparisonInteractions","comparisonPolynomials","comparisonRandomIntercept")) value = value == "true" else
-        if (name == "clusters") value = as.integer(value)
+        if (name %in% c("clusters","comparisonClusters","outputOptionsVersion","plotLabelEditorVersion","samplePolicyVersion")) value = as.integer(value)
       option = options$option(name)
       option$value = value
     }

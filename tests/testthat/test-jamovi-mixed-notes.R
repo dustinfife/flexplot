@@ -15,8 +15,8 @@ test_that("CAS ghost notes follow actual directional lines and clear on option c
     identical(layer$aes_params$linetype,"dashed"),logical(1))),integer(1)),c(1L,0L))
   items = vapply(analysis$results$items,function(item)item$name,character(1))
   expect_identical(match("comparisonPlotNote",items),match("comparisonplot",items)+1L)
-  for (change in list(list(casGhost=FALSE),list(casGhost=TRUE,predictionType="population"),
-      list(predictionType="cas",compare=FALSE),list(compare=TRUE,comparisonGraphic=FALSE))) {
+  for (change in list(list(casGhost=FALSE),list(casGhost=TRUE,comparisonPredictionType="population"),
+      list(comparisonPredictionType="cas",compare=FALSE),list(compare=TRUE,comparisonGraphic=FALSE))) {
     expect_true(jamovi_reporting_update(analysis,change))
     expect_false(note$visible)
     expect_identical(note$content,"")
@@ -77,7 +77,8 @@ test_that("CAS layout changes preserve the original cluster data and fitted rand
     local({
       local_mocked_bindings(jamovi_mixed_fit=function(...)stop("Unexpected model refit"),
         jamovi_mixed_comparison=function(...)stop("Unexpected comparison refit"))
-      expect_true(jamovi_reporting_update(analysis,list(predictionType="cas",plotPanels="z")))
+      change = if(comparison) list(comparisonPredictionType="cas",comparisonPanels="z") else list(predictionType="cas",plotPanels="z")
+      expect_true(jamovi_reporting_update(analysis,change))
       current = if (comparison) analysis$results$comparisonplot$state else analysis$results$plot$state
       expect_identical(analysis$options$cluster,"id")
       expect_true("id" %in% names(current$data))
@@ -85,8 +86,8 @@ test_that("CAS layout changes preserve the original cluster data and fitted rand
         expect_identical(current$model1,original$model1)
         expect_identical(current$model2,original$model2)
       } else expect_identical(current$model,original$model)
-      expect_identical(analysis$options$plotPanels,"z")
-      expect_true(jamovi_reporting_update(analysis,list(predictionType="cluster",plotPanels="id")))
+      expect_identical(analysis$options[[if(comparison) "comparisonPanels" else "plotPanels"]],"z")
+      expect_true(jamovi_reporting_update(analysis,if(comparison) list(comparisonPredictionType="cluster",comparisonPanels="id") else list(predictionType="cluster",plotPanels="id")))
     })
   }
 })

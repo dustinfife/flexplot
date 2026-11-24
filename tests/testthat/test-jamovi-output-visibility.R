@@ -4,7 +4,8 @@ output_host = function(module, values=list(), data=small) {
   if (module=="mixedmodel") {
     data = jamovi_mixed_test_data()
     defaults = c(defaults,list(cluster="id",plotPanels="id",predictionType="population",randomSlopes="x",
-      comparisonRandomSlopes="x",showCorrelations=TRUE,clusters=16))
+      comparisonRandomSlopes="x",showCorrelations=TRUE,clusters=16,comparisonX="x",
+      comparisonPanels="id",comparisonPredictionType="population",comparisonClusters=16))
   } else defaults$comparisonX = "x"
   if (module=="glmgeneralized") defaults$family = "gaussian"
   options = do.call(get(paste0(module,"Options"),asNamespace("flexplot"))$new,
@@ -40,14 +41,14 @@ test_that("model outputs default on and toggles independently preserve fits, tab
     expect_lt(match("comparisonplot",order),match("comparison",order))
     expect_true(results$comparisonplot$visible)
     expect_true(results$comparison$visible)
-    expect_identical(results$plot$visible,module!="mixedmodel")
+    expect_true(results$plot$visible)
     tables = output_tables(analysis); fit = output_fit(analysis,module)
     labels = list(list(key="retained",role="legendLevel",variable="a",value="high",display="retained",label="Custom"))
     expect_true(jamovi_reporting_update(analysis,list(plotLabelStore=labels)))
     for (values in list(list(graphic=FALSE),list(comparisonGraphic=FALSE),list(comparisonStatistics=FALSE),
         list(graphic=TRUE),list(comparisonGraphic=TRUE),list(comparisonStatistics=TRUE))) {
       expect_true(jamovi_reporting_update(analysis,values))
-      expect_identical(results$plot$visible,module!="mixedmodel" && analysis$options$graphic)
+      expect_identical(results$plot$visible,analysis$options$graphic)
       expect_identical(results$comparisonplot$visible,analysis$options$comparisonGraphic)
       expect_identical(results$comparison$visible,analysis$options$comparisonStatistics)
       expect_equal(output_tables(analysis),tables)

@@ -8,10 +8,12 @@ jamovi_mixed_label_catalog = function(plot, layout) {
   jamovi_plot_label_catalog(plot,layout)
 }
 
-jamovi_mixed_sync_labels = function(options, plot=NULL, layout=NULL) {
+jamovi_mixed_sync_labels = function(options, plot=NULL, layout=NULL, comparison=FALSE) {
   if (!is.null(plot) && !is.null(attr(plot,"jamovi_cas_children"))) plot = attr(plot,"jamovi_cas_children")[[1]]
   if (!is.null(plot)) layout$comparison = isTRUE(attr(plot,"jamovi_mixed_comparison"))
-  jamovi_plot_sync_labels(options,plot,layout)
+  jamovi_plot_sync_labels(options,plot,layout,
+    rows=if(comparison) "comparisonPlotLabels" else "plotLabels",
+    retained=if(comparison) "comparisonPlotLabelStore" else "plotLabelStore")
 }
 
 jamovi_mixed_apply_labels = function(plot, entries) {

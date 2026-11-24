@@ -56,7 +56,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     const view = {workspace:{}};
     const defaults = {ghostLines:false,plotLabelEditorVersion:0,modifyPlotLabels:false,modifyComparisonPlotLabels:false,outputOptionsVersion:0,comparisonGraphic:true,comparisonStatistics:true,estimates:true,samplePolicyVersion:0,casGhost:false,compare:false,comparisonFixed:null,comparisonTerms:null,comparisonInteractions:false,comparisonPolynomials:false,comparisonQuadratic:null,comparisonRandomIntercept:true,comparisonRandomSlopes:null,comparisonEstimation:"REML",interactions:false,polynomials:false,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
         randomIntercept:true,estimation:'REML',includeP:false,graphic:true,predictionType:'cluster',
-        clusters:3,plotX:null,plotPanels:null,plotGroup:null};
+        clusters:3,plotX:null,plotPanels:null,plotGroup:null,comparisonX:null,comparisonPanels:null,comparisonGroup:null,comparisonPredictionType:'cluster',comparisonClusters:3,comparisonPlotLabels:[],comparisonPlotLabelStore:[]};
     const native = {}, packets = [], queued = new Set();
     const manager = {_beginEdit:0,beginEdit,endEdit,fireQueuedEvents() {
         if (!queued.size) return;
@@ -81,7 +81,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     }
     manager.getOption = name => native[name];
     manager.setOptionValue = (name,value) => ui[name].setValue(value);
-    for (const name of ['quadraticSupplier','randomSupplier','primarySupplier','plotSupplier','plotGroupingLayout','comparisonFixedSupplier','comparisonSupplier','comparisonQuadraticSupplier','comparisonRandomSupplier']) {
+    for (const name of ['quadraticSupplier','randomSupplier','primarySupplier','plotSupplier','plotGroupingLayout','comparisonPlotSupplier','comparisonGroupingLayout','comparisonFixedSupplier','comparisonSupplier','comparisonQuadraticSupplier','comparisonRandomSupplier']) {
         let value = [];
         ui[name] = {value:() => value,setValue(updated) {
             if (JSON.stringify(value) === JSON.stringify(updated)) return;
@@ -197,7 +197,8 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     record('select-second-predictors',()=>ui.comparisonFixed.setValue(['x','z']));
     assert.equal(JSON.stringify(ui.comparisonTerms.value()),'[["x"],["z"]]');
     record('comparison-on',()=>ui.compare.setValue(true));
-    assert.ok(ui.plotSupplier.value().some(item=>item.value.raw==='z'));
+    assert.ok(ui.comparisonPlotSupplier.value().some(item=>item.value.raw==='z'));
+    assert.equal(ui.plotSupplier.value().some(item=>item.value.raw==='z'),false,'Main roles only use Model 1 predictors');
     const firstTerms = JSON.stringify(ui.modelTerms.value());
     options = record('second-allow-interactions',()=>ui.comparisonInteractions.setValue(true));
     assert.equal(JSON.stringify(options.comparisonTerms),'[["x"],["z"]]');
@@ -311,5 +312,39 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     console.log('PASS: legacy comparison requests one native calculation update without changing models.');
     console.log('PASS: native CAS selection filtering, mode switching, and saved-option restoration; model specifications unchanged.');
     console.log('PASS: installed native option setters, synchronous handler re-entry and server batches; fresh and restored options.');
+    for (const comparing of [false,true]) for (const type of ['population','cluster','cas']) {
+        events.find(event=>event.onEvent==='view.data-initializing').execute.call(view,ui,{id:'independent-'+comparing+'-'+type});
+        for (const [name,value] of Object.entries({outputOptionsVersion:1,compare:comparing,
+            preds:['x','a','z'],modelTerms:[['x'],['a'],['z']],comparisonFixed:['x','a'],comparisonTerms:[['x'],['a']],
+            plotX:'x',plotPanels:['z'],plotGroup:null,predictionType:type,clusters:5,
+            plotLabels:savedLabels,plotLabelStore:savedLabels,graphic:false,comparisonGraphic:true,ghostLines:true,casGhost:true}))
+            native[name].setValue(value);
+        events.find(event=>event.onEvent==='view.ready').execute.call(view,ui,{id:'independent-'+comparing+'-'+type});
+        assert.equal(ui.outputOptionsVersion.value(),2);
+        assert.equal(ui.comparisonPredictionType.value(),type);
+        assert.equal(ui.comparisonClusters.value(),5);
+        assert.equal(ui.comparisonX.value(),'x');
+        assert.equal(JSON.stringify(ui.comparisonPanels.value()),JSON.stringify(ui.plotPanels.value()));
+        assert.equal(JSON.stringify(ui.comparisonPlotLabelStore.value()),JSON.stringify(savedLabels));
+        assert.equal(ui.graphic.value(),false);assert.equal(ui.comparisonGraphic.value(),true);
+        assert.equal(ui.ghostLines.value(),true);assert.equal(ui.casGhost.value(),true);
+        ui.comparisonPredictionType.setValue('cas');ui.predictionType.setValue('population');
+        ui.clusters.setValue(2);ui.comparisonClusters.setValue(7);
+        ui.plotLabels.setValue([]);handlers.view_updated.call(view,ui);
+        assert.equal(ui.comparisonPredictionType.value(),'cas');
+        assert.equal(ui.predictionType.value(),'population');
+        assert.equal(ui.comparisonClusters.value(),7);assert.equal(ui.clusters.value(),2);
+        assert.equal(JSON.stringify(ui.comparisonPlotLabelStore.value()),JSON.stringify(savedLabels));
+    }
+    events.find(event=>event.onEvent==='view.data-initializing').execute.call(view,ui,{id:'legacy-second-only'});
+    for (const [name,value] of Object.entries({outputOptionsVersion:1,compare:true,preds:['x','a','z'],
+        modelTerms:[['x']],quadratic:[],randomSlopes:[],comparisonFixed:['a','z'],
+        comparisonTerms:[['a'],['z']],comparisonQuadratic:[],comparisonRandomSlopes:[],
+        plotX:'z',plotPanels:['a'],plotGroup:null,predictionType:'population'})) native[name].setValue(value);
+    events.find(event=>event.onEvent==='view.ready').execute.call(view,ui,{id:'legacy-second-only'});
+    assert.equal(ui.comparisonX.value(),'z','Legacy Model 2-only comparison x survives migration');
+    assert.equal(JSON.stringify(ui.comparisonPanels.value()),'["a"]','Copy legacy panels before main-role normalization');
+    assert.equal(ui.plotX.value(),'x');assert.equal(JSON.stringify(ui.plotPanels.value()),'[]');
+    console.log('PASS: legacy Mixed visualization migration is idempotent; native main/comparison controls, stores and preferences remain independent.');
     return records;
 };

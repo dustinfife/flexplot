@@ -125,7 +125,8 @@ analysis. Mixed-model comparison is available as described below.
 
 ### Custom plot labels
 
-The collapsible **Plot Labels** editor lists only elements in the generated plot:
+Each visualization section has its own default-off **Modify Plot Labels** checkbox
+and large editor. Each editor lists only elements in its generated plot:
 x/y titles, an applicable color/line/symbol legend title and its categories,
 and row/column panel titles and the displayed facet levels. Numeric bins and
 the selected displayed clusters come from the actual plot, not a second binning
@@ -136,8 +137,7 @@ contrasts, facet membership, or predictions.
 Label edits update the visualization while reusing the existing fit and selected
 clusters. Custom labels are keyed by variable, role, and original level, so they
 survive unrelated settings changes and saved-analysis restoration. Removing a
-plot role hides its controls but retains its labels for later reuse. The same
-editor supports population, cluster-specific, and CAS displays. Label metadata
+plot role hides its controls but retains its labels for later reuse. Each editor supports population, cluster-specific, and CAS displays independently. Label metadata
 is returned through jamovi's options response so the editor and saved options
 stay synchronized.
 
@@ -146,8 +146,8 @@ stay synchronized.
 **Compare two models** defaults off. Model 2 has independent main effects,
 interaction and polynomial switches, squared terms, random intercept/slopes,
 and ML/REML estimation. Both models share the outcome, grouping variable and
-selected predictor pool. The shared visualization roles may use predictors in
-either model. Saved settings and dependent selections follow the same native
+selected predictor pool. Main visualization roles use Model 1 predictors and its grouping variable;
+comparison roles may use predictors in either model. Saved settings and dependent selections follow the same native
 synchronization rules as Model 1.
 
 When comparison is enabled, all estimates, diagnostics, plots and comparison
@@ -160,8 +160,8 @@ missing observations can therefore change Model 1's reported estimates.
 Disabling comparison restores Model 1's own eligible sample.
 
 Requested ML/REML settings are preserved for estimates and plots; only the
-statistical comparison uses ML copies. No standalone Model 1 is fitted in
-comparison mode. Fit caches distinguish standalone and common-sample results;
+statistical comparison uses ML copies. The main visualization uses the requested-method common-sample Model 1 fit;
+it does not fit another standalone model or substitute the ML statistics copy. Fit caches distinguish standalone and common-sample results;
 label changes reuse the existing fits. Saved model options retain their format.
 Old saved comparisons request a one-time recalculation when their analysis
 controls initialize. Jamovi may display stored results before those controls
@@ -289,7 +289,8 @@ not fitted to Model 1's adjusted dots.
 Less scatter after a more flexible random-effects adjustment does not by itself
 indicate better model fit. No prediction confidence bands are added.
 
-Custom axis, group and facet labels apply to both plots. Unsupported layouts or
+Comparison axis, group and facet labels apply to both CAS comparison children.
+They do not change the main visualization's labels. Unsupported layouts or
 failures in either plot produce a terminal error rather than a partial comparison
 or indefinite rendering state. Existing CAS restrictions (one grouping factor,
 untransformed numeric response, no offsets, required raw fixed-effect variables)
@@ -298,7 +299,8 @@ continue to apply. Single-model CAS and other comparison modes are unchanged.
 ### Detailed comparison estimates
 
 Comparison results show separate Model 1 and Model 2 fixed-effect and random-effect
-tables, followed by the shared comparison statistics and visualization. Both table
+tables. The main plot and its explanation precede estimates; the comparison
+visualization and its explanation precede comparison statistics. Both table
 sets reuse the common-sample fits with each model's requested ML/REML method; no
 additional fit is performed to report Model 2. Diagnostics identify the affected
 model. Both fixed-effect tables report the existing 95% normal-Wald intervals by
@@ -329,3 +331,35 @@ notes or unnecessary adjacent adapter HTML. The trailing blank editable Annotati
 region and spacing before a model heading/reference block belong to jamovi's
 renderer. That native space is preserved. Old empty notes are cleared by the
 existing result reset on recalculation; no installed CSS is modified.
+
+## Independent visualizations (Stage 9)
+
+**Model Visualization** and **Model Comparison Visualization** have independent x,
+panel, supported grouping, prediction-type, cluster-count and label settings.
+Both outputs can be shown simultaneously. Their Output Options checkboxes control
+them independently of comparison statistics and of collapsed controls. Ordinary
+comparison overlays reserve model-identifying aesthetics for the models; saved
+unsupported grouping choices are retained and explained using the established
+x/panel fallback. CAS comparisons retain their supported grouping.
+
+Legacy shared visualization options and all retained label edits initialize the
+comparison settings once through output-options revision 2, including when
+comparison is disabled. Main option identifiers and label keys remain unchanged;
+comparison labels have their own catalog and retained store. Saved visibility
+preferences remain intact. Subsequent main edits do not overwrite comparison
+settings. Temporarily unavailable label rows remain in their respective stores.
+
+**Show ghost lines** controls only the main reference-panel overlay. For supported
+population, cluster-specific and ordinary CAS plots with a continuous x and one
+or two conditioning variables, it copies the already calculated reference curve
+into other panels, excluding the source. CAS adjusted observations and its fixed
+curve are unchanged. Grouped or otherwise unsupported layouts retain an explicit
+unavailability explanation. Reference notes use actual prepared bin/facet labels,
+including saved custom labels. This preference is independent of CAS comparison's
+**Add ghost line**, which overlays Model 2's fixed curve on Model 1's adjusted plot.
+
+Fit and plot caches remain separate for the two outputs. Label-only changes reuse
+fits and cached unlabelled plots, preserving sampled clusters; changing one layout
+rebuilds that output. Requested methods and the common-sample policy apply even
+when either plot is hidden. Serialized cached plot states can still trigger
+jamovi's existing large-state advisory; Stage 9 save/close/reopen checks succeeded.

@@ -18,8 +18,8 @@ jamovi_cas_check_curves = function(state, children, variables) {
 test_that("two-model CAS uses independent adjustments and shared marginal prediction conditions", {
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_test_data()
-  analysis = jamovi_mixed_analysis(data,graphic=TRUE,compare=TRUE,predictionType="cas",plotX="x",
-    plotPanels="z",modelTerms=list("x","z","a",c("x","z")),interactions=TRUE,
+  analysis = jamovi_mixed_analysis(data,graphic=TRUE,compare=TRUE,comparisonPredictionType="cas",comparisonX="x",
+    comparisonPanels="z",modelTerms=list("x","z","a",c("x","z")),interactions=TRUE,
     polynomials=TRUE,quadratic="x",randomSlopes="x",comparisonTerms=list("a"),comparisonEstimation="ML",casGhost=TRUE)
   expect_true(analysis$run())
   state = analysis$results$comparisonplot$state
@@ -63,8 +63,8 @@ test_that("two-model CAS uses independent adjustments and shared marginal predic
 test_that("CAS comparison synchronizes categorical encodings, cluster facets and custom labels", {
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_test_data()
-  analysis = jamovi_mixed_analysis(data,graphic=TRUE,compare=TRUE,predictionType="cas",plotX="a",plotPanels="id",
-    plotGroup="z",modelTerms=list("x","a","z"),comparisonTerms=list("x"),casGhost=TRUE)
+  analysis = jamovi_mixed_analysis(data,graphic=TRUE,compare=TRUE,comparisonPredictionType="cas",comparisonX="a",comparisonPanels="id",
+    comparisonGroup="z",modelTerms=list("x","a","z"),comparisonTerms=list("x"),casGhost=TRUE)
   expect_true(analysis$run())
   children = jamovi_cas_children(analysis)
   jamovi_cas_check_curves(analysis$results$comparisonplot$state,children,c("a","id","z"))
@@ -82,7 +82,7 @@ test_that("CAS comparison synchronizes categorical encodings, cluster facets and
     second = builds[[2]]$plot$scales$get_scales(aesthetic)
     if (!is.null(first)) expect_equal(first$map(first$get_limits()),second$map(first$get_limits()))
   }
-  labels = analysis$options$plotLabels
+  labels = analysis$options$comparisonPlotLabels
   for (i in seq_along(labels)) {
     if (labels[[i]]$role=="x") labels[[i]]$label="Category"
     if (labels[[i]]$role=="y") labels[[i]]$label="Adjusted outcome"
@@ -105,7 +105,7 @@ test_that("identical and singular CAS fits retain their own estimation samples a
   skip_if_not_installed("jmvcore")
   data = jamovi_mixed_test_data()
   data$z[c(2,5)] = NA
-  analysis = jamovi_mixed_analysis(data,graphic=TRUE,compare=TRUE,predictionType="cas",plotX="x",
+  analysis = jamovi_mixed_analysis(data,graphic=TRUE,compare=TRUE,comparisonPredictionType="cas",comparisonX="x",
     modelTerms=list("x","z"),comparisonTerms=list("x","z"),casGhost=TRUE)
   expect_true(analysis$run())
   state = analysis$results$comparisonplot$state
@@ -117,7 +117,7 @@ test_that("identical and singular CAS fits retain their own estimation samples a
   expect_error(flexplot:::jamovi_mixed_cas_comparison(state,"x"),"Data do not match")
   singular = small_mixed
   singular$y = 1+.4*singular$x+.01*sin(seq_len(nrow(singular)))
-  analysis = jamovi_mixed_analysis(singular,graphic=TRUE,compare=TRUE,predictionType="cas",plotX="x",
+  analysis = jamovi_mixed_analysis(singular,graphic=TRUE,compare=TRUE,comparisonPredictionType="cas",comparisonX="x",
     modelTerms=list("x"),comparisonTerms=list("x"))
   expect_true(analysis$run())
   expect_true(lme4::isSingular(analysis$results$comparisonplot$state$model1))
@@ -130,7 +130,7 @@ test_that("unordered categories and binary numeric displays keep common scales",
     data = jamovi_mixed_test_data()
     if (numeric) data$x = as.numeric(data$x>0) else data$a = factor(data$a,levels=c("high","low","middle"))
     x = if (numeric) "x" else "a"
-    analysis = jamovi_mixed_analysis(data,graphic=TRUE,compare=TRUE,predictionType="cas",plotX=x,
+    analysis = jamovi_mixed_analysis(data,graphic=TRUE,compare=TRUE,comparisonPredictionType="cas",comparisonX=x,
       modelTerms=list("x","a"),comparisonTerms=list("z"),casGhost=TRUE)
     expect_true(analysis$run())
     children = jamovi_cas_children(analysis)
@@ -150,7 +150,7 @@ test_that("a failed child CAS is identified and never leaves a partial compariso
     if (!"x" %in% all.vars(stats::formula(object))) stop("child rendering probe")
     render(formula,object,...)
   })
-  analysis = jamovi_mixed_analysis(graphic=TRUE,compare=TRUE,predictionType="cas",plotX="x",
+  analysis = jamovi_mixed_analysis(graphic=TRUE,compare=TRUE,comparisonPredictionType="cas",comparisonX="x",
     modelTerms=list("x"),comparisonTerms=list("z"))
   expect_true(analysis$run())
   expect_identical(analysis$results$comparisonplot$status,"error")

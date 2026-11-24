@@ -36,6 +36,13 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             plotGroup = NULL,
             plotLabels = list(),
             plotLabelStore = list(),
+            comparisonX = NULL,
+            comparisonPanels = NULL,
+            comparisonGroup = NULL,
+            comparisonPredictionType = "cluster",
+            comparisonClusters = 3,
+            comparisonPlotLabels = list(),
+            comparisonPlotLabelStore = list(),
             samplePolicyVersion = 0,
             includeCI = TRUE,
             estimates = TRUE,
@@ -246,6 +253,87 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             "label",
                             NULL,
                             default=""))))
+            private$..comparisonX = jmvcore::OptionVariable$new(
+                "comparisonX",
+                comparisonX,
+                default=NULL)
+            private$..comparisonPanels = jmvcore::OptionVariables$new(
+                "comparisonPanels",
+                comparisonPanels,
+                default=NULL)
+            private$..comparisonGroup = jmvcore::OptionVariable$new(
+                "comparisonGroup",
+                comparisonGroup,
+                default=NULL)
+            private$..comparisonPredictionType = jmvcore::OptionList$new(
+                "comparisonPredictionType",
+                comparisonPredictionType,
+                options=list(
+                    "population",
+                    "cas",
+                    "cluster"),
+                default="cluster")
+            private$..comparisonClusters = jmvcore::OptionInteger$new(
+                "comparisonClusters",
+                comparisonClusters,
+                default=3,
+                min=1,
+                max=20)
+            private$..comparisonPlotLabels = jmvcore::OptionArray$new(
+                "comparisonPlotLabels",
+                comparisonPlotLabels,
+                default=list(),
+                template=jmvcore::OptionGroup$new(
+                    "comparisonPlotLabels",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
+            private$..comparisonPlotLabelStore = jmvcore::OptionArray$new(
+                "comparisonPlotLabelStore",
+                comparisonPlotLabelStore,
+                hidden=TRUE,
+                default=list(),
+                template=jmvcore::OptionGroup$new(
+                    "comparisonPlotLabelStore",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionString$new(
+                            "key",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "role",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "variable",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "value",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "display",
+                            NULL),
+                        jmvcore::OptionString$new(
+                            "label",
+                            NULL,
+                            default=""))))
             private$..samplePolicyVersion = jmvcore::OptionInteger$new(
                 "samplePolicyVersion",
                 samplePolicyVersion,
@@ -295,6 +383,13 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..plotGroup)
             self$.addOption(private$..plotLabels)
             self$.addOption(private$..plotLabelStore)
+            self$.addOption(private$..comparisonX)
+            self$.addOption(private$..comparisonPanels)
+            self$.addOption(private$..comparisonGroup)
+            self$.addOption(private$..comparisonPredictionType)
+            self$.addOption(private$..comparisonClusters)
+            self$.addOption(private$..comparisonPlotLabels)
+            self$.addOption(private$..comparisonPlotLabelStore)
             self$.addOption(private$..samplePolicyVersion)
             self$.addOption(private$..includeCI)
         }),
@@ -337,6 +432,13 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plotGroup = function() private$..plotGroup$value,
         plotLabels = function() private$..plotLabels$value,
         plotLabelStore = function() private$..plotLabelStore$value,
+        comparisonX = function() private$..comparisonX$value,
+        comparisonPanels = function() private$..comparisonPanels$value,
+        comparisonGroup = function() private$..comparisonGroup$value,
+        comparisonPredictionType = function() private$..comparisonPredictionType$value,
+        comparisonClusters = function() private$..comparisonClusters$value,
+        comparisonPlotLabels = function() private$..comparisonPlotLabels$value,
+        comparisonPlotLabelStore = function() private$..comparisonPlotLabelStore$value,
         samplePolicyVersion = function() private$..samplePolicyVersion$value,
         includeCI = function() private$..includeCI$value),
     private = list(
@@ -378,6 +480,13 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..plotGroup = NA,
         ..plotLabels = NA,
         ..plotLabelStore = NA,
+        ..comparisonX = NA,
+        ..comparisonPanels = NA,
+        ..comparisonGroup = NA,
+        ..comparisonPredictionType = NA,
+        ..comparisonClusters = NA,
+        ..comparisonPlotLabels = NA,
+        ..comparisonPlotLabelStore = NA,
         ..samplePolicyVersion = NA,
         ..includeCI = NA)
 )

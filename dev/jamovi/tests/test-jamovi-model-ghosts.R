@@ -28,7 +28,7 @@ test_that("model ghost options restore real protobuf preferences without alterin
     expect_true(jamovi_reporting_update(analysis,list(plotGroup=NULL,plotPanels="z",compare=TRUE)))
     if(module=="mixedmodel") {
       expect_true(analysis$.__enclos_env__$private$.comparisonplot(analysis$results$comparisonplot))
-      rows=restored$plotLabels
+      rows=restored$comparisonPlotLabels
       expect_true(all(c("Legend entry: Model 1","Legend entry: Model 2") %in% vapply(rows,`[[`,character(1),"display")))
     }
     comparison=tables()

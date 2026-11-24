@@ -13,7 +13,7 @@ module.exports = function(ui, context, module = 'glmgeneralized') {
     let panels = ui.plotPanels.value() || [];
     if (mixed && ui.predictionType.value() === 'cluster' && !panels.length && !group && ui.cluster.value()) panels = [ui.cluster.value()];
     if (!ui.graphic.value() || !ui.out.value() || !predictors.length || !panels.length || panels.length > 2 ||
-        (group || []).length || mixed && (ui.compare.value() || ui.predictionType.value() === 'cas') ||
+        (group || []).length ||
         typeof context.requestData !== 'function') return;
     const selected = ui.plotX.value();
     const available = mixed ? predictors.filter(name => name !== ui.cluster.value()) : predictors.filter(name => !panels.includes(name));

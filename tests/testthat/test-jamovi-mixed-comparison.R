@@ -139,11 +139,11 @@ test_that("Mixed comparison plots use actual original-model predictions and pres
   skip_if_not_installed("jmvcore")
   for (type in c("population","cluster")) {
     set.seed(151)
-    analysis = jamovi_mixed_comparison_analysis(graphic=TRUE,plotX="x",plotPanels="id",predictionType=type)
+    analysis = jamovi_mixed_comparison_analysis(graphic=TRUE,comparisonX="x",comparisonPanels="id",comparisonPredictionType=type)
     expect_true(analysis$run())
     state = analysis$results$comparisonplot$state
     expect_true(analysis$results$comparisonplot$visible)
-    expect_false(analysis$results$plot$visible)
+    expect_true(analysis$results$plot$visible)
     plot = state$displayPlot
     expect_false(is.null(plot))
     curve = Filter(function(layer) is.data.frame(layer$data) && "prediction" %in% names(layer$data),plot$layers)[[1]]$data
@@ -162,10 +162,10 @@ test_that("Mixed comparison plots use actual original-model predictions and pres
     expect_setequal(built$plot$scales$get_scales("colour")$get_labels(),c("Model 1","Model 2"))
     expect_false(any(vapply(plot$layers,function(layer) inherits(layer$geom,"GeomRibbon"),logical(1))))
     expect_no_warning(ggplot2::ggplotGrob(plot))
-    entries = analysis$options$plotLabels
+    entries = analysis$options$comparisonPlotLabels
     for (i in seq_along(entries)) if (entries[[i]]$role=="x") entries[[i]]$label="Time"
-    option = analysis$options$option("plotLabels");option$value=entries
-    analysis$optionsChangedHandler("plotLabels")
+    option = analysis$options$option("comparisonPlotLabels");option$value=entries
+    analysis$optionsChangedHandler("comparisonPlotLabels")
     expect_true(analysis$run())
     expect_identical(analysis$results$comparisonplot$state$model1,state$model1)
     capture = new.env(parent=emptyenv())
@@ -207,7 +207,7 @@ test_that("Mixed comparisons recognize actual random designs and reject unreliab
 
 test_that("Mixed categorical comparison layouts build and intercept-only visualizations are explicit", {
   skip_if_not_installed("jmvcore")
-  analysis=jamovi_mixed_comparison_analysis(graphic=TRUE,plotX="a",plotPanels=c("id","z"),predictionType="cluster")
+  analysis=jamovi_mixed_comparison_analysis(graphic=TRUE,comparisonX="a",comparisonPanels=c("id","z"),comparisonPredictionType="cluster")
   expect_true(analysis$run())
   plot=analysis$results$comparisonplot$state$displayPlot
   expect_false(is.null(plot))
@@ -252,14 +252,14 @@ test_that("Mixed comparison presentation is compact without losing model specifi
 test_that("Mixed Model 2 fixed selections constrain terms without selecting fixed effects from slopes", {
   skip_if_not_installed("jmvcore")
   analysis = jamovi_mixed_comparison_analysis(modelTerms=list("x","a"),polynomials=FALSE,quadratic=NULL,
-    comparisonFixed="a",comparisonTerms=list("x","a"),comparisonRandomSlopes="x",graphic=TRUE,plotX="x",plotPanels="id")
+    comparisonFixed="a",comparisonTerms=list("x","a"),comparisonRandomSlopes="x",graphic=TRUE,comparisonX="x",comparisonPanels="id")
   expect_true(analysis$run())
   state = analysis$results$comparisonplot$state
   expect_identical(colnames(lme4::getME(state$model1,"X")),c("(Intercept)","x","a.L","a.Q"))
   expect_identical(colnames(lme4::getME(state$model2,"X")),c("(Intercept)","a.L","a.Q"))
   expect_identical(lme4::getME(state$model2,"cnms")[[1]],c("(Intercept)","x"))
-  expect_false(analysis$results$plotExplanation$visible)
-  expect_identical(analysis$results$plotExplanation$content,"")
+  expect_true(analysis$results$plotExplanation$visible)
+  expect_match(analysis$results$plotExplanation$content,"Cluster-specific",fixed=TRUE)
   expect_match(analysis$results$comparison$notes$estimation$note,
     "Model comparisons use ML on identical observations; plots use the original fitted models",fixed=TRUE)
   expect_true(jamovi_reporting_update(analysis,list(comparisonFixed=c("x","a"),comparisonTerms=list("x","a"))))

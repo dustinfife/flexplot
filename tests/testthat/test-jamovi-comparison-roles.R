@@ -131,19 +131,19 @@ test_that("grouped native magnets identify models in separate facets without cha
 
 test_that("Mixed overlays reserve model identity but standalone and CAS grouping remain legitimate", {
   skip_if_not_installed("jmvcore")
-  analysis = jamovi_mixed_comparison_analysis(graphic=TRUE,plotX="x",plotPanels="id",plotGroup="a",predictionType="population",clusters=16)
+  analysis = jamovi_mixed_comparison_analysis(graphic=TRUE,comparisonX="x",comparisonPanels="id",comparisonGroup="a",comparisonPredictionType="population",comparisonClusters=16)
   expect_true(analysis$run())
   statistics = analysis$results$comparison$asDF
   fixed = analysis$results$fixed$asDF
   for (type in c("population","cluster")) {
-    expect_true(jamovi_reporting_update(analysis,list(predictionType=type)))
+    expect_true(jamovi_reporting_update(analysis,list(comparisonPredictionType=type)))
     state = analysis$results$comparisonplot$state
     expect_false(is.null(state))
     plot = state$displayPlot
     expect_identical(flexplot:::jamovi_mixed_comparison_plot(state,"x","id","a",type,16),plot)
     expect_comparison_identity(plot)
     expect_match(analysis$results$comparisonPlotNote$content,"saved grouping choice is retained",fixed=TRUE)
-    expect_identical(analysis$options$plotGroup,"a")
+    expect_identical(analysis$options$comparisonGroup,"a")
     expect_equal(analysis$results$comparison$asDF,statistics)
     expect_equal(analysis$results$fixed$asDF,fixed)
     withr::with_seed(419, {
@@ -153,22 +153,22 @@ test_that("Mixed overlays reserve model identity but standalone and CAS grouping
     })
   }
   # The directional CAS ghost and grouping stay in separate model-specific views.
-  expect_true(jamovi_reporting_update(analysis,list(predictionType="cas",plotPanels=NULL,casGhost=TRUE)))
+  expect_true(jamovi_reporting_update(analysis,list(comparisonPredictionType="cas",comparisonPanels=NULL,casGhost=TRUE)))
   plot = analysis$results$comparisonplot$state$displayPlot
   expect_length(attr(plot,"jamovi_cas_children"),2L)
   expect_true(attr(plot,"jamovi_cas_ghost"))
   expect_null(attr(plot,"jamovi_comparison_note"))
-  expect_identical(analysis$options$plotGroup,"a")
+  expect_identical(analysis$options$comparisonGroup,"a")
   expect_match(analysis$results$comparisonPlotNote$content,"Model 2's fixed-effects predictions",fixed=TRUE)
   expect_equal(analysis$results$comparison$asDF,statistics)
   # Saved cluster-as-group layouts need an explicit panel choice, never an implicit move.
-  expect_true(jamovi_reporting_update(analysis,list(predictionType="cluster",plotGroup="id",plotPanels=NULL)))
+  expect_true(jamovi_reporting_update(analysis,list(comparisonPredictionType="cluster",comparisonGroup="id",comparisonPanels=NULL)))
   expect_null(analysis$results$comparisonplot$state)
   expect_match(analysis$results$comparisonPlotNote$content,"place the shared grouping variable in panels",fixed=TRUE)
-  expect_null(analysis$options$plotPanels)
-  expect_identical(analysis$options$plotGroup,"id")
+  expect_null(analysis$options$comparisonPanels)
+  expect_identical(analysis$options$comparisonGroup,"id")
   expect_equal(analysis$results$comparison$asDF,statistics)
-  expect_true(jamovi_reporting_update(analysis,list(plotPanels="id")))
+  expect_true(jamovi_reporting_update(analysis,list(comparisonPanels="id")))
   expect_false(is.null(analysis$results$comparisonplot$state))
   expect_match(analysis$results$comparisonPlotNote$content,"x and panels only",fixed=TRUE)
   expect_true(jamovi_reporting_update(analysis,list(compare=FALSE,plotGroup="a",predictionType="population",clusters=16)))

@@ -168,8 +168,6 @@ children:
   children:
   - type: CheckBox
     name: graphic
-    useSingleCell: true
-    contentLink: (!compare)
   - type: CheckBox
     name: estimates
   - type: CheckBox
@@ -188,15 +186,11 @@ children:
     contentLink: (compare)
 - type: CollapseBox
   name: modelVisualizationSection
-  label: Model Visualization / Model Comparison Visualization
+  label: Model Visualization
   collapsed: true
   children:
   - type: ComboBox
     name: predictionType
-  - type: CheckBox
-    name: casGhost
-    useSingleCell: true
-    contentLink: (compare && predictionType:cas)
   - type: TextBox
     name: clusters
     enable: (!predictionType:cas)
@@ -227,7 +221,6 @@ children:
     format: variable
     persistentItems: false
     useSingleCell: true
-    contentLink: (!compare || predictionType:cas)
     children:
     - type: TargetLayoutBox
       label: Color / symbol variable
@@ -236,31 +229,96 @@ children:
         name: plotGroup
         maxItemCount: 1
         isTarget: true
-        enable: (!compare || predictionType:cas)
-
   - type: CheckBox
     name: ghostLines
   - type: CheckBox
     name: modifyPlotLabels
     useSingleCell: true
-    contentLink: (!compare)
-  - type: CheckBox
-    name: modifyComparisonPlotLabels
-    useSingleCell: true
-    contentLink: (compare)
   - type: ListBox
     name: plotLabels
     height: large
     useSingleCell: true
-    contentLink: ((!compare && modifyPlotLabels) || (compare && modifyComparisonPlotLabels))
     stretchFactor: 1
     columns:
-      - name: display
-        label: Plot element
-        template:
-          type: Label
-      - name: label
-        label: Custom label (blank = automatic)
-        template:
-          type: TextBox
-          format: string
+    - name: display
+      label: Plot element
+      template:
+        type: Label
+    - name: label
+      label: Custom label (blank = automatic)
+      template:
+        type: TextBox
+        format: string
+    contentLink: (modifyPlotLabels)
+- type: CollapseBox
+  name: comparisonVisualizationSection
+  label: Model Comparison Visualization
+  collapsed: true
+  children:
+  - type: ComboBox
+    name: comparisonPredictionType
+  - type: CheckBox
+    name: casGhost
+    useSingleCell: true
+    contentLink: (comparisonPredictionType:cas)
+  - type: TextBox
+    name: comparisonClusters
+    enable: (!comparisonPredictionType:cas)
+    format: number
+  - type: Supplier
+    name: comparisonPlotSupplier
+    label: Model predictors and grouping variable
+    format: variable
+    persistentItems: false
+    children:
+    - type: TargetLayoutBox
+      label: Plot x variable
+      children:
+      - type: VariablesListBox
+        name: comparisonX
+        maxItemCount: 1
+        isTarget: true
+    - type: TargetLayoutBox
+      label: Panel variables (up to two)
+      children:
+      - type: VariablesListBox
+        name: comparisonPanels
+        maxItemCount: 2
+        isTarget: true
+  - type: Supplier
+    name: comparisonGroupingLayout
+    label: Predictors for grouping
+    format: variable
+    persistentItems: false
+    useSingleCell: true
+    children:
+    - type: TargetLayoutBox
+      label: Color / symbol variable
+      children:
+      - type: VariablesListBox
+        name: comparisonGroup
+        maxItemCount: 1
+        isTarget: true
+        enable: (comparisonPredictionType:cas)
+    contentLink: (comparisonPredictionType:cas)
+  - type: CheckBox
+    name: modifyComparisonPlotLabels
+    useSingleCell: true
+  - type: ListBox
+    name: comparisonPlotLabels
+    height: large
+    useSingleCell: true
+    stretchFactor: 1
+    columns:
+    - name: display
+      label: Plot element
+      template:
+        type: Label
+    - name: label
+      label: Custom label (blank = automatic)
+      template:
+        type: TextBox
+        format: string
+    contentLink: (modifyComparisonPlotLabels)
+  contentLink: (compare)
+  useSingleCell: true

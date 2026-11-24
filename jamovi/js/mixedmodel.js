@@ -8,13 +8,15 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
     // Native setters synchronously invoke other handlers while an option edit is
     // still in progress. Synchronize once, and send the complete option batch.
     if (context.flags && context.flags.updating) return;
-    migrateOutput(ui, context, 'mixedmodel');
-    updateEditors(ui, context, 'mixedmodel');
     if (context.workspace.mixedSynchronizing) return;
     context.workspace.mixedSynchronizing = true;
     const options = ui.view.model.options;
     options.beginEdit();
     try {
+        // Preserve the complete legacy layout before synchronous setters can
+        // normalize the newly independent main controls.
+        migrateOutput(ui, context, 'mixedmodel');
+        updateEditors(ui, context, 'mixedmodel');
         const predictors = ui.preds.value() || [];
         const comparing = ui.compare.value() === true;
         // Old saved results may lack Model 2 tables. Request one
@@ -60,32 +62,41 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
             ui[randomSupplier].setValue(utils.valuesToItems(predictors, FormatDef.variable));
         }
         const cluster = ui.cluster.value();
-        const cas = ui.predictionType.value() === 'cas';
-        const layouts = [{supplier:'plotSupplier', models:comparing ? ['modelTerms','comparisonTerms'] : ['modelTerms'],
-            selections:comparing && !cas ? ['plotX','plotPanels'] : ['plotX','plotPanels','plotGroup'], exclusive:true, requireX:true,
-            reserved:comparing && !cas ? [].concat(ui.plotGroup.value() || []) : [],
-            extra:comparing ? ['quadratic','randomSlopes','comparisonQuadratic','comparisonRandomSlopes','cluster'] : ['quadratic','randomSlopes','cluster'],
-            include:'cluster', exclude:cas && cluster ? [cluster] : []}];
-        layouts.push(Object.assign({},layouts[0],{supplier:'plotGroupingLayout',selections:[],requireX:false}));
-        // A new grouping selection defaults to panels; do not overwrite a saved layout.
-        if (cluster !== context.workspace.mixedCluster) {
-            const previous = context.workspace.mixedCluster;
-            if (previous && ui.plotX.value() === previous) ui.plotX.setValue(null);
-            if (previous && ui.plotGroup.value() === previous) ui.plotGroup.setValue(null);
-            const panels = (ui.plotPanels.value() || []).filter(name => name !== previous);
-            const restored = context.workspace.mixedCluster === undefined &&
-                [ui.plotX.value(), ui.plotGroup.value(), ...panels].includes(cluster);
-            if (cluster && !cas && !restored && panels.length < 2 && ![ui.plotX.value(),ui.plotGroup.value(),...panels].includes(cluster)) panels.push(cluster);
-            context.workspace.mixedCluster = cluster;
-            if (JSON.stringify(ui.plotPanels.value()) !== JSON.stringify(panels)) ui.plotPanels.setValue(panels);
+        const layouts = [];
+        for (const comparison of [false,true]) {
+            const x = comparison ? 'comparisonX' : 'plotX';
+            const panelsName = comparison ? 'comparisonPanels' : 'plotPanels';
+            const group = comparison ? 'comparisonGroup' : 'plotGroup';
+            const prediction = ui[comparison ? 'comparisonPredictionType' : 'predictionType'].value();
+            const cas = prediction === 'cas';
+            const ordinaryComparison = comparison && !cas;
+            const layout = {supplier:comparison ? 'comparisonPlotSupplier' : 'plotSupplier',
+                models:comparison ? ['modelTerms','comparisonTerms'] : ['modelTerms'],
+                selections:ordinaryComparison ? [x,panelsName] : [x,panelsName,group], exclusive:true, requireX:true,
+                reserved:ordinaryComparison ? [].concat(ui[group].value() || []) : [],
+                extra:comparison ? ['quadratic','randomSlopes','comparisonQuadratic','comparisonRandomSlopes','cluster'] : ['quadratic','randomSlopes','cluster'],
+                include:'cluster',exclude:cas && cluster ? [cluster] : []};
+            layouts.push(layout,Object.assign({},layout,{supplier:comparison ? 'comparisonGroupingLayout' : 'plotGroupingLayout',selections:[],requireX:false}));
+            const key = comparison ? 'mixedComparisonCluster' : 'mixedCluster';
+            if (cluster !== context.workspace[key]) {
+                const previous = context.workspace[key];
+                if (previous && ui[x].value() === previous) ui[x].setValue(null);
+                if (previous && ui[group].value() === previous) ui[group].setValue(null);
+                const panels = (ui[panelsName].value() || []).filter(name => name !== previous);
+                const restored = context.workspace[key] === undefined && (panels.length > 0 || !!ui[group].value());
+                if (cluster && prediction === 'cluster' && !restored && panels.length < 2 && ![ui[x].value(),ui[group].value(),...panels].includes(cluster)) panels.push(cluster);
+                context.workspace[key] = cluster;
+                if (JSON.stringify(ui[panelsName].value()) !== JSON.stringify(panels)) ui[panelsName].setValue(panels);
+            }
+            if (cluster && ui[x].value() === cluster) ui[x].setValue(null);
         }
-        if (cluster && ui.plotX.value() === cluster) ui.plotX.setValue(null);
         updateTerms(ui, context, added, ['modelTerms'], ['primarySupplier'], layouts);
-        if (cluster && ui.plotX.value() === cluster) {
-            ui.plotX.setValue(null);
-            const panels = ui.plotPanels.value() || [];
-            if (panels.length < 2 && !panels.includes(cluster) && ui.plotGroup.value() !== cluster)
-                ui.plotPanels.setValue(panels.concat(cluster));
+        for (const [x,panelsName,group] of [['plotX','plotPanels','plotGroup'],['comparisonX','comparisonPanels','comparisonGroup']]) {
+            if (cluster && ui[x].value() === cluster) {
+                ui[x].setValue(null);
+                const panels = ui[panelsName].value() || [];
+                if (panels.length < 2 && !panels.includes(cluster) && ui[group].value() !== cluster) ui[panelsName].setValue(panels.concat(cluster));
+            }
         }
     } finally {
         try { options.endEdit(); }
@@ -98,8 +109,17 @@ module.exports = {
     ghostLines_changed: function(ui) { updateGhostControls(ui, this, 'mixedmodel'); },
     plotGroupingLayout_updated: function(ui) { synchronize(ui,this,false); },
     plotGroup_changing: function(ui, event) {
-        updateTerms.groupChanging(ui.compare.value() !== true || ui.predictionType.value() === 'cas',event);
+        updateTerms.groupChanging(true,event);
     },
+    comparisonGroup_changing: function(ui,event) {
+        updateTerms.groupChanging(ui.comparisonPredictionType.value() === 'cas',event);
+    },
+    comparisonPlotSupplier_updated: function(ui) { synchronize(ui,this,false); },
+    comparisonGroupingLayout_updated: function(ui) { synchronize(ui,this,false); },
+    comparisonX_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonPanels_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonGroup_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonPredictionType_changed: function(ui) { synchronize(ui,this,false); },
     // loaded precedes host option initialization; ready/view_updated is the
     // first safe point for defaults or synchronization of a saved analysis.
     view_loaded: function() {},
