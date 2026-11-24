@@ -143,7 +143,7 @@ items:
           title: BIC Bayes factor
           type: number
         - name: p
-          title: p (nested F-test)
+          title: p
           type: number
           format: zto,pvalue
         - name: rsq

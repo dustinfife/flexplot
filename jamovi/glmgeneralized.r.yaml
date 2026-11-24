@@ -101,7 +101,7 @@ items:
         title: df
         type: integer
       - name: p
-        title: p (nested LRT)
+        title: p
         type: number
         format: zto,pvalue
 ...

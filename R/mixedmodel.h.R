@@ -657,7 +657,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer"),
                     list(
                         `name`="p",
-                        `title`="p (fixed-effect LRT)",
+                        `title`="p",
                         `type`="number",
                         `format`="zto,pvalue",
                         `visible`="(includeP)"))))}))

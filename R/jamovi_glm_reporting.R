@@ -46,8 +46,10 @@ jamovi_glm_visible_notes = function(results) {
   context = results$coefficients$notes[intersect(c("model","missing"),names(results$coefficients$notes))]
   for (name in c("coefficients","irt","probabilities")) {
     table = results[[name]]
-    if (!table$visible || table$rowCount == 0L)
+    if (!table$visible || table$rowCount == 0L) {
       for (key in names(table$notes)) table$setNote(key,NULL)
+      jamovi_table_clear_footnotes(table)
+    }
   }
   if (results$coefficients$visible) return(invisible(NULL))
   for (name in c("irt","probabilities")) {
@@ -62,6 +64,9 @@ jamovi_glm_visible_notes = function(results) {
 
 # Coefficient-level statistics come from estimates.glm; uncertainty from the fitted model.
 jamovi_glm_estimates = function(results, state, includeP=FALSE) {
+  for (name in c("coefficients","irt","probabilities")) jamovi_result_clear(results[[name]])
+  for (name in c("irt","probabilities")) results[[name]]$setVisible(FALSE)
+  for (column in results$coefficients$columns) column$visible = identical(column$name,"term")
   model = state$model
   coefficients = summary(model)$coefficients
   values = tryCatch(estimates(model), error=identity)
@@ -73,11 +78,6 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
   }
   t_intervals = colnames(coefficients)[3] == "t value"
   interval_title = if (t_intervals) "95% t CI" else "95% normal Wald CI"
-  results$coefficients$setNote("intervals", if (t_intervals)
-    paste0("Residual df: ", stats::df.residual(model), ".") else NULL)
-  description = ""
-  if (unavailable) description = paste0(description,
-    "Supplementary effect summaries are unavailable for this specification.")
   irt = attr(values, "irt")
   probabilities = attr(values, "marginal_probabilities")
   # IRT and marginal probabilities have predictor-level rows, not coefficient rows.
@@ -114,10 +114,6 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
     if (is.numeric(value)) return(any(is.finite(value)))
     any(!is.na(value) & !value %in% c("", "NA", "NaN"))
   }
-  if (any(vapply(c("OR","multiplicative.coef","inverse.coef"),shown,logical(1))))
-    results$coefficients$setNote("uncertainty", "SE and confidence limits refer to raw coefficients.")
-  if (shown("Prediction Difference (+/- 1 SD)"))
-    results$coefficients$setNote("differences", "Prediction differences compare mean - 1 SD with mean + 1 SD, or factor levels, at the reference profile.")
   model_note = paste0("Family: ", model$family$family, "; Link: ", model$family$link)
   if (model$family$family == "binomial") {
     response = stats::model.response(stats::model.frame(model))
@@ -127,46 +123,56 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
   results$coefficients$setNote("model", model_note)
   if (state$omitted > 0L) results$coefficients$setNote("missing",
     paste(state$omitted, "observations omitted because model variables were missing."))
-  if (any(vapply(stats::model.frame(model)[-1],is.factor,logical(1))))
-    description = paste(description,"Factor coefficients follow the fitted contrasts.")
-  if (any(attr(stats::terms(model),"order") > 1L))
-    description = paste(description,"Interaction effects depend on the other interacting predictors.")
+  if (unavailable) results$coefficients$setNote("interpretation",
+    "Supplementary effect summaries are unavailable for this specification.")
+  uncertainty = "SE and confidence limits refer to raw coefficients."
+  if (t_intervals) uncertainty = paste0(uncertainty," t reference with ",stats::df.residual(model)," residual df.")
+  if (inherits(model,"negbin")) uncertainty = paste(uncertainty,"Uncertainty conditions on estimated size (theta).")
+  jamovi_table_footnote(results$coefficients,c("Std. Error","Std..Error","SE","lower","upper"),uncertainty)
+  effect_rows = which(reported$term!="(Intercept)")
+  if (shown("Prediction Difference (+/- 1 SD)")) jamovi_table_footnote(results$coefficients,
+    "Prediction Difference (+/- 1 SD)",
+    "Prediction differences compare mean - 1 SD with mean + 1 SD, or factor levels, at the reference profile.",rows=effect_rows)
+  assignment = attr(stats::model.matrix(model),"assign")[match(rownames(values),colnames(stats::model.matrix(model)))]
+  factors = attr(stats::terms(model),"factors")
+  factor_variables = names(Filter(is.factor,stats::model.frame(model)[-1]))
+  factor_terms = if (length(factors)) which(colSums(factors[intersect(rownames(factors),factor_variables),,drop=FALSE])>0L) else integer()
+  jamovi_table_footnote(results$coefficients,"term","Factor coefficients follow the fitted contrasts.",
+    rows=which(assignment %in% factor_terms))
+  interaction_terms = which(attr(stats::terms(model),"order")>1L)
+  if (length(interaction_terms)) {
+    involved = rownames(factors)[rowSums(factors[,interaction_terms,drop=FALSE])>0L]
+    conditional_terms = which(colSums(factors[involved,,drop=FALSE])>0L)
+    for (row in which(assignment %in% conditional_terms)) jamovi_table_footnote(results$coefficients,
+      c("raw.coefficients","Estimate"),"Interaction effects depend on the other interacting predictors.",rows=row)
+  }
   if (model$family$family != "binomial") {
-    interpretation = switch(model$family$link,
-      log=paste("Coefficients are on the log-mean scale.",
-        if (shown("multiplicative.coef")) "Multipliers act on the expected outcome." else "",
-        if (shown("std.mult.coef")) "Standardized multipliers use a one-SD predictor change." else ""),
-      inverse=paste("Coefficients are on the inverse-mean scale.",
-        if (shown("inverse.coef")) "Reciprocals are not response ratios." else "",
-        if (shown("std.mult.coef")) "Standardized reciprocals use a one-SD predictor change." else ""),
-      identity="Coefficients are in outcome units.")
-    description = paste(description,interpretation)
-    if (inherits(model, "negbin")) description = paste(description,
-      "Uncertainty conditions on estimated size (theta).")
-    results$coefficients$setNote("interpretation", trimws(description))
+    jamovi_table_footnote(results$coefficients,"multiplicative.coef","Multipliers act on the expected outcome.",rows=effect_rows)
+    jamovi_table_footnote(results$coefficients,"inverse.coef","Reciprocals are not response ratios.",rows=effect_rows)
+    jamovi_table_footnote(results$coefficients,"std.mult.coef",if(model$family$link=="inverse")
+      "Standardized reciprocals use a one-SD predictor change." else "Standardized multipliers use a one-SD predictor change.",rows=effect_rows)
     return(invisible(NULL))
   }
   if (!is.null(irt)) {
     irt = irt[irt$variable %in% attr(values, "continuous"), , drop=FALSE]
     jamovi_glm_table_rows(results$irt, irt)
     results$irt$setVisible(nrow(irt) > 0L)
-    if (nrow(irt) && length(attr(values, "conditioning")) > 1L) results$irt$setNote("conditioning", paste(
+    if (length(attr(values,"conditioning"))>1L) jamovi_table_footnote(results$irt,"variable",paste(
       "Estimates are conditional on other numeric predictors at their means and factors at fitted reference levels.",
-      if (any(attr(stats::terms(model),"order") > 1L)) "Interaction results depend on these settings." else ""))
-    if (nrow(irt)) results$irt$setNote("interpretation", paste(
-      "Slopes describe probability change per predictor unit, not average marginal effects. Thresholds are in predictor units.",
-      if (any(!is.finite(irt$intercept_threshold))) "Blank thresholds are undefined or nonunique." else ""))
+      if(length(interaction_terms)) "Interaction results depend on these settings." else ""))
+    jamovi_table_footnote(results$irt,"instantaneous_slope","Probability change per predictor unit, not average marginal effects.")
+    jamovi_table_footnote(results$irt,"intercept_threshold","Thresholds are in predictor units.",missing=TRUE)
+    for(row in which(!is.finite(irt$intercept_threshold))) jamovi_table_footnote(results$irt,
+      "intercept_threshold","Blank thresholds are undefined or nonunique.",rows=row,missing=TRUE)
   }
   if (!is.null(probabilities)) {
     jamovi_glm_table_rows(results$probabilities, probabilities)
     results$probabilities$setVisible(nrow(probabilities) > 0L)
-    if (nrow(probabilities)) results$probabilities$setNote("averaging", "Each level is set across eligible observations; probabilities are averaged over the other observed predictors.")
+    jamovi_table_footnote(results$probabilities,"Probability",
+      "Each level is set across eligible observations; probabilities are averaged over the other observed predictors.")
   }
-  description = paste(description, "Coefficients are log odds.",
-    if (shown("OR")) "OR multiplies the odds." else "",
-    if (shown("inverse.OR") || shown("inverse.standardized.OR")) "Inverse ratios are reciprocals." else "",
-    if (shown("standardized.OR")) "Std. OR uses a one-SD change in the fitted predictor contrast." else "")
-  results$coefficients$setNote("interpretation", trimws(description))
+  jamovi_table_footnote(results$coefficients,c("standardized.OR","inverse.standardized.OR"),
+    "Std. OR uses a one-SD change in the fitted predictor contrast.",rows=effect_rows)
   invisible(NULL)
 }
 

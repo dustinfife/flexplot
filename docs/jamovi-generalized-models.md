@@ -195,8 +195,9 @@ are unchanged. The research references are Fife's published 2022 flexplot paper
 (DOI: 10.1037/met0000424) and the 2021 graphical-analysis interface paper
 (DOI: 10.3758/s13428-020-01520-2).
 
-Linear-model comparison specifications use two paragraphs in a supported table
-note. The existing p-value presentation and Bayes-factor note are preserved.
+Model-comparison specifications use the existing specification renderer.
+Comparison columns are headed **p**, with method-specific conditional explanations
+and a concise BIC Bayes-factor description.
 
 Rebuild and reinstall from the package root, then restart jamovi:
 
@@ -227,7 +228,7 @@ equivalent models have blank test cells. Negative Binomial theta is estimated
 separately for each model and included in the likelihood parameter count.
 These tests rely on regularity and adequate sample size; sparse or separated
 logistic data and unstable dispersion estimates require caution. Fitting
-warnings are included in the comparison note.
+warnings remain visible in the independent diagnostic result near the specification.
 
 Comparison plots use `compare_fits()` response-scale marginal predictions from
 the original fitted models and their common eligible population. Choose one x
@@ -259,12 +260,10 @@ term builder for a deliberate square-only specification. Model 2 remains
 independent. Existing saved term lists remain authoritative; the old Model 1
 main-effects option is retained internally for compatibility.
 
-Jamovi 2.7.41 does not expose per-column tooltip/help metadata in its results
-schema or `jmvcore::Column` API. Concise native table notes therefore explain raw
-coefficients, odds ratios and their reciprocals, standardized odds ratios,
-prediction differences, standard errors and confidence limits. Interval methods
-remain identified in column headings; success-event and IRT qualifications are
-retained.
+Jamovi 2.7.41 does not expose per-column tooltip/help metadata or heading
+footnotes in its result-column API. Stage 7 uses the supported
+`Table$addFootnote(col=..., rowNo=..., note=...)` API on relevant existing cells.
+No new result-column identifiers or unsupported heading markers are introduced.
 
 GLM comparison plots use 1.2-width fitted curves and lightly shaded confidence
 bands (alpha 0.13). Model 1 remains solid and Model 2 dashed, with the existing
@@ -276,12 +275,14 @@ model colors and prediction scales. Model 2 specifications appear under
 Column labels use **Coefficient**, **1/OR**, **Std. OR**, **1/Std. OR**,
 **Multiplier** and **Reciprocal** while retaining the saved result-column IDs.
 Confidence-interval headings identify the distribution and level; t-based
-intervals retain only a residual-df note. SE and confidence limits remain on the
-raw coefficient scale, including when ratios are shown alongside them.
+intervals retain their residual degrees of freedom in a targeted SE/CI footnote.
+SE and confidence limits remain on the raw coefficient scale, including when ratios are shown alongside them.
 
 Notes identify the family/link and binary success event once, on the first visible
-summary table. Odds-ratio, standardization, prediction-difference and fitted-contrast
-explanations appear only where relevant. IRT headings identify p = .5; notes retain
+summary table, before specialized footnotes. Standardization, prediction-difference
+and fitted-contrast explanations attach to relevant effect cells; basic OR and
+reciprocal definitions already clear from standard column labels are omitted.
+IRT headings identify p = .5; targeted footnotes retain
 predictor units, conditioning and the distinction from average marginal effects.
 Marginal probabilities retain their averaging interpretation. Hidden and empty
 tables have no note rows. Fitting warnings appear in the independent diagnostic
@@ -333,3 +334,29 @@ when that configuration returns. Older saved analyses retain automatic labels.
 Stage 5B shares reference-panel ghost styling and eligibility with LM and eligible
 Mixed Models visualizations, including automatic continuous x selection. See
 [Modeling reference-panel ghost lines](jamovi-model-ghosts.md).
+
+## Stage 7 statistical footnotes
+
+SE and confidence-limit markers identify raw-coefficient uncertainty. Standardized
+ratio and prediction-difference markers attach to effect rows rather than the
+intercept's reference-profile prediction. Interaction-dependent coefficients get
+a shared conditional-interpretation marker. Gamma inverse-link reciprocals remain
+explicitly distinguished from response ratios; negative-binomial uncertainty still
+conditions on estimated theta. IRT footnotes retain conditioning, probability
+change per predictor unit rather than average marginal effects, predictor-unit
+thresholds, and undefined/nonunique blank thresholds. Marginal probability cells
+identify averaging over other observed predictors.
+
+Writers clear existing rows and notes before repopulation. Hidden GLM estimates
+sections have their cell footnotes cleared. Family/link/success context moves to
+the first visible summary table, without repetition beneath every table. Restored
+analyses reuse existing result objects and regenerate current markers and headings.
+
+Available comparison tests have concise method labels, rather than a generic
+nesting restriction. Unavailable LM/GLM tests distinguish equivalent designs,
+nonnested designs, and invalid comparisons under the existing test. Negative
+binomial comparisons retain the separately estimated size qualification. Mixed
+Models retains all ML, random-structure, boundary, singularity and convergence
+qualifications. All three modules use:
+"Approximate BIC Bayes factor favoring the row model over the other model."
+The values and their directions are unchanged, including Mixed Models' ML basis.

@@ -18,17 +18,31 @@ const functions=vm.runInNewContext(extract('V')+'\n'+extract('$e')+'\n({escape:V
 const start=renderer.indexOf('a="";for(let R=0;R<e.notes.length;R++)');
 const end=renderer.indexOf('if(this.$tableFooter.innerHTML=a',start);
 assert.ok(start>=0 && end>start,'Installed native table-note footer code must be inspectable');
-const footer=vm.runInNewContext('(function(e,N){let a;const s=[],rd=[];'+renderer.slice(start,end)+'return a;})',
+const footer=vm.runInNewContext('(function(e,N,s,rd){let a;'+renderer.slice(start,end)+'return a;})',
     {on:functions.escape,Gp:functions.paragraphs,_:text=>text});
+const markerStart=renderer.indexOf('for(let $ of B.symbols)F.sups');
+const markerEnd=renderer.indexOf('if(yg(B))',markerStart);
+assert.ok(markerStart>=0 && markerEnd>markerStart);
+const marker=vm.runInNewContext('(function(B,i,s,rd){const F={sups:""};'+renderer.slice(markerStart,markerEnd)+'return F.sups;})');
+const symbols=JSON.parse(renderer.match(/,rd=(\[[^\]]+\])/)[1]);
 const records=JSON.parse(fs.readFileSync(fixtures,'utf8'));
 for(const record of records){
-    const html=footer({notes:record.notes},record.columns);
+    const footnotes=[],indices={};
+    let marked=0;
+    for(const cell of record.cells || []) {
+        const text=marker(cell,indices,footnotes,symbols);
+        if(cell.footnotes.length){assert.ok(text.length>0,'Native cell superscript must be visible');marked++;}
+    }
+    const html=footer({notes:record.notes},record.columns,footnotes,symbols);
+    assert.equal(footnotes.length,new Set(footnotes).size,'Repeated cell markers must share one footer entry');
+    for(const note of footnotes)assert.ok(html.includes(functions.escape(note)),'Every marker has explanatory text');
+    if(record.familyContext && footnotes.length)assert.ok(html.indexOf(functions.escape(record.familyContext))<html.indexOf(functions.escape(footnotes[0])),'Context precedes specialized footnotes');
     const text=html.replace(/<[^>]*>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
     assert.equal((html.match(/class="table-note"/g)||[]).length,record.notes.length,record.name);
     assert.equal(new Set(record.notes.map(note=>note.note.trim())).size,record.notes.length,'No duplicated notes');
     for(const expected of record.expected)assert.ok(text.includes(expected),record.name+': '+expected);
     for(const forbidden of record.forbidden)assert.equal(text.includes(forbidden),false,record.name+': '+forbidden);
     assert.equal(/<(script|img|svg)\b/i.test(html),false,'Native note rendering must escape untrusted text');
-    if(!record.notes.length)assert.equal(html,'','Hidden or empty tables must not leave note rows');
+    if(!record.notes.length && !footnotes.length)assert.equal(html,'','Hidden or empty tables must not leave note rows');
 }
 console.log('PASS: installed native table-footer code rendered '+records.length+' serialized GLM note fixtures.');

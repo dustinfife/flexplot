@@ -622,7 +622,7 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="p",
-                        `title`="p (nested F-test)",
+                        `title`="p",
                         `type`="number",
                         `format`="zto,pvalue"),
                     list(

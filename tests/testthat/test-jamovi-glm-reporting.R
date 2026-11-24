@@ -27,7 +27,7 @@ test_that("jamovi logistic sections reuse estimates.glm and independent conditio
     mean(predict(model,profile,type="response"))
   },numeric(1))
   expect_equal(probabilities$Probability, unname(expected), tolerance=1e-12)
-  expect_match(analysis$results$irt$notes$conditioning$note, "conditional")
+  expect_match(paste(analysis$results$irt$getCell("variable",rowNo=1)$footnotes,collapse=" "), "conditional")
   expect_false(grepl("Unshown",analysis$results$plotExplanation$content))
   expect_length(analysis$results$plot$getRefs(),0L)
   expect_length(analysis$results$coefficients$getRefs(),0L)

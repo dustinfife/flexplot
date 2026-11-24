@@ -53,12 +53,9 @@ test_that("jamovi comparison p-value cells are numeric or genuinely blank and Ba
     expect_match(analysis$results$specification$content, "<strong>Model 1:</strong>", fixed=TRUE)
     expect_match(analysis$results$specification$content, "</p><p><strong>Model 2:</strong>", fixed=TRUE)
     notes = table$footnotes
-    bayes = notes[grepl("Bayes factors", notes, fixed=TRUE)]
+    bayes = notes[grepl("BIC Bayes factor", notes, fixed=TRUE)]
     expect_length(bayes, 1L)
-    expect_identical(unname(bayes), paste(
-      "These are approximate Bayes factors derived from BIC.",
-      "Model 1's Bayes factor expresses evidence favoring Model 1 over Model 2.",
-      "Model 2's Bayes factor expresses evidence favoring Model 2 over Model 1."))
+    expect_identical(unname(bayes), "Approximate BIC Bayes factor favoring the row model over the other model.")
   }
 })
 

@@ -108,6 +108,8 @@ jamovi_mixed_comparison = function(options, data) {
 }
 
 jamovi_mixed_comparison_report = function(results, state, includeP=FALSE, information="") {
+  jamovi_result_clear(results$comparison)
+  results$comparison$getColumn("p")$setTitle("p")
   statistics = state$statistics
   values = data.frame(model=c("Model 1","Model 2"),n=c(stats::nobs(state$model1),stats::nobs(state$model2)),
     aic=statistics$aic,bic=statistics$bic,bayes.factor=statistics$bayes,
@@ -119,7 +121,7 @@ jamovi_mixed_comparison_report = function(results, state, includeP=FALSE, inform
     "Model comparisons use ML on identical observations; plots use the original fitted models.")
   results$comparison$setNote("bayes",NULL)
   if (any(is.finite(statistics$bayes))) results$comparison$setNote("bayes",
-    "Approximate BIC Bayes factors favor the model in each row; the two values are reciprocal.")
+    jamovi_bayes_note())
   test_note = statistics$reason
   if (is.finite(statistics$lr)) test_note = if (isTRUE(statistics$random_p_unavailable)) NULL else
     if (is.finite(statistics$p)) "Nested fixed-effects LRT (asymptotic chi-square)." else NULL

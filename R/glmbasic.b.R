@@ -172,7 +172,7 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
             var=as.character(values$variables),levels=values$levels,
             means=round(values$estimate,2),lower=round(values$lower,2),upper=round(values$upper,2)))
           self$results$factorMeans$setNote("reference",
-            "Conditional predictions: other numeric predictors are held at their means and categorical predictors at their modes. These are not model coefficients.")
+            "Conditional predictions: other numeric predictors are held at their means and categorical predictors at their modes.")
           self$results$factorMeans$setVisible(self$options$estimates)
           private$.diff(results$difference.matrix)
         },
@@ -242,7 +242,7 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
         if (!is.data.frame(l) || !nrow(l)) return(invisible(NULL))
         table$setVisible(self$options$estimates)
         adjustments = attr(l, "adjustments")
-        table$setNote("intervals", paste0("95% confidence intervals: ",
+        table$setNote("intervals", paste0("Pairwise interval methods: ",
           paste(paste(names(adjustments), adjustments, sep=": "), collapse="; "),
           ". Adjusted intervals cover the estimable pairwise family within each factor. Other numeric predictors are held at their means and categorical predictors at their modes."))
 

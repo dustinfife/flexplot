@@ -22,7 +22,7 @@ test_that("GLM notes and display headings are concise, family-specific and prese
       expect_identical(results$coefficients$getColumn(name)$title,unname(expected[[name]]))
       expect_identical(results$coefficients$getColumn(name)$name,name)
     }
-    notes = vapply(results$coefficients$notes,function(note)note$note,character(1))
+    notes = jamovi_test_table_notes(results$coefficients)
     text = paste(notes,collapse=" ")
     expect_false(anyDuplicated(notes)>0L)
     expect_false(grepl("estimates.glm|95% t confidence intervals|95% normal.Wald confidence intervals",text))
@@ -30,12 +30,12 @@ test_that("GLM notes and display headings are concise, family-specific and prese
     expect_match(text,"Factor coefficients follow the fitted contrasts",fixed=TRUE)
     if (family=="binomial") {
       expect_match(text,"Success event: 1",fixed=TRUE)
-      expect_match(text,"OR multiplies the odds",fixed=TRUE)
-      expect_match(text,"reciprocals",fixed=TRUE)
+      expect_null(results$coefficients$notes$interpretation)
+      expect_match(text,"raw coefficients",fixed=TRUE)
       expect_match(text,"one-SD change in the fitted predictor contrast",fixed=TRUE)
       expect_null(results$coefficients$notes$success)
-      expect_match(results$irt$notes$conditioning$note,"fitted reference levels",fixed=TRUE)
-      expect_match(results$irt$notes$interpretation$note,"not average marginal effects",fixed=TRUE)
+      expect_match(paste(results$irt$getCell("variable",rowNo=1)$footnotes,collapse=" "),"fitted reference levels",fixed=TRUE)
+      expect_match(paste(results$irt$getCell("instantaneous_slope",rowNo=1)$footnotes,collapse=" "),"not average marginal effects",fixed=TRUE)
     } else {
       expect_false(grepl("Success event|odds|Std. OR",text))
       expect_length(results$irt$notes,0L)
@@ -57,7 +57,7 @@ test_that("empty and hidden GLM tables have no notes, and notes return on live c
   expect_true(jamovi_reporting_update(analysis,list(showEstimates=FALSE,showIRT=FALSE,showProbabilities=FALSE)))
   for (name in c("coefficients","irt","probabilities")) expect_length(analysis$results[[name]]$notes,0L)
   expect_true(jamovi_reporting_update(analysis,list(preds=c("x","a"),showEstimates=TRUE,showIRT=TRUE,showProbabilities=TRUE)))
-  for (name in c("coefficients","irt","probabilities")) expect_gt(length(analysis$results[[name]]$notes),0L)
+  for (name in c("coefficients","irt","probabilities")) expect_gt(length(jamovi_test_table_notes(analysis$results[[name]])),0L)
 })
 
 test_that("GLM explanations omit statistics that are entirely unavailable", {
@@ -73,8 +73,8 @@ test_that("GLM explanations omit statistics that are entirely unavailable", {
     preds=c("x","a"),family="binomial",graphic=FALSE),small)
   expect_true(analysis$run())
   expect_null(analysis$results$coefficients$notes$differences)
-  expect_false(grepl("Std. OR",analysis$results$coefficients$notes$interpretation$note,fixed=TRUE))
-  expect_match(analysis$results$coefficients$notes$interpretation$note,"OR multiplies",fixed=TRUE)
+  expect_false(grepl("Std. OR",paste(jamovi_test_table_notes(analysis$results$coefficients),collapse=" "),fixed=TRUE))
+  expect_match(paste(jamovi_test_table_notes(analysis$results$coefficients),collapse=" "),"raw coefficients",fixed=TRUE)
 })
 
 test_that("fitting warnings remain visible independently of output preferences", {

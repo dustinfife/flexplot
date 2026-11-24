@@ -31,7 +31,7 @@ test_that("Mixed comparisons use ML copies for nested fixed effects and preserve
   expect_equal(table$p[1],independent$`Pr(>Chisq)`[2],tolerance=1e-8)
   expect_null(analysis$results$comparison$getCell("p",rowNo=2)$value)
   expect_match(analysis$results$comparison$notes$estimation$note,"Model comparisons use ML")
-  expect_match(analysis$results$comparison$notes$bayes$note,"Approximate BIC.*each row.*reciprocal")
+  expect_match(analysis$results$comparison$notes$bayes$note,"Approximate BIC Bayes factor favoring the row model over the other model.")
   expect_match(analysis$results$comparisonSpecification$content,"Model 2")
 })
 
@@ -232,7 +232,7 @@ test_that("Mixed comparison presentation is compact without losing model specifi
   expect_length(notes,3L)
   expect_lt(sum(nchar(notes)),350)
   expect_match(notes[["estimation"]],"Model comparisons use ML on identical observations; plots use the original fitted models")
-  expect_match(notes[["bayes"]],"Approximate BIC.*reciprocal")
+  expect_match(notes[["bayes"]],"Approximate BIC Bayes factor favoring the row model over the other model.")
   expect_false(analysis$results$specification$visible)
   content = analysis$results$comparisonSpecification$content
   expect_match(content,"</strong>.*<br><strong>Model 2:")

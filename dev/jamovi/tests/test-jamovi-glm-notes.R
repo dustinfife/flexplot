@@ -5,6 +5,9 @@ test_that("serialized GLM notes render compactly through the installed native ta
     element = table$asProtoBuf()
     fixtures$value[[length(fixtures$value)+1L]] = list(name=name,columns=length(element$table$columns),
       notes=lapply(element$table$notes,function(note)list(note=note$note)),
+      cells=unlist(lapply(Filter(function(column)isTRUE(table$getColumn(column$name)$visible),element$table$columns),function(column)
+        lapply(column$cells,function(cell)list(footnotes=as.list(cell$footnotes),symbols=as.list(cell$symbols)))),recursive=FALSE),
+      familyContext=if(!is.null(table$notes$model))table$notes$model$note else NULL,
       expected=as.list(expected),forbidden=as.list(c("estimates.glm()","95% t confidence intervals",forbidden)))
   }
   for (family in c("gaussian","binomial","poisson","gammaLog","Gamma","negativebinomial")) {
@@ -19,7 +22,7 @@ test_that("serialized GLM notes render compactly through the installed native ta
     add(analysis$results$irt,paste(family,"IRT"))
     add(analysis$results$probabilities,paste(family,"probabilities"))
     add(analysis$results$comparison,paste(family,"comparison"),
-      c("Approximate BIC Bayes factors","each row over the other model"), forbidden=c("Model 1:","Model 2:"))
+      c("Approximate BIC Bayes factor","row model over the other model"), forbidden=c("Model 1:","Model 2:"))
     expect_true(jamovi_reporting_update(analysis,list(showEstimates=FALSE,showIRT=FALSE,showProbabilities=FALSE)))
     for (name in c("coefficients","irt","probabilities")) {
       expect_length(analysis$results[[name]]$notes,0L)

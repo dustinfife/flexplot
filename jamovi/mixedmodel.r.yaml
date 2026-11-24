@@ -195,7 +195,7 @@ items:
         title: df
         type: integer
       - name: p
-        title: p (fixed-effect LRT)
+        title: p
         type: number
         format: zto,pvalue
         visible: (includeP)

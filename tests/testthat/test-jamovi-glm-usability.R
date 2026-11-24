@@ -89,14 +89,15 @@ test_that("GLM table help and plot explanations are concise and mode-specific", 
     expect_identical(notes$model$note,paste0("Family: ",model$family$family,"; Link: ",model$family$link,if (family=="binomial") ". Success event: 1" else ""))
     expect_false(grepl("estimates.glm",paste(vapply(notes,function(note)note$note,character(1)),collapse=" "),fixed=TRUE))
     if (family %in% c("binomial","poisson","negativebinomial")) expect_null(notes$intervals)
-    if (family=="gaussian") expect_null(notes$uncertainty) else expect_match(notes$uncertainty$note,"SE")
+    expect_null(notes$uncertainty)
+    expect_match(paste(jamovi_test_table_notes(analysis$results$coefficients),collapse=" "),"SE")
     state = analysis$results$plot$state
     if (family=="binomial") {
       expect_match(flexplot:::jamovi_glm_plot_guide(state,"x",panels="a"),"success proportions")
       expect_match(flexplot:::jamovi_glm_plot_guide(state,"x",panels="a",scale="logit"),"observed-bin logits")
       expect_match(flexplot:::jamovi_glm_plot_guide(state,"x",panels="a",style="raw",scale="logit"),"Probability scale is used")
       expect_false(grepl("observed-bin",flexplot:::jamovi_glm_plot_guide(state,"x",panels="a",style="raw")))
-      expect_match(notes$interpretation$note,"reciprocal")
+      expect_match(paste(jamovi_test_table_notes(analysis$results$coefficients),collapse=" "),"one-SD")
       expect_match(notes$model$note,"Success event")
     } else expect_identical(flexplot:::jamovi_glm_plot_guide(state,"x",panels="a"),"")
   }

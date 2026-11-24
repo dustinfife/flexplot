@@ -15,17 +15,17 @@ inspection. Keep stages small and preserve statistical behavior.
 | 4 | Independent GLM visualization settings | Complete: `9bab9cc0` |
 | 5 | Plot-control organization, Modify Plot Labels checkboxes, taller editors, readable dynamic legend descriptions | Complete: `a306b18f` |
 | 5B | Shared ordinary reference-panel ghost lines | Complete: `07a2ed5d` |
-| 6 | Mixed Models estimates, confidence-interval controls, removal of permanently empty fixed-effect p-value columns | Complete; implementation commit resolved below |
-| 7 | Compact table notes, targeted native footnotes, conditional comparison-test explanations | Remaining |
+| 6 | Mixed Models estimates, confidence-interval controls, removal of permanently empty fixed-effect p-value columns | Complete: `dedf2a57` |
+| 7 | Compact table notes, targeted native footnotes, conditional comparison-test explanations | Complete; implementation commit resolved below |
 | 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Remaining |
 | 9 | Independent Mixed Models main/comparison visualizations and label editors | Remaining |
 | 10 | Automatic Binomial/logit selection for eligible binary outcomes, preserving explicit family choices | Remaining |
 | 11 | Final shared-infrastructure review, GUI testing, release preparation | Remaining |
 
-Resolve the Stage 6 implementation commit:
+Resolve the Stage 7 implementation commit:
 
 ```sh
-git log -1 --format='%H %s' --grep='Simplify Mixed Models estimates and inference controls'
+git log -1 --format='%H %s' --grep='Standardize comparison notes and targeted statistical footnotes'
 ```
 
 ## Architecture and compatibility
@@ -167,6 +167,58 @@ The disposable review was closed without saving and existing documents preserved
 Secondary-monitor placement was unconfirmed. Legacy CI-off restoration was checked
 through protobuf/R6 rather than a separate live saved-file scenario. Broader GUI,
 stale E2E inventory and JASP verification remain outstanding as described below.
+
+## Stage 7 architecture and verification
+
+- Comparison p headings are `p` in declarations, checked-in headers and reporting
+  setters (including restored cached headings). Available tests keep concise
+  method identification: LM nested-model F-test; GLM likelihood-ratio/asymptotic
+  chi-square; Mixed existing safeguarded fixed-effect LRT. Unavailable LM/GLM
+  cases distinguish equivalent designs, nonnested designs and invalid comparisons
+  (including identified invalid likelihood df or negative/nonfinite LR statistics).
+  Mixed reasons, random-boundary/singularity/convergence safeguards and negative
+  binomial separately estimated size qualifications remain intact.
+- `R/jamovi_table_notes.R` provides native cell-note attachment, hidden-cell note
+  clearing, comparison-reason presentation and one concise Bayes-factor definition:
+  "Approximate BIC Bayes factor favoring the row model over the other model."
+  LM/GLM directions retain existing rounded values; Mixed remains based on the ML
+  comparison BIC values, not the original requested REML fits used for plots.
+- GLM retains family/link/success context first on the first visible summary table.
+  Supported `Table$addFootnote` cell markers cover raw SE/CI, standardized ratios,
+  prediction differences, fitted contrasts, interacting coefficients, Gamma
+  inverse reciprocals, negative-binomial uncertainty, IRT conditioning/slopes/
+  thresholds, undefined blanks and marginal averaging. Effect-summary markers
+  skip intercept predictions. No column-heading footnote API is assumed.
+- Writers clear old rows/notes before repopulation, retain column/result IDs and
+  replace stale cached headings. Hidden GLM tables clear cell notes; invalid/empty
+  tables serialize no explanatory cells. Native cell/renderer de-duplication
+  shares one explanation across repeated relevant markers. Generic definitions
+  already conveyed by OR/1/OR and link labels are omitted. LM pairwise notes retain
+  multiplicity methods/conditioning while dropping a repeated 95% prefix; the
+  conditional-means note drops the redundant non-coefficient sentence.
+- Stage 6's hidden fixed-effect p columns and saved CI preferences are preserved.
+  No options, fitting, inference, estimates, result order, geometry or dependencies
+  changed. See `docs/jamovi-generalized-models.md`.
+
+Focused Stage 7 checks passed 1,048 R6 assertions and 495 native assertions,
+covering all supported GLM families, available/unavailable tests, BIC direction,
+repeated and invalid/valid transitions, hidden/empty sections, protobuf restoration,
+restored result-object reuse, native cell serialization, superscripts, escaped
+text, context ordering and one footer entry per repeated note. Six before/after
+numerical table comparisons against Stage 6 matched exactly. Tested prediction,
+interval, ghost and Mixed population/cluster/CAS coordinates also matched.
+No full package suite was run. Final installed-package checks passed 425
+assertions; the final focused LM wording/conditional-reason comparison check passed 386 assertions.
+
+The module was built/installed in jamovi 2.7.41. Live checks showed LM's `p`
+heading with short F-test and BIC footnotes; GLM had readable cell markers,
+family/link/success context before specialized notes, distinct IRT and marginal
+averaging footnotes; Mixed retained Stage 6 fixed-effect output and its ML/LRT
+qualifications with the shortened BIC wording. Live coverage was representative,
+not every family/invalid/restored configuration; native/R6 checks cover those
+paths. Secondary-monitor placement was unconfirmed. At the user's request all
+review windows were closed, saving pending Stage 1, Stage 2 and scale-check edits.
+The broader GUI, stale E2E inventory and JASP requirements remain outstanding.
 
 ## Verification and outstanding issues
 

@@ -592,7 +592,7 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="integer"),
                     list(
                         `name`="p",
-                        `title`="p (nested LRT)",
+                        `title`="p",
                         `type`="number",
                         `format`="zto,pvalue"))))}))
 

@@ -44,6 +44,8 @@ jamovi_glm_generalized_comparison = function(options, data) {
 }
 
 jamovi_glm_generalized_comparison_table = function(table, state) {
+  jamovi_result_clear(table)
+  table$getColumn("p")$setTitle("p")
   for (i in seq_len(2L)) {
     row = list(model=paste("Model", i), n=stats::nobs(state[[paste0("model", i)]]))
     for (name in c("aic", "bic", "bayes.factor")) {
@@ -58,9 +60,9 @@ jamovi_glm_generalized_comparison_table = function(table, state) {
     table$addRow(rowKey=i, values=row)
   }
   table$setNote("population", "Same complete observations for both models.")
-  table$setNote("bayes", paste("Approximate BIC Bayes factors favor the model on each row over the other model."))
-  test_note = if (is.finite(state$p)) "Nested-model likelihood-ratio test (asymptotic chi-square)." else
-    "Likelihood-ratio test unavailable: nonnested/equivalent models or invalid likelihood comparison."
+  table$setNote("bayes", jamovi_bayes_note())
+  test_note = if (is.finite(state$p)) "Likelihood-ratio test; asymptotic chi-square reference." else
+    jamovi_comparison_unavailable(state$model1,state$model2,"Likelihood-ratio test",state)
   if (inherits(state$model1, "negbin")) test_note = paste(test_note, "Size estimated separately per model.")
   table$setNote("test", test_note)
 }

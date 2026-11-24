@@ -39,6 +39,8 @@ jamovi_glm_comparison = function(options, data) {
 }
 
 jamovi_glm_comparison_table = function(table, state) {
+  jamovi_result_clear(table)
+  table$getColumn("p")$setTitle("p")
   statistics = state$statistics
   for (i in seq_len(2L)) {
     row = list(model=paste("Model", i), n=stats::nobs(state[[paste0("model", i)]]))
@@ -50,11 +52,9 @@ jamovi_glm_comparison_table = function(table, state) {
     table$addRow(rowKey=i, values=row)
   }
   table$addFootnote(rowNo=1, col="n", note="Both models use the same complete observations across their combined variables.")
-  table$addFootnote(rowNo=1, col="bayes.factor", note=paste(
-    "These are approximate Bayes factors derived from BIC.",
-    "Model 1's Bayes factor expresses evidence favoring Model 1 over Model 2.",
-    "Model 2's Bayes factor expresses evidence favoring Model 2 over Model 1."))
-  table$addFootnote(rowNo=1, col="p", note="F-test for nested models only; unavailable for nonnested or equivalent models.")
+  jamovi_table_footnote(table,"bayes.factor",jamovi_bayes_note())
+  jamovi_table_footnote(table,"p",if (is.finite(state$p)) "Nested-model F-test." else
+    jamovi_comparison_unavailable(state$model1,state$model2,"F-test"),rows=1L,missing=TRUE)
 }
 
 jamovi_glm_comparison_plot = function(state) {
