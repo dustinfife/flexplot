@@ -1,5 +1,12 @@
 # Phase 2A harness and pilot status
 
+Stage 11C status (2026-11-24): this is a historical pilot record, not current-build
+acceptance. The current matrix is 77 scenarios (16 FP / 17 LM / 24 GLM / 20 Mixed),
+267 transitions and 77 final host-reopen checks. No new live checks were run in
+Stage 11C. Use [Stage 11D](STAGE-11D-PLAN.md) for the current campaign; historical
+70/73 counts and older build claims below describe only their recorded phases.
+
+
 **Status: validated partial infrastructure; GUI pilot remains incomplete.**
 
 The stabilization task authorizes committing this infrastructure independently of

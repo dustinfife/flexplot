@@ -10,7 +10,7 @@
             "name": "data",
             "type": "Data"
           },
-          "scenarios": ["FP-01", "FP-02", "FP-03", "FP-04", "FP-05", "FP-06", "FP-07", "FP-08", "FP-09", "FP-10", "FP-11", "FP-12", "FP-13", "FP-14", "FP-15", "FP-16"],
+          "scenarios": "FP-03",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -396,6 +396,18 @@
       ],
       "results": [
         {
+          "name": "waiting",
+          "title": "",
+          "type": "Html",
+          "visible": false
+        },
+        {
+          "name": "explanation",
+          "title": "",
+          "type": "Html",
+          "visible": false
+        },
+        {
           "name": "plot",
           "title": "Analysis Plot",
           "type": "Image",
@@ -417,7 +429,7 @@
             "name": "data",
             "type": "Data"
           },
-          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-05", "LM-06", "LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-12", "LM-13", "LM-14", "LM-15", "LM-16"],
+          "scenarios": "LM-17",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -427,7 +439,7 @@
             "title": "Dependent variable",
             "type": "Variable"
           },
-          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-05", "LM-06", "LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-12", "LM-13", "LM-14", "LM-15", "LM-16"],
+          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-05", "LM-06", "LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-12", "LM-13", "LM-14", "LM-15", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -437,25 +449,25 @@
             "title": "Predictor variable",
             "type": "Variables"
           },
-          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-05", "LM-06", "LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-12", "LM-13", "LM-14", "LM-15", "LM-16"],
+          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-05", "LM-06", "LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-12", "LM-13", "LM-14", "LM-15", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
           "id": "glmbasic.graphic",
           "definition": {
             "name": "graphic",
-            "title": "Analysis graphs",
+            "title": "Model visualization",
             "type": "Bool",
             "default": true
           },
-          "scenarios": ["LM-11", "LM-16"],
+          "scenarios": ["LM-11", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
           "id": "glmbasic.graphicassump",
           "definition": {
             "name": "graphicassump",
-            "title": "Diagnostics",
+            "title": "Residual diagnostics",
             "type": "Bool",
             "default": false
           },
@@ -466,7 +478,7 @@
           "id": "glmbasic.estimates",
           "definition": {
             "name": "estimates",
-            "title": "Estimates and effect eizes",
+            "title": "Estimates",
             "type": "Bool",
             "default": true
           },
@@ -507,7 +519,7 @@
             "options": ["Loess", "Regression", "Logistic"],
             "default": "Loess"
           },
-          "scenarios": "LM-11",
+          "scenarios": "LM-17",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -520,7 +532,7 @@
             "options": ["Median + quartiles", "Mean + sterr", "Mean + stdev"],
             "default": "Median + quartiles"
           },
-          "scenarios": "LM-11",
+          "scenarios": "LM-17",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -532,7 +544,7 @@
             "default": null,
             "description": "Main effects and interactions. NULL retains the additive model; an empty list fits an intercept only."
           },
-          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-05", "LM-06", "LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-12", "LM-13", "LM-14", "LM-15", "LM-16"],
+          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-05", "LM-06", "LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-12", "LM-13", "LM-14", "LM-15", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -544,7 +556,7 @@
             "default": false,
             "description": "Fit and compare two models on the same complete observations."
           },
-          "scenarios": ["LM-07", "LM-08", "LM-09", "LM-10", "LM-14", "LM-15", "LM-16"],
+          "scenarios": ["LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-14", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -556,7 +568,7 @@
             "default": null,
             "description": "Independent main effects and interactions for Model 2. NULL uses all selected main effects."
           },
-          "scenarios": ["LM-07", "LM-08", "LM-09", "LM-10", "LM-14", "LM-15", "LM-16"],
+          "scenarios": ["LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-14", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -568,7 +580,7 @@
             "default": null,
             "description": "Predictor used on the comparison x axis; defaults to the first numeric model predictor, otherwise the first model predictor."
           },
-          "scenarios": ["LM-07", "LM-08", "LM-09", "LM-10", "LM-14", "LM-15", "LM-16"],
+          "scenarios": ["LM-07", "LM-08", "LM-09", "LM-10", "LM-11", "LM-14", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -580,7 +592,7 @@
             "default": null,
             "description": "Additional model predictors displayed in panels, not on a second axis."
           },
-          "scenarios": ["LM-07", "LM-15", "LM-16"],
+          "scenarios": ["LM-07", "LM-11", "LM-15", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -592,7 +604,7 @@
             "default": null,
             "description": "Visualization variables must occur in the fitted model terms (either model for comparisons)."
           },
-          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-07", "LM-08", "LM-09", "LM-11", "LM-12", "LM-13", "LM-15", "LM-16"],
+          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-07", "LM-08", "LM-09", "LM-11", "LM-12", "LM-13", "LM-15", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -604,7 +616,7 @@
             "default": null,
             "description": "Visualization variables must occur in the fitted model terms (either model for comparisons)."
           },
-          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-07", "LM-08", "LM-09", "LM-11", "LM-15", "LM-16"],
+          "scenarios": ["LM-01", "LM-02", "LM-03", "LM-04", "LM-07", "LM-08", "LM-09", "LM-11", "LM-15", "LM-16", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -616,7 +628,19 @@
             "default": null,
             "description": "Visualization variables must occur in the fitted model terms (either model for comparisons)."
           },
-          "scenarios": ["LM-12", "LM-15"],
+          "scenarios": ["LM-11", "LM-12", "LM-15"],
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmbasic.comparisonMagnet",
+          "definition": {
+            "name": "comparisonMagnet",
+            "title": "Internal comparison grouping capability",
+            "type": "Bool",
+            "hidden": true,
+            "default": false
+          },
+          "scenarios": "LM-17",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -628,7 +652,7 @@
             "default": null,
             "description": "Visualization variables must occur in the fitted model terms (either model for comparisons)."
           },
-          "scenarios": "LM-15",
+          "scenarios": ["LM-15", "LM-17"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -683,7 +707,7 @@
             "type": "Bool",
             "default": false
           },
-          "scenarios": ["LM-02", "LM-07"],
+          "scenarios": ["LM-02", "LM-07", "LM-08", "LM-12"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -694,18 +718,19 @@
             "type": "Bool",
             "default": false
           },
-          "scenarios": ["LM-02", "LM-07"],
+          "scenarios": ["LM-02", "LM-07", "LM-08"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
           "id": "glmbasic.mainEffects",
           "definition": {
             "name": "mainEffects",
+            "hidden": true,
             "title": "Model 1 main effects",
             "type": "Variables",
             "default": null
           },
-          "scenarios": ["LM-02", "LM-07"],
+          "scenarios": "LM-17",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -728,7 +753,7 @@
             "type": "Integer",
             "default": 0
           },
-          "scenarios": ["LM-02", "LM-07"],
+          "scenarios": "LM-17",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -892,6 +917,85 @@
           },
           "scenarios": "LM-16",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmbasic.comparisonGraphic",
+          "definition": {
+            "name": "comparisonGraphic",
+            "title": "Model comparison plot",
+            "type": "Bool",
+            "default": true
+          },
+          "scenarios": "LM-11",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmbasic.comparisonStatistics",
+          "definition": {
+            "name": "comparisonStatistics",
+            "title": "Model comparison statistics",
+            "type": "Bool",
+            "default": true
+          },
+          "scenarios": "LM-11",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmbasic.outputOptionsVersion",
+          "definition": {
+            "name": "outputOptionsVersion",
+            "title": "Internal output options revision",
+            "type": "Integer",
+            "default": 0,
+            "hidden": true
+          },
+          "scenarios": "LM-17",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmbasic.modifyPlotLabels",
+          "definition": {
+            "name": "modifyPlotLabels",
+            "title": "Modify Plot Labels",
+            "type": "Bool",
+            "default": false
+          },
+          "scenarios": "LM-16",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmbasic.modifyComparisonPlotLabels",
+          "definition": {
+            "name": "modifyComparisonPlotLabels",
+            "title": "Modify Plot Labels",
+            "type": "Bool",
+            "default": false
+          },
+          "scenarios": "LM-16",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmbasic.plotLabelEditorVersion",
+          "definition": {
+            "name": "plotLabelEditorVersion",
+            "title": "Internal plot-label editor revision",
+            "type": "Integer",
+            "default": 0,
+            "hidden": true
+          },
+          "scenarios": "LM-17",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmbasic.ghostLines",
+          "definition": {
+            "name": "ghostLines",
+            "title": "Show ghost lines",
+            "type": "Bool",
+            "default": false
+          },
+          "scenarios": "LM-11",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
         }
       ],
       "controls": [
@@ -931,30 +1035,6 @@
           "name": "preds",
           "type": "VariablesListBox",
           "path": ["glmbasic", "Predictor Variable(s)", "preds"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "primaryMainSupplier",
-          "type": "Supplier",
-          "path": ["glmbasic", "Available main effects"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "TargetLayoutBox",
-          "path": ["glmbasic", "Available main effects", "Model 1 main effects"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "mainEffects",
-          "type": "VariablesListBox",
-          "path": ["glmbasic", "Available main effects", "Model 1 main effects", "mainEffects"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -1144,158 +1224,6 @@
           "permitted": "numeric"
         },
         {
-          "name": "comparisonPlotSupplier",
-          "type": "Supplier",
-          "path": ["glmbasic", "Model Comparison", "Predictors in either model"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "TargetLayoutBox",
-          "path": ["glmbasic", "Model Comparison", "Predictors in either model", "Comparison x variable"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "comparisonX",
-          "type": "VariablesListBox",
-          "path": ["glmbasic", "Model Comparison", "Predictors in either model", "Comparison x variable", "comparisonX"],
-          "conditions": "(compare)",
-          "maxItemCount": 1,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "TargetLayoutBox",
-          "path": ["glmbasic", "Model Comparison", "Predictors in either model", "Comparison panel variables (up to two)"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "comparisonPanels",
-          "type": "VariablesListBox",
-          "path": ["glmbasic", "Model Comparison", "Predictors in either model", "Comparison panel variables (up to two)", "comparisonPanels"],
-          "conditions": "(compare)",
-          "maxItemCount": 2,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "TargetLayoutBox",
-          "path": ["glmbasic", "Model Comparison", "Predictors in either model", "Grouping (magnet plots only; otherwise use panels)"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "comparisonGroup",
-          "type": "VariablesListBox",
-          "path": ["glmbasic", "Model Comparison", "Predictors in either model", "Grouping (magnet plots only; otherwise use panels)", "comparisonGroup"],
-          "conditions": "(compare)",
-          "maxItemCount": 1,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "CollapseBox",
-          "path": ["glmbasic", "Model Comparison", "Plot Labels"],
-          "conditions": "(compare)",
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "comparisonPlotLabels",
-          "type": "ListBox",
-          "path": ["glmbasic", "Model Comparison", "Plot Labels", "comparisonPlotLabels"],
-          "conditions": "(compare)",
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "CollapseBox",
-          "path": ["glmbasic", "Model visualization layout"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "plotSupplier",
-          "type": "Supplier",
-          "path": ["glmbasic", "Model visualization layout", "Predictors in the model"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "TargetLayoutBox",
-          "path": ["glmbasic", "Model visualization layout", "Predictors in the model", "Plot x variable (automatic if empty)"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "plotX",
-          "type": "VariablesListBox",
-          "path": ["glmbasic", "Model visualization layout", "Predictors in the model", "Plot x variable (automatic if empty)", "plotX"],
-          "conditions": [],
-          "maxItemCount": 1,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "TargetLayoutBox",
-          "path": ["glmbasic", "Model visualization layout", "Predictors in the model", "Panel variables"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "plotPanels",
-          "type": "VariablesListBox",
-          "path": ["glmbasic", "Model visualization layout", "Predictors in the model", "Panel variables", "plotPanels"],
-          "conditions": [],
-          "maxItemCount": 2,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "TargetLayoutBox",
-          "path": ["glmbasic", "Model visualization layout", "Predictors in the model", "Grouping variable"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "plotGroup",
-          "type": "VariablesListBox",
-          "path": ["glmbasic", "Model visualization layout", "Predictors in the model", "Grouping variable", "plotGroup"],
-          "conditions": [],
-          "maxItemCount": 1,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "CollapseBox",
-          "path": ["glmbasic", "Model visualization layout", "Plot Labels"],
-          "conditions": "(graphic)",
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "plotLabels",
-          "type": "ListBox",
-          "path": ["glmbasic", "Model visualization layout", "Plot Labels", "plotLabels"],
-          "conditions": "(graphic)",
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
           "name": null,
           "type": "LayoutBox",
           "path": "glmbasic",
@@ -1328,17 +1256,33 @@
           "permitted": null
         },
         {
-          "name": "graphicassump",
+          "name": "estimates",
           "type": "CheckBox",
-          "path": ["glmbasic", "Output Options", "graphicassump"],
+          "path": ["glmbasic", "Output Options", "estimates"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
         },
         {
-          "name": "estimates",
+          "name": "comparisonGraphic",
           "type": "CheckBox",
-          "path": ["glmbasic", "Output Options", "estimates"],
+          "path": ["glmbasic", "Output Options", "comparisonGraphic"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonStatistics",
+          "type": "CheckBox",
+          "path": ["glmbasic", "Output Options", "comparisonStatistics"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "graphicassump",
+          "type": "CheckBox",
+          "path": ["glmbasic", "Output Options", "graphicassump"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -1353,24 +1297,72 @@
         },
         {
           "name": null,
-          "type": "LayoutBox",
-          "path": "glmbasic",
+          "type": "CollapseBox",
+          "path": ["glmbasic", "Model Visualization"],
+          "conditions": [],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "plotSupplier",
+          "type": "Supplier",
+          "path": ["glmbasic", "Model Visualization", "Predictors in the model"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
         },
         {
           "name": null,
-          "type": "LayoutBox",
-          "path": "glmbasic",
+          "type": "TargetLayoutBox",
+          "path": ["glmbasic", "Model Visualization", "Predictors in the model", "Plot x variable (automatic if empty)"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
         },
         {
+          "name": "plotX",
+          "type": "VariablesListBox",
+          "path": ["glmbasic", "Model Visualization", "Predictors in the model", "Plot x variable (automatic if empty)", "plotX"],
+          "conditions": [],
+          "maxItemCount": 1,
+          "permitted": null
+        },
+        {
           "name": null,
-          "type": "Label",
-          "path": ["glmbasic", "Graphic Options"],
+          "type": "TargetLayoutBox",
+          "path": ["glmbasic", "Model Visualization", "Predictors in the model", "Panel variables"],
+          "conditions": [],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "plotPanels",
+          "type": "VariablesListBox",
+          "path": ["glmbasic", "Model Visualization", "Predictors in the model", "Panel variables", "plotPanels"],
+          "conditions": [],
+          "maxItemCount": 2,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "TargetLayoutBox",
+          "path": ["glmbasic", "Model Visualization", "Predictors in the model", "Grouping variable"],
+          "conditions": [],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "plotGroup",
+          "type": "VariablesListBox",
+          "path": ["glmbasic", "Model Visualization", "Predictors in the model", "Grouping variable", "plotGroup"],
+          "conditions": [],
+          "maxItemCount": 1,
+          "permitted": null
+        },
+        {
+          "name": "ghostLines",
+          "type": "CheckBox",
+          "path": ["glmbasic", "Model Visualization", "ghostLines"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -1378,21 +1370,134 @@
         {
           "name": "se",
           "type": "CheckBox",
-          "path": ["glmbasic", "Graphic Options", "se"],
+          "path": ["glmbasic", "Model Visualization", "se"],
           "conditions": [],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "modifyPlotLabels",
+          "type": "CheckBox",
+          "path": ["glmbasic", "Model Visualization", "modifyPlotLabels"],
+          "conditions": [],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "plotLabels",
+          "type": "ListBox",
+          "path": ["glmbasic", "Model Visualization", "plotLabels"],
+          "conditions": "(modifyPlotLabels)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "CollapseBox",
+          "path": ["glmbasic", "Model Comparison Visualization"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPlotSupplier",
+          "type": "Supplier",
+          "path": ["glmbasic", "Model Comparison Visualization", "Predictors in either model"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "TargetLayoutBox",
+          "path": ["glmbasic", "Model Comparison Visualization", "Predictors in either model", "Comparison x variable"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonX",
+          "type": "VariablesListBox",
+          "path": ["glmbasic", "Model Comparison Visualization", "Predictors in either model", "Comparison x variable", "comparisonX"],
+          "conditions": ["(compare)", "(compare)"],
+          "maxItemCount": 1,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "TargetLayoutBox",
+          "path": ["glmbasic", "Model Comparison Visualization", "Predictors in either model", "Comparison panel variables (up to two)"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPanels",
+          "type": "VariablesListBox",
+          "path": ["glmbasic", "Model Comparison Visualization", "Predictors in either model", "Comparison panel variables (up to two)", "comparisonPanels"],
+          "conditions": ["(compare)", "(compare)"],
+          "maxItemCount": 2,
+          "permitted": null
+        },
+        {
+          "name": "comparisonGroupingLayout",
+          "type": "Supplier",
+          "path": ["glmbasic", "Model Comparison Visualization", "Predictors for magnet grouping"],
+          "conditions": ["(compare)", "(compare)"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "TargetLayoutBox",
+          "path": ["glmbasic", "Model Comparison Visualization", "Predictors for magnet grouping", "Magnet comparison grouping"],
+          "conditions": ["(compare)", "(compare)"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonGroup",
+          "type": "VariablesListBox",
+          "path": ["glmbasic", "Model Comparison Visualization", "Predictors for magnet grouping", "Magnet comparison grouping", "comparisonGroup"],
+          "conditions": ["(compare)", "(compare)", "(compare)"],
+          "maxItemCount": 1,
+          "permitted": null
+        },
+        {
+          "name": "modifyComparisonPlotLabels",
+          "type": "CheckBox",
+          "path": ["glmbasic", "Model Comparison Visualization", "modifyComparisonPlotLabels"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPlotLabels",
+          "type": "ListBox",
+          "path": ["glmbasic", "Model Comparison Visualization", "comparisonPlotLabels"],
+          "conditions": ["(compare)", "(modifyComparisonPlotLabels)"],
           "maxItemCount": null,
           "permitted": null
         }
       ],
       "results": [
         {
-          "name": "assumpplot",
-          "title": "Residual (diagnostic) plots",
-          "type": "Image",
-          "width": 600,
-          "height": 400,
-          "renderFun": ".assumpplot",
-          "visible": "(graphicassump)"
+          "name": "waiting",
+          "title": "",
+          "type": "Html",
+          "visible": false
+        },
+        {
+          "name": "specification",
+          "title": "Model specification",
+          "type": "Html",
+          "visible": false
+        },
+        {
+          "name": "explanation",
+          "title": "",
+          "type": "Html",
+          "visible": false
         },
         {
           "name": "plot",
@@ -1402,6 +1507,12 @@
           "height": 400,
           "renderFun": ".plot",
           "visible": "(graphic)"
+        },
+        {
+          "name": "plotExplanation",
+          "title": "",
+          "type": "Html",
+          "visible": false
         },
         {
           "name": "glmcat",
@@ -1555,13 +1666,13 @@
           "width": 700,
           "height": 450,
           "renderFun": ".comparisonplot",
-          "visible": "(compare)"
+          "visible": "(compare && comparisonGraphic)"
         },
         {
           "name": "comparison",
           "title": "Model comparison statistics",
           "type": "Table",
-          "visible": "(compare)",
+          "visible": "(compare && comparisonStatistics)",
           "columns": [
             {
               "name": "model",
@@ -1590,7 +1701,7 @@
             },
             {
               "name": "p",
-              "title": "p (nested F-test)",
+              "title": "p",
               "type": "number",
               "format": "zto,pvalue"
             },
@@ -1605,11 +1716,20 @@
               "type": "number"
             }
           ]
+        },
+        {
+          "name": "assumpplot",
+          "title": "Residual (diagnostic) plots",
+          "type": "Image",
+          "width": 600,
+          "height": 400,
+          "renderFun": ".assumpplot",
+          "visible": "(graphicassump)"
         }
       ],
       "sources": ["jamovi/glmbasic.a.yaml", "jamovi/glmbasic.u.yaml", "jamovi/glmbasic.r.yaml", "jamovi/js/glmbasic.js", "R/glmbasic.b.R"],
-      "handler_inventory": ["    interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },", "    comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },", "    mainEffects_changed: function(ui) { synchronize(ui, this, false, 'mainEffects'); },", "    comparisonMainEffects_changed: function(ui) { synchronize(ui, this, false, 'comparisonMainEffects'); },", "    primaryMainSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonMainSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    compare_changed: function(ui) { synchronize(ui, this, false); },", "    view_loaded: function(ui) { synchronize(ui, this, false); },", "    view_updated: function(ui) { synchronize(ui, this, false); },", "    polynomials_changed: function(ui) { synchronize(ui, this, false); },", "    quadratic_changed: function(ui) { synchronize(ui, this, false, 'quadratic'); },", "    quadraticSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonPolynomials_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonQuadratic_changed: function(ui) { synchronize(ui, this, false, 'comparisonQuadratic'); },", "    comparisonQuadraticSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    preds_changed: function(ui) { synchronize(ui, this, true); },", "    modelTerms_changed: function(ui) { synchronize(ui, this, false); },", "    primarySupplier_updated: function(ui) { synchronize(ui, this, false); },", "    plotSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonTerms_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonPlotSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    plotX_changed: function(ui) { synchronize(ui, this, false); },", "    plotPanels_changed: function(ui) { synchronize(ui, this, false); },", "    plotGroup_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonX_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonPanels_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonGroup_changed: function(ui) { synchronize(ui, this, false); }"],
-      "existing_tests": ["test-jamovi-glm-tables.R", "test-jamovi-lm-coefficients.R", "test-jamovi-lm-quadratic.R", "test-jamovi-glm-comparison.R", "test-semi-partial-r-squared.R", "test-estimates-factor-contrasts.R", "test-jamovi-plot-labels.R"]
+      "handler_inventory": ["    graphic_changed: function(ui) { updateGhostControls(ui, this, 'glmbasic'); },", "    ghostLines_changed: function(ui) { updateGhostControls(ui, this, 'glmbasic'); },", "    comparisonGroupingLayout_updated: function(ui) { synchronize(ui, this, false); },", "    out_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonGroup_changing: function(ui, event) {", "    plotX_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotX', event); },", "    plotPanels_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotPanels', event); },", "    plotGroup_changing: function(ui, event) { plotRoleChanging(ui, this, 'plotGroup', event); },", "    interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },", "    comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },", "    comparisonMainEffects_changed: function(ui) { synchronize(ui, this, false, 'comparisonMainEffects'); },", "    comparisonMainSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    compare_changed: function(ui) { synchronize(ui, this, false); },", "    view_loaded: function(ui) { synchronize(ui, this, false); },", "    view_updated: function(ui) { synchronize(ui, this, false); },", "    polynomials_changed: function(ui) { synchronize(ui, this, false); },", "    quadratic_changed: function(ui) { synchronize(ui, this, false, 'quadratic'); },", "    quadraticSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonPolynomials_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonQuadratic_changed: function(ui) { synchronize(ui, this, false, 'comparisonQuadratic'); },", "    comparisonQuadraticSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    preds_changed: function(ui) { synchronize(ui, this, true); },", "    modelTerms_changed: function(ui) { synchronize(ui, this, false); },", "    primarySupplier_updated: function(ui) { synchronize(ui, this, false); },", "    plotSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonTerms_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonPlotSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    plotX_changed: function(ui) { synchronize(ui, this, false); },", "    plotPanels_changed: function(ui) { synchronize(ui, this, false); },", "    plotGroup_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonX_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonPanels_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonGroup_changed: function(ui) { synchronize(ui, this, false); }"],
+      "existing_tests": ["test-jamovi-glm-tables.R", "test-jamovi-lm-coefficients.R", "test-jamovi-lm-quadratic.R", "test-jamovi-glm-comparison.R", "test-semi-partial-r-squared.R", "test-estimates-factor-contrasts.R", "test-jamovi-plot-labels.R", "test-jamovi-output-visibility.R", "test-jamovi-label-editors.R", "test-jamovi-interactions.R"]
     },
     "glmgeneralized": {
       "title": "Generalized Linear Model",
@@ -1620,7 +1740,7 @@
             "name": "data",
             "type": "Data"
           },
-          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-12", "GLM-13", "GLM-14", "GLM-15", "GLM-16", "GLM-17", "GLM-18", "GLM-19", "GLM-20", "GLM-21", "GLM-22", "GLM-23"],
+          "scenarios": "GLM-24",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1630,7 +1750,7 @@
             "title": "Outcome",
             "type": "Variable"
           },
-          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-12", "GLM-13", "GLM-14", "GLM-15", "GLM-16", "GLM-17", "GLM-18", "GLM-19", "GLM-20", "GLM-21", "GLM-22", "GLM-23"],
+          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-12", "GLM-13", "GLM-14", "GLM-15", "GLM-16", "GLM-17", "GLM-18", "GLM-19", "GLM-20", "GLM-21", "GLM-22", "GLM-23", "GLM-24"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1640,7 +1760,7 @@
             "title": "Predictors",
             "type": "Variables"
           },
-          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-12", "GLM-13", "GLM-14", "GLM-15", "GLM-16", "GLM-17", "GLM-18", "GLM-19", "GLM-20", "GLM-21", "GLM-22", "GLM-23"],
+          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-12", "GLM-13", "GLM-14", "GLM-15", "GLM-16", "GLM-17", "GLM-18", "GLM-19", "GLM-20", "GLM-21", "GLM-22", "GLM-23", "GLM-24"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1650,6 +1770,10 @@
             "title": "Distribution and link",
             "type": "List",
             "options": [
+              {
+                "name": "auto",
+                "title": "Automatic"
+              },
               {
                 "name": "gaussian",
                 "title": "Gaussian (identity)"
@@ -1675,9 +1799,32 @@
                 "title": "Negative Binomial (log)"
               }
             ],
-            "default": "gaussian"
+            "default": "auto"
           },
-          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-12", "GLM-13", "GLM-14", "GLM-15", "GLM-16", "GLM-17", "GLM-18", "GLM-19", "GLM-20", "GLM-21", "GLM-22", "GLM-23"],
+          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-12", "GLM-13", "GLM-14", "GLM-15", "GLM-16", "GLM-17", "GLM-18", "GLM-19", "GLM-20", "GLM-21", "GLM-22", "GLM-23", "GLM-24"],
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.automaticFamily",
+          "definition": {
+            "name": "automaticFamily",
+            "type": "List",
+            "options": ["gaussian", "binomial", "poisson", "gammaLog", "Gamma", "negativebinomial"],
+            "default": "gaussian",
+            "hidden": true
+          },
+          "scenarios": "GLM-24",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.automaticFamilyOutcome",
+          "definition": {
+            "name": "automaticFamilyOutcome",
+            "type": "String",
+            "default": "",
+            "hidden": true
+          },
+          "scenarios": "GLM-24",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1688,7 +1835,7 @@
             "type": "Terms",
             "default": null
           },
-          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-12", "GLM-13", "GLM-14", "GLM-15", "GLM-16", "GLM-17", "GLM-18", "GLM-19", "GLM-20", "GLM-21", "GLM-22", "GLM-23"],
+          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-12", "GLM-13", "GLM-14", "GLM-15", "GLM-16", "GLM-17", "GLM-18", "GLM-19", "GLM-20", "GLM-21", "GLM-22", "GLM-23", "GLM-24"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1776,7 +1923,7 @@
             "type": "Variable",
             "default": null
           },
-          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-19", "GLM-20", "GLM-22", "GLM-23"],
+          "scenarios": ["GLM-01", "GLM-02", "GLM-03", "GLM-04", "GLM-05", "GLM-06", "GLM-07", "GLM-08", "GLM-09", "GLM-10", "GLM-11", "GLM-19", "GLM-20", "GLM-22", "GLM-23", "GLM-24"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1859,7 +2006,7 @@
           "id": "glmgeneralized.showIRT",
           "definition": {
             "name": "showIRT",
-            "title": "IRT Estimates",
+            "title": "IRT estimates",
             "type": "Bool",
             "default": true
           },
@@ -1870,7 +2017,7 @@
           "id": "glmgeneralized.showProbabilities",
           "definition": {
             "name": "showProbabilities",
-            "title": "Marginal Predicted Probabilities",
+            "title": "Marginal predicted probabilities",
             "type": "Bool",
             "default": true
           },
@@ -1896,7 +2043,7 @@
             "type": "Bool",
             "default": false
           },
-          "scenarios": ["GLM-08", "GLM-12", "GLM-22"],
+          "scenarios": ["GLM-08", "GLM-10", "GLM-12", "GLM-22"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1919,7 +2066,7 @@
             "type": "Variables",
             "default": null
           },
-          "scenarios": "GLM-12",
+          "scenarios": "GLM-24",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1942,7 +2089,7 @@
             "type": "Integer",
             "default": 0
           },
-          "scenarios": ["GLM-11", "GLM-12", "GLM-22"],
+          "scenarios": "GLM-24",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1953,7 +2100,7 @@
             "type": "Bool",
             "default": false
           },
-          "scenarios": ["GLM-11", "GLM-22"],
+          "scenarios": ["GLM-08", "GLM-11", "GLM-22"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -1964,7 +2111,7 @@
             "type": "Bool",
             "default": false
           },
-          "scenarios": "GLM-11",
+          "scenarios": ["GLM-08", "GLM-11"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -2149,6 +2296,127 @@
           },
           "scenarios": "GLM-23",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.comparisonGraphic",
+          "definition": {
+            "name": "comparisonGraphic",
+            "title": "Model comparison plot",
+            "type": "Bool",
+            "default": true
+          },
+          "scenarios": "GLM-23",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.comparisonStatistics",
+          "definition": {
+            "name": "comparisonStatistics",
+            "title": "Model comparison statistics",
+            "type": "Bool",
+            "default": true
+          },
+          "scenarios": "GLM-23",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.outputOptionsVersion",
+          "definition": {
+            "name": "outputOptionsVersion",
+            "title": "Internal output options revision",
+            "type": "Integer",
+            "default": 0,
+            "hidden": true
+          },
+          "scenarios": "GLM-24",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.comparisonSe",
+          "definition": {
+            "name": "comparisonSe",
+            "title": "Confidence intervals",
+            "type": "Bool",
+            "default": true
+          },
+          "scenarios": "GLM-23",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.comparisonPlotStyle",
+          "definition": {
+            "name": "comparisonPlotStyle",
+            "title": "Binomial visualization",
+            "type": "List",
+            "options": [
+              {
+                "name": "auto",
+                "title": "Automatic (logistic overlay for continuous x)"
+              },
+              {
+                "name": "raw",
+                "title": "Raw observations and model predictions"
+              }
+            ],
+            "default": "auto"
+          },
+          "scenarios": "GLM-23",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.comparisonPlotScale",
+          "definition": {
+            "name": "comparisonPlotScale",
+            "title": "Visualization scale",
+            "type": "List",
+            "options": [
+              {
+                "name": "probability",
+                "title": "Probability"
+              },
+              {
+                "name": "logit",
+                "title": "Logit"
+              }
+            ],
+            "default": "probability"
+          },
+          "scenarios": "GLM-23",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.modifyPlotLabels",
+          "definition": {
+            "name": "modifyPlotLabels",
+            "title": "Modify Plot Labels",
+            "type": "Bool",
+            "default": false
+          },
+          "scenarios": "GLM-23",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.modifyComparisonPlotLabels",
+          "definition": {
+            "name": "modifyComparisonPlotLabels",
+            "title": "Modify Plot Labels",
+            "type": "Bool",
+            "default": false
+          },
+          "scenarios": "GLM-23",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "glmgeneralized.plotLabelEditorVersion",
+          "definition": {
+            "name": "plotLabelEditorVersion",
+            "title": "Internal plot-label editor revision",
+            "type": "Integer",
+            "default": 0,
+            "hidden": true
+          },
+          "scenarios": "GLM-24",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
         }
       ],
       "controls": [
@@ -2196,6 +2464,14 @@
           "name": "family",
           "type": "ComboBox",
           "path": ["glmgeneralized", "family"],
+          "conditions": [],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "Label",
+          "path": ["glmgeneralized", "Automatic selects Binomial / Logistic for binary outcomes, otherwise Gaussian."],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -2378,72 +2654,16 @@
         },
         {
           "name": null,
-          "type": "Label",
-          "path": ["glmgeneralized", "Model Comparison", "Model Comparison Visualization"],
-          "conditions": "(compare)",
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "comparisonPlotSupplier",
-          "type": "Supplier",
-          "path": ["glmgeneralized", "Model Comparison", "Model Comparison Visualization", "Available predictors for comparison plot"],
-          "conditions": ["(compare)", "(compare)"],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "TargetLayoutBox",
-          "path": ["glmgeneralized", "Model Comparison", "Model Comparison Visualization", "Available predictors for comparison plot", "Comparison x variable"],
-          "conditions": ["(compare)", "(compare)"],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "comparisonX",
-          "type": "VariablesListBox",
-          "path": ["glmgeneralized", "Model Comparison", "Model Comparison Visualization", "Available predictors for comparison plot", "Comparison x variable", "comparisonX"],
-          "conditions": ["(compare)", "(compare)", "(compare)"],
-          "maxItemCount": 1,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "TargetLayoutBox",
-          "path": ["glmgeneralized", "Model Comparison", "Model Comparison Visualization", "Available predictors for comparison plot", "Comparison panel variables (up to two)"],
-          "conditions": ["(compare)", "(compare)"],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "comparisonPanels",
-          "type": "VariablesListBox",
-          "path": ["glmgeneralized", "Model Comparison", "Model Comparison Visualization", "Available predictors for comparison plot", "Comparison panel variables (up to two)", "comparisonPanels"],
-          "conditions": ["(compare)", "(compare)", "(compare)"],
-          "maxItemCount": 2,
-          "permitted": null
-        },
-        {
-          "name": null,
-          "type": "CollapseBox",
-          "path": ["glmgeneralized", "Model Comparison", "Plot Labels"],
-          "conditions": "(compare)",
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "comparisonPlotLabels",
-          "type": "ListBox",
-          "path": ["glmgeneralized", "Model Comparison", "Plot Labels", "comparisonPlotLabels"],
-          "conditions": "(compare)",
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": null,
           "type": "CollapseBox",
           "path": ["glmgeneralized", "Output Options"],
+          "conditions": [],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "graphic",
+          "type": "CheckBox",
+          "path": ["glmgeneralized", "Output Options", "graphic"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -2460,7 +2680,7 @@
           "name": "showIRT",
           "type": "CheckBox",
           "path": ["glmgeneralized", "Output Options", "showIRT"],
-          "conditions": "(family:binomial)",
+          "conditions": "(family:binomial || (family:auto && automaticFamily:binomial))",
           "maxItemCount": null,
           "permitted": null
         },
@@ -2468,7 +2688,23 @@
           "name": "showProbabilities",
           "type": "CheckBox",
           "path": ["glmgeneralized", "Output Options", "showProbabilities"],
-          "conditions": "(family:binomial)",
+          "conditions": "(family:binomial || (family:auto && automaticFamily:binomial))",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonGraphic",
+          "type": "CheckBox",
+          "path": ["glmgeneralized", "Output Options", "comparisonGraphic"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonStatistics",
+          "type": "CheckBox",
+          "path": ["glmgeneralized", "Output Options", "comparisonStatistics"],
+          "conditions": "(compare)",
           "maxItemCount": null,
           "permitted": null
         },
@@ -2483,15 +2719,7 @@
         {
           "name": null,
           "type": "CollapseBox",
-          "path": ["glmgeneralized", "Model visualization"],
-          "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "graphic",
-          "type": "CheckBox",
-          "path": ["glmgeneralized", "Model visualization", "graphic"],
+          "path": ["glmgeneralized", "Model Visualization"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -2499,7 +2727,7 @@
         {
           "name": "plotSupplier",
           "type": "Supplier",
-          "path": ["glmgeneralized", "Model visualization", "Predictors in the model"],
+          "path": ["glmgeneralized", "Model Visualization", "Predictors in the model"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -2507,7 +2735,7 @@
         {
           "name": null,
           "type": "TargetLayoutBox",
-          "path": ["glmgeneralized", "Model visualization", "Predictors in the model", "Plot x variable"],
+          "path": ["glmgeneralized", "Model Visualization", "Predictors in the model", "Plot x variable"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -2515,7 +2743,7 @@
         {
           "name": "plotX",
           "type": "VariablesListBox",
-          "path": ["glmgeneralized", "Model visualization", "Predictors in the model", "Plot x variable", "plotX"],
+          "path": ["glmgeneralized", "Model Visualization", "Predictors in the model", "Plot x variable", "plotX"],
           "conditions": [],
           "maxItemCount": 1,
           "permitted": null
@@ -2523,7 +2751,7 @@
         {
           "name": null,
           "type": "TargetLayoutBox",
-          "path": ["glmgeneralized", "Model visualization", "Predictors in the model", "Panel variables (up to two)"],
+          "path": ["glmgeneralized", "Model Visualization", "Predictors in the model", "Panel variables (up to two)"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -2531,7 +2759,7 @@
         {
           "name": "plotPanels",
           "type": "VariablesListBox",
-          "path": ["glmgeneralized", "Model visualization", "Predictors in the model", "Panel variables (up to two)", "plotPanels"],
+          "path": ["glmgeneralized", "Model Visualization", "Predictors in the model", "Panel variables (up to two)", "plotPanels"],
           "conditions": [],
           "maxItemCount": 2,
           "permitted": null
@@ -2539,7 +2767,7 @@
         {
           "name": null,
           "type": "TargetLayoutBox",
-          "path": ["glmgeneralized", "Model visualization", "Predictors in the model", "Color / symbol variable"],
+          "path": ["glmgeneralized", "Model Visualization", "Predictors in the model", "Color / symbol variable"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -2547,7 +2775,7 @@
         {
           "name": "plotGroup",
           "type": "VariablesListBox",
-          "path": ["glmgeneralized", "Model visualization", "Predictors in the model", "Color / symbol variable", "plotGroup"],
+          "path": ["glmgeneralized", "Model Visualization", "Predictors in the model", "Color / symbol variable", "plotGroup"],
           "conditions": [],
           "maxItemCount": 1,
           "permitted": null
@@ -2555,7 +2783,7 @@
         {
           "name": "ghostLines",
           "type": "CheckBox",
-          "path": ["glmgeneralized", "Model visualization", "ghostLines"],
+          "path": ["glmgeneralized", "Model Visualization", "ghostLines"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -2563,40 +2791,128 @@
         {
           "name": "plotStyle",
           "type": "ComboBox",
-          "path": ["glmgeneralized", "Model visualization", "plotStyle"],
-          "conditions": "(family:binomial)",
+          "path": ["glmgeneralized", "Model Visualization", "plotStyle"],
+          "conditions": "(family:binomial || (family:auto && automaticFamily:binomial))",
           "maxItemCount": null,
           "permitted": null
         },
         {
           "name": "plotScale",
           "type": "ComboBox",
-          "path": ["glmgeneralized", "Model visualization", "plotScale"],
-          "conditions": "(family:binomial)",
+          "path": ["glmgeneralized", "Model Visualization", "plotScale"],
+          "conditions": "(family:binomial || (family:auto && automaticFamily:binomial))",
           "maxItemCount": null,
           "permitted": null
         },
         {
           "name": "se",
           "type": "CheckBox",
-          "path": ["glmgeneralized", "Model visualization", "se"],
+          "path": ["glmgeneralized", "Model Visualization", "se"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
         },
         {
-          "name": null,
-          "type": "CollapseBox",
-          "path": ["glmgeneralized", "Model visualization", "Plot Labels"],
-          "conditions": "(graphic)",
+          "name": "modifyPlotLabels",
+          "type": "CheckBox",
+          "path": ["glmgeneralized", "Model Visualization", "modifyPlotLabels"],
+          "conditions": [],
           "maxItemCount": null,
           "permitted": null
         },
         {
           "name": "plotLabels",
           "type": "ListBox",
-          "path": ["glmgeneralized", "Model visualization", "Plot Labels", "plotLabels"],
-          "conditions": "(graphic)",
+          "path": ["glmgeneralized", "Model Visualization", "plotLabels"],
+          "conditions": "(modifyPlotLabels)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "CollapseBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPlotSupplier",
+          "type": "Supplier",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "Available predictors for comparison plot"],
+          "conditions": ["(compare)", "(compare)"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "TargetLayoutBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "Available predictors for comparison plot", "Comparison x variable"],
+          "conditions": ["(compare)", "(compare)"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonX",
+          "type": "VariablesListBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "Available predictors for comparison plot", "Comparison x variable", "comparisonX"],
+          "conditions": ["(compare)", "(compare)", "(compare)"],
+          "maxItemCount": 1,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "TargetLayoutBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "Available predictors for comparison plot", "Comparison panel variables (up to two)"],
+          "conditions": ["(compare)", "(compare)"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPanels",
+          "type": "VariablesListBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "Available predictors for comparison plot", "Comparison panel variables (up to two)", "comparisonPanels"],
+          "conditions": ["(compare)", "(compare)", "(compare)"],
+          "maxItemCount": 2,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPlotStyle",
+          "type": "ComboBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "comparisonPlotStyle"],
+          "conditions": ["(compare)", "(family:binomial || (family:auto && automaticFamily:binomial))"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPlotScale",
+          "type": "ComboBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "comparisonPlotScale"],
+          "conditions": ["(compare)", "(family:binomial || (family:auto && automaticFamily:binomial))"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonSe",
+          "type": "CheckBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "comparisonSe"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "modifyComparisonPlotLabels",
+          "type": "CheckBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "modifyComparisonPlotLabels"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPlotLabels",
+          "type": "ListBox",
+          "path": ["glmgeneralized", "Model Comparison Visualization", "comparisonPlotLabels"],
+          "conditions": ["(compare)", "(modifyComparisonPlotLabels)"],
           "maxItemCount": null,
           "permitted": null
         }
@@ -2607,6 +2923,33 @@
           "title": "",
           "type": "Html",
           "content": "<p>Select an outcome and predictors, and specify at least one model term.<\/p>"
+        },
+        {
+          "name": "specification",
+          "title": "Model specification",
+          "type": "Html",
+          "visible": false
+        },
+        {
+          "name": "explanation",
+          "title": "Interpretation",
+          "type": "Html",
+          "visible": false
+        },
+        {
+          "name": "plot",
+          "title": "Model visualization",
+          "type": "Image",
+          "width": 700,
+          "height": 450,
+          "visible": false,
+          "renderFun": ".plot"
+        },
+        {
+          "name": "plotExplanation",
+          "title": "",
+          "type": "Html",
+          "visible": false
         },
         {
           "name": "coefficients",
@@ -2668,22 +3011,16 @@
           ]
         },
         {
-          "name": "explanation",
-          "title": "Interpretation",
-          "type": "Html",
-          "visible": false
-        },
-        {
-          "name": "plot",
-          "title": "Model visualization",
+          "name": "comparisonplot",
+          "title": "Model comparison plot",
           "type": "Image",
           "width": 700,
           "height": 450,
           "visible": false,
-          "renderFun": ".plot"
+          "renderFun": ".comparisonplot"
         },
         {
-          "name": "plotExplanation",
+          "name": "comparisonPlotExplanation",
           "title": "",
           "type": "Html",
           "visible": false
@@ -2731,31 +3068,16 @@
             },
             {
               "name": "p",
-              "title": "p (nested LRT)",
+              "title": "p",
               "type": "number",
               "format": "zto,pvalue"
             }
           ]
-        },
-        {
-          "name": "comparisonplot",
-          "title": "Model comparison plot",
-          "type": "Image",
-          "width": 700,
-          "height": 450,
-          "visible": false,
-          "renderFun": ".comparisonplot"
-        },
-        {
-          "name": "comparisonPlotExplanation",
-          "title": "",
-          "type": "Html",
-          "visible": false
         }
       ],
       "sources": ["jamovi/glmgeneralized.a.yaml", "jamovi/glmgeneralized.u.yaml", "jamovi/glmgeneralized.r.yaml", "jamovi/js/glmgeneralized.js", "R/glmgeneralized.b.R"],
-      "handler_inventory": ["const synchronize = function(ui, context, added, changed = null) {", "const updatePlotControls = function(ui, context) {", "    if (typeof context.requestData !== 'function') return;", "    interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },", "    comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },", "    comparisonMainEffects_changed: function(ui) { synchronize(ui, this, false, 'comparisonMainEffects'); },", "    comparisonMainSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    out_changed: function(ui) { updatePlotControls(ui, this); },", "    ghostLines_changed: function(ui) { updatePlotControls(ui, this); },", "    graphic_changed: function(ui) { updatePlotControls(ui, this); },", "    family_changed: function(ui) { updatePlotControls(ui, this); },", "    plotStyle_changed: function(ui) { updatePlotControls(ui, this); },", "    plotScale_changed: function(ui) { updatePlotControls(ui, this); },", "    compare_changed: function(ui) { synchronize(ui, this, false); },", "    view_loaded: function(ui) { synchronize(ui, this, false); },", "    view_updated: function(ui) { synchronize(ui, this, false); },", "    preds_changed: function(ui) { synchronize(ui, this, true); },", "    modelTerms_changed: function(ui) { synchronize(ui, this, false); },", "    polynomials_changed: function(ui) { synchronize(ui, this, false, 'polynomials'); },", "    comparisonPolynomials_changed: function(ui) { synchronize(ui, this, false, 'comparisonPolynomials'); },", "    quadratic_changed: function(ui) { synchronize(ui, this, false, 'quadratic'); },", "    quadraticSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    primarySupplier_updated: function(ui) { synchronize(ui, this, false); },", "    plotSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    plotX_changed: function(ui) { synchronize(ui, this, false); },", "    plotPanels_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonTerms_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonQuadratic_changed: function(ui) { synchronize(ui, this, false, 'comparisonQuadratic'); },", "    comparisonQuadraticSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonPlotSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonX_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonPanels_changed: function(ui) { synchronize(ui, this, false); },", "    plotGroup_changed: function(ui) { synchronize(ui, this, false); }"],
-      "existing_tests": ["test-jamovi-generalized.R", "test-jamovi-glm-report-interface.R", "test-jamovi-glm-reporting.R", "test-jamovi-generalized-comparison.R", "test-jamovi-glm-restoration.R", "test-jamovi-expansion.R", "test-jamovi-glm-output-options.R", "test-jamovi-glm-panel-ghosts.R", "test-ghost-reference-regressions.R", "test-jamovi-plot-labels.R"]
+      "handler_inventory": ["const synchronize = function(ui, context, added, changed = null) {", "const updatePlotControls = function(ui, context) {", "    interactions_changed: function(ui) { synchronize(ui, this, false, 'interactions'); },", "    comparisonInteractions_changed: function(ui) { synchronize(ui, this, false, 'comparisonInteractions'); },", "    comparisonMainEffects_changed: function(ui) { synchronize(ui, this, false, 'comparisonMainEffects'); },", "    comparisonMainSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    out_changed: function(ui) { updatePlotControls(ui, this); },", "    ghostLines_changed: function(ui) { updatePlotControls(ui, this); },", "    graphic_changed: function(ui) { updatePlotControls(ui, this); },", "    family_changed: function(ui) { updatePlotControls(ui, this); },", "    automaticFamily_changed: function(ui) { updatePlotControls(ui, this); },", "    automaticFamilyOutcome_changed: function(ui) { updatePlotControls(ui, this); },", "    comparisonPlotStyle_changed: function(ui) { updatePlotControls(ui, this); },", "    comparisonPlotScale_changed: function(ui) { updatePlotControls(ui, this); },", "    plotStyle_changed: function(ui) { updatePlotControls(ui, this); },", "    plotScale_changed: function(ui) { updatePlotControls(ui, this); },", "    compare_changed: function(ui) { synchronize(ui, this, false); },", "    view_loaded: function(ui) { synchronize(ui, this, false); },", "    view_updated: function(ui) { synchronize(ui, this, false); },", "    preds_changed: function(ui) { synchronize(ui, this, true); },", "    modelTerms_changed: function(ui) { synchronize(ui, this, false); },", "    polynomials_changed: function(ui) { synchronize(ui, this, false, 'polynomials'); },", "    comparisonPolynomials_changed: function(ui) { synchronize(ui, this, false, 'comparisonPolynomials'); },", "    quadratic_changed: function(ui) { synchronize(ui, this, false, 'quadratic'); },", "    quadraticSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    primarySupplier_updated: function(ui) { synchronize(ui, this, false); },", "    plotSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    plotX_changed: function(ui) { synchronize(ui, this, false); },", "    plotPanels_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonTerms_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonQuadratic_changed: function(ui) { synchronize(ui, this, false, 'comparisonQuadratic'); },", "    comparisonQuadraticSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonPlotSupplier_updated: function(ui) { synchronize(ui, this, false); },", "    comparisonX_changed: function(ui) { synchronize(ui, this, false); },", "    comparisonPanels_changed: function(ui) { synchronize(ui, this, false); },", "    plotGroup_changed: function(ui) { synchronize(ui, this, false); }"],
+      "existing_tests": ["test-jamovi-generalized.R", "test-jamovi-glm-report-interface.R", "test-jamovi-glm-reporting.R", "test-jamovi-generalized-comparison.R", "test-jamovi-glm-restoration.R", "test-jamovi-expansion.R", "test-jamovi-glm-output-options.R", "test-jamovi-glm-panel-ghosts.R", "test-ghost-reference-regressions.R", "test-jamovi-plot-labels.R", "test-jamovi-glm-automatic-family.R"]
     },
     "mixedmodel": {
       "title": "Mixed Models",
@@ -2766,7 +3088,7 @@
             "name": "data",
             "type": "Data"
           },
-          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18"],
+          "scenarios": "MM-20",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -2776,7 +3098,7 @@
             "title": "Outcome",
             "type": "Variable"
           },
-          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18"],
+          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18", "MM-19"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -2786,7 +3108,7 @@
             "title": "Fixed-effect predictors",
             "type": "Variables"
           },
-          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18"],
+          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18", "MM-19"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -2819,7 +3141,7 @@
             "type": "Terms",
             "default": null
           },
-          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18"],
+          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18", "MM-19"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -2841,7 +3163,7 @@
             "type": "Variable",
             "default": null
           },
-          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18"],
+          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18", "MM-19"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -2863,7 +3185,7 @@
             "type": "Variables",
             "default": null
           },
-          "scenarios": ["MM-02", "MM-04", "MM-05", "MM-07", "MM-10", "MM-11", "MM-13", "MM-14", "MM-16"],
+          "scenarios": ["MM-02", "MM-04", "MM-05", "MM-07", "MM-10", "MM-11", "MM-13", "MM-14", "MM-16", "MM-19"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -2895,7 +3217,7 @@
             "type": "Bool",
             "default": false
           },
-          "scenarios": ["MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-13", "MM-15", "MM-16", "MM-17"],
+          "scenarios": ["MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-13", "MM-15", "MM-16", "MM-17", "MM-19", "MM-20"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -2917,7 +3239,7 @@
             "type": "Terms",
             "default": null
           },
-          "scenarios": ["MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-13", "MM-15", "MM-16", "MM-17"],
+          "scenarios": ["MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-13", "MM-15", "MM-16", "MM-17", "MM-19", "MM-20"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -2972,7 +3294,7 @@
             "type": "Variables",
             "default": null
           },
-          "scenarios": ["MM-07", "MM-08", "MM-10", "MM-16"],
+          "scenarios": ["MM-07", "MM-08", "MM-10", "MM-16", "MM-19"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -3026,7 +3348,7 @@
             "type": "Bool",
             "default": true
           },
-          "scenarios": "MM-04",
+          "scenarios": ["MM-04", "MM-19", "MM-20"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -3051,7 +3373,7 @@
             ],
             "default": "cluster"
           },
-          "scenarios": ["MM-05", "MM-11", "MM-12", "MM-15"],
+          "scenarios": ["MM-05", "MM-11", "MM-12", "MM-15", "MM-19", "MM-20"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -3062,7 +3384,7 @@
             "type": "Bool",
             "default": false
           },
-          "scenarios": "MM-11",
+          "scenarios": ["MM-11", "MM-19"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -3086,7 +3408,7 @@
             "type": "Variable",
             "default": null
           },
-          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18"],
+          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18", "MM-19", "MM-20"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -3097,7 +3419,7 @@
             "type": "Variables",
             "default": null
           },
-          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17"],
+          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-19"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -3149,7 +3471,7 @@
               ]
             }
           },
-          "scenarios": "MM-12",
+          "scenarios": ["MM-12", "MM-19"],
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -3190,7 +3512,157 @@
               ]
             }
           },
-          "scenarios": "MM-12",
+          "scenarios": "MM-19",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.comparisonX",
+          "definition": {
+            "name": "comparisonX",
+            "type": "Variable",
+            "default": null
+          },
+          "scenarios": ["MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-13", "MM-15", "MM-16", "MM-17", "MM-19", "MM-20"],
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.comparisonPanels",
+          "definition": {
+            "name": "comparisonPanels",
+            "type": "Variables",
+            "default": null
+          },
+          "scenarios": ["MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-13", "MM-15", "MM-16", "MM-17", "MM-19", "MM-20"],
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.comparisonGroup",
+          "definition": {
+            "name": "comparisonGroup",
+            "type": "Variable",
+            "default": null
+          },
+          "scenarios": ["MM-15", "MM-19"],
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.comparisonPredictionType",
+          "definition": {
+            "name": "comparisonPredictionType",
+            "title": "Comparison predictions",
+            "type": "List",
+            "options": [
+              {
+                "name": "population",
+                "title": "Population-level (exclude random effects)"
+              },
+              {
+                "name": "cas",
+                "title": "Cluster-adjusted scatterplot (remove estimated random effects)"
+              },
+              {
+                "name": "cluster",
+                "title": "Cluster-specific (include estimated random effects)"
+              }
+            ],
+            "default": "cluster"
+          },
+          "scenarios": ["MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-13", "MM-15", "MM-16", "MM-17", "MM-19", "MM-20"],
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.comparisonClusters",
+          "definition": {
+            "name": "comparisonClusters",
+            "title": "Number of displayed clusters",
+            "type": "Integer",
+            "default": 3,
+            "min": 1,
+            "max": 20
+          },
+          "scenarios": ["MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-13", "MM-15", "MM-16", "MM-17", "MM-19", "MM-20"],
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.comparisonPlotLabels",
+          "definition": {
+            "name": "comparisonPlotLabels",
+            "title": "Plot Labels",
+            "type": "Array",
+            "default": [],
+            "template": {
+              "type": "Group",
+              "elements": [
+                {
+                  "name": "key",
+                  "type": "String"
+                },
+                {
+                  "name": "role",
+                  "type": "String"
+                },
+                {
+                  "name": "variable",
+                  "type": "String"
+                },
+                {
+                  "name": "value",
+                  "type": "String"
+                },
+                {
+                  "name": "display",
+                  "type": "String"
+                },
+                {
+                  "name": "label",
+                  "type": "String",
+                  "default": ""
+                }
+              ]
+            }
+          },
+          "scenarios": "MM-19",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.comparisonPlotLabelStore",
+          "definition": {
+            "name": "comparisonPlotLabelStore",
+            "type": "Array",
+            "hidden": true,
+            "default": [],
+            "template": {
+              "type": "Group",
+              "elements": [
+                {
+                  "name": "key",
+                  "type": "String"
+                },
+                {
+                  "name": "role",
+                  "type": "String"
+                },
+                {
+                  "name": "variable",
+                  "type": "String"
+                },
+                {
+                  "name": "value",
+                  "type": "String"
+                },
+                {
+                  "name": "display",
+                  "type": "String"
+                },
+                {
+                  "name": "label",
+                  "type": "String",
+                  "default": ""
+                }
+              ]
+            }
+          },
+          "scenarios": "MM-19",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -3202,7 +3674,7 @@
             "type": "Integer",
             "default": 0
           },
-          "scenarios": ["MM-01", "MM-02", "MM-03", "MM-04", "MM-05", "MM-06", "MM-07", "MM-08", "MM-09", "MM-10", "MM-11", "MM-12", "MM-13", "MM-14", "MM-15", "MM-16", "MM-17", "MM-18"],
+          "scenarios": "MM-20",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         },
         {
@@ -3210,10 +3682,101 @@
           "definition": {
             "name": "includeCI",
             "title": "Confidence intervals",
+            "hidden": true,
             "type": "Bool",
             "default": true
           },
-          "scenarios": "MM-04",
+          "scenarios": "MM-20",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.estimates",
+          "definition": {
+            "name": "estimates",
+            "title": "Estimates",
+            "type": "Bool",
+            "default": true
+          },
+          "scenarios": "MM-19",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.comparisonGraphic",
+          "definition": {
+            "name": "comparisonGraphic",
+            "title": "Model comparison plot",
+            "type": "Bool",
+            "default": true
+          },
+          "scenarios": ["MM-19", "MM-20"],
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.comparisonStatistics",
+          "definition": {
+            "name": "comparisonStatistics",
+            "title": "Model comparison statistics",
+            "type": "Bool",
+            "default": true
+          },
+          "scenarios": "MM-19",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.outputOptionsVersion",
+          "definition": {
+            "name": "outputOptionsVersion",
+            "title": "Internal output options revision",
+            "type": "Integer",
+            "default": 0,
+            "hidden": true
+          },
+          "scenarios": "MM-20",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.modifyPlotLabels",
+          "definition": {
+            "name": "modifyPlotLabels",
+            "title": "Modify Plot Labels",
+            "type": "Bool",
+            "default": false
+          },
+          "scenarios": "MM-19",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.modifyComparisonPlotLabels",
+          "definition": {
+            "name": "modifyComparisonPlotLabels",
+            "title": "Modify Plot Labels",
+            "type": "Bool",
+            "default": false
+          },
+          "scenarios": "MM-19",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.plotLabelEditorVersion",
+          "definition": {
+            "name": "plotLabelEditorVersion",
+            "title": "Internal plot-label editor revision",
+            "type": "Integer",
+            "default": 0,
+            "hidden": true
+          },
+          "scenarios": "MM-20",
+          "coverage": "planned GUI checkpoint; not yet GUI verified"
+        },
+        {
+          "id": "mixedmodel.ghostLines",
+          "definition": {
+            "name": "ghostLines",
+            "title": "Show ghost lines",
+            "type": "Bool",
+            "default": false
+          },
+          "scenarios": "MM-19",
           "coverage": "planned GUI checkpoint; not yet GUI verified"
         }
       ],
@@ -3555,17 +4118,17 @@
           "permitted": null
         },
         {
-          "name": "includeCI",
+          "name": "graphic",
           "type": "CheckBox",
-          "path": ["mixedmodel", "Output Options", "includeCI"],
+          "path": ["mixedmodel", "Output Options", "graphic"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
         },
         {
-          "name": "includeP",
+          "name": "estimates",
           "type": "CheckBox",
-          "path": ["mixedmodel", "Output Options", "includeP"],
+          "path": ["mixedmodel", "Output Options", "estimates"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -3579,17 +4142,33 @@
           "permitted": null
         },
         {
-          "name": null,
-          "type": "CollapseBox",
-          "path": ["mixedmodel", "Model visualization"],
-          "conditions": [],
+          "name": "comparisonGraphic",
+          "type": "CheckBox",
+          "path": ["mixedmodel", "Output Options", "comparisonGraphic"],
+          "conditions": "(compare)",
           "maxItemCount": null,
           "permitted": null
         },
         {
-          "name": "graphic",
+          "name": "comparisonStatistics",
           "type": "CheckBox",
-          "path": ["mixedmodel", "Model visualization", "graphic"],
+          "path": ["mixedmodel", "Output Options", "comparisonStatistics"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "includeP",
+          "type": "CheckBox",
+          "path": ["mixedmodel", "Output Options", "includeP"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "modelVisualizationSection",
+          "type": "CollapseBox",
+          "path": ["mixedmodel", "Model Visualization"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -3597,23 +4176,15 @@
         {
           "name": "predictionType",
           "type": "ComboBox",
-          "path": ["mixedmodel", "Model visualization", "predictionType"],
+          "path": ["mixedmodel", "Model Visualization", "predictionType"],
           "conditions": [],
-          "maxItemCount": null,
-          "permitted": null
-        },
-        {
-          "name": "casGhost",
-          "type": "CheckBox",
-          "path": ["mixedmodel", "Model visualization", "casGhost"],
-          "conditions": "(compare && predictionType:cas)",
           "maxItemCount": null,
           "permitted": null
         },
         {
           "name": "clusters",
           "type": "TextBox",
-          "path": ["mixedmodel", "Model visualization", "clusters"],
+          "path": ["mixedmodel", "Model Visualization", "clusters"],
           "conditions": "(!predictionType:cas)",
           "maxItemCount": null,
           "permitted": null
@@ -3621,7 +4192,7 @@
         {
           "name": "plotSupplier",
           "type": "Supplier",
-          "path": ["mixedmodel", "Model visualization", "Model predictors and grouping variable"],
+          "path": ["mixedmodel", "Model Visualization", "Model predictors and grouping variable"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -3629,7 +4200,7 @@
         {
           "name": null,
           "type": "TargetLayoutBox",
-          "path": ["mixedmodel", "Model visualization", "Model predictors and grouping variable", "Plot x variable"],
+          "path": ["mixedmodel", "Model Visualization", "Model predictors and grouping variable", "Plot x variable"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -3637,7 +4208,7 @@
         {
           "name": "plotX",
           "type": "VariablesListBox",
-          "path": ["mixedmodel", "Model visualization", "Model predictors and grouping variable", "Plot x variable", "plotX"],
+          "path": ["mixedmodel", "Model Visualization", "Model predictors and grouping variable", "Plot x variable", "plotX"],
           "conditions": [],
           "maxItemCount": 1,
           "permitted": null
@@ -3645,7 +4216,7 @@
         {
           "name": null,
           "type": "TargetLayoutBox",
-          "path": ["mixedmodel", "Model visualization", "Model predictors and grouping variable", "Panel variables (up to two)"],
+          "path": ["mixedmodel", "Model Visualization", "Model predictors and grouping variable", "Panel variables (up to two)"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -3653,15 +4224,23 @@
         {
           "name": "plotPanels",
           "type": "VariablesListBox",
-          "path": ["mixedmodel", "Model visualization", "Model predictors and grouping variable", "Panel variables (up to two)", "plotPanels"],
+          "path": ["mixedmodel", "Model Visualization", "Model predictors and grouping variable", "Panel variables (up to two)", "plotPanels"],
           "conditions": [],
           "maxItemCount": 2,
           "permitted": null
         },
         {
+          "name": "plotGroupingLayout",
+          "type": "Supplier",
+          "path": ["mixedmodel", "Model Visualization", "Predictors for grouping"],
+          "conditions": [],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
           "name": null,
           "type": "TargetLayoutBox",
-          "path": ["mixedmodel", "Model visualization", "Model predictors and grouping variable", "Color / symbol variable"],
+          "path": ["mixedmodel", "Model Visualization", "Predictors for grouping", "Color / symbol variable"],
           "conditions": [],
           "maxItemCount": null,
           "permitted": null
@@ -3669,24 +4248,144 @@
         {
           "name": "plotGroup",
           "type": "VariablesListBox",
-          "path": ["mixedmodel", "Model visualization", "Model predictors and grouping variable", "Color / symbol variable", "plotGroup"],
+          "path": ["mixedmodel", "Model Visualization", "Predictors for grouping", "Color / symbol variable", "plotGroup"],
           "conditions": [],
           "maxItemCount": 1,
           "permitted": null
         },
         {
-          "name": null,
-          "type": "CollapseBox",
-          "path": ["mixedmodel", "Model visualization", "Plot Labels"],
-          "conditions": "(graphic)",
+          "name": "ghostLines",
+          "type": "CheckBox",
+          "path": ["mixedmodel", "Model Visualization", "ghostLines"],
+          "conditions": [],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "modifyPlotLabels",
+          "type": "CheckBox",
+          "path": ["mixedmodel", "Model Visualization", "modifyPlotLabels"],
+          "conditions": [],
           "maxItemCount": null,
           "permitted": null
         },
         {
           "name": "plotLabels",
           "type": "ListBox",
-          "path": ["mixedmodel", "Model visualization", "Plot Labels", "plotLabels"],
-          "conditions": "(graphic)",
+          "path": ["mixedmodel", "Model Visualization", "plotLabels"],
+          "conditions": "(modifyPlotLabels)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonVisualizationSection",
+          "type": "CollapseBox",
+          "path": ["mixedmodel", "Model Comparison Visualization"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPredictionType",
+          "type": "ComboBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "comparisonPredictionType"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "casGhost",
+          "type": "CheckBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "casGhost"],
+          "conditions": ["(compare)", "(comparisonPredictionType:cas)"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonClusters",
+          "type": "TextBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "comparisonClusters"],
+          "conditions": ["(compare)", "(!comparisonPredictionType:cas)"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPlotSupplier",
+          "type": "Supplier",
+          "path": ["mixedmodel", "Model Comparison Visualization", "Model predictors and grouping variable"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "TargetLayoutBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "Model predictors and grouping variable", "Plot x variable"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonX",
+          "type": "VariablesListBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "Model predictors and grouping variable", "Plot x variable", "comparisonX"],
+          "conditions": "(compare)",
+          "maxItemCount": 1,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "TargetLayoutBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "Model predictors and grouping variable", "Panel variables (up to two)"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPanels",
+          "type": "VariablesListBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "Model predictors and grouping variable", "Panel variables (up to two)", "comparisonPanels"],
+          "conditions": "(compare)",
+          "maxItemCount": 2,
+          "permitted": null
+        },
+        {
+          "name": "comparisonGroupingLayout",
+          "type": "Supplier",
+          "path": ["mixedmodel", "Model Comparison Visualization", "Predictors for grouping"],
+          "conditions": ["(compare)", "(comparisonPredictionType:cas)"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": null,
+          "type": "TargetLayoutBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "Predictors for grouping", "Color / symbol variable"],
+          "conditions": ["(compare)", "(comparisonPredictionType:cas)"],
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonGroup",
+          "type": "VariablesListBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "Predictors for grouping", "Color / symbol variable", "comparisonGroup"],
+          "conditions": ["(compare)", "(comparisonPredictionType:cas)", "(comparisonPredictionType:cas)"],
+          "maxItemCount": 1,
+          "permitted": null
+        },
+        {
+          "name": "modifyComparisonPlotLabels",
+          "type": "CheckBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "modifyComparisonPlotLabels"],
+          "conditions": "(compare)",
+          "maxItemCount": null,
+          "permitted": null
+        },
+        {
+          "name": "comparisonPlotLabels",
+          "type": "ListBox",
+          "path": ["mixedmodel", "Model Comparison Visualization", "comparisonPlotLabels"],
+          "conditions": ["(compare)", "(modifyComparisonPlotLabels)"],
           "maxItemCount": null,
           "permitted": null
         }
@@ -3719,6 +4418,21 @@
         {
           "name": "diagnostics",
           "title": "Model diagnostics",
+          "type": "Html",
+          "visible": false
+        },
+        {
+          "name": "plot",
+          "title": "Model visualization",
+          "type": "Image",
+          "width": 700,
+          "height": 450,
+          "visible": false,
+          "renderFun": ".plot"
+        },
+        {
+          "name": "plotExplanation",
+          "title": "Visualization guide",
           "type": "Html",
           "visible": false
         },
@@ -3770,7 +4484,7 @@
               "name": "p",
               "title": "p",
               "type": "number",
-              "visible": "(includeP)",
+              "visible": false,
               "format": "zto,pvalue"
             }
           ]
@@ -3864,7 +4578,7 @@
               "name": "p",
               "title": "p",
               "type": "number",
-              "visible": "(includeP)",
+              "visible": false,
               "format": "zto,pvalue"
             }
           ]
@@ -3911,22 +4625,22 @@
           ]
         },
         {
-          "name": "plotExplanation",
-          "title": "Visualization guide",
+          "name": "comparisonHeading",
+          "title": "",
           "type": "Html",
           "visible": false
         },
         {
-          "name": "plot",
-          "title": "Model visualization",
+          "name": "comparisonplot",
+          "title": "Mixed-model comparison",
           "type": "Image",
           "width": 700,
           "height": 450,
           "visible": false,
-          "renderFun": ".plot"
+          "renderFun": ".comparisonplot"
         },
         {
-          "name": "comparisonHeading",
+          "name": "comparisonPlotNote",
           "title": "",
           "type": "Html",
           "visible": false
@@ -3974,33 +4688,18 @@
             },
             {
               "name": "p",
-              "title": "p (fixed-effect LRT)",
+              "title": "p",
               "type": "number",
               "format": "zto,pvalue",
               "visible": "(includeP)"
             }
           ]
-        },
-        {
-          "name": "comparisonplot",
-          "title": "Mixed-model comparison",
-          "type": "Image",
-          "width": 700,
-          "height": 450,
-          "visible": false,
-          "renderFun": ".comparisonplot"
-        },
-        {
-          "name": "comparisonPlotNote",
-          "title": "",
-          "type": "Html",
-          "visible": false
         }
       ],
       "sources": ["jamovi/mixedmodel.a.yaml", "jamovi/mixedmodel.u.yaml", "jamovi/mixedmodel.r.yaml", "jamovi/js/mixedmodel.js", "R/mixedmodel.b.R"],
-      "handler_inventory": ["const synchronize = function(ui, context, added, quadraticChanged = null) {", "    view_loaded: function() {},", "    view_updated: function(ui) { synchronize(ui,this,false); },", "    preds_changed: function(ui) { synchronize(ui,this,true); },", "    interactions_changed: function(ui) { synchronize(ui,this,false); },", "    polynomials_changed: function(ui) { synchronize(ui,this,false); },", "    modelTerms_changed: function(ui) { synchronize(ui,this,false); },", "    primarySupplier_updated: function(ui) { synchronize(ui,this,false); },", "    quadratic_changed: function(ui) { synchronize(ui,this,false,'quadratic'); },", "    quadraticSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    randomSlopes_changed: function(ui) { synchronize(ui,this,false); },", "    randomSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    compare_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonFixed_changed: function(ui) { synchronize(ui,this,false,'comparisonFixed'); },", "    comparisonFixedSupplier_updated: function() {},", "    comparisonTerms_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonInteractions_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonPolynomials_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonQuadratic_changed: function(ui) { synchronize(ui,this,false,'comparisonQuadratic'); },", "    comparisonRandomSlopes_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    comparisonQuadraticSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    comparisonRandomSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    cluster_changed: function(ui) { synchronize(ui,this,false); },", "    predictionType_changed: function(ui) { synchronize(ui,this,false); },", "    plotSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    plotX_changed: function(ui) { synchronize(ui,this,false); },", "    plotPanels_changed: function(ui) { synchronize(ui,this,false); },", "    plotGroup_changed: function(ui) { synchronize(ui,this,false); }"],
-      "existing_tests": ["test-jamovi-mixed.R", "test-jamovi-mixed-comparison.R", "test-jamovi-mixed-sample.R", "test-jamovi-mixed-cas-comparison.R", "test-jamovi-mixed-tables.R", "test-jamovi-mixed-notes.R"]
+      "handler_inventory": ["const synchronize = function(ui, context, added, quadraticChanged = null) {", "    graphic_changed: function(ui) { updateGhostControls(ui, this, 'mixedmodel'); },", "    ghostLines_changed: function(ui) { updateGhostControls(ui, this, 'mixedmodel'); },", "    plotGroupingLayout_updated: function(ui) { synchronize(ui,this,false); },", "    plotGroup_changing: function(ui, event) {", "    comparisonGroup_changing: function(ui,event) {", "    comparisonPlotSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    comparisonGroupingLayout_updated: function(ui) { synchronize(ui,this,false); },", "    comparisonX_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonPanels_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonGroup_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonPredictionType_changed: function(ui) { synchronize(ui,this,false); },", "    view_loaded: function() {},", "    view_updated: function(ui) { synchronize(ui,this,false); },", "    preds_changed: function(ui) { synchronize(ui,this,true); },", "    interactions_changed: function(ui) { synchronize(ui,this,false); },", "    polynomials_changed: function(ui) { synchronize(ui,this,false); },", "    modelTerms_changed: function(ui) { synchronize(ui,this,false); },", "    primarySupplier_updated: function(ui) { synchronize(ui,this,false); },", "    quadratic_changed: function(ui) { synchronize(ui,this,false,'quadratic'); },", "    quadraticSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    randomSlopes_changed: function(ui) { synchronize(ui,this,false); },", "    randomSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    compare_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonFixed_changed: function(ui) { synchronize(ui,this,false,'comparisonFixed'); },", "    comparisonFixedSupplier_updated: function() {},", "    comparisonTerms_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonInteractions_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonPolynomials_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonQuadratic_changed: function(ui) { synchronize(ui,this,false,'comparisonQuadratic'); },", "    comparisonRandomSlopes_changed: function(ui) { synchronize(ui,this,false); },", "    comparisonSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    comparisonQuadraticSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    comparisonRandomSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    cluster_changed: function(ui) { synchronize(ui,this,false); },", "    predictionType_changed: function(ui) { synchronize(ui,this,false); },", "    plotSupplier_updated: function(ui) { synchronize(ui,this,false); },", "    plotX_changed: function(ui) { synchronize(ui,this,false); },", "    plotPanels_changed: function(ui) { synchronize(ui,this,false); },", "    plotGroup_changed: function(ui) { synchronize(ui,this,false); }"],
+      "existing_tests": ["test-jamovi-mixed.R", "test-jamovi-mixed-comparison.R", "test-jamovi-mixed-sample.R", "test-jamovi-mixed-cas-comparison.R", "test-jamovi-mixed-tables.R", "test-jamovi-mixed-notes.R", "test-jamovi-mixed-independent.R", "test-jamovi-model-ghosts.R", "test-jamovi-label-editors.R", "test-jamovi-output-visibility.R"]
     }
   },
-  "test_files": ["dev/jamovi/tests/test-boundaries.R", "dev/jamovi/tests/test-development-failures.R", "dev/jamovi/tests/test-e2e-design.R", "dev/jamovi/tests/test-e2e-harness.R", "dev/jamovi/tests/test-flexplot-standard-error.R", "dev/jamovi/tests/test-jamovi-diagnostic-renderer.R", "dev/jamovi/tests/test-jamovi-flexplot-conditioning.R", "dev/jamovi/tests/test-jamovi-generalized.R", "dev/jamovi/tests/test-jamovi-glm-comparison.R", "dev/jamovi/tests/test-jamovi-glm-initialization.R", "dev/jamovi/tests/test-jamovi-glm-notes.R", "dev/jamovi/tests/test-jamovi-glm-output-options.R", "dev/jamovi/tests/test-jamovi-glm-panel-ghosts.R", "dev/jamovi/tests/test-jamovi-glm-polynomials.R", "dev/jamovi/tests/test-jamovi-glm-restoration.R", "dev/jamovi/tests/test-jamovi-glm-scale.R", "dev/jamovi/tests/test-jamovi-glm-usability.R", "dev/jamovi/tests/test-jamovi-interactions.R", "dev/jamovi/tests/test-jamovi-lm-graphics.R", "dev/jamovi/tests/test-jamovi-lm-quadratic.R", "dev/jamovi/tests/test-jamovi-mixed-cas.R", "dev/jamovi/tests/test-jamovi-mixed-comparison.R", "dev/jamovi/tests/test-jamovi-mixed-tables.R", "dev/jamovi/tests/test-jamovi-mixed.R", "dev/jamovi/tests/test-jamovi-plot-labels.R", "dev/jamovi/tests/test-presentation.R", "tests/testthat/test-cas-moderators.R", "tests/testthat/test-cas-regression.R", "tests/testthat/test-compare-fits-binned.R", "tests/testthat/test-compare-fits-binomial.R", "tests/testthat/test-compare-fits-lm-matrix.R", "tests/testthat/test-compare-fits-marginal.R", "tests/testthat/test-compare-fits-mixed-limits.R", "tests/testthat/test-compare-fits-mixed-population.R", "tests/testthat/test-compare-fits-object.R", "tests/testthat/test-estimates_lm.R", "tests/testthat/test-estimates_lmer.R", "tests/testthat/test-estimates-binomial.R", "tests/testthat/test-estimates-factor-contrasts.R", "tests/testthat/test-estimates-formula-factors.R", "tests/testthat/test-estimates-lm-names.R", "tests/testthat/test-fits.R", "tests/testthat/test-flexplot_glm.R", "tests/testthat/test-flexplot_helper.R", "tests/testthat/test-flexplot_subroutines.R", "tests/testthat/test-flexplot-association-object.R", "tests/testthat/test-flexplot-bivariate-object.R", "tests/testthat/test-flexplot-categorical-ghost-object.R", "tests/testthat/test-flexplot-categorical-line-object.R", "tests/testthat/test-flexplot-categorical-object.R", "tests/testthat/test-flexplot-comparison-methods-object.R", "tests/testthat/test-flexplot-distribution-object.R", "tests/testthat/test-flexplot-draws-object.R", "tests/testthat/test-flexplot-facets-object.R", "tests/testthat/test-flexplot-ghost-object.R", "tests/testthat/test-flexplot-grouped-distributions.R", "tests/testthat/test-flexplot-logistic-object.R", "tests/testthat/test-flexplot-magnet-comparison-object.R", "tests/testthat/test-flexplot-magnet-grouping-object.R", "tests/testthat/test-flexplot-magnet-local-fits.R", "tests/testthat/test-flexplot-magnet-object.R", "tests/testthat/test-flexplot-object-integration.R", "tests/testthat/test-flexplot-plot-type-object.R", "tests/testthat/test-flexplot-prediction-ghost-object.R", "tests/testthat/test-flexplot-prediction-object.R", "tests/testthat/test-flexplot-raw-line-object.R", "tests/testthat/test-flexplot-related-object.R", "tests/testthat/test-flexplot-response-validation-object.R", "tests/testthat/test-flexplot-reversal-object.R", "tests/testthat/test-flexplot-sampling-object.R", "tests/testthat/test-flexplot-standard-error.R", "tests/testthat/test-formula-security.R", "tests/testthat/test-ghost-reference-regressions.R", "tests/testthat/test-helper_binning_functions.R", "tests/testthat/test-helper_compare_fits.R", "tests/testthat/test-helper_estimates_glm.R", "tests/testthat/test-helper_estimates.R", "tests/testthat/test-helper_functions.R", "tests/testthat/test-helper_jamovi.R", "tests/testthat/test-helper_logistic_overlay.R", "tests/testthat/test-helper_model_comparisons.R", "tests/testthat/test-helper_plot_avp.R", "tests/testthat/test-helper-defect-regressions.R", "tests/testthat/test-helper-logistic-aligned.R", "tests/testthat/test-icc.R", "tests/testthat/test-jamovi-comparison-style.R", "tests/testthat/test-jamovi-diagnostics.R", "tests/testthat/test-jamovi-expansion.R", "tests/testthat/test-jamovi-flexplot-conditioning.R", "tests/testthat/test-jamovi-generalized-comparison.R", "tests/testthat/test-jamovi-generalized.R", "tests/testthat/test-jamovi-glm-comparison-styling.R", "tests/testthat/test-jamovi-glm-comparison.R", "tests/testthat/test-jamovi-glm-initialization.R", "tests/testthat/test-jamovi-glm-notes.R", "tests/testthat/test-jamovi-glm-output-options.R", "tests/testthat/test-jamovi-glm-panel-ghosts.R", "tests/testthat/test-jamovi-glm-plots.R", "tests/testthat/test-jamovi-glm-report-interface.R", "tests/testthat/test-jamovi-glm-reporting.R", "tests/testthat/test-jamovi-glm-scale.R", "tests/testthat/test-jamovi-glm-tables.R", "tests/testthat/test-jamovi-glm-usability.R", "tests/testthat/test-jamovi-interactions.R", "tests/testthat/test-jamovi-lm-automatic.R", "tests/testthat/test-jamovi-lm-coefficients.R", "tests/testthat/test-jamovi-lm-graphics.R", "tests/testthat/test-jamovi-lm-quadratic.R", "tests/testthat/test-jamovi-mixed-cas-comparison.R", "tests/testthat/test-jamovi-mixed-cas.R", "tests/testthat/test-jamovi-mixed-comparison.R", "tests/testthat/test-jamovi-mixed-notes.R", "tests/testthat/test-jamovi-mixed-sample.R", "tests/testthat/test-jamovi-mixed-tables.R", "tests/testthat/test-jamovi-mixed.R", "tests/testthat/test-jamovi-plot-labels.R", "tests/testthat/test-jamovi-results-presentation.R", "tests/testthat/test-jasp-errorbar-linewidth.R", "tests/testthat/test-jasp-glm-families.R", "tests/testthat/test-jasp-themes.R", "tests/testthat/test-magnet_plot.R", "tests/testthat/test-magnet-rendering.R", "tests/testthat/test-partial_residual_helper.R", "tests/testthat/test-partial.R", "tests/testthat/test-plot_avp.R", "tests/testthat/test-plot_cas.R", "tests/testthat/test-plot_jamovi_plots.R", "tests/testthat/test-plot_logistic_magnet.R", "tests/testthat/test-plot_logistic_plots.R", "tests/testthat/test-plot_mediate_plot.R", "tests/testthat/test-prepare-flexplot.R", "tests/testthat/test-semi-partial-r-squared.R", "tests/testthat/test-univariate_list.R", "tests/testthat/test-visual-snapshots.R", "tests/testthat/test-visualize-binomial-model.R", "tests/testthat/test-visualize-glmer-mappings.R", "tests/testthat/test-visualize-lmer-mappings.R", "tests/testthat/test-visualize-singleton-lines.R", "tests/testthat/testflexplot_bivariate.R", "tests/testthat/testflexplot_ghost.R", "tests/testthat/testflexplot_unconventional.R", "tests/testthat/testflexplot_univariate.R", "tests/testthat/testhidden_functions.R", "tests/testthat/testjasp_modelcomp_table.R", "tests/testthat/testjasp.R", "tests/testthat/testmargin_plot.R", "tests/testthat/testmixed_mod_functions.R", "tests/testthat/testmodel_comparisons.R", "tests/testthat/testother_functions.R", "tests/testthat/testvisualize_linearmodels.R", "tests/testthat/testvisualize_mixed.R", "tests/testthat/testvisualize_othermods.R"]
+  "test_files": ["dev/jamovi/tests/test-boundaries.R", "dev/jamovi/tests/test-development-failures.R", "dev/jamovi/tests/test-e2e-design.R", "dev/jamovi/tests/test-e2e-harness.R", "dev/jamovi/tests/test-e2e-reconciliation.R", "dev/jamovi/tests/test-flexplot-standard-error.R", "dev/jamovi/tests/test-jamovi-basic-lifecycle.R", "dev/jamovi/tests/test-jamovi-comparison-roles.R", "dev/jamovi/tests/test-jamovi-diagnostic-renderer.R", "dev/jamovi/tests/test-jamovi-error-isolation.R", "dev/jamovi/tests/test-jamovi-flexplot-conditioning.R", "dev/jamovi/tests/test-jamovi-generalized.R", "dev/jamovi/tests/test-jamovi-glm-automatic-family.R", "dev/jamovi/tests/test-jamovi-glm-comparison.R", "dev/jamovi/tests/test-jamovi-glm-independent-display.R", "dev/jamovi/tests/test-jamovi-glm-initialization.R", "dev/jamovi/tests/test-jamovi-glm-notes.R", "dev/jamovi/tests/test-jamovi-glm-output-options.R", "dev/jamovi/tests/test-jamovi-glm-panel-ghosts.R", "dev/jamovi/tests/test-jamovi-glm-polynomials.R", "dev/jamovi/tests/test-jamovi-glm-restoration.R", "dev/jamovi/tests/test-jamovi-glm-scale.R", "dev/jamovi/tests/test-jamovi-glm-usability.R", "dev/jamovi/tests/test-jamovi-interactions.R", "dev/jamovi/tests/test-jamovi-label-editors.R", "dev/jamovi/tests/test-jamovi-lm-graphics.R", "dev/jamovi/tests/test-jamovi-lm-quadratic.R", "dev/jamovi/tests/test-jamovi-mixed-cas.R", "dev/jamovi/tests/test-jamovi-mixed-comparison.R", "dev/jamovi/tests/test-jamovi-mixed-independent.R", "dev/jamovi/tests/test-jamovi-mixed-inference-ui.R", "dev/jamovi/tests/test-jamovi-mixed-tables.R", "dev/jamovi/tests/test-jamovi-mixed.R", "dev/jamovi/tests/test-jamovi-model-ghosts.R", "dev/jamovi/tests/test-jamovi-output-visibility.R", "dev/jamovi/tests/test-jamovi-plot-labels.R", "dev/jamovi/tests/test-jamovi-table-footnotes.R", "dev/jamovi/tests/test-presentation.R", "tests/testthat/test-cas-moderators.R", "tests/testthat/test-cas-regression.R", "tests/testthat/test-compare-fits-binned.R", "tests/testthat/test-compare-fits-binomial.R", "tests/testthat/test-compare-fits-lm-matrix.R", "tests/testthat/test-compare-fits-marginal.R", "tests/testthat/test-compare-fits-mixed-limits.R", "tests/testthat/test-compare-fits-mixed-population.R", "tests/testthat/test-compare-fits-object.R", "tests/testthat/test-estimates_lm.R", "tests/testthat/test-estimates_lmer.R", "tests/testthat/test-estimates-binomial.R", "tests/testthat/test-estimates-factor-contrasts.R", "tests/testthat/test-estimates-formula-factors.R", "tests/testthat/test-estimates-lm-names.R", "tests/testthat/test-fits.R", "tests/testthat/test-flexplot_glm.R", "tests/testthat/test-flexplot_helper.R", "tests/testthat/test-flexplot_subroutines.R", "tests/testthat/test-flexplot-association-object.R", "tests/testthat/test-flexplot-bivariate-object.R", "tests/testthat/test-flexplot-categorical-ghost-object.R", "tests/testthat/test-flexplot-categorical-line-object.R", "tests/testthat/test-flexplot-categorical-object.R", "tests/testthat/test-flexplot-comparison-methods-object.R", "tests/testthat/test-flexplot-distribution-object.R", "tests/testthat/test-flexplot-draws-object.R", "tests/testthat/test-flexplot-facets-object.R", "tests/testthat/test-flexplot-ghost-object.R", "tests/testthat/test-flexplot-grouped-distributions.R", "tests/testthat/test-flexplot-logistic-object.R", "tests/testthat/test-flexplot-magnet-comparison-object.R", "tests/testthat/test-flexplot-magnet-grouping-object.R", "tests/testthat/test-flexplot-magnet-local-fits.R", "tests/testthat/test-flexplot-magnet-object.R", "tests/testthat/test-flexplot-object-integration.R", "tests/testthat/test-flexplot-plot-type-object.R", "tests/testthat/test-flexplot-prediction-ghost-object.R", "tests/testthat/test-flexplot-prediction-object.R", "tests/testthat/test-flexplot-raw-line-object.R", "tests/testthat/test-flexplot-related-object.R", "tests/testthat/test-flexplot-response-validation-object.R", "tests/testthat/test-flexplot-reversal-object.R", "tests/testthat/test-flexplot-sampling-object.R", "tests/testthat/test-flexplot-standard-error.R", "tests/testthat/test-formula-security.R", "tests/testthat/test-ghost-reference-regressions.R", "tests/testthat/test-helper_binning_functions.R", "tests/testthat/test-helper_compare_fits.R", "tests/testthat/test-helper_estimates_glm.R", "tests/testthat/test-helper_estimates.R", "tests/testthat/test-helper_functions.R", "tests/testthat/test-helper_jamovi.R", "tests/testthat/test-helper_logistic_overlay.R", "tests/testthat/test-helper_model_comparisons.R", "tests/testthat/test-helper_plot_avp.R", "tests/testthat/test-helper-defect-regressions.R", "tests/testthat/test-helper-logistic-aligned.R", "tests/testthat/test-icc.R", "tests/testthat/test-jamovi-basic-lifecycle.R", "tests/testthat/test-jamovi-comparison-roles.R", "tests/testthat/test-jamovi-comparison-style.R", "tests/testthat/test-jamovi-diagnostics.R", "tests/testthat/test-jamovi-error-isolation.R", "tests/testthat/test-jamovi-expansion.R", "tests/testthat/test-jamovi-flexplot-conditioning.R", "tests/testthat/test-jamovi-generalized-comparison.R", "tests/testthat/test-jamovi-generalized.R", "tests/testthat/test-jamovi-ghost-notes.R", "tests/testthat/test-jamovi-glm-automatic-family.R", "tests/testthat/test-jamovi-glm-comparison-styling.R", "tests/testthat/test-jamovi-glm-comparison.R", "tests/testthat/test-jamovi-glm-independent-display.R", "tests/testthat/test-jamovi-glm-initialization.R", "tests/testthat/test-jamovi-glm-notes.R", "tests/testthat/test-jamovi-glm-output-options.R", "tests/testthat/test-jamovi-glm-panel-ghosts.R", "tests/testthat/test-jamovi-glm-plots.R", "tests/testthat/test-jamovi-glm-report-interface.R", "tests/testthat/test-jamovi-glm-reporting.R", "tests/testthat/test-jamovi-glm-scale.R", "tests/testthat/test-jamovi-glm-tables.R", "tests/testthat/test-jamovi-glm-usability.R", "tests/testthat/test-jamovi-interactions.R", "tests/testthat/test-jamovi-label-editors.R", "tests/testthat/test-jamovi-lm-automatic.R", "tests/testthat/test-jamovi-lm-coefficients.R", "tests/testthat/test-jamovi-lm-graphics.R", "tests/testthat/test-jamovi-lm-layout-recovery.R", "tests/testthat/test-jamovi-lm-quadratic.R", "tests/testthat/test-jamovi-mixed-cas-comparison.R", "tests/testthat/test-jamovi-mixed-cas.R", "tests/testthat/test-jamovi-mixed-comparison.R", "tests/testthat/test-jamovi-mixed-independent-plots.R", "tests/testthat/test-jamovi-mixed-inference-ui.R", "tests/testthat/test-jamovi-mixed-notes.R", "tests/testthat/test-jamovi-mixed-sample.R", "tests/testthat/test-jamovi-mixed-tables.R", "tests/testthat/test-jamovi-mixed.R", "tests/testthat/test-jamovi-model-ghosts.R", "tests/testthat/test-jamovi-model-presentation.R", "tests/testthat/test-jamovi-model-terms.R", "tests/testthat/test-jamovi-output-visibility.R", "tests/testthat/test-jamovi-plot-labels.R", "tests/testthat/test-jamovi-result-lifecycle.R", "tests/testthat/test-jamovi-results-presentation.R", "tests/testthat/test-jamovi-table-footnotes.R", "tests/testthat/test-jamovi-table-writer.R", "tests/testthat/test-jasp-errorbar-linewidth.R", "tests/testthat/test-jasp-glm-families.R", "tests/testthat/test-jasp-themes.R", "tests/testthat/test-magnet_plot.R", "tests/testthat/test-magnet-rendering.R", "tests/testthat/test-partial_residual_helper.R", "tests/testthat/test-partial.R", "tests/testthat/test-plot_avp.R", "tests/testthat/test-plot_cas.R", "tests/testthat/test-plot_jamovi_plots.R", "tests/testthat/test-plot_logistic_magnet.R", "tests/testthat/test-plot_logistic_plots.R", "tests/testthat/test-plot_mediate_plot.R", "tests/testthat/test-prepare-flexplot.R", "tests/testthat/test-semi-partial-r-squared.R", "tests/testthat/test-univariate_list.R", "tests/testthat/test-visual-snapshots.R", "tests/testthat/test-visualize-binomial-model.R", "tests/testthat/test-visualize-glmer-mappings.R", "tests/testthat/test-visualize-lmer-mappings.R", "tests/testthat/test-visualize-singleton-lines.R", "tests/testthat/testflexplot_bivariate.R", "tests/testthat/testflexplot_ghost.R", "tests/testthat/testflexplot_unconventional.R", "tests/testthat/testflexplot_univariate.R", "tests/testthat/testhidden_functions.R", "tests/testthat/testjasp_modelcomp_table.R", "tests/testthat/testjasp.R", "tests/testthat/testmargin_plot.R", "tests/testthat/testmixed_mod_functions.R", "tests/testthat/testmodel_comparisons.R", "tests/testthat/testother_functions.R", "tests/testthat/testvisualize_linearmodels.R", "tests/testthat/testvisualize_mixed.R", "tests/testthat/testvisualize_othermods.R"]
 }

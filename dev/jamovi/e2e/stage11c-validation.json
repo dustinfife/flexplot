@@ -1,0 +1,65 @@
+{
+  "stage": "11C",
+  "date": "2026-11-24",
+  "starting_commit": "55363abdd5bd9160373051f5ceed768cb15ccdbd",
+  "production_fingerprint": "68964d65afd6f88cbf4697301d09edc4d32412ad773ddcb1298cd965fb317550",
+  "full_package": {
+    "elapsed_seconds": 1038.0128,
+    "passed": 24504,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0,
+    "skipped": 0,
+    "tests": 797
+  },
+  "full_native": {
+    "passed": 4837,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0,
+    "skipped": 0,
+    "tests": 92,
+    "elapsed_seconds": 224.1924
+  },
+  "focused_e2e": {
+    "passed": 882,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0,
+    "skipped": 0,
+    "tests": 32,
+    "elapsed_seconds": 37.4293
+  },
+  "approved_visuals": {
+    "passed": 140,
+    "total": 140,
+    "unchanged": true
+  },
+  "inventory_options": 150,
+  "scenarios": {
+    "total": 77,
+    "flexplota": 16,
+    "glmbasic": 17,
+    "glmgeneralized": 24,
+    "mixedmodel": 20,
+    "transitions": 267,
+    "reference_checkpoints": 156,
+    "host_reopens": 77,
+    "P0": 39,
+    "P1": 38
+  },
+  "live_gui": {
+    "executed_in_this_stage": 0,
+    "passed_in_this_stage": 0,
+    "current_build_full_scenario_acceptance": 0
+  },
+  "protected_artifacts": {
+    "files": 153,
+    "changed": 0
+  },
+  "coverage": {
+    "previous_missing": 27,
+    "current_unmapped": 0
+  },
+  "release_ready": false
+}

@@ -1,19 +1,23 @@
-# jamovi end-to-end framework — Phase 1
+# jamovi end-to-end framework — Stage 11C
 
-This is a fixture and test-plan layer, **not a GUI automation runner**. Nothing in
-this directory opens, installs, activates, or closes an application. The first
-GUI campaign and `.omv` assembly belong to Phase 2. All scenarios currently have
-`execution_status = not_gui_executed`; headless validation does not change that.
+This directory contains deterministic fixtures, authoritative scenario definitions,
+strict metadata validation and a single-scenario native GUI evidence harness.
+Stage 11C reconciles the Stage 10–11B implementation from `55363abd`; it does
+not execute the Stage 11D campaign. All **77 scenarios / 267 transitions** remain
+**defined, not executed or passed on the current installed build**. Each also
+requires a final host save/close/reopen checkpoint (344 required captures total).
+Component native/R6/renderer/protobuf tests are separate evidence, not full live
+scenario passes. Historical pilot observations in PHASE-2A.md remain historical.
 
-Baseline: flexplot commit `43bbd64a`, module 0.27.0. Definitions and current R/JS
-behavior, rather than historical requests, are the authority for this inventory.
+See [the option reconciliation](STAGE-11C-COVERAGE.md) and the prioritized
+[Stage 11D campaign plan](STAGE-11D-PLAN.md). Source R/JS/YAML remains authoritative.
 
 ## Files and reproducibility
 
 | File | Purpose |
 | --- | --- |
 | `fixtures.R` | Fixed-seed DGP and independent `lm`, `glm`, `glm.nb`, `lmer` reference fitting; no flexplot fitting calls |
-| `manifest.json` | 70 scenarios and ordered native-control edits/checkpoints; curated source of truth |
+| `manifest.json` | 77 scenarios and ordered native-control/restoration checkpoints; curated source of truth |
 | `generate.R` | Validate manifest, regenerate typed data, independent references, source inventory and option coverage |
 | `artifacts/fixtures.rds` | Authoritative typed fixtures, preserving factors, ordered levels and literal names |
 | `artifacts/*.csv` | Importable datasets; empty fields are missing values, not empty categories |
@@ -27,8 +31,8 @@ behavior, rather than historical requests, are the authority for this inventory.
 | `../tests/test-e2e-design.R` | Mandatory fixture, oracle, coverage, regeneration and representative real-R6 tests |
 
 ```sh
-# Regenerate deliberately after reviewing changes to the DGP or manifest.
-Rscript --vanilla dev/jamovi/e2e/generate.R
+# Stage 11C: metadata only; never overwrite numerical fixtures or references.
+Rscript --vanilla dev/jamovi/e2e/generate.R --metadata-only
 # Alternative output directory supports a read-only comparison with tracked artifacts.
 Rscript --vanilla dev/jamovi/e2e/generate.R /tmp/flexplot-e2e-artifacts
 # Existing mandatory development validation includes the new tests automatically.
@@ -112,7 +116,7 @@ levels before running any analysis.
 
 ## Actual feature inventory
 
-`inventory.json` contains **91 declared options** across the four analyses,
+`inventory.json` contains **150 declared options** across the four analyses,
 including implicit data, hidden compatibility state, defaults, allowed values,
 UI conditions inherited from containers, and all result-schema items.
 `coverage.csv` has one row per option. Links to existing tests are analysis-level
@@ -143,11 +147,12 @@ backend behavior is legacy or unusual.
   separate independence fit within each panel. No theme/custom-label GUI control exists
   in this analysis; JASP theme options are outside this inventory.
 
-### Linear Model (`glmbasic`): 15 scenarios
+### Linear Model (`glmbasic`): 17 scenarios
 
 - Outcome/predictor pool; native independent primary/second `Terms` builders.
   NULL means additive defaults; explicit empty terms mean intercept-only in R.
-  Interactions are entered directly, not gated by an interaction checkbox.
+  Interactions have independent enable gates; native main-effect and interaction
+  destinations must agree with the generated fitted model terms.
 - Model 1 and Model 2 each have an initially unchecked polynomial switch and
   numeric squared-term destination. Selecting a square adds its linear term by
   default; removing the linear term deliberately can retain square-only terms.
@@ -156,8 +161,9 @@ backend behavior is legacy or unusual.
   supported magnet comparisons. Numeric-outcome comparisons direct users to
   panels. Model terms in either fit define eligible display variables.
 - Single-model x/two panels/group; automatic x if empty. Model plots, diagnostic
-  plots, estimates, SE display, descriptive line and center controls remain
-  distinct. Do not assume every graphic control affects every callback.
+  plots, estimates and SE display are distinct. Legacy line and center values
+  are retained compatibility state, with no native controls. Ordinary ghost lines
+  and main/comparison label editors have independent retained state.
 - Full coefficient table (including interactions and aliases), finite-df t CI
   and optional coefficient p. Conditional factor means/differences hold numeric
   covariates at means and other factors at modes. Two-level t, one-way Tukey–Kramer,
@@ -170,15 +176,19 @@ backend behavior is legacy or unusual.
   approximate reciprocal BIC Bayes factors, nested F only. Aliased single fits
   retain explicit coefficients; nonestimable comparisons are rejected.
 
-### Generalized Linear Model (`glmgeneralized`): 21 scenarios
+### Generalized Linear Model (`glmgeneralized`): 24 scenarios
 
 - Fresh/waiting visibility requires outcome, predictor pool, and a usable model
   term or square. Invalid/removed selections must clear stale results.
-- Independent primary/second term and square destinations; no polynomial
-  enable/disable checkbox. Adding a square adds a main effect by default;
+- Independent primary/second term and square destinations with interaction and
+  polynomial enable gates. Adding a square adds a main effect by default;
   clearing/removing its predictor removes the square. Controls and saved options
   must agree after fresh, prepared, reopened and legacy initialization.
-- Exact family values: `gaussian` identity, `binomial` logit, `poisson` log,
+- Fresh `family=auto` resolves the actual outcome: eligible binary values use
+  Binomial/logit; other outcomes use Gaussian/identity. Hidden `automaticFamily`
+  and `automaticFamilyOutcome` are derived observations, never native edits.
+  Legacy omitted family restores Gaussian; explicit named families remain manual.
+  Exact manual family values: `gaussian` identity, `binomial` logit, `poisson` log,
   `gammaLog` log, `Gamma` inverse (saved compatibility), `negativebinomial` log
   using MASS::glm.nb. No generic free-link selector or extra families.
 - One family-aware Estimates table based on estimates.glm; logistic IRT and
@@ -191,8 +201,9 @@ backend behavior is legacy or unusual.
 - Default continuous-x logistic overlay shows observed bin proportions and
   supplied-model adjusted response predictions; `raw` retains binary observations.
   Observed bin proportions are not asserted to be bin-matched to marginal curves.
-- Binomial dropdown visible only for family `binomial`, retains selection while
-  hidden; prediction-CI toggle visible for every family.
+- Binomial style/scale controls follow the effective fitted family, including
+  Automatic. Main `se`/`plotStyle`/`plotScale` are independent of comparison
+  `comparisonSe`/`comparisonPlotStyle`/`comparisonPlotScale`; hidden settings persist.
 - Exclusive x/panel/color roles, exactly one x automatically selected where
   possible; only actual model predictors eligible. Comparison has one x and up
   to two panels, no group selector. Response-scale curves use the original models.
@@ -200,7 +211,7 @@ backend behavior is legacy or unusual.
   LR/df/asymptotic p, nonnested/equivalent LRT blank. NB estimates theta separately
   for both fits. Invalid outcomes/domain/rank/nonconvergence need useful errors.
 
-### Mixed Models (`mixedmodel`): 18 scenarios
+### Mixed Models (`mixedmodel`): 20 scenarios
 
 - One outcome/one shared cluster, fixed predictor pool. Independently gated
   interactions and numeric squares default off. Switches remove selected terms,
@@ -213,7 +224,9 @@ backend behavior is legacy or unusual.
   no silent simplification. One grouping factor only; no GLMM families here.
 - Both model-specific coefficient and random-variance tables; residual variance/
   SD; optional symmetric correlation matrices; normal-Wald fixed CIs; coefficient
-  p blank because no denominator-df approximation is imposed. Singular and
+  p column retained in the schema but hidden because no denominator-df
+  approximation is imposed. Estimates toggles both model-specific sections;
+  normal-Wald confidence intervals remain present, independent of legacy includeCI. Singular and
   convergence diagnostics are distinct and appear before estimates.
 - Comparison enabled means **one common sample for all tables and plots**, while
   each original model keeps its requested ML/REML method. Comparison statistics
@@ -223,9 +236,12 @@ backend behavior is legacy or unusual.
   random design and no singularity. Random-structure boundaries get LR/df when
   valid, not an uncalibrated chi-square p. Nonnested LRT unavailable. Hiding p
   removes the whole comparison column and conditional random-p note.
-- Population, cluster-specific (three random displayed clusters default; 1–20),
+- Main and comparison images/settings/label stores are independent; each offers
+  population, cluster-specific (three random displayed clusters default; 1–20),
   CAS modes. Cluster-specific layout needs the cluster in panels/color; unsupported
-  layouts must show errors. No mixed prediction confidence bands.
+  layouts must show plot-local errors. Main Model 1 retains its intended requested
+  fit and prediction type instead of the ML inference copy. No mixed prediction
+  confidence bands. Ordinary ghosts affect supported main plots only.
 - CAS removes all original fitted random contributions (`y-Zb`), not population
   prediction substitution. Two CAS panels have their own model adjustment, shared
   axes/reference conditions. Optional dashed Model 2 fixed curve appears **only
@@ -358,7 +374,7 @@ GUI dependency until existing installed-handler and desktop tools are assessed.
 
 ## Beta acceptance gates
 
-- All 70 planned scenarios executed or explicitly dispositioned; all P0 scenarios
+- All 77 planned scenarios executed or explicitly dispositioned; all P0 scenarios
   pass on fresh and required restored paths. No P0 skip counts as a pass.
 - All four analyses initialize and update; visible native controls match saved
   options at every checkpoint. No persistent waiting state, loading spinner,
@@ -382,9 +398,11 @@ GUI dependency until existing installed-handler and desktop tools are assessed.
 Before automation starts, decide how to obtain a trustworthy live option/result
 snapshot without bypassing native controls, retain any real legacy `.omv` files
 available, and confirm the single registered window is on the secondary monitor.
-No statistical design decisions or new dependencies are required for Phase 1.
+Stage 11C changes no statistical design or dependencies.
 
-GLM-22 adds reference-panel ghosts; LM-16 and GLM-23 add independent label editors (73 scenarios total).
+The pre-Stage-11C matrix had 73 scenarios: GLM-22 added reference-panel ghosts;
+LM-16 and GLM-23 added independent label editors. Stage 11C adds LM-17, GLM-24,
+MM-19 and MM-20 (77 total). Their definitions are not live execution evidence.
 Existing numerical reference files remain unchanged. This scenario requires a
 separate `panel_ghosts` native GUI review with `source: "native_gui_review"`, a
 nonempty `evidence` identifier, observed `visible` and `scale`, and (when enabled)
@@ -400,3 +418,40 @@ a nonempty evidence identifier and the actual rendered `text` values. Without
 that observation, the checkpoint is blocked. Hidden stores are checked through
 saved options, never edited as user controls. Existing numerical references are
 unchanged.
+
+## Stage 11C evidence and indirect coverage contract
+
+`initialization` sends deterministic import/schema and initial public native-control
+entry to the first driver request. Subsequent `changes` must agree with expected
+saved/control values. Hidden options are rejected as native edits. Label actions
+use actual generated row identities, commit by blur/Enter, and require rendered
+text rather than fabricated label keys.
+
+`indirect_coverage` is an explicit option → checkpoint → semantic kind → observation
+mapping. Kinds are dataset import, derived metadata, actual legacy protobuf
+restoration and retained label stores. There are no blanket internal exclusions
+or “all scenarios cover this hidden option” rules. Removing a real action removes
+its coverage. Restoration source options are decoded with installed protobuf types
+in native tests; actual host opening and save/reopen remain Stage 11D requirements.
+`restoration.original_options` must equal the original serialized input, accompanied
+by its original file/hash and actual host-open evidence.
+
+New/revised checkpoints carry concrete `observation_contracts` and required reviews.
+For each required key, submit `reviews[key] = {source: "native_gui_review",
+evidence: "path-or-record-ID", value: true}` only after verifying the stated
+rendered geometry, family/coding/independent fit, stores or migration behavior.
+Missing evidence is blocked, a negative observation is failed, and R6 provenance
+is rejected. `expected_derived_options` checks saved read-only fields without
+requiring editable controls. `expected_ui` requires separately captured `ui_state`
+values from native inspection. Every visible image must have an actual resource
+and displayed-image evidence, even with the main image hidden. Hidden estimates
+are explicitly not counted as numerically inspected; re-enable and verify them.
+GLM numerical inspection recognizes actual SE column identifiers and the existing
+three-decimal Gaussian SE presentation; confidence limits retain full-precision
+checks. No numerical reference or tolerance in the stored oracles changed.
+
+The full generator may fit references **only in a disposable output directory**
+for deterministic comparison. Stage 11C writes just inventory.json, coverage.csv
+and scenario-index.csv through `--metadata-only`; it never writes tracked numerical
+CSV/JSON/RDS, fixture schema/provenance or approved SVGs. Native design tests verify
+metadata-only output isolation, exact reference keys and all four module counts.

@@ -28,15 +28,20 @@ e2e_inventory = function(root, manifest) {
     visit(ui)
     selected = Filter(function(s) s$analysis==analysis,manifest$scenarios)
     options = lapply(definition$options,function(option) {
-      covered = Filter(function(s) any(vapply(s$steps,function(step) option$name %in%
-        c(names(s$initial_options),names(step$changes),if(step$action=="edit_generated_plot_label_rows") { if(is.null(step$label_option)) "plotLabels" else step$label_option }),logical(1))),selected)
-      if(option$name %in% c("plotLabelStore","comparisonPlotLabelStore")) {
-        visible = sub("LabelStore$","Labels",option$name)
-        covered = Filter(function(s)any(vapply(s$steps,function(step)
-          identical(step$action,"edit_generated_plot_label_rows") &&
-          identical(if(is.null(step$label_option)) "plotLabels" else step$label_option,visible),logical(1))),selected)
-      }
-      if(option$name %in% c("data","samplePolicyVersion","comparisonMagnet","outputOptionsVersion","plotLabelEditorVersion")) covered = selected
+      # Public native transitions and explicit indirect contracts are separate.
+      # A hidden field is never credited as if it were an editable control.
+      internal = isTRUE(option$hidden) || option$name == "data" ||
+        analysis == "glmbasic" && option$name %in% c("line","center")
+      covered = Filter(function(s) {
+        indirect = any(vapply(s$indirect_coverage,function(contract)
+          identical(contract$option,option$name),logical(1)))
+        direct = !internal && (option$name %in% names(s$initialization$options) ||
+          any(vapply(s$steps,function(step) option$name %in% names(step$changes) &&
+            step$action != "restore_saved_options" ||
+            identical(step$action,"edit_generated_plot_label_rows") &&
+            identical(if(is.null(step$label_option)) "plotLabels" else step$label_option,option$name),logical(1))))
+        indirect || direct
+      },selected)
       list(id=paste(analysis,option$name,sep="."),definition=option,
         scenarios=vapply(covered,`[[`,character(1),"id"),
         coverage=if(length(covered)) "planned GUI checkpoint; not yet GUI verified" else "gap: no planned option transition")
@@ -61,9 +66,39 @@ e2e_validate_manifest = function(manifest, fixtures, root) {
       isTRUE(scenario$gui_execution_required),scenario$priority %in% c("P0","P1","P2"))
     definitions = yaml::read_yaml(file.path(root,"jamovi",paste0(scenario$analysis,".a.yaml")))$options
     allowed = vapply(definitions,`[[`,character(1),"name")
+    hidden = vapply(Filter(function(d)isTRUE(d$hidden) || d$name == "data" ||
+      scenario$analysis == "glmbasic" && d$name %in% c("line","center"),definitions),`[[`,character(1),"name")
+    stopifnot(identical(scenario$initialization$action,"enter_initial_options_through_native_controls"),
+      identical(scenario$initialization$options,scenario$initial_options),
+      !any(names(scenario$initial_options) %in% hidden))
+    for(contract in scenario$indirect_coverage) {
+      stopifnot(contract$option %in% allowed,contract$kind %in%
+        c("derived","restoration","retained_store","dataset_import"),
+        contract$checkpoint %in% seq_along(scenario$steps))
+      checkpoint = scenario$steps[[contract$checkpoint]]
+      stopifnot(contract$observation %in% names(checkpoint$required_observations),
+        nzchar(checkpoint$observation_contracts[[contract$observation]]))
+      if(contract$kind == "restoration") stopifnot(checkpoint$action == "restore_saved_options")
+      if(contract$kind == "retained_store") stopifnot(checkpoint$action == "edit_generated_plot_label_rows",
+        identical(checkpoint$label_option,sub("LabelStore$","Labels",contract$option)))
+      if(contract$kind == "derived") stopifnot(contract$option %in% names(checkpoint$expected_derived_options))
+    }
     for (step in scenario$steps) {
+      stopifnot(step$action %in% c("set_options_through_native_controls","edit_generated_plot_label_rows",
+        "restore_saved_options","rapid_outcome_changes"),
+        !any(names(step$changes) %in% hidden),
+        all(names(step$expected_derived_options) %in% hidden),
+        all(names(step$required_observations) %in% names(step$observation_contracts)))
+      if(step$action == "restore_saved_options") stopifnot(
+        identical(step$restoration$format,"jamovi AnalysisOptions protobuf"),
+        length(step$restoration$saved_options)>0,
+        all(names(step$restoration$saved_options) %in% allowed))
       stopifnot(all(names(step$expected_options) %in% allowed),all(names(step$changes) %in% allowed),
         isTRUE(step$verify_visible_against_saved_options),step$expected_status %in% c("complete","waiting","error","diagnostic"))
+      for(name in names(step$changes)) stopifnot(name %in% names(step$expected_options),
+        identical(step$changes[[name]],step$expected_options[[name]]))
+      results = yaml::read_yaml(file.path(root,"jamovi",paste0(scenario$analysis,".r.yaml")))$items
+      stopifnot(all(names(step$expected_result_visibility) %in% vapply(results,`[[`,character(1),"name")))
       phases = unlist(step$expected_diagnostic_phase, use.names=FALSE)
       stopifnot(all(phases %in% c("waiting","warning","fitting_error","rendering_error")))
       for (definition in definitions) {
@@ -89,6 +124,29 @@ e2e_validate_manifest = function(manifest, fixtures, root) {
   invisible(TRUE)
 }
 
+# Metadata-only mode never fits a model or writes numerical fixtures/references.
+e2e_write_metadata = function(inventory,manifest,output) {
+  dir.create(output,recursive=TRUE,showWarnings=FALSE)
+  jsonlite::write_json(inventory,file.path(output,"inventory.json"),auto_unbox=TRUE,pretty=TRUE,null="null")
+  coverage = do.call(rbind,lapply(names(inventory$analyses),function(analysis) do.call(rbind,lapply(
+    inventory$analyses[[analysis]]$options,function(option) data.frame(feature=option$id,
+      scenarios=paste(option$scenarios,collapse=";"),status=option$coverage,
+      evidence=paste(inventory$analyses[[analysis]]$existing_tests,collapse=";"))))))
+  utils::write.csv(coverage,file.path(output,"coverage.csv"),row.names=FALSE)
+  scenario_index = do.call(rbind,lapply(manifest$scenarios,function(s) data.frame(id=s$id,analysis=s$analysis,
+    title=s$title,dataset=s$dataset,priority=s$priority,risk=s$risk,checkpoints=length(s$steps),
+    references=sum(vapply(s$steps,function(step)!is.null(step$reference),logical(1))),
+    launch_paths=paste(s$launch_paths,collapse=";"),gui_status="not_run")))
+  utils::write.csv(scenario_index,file.path(output,"scenario-index.csv"),row.names=FALSE)
+  invisible(inventory)
+}
+e2e_generate_metadata = function(root,output=file.path(root,"dev/jamovi/e2e/artifacts")) {
+  source(file.path(root,"dev/jamovi/e2e/fixtures.R"),local=TRUE)
+  manifest = jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"),simplifyVector=FALSE)
+  e2e_validate_manifest(manifest,e2e_fixtures(),root)
+  e2e_write_metadata(e2e_inventory(root,manifest),manifest,output)
+}
+
 e2e_generate = function(root, output=file.path(root,"dev/jamovi/e2e/artifacts")) {
   for(package in c("yaml","jsonlite","lme4","MASS"))
     if(!requireNamespace(package,quietly=TRUE)) stop("Existing development dependency required: ",package)
@@ -109,20 +167,10 @@ e2e_generate = function(root, output=file.path(root,"dev/jamovi/e2e/artifacts"))
   saveRDS(fixtures,file.path(output,"fixtures.rds"),version=3,compress="xz")
   saveRDS(references,file.path(output,"references.rds"),version=3,compress="xz")
   jsonlite::write_json(references,file.path(output,"references.json"),auto_unbox=TRUE,digits=NA,pretty=TRUE,na="null",null="null")
-  jsonlite::write_json(inventory,file.path(output,"inventory.json"),auto_unbox=TRUE,pretty=TRUE,null="null")
   schema = lapply(fixtures,function(data) lapply(data,function(column) list(class=class(column),levels=levels(column),
     missing=sum(is.na(column)))))
   jsonlite::write_json(schema,file.path(output,"data-schema.json"),auto_unbox=TRUE,pretty=TRUE,null="null")
-  coverage = do.call(rbind,lapply(names(inventory$analyses),function(analysis) do.call(rbind,lapply(
-    inventory$analyses[[analysis]]$options,function(option) data.frame(feature=option$id,
-      scenarios=paste(option$scenarios,collapse=";"),status=option$coverage,
-      evidence=paste(inventory$analyses[[analysis]]$existing_tests,collapse=";"))))))
-  utils::write.csv(coverage,file.path(output,"coverage.csv"),row.names=FALSE)
-  scenario_index = do.call(rbind,lapply(manifest$scenarios,function(s) data.frame(id=s$id,analysis=s$analysis,
-    title=s$title,dataset=s$dataset,priority=s$priority,risk=s$risk,checkpoints=length(s$steps),
-    references=sum(vapply(s$steps,function(step)!is.null(step$reference),logical(1))),
-    launch_paths=paste(s$launch_paths,collapse=";"),gui_status="not_run")))
-  utils::write.csv(scenario_index,file.path(output,"scenario-index.csv"),row.names=FALSE)
+  e2e_write_metadata(inventory,manifest,output)
   versions = vapply(c("R","yaml","jsonlite","lme4","MASS"),function(package)
     if(package=="R") as.character(getRversion()) else as.character(utils::packageVersion(package)),character(1))
   provenance = list(generator="dev/jamovi/e2e/fixtures.R",seed=20261120,common_sample_seed=925,
@@ -135,5 +183,7 @@ e2e_generate = function(root, output=file.path(root,"dev/jamovi/e2e/artifacts"))
 }
 if(sys.nframe()==0L) {
   arguments = commandArgs(TRUE)
-  e2e_generate(e2e_root(),if(length(arguments)) arguments[1] else file.path(e2e_root(),"dev/jamovi/e2e/artifacts"))
+  if(length(arguments) && arguments[1] == "--metadata-only") {
+    e2e_generate_metadata(e2e_root(),if(length(arguments)>1) arguments[2] else file.path(e2e_root(),"dev/jamovi/e2e/artifacts"))
+  } else e2e_generate(e2e_root(),if(length(arguments)) arguments[1] else file.path(e2e_root(),"dev/jamovi/e2e/artifacts"))
 }

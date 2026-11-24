@@ -20,7 +20,12 @@ inspection. Keep stages small and preserve statistical behavior.
 | 8 | Ghost-line reference explanations and reduced plot-to-note spacing | Complete: `843a1269` |
 | 9 | Independent Mixed Models main/comparison visualizations and label editors | Complete: `9481f993` |
 | 10 | Automatic Binomial/logit selection for eligible binary outcomes, preserving explicit family choices | Complete; implementation commit resolved below |
-| 11 | Final shared-infrastructure review, GUI testing, release preparation | Remaining |
+| 11A | Release-readiness audit | Complete; findings below |
+| 11B.1 | GLM/LM plot-error isolation | Complete: `ba5d76e1` |
+| 11B.2 | Stale tests and artifact retirement | Complete: `55363abd` |
+| 11C | E2E coverage and validation metadata | Complete; validation below |
+| 11D | Current-build live GUI campaign | Planned; not executed |
+| Release | Isolated package checks and actual-host JASP compatibility | Remaining |
 
 Resolve the Stage 10 implementation commit:
 
@@ -686,3 +691,44 @@ correct. It is documented as a separate development-harness compatibility
 follow-up. No production workaround was added. Complete the deferred E2E work in
 Stage 11C, then the comprehensive GUI, isolated built-package release checks and
 actual-host JASP validation before claiming release readiness.
+
+
+## Stage 11C — E2E reconciliation complete
+
+Completed 2026-11-24 from `55363abd`. The final native suite is green:
+**4,837 passed, 0 failures/errors/testthat warnings/skips**, across
+92 cases. Focused E2E/native replay checks pass **882**
+assertions across 32 cases. The clean full package retains the
+**24,504 / 0** baseline across 797 cases, with **140/140** approved exact visual
+comparisons passing. The audit contains methods, classifications and local evidence
+paths; [structured counts](e2e/stage11c-validation.json) accompany it.
+
+All 150 current options have meaningful planned actions or explicit indirect
+contracts; the 29 Stage 11C failures are resolved without blanket exclusions.
+The matrix is **77 scenarios** (16 Flexplot / 17 LM / 24 GLM / 20 Mixed),
+**267 transitions**, **156 preserved reference checkpoints**, and 77 final host
+reopen checks. New LM-17, GLM-24, MM-19 and MM-20 cover legacy provenance,
+Automatic/manual families and independent Mixed controls/stores. Existing label,
+visibility, CAS/ordinary ghosts and recovery definitions were reconciled with
+current native controls. Removed controls and inferred fields are not submitted
+as user edits. Actual protobuf decoding/migration and intended main REML-fit
+invariance are independently tested. Required reviews, current UI/derived values,
+actual restoration inputs and comparison-only image resources fail closed when
+missing or wrong. See [every prior option gap and its checkpoints](e2e/STAGE-11C-COVERAGE.md).
+
+Regeneration changes only source inventory, coverage CSV and scenario index.
+All 13 numerical/schema/provenance files, original formulas/reference keys and
+140 approved SVG bytes are preserved. Production source/result identities,
+dependencies, model calculations and installed build remain unchanged at
+`68964d65afd6f88cbf4697301d09edc4d32412ad773ddcb1298cd965fb317550`. No rebuild or new GUI campaign was performed; no additional
+modeling defect was found. Keep the earlier jmvcore empty-table exporter caveat
+separate from production correctness.
+
+Next use [Stage 11D's prioritized plan](e2e/STAGE-11D-PLAN.md): **39 P0 / 38 P1**,
+with humans for monitor/window ownership, inaccessible controls, host file pickers,
+dynamic labels and controlled delayed replies. Record actual native save/close/
+reopen, stale-image recovery, plot coordinates, fitted-family/event coding and
+independent numerical comparisons. These 77 scenarios are **defined, not complete
+current-build live GUI passes**; component-native tests and historical pilot
+observations do not change that status. Release still requires the complete live
+campaign, isolated built-package checks and actual-host JASP compatibility.

@@ -2,7 +2,7 @@
 
 Audited Stage 10 (`96a2152bdd2be40dbd36e74dd0d2cbe3a4579445`) on `ggplot-objects`, 2026-11-24, with desktop completion against the laptop handoff commit `9e14c0326d258085635cdd7b4dd6c2344187b68e`. The [development handoff](DEVELOPMENT-HANDOFF.md) records the historical test and live-GUI evidence.
 
-**Stage 11A complete.** The desktop completed the interrupted full-package investigation from a clean source export, verified the existing development environment and installed payload, and classified the remaining failures. The full suite was not green and this was not release approval. The two confirmed implementation defects were assigned to Stage 11B; see the Stage 11B.1 continuation below for their corrections. At audit completion, stale validation gates, repository artifacts, comprehensive GUI coverage and JASP compatibility remained open. Stage 11A changed no production source, tests or visual baselines. The latest package baseline and completed artifact retirement are recorded in Stage 11B.2 below; E2E and host-level release gates remain open.
+**Stage 11A complete.** The desktop completed the interrupted full-package investigation from a clean source export, verified the existing development environment and installed payload, and classified the remaining failures. The full suite was not green and this was not release approval. The two confirmed implementation defects were assigned to Stage 11B; see the Stage 11B.1 continuation below for their corrections. At audit completion, stale validation gates, repository artifacts, comprehensive GUI coverage and JASP compatibility remained open. Stage 11A changed no production source, tests or visual baselines. Stage 11B.2 records artifact retirement; the latest green package/native baseline and reconciled E2E definitions are recorded in Stage 11C below. Live host-level release gates remain open.
 
 ## Laptop environment and test method
 
@@ -234,3 +234,118 @@ The final clean source export (`.jamovi-dev/stage11b2-final-source`) contains ex
 All **140/140 approved visual comparisons have recorded successful expectations**, with no skipped or failed comparison. Strict inventory validation passes. Post-run hashes confirm all approved files are byte-identical in both the working tree and clean export; the 26 retired local copies and all three local Finder files also retain their original hashes. Review of the Git index confirms exactly 27 intended removals (the listed 26 SVGs plus root `.DS_Store`) and all 140 approved references still tracked. `git diff --check` passes.
 
 No production source, numerical calculations, dependency versions, checked-in E2E artifacts or scenario files were changed. The build-input fingerprint remains Stage 11B.1's `68964d65afd6f88cbf4697301d09edc4d32412ad773ddcb1298cd965fb317550`; no module rebuild or new GUI campaign was needed for this test/hygiene stage. No new modeling implementation defect was found. The empty-after-populated dataframe-export limitation above is recorded separately, not hidden by a numerical tolerance change. Stage 11C must address the 29 E2E gates by updating actual transitions and derived-state observations before regenerating inventory/coverage. The comprehensive live GUI campaign, isolated built-package release checks and actual-host JASP compatibility still remain release requirements.
+
+
+## Stage 11C — Reconciled E2E definitions and validation metadata
+
+Completed 2026-11-24 from `55363abd` on `ggplot-objects`. The 29 deferred native
+assertions are resolved by real scenario contracts before metadata regeneration,
+not exclusions. See [all 27 option mappings](e2e/STAGE-11C-COVERAGE.md),
+[the Stage 11D plan](e2e/STAGE-11D-PLAN.md) and
+[structured validation results](e2e/stage11c-validation.json).
+
+The final inventory represents all four current definitions and all **150 options**
+(17 Flexplot / 40 LM / 45 GLM / 48 Mixed). Every option retains a planned action
+or explicit indirect contract. Blanket coverage of data, migration markers,
+comparison capability and stores was replaced with named import, derived-state,
+actual saved-protobuf restoration or committed-row/store checkpoints. Hidden
+options cannot be submitted as native edits. Public changes must match expected
+option state, and result names must exist in the current schemas. Removing the
+real transition removes its coverage; negative tests enforce this requirement.
+
+The matrix grows from **73 scenarios / 236 transitions to 77 / 267**, with
+**156 unchanged independent fitted-reference keys**. Additions are LM-17 legacy
+saved state and fitted magnet capability, GLM-24 Automatic/manual/rapid metadata
+and legacy Gaussian, MM-19 independent main/comparison settings/modes/labels and
+MM-20 saved shared-to-independent migration. Existing IDs, datasets and independent
+formula specifications are preserved. Native interaction/polynomial gates are
+explicit rather than relying on inaccessible term destinations. LM-11, LM-16,
+GLM-23 and MM-19 cover independent outputs/editors and retained text. MM-11
+explicitly selects comparison CAS and requires directional ghost evidence.
+MM-15 retains plot-local failure/recovery with intact fits and other output.
+LM-15 restores a retained ordinary grouping preference instead of pretending its
+unavailable control is editable. MM-04 legacy includeCI transitions restore
+protobuf input, without reintroducing a removed checkbox or fixed-effect p output.
+
+Automatic's inferred family/outcome are saved read-only observations tied to real
+outcome selection, Automatic control state, fitted family/link/event coding and
+independent base-R fits. Delayed stale-reply rejection requires request identities
+and controlled live reply evidence; without them it remains blocked. Legacy
+source messages are decoded using installed actual protobuf types; native tests
+verify one-time output/label migration, retained unavailable label rows,
+integer/double numeric representations and repeated serialization. Independent
+Mixed transitions compare the intended REML Model 1 coefficients/covariance with
+unchanged MM-07/1 references through mode, cluster, ghost and visibility changes.
+
+The harness requires explicit native UI state and evidence-backed observations.
+Missing reviews are blocked; incorrect observations fail; reconstructed R6
+provenance cannot establish GUI coverage. Restoration needs the original saved
+input options, file/hash and actual host open. Comparison-only visible images
+are now inspected even with the main graphic hidden. Hidden estimates are
+explicitly recorded as not numerically inspected, then re-enabled for independent
+checks. GLM live-table validation recognizes existing SE identifiers/rounding;
+full-precision confidence-limit checks and stored numerical tolerances remain.
+These correct validation semantics without changing production output.
+
+Only `inventory.json`, `coverage.csv` and `scenario-index.csv` were regenerated in
+place, using the deterministic generator's metadata-only route. Tests regenerate
+numerical references exclusively in temporary directories for comparison. All
+**13 protected non-metadata fixture/reference/schema/provenance files and 140
+approved SVGs remain byte-identical** to the starting commit. Existing result
+identities/schemas and build inputs are unchanged; fingerprint remains
+`68964d65afd6f88cbf4697301d09edc4d32412ad773ddcb1298cd965fb317550`. No module rebuild, dependency change, production/statistical
+change, JASP modification or snapshot approval occurred.
+
+### Final desktop validation
+
+| Check | Passed | Failures / errors / testthat warnings / skips |
+| --- | ---: | --- |
+| Focused E2E design, numerical references, evidence validator and native scenario replay | 882 (32 cases) | 0 / 0 / 0 / 0 |
+| Full native integration, frozen clean source export | 4,837 (92 cases) | 0 / 0 / 0 / 0 |
+| Full package, clean source export | 24,504 (797 cases) | 0 / 0 / 0 / 0 |
+| Approved exact SVG expectations in the full package run | 140 / 140 | None missing, failed, skipped or regenerated |
+| Strict metadata/coverage and original reference-key checks | 150 options / 77 scenarios / 156 reference keys | No unmapped current option |
+
+Full native elapsed 224.2 seconds; full package elapsed
+1038.0 seconds. Runs use the existing desktop libraries,
+NOT_CRAN=true, no snapshot candidates, null PDF device and unlimited test-failure
+collection, with jamovi app libraries appended after system R. The approved
+visual environment remains ARM64 macOS / R 4.5.0 / ggplot2 4.0.3 / vdiffr 1.0.8.
+The full package assertion total is unchanged from Stage 11B.2. Native changes
+resolve all 29 earlier failures and add positive/negative evidence-contract,
+restoration and independent-fit checks. Actual successful expectations are matched
+to each of the 140 approved references, with post-run hashes checked in the
+working tree and clean source. `git diff --check` passes. Local detailed logs,
+RDS results, summaries and protected hashes are ignored `.jamovi-dev/stage11c-*`.
+The installed-testthat R-build startup advisory and pre-existing large Mixed-state
+messages are separate from testthat warning counts.
+
+### Findings and remaining release gates
+
+- **Genuine implementation defects:** no additional modeling defect found. The
+  GLM layout isolation and LM label-preview exceptions remain corrected by
+  Stage 11B.1; no production repair was added here.
+- **Stale validation:** the prior 1 inventory / 27 option / 1 coverage-CSV failures
+  are resolved. Current planned-option coverage has zero gaps; no former scenario
+  or numerical reference was removed to achieve this.
+- **Environment-dependent limitations:** the desktop matches the approved renderer.
+  Historical laptop spelling/rendering results are not new failures here. Keep
+  the previously documented empty-after-populated jmvcore asDF exporter limitation
+  separate; it was neither changed nor reclassified as a modeling defect.
+- **Outstanding GUI:** zero new live GUI executions or passes. The 77 defined
+  scenarios require 267 transitions and 77 final host reopen captures. Native
+  component/replay tests do not establish full live scenario execution. The plan
+  has **39 P0 / 38 P1** scenarios; historical pilot results remain historical.
+  Secondary-monitor/focus targeting, actual files/reopens, restored independent
+  labels and plots, source/destination ghost coordinates and controlled stale
+  replies need fresh evidence. A blocked P0 remains a release blocker.
+- **Outstanding release/JASP:** run isolated built-package checks and test this
+  exact build in the intended JASP host(s), including dependencies/native linkage,
+  four menu entries, option transfer, tables/plots, invalid-input recovery and
+  real .jasp save/reopen/edit. Existing source-level JASP tests are not host proof.
+
+Recommended sequence: run the Stage 11D P0 preflight/recovery and independent-output
+batches, then migrations/family/ghosts and remaining P0; execute/disposition P1.
+File any new product defect separately with captured reproduction before repair.
+Complete isolated built-package and actual-host JASP gates before release approval.
+Stage 11C completes validation-framework reconciliation, not release sign-off.

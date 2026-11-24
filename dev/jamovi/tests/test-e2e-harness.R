@@ -2,15 +2,33 @@ source(file.path(root,"dev/jamovi/e2e/harness.R"),local=TRUE)
 
 e2e_synthetic_observation = function(scenario,index=1L) {
   checkpoint = scenario$steps[[index]]
-  list(source="native_gui",checkpoint_id=paste0(scenario$id,"/",index),analysis_id=2L,
+  observation = list(source="native_gui",checkpoint_id=paste0(scenario$id,"/",index),analysis_id=2L,
     desktop=list(secondary_monitor=TRUE,window_count=1L,owned_document=TRUE),
     accessibility="Synthetic fixture for validator tests; not evidence of actual GUI execution",
-    native_status="complete",visible_options=checkpoint$expected_options,
+    native_status="complete",visible_options=checkpoint$expected_options,ui_state=checkpoint$expected_ui,
+    reviews=lapply(checkpoint$required_observations,function(value)list(source="native_gui_review",evidence="Synthetic validator fixture, not actual GUI evidence",value=value)),
     rendered_images=list(plot=TRUE),saved=list(source="saved_gui_document",sha256="synthetic-fixture",
       analyses=list(list(id=2L,name=scenario$analysis,status="ANALYSIS_COMPLETE",error="",revision=0L,
-        options=checkpoint$expected_options,results=list(name="results",type="group",status="ANALYSIS_COMPLETE",error="",
+        options=c(checkpoint$expected_options,checkpoint$expected_derived_options),results=list(name="results",type="group",status="ANALYSIS_COMPLETE",error="",
           stale=FALSE,visible="YES",children=list(list(name="plot",type="image",status="ANALYSIS_COMPLETE",stale=FALSE,
             error="",visible="YES",resource_exists=TRUE)))))))
+  if(length(checkpoint$required_observations) || checkpoint$action=="edit_generated_plot_label_rows") {
+    for(name in names(checkpoint$expected_result_visibility)) {
+      children = observation$saved$analyses[[1]]$results$children
+      index = which(vapply(children,function(child)identical(child$name,name),logical(1)))
+      if(!length(index)) {
+        index = length(children)+1L
+        children[[index]] = list(name=name,type=if(name %in% c("plot","comparisonplot"))"image" else "table",
+          status="ANALYSIS_COMPLETE",stale=FALSE,error="",resource_exists=TRUE)
+      }
+      children[[index]]$visible = if(isTRUE(checkpoint$expected_result_visibility[[name]]))"YES" else "NO"
+      if(name %in% c("plot","comparisonplot"))
+        observation$rendered_images[[name]] = isTRUE(checkpoint$expected_result_visibility[[name]])
+      observation$saved$analyses[[1]]$results$children = children
+    }
+  }
+  observation
+
 }
 
 test_that("harness fails controlled visible-option, numerical, missing/stale and restoration faults", {
@@ -329,4 +347,66 @@ test_that("custom label checkpoints require rendered text rather than saved opti
   expect_identical(e2e_checkpoint(scenario,2L,observation)$status,"passed")
   observation$plot_labels$evidence = NULL
   expect_identical(e2e_checkpoint(scenario,2L,observation)$status,"blocked")
+})
+
+test_that("Stage 11C reviews, derived values and comparison-only images fail closed", {
+  manifest = jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))
+  scenario = Filter(function(s)s$id=="GLM-24",manifest$scenarios)[[1]]
+  good = e2e_synthetic_observation(scenario)
+  good$saved$analyses[[1]]$options = c(good$saved$analyses[[1]]$options,scenario$steps[[1]]$expected_derived_options)
+  expect_identical(e2e_checkpoint(scenario,1L,good)$status,"passed")
+  bad = good;bad$reviews = NULL
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"blocked")
+  bad = good;bad$reviews$automatic_binary$source = "reconstructed_R6"
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"blocked")
+  bad = good;bad$reviews$automatic_binary$value = FALSE
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"failed")
+  bad = good;bad$saved$analyses[[1]]$options$automaticFamily = "gaussian"
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"failed")
+  scenario$steps[[1]]$expected_ui = list("family.value"="auto")
+  expect_identical(e2e_checkpoint(scenario,1L,good)$status,"blocked")
+  good$ui_state = list("family.value"="gaussian")
+  expect_identical(e2e_checkpoint(scenario,1L,good)$status,"failed")
+  good$ui_state = list("family.value"="auto")
+  expect_identical(e2e_checkpoint(scenario,1L,good)$status,"passed")
+  scenario$steps[[1]]$expected_options$graphic = FALSE
+  scenario$steps[[1]]$expected_options$compare = TRUE
+  scenario$steps[[1]]$expected_options$comparisonGraphic = TRUE
+  good$visible_options = scenario$steps[[1]]$expected_options
+  good$saved$analyses[[1]]$options = c(good$visible_options,scenario$steps[[1]]$expected_derived_options)
+  scenario$steps[[1]]$expected_result_visibility = list(plot=FALSE,comparisonplot=TRUE)
+  good$saved$analyses[[1]]$results$children = list(
+    list(name="plot",type="image",status="ANALYSIS_COMPLETE",stale=FALSE,error="",visible="NO",resource_exists=FALSE),
+    list(name="comparisonplot",type="image",status="ANALYSIS_COMPLETE",stale=FALSE,error="",visible="YES",resource_exists=TRUE))
+  good$rendered_images = list(comparisonplot=TRUE)
+  expect_identical(e2e_checkpoint(scenario,1L,good)$status,"passed")
+  bad = good;bad$saved$analyses[[1]]$results$children[[2]]$resource_exists = FALSE
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"failed")
+  bad = good;bad$rendered_images = list()
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"blocked")
+  bad = good;bad$saved$analyses[[1]]$results$children = list()
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"failed")
+})
+
+test_that("restoration checkpoints need the original actual saved input and a host open", {
+  manifest = jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))
+  scenario = Filter(function(s)s$id=="MM-20",manifest$scenarios)[[1]]
+  good = e2e_synthetic_observation(scenario)
+  good$saved$analyses[[1]]$options = c(good$visible_options,scenario$steps[[1]]$expected_derived_options)
+  good$restoration = list(source="saved_gui_document",opened_in_gui=TRUE,input_file="synthetic-validator-input.omv",
+    sha256="synthetic-only",original_options=scenario$steps[[1]]$restoration$saved_options)
+  expect_identical(e2e_checkpoint(scenario,1L,good)$status,"passed")
+  bad = good;bad$restoration = NULL
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"blocked")
+  bad = good;bad$restoration$original_options$outputOptionsVersion = 2L
+  expect_identical(e2e_checkpoint(scenario,1L,bad)$status,"failed")
+})
+
+
+test_that("saved numeric revisions survive protobuf integer/double representation", {
+  expect_true(e2e_option_equal(2L,2))
+  expect_true(e2e_option_equal(list(3L,5L),c(3,5)))
+  expect_false(e2e_option_equal(FALSE,0))
+  expect_false(e2e_option_equal("2",2))
+  expect_false(e2e_option_equal(2L,3))
 })

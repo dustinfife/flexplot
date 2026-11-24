@@ -24,7 +24,8 @@ e2e_option_equal = function(first, second) {
   # jsonlite's one-element arrays and R character vectors represent the same option.
   canonical = function(value) {
     if(is.null(value)) return(NULL)
-    if(!is.list(value) && length(value)<=1L) return(unname(value))
+    # Protobuf numeric options may reopen as doubles instead of R integers.
+    if(!is.list(value) && length(value)<=1L) return(if(is.numeric(value))as.numeric(value) else unname(value))
     if(!is.list(value)) value = unname(as.list(value))
     lapply(value,canonical)
   }
@@ -53,6 +54,34 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
       missing = c(missing,paste("visible option",name)) else if(name %in% names(observation$visible_options))
       if(!e2e_option_equal(observation$visible_options[[name]],analysis$options[[name]]))
         problems = c(problems,paste("Visible/saved mismatch:",name))
+  }
+  for(name in names(checkpoint$expected_derived_options)) {
+    if(!e2e_option_equal(analysis$options[[name]],checkpoint$expected_derived_options[[name]]))
+      problems = c(problems,paste("Derived saved option mismatch:",name))
+  }
+  for(name in names(checkpoint$expected_ui)) {
+    if(!name %in% names(observation$ui_state)) missing = c(missing,paste("native UI state",name)) else
+      if(!e2e_option_equal(observation$ui_state[[name]],checkpoint$expected_ui[[name]]))
+        problems = c(problems,paste("Incorrect native UI state:",name))
+  }
+  # Explicit indirect contracts require independent, inspectable rendered/restoration
+  # evidence. Neither option presence nor an R6 run can satisfy these reviews.
+  for(name in names(checkpoint$required_observations)) {
+    review = observation$reviews[[name]]
+    if(is.null(review) || !identical(review$source,"native_gui_review") ||
+        !is.character(review$evidence) || length(review$evidence)!=1L || !nzchar(review$evidence)) {
+      missing = c(missing,paste("native observation",name))
+    } else if(!e2e_option_equal(review$value,checkpoint$required_observations[[name]]))
+      problems = c(problems,paste("Incorrect native observation:",name))
+  }
+  if(identical(checkpoint$action,"restore_saved_options")) {
+    restoration = observation$restoration
+    if(!isTRUE(restoration$opened_in_gui) || !identical(restoration$source,"saved_gui_document") ||
+        !is.character(restoration$input_file) || length(restoration$input_file)!=1L ||
+        !nzchar(restoration$input_file) || !nzchar(paste(restoration$sha256,collapse=""))) {
+      missing = c(missing,"original legacy document, protobuf inspection and actual host open")
+    } else if(!e2e_option_equal(restoration$original_options,checkpoint$restoration$saved_options))
+      problems = c(problems,"Legacy input options differ from the restoration contract")
   }
   changed = !is.null(previous) && any(vapply(names(checkpoint$expected_options),function(name)
     !e2e_option_equal(checkpoint$expected_options[[name]],previous$saved_options[[name]]),logical(1)))
@@ -113,14 +142,15 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
     errors = vapply(visible,function(e)nzchar(e$error),logical(1))
     if(nzchar(analysis$error) || any(errors)) problems = c(problems,"Visible result contains an error")
     images = Filter(function(e)identical(e$type,"image"),visible)
-    if(!identical(analysis$options$graphic,FALSE)) {
-      if(!length(images)) problems = c(problems,"Missing visible plot")
-      for(image in images) {
-        if(!isTRUE(image$resource_exists)) problems = c(problems,paste("Missing image resource:",image$name))
-        if(!isTRUE(observation$rendered_images[[image$name]])) missing = c(missing,paste("actual displayed image",image$name))
-      }
+    needs_image = !identical(analysis$options$graphic,FALSE) ||
+      isTRUE(analysis$options$compare) && !identical(analysis$options$comparisonGraphic,FALSE)
+    if(needs_image && !length(images)) problems = c(problems,"Missing visible plot")
+    for(image in images) {
+      if(!isTRUE(image$resource_exists)) problems = c(problems,paste("Missing image resource:",image$name))
+      if(!isTRUE(observation$rendered_images[[image$name]])) missing = c(missing,paste("actual displayed image",image$name))
     }
   }
+
   # Saved error metadata is not evidence that the user can see a diagnostic.
   # Require a separately observed, analysis-scoped accessibility/DOM message.
   patterns = unlist(checkpoint$expected_warnings_or_errors, use.names=FALSE)
@@ -178,6 +208,10 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
         if(i==1L) "fixed" else "fixed2" else "coefficients"
       # LM/GLM do not expose Model 2 coefficient tables: do not claim they were checked.
       if(i>1L && scenario$analysis!="mixedmodel") next
+      if(identical(analysis$options[[if(scenario$analysis=="glmgeneralized") "showEstimates" else "estimates"]],FALSE)) {
+        numerical[[name]] = list(status="not_checked_hidden",reason="Re-enable estimates and compare the independent reference before claiming numerical GUI coverage")
+        next
+      }
       tables = Filter(function(e)identical(e$name,name) && identical(e$type,"table"),visible)
       if(length(tables)!=1L) { problems = c(problems,paste("Missing coefficient table:",name));next }
       table = tables[[1]]
@@ -191,12 +225,13 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
       if(length(actual)!=length(expected$coefficients) || any(!is.finite(actual)) ||
           any(abs(actual-unname(expected$coefficients))>tolerance)) problems = c(problems,paste("Incorrect coefficients:",name))
       numerical[[name]] = list(actual=actual,expected=unname(expected$coefficients),tolerance=tolerance)
-      se_name = if(name=="coefficients") "SE" else "se"
+      se_name = if(name=="coefficients") intersect(c("SE","Std..Error","Std. Error"),names(columns))[1] else "se"
+      if(is.na(se_name)) { problems = c(problems,"Missing coefficient SE column"); next }
       for(field in c(se_name,"lower","upper")) {
         expected_value = if(field==se_name) expected$se else expected[[field]]
         observed_value = as.numeric(unlist(columns[[field]]))
         if(length(observed_value)!=length(expected_value) || any(!is.finite(observed_value)) ||
-            any(abs(observed_value-unname(expected_value))>if(scenario$analysis=="mixedmodel")1e-5 else 1e-8))
+            any(abs(observed_value-unname(expected_value))>if(scenario$analysis=="mixedmodel")1e-5 else if(name=="coefficients" && field==se_name && se_name!="SE") .00050001 else 1e-8))
           problems = c(problems,paste("Incorrect coefficient uncertainty:",name,field))
       }
     }
@@ -214,6 +249,7 @@ e2e_run_scenario = function(scenario, driver, references, output, timeout=30, no
     index = tasks[number];restored = number>length(scenario$steps)
     request = list(id=paste0(scenario$id,"/",index,if(restored)"/restored"),scenario=scenario$id,
       analysis=scenario$analysis,dataset=scenario$dataset,checkpoint=index,restored=restored,
+      initialization=if(number==1L)scenario$initialization else NULL,
       action=if(restored)"save_close_reopen_through_gui" else scenario$steps[[index]],timeout=timeout)
     path = file.path(output,paste0(sprintf("%02d",number),"-request.json"))
     jsonlite::write_json(request,path,pretty=TRUE,auto_unbox=TRUE,null="null",digits=NA)
