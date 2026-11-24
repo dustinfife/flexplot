@@ -137,21 +137,34 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
           self$results$plotExplanation$setContent("")
           if (self$options$graphic) {
             previous_theme = theme_set(theme_bw(base_size=16))
-            plot = suppressWarnings(tryCatch(jamovi_lm_display(model,data,self$options),
-              error=function(error) NULL,finally=theme_set(previous_theme)))
-            if (!is.null(plot)) {
+            preview = suppressWarnings(tryCatch({
+              plot = jamovi_lm_display(model,data,self$options)
               info = jamovi_lm_label_info(model,self$options)
               jamovi_plot_sync_labels(self$options,plot,info$layout,info$context)
               jamovi_model_publish_ghost_note(self$results$plotExplanation,
                 jamovi_plot_apply_labels(plot,self$options$plotLabels,info$context,info$layout),self$options$graphic)
+              NULL
+            },error=identity,finally=theme_set(previous_theme)))
+            if (inherits(preview,"error")) {
+              output$plotError = conditionMessage(preview)
+              self$results$plot$setState(output)
+              self$results$plot$setError(conditionMessage(preview))
+              jamovi_diagnostic(self$results$plotExplanation,conditionMessage(preview),error=TRUE)
             }
           }
           if (self$options$compare && self$options$comparisonGraphic) {
-            plot = suppressWarnings(tryCatch(jamovi_glm_comparison_plot(comparison),error=function(error) NULL))
-            if (!is.null(plot)) {
+            preview = suppressWarnings(tryCatch({
+              plot = jamovi_glm_comparison_plot(comparison)
               info = jamovi_lm_label_info(model,self$options,TRUE,comparison$formula)
               jamovi_plot_sync_labels(self$options,plot,info$layout,info$context,
                 rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
+              NULL
+            },error=identity))
+            if (inherits(preview,"error")) {
+              comparison$plotError = conditionMessage(preview)
+              self$results$comparisonplot$setState(comparison)
+              self$results$comparisonplot$setError(conditionMessage(preview))
+              jamovi_diagnostic(self$results$explanation,conditionMessage(preview),error=TRUE)
             }
           }
           # A failed supplementary summary must not remove valid coefficients.
@@ -185,6 +198,8 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
                 TRUE
             },error=function(error) {
                 image$setState(NULL)
+                jamovi_diagnostic(self$results$explanation,conditionMessage(error),error=TRUE)
+                self$results$explanation$setVisible(self$options$comparisonGraphic)
                 jamovi_glm_plot_error(image,error)
             })
         },
@@ -193,6 +208,7 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
             # Legacy line/center options remain readable but do not select a
             # second smoother or observed-group summary for a fitted model.
             tryCatch({
+                if (!is.null(image$state$plotError)) stop(image$state$plotError,call.=FALSE)
                 formula = image$state$formula
                 data = image$state$data
                 mod = lm(formula, data=data)
@@ -205,6 +221,8 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
                 TRUE
             }, error=function(error) {
                 image$setState(NULL)
+                jamovi_diagnostic(self$results$plotExplanation,conditionMessage(error),error=TRUE)
+                self$results$plotExplanation$setVisible(self$options$graphic)
                 jamovi_glm_plot_error(image,error)
             })
 			},

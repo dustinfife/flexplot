@@ -165,13 +165,6 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         jamovi_glm_generalized_comparison_table(self$results$comparison, comparison)
         self$results$comparisonplot$setState(comparison)
         self$results$comparisonplot$setVisible(self$options$comparisonGraphic)
-        if (self$options$comparisonGraphic) {
-          roles = flexplot_axis_given(comparison$formula)
-          guide = jamovi_glm_plot_guide(list(model=comparison$model1, models=list(comparison$model1, comparison$model2), data=comparison$data),
-            roles$axis[1], roles$given[!is.na(roles$given)], style=self$options$comparisonPlotStyle, scale=self$options$comparisonPlotScale)
-          self$results$comparisonPlotExplanation$setContent(jamovi_plot_compact_notes(guide))
-          self$results$comparisonPlotExplanation$setVisible(nzchar(guide))
-        }
       }
       model = state$model
       summary = summary(model)
@@ -212,12 +205,25 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         }
       }
       if (!is.null(comparison) && self$options$comparisonGraphic) {
-        plot = suppressWarnings(tryCatch(jamovi_glm_generalized_comparison_plot(comparison,self$options$comparisonSe,
-          self$options$comparisonPlotStyle,self$options$comparisonPlotScale),error=function(error) NULL))
-        if (!is.null(plot)) {
+        preview = suppressWarnings(tryCatch({
+          if (!is.null(comparison$plotError)) stop(comparison$plotError,call.=FALSE)
+          roles = flexplot_axis_given(comparison$formula)
+          guide = jamovi_glm_plot_guide(list(model=comparison$model1, models=list(comparison$model1, comparison$model2), data=comparison$data),
+            roles$axis[1], roles$given[!is.na(roles$given)], style=self$options$comparisonPlotStyle, scale=self$options$comparisonPlotScale)
+          self$results$comparisonPlotExplanation$setContent(jamovi_plot_compact_notes(guide))
+          self$results$comparisonPlotExplanation$setVisible(nzchar(guide))
+          plot = jamovi_glm_generalized_comparison_plot(comparison,self$options$comparisonSe,
+            self$options$comparisonPlotStyle,self$options$comparisonPlotScale)
           info = jamovi_glm_label_info(comparison,self$options,TRUE)
           jamovi_plot_sync_labels(self$options,plot,info$layout,info$context,
             rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
+          NULL
+        },error=identity))
+        if (inherits(preview,"error")) {
+          comparison$plotError = conditionMessage(preview)
+          self$results$comparisonplot$setState(comparison)
+          self$results$comparisonplot$setError(conditionMessage(preview))
+          jamovi_diagnostic(self$results$comparisonPlotExplanation,conditionMessage(preview),error=TRUE)
         }
       }
     },
@@ -229,6 +235,9 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         print(jamovi_plot_apply_labels(plot,self$options$comparisonPlotLabels,info$context,info$layout))
         TRUE
       }, error=function(error) {
+        image$setState(NULL)
+        jamovi_diagnostic(self$results$comparisonPlotExplanation,conditionMessage(error),error=TRUE)
+        self$results$comparisonPlotExplanation$setVisible(self$options$comparisonGraphic)
         jamovi_glm_plot_error(image, error)
       })
     },

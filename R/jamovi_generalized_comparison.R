@@ -16,8 +16,11 @@ jamovi_glm_generalized_comparison = function(options, data) {
   primary$omitted = nrow(data)-nrow(primary$data)
   model1 = primary$model
   model2 = secondary$model
-  layout = jamovi_comparison_layout(list(model1, model2), primary$data,
-    options$comparisonX, options$comparisonPanels)
+  # A stale saved plot role must not discard either fit or their statistics.
+  layout = tryCatch(jamovi_comparison_layout(list(model1, model2), primary$data,
+    options$comparisonX, options$comparisonPanels), error=identity)
+  plot_error = if (inherits(layout,"error")) conditionMessage(layout) else NULL
+  if (!is.null(plot_error)) layout = NULL
   # model.comparison supplies the established AIC/BIC/Bayes-factor presentation.
   comparison = model.comparison(model1, model2)
   # Test nesting in the fitted design space, including categorical contrasts.
@@ -40,7 +43,7 @@ jamovi_glm_generalized_comparison = function(options, data) {
     }
   }
   list(model1=model1, model2=model2, primary=primary, data=primary$data,
-    formula=layout, statistics=comparison$statistics, lr=lr, df=df, p=p,
+    formula=layout, plotError=plot_error, statistics=comparison$statistics, lr=lr, df=df, p=p,
     warnings=unique(c(primary$warnings, secondary$warnings)))
 }
 
@@ -79,6 +82,7 @@ jamovi_glm_comparison_emphasis = function(plot) {
 }
 
 jamovi_glm_generalized_comparison_plot = function(state, se=TRUE, style="auto", scale="probability") {
+  if (!is.null(state$plotError)) stop(state$plotError,call.=FALSE)
   model1 = state$model1
   model2 = state$model2
   x = flexplot_axis_given(state$formula)$axis[1]

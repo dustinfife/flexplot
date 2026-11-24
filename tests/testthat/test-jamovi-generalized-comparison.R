@@ -153,7 +153,12 @@ test_that("GLM comparison toggles clear results and preserve the default single-
   option$value = TRUE
   option = options$option("comparisonX")
   option$value = "missing"
-  expect_error(flexplot:::jamovi_glm_generalized_comparison(options, data), "Visualization variables")
+  comparison = flexplot:::jamovi_glm_generalized_comparison(options, data)
+  expect_match(comparison$plotError, "Visualization variables")
+  expect_null(comparison$formula)
+  expect_s3_class(comparison$model1, "glm")
+  expect_equal(comparison$statistics$aic, round(c(AIC(comparison$model1),AIC(comparison$model2)),3))
+  expect_error(flexplot:::jamovi_glm_generalized_comparison_plot(comparison), "Visualization variables")
 })
 
 test_that("comparison uncertainty uses each model's existing family-specific link intervals", {

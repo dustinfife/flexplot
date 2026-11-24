@@ -573,3 +573,62 @@ Comprehensive live jamovi coverage, isolated built-package checks and actual-hos
 JASP compatibility remain release requirements. No new desktop GUI or JASP
 campaign was performed, and no production source, test expectations or approved
 visual baselines were changed in this continuation.
+
+## Stage 11B.1 error isolation
+
+Completed on 2026-11-24 from `21e57176` on `ggplot-objects`.
+
+GLM comparison layout failures now remain in the comparison image's `plotError`
+state, preserving both fits, their common sample, coefficient tables and
+comparison statistics. Guide/catalog preparation and rendering use plot-local
+error handling and replace stale explanatory content. Hidden comparison output
+remains independent. LM's preview guard now includes label/context/catalog and
+ghost-note preparation; preview and renderer errors produce terminal diagnostic
+images while numerical and supplementary results continue. The next valid run
+clears the diagnostic and recovers in the same analysis. Existing option/result
+identifiers, saved label keys/stores and migration versions are unchanged.
+
+The focused package run passes 684 assertions; native-handler/protobuf/restoration
+checks pass 606, including 25 new saved-option assertions. Regressions cover
+visible/hidden GLM recovery, explicit and Automatic families, common samples,
+renderer-only errors, LM preview and comparison label preparation, label
+persistence and protocol reopen. Actual PNG files, result status, cleared image
+state and retained numerical tables are checked. Fitting/inference failures are
+not converted into layout errors.
+
+Four representative LM/Gaussian/Binomial/Automatic captures are identical to
+Stage 11A for tables, coefficients/covariance, fitted values and rows, built plot
+coordinates and ghost metadata, including interactions, quadratics and panels.
+The module was built and installed using existing caches with source fingerprint
+`68964d65afd6f88cbf4697301d09edc4d32412ad773ddcb1298cd965fb317550`;
+archive and installed-payload hashes were independently verified. No dependency,
+JASP, E2E manifest, unrelated stale test, `.DS_Store` or visual-reference changes
+were made. See the audit's Stage 11B.1 section for detailed evidence.
+
+Live jamovi 2.7.41 verified the stale GLM comparison role and a controlled LM
+layout error, with valid estimates and comparison statistics retained. A test-data
+edit forced native recalculation before opening the options panes; changed
+coefficient values confirmed the results were not merely cached fixture output.
+Correcting the roles recovered both plots and removed their diagnostics. GLM
+main/comparison visibility remained independent. The user's help was needed only
+to open the disposable file through the macOS picker; the review was subsequently
+closed and test edits discarded. Injected label-helper/renderer exceptions and
+hidden stale-layout cases are R6/native evidence, not additional live GUI claims.
+The comprehensive GUI campaign and JASP compatibility remain outstanding.
+
+The final full package suite completes from a fresh source export with **23,767
+passed, 15 failed assertions, 1 error, zero testthat warnings and zero skips**
+across 796 test cases. All **140 approved visual comparisons pass** and their
+files are byte-identical. The repository's 26 unapproved SVG artifacts and all
+`.DS_Store` files remain untouched. Compared with Stage 11A's 23,253/15/2 baseline,
+the LM preview error is resolved; the extra passes come from new coverage and
+assertions now reached. The existing direct-helper stale-axis assertion was
+updated to require retained fits/statistics and a plot-local error. No unrelated
+stale expectations were repaired.
+
+The remaining failures are twelve GLM note/visibility assertions, two Mixed
+image-path assertions, one SVG inventory assertion and one obsolete GLM
+table-note error. The complete laptop native audit's 42 classified failures
+remain separate from this stage's passing 606-assertion selection. Next stages
+should address the verified stale tests, portable oracles and repository/E2E
+hygiene before rerunning release gates and the broader GUI/JASP campaigns.
