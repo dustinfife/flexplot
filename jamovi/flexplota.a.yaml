@@ -44,6 +44,7 @@ options:
       default: true
       
     - name: diff
+      hidden: true
       title: Difference plot (related t)
       type: Bool
       default: false 

@@ -47,7 +47,7 @@ flexplot_render_object = function(data, outcome, axis, given,
       raw.data=raw.data,
       sample=sample,
       jitter=jitter,
-      show_fitted=magnet_summary,
+      show_fitted=magnet_summary && !suppress_smooth,
       outcome_labels=magnet_labels,
       connect_fitted=magnet_lines
     ))

@@ -1,65 +1,60 @@
+const updates = new WeakMap();
+
 const events = {
     update: function(ui) {
         updateUI(ui, this);
     },
-
     onChange_preds: function(ui) {
         updateUI(ui, this);
     },
-
     onChange_given: function(ui) {
         updateUI(ui, this);
     },
-
-    // data changed event
-    onRemoteDataChanged: function(ui, data) {
+    onRemoteDataChanged: function(ui) {
         updateUI(ui, this);
     }
 };
 
 const updateUI = function(ui, context) {
+    const request = {};
+    updates.set(ui, request);
+    const predictors = ui.preds.value() || [];
+    const panels = ui.given.value() || [];
+    const hasPanels = panels.length > 0;
+    ui.view.model.options.beginEdit();
+    ui.suppr.setPropertyValue('enable', true);
+    ui.ghost.setPropertyValue('enable', hasPanels);
+    ui.resid.setPropertyValue('enable', hasPanels);
+    ui.bins.setPropertyValue('enable', false);
+    ui.view.model.options.endEdit();
 
-    // change depending on numeric/categorical variable
-    let columnNames = ui.preds.value();
-    let givenNames = ui.given.value();
-
-    // if givenNames array is empty or null
-    if ( ! givenNames || givenNames.length === 0) {
-          ui.view.model.options.beginEdit();
-          ui.ghost.setPropertyValue('enable', false);
-          ui.bins.setPropertyValue('enable', false);
-          ui.resid.setPropertyValue('enable', false);
-          ui.view.model.options.endEdit();
-    }
-    else {
+    // Only the second axis and conditioning variables are binned. Numeric
+    // storage alone does not make nominal/ordinal variables continuous.
+    const binning = [...new Set([...predictors.slice(1, 2), ...panels])];
+    const names = [...new Set([...predictors.slice(0, 1), ...binning])];
+    Promise.all(names.map(columnName => context.requestData('column', {
+        columnName, properties: ['dataType', 'measureType']
+    }))).then(columns => {
+        if (updates.get(ui) !== request) return;
+        const metadata = new Map(names.map((name, index) => [name, columns[index]]));
+        const numeric = column => column && column.columnFound &&
+            column.measureType === 'continuous' && ['decimal', 'integer'].includes(column.dataType);
         ui.view.model.options.beginEdit();
-        ui.ghost.setPropertyValue('enable', true);
-        ui.bins.setPropertyValue('enable', true);
-        ui.resid.setPropertyValue('enable', true);
+        ui.bins.setPropertyValue('enable', binning.some(name => numeric(metadata.get(name))));
+        const first = metadata.get(predictors[0]);
+        if (first && first.columnFound) {
+            const numericStorage = first.dataType === 'decimal' || first.dataType === 'integer';
+            ui.line.setPropertyValue('enable', numericStorage);
+            ui.se.setPropertyValue('enable', numericStorage);
+            ui.center.setPropertyValue('enable', first.dataType === 'text');
+            ui.plmethod.setPropertyValue('enable', first.dataType === 'text');
+        }
         ui.view.model.options.endEdit();
-    }
-
-    // if columnNames array is not empty or null
-    if (columnNames && columnNames.length > 0) {
-        let columnName = columnNames[0];
-        //request column info - dataType and measureType
-        let promise = context.requestData("column", { columnName: columnName, properties: ["dataType", "measureType"] })
-        promise.then(rData => {
-            if (rData.columnFound) {
-                console.log(rData.dataType);
-                console.log(rData.measureType);
-
-                //disable checkbox call 'suppr' and 'line' when the dataType is not an integer
-                ui.view.model.options.beginEdit();
-                ui.suppr.setPropertyValue('enable', rData.dataType === 'decimal' || rData.dataType === 'integer');
-                ui.line.setPropertyValue('enable', rData.dataType === 'decimal' || rData.dataType === 'integer');
-                ui.se.setPropertyValue('enable', rData.dataType === 'decimal' || rData.dataType === 'integer' );
-                ui.center.setPropertyValue('enable', rData.dataType === 'text' );
-                ui.plmethod.setPropertyValue('enable', rData.dataType === 'text' );
-                ui.view.model.options.endEdit();
-            }
-        });
-    }
+    }).catch(() => {
+        // An unavailable column cannot establish bin eligibility. Do not let
+        // an obsolete failed request disable a newly eligible layout.
+        if (updates.get(ui) === request) ui.bins.setPropertyValue('enable', false);
+    });
 };
 
 module.exports = events;

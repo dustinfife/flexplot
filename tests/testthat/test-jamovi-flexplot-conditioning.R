@@ -97,7 +97,7 @@ test_that("the callback keeps the existing two-panel ghost route", {
   capture = new.env(parent=emptyenv())
   local_mocked_bindings(jamovi_plots=jamovi_flexplot_recorder(capture))
   options = flexplot:::flexplotaOptions$new(out="y",preds="x",given=c("a","b"),
-    line="Regression",se=FALSE,ghost=TRUE,suppr=TRUE,jittx=0,jitty=0)
+    line="Regression",se=FALSE,ghost=TRUE,suppr=FALSE,jittx=0,jitty=0)
   analysis = flexplot:::flexplotaClass$new(options=options,data=small)
   expect_true(analysis$run())
   expect_no_warning({plot = jamovi_flexplot_render(analysis,capture)})

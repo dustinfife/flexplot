@@ -50,7 +50,7 @@ jamovi_plots = function(formula, data, options=NULL) {
     return(p)
   }
   
-  if (given_exists & ghost==TRUE){
+  if (given_exists && ghost && !suppr){
     
     p = flexplot(formula, data=data, se=se,spread=se.type, 
                  method=line, alpha = alpha, ghost.line="black", 

@@ -24,7 +24,7 @@ inspection. Keep stages small and preserve statistical behavior.
 | 11B.1 | GLM/LM plot-error isolation | Complete: `ba5d76e1` |
 | 11B.2 | Stale tests and artifact retirement | Complete: `55363abd` |
 | 11C | E2E coverage and validation metadata | Complete; validation below |
-| 11D | Current-build live GUI campaign | Pilot executed; remaining 70 scenarios unexecuted |
+| 11D | Current-build live GUI campaign | Paused for manual usability review; see latest entry |
 | 11D.2 | Resolve live pilot findings | Complete; [correction report](e2e/STAGE-11D2-CORRECTIONS.md) |
 | Release | Isolated package checks and actual-host JASP compatibility | Remaining |
 
@@ -891,3 +891,87 @@ settled-save evidence before rerunning affected scenarios. Then resume authorize
 P0/P1 batches, isolated built-package validation and actual-host JASP/.jasp checks.
 This batch supplies evidence and blockers; it neither repairs them nor approves
 release. Earlier statements about 70 unlaunched scenarios are historical.
+
+
+## Manual usability review — ordinary Flexplot corrections
+
+Completed 2026-11-25 from `c57f1af5` on `ggplot-objects`. The comprehensive E2E
+campaign is **paused for the user's manual review**; no new campaign scenario,
+LM/GLM/Mixed feature work, JASP work or release-package campaign was started.
+Earlier Stage 11D ledgers retain their original build identities and verdicts.
+
+- Removed the related-t checkbox from ordinary Flexplot. Its existing `diff`
+  Bool option/default and R adapter behavior remain for saved analyses. The option
+  is explicitly hidden in the analysis declaration because the jamovi compiler
+  otherwise adds an omitted control back into the compiled interface. Core paired
+  differences remain available in R; actual protobuf restoration is tested.
+- Ordinary suppression now bypasses the reference-ghost route while retaining the
+  saved `ghost` preference. Curves, categorical fitted means/uncertainty and their
+  ghosts disappear together; raw observations remain. Restoring fits restores
+  supported ghosts. Binary categorical probability markers also honor suppression:
+  the shared magnet renderer now gates `show_fitted` with `!suppress_smooth`.
+  Explicit comparison predictions retain their existing separate path, checked by
+  the directly affected magnet-comparison regressions. No fit calculations changed.
+- The suppression checkbox remains enabled for continuous, categorical and empty
+  predictor layouts; measurement type no longer traps a retained true value.
+- Bins are enabled only for a continuous numeric second predictor or continuous
+  numeric conditioning variable. A numeric first predictor alone, integer-stored
+  nominal/ordinal roles, or categorical panels do not qualify. Native metadata
+  requests refresh on predictor/panel changes and remote data changes; request
+  identity rejects obsolete replies. Eligibility changes do not reset `bins`.
+  Other ordinary fit controls retain their existing enablement rules.
+
+Citation review: commit `6a57fc36` moved GLM citations from individual tables to
+analysis-level refs. Ordinary `jamovi/flexplota.r.yaml` **already uses that solution**:
+root `refs: [flexplot, graphicalAnalysis]`, with no plot/item citation declarations.
+They identify Fife (2022) and Fife et al. (2021) in `jamovi/00refs.yaml`. Read-only
+inspection of jamovi 2.7.41's `resultsview-CmqlfJYb.js` confirms its
+`jmv-reference-numbers` component maps reference IDs to numbered spans and the
+result element appends that component. Actual native screenshots show [3] [4] at
+the analysis footer, with their full bibliography and jamovi/R software attribution
+preserved. Analysis-level placement avoids table-attached markers but does not
+remove the host-generated footer numbers. That remaining placement is a host
+limitation; no citation was deleted, CSS hidden, or installed renderer modified.
+
+Focused validation passed **3,389 package assertions / 53 cases** and **32 native
+R assertions / two cases**, zero failures/errors/test warnings/skips. The native
+subset compiles/bundles ordinary Flexplot against the installed automatic-handler
+runtime and exercises reorder/reassignment, metadata-type changes, stale replies,
+unavailable columns, preference retention and citation declarations. New package
+regressions cover continuous/categorical suppression/restoration, probability
+markers, raw points, ghosts, callback transitions, univariate validity and real
+legacy protobuf options. The older conditioning test now requests fits explicitly
+when asserting that ghosts are drawn. Directly affected magnet/ghost/related-plot
+regressions and the four existing ordinary adapter SVG comparisons pass. No full
+package/native suite was run. All 140 approved SVGs and 16 deterministic artifact
+files retain their hashes; no visual baseline was regenerated or approved.
+
+Built and installed 0.27.0 using the existing dependency cache. Final installed/
+running preflight passed with source fingerprint
+`2cdaca06b435693667527848f5e60c361777f1ec15375459ac0b1c85bc88df32`, archive
+`48366487b5145d0fa7d52f03a580c44b69efd081d1ed667b9fda8ed320a3f012`, payload
+`86d2cd6c9e261bdf8f949a21f323f9199b8b2e4ec1db099387342e4ff9154c49`.
+The latest module is left installed. No LM, GLM or Mixed definition/handler was
+changed; this focused validation does not promote historical GUI passes to the
+new build or claim a new complete-suite baseline.
+
+Brief actual jamovi 2.7.41 smoke checks confirmed related-t control absence,
+continuous fitted/band/ghost suppression, categorical transition with the checkbox
+still enabled, restored categorical summaries/ghosts, numeric second-axis and
+numeric-panel bin eligibility, retained value 5 while disabled, and native citation
+placement. A settled native save is complete with categorical predictor `binary`,
+panels `group,z`, bins 5 and retained ghost preference. Probability-marker and
+measurement-type/reorder edge cases are additionally covered by the focused
+renderer/compiled-handler tests; they are not claimed as extra live campaign
+transitions. Monitor placement was unconfirmed. Automation stopped safely when
+the foreground became the user's `testing` document; after the user requested
+continuation, native Recent reopened the owned review file. One bounded bridge
+operation timed out and was rebound; an initial incomplete transfer capture is
+retained as a probe, not a categorical-first pass. The completed owned review
+was saved/closed, returning to `testing`; no user document was edited or closed.
+Local screenshots, AX captures, saved OMV/inspection, receipt/preflight and test
+logs are under `.jamovi-dev/manual-flexplot-20261125/`.
+
+Stop here and await the next manual-feedback batch. Comprehensive GUI acceptance,
+previous Stage 11D.3 findings, isolated package checks and actual-host JASP remain
+separate outstanding release work.

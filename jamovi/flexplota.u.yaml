@@ -42,8 +42,6 @@ children:
     children:
       - type: CheckBox
         name: resid
-      - type: CheckBox
-        name: diff
   - type: CollapseBox
     label: Fit options
     collapsed: true
