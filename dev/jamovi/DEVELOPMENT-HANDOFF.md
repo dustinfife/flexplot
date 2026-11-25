@@ -1367,3 +1367,45 @@ failures, test warnings or skips. Results are recorded in
 `.jamovi-dev/manual-glm-20261125/focused-installed.log`; other focused logs and
 preflight are in that same directory. No live GUI testing or jamovi window
 manipulation was performed. Module left installed for the user's manual review.
+
+## Plot/table notes — reference-panel wording and one marker per explanation
+
+Completed 2026-11-25 from `dac61cff`, following the user's GLM screenshots.
+The shared ghost-reference renderer now says “Dashed gray lines show the fitted
+curve from the panel where z = … and binary = No.” It derives the actual reference
+values and edited labels from the existing facet labeller, preserving interval
+labels and HTML escaping. This grammar applies consistently to LM, GLM and
+supported Mixed plots; no ghost selection, fitted curve or geometry changed.
+
+Updated the existing shared `jamovi_table_column_notes` rather than adding
+module/table exceptions. It anchors each explanation once to its first relevant
+visible column, sorts notes by those actual header positions, and assigns
+sequential alphabetic superscripts in that order. It resets base headers and old
+column-note entries each time, so conditional or restored output cannot retain
+stale order/letters. This applies to all tables using the shared header-note
+infrastructure, including LM and every GLM summary/comparison table. In the
+reported interaction example the sequence is Coefficientᵃ, Std. ORᵇ, Prediction
+differenceᶜ, SEᵈ; 1/Std. OR, Lower and Upper do not repeat those markers. Comparison
+test notes similarly mark Likelihood ratio once rather than repeating at df/p.
+Specific undefined-threshold warning symbols and bibliographic numbers are
+unchanged. Note content and all statistical calculations remain unchanged.
+
+Focused source and installed-package tests each passed **481 assertions**; native LM/GLM serialization,
+restoration and installed renderer tests passed **257 assertions**, with zero
+failures, test warnings or skips. They verify left-to-right order, exactly one
+header marker for each explanation, disappearance/reappearance of conditional
+notes, numerical table invariance, custom facet labels, HTML escaping and the
+actual ghost reference. Hidden native tables retain no displayed explanatory
+rows; marker-order checks apply to rendered visible tables. The existing
+testthat/R-build startup warning remains. Source-boundary and `git diff --check`
+checks passed. All 140 SVGs and 16 protected fixture/metadata artifacts remain
+unchanged. No full package/native suite, E2E campaign, visual-baseline regeneration,
+live GUI testing or jamovi window manipulation occurred.
+
+Built and installed 0.27.0 with the existing cache. Installed preflight verified
+source fingerprint `89fea1088c7c4d71ae38fbd790dec86cbf6494c98e61ae12029b1bda76680a54`,
+archive `d060d859ad5dfd837a83bdbb337301901ec900b58fd0e8ceb239ae1cc7cbaae7`,
+and payload `ac95693bb4ec1d407b45a93cfb0dbbaf4ac9fe279c6dd325191835f960c2a1b2`.
+Logs and installed-package verification:
+`.jamovi-dev/manual-note-order-20261125/`. Recalculation updates cached headings
+and notes. Module left installed for manual review; comprehensive E2E remains paused.

@@ -7,7 +7,9 @@ test_that("GLM column-wide notes use matching sequential letters and retain only
     markers = substr(vapply(notes,`[[`,character(1),"note"),1,1)
     expect_identical(unname(markers),c("ᵃ","ᵇ","ᶜ","ᵈ","ᵉ","ᶠ")[seq_along(markers)])
     titles = vapply(Filter(function(column)column$visible,table$columns),function(column)column$title,character(1))
-    for (marker in markers) expect_true(any(grepl(marker,titles,fixed=TRUE)))
+    for (marker in markers) expect_equal(sum(grepl(marker,titles,fixed=TRUE)),1L)
+    encountered = unlist(regmatches(titles,gregexpr("[ᵃᵇᶜᵈᵉᶠᵍʰⁱʲ]",titles)))
+    expect_identical(unname(encountered),unname(markers))
     for (column in table$columns) for (i in seq_len(table$rowCount)) {
       if (column$name!="intercept_threshold") expect_length(column$getCell(i)$footnotes,0L)
     }
@@ -19,13 +21,22 @@ test_that("GLM column-wide notes use matching sequential letters and retain only
   expect_null(table$notes$column_test)
   expect_true(jamovi_reporting_update(analysis,list(includeP=TRUE)))
   expect_true(table$getColumn("p")$visible)
-  expect_match(table$getColumn("p")$title,"ᵇ$",fixed=FALSE)
+  expect_identical(table$getColumn("p")$title,"p")
+  expect_identical(table$getColumn("lr")$title,"Likelihood ratioᵇ")
   expect_match(table$notes$column_test$note,"^ᵇ ")
   before = analysis$results$coefficients$asDF
   expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("x","a",c("x","a")),interactions=TRUE)))
   expect_match(analysis$results$coefficients$notes$column_interaction$note,"Interaction")
+  check(analysis$results$coefficients)
+  coefficients = analysis$results$coefficients
+  for (name in c("raw.coefficients","standardized.OR","Prediction Difference (+/- 1 SD)","SE"))
+    expect_match(coefficients$getColumn(name)$title,switch(name,raw.coefficients="ᵃ$",standardized.OR="ᵇ$",
+      `Prediction Difference (+/- 1 SD)`="ᶜ$",SE="ᵈ$"))
+  for (name in c("inverse.standardized.OR","lower","upper"))
+    expect_false(grepl("[ᵃᵇᶜᵈ]",coefficients$getColumn(name)$title))
   expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("x","a"),interactions=FALSE)))
   expect_null(analysis$results$coefficients$notes$column_interaction)
+  check(analysis$results$coefficients)
   expect_equal(analysis$results$coefficients$asDF,before)
   expect_true(jamovi_reporting_update(analysis,list(preds="x")))
   expect_null(analysis$results$coefficients$notes$column_standardized)
@@ -46,12 +57,14 @@ test_that("GLM common-sample notes only label additional exclusions and renumber
   expect_match(table$notes$column_population$note,"additional observations from Model 1",fixed=TRUE)
   expect_identical(table$getColumn("n")$title,"Nᵃ")
   expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factorᵇ")
-  expect_identical(table$getColumn("p")$title,"pᶜ")
+  expect_identical(table$getColumn("p")$title,"p")
+  expect_identical(table$getColumn("lr")$title,"Likelihood ratioᶜ")
   expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("x","z"))))
   expect_null(table$notes$column_population)
   expect_identical(table$getColumn("n")$title,"N")
   expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factorᵃ")
-  expect_identical(table$getColumn("p")$title,"pᵇ")
+  expect_identical(table$getColumn("p")$title,"p")
+  expect_identical(table$getColumn("lr")$title,"Likelihood ratioᵇ")
 })
 
 test_that("routine logistic overlay text is exact when no qualification is needed", {

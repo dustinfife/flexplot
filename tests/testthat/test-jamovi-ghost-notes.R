@@ -19,6 +19,8 @@ test_that("source metadata reports actual prepared reference labels without chan
       source = flexplot:::flexplot_ghost_reference_data(curve,panels,resolved,"x")
       expect_identical(metadata$levels,lapply(metadata$columns,function(name)unique(as.character(source[[name]]))))
       note = flexplot:::jamovi_model_ghost_note(plot)
+      expect_match(note,"from the panel where ",fixed=TRUE)
+      if(length(panels)==2L) expect_match(note," and ",fixed=TRUE)
       for (value in unlist(metadata$levels)) expect_true(grepl(flexplot:::jamovi_html_escape(value),note,fixed=TRUE))
       edits = list(list(role="columnTitle",variable="a",value="",label="Treatment <arm>"),
         list(role="facetLevel",variable="a",value=metadata$levels[[1]],label="Control & reference"))
@@ -26,8 +28,8 @@ test_that("source metadata reports actual prepared reference labels without chan
         list(role="rowTitle",variable=metadata$columns[2],value="",label="Age"),
         list(role="facetLevel",variable=metadata$columns[2],value=metadata$levels[[2]],label="Middle")))
       labeled = flexplot:::jamovi_plot_apply_labels(plot,edits)
-      if(length(panels)==2L) expect_match(flexplot:::jamovi_model_ghost_note(labeled),"Age: Middle",fixed=TRUE)
-      expect_match(flexplot:::jamovi_model_ghost_note(labeled),"Treatment &lt;arm&gt;: Control &amp; reference",fixed=TRUE)
+      if(length(panels)==2L) expect_match(flexplot:::jamovi_model_ghost_note(labeled),"Age = Middle",fixed=TRUE)
+      expect_match(flexplot:::jamovi_model_ghost_note(labeled),"Treatment &lt;arm&gt; = Control &amp; reference",fixed=TRUE)
       expect_identical(lapply(labeled$layers,function(layer)layer$data),lapply(plot$layers,function(layer)layer$data))
       expect_match(note,'style="margin:0 0 4px 0;"',fixed=TRUE)
     }
@@ -69,7 +71,7 @@ test_that("GLM family and logit paths carry the same resolved source metadata", 
       metadata = attr(plot,"ghost_reference")
       expect_true(metadata$drawable)
       expect_identical(metadata$levels[[1]],"high")
-      expect_match(flexplot:::jamovi_model_ghost_note(plot),"a: high",fixed=TRUE)
+      expect_match(flexplot:::jamovi_model_ghost_note(plot),"a = high",fixed=TRUE)
     }
   }
 })

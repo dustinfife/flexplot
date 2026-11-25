@@ -3,7 +3,7 @@ test_that("serialized GLM notes render compactly through the installed native ta
   fixtures = new.env(parent=emptyenv()); fixtures$value = list()
   add = function(table,name,expected=character(),forbidden=character()) {
     element = table$asProtoBuf()
-    fixtures$value[[length(fixtures$value)+1L]] = list(name=name,columns=length(element$table$columns),
+    fixtures$value[[length(fixtures$value)+1L]] = list(name=name,visible=table$visible,columns=length(element$table$columns),
       notes=lapply(element$table$notes,function(note)list(note=note$note)),
       headings=unname(lapply(Filter(function(column)column$visible,table$columns),function(column)list(name=column$name,value=column$title,classes="",sortable=FALSE))),
       cells=unlist(lapply(Filter(function(column)isTRUE(table$getColumn(column$name)$visible),element$table$columns),function(column)

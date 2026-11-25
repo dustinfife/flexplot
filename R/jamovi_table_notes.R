@@ -42,27 +42,26 @@ jamovi_comparison_unavailable = function(model1, model2, test, comparison=NULL) 
   paste0(test," unavailable: ",reason,".")
 }
 
-# Column-wide notes share a letter across their relevant visible headers.
+# Column-wide notes are marked once, at their first relevant visible header.
 # Reset base titles on every pass so conditional notes never leave stale markers.
 jamovi_table_column_notes = function(table, titles, notes, targets=NULL) {
   markers = c("ᵃ","ᵇ","ᶜ","ᵈ","ᵉ","ᶠ","ᵍ","ʰ","ⁱ","ʲ","ᵏ","ˡ","ᵐ","ⁿ","ᵒ","ᵖ")
   for (name in names(titles)) table$getColumn(name)$setTitle(titles[[name]])
-  index = 0L
-  for (name in names(notes)) {
+  for (key in grep("^column_",names(table$notes),value=TRUE)) table$setNote(key,NULL)
+  visible = vapply(Filter(function(column)isTRUE(column$visible),table$columns),function(column)column$name,character(1))
+  anchors = vapply(names(notes),function(name) {
     columns = if (is.null(targets)) name else targets[[name]]
-    columns = intersect(columns,names(titles))
-    columns = columns[vapply(columns,function(column)isTRUE(table$getColumn(column)$visible),logical(1))]
-    note = notes[[name]]
-    key = paste0("column_",name)
-    table$setNote(key,NULL)
-    if (!length(note) || !length(columns)) next
+    eligible = which(visible %in% intersect(columns,names(titles)))
+    if (length(notes[[name]]) && length(eligible)) eligible[1] else Inf
+  },numeric(1))
+  index = 0L
+  for (name in names(notes)[order(anchors)]) {
+    if (!is.finite(anchors[[name]])) next
     index = index+1L
     if (index>length(markers)) stop("Too many column notes for superscript lettering.",call.=FALSE)
     marker = markers[index]
-    for (column in columns) {
-      item = table$getColumn(column)
-      item$setTitle(paste0(item$title,marker))
-    }
-    table$setNote(key,paste(marker,note))
+    item = table$getColumn(visible[anchors[[name]]])
+    item$setTitle(paste0(item$title,marker))
+    table$setNote(paste0("column_",name),paste(marker,notes[[name]]))
   }
 }

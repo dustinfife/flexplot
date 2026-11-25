@@ -90,9 +90,9 @@ jamovi_model_ghost_note = function(plot) {
   labeller = plot$facet$params$labeller
   if (is.null(labeller)) labeller = custom.labeler
   rendered = labeller(labels)
-  text = vapply(rendered,function(value) paste(gsub("\n"," ",as.character(value)),collapse=", "),character(1))
-  jamovi_plot_note_paragraph(paste0("Dashed gray lines show the fitted curve from the ",
-    paste(text,collapse="; ")," panel."))
+  text = vapply(rendered,function(value) paste(gsub("\n"," ",sub(":\n"," = ",as.character(value),fixed=TRUE)),collapse=", "),character(1))
+  jamovi_plot_note_paragraph(paste0("Dashed gray lines show the fitted curve from the panel where ",
+    paste(text,collapse=" and "),"."))
 }
 
 jamovi_plot_note_paragraph = function(text) {

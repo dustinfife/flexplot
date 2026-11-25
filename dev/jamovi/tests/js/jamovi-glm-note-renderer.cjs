@@ -35,8 +35,10 @@ for(const record of records){
     for(const [i,note] of columnNotes.entries()) {
         const marker=['ᵃ','ᵇ','ᶜ','ᵈ','ᵉ','ᶠ','ᵍ','ʰ','ⁱ','ʲ'][i];
         assert.ok(note.note.startsWith(marker+' '));
-        assert.ok(headings.includes(marker),'Column-wide note has a visible marked header');
+        assert.equal(headings.split(marker).length-1,1,'Column-wide note is marked exactly once');
     }
+    const headerMarkers=record.headings.flatMap(h=>h.value.match(/[ᵃᵇᶜᵈᵉᶠᵍʰⁱʲ]/g)||[]);
+    if(record.visible) assert.equal(JSON.stringify(headerMarkers),JSON.stringify(columnNotes.map(note=>note.note[0])),'Header order matches note order');
     const footnotes=[],indices={};
     let marked=0;
     for(const cell of record.cells || []) {
