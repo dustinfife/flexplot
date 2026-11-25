@@ -182,8 +182,7 @@ children:
     contentLink: (compare)
   - type: CheckBox
     name: includeP
-    useSingleCell: true
-    contentLink: (compare)
+    enable: (compare && comparisonStatistics && comparisonPAvailable)
 - type: CollapseBox
   name: modelVisualizationSection
   label: Model Visualization
@@ -197,7 +196,7 @@ children:
     format: number
   - type: Supplier
     name: plotSupplier
-    label: Model predictors and grouping variable
+    label: Available variables
     format: variable
     persistentItems: false
     children:
@@ -215,20 +214,15 @@ children:
         name: plotPanels
         maxItemCount: 2
         isTarget: true
-  - type: Supplier
-    name: plotGroupingLayout
-    label: Predictors for grouping
-    format: variable
-    persistentItems: false
-    useSingleCell: true
-    children:
     - type: TargetLayoutBox
+      name: plotGroupingLayout
       label: Color / symbol variable
       children:
       - type: VariablesListBox
         name: plotGroup
         maxItemCount: 1
         isTarget: true
+
   - type: CheckBox
     name: ghostLines
   - type: CheckBox
@@ -267,7 +261,7 @@ children:
     format: number
   - type: Supplier
     name: comparisonPlotSupplier
-    label: Model predictors and grouping variable
+    label: Available variables
     format: variable
     persistentItems: false
     children:
@@ -285,14 +279,8 @@ children:
         name: comparisonPanels
         maxItemCount: 2
         isTarget: true
-  - type: Supplier
-    name: comparisonGroupingLayout
-    label: Predictors for grouping
-    format: variable
-    persistentItems: false
-    useSingleCell: true
-    children:
     - type: TargetLayoutBox
+      name: comparisonGroupingLayout
       label: Color / symbol variable
       children:
       - type: VariablesListBox
@@ -300,7 +288,7 @@ children:
         maxItemCount: 1
         isTarget: true
         enable: (comparisonPredictionType:cas)
-    contentLink: (comparisonPredictionType:cas)
+
   - type: CheckBox
     name: modifyComparisonPlotLabels
     useSingleCell: true

@@ -1490,3 +1490,154 @@ archive `8eec02f38d476f0369875e1cad7d87d2ba396f6804f9e8b2a7e2f2c5bf74509f`,
 payload `124ad4f13323793a4b32b59c024df334e118aa4e922dd1aa13df8b4edbf3ca6d`.
 Existing cached responses need recalculation to remove their old root markers.
 Module left installed for manual review; comprehensive E2E remains paused.
+
+## Mixed Models — manual review corrections
+
+Completed 2026-11-25 from synchronized `ddbfde17`. Ordinary Flexplot, LM and GLM
+corrections are preserved; comprehensive E2E remains paused.
+
+### Defaults, titles and legends
+
+The original Mixed module (`950dc1e5`, 2026-11-16) defaulted to cluster-specific
+predictions when only population/cluster modes existed. Adding CAS did not change
+that default; independent visualization commit `9481f993` (2026-11-24) copied
+`cluster` to the comparison selector. Both selectors now default to `cas` for new
+analyses. Explicit saved main/comparison modes remain independent. Real protobuf
+restoration tests cover all nine mode combinations over two reopen cycles.
+Historical missing selector values retain the old cluster default, followed by
+the existing one-time shared-to-independent migration where applicable. No new
+migration framework. Native jamovi saves the complete option values (including
+mode defaults), so newly saved CAS analyses retain their modes.
+
+Default subtitles are now Cluster-specific predictions, Population-level
+predictions and Cluster-adjusted scatterplot, with no redundant parentheses.
+Result headings/default main title use Model Visualization and the comparison
+heading/default ordinary-comparison title use Model Comparison Visualization.
+Existing CAS comparison child titles remain Model 1/Model 2. Saved label keys and
+independent stores are unchanged. Existing title/subtitle label rows are honored
+by the Mixed wrapper after default styling, in addition to its existing label
+edits. Styling is idempotent for cached layouts, preserving independent plot
+objects and sampled clusters. Single-model legend suppression follows the
+existing compare_fits convention but is conditional on one prediction stream and
+no aesthetic grouping; meaningful predictor legends, genuine multiple prediction
+streams and comparison legends remain.
+
+### Guides, estimation and inference presentation
+
+Cluster-specific guides now report the actual distinct displayed count (“3
+clusters were randomly selected.”), with singular grammar for one; when every
+available cluster is shown they say “All N clusters are displayed.” No selection
+note appears for population/CAS modes. Removed the routine random-effects,
+marginal-method, eligible-population and missing-confidence-band paragraphs.
+CAS retains only the nonobvious software-specific adjustment statement; two-model
+CAS identifies each panel's model-specific adjustment. Actual reference-panel
+ghost notes, CAS comparison ghosts, plot failure messages and fitting diagnostics
+remain. Hidden/unneeded guide results are invisible rather than reserving space.
+
+Both estimation dropdowns show REML/ML; identifiers and fitting behavior are
+unchanged. Comparisons still use the same ML copies and requested-method common-
+sample fits remain the plot/estimate source. The estimation note appears only
+when at least one visualization fit uses REML, naming the affected model if their
+methods differ; both ML fits need no redundant note. LM's common-sample renderer
+is reused with additional exclusions counted separately for each formula; the
+existing common estimation mask is unchanged.
+
+Added a hidden, backend-derived `comparisonPAvailable` capability. Include p-values
+is disabled unless comparison statistics are enabled and the existing inference
+path supplies a finite applicable p-value. It remains visible when comparison is
+off, retaining the checked preference. Native model-edit invalidation and response
+updates avoid stale capability and do not request a fit on capability replies.
+The p column and test note follow the preference/availability. Fixed-effect p
+columns remain hidden: no significance test was introduced. Existing singular,
+convergence and random-effects-LRT calibration warnings are preserved. Column-wide
+comparison explanations reuse LM/GLM's shared alphabetic header-note renderer,
+once per note in left-to-right order; the heading is BIC Bayes factor, retaining
+the approximate/row-model explanation. Removed the routine fixed-effect CI note
+because the 95% Wald CI heading already identifies it. Fixed intervals are still
+pointwise normal-Wald (`qnorm(.975)`), with no multiplicity adjustment found.
+There are no statistical changes to fits, estimates, SEs, effect sizes, sampling,
+prediction calculations, inference or comparison methods. The intended display
+changes are the new CAS default, concise notes/titles and conditional visibility.
+
+### Unified suppliers and complete terminology inventory
+
+`c36f4b06` (2026-11-23) introduced the separate Predictors for grouping supplier to
+conditionally hide the color/symbol destination in ordinary comparisons; Stage 9
+copied the arrangement for independent outputs. It was a conditional-wrapper
+choice, not a statistical requirement. The new UI uses one native supplier and
+three direct TargetLayoutBox destinations per output. The color/symbol destination
+is disabled outside CAS in ordinary comparisons, preserving its stored preference.
+This avoids both a duplicate supplier and the earlier fragile single-cell target
+wrapping. Existing shared term/role synchronization, native persistentItems=false
+used-item filtering and native property APIs are reused. Destination guards block
+cluster IDs on x and in incompatible CAS roles. Cluster mode restores an eligible
+cluster panel on mode entry when space is available; deliberately restored layouts
+and fixed/random model terms are not rewritten. Main/comparison modes, roles,
+counts, grouping preferences and labels remain independent.
+
+All user-facing grouping/predictor references in the Mixed adapter and UI were
+inventoried before editing. Repeated main/comparison occurrences are grouped here;
+internal `group`, `plotGroup`, `plotGroupingLayout` etc. and public R APIs retain
+their names.
+
+| Context | Before | After |
+| --- | --- | --- |
+| Main and comparison visualization supplier | Model predictors and grouping variable | Available variables |
+| Separate main/comparison aesthetic supplier | Predictors for grouping | Removed; destination is in the unified supplier |
+| Both aesthetic destinations/options | Color / symbol variable | Unchanged |
+| Both random-effect table headers | Grouping factor | Cluster variable |
+| Cluster input/option | Cluster Variable / Cluster variable | Unchanged |
+| Fixed-model selection, including Model 2 | Fixed-effect Predictors / Fixed-effect predictors; Model 2 — Fixed Effects / Model 2 fixed-effect predictors | Unchanged: ordinary fixed-model predictors |
+| Model 2 predictor supplier and random-slope suppliers | Available predictors; Selected predictors | Unchanged: eligible model predictors, not cluster IDs |
+| Cluster-count validation | The cluster variable needs at least two observed groups. | The cluster variable needs at least two observed clusters. |
+| Model-specification count | N groups | N clusters |
+| Main visualization-name diagnostic | The existing mixed-model plot path cannot handle this grouping-variable name. Use a simple grouping name for visualization. | The existing mixed-model plot path cannot handle this cluster-variable name. Use a simple cluster name for visualization. |
+| Comparison-name diagnostic | The existing mixed-model visualization requires a simple shared grouping-variable name. | The existing mixed-model visualization requires a simple shared cluster-variable name. |
+| Main cluster-specific layout diagnostic | For cluster-specific predictions, place the grouping variable in panels or color / symbol. | For cluster-specific predictions, place the cluster variable in panels or color / symbol. |
+| Main/CAS x-layout diagnostic | Use a model predictor on x; place the grouping variable in panels or color / symbol. | Use a model predictor on x; place the cluster variable in panels or color / symbol. |
+| Ordinary comparison x-layout diagnostic | Use a predictor on x; place the grouping variable in panels. | Use a predictor on x; place the cluster variable in panels. |
+| Cluster-specific comparison diagnostic | For cluster-specific comparisons, place the shared grouping variable in panels. | For cluster-specific comparisons, place the shared cluster variable in panels. |
+| Redundant single-model legend | model → random effects | Suppressed for a single prediction stream; meaningful aesthetic/comparison legends retained |
+
+### Verification and installation
+
+Focused source group: 648 passing assertions. Native compilation/handler,
+protobuf/restoration and header-renderer group: 476 passing assertions (plus the
+JavaScript assertions executed by those tests). Installed checks against the
+actual bundled jmvcore 2.7.35: 447 passing assertions. Zero failures, test warnings
+or skips in these final groups; the development R environment emits its existing
+testthat/R-build startup warning. Coverage includes CAS defaults, actual cluster
+counts, mode/role transitions, native supplier assignment/removal, p eligibility
+and preference retention, independent controls/caches, preserved requested-method
+REML/ML fits, common samples, invalid/nonnested/singular/random-effects comparisons,
+pointwise CI verification and one-per-note sequential native header rendering.
+Additional directly selected plot callback/CAS/custom-label checks passed 182
+assertions across four cases, verifying identical adjusted outcomes, prediction
+curves, rendering coordinates, saved label keys and inactive label preferences.
+Final source-header parity/review checks passed 60 source and 60 installed
+assertions after aligning source metadata with the already-correct compiled
+labels and visibility. The rebuild installer returned before the final copy had
+settled, producing a transient DESCRIPTION checksum mismatch. After all files
+matched the new archive byte-for-byte, the existing receipt writer revalidated
+the full payload and recorded the final archive; source/archive/payload preflight
+then passed. No checksum bypass or installer/source framework change was made.
+All 140 SVGs and 16 protected fixture/metadata artifacts remain unchanged.
+Source-boundary checks and `git diff --check` passed. No full package/native suite,
+comprehensive E2E campaign, baseline regeneration, live GUI testing or window
+manipulation occurred.
+
+Compiled, built and installed module 0.27.0 with the existing cache. Installed
+source/archive/payload preflight passed: source fingerprint
+`219949d839c01b75e28d76537351c86910e17a3708e4fafb62554f495b104dab`,
+archive `7a83127a3d966854f8b0d04647ad7ffc5b2310f173dcfa65ba5b15192bb7dcdb`,
+payload `0c08a3d7748160a58d38e3b2dc49cb2e54b65b47db7c65490c608567a174725a`.
+Logs/preflight: `.jamovi-dev/manual-mixed-review-20261125/`.
+
+Native limitations remain: the comparison color/symbol destination stays visible
+but disabled outside CAS; its unsupported stored choice is retained. Existing
+invalid restored layouts keep explicit diagnostics. Plot/HTML spacing is native.
+Bibliography-only behavior from `ddbfde17` is preserved, with no new Method
+References block. The already-confirmed native reference component can retain
+old [3]/[4] in an existing view even after empty refs arrive; fully reopening the
+view/jamovi clears that stale display. No host renderer/CSS workaround was added.
+Latest module is left installed for manual review; comprehensive E2E stays paused.

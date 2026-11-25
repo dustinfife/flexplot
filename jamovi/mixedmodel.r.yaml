@@ -25,7 +25,7 @@ items:
     type: Html
     visible: false
   - name: plot
-    title: Model visualization
+    title: Model Visualization
     type: Image
     width: 700
     height: 450
@@ -75,7 +75,7 @@ items:
     visible: false
     columns:
       - name: group
-        title: Grouping factor
+        title: Cluster variable
         type: text
       - name: term
         title: Random-effect term
@@ -134,7 +134,7 @@ items:
     visible: false
     columns:
       - name: group
-        title: Grouping factor
+        title: Cluster variable
         type: text
       - name: term
         title: Random-effect term
@@ -158,7 +158,7 @@ items:
     type: Html
     visible: false
   - name: comparisonplot
-    title: Mixed-model comparison
+    title: Model Comparison Visualization
     type: Image
     width: 700
     height: 450
@@ -186,7 +186,7 @@ items:
         title: BIC
         type: number
       - name: bayes.factor
-        title: Approximate BIC Bayes factor
+        title: BIC Bayes factor
         type: number
       - name: lr
         title: Likelihood ratio
@@ -198,5 +198,5 @@ items:
         title: p
         type: number
         format: zto,pvalue
-        visible: (includeP)
+        visible: (includeP && comparisonPAvailable)
 ...

@@ -49,7 +49,7 @@ options:
       - name: REML
         title: REML
       - name: ML
-        title: Maximum likelihood (ML)
+        title: ML
     default: REML
   - name: compare
     title: Compare two models
@@ -90,18 +90,22 @@ options:
       - name: REML
         title: REML
       - name: ML
-        title: Maximum likelihood (ML)
+        title: ML
     default: REML
   - name: includeP
-    title: Include p-values (where available)
+    title: Include p-values
     type: Bool
     default: false
+  - name: comparisonPAvailable
+    type: Bool
+    default: false
+    hidden: true
   - name: showCorrelations
     title: Random-effect correlations
     type: Bool
     default: false
   - name: graphic
-    title: Model visualization
+    title: Model Visualization
     type: Bool
     default: true
   - name: predictionType
@@ -109,12 +113,12 @@ options:
     type: List
     options:
       - name: population
-        title: Population-level (exclude random effects)
+        title: Population-level
       - name: cas
-        title: Cluster-adjusted scatterplot (remove estimated random effects)
+        title: Cluster-adjusted scatterplot
       - name: cluster
-        title: Cluster-specific (include estimated random effects)
-    default: cluster
+        title: Cluster-specific
+    default: cas
   - name: casGhost
     title: Add ghost line
     type: Bool
@@ -176,12 +180,12 @@ options:
     type: List
     options:
       - name: population
-        title: Population-level (exclude random effects)
+        title: Population-level
       - name: cas
-        title: Cluster-adjusted scatterplot (remove estimated random effects)
+        title: Cluster-adjusted scatterplot
       - name: cluster
-        title: Cluster-specific (include estimated random effects)
-    default: cluster
+        title: Cluster-specific
+    default: cas
   - name: comparisonClusters
     title: Number of displayed clusters
     type: Integer
@@ -204,7 +208,7 @@ options:
     type: Integer
     default: 0
   - name: includeCI
-    title: Confidence intervals
+    title: 95% confidence intervals
     hidden: true
     type: Bool
     default: true
@@ -213,7 +217,7 @@ options:
     type: Bool
     default: true
   - name: comparisonGraphic
-    title: Model comparison plot
+    title: Model Comparison Visualization
     type: Bool
     default: true
   - name: comparisonStatistics

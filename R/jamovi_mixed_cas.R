@@ -3,7 +3,7 @@ jamovi_mixed_cas_comparison = function(state, x, panels=NULL, group=NULL, ghost=
   models = list(state$model1,state$model2)
   formula = jamovi_model_layout(models,state$data,x,panels,group)
   x = flexplot_axis_given(formula)$axis[1]
-  if (identical(x,state$cluster)) stop("Use a model predictor on x; place the grouping variable in panels or color / symbol.",call.=FALSE)
+  if (identical(x,state$cluster)) stop("Use a model predictor on x; place the cluster variable in panels or color / symbol.",call.=FALSE)
   reference = state$data
   frames = lapply(seq_along(models),function(i) {
     model = models[[i]]

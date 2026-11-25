@@ -26,9 +26,10 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             comparisonRandomSlopes = NULL,
             comparisonEstimation = "REML",
             includeP = FALSE,
+            comparisonPAvailable = FALSE,
             showCorrelations = FALSE,
             graphic = TRUE,
-            predictionType = "cluster",
+            predictionType = "cas",
             casGhost = FALSE,
             clusters = 3,
             plotX = NULL,
@@ -39,7 +40,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             comparisonX = NULL,
             comparisonPanels = NULL,
             comparisonGroup = NULL,
-            comparisonPredictionType = "cluster",
+            comparisonPredictionType = "cas",
             comparisonClusters = 3,
             comparisonPlotLabels = list(),
             comparisonPlotLabelStore = list(),
@@ -160,6 +161,11 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "includeP",
                 includeP,
                 default=FALSE)
+            private$..comparisonPAvailable = jmvcore::OptionBool$new(
+                "comparisonPAvailable",
+                comparisonPAvailable,
+                default=FALSE,
+                hidden=TRUE)
             private$..showCorrelations = jmvcore::OptionBool$new(
                 "showCorrelations",
                 showCorrelations,
@@ -175,7 +181,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "population",
                     "cas",
                     "cluster"),
-                default="cluster")
+                default="cas")
             private$..casGhost = jmvcore::OptionBool$new(
                 "casGhost",
                 casGhost,
@@ -272,7 +278,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "population",
                     "cas",
                     "cluster"),
-                default="cluster")
+                default="cas")
             private$..comparisonClusters = jmvcore::OptionInteger$new(
                 "comparisonClusters",
                 comparisonClusters,
@@ -373,6 +379,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..comparisonRandomSlopes)
             self$.addOption(private$..comparisonEstimation)
             self$.addOption(private$..includeP)
+            self$.addOption(private$..comparisonPAvailable)
             self$.addOption(private$..showCorrelations)
             self$.addOption(private$..graphic)
             self$.addOption(private$..predictionType)
@@ -422,6 +429,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         comparisonRandomSlopes = function() private$..comparisonRandomSlopes$value,
         comparisonEstimation = function() private$..comparisonEstimation$value,
         includeP = function() private$..includeP$value,
+        comparisonPAvailable = function() private$..comparisonPAvailable$value,
         showCorrelations = function() private$..showCorrelations$value,
         graphic = function() private$..graphic$value,
         predictionType = function() private$..predictionType$value,
@@ -470,6 +478,7 @@ mixedmodelOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..comparisonRandomSlopes = NA,
         ..comparisonEstimation = NA,
         ..includeP = NA,
+        ..comparisonPAvailable = NA,
         ..showCorrelations = NA,
         ..graphic = NA,
         ..predictionType = NA,
@@ -552,7 +561,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Model visualization",
+                title="Model Visualization",
                 width=700,
                 height=450,
                 visible=FALSE,
@@ -613,7 +622,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="group",
-                        `title`="Grouping factor",
+                        `title`="Cluster variable",
                         `type`="text"),
                     list(
                         `name`="term",
@@ -688,7 +697,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="group",
-                        `title`="Grouping factor",
+                        `title`="Cluster variable",
                         `type`="text"),
                     list(
                         `name`="term",
@@ -720,7 +729,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="comparisonplot",
-                title="Mixed-model comparison",
+                title="Model Comparison Visualization",
                 width=700,
                 height=450,
                 visible=FALSE,
@@ -754,7 +763,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="bayes.factor",
-                        `title`="Approximate BIC Bayes factor",
+                        `title`="BIC Bayes factor",
                         `type`="number"),
                     list(
                         `name`="lr",
@@ -769,7 +778,7 @@ mixedmodelResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="p",
                         `type`="number",
                         `format`="zto,pvalue",
-                        `visible`="(includeP)"))))}))
+                        `visible`="(includeP && comparisonPAvailable)"))))}))
 
 mixedmodelBase = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "mixedmodelBase",

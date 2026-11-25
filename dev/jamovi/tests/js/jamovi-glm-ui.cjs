@@ -78,7 +78,7 @@ const {pathToFileURL} = require('node:url');
         const nodes = flatten(compiled.view.layout.controls);
         const mainSection = compiled.view.layout.controls.find(item=>item.label==='Model Visualization');
         assert.ok(mainSection,'Missing main visualization section');
-        assert.equal(mainSection.controls.findIndex(c=>c.name==='ghostLines'),mainSection.controls.findIndex(c=>c.name===(analysis==='mixedmodel'?'plotGroupingLayout':'plotSupplier'))+1,'Ghost checkbox follows selectors');
+        assert.equal(mainSection.controls.findIndex(c=>c.name==='ghostLines'),mainSection.controls.findIndex(c=>c.name==='plotSupplier')+1,'Ghost checkbox follows selectors');
         const compSection = compiled.view.layout.controls.find(item=>item.label==='Model Comparison Visualization');
         assert.ok(compSection,'Missing distinct comparison visualization section');
         const modelSpec = compiled.view.layout.controls.find(item=>item.label==='Model Comparison');
@@ -219,8 +219,14 @@ const {pathToFileURL} = require('node:url');
                 const main = all.find(item=>item.name==='graphic');
                 assert.equal(main.contentLink,undefined);
             }
-            assert.equal(target.type,'Supplier');
-            assert.equal(target.useSingleCell,true);
+            assert.equal(target.type,analysis==='mixedmodel' ? 'TargetLayoutBox' : 'Supplier');
+            assert.equal(target.useSingleCell,analysis==='mixedmodel' ? undefined : true);
+            if(analysis==='mixedmodel') for(const section of [mainSection,compSection]) {
+                const suppliers=section.controls.filter(c=>c.type==='Supplier');
+                assert.equal(suppliers.length,1);
+                assert.equal(suppliers[0].label,'Available variables');
+                assert.equal(suppliers[0].controls.filter(c=>c.type==='TargetLayoutBox').length,3);
+            }
             assert.equal(target.contentLink,analysis === 'glmbasic' ? '(compare)' : undefined);
             if (runtime && analysis === 'glmbasic') require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),target,null,compilerPath);
         }
@@ -281,6 +287,7 @@ const {pathToFileURL} = require('node:url');
         }
         if (analysis === 'mixedmodel') {
             ui.samplePolicyVersion = control(0);
+            ui.comparisonPAvailable=control(false);
             ui.view.model.options.getOption = name => ({getValue:ui[name].value});
             ui.view.model.options.setOptionValue = (name,value) => ui[name].setValue(value);
 
@@ -298,15 +305,15 @@ const {pathToFileURL} = require('node:url');
             assert.equal(definition.options.find(option => option.name === 'compare').default,false);
             const resultSchema = yaml.load(fs.readFileSync(path.join(root,'jamovi/mixedmodel.r.yaml'),'utf8'));
             for(const name of ['fixed','fixed2'])assert.equal(resultSchema.items.find(item=>item.name===name).columns.find(column=>column.name==='p').visible,false);
-            assert.equal(resultSchema.items.find(item=>item.name==='comparison').columns.find(column=>column.name==='p').visible,'(includeP)');
+            assert.equal(resultSchema.items.find(item=>item.name==='comparison').columns.find(column=>column.name==='p').visible,'(includeP && comparisonPAvailable)');
             assert.equal(controls.has('includeCI'),false,'CI preference is hidden for compatibility');
             assert.equal(definition.options.find(option=>option.name==='includeCI').hidden,true);
             assert.equal(definition.options.find(option=>option.name==='includeCI').default,true);
             const inferenceControls = compiled.view.layout.controls.find(c=>c.label==='Output Options').controls;
             assert.equal(JSON.stringify(inferenceControls.map(c=>c.name)),JSON.stringify(['graphic','estimates','showCorrelations','comparisonGraphic','comparisonStatistics','includeP']));
             const p = inferenceControls.find(c=>c.name==='includeP');
-            assert.equal(p.contentLink,'(compare)');assert.equal(p.useSingleCell,true);
-            if(runtime)require('./jamovi-binomial-visibility.cjs')(fs.readFileSync(runtime,'utf8'),p,null,compilerPath);
+            assert.equal(p.contentLink,undefined);assert.equal(p.enable,'(compare && comparisonStatistics && comparisonPAvailable)');
+
             assert.equal(definition.title,'Mixed Models');
             assert.equal(definition.options.find(option => option.name === 'cluster').title,'Cluster variable');
             const variables = compiled.view.layout.controls.find(control => control.type === 'VariableSupplier');

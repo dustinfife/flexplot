@@ -54,9 +54,9 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     const beginEdit = vm.runInNewContext('('+extract('beginEdit(){',true)+')');
     const endEdit = vm.runInNewContext('('+extract('endEdit(){',true)+')');
     const view = {workspace:{}};
-    const defaults = {ghostLines:false,plotLabelEditorVersion:0,modifyPlotLabels:false,modifyComparisonPlotLabels:false,outputOptionsVersion:0,comparisonGraphic:true,comparisonStatistics:true,estimates:true,samplePolicyVersion:0,casGhost:false,compare:false,comparisonFixed:null,comparisonTerms:null,comparisonInteractions:false,comparisonPolynomials:false,comparisonQuadratic:null,comparisonRandomIntercept:true,comparisonRandomSlopes:null,comparisonEstimation:"REML",interactions:false,polynomials:false,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
-        randomIntercept:true,estimation:'REML',includeP:false,graphic:true,predictionType:'cluster',
-        clusters:3,plotX:null,plotPanels:null,plotGroup:null,comparisonX:null,comparisonPanels:null,comparisonGroup:null,comparisonPredictionType:'cluster',comparisonClusters:3,comparisonPlotLabels:[],comparisonPlotLabelStore:[]};
+    const defaults = {comparisonPAvailable:false,ghostLines:false,plotLabelEditorVersion:0,modifyPlotLabels:false,modifyComparisonPlotLabels:false,outputOptionsVersion:0,comparisonGraphic:true,comparisonStatistics:true,estimates:true,samplePolicyVersion:0,casGhost:false,compare:false,comparisonFixed:null,comparisonTerms:null,comparisonInteractions:false,comparisonPolynomials:false,comparisonQuadratic:null,comparisonRandomIntercept:true,comparisonRandomSlopes:null,comparisonEstimation:"REML",interactions:false,polynomials:false,showCorrelations:false,plotLabels:[],plotLabelStore:[],out:null,preds:[],modelTerms:null,quadratic:null,randomSlopes:null,cluster:null,
+        randomIntercept:true,estimation:'REML',includeP:false,graphic:true,predictionType:'cas',
+        clusters:3,plotX:null,plotPanels:null,plotGroup:null,comparisonX:null,comparisonPanels:null,comparisonGroup:null,comparisonPredictionType:'cas',comparisonClusters:3,comparisonPlotLabels:[],comparisonPlotLabelStore:[]};
     const native = {}, packets = [], queued = new Set();
     const manager = {_beginEdit:0,beginEdit,endEdit,fireQueuedEvents() {
         if (!queued.size) return;
@@ -153,7 +153,7 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     events.find(event => event.onEvent === 'view.data-initializing').execute.call(view,ui,{id:'restored'});
     for (const [name,value] of [
         ['interactions',true],['polynomials',true],['preds',[]],['modelTerms',[['a']]],['quadratic',['x']],['randomSlopes',['x']],
-        ['cluster','id'],['plotX','x'],['plotGroup','id'],['plotPanels',[]],
+        ['predictionType','cluster'],['cluster','id'],['plotX','x'],['plotGroup','id'],['plotPanels',[]],
         ['randomIntercept',false],['preds',['x','a']]]) native[name].setValue(value);
     assert.equal(packets.length,count,'No server writes while host options are being restored');
     events.find(event => event.onEvent === 'view.ready').execute.call(view,ui,{id:'restored'});
@@ -280,7 +280,8 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
         for (const type of ['population','cluster']) {
             ui.predictionType.setValue(type);
             assert.ok(ui.plotSupplier.value().some(item=>item.value.raw==='id'));
-            ui.plotGroup.setValue('id'); assert.equal(ui.plotGroup.value(),'id');
+            if(type==='cluster') assert.ok(ui.plotPanels.value().includes('id'),'Cluster mode restores an eligible cluster panel');
+            ui.plotPanels.setValue([]);ui.plotGroup.setValue('id'); assert.equal(ui.plotGroup.value(),'id');
             ui.predictionType.setValue('cas'); assert.equal(ui.plotGroup.value(),null);
         }
         events.find(event=>event.onEvent==='view.data-initializing').execute.call(view,ui,{id:'saved-cas-'+comparison});
@@ -346,5 +347,51 @@ module.exports = function(source, compilerPath, handlers, FormatDef, utils, asse
     assert.equal(JSON.stringify(ui.comparisonPanels.value()),'["a"]','Copy legacy panels before main-role normalization');
     assert.equal(ui.plotX.value(),'x');assert.equal(JSON.stringify(ui.plotPanels.value()),'[]');
     console.log('PASS: legacy Mixed visualization migration is idempotent; native main/comparison controls, stores and preferences remain independent.');
+    // Enablement uses the installed property API and preserves the preference.
+    const property={value:false};property.get=()=>property.value;property.set=value=>{property.value=value;};
+    Object.assign(ui.includeP,{properties:{enable:property},params:{},
+        getPropertyValue:nativeMethod('getPropertyValue(e){'),setPropertyValue:nativeMethod('setPropertyValue(e,t){'),
+        firePropertyChangedEvent(){},onPropertyChanged(){}});
+    ui.includeP.setValue(true);ui.compare.setValue(false);ui.comparisonStatistics.setValue(true);
+    native.comparisonPAvailable.setValue(true);handlers.view_updated.call(view,ui);
+    assert.equal(ui.includeP.getPropertyValue('enable'),false);assert.equal(ui.includeP.value(),true);
+    ui.compare.setValue(true);native.comparisonPAvailable.setValue(true);
+    assert.equal(ui.includeP.getPropertyValue('enable'),true);
+    const replies=packets.length;
+    native.comparisonPAvailable.setValue(false);
+    assert.equal(packets.length,replies,'A backend capability update does not request another fit');
+    assert.equal(ui.includeP.getPropertyValue('enable'),false);assert.equal(ui.includeP.value(),true);
+    native.comparisonPAvailable.setValue(true);ui.comparisonStatistics.setValue(false);
+    assert.equal(ui.includeP.getPropertyValue('enable'),false);assert.equal(ui.includeP.value(),true);
+    ui.comparisonStatistics.setValue(true);native.comparisonPAvailable.setValue(true);
+    assert.equal(ui.includeP.getPropertyValue('enable'),true);
+    ui.modelTerms.setValue([['x'],['a']]);
+    assert.equal(ui.includeP.getPropertyValue('enable'),false,'Model edits invalidate stale p capability');
+    assert.equal(ui.includeP.value(),true);
+    // Exercise the installed supplier's actual used-item filter over all roles.
+    const filter=nativeMethod('filterSuppliersList(e=!1){');
+    for(const comparison of [false,true]) {
+        const mode=comparison ? 'comparisonPredictionType':'predictionType';
+        const x=comparison ? 'comparisonX':'plotX', panels=comparison ? 'comparisonPanels':'plotPanels',
+            group=comparison ? 'comparisonGroup':'plotGroup',supplier=comparison ? 'comparisonPlotSupplier':'plotSupplier';
+        ui.preds.setValue(['x','a','z']);ui.modelTerms.setValue([['x'],['a'],['z']]);
+        ui.comparisonFixed.setValue(['x','a','z']);ui.comparisonTerms.setValue([['x'],['a'],['z']]);
+        ui[mode].setValue('cas');ui[x].setValue('x');ui[panels].setValue(['z']);ui[group].setValue('a');
+        const visible=()=>{
+            const used=[].concat(ui[x].value()||[],ui[panels].value()||[],ui[group].value()||[]);
+            const items=ui[supplier].value().map(item=>({value:item.value.raw,used:used.includes(item.value.raw)?1:0}));
+            const shown=[];
+            filter.call({blockFilterProcess:false,$searchInput:{value:''},_persistentItems:false,_items:items,
+                supplier:{getRow:i=>[{setVisibility:value=>{if(value)shown.push(items[i-1].value);}}]}});
+            return shown.sort();
+        };
+        assert.equal(JSON.stringify(visible()),'[]');
+        ui[group].setValue(null);assert.equal(JSON.stringify(visible()),'["a"]');
+        ui[panels].setValue([]);assert.equal(JSON.stringify(visible()),'["a","z"]');
+        assert.ok(!ui[supplier].value().some(item=>item.value.raw==='id'));
+        const invalid={value:'id'};handlers[x+'_changing'].call(view,ui,invalid);assert.equal(invalid.cancel,true);
+        ui[mode].setValue('cluster');assert.ok(ui[supplier].value().some(item=>item.value.raw==='id'));
+    }
+    console.log('PASS: conditional native p enablement/preference retention and unified supplier assignment/removal/role eligibility.');
     return records;
 };

@@ -32,8 +32,7 @@ test_that("Mixed inference preferences restore through real native protobuf opti
       expect_null(analysis$results[[name]]$notes$p)
     }
     expect_identical(analysis$results$fixed$getColumn("lower")$visible,!identical(ci,FALSE))
-    expect_identical(analysis$results$fixed$notes$intervals$note,
-      if(!identical(ci,FALSE))"95% normal-Wald confidence intervals." else NULL)
+    expect_null(analysis$results$fixed$notes$intervals)
     expect_length(analysis$results$random$notes,0L)
     expect_true(jamovi_reporting_update(analysis,list(compare=!comparison)))
     expect_true(roundtrip$includeP)

@@ -12,8 +12,7 @@ test_that("Mixed fixed-effect inference presentation keeps compatibility without
       for(column in c("lower","upper")) expect_identical(table$getColumn(column)$visible,intervals)
       expect_null(table$notes$p)
     }
-    expect_identical(analysis$results$fixed$notes$intervals$note,
-      if(intervals) "95% normal-Wald confidence intervals." else NULL)
+    expect_null(analysis$results$fixed$notes$intervals)
     for(name in c("random","random2")) expect_length(analysis$results[[name]]$notes,0L)
     numbers=function()lapply(Filter(function(item)inherits(item,"Table"),analysis$results$items),function(item) {value=item$asDF;value[names(value)!="p"]})
     values=numbers()

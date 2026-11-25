@@ -94,7 +94,10 @@ jamovi_mixed_comparison = function(options, data) {
   second_options = jamovi_mixed_second_options(options)
   formulas = list(jamovi_mixed_formula(options,data)$formula,jamovi_mixed_formula(second_options,data)$formula)
   variables = unique(unlist(lapply(formulas,all.vars)))
-  eligible = data[stats::complete.cases(data[,variables,drop=FALSE]),,drop=FALSE]
+  common = stats::complete.cases(data[,variables,drop=FALSE])
+  additional = vapply(formulas,function(formula)
+    sum(stats::complete.cases(data[,all.vars(formula),drop=FALSE]) & !common),integer(1))
+  eligible = data[common,,drop=FALSE]
   if (!nrow(eligible)) stop("No common complete observations are available for both mixed models.",call.=FALSE)
   first = jamovi_mixed_fit(options,eligible)
   second = jamovi_mixed_fit(second_options,eligible)
@@ -104,7 +107,7 @@ jamovi_mixed_comparison = function(options, data) {
     lr=NA_real_,df=NA_real_,p=NA_real_,warnings=character(),
     reason=paste0("ML comparison unavailable: ",conditionMessage(statistics)))
   list(model1=first$model,model2=second$model,data=first$data,cluster=options$cluster,
-    first=first,second=second,statistics=statistics,samplePolicy="common",omitted=nrow(data)-nrow(eligible))
+    first=first,second=second,statistics=statistics,additionalExcluded=additional,samplePolicy="common",omitted=nrow(data)-nrow(eligible))
 }
 
 jamovi_mixed_comparison_report = function(results, state, includeP=FALSE, information="") {
@@ -117,24 +120,22 @@ jamovi_mixed_comparison_report = function(results, state, includeP=FALSE, inform
   p_column = results$comparison$getColumn("p")
   p_column$setVisible(includeP)
   jamovi_glm_table_rows(results$comparison,values)
-  results$comparison$setNote("estimation",
-    "Model comparisons use ML on identical observations; plots use the original fitted models.")
-  results$comparison$setNote("bayes",NULL)
-  if (any(is.finite(statistics$bayes))) results$comparison$setNote("bayes",
-    jamovi_bayes_note())
-  test_note = statistics$reason
-  if (is.finite(statistics$lr)) test_note = if (isTRUE(statistics$random_p_unavailable)) NULL else
-    if (is.finite(statistics$p)) "Nested fixed-effects LRT (asymptotic chi-square)." else NULL
-  results$comparison$setNote("test",test_note)
-  results$comparison$setNote("randomP",NULL)
-  if (isTRUE(p_column$visible) && isTRUE(statistics$random_p_unavailable)) {
-    results$comparison$setNote("randomP",
-      "P-value unavailable: random-effects comparisons may not follow the usual chi-square distribution; no calibrated alternative is implemented.")
-  }
-  if (isTRUE(statistics$singular)) results$comparison$setNote("singular",paste0(
-    "Singular ML comparison fit; interpret covariance estimates cautiously. BIC Bayes factors",
-    if (isTRUE(p_column$visible) && !isTRUE(statistics$random_p_unavailable)) " and ordinary p-values are" else " are",
-    " unavailable."))
+  reml = which(vapply(list(state$model1,state$model2),lme4::isREML,logical(1)))
+  if (length(reml)) results$comparison$setNote("estimation",if(length(reml)==2L)
+    "Comparisons use ML; visualizations use REML estimates." else paste0(
+      "Comparisons use ML; Model ",reml," visualizations use REML estimates."))
+  available = is.finite(statistics$p)
+  p_column$setVisible(includeP && available)
+  jamovi_table_column_notes(results$comparison,
+    c(n="N",bayes.factor="BIC Bayes factor",lr="Likelihood ratio",df="df",p="p"),
+    list(sample=jamovi_lm_sample_note(state),bayes=if(any(is.finite(statistics$bayes))) jamovi_bayes_note() else NULL,
+      test=if(includeP && available) "Nested fixed-effects LRT (asymptotic chi-square)." else NULL),
+    list(sample="n",bayes="bayes.factor",test=c("lr","df","p")))
+  if (!is.finite(statistics$lr)) results$comparison$setNote("unavailable",statistics$reason)
+  if (includeP && isTRUE(statistics$random_p_unavailable)) results$comparison$setNote("randomP",
+    "P-value unavailable: random-effects comparisons may not follow the usual chi-square distribution; no calibrated alternative is implemented.")
+  if (isTRUE(statistics$singular)) results$comparison$setNote("singular",
+    "Singular ML comparison fit; BIC Bayes factors and ordinary p-values are unavailable.")
   warnings = statistics$warnings
   if (length(warnings)) results$comparison$setNote("warnings",paste(warnings,collapse="; "))
   content = character()
@@ -167,17 +168,17 @@ jamovi_mixed_comparison_plot = function(state, x=NULL, panels=NULL, group=NULL, 
   if (length(clusters) != 1L || !is.finite(clusters) || clusters < 1 || clusters != as.integer(clusters))
     stop("The number of displayed clusters must be a positive integer.",call.=FALSE)
   if (!identical(extract_random_term(state$model1),state$cluster) || !identical(extract_random_term(state$model2),state$cluster))
-    stop("The existing mixed-model visualization requires a simple shared grouping-variable name.",call.=FALSE)
-  if (identical(x,state$cluster)) stop("Use a predictor on x; place the grouping variable in panels.",call.=FALSE)
+    stop("The existing mixed-model visualization requires a simple shared cluster-variable name.",call.=FALSE)
+  if (identical(x,state$cluster)) stop("Use a predictor on x; place the cluster variable in panels.",call.=FALSE)
   if (type == "cluster" && !state$cluster %in% panels) {
-    stop("For cluster-specific comparisons, place the shared grouping variable in panels.",call.=FALSE)
+    stop("For cluster-specific comparisons, place the shared cluster variable in panels.",call.=FALSE)
   }
   formula = jamovi_comparison_layout(list(state$model1,state$model2),state$data,x,panels,group)
   model1 = state$model1; model2 = state$model2
   plot = compare_fits(formula,state$data,model1=model1,model2=model2,re=type=="cluster",
     clusters=clusters,report.se=FALSE,pred.type="response")
   plot = jamovi_comparison_style(plot)
-  plot = plot + ggplot2::labs(subtitle=if (type == "cluster")
+  plot = plot + ggplot2::labs(title="Model Comparison Visualization",subtitle=if (type == "cluster")
     "Model 1 vs Model 2: cluster-specific predictions" else "Model 1 vs Model 2: population-level predictions")
   attr(plot,"jamovi_comparison_note") = attr(formula,"jamovi_comparison_note")
   attr(plot,"jamovi_mixed_comparison") = TRUE

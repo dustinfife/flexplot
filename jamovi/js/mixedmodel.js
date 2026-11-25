@@ -17,6 +17,12 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
         // normalize the newly independent main controls.
         migrateOutput(ui, context, 'mixedmodel');
         updateEditors(ui, context, 'mixedmodel');
+        const capability = options.getOption('comparisonPAvailable');
+        const pKey = () => JSON.stringify(['interactions','polynomials','comparisonInteractions','comparisonPolynomials','out','preds','cluster','modelTerms','quadratic','randomIntercept','randomSlopes',
+            'estimation','comparisonFixed','comparisonTerms','comparisonQuadratic','comparisonRandomIntercept',
+            'comparisonRandomSlopes','comparisonEstimation','compare','comparisonStatistics'].map(name=>ui[name].value()));
+        if (context.workspace.mixedPKey !== undefined && context.workspace.mixedPKey !== pKey() && capability && capability.getValue())
+            options.setOptionValue('comparisonPAvailable',false);
         const predictors = ui.preds.value() || [];
         const comparing = ui.compare.value() === true;
         // Old saved results may lack Model 2 tables. Request one
@@ -76,7 +82,14 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
                 reserved:ordinaryComparison ? [].concat(ui[group].value() || []) : [],
                 extra:comparison ? ['quadratic','randomSlopes','comparisonQuadratic','comparisonRandomSlopes','cluster'] : ['quadratic','randomSlopes','cluster'],
                 include:'cluster',exclude:cas && cluster ? [cluster] : []};
-            layouts.push(layout,Object.assign({},layout,{supplier:comparison ? 'comparisonGroupingLayout' : 'plotGroupingLayout',selections:[],requireX:false}));
+            layouts.push(layout);
+            const modeKey = comparison ? 'mixedComparisonMode' : 'mixedMode';
+            if (context.workspace[modeKey] !== undefined && context.workspace[modeKey] !== prediction &&
+                prediction === 'cluster' && cluster && ui[group].value() !== cluster) {
+                const panels = ui[panelsName].value() || [];
+                if (panels.length < 2 && !panels.includes(cluster)) ui[panelsName].setValue(panels.concat(cluster));
+            }
+            context.workspace[modeKey] = prediction;
             const key = comparison ? 'mixedComparisonCluster' : 'mixedCluster';
             if (cluster !== context.workspace[key]) {
                 const previous = context.workspace[key];
@@ -98,24 +111,46 @@ const synchronize = function(ui, context, added, quadraticChanged = null) {
                 if (panels.length < 2 && !panels.includes(cluster) && ui[group].value() !== cluster) ui[panelsName].setValue(panels.concat(cluster));
             }
         }
+        context.workspace.mixedPKey = pKey();
     } finally {
         try { options.endEdit(); }
         finally { context.workspace.mixedSynchronizing = false; }
     }
     updateGhostControls(ui, context, 'mixedmodel');
+    updatePControl(ui,context);
+};
+const updatePControl = function(ui, context) {
+    const capability = ui.view.model.options.getOption('comparisonPAvailable');
+    if (ui.includeP && typeof ui.includeP.setPropertyValue === 'function')
+        ui.includeP.setPropertyValue('enable',ui.compare.value() === true && ui.comparisonStatistics.value() === true &&
+            !!capability && capability.getValue() === true);
+};
+const roleChanging = function(ui, event, comparison, x) {
+    const values = [].concat(event.value || []);
+    const cas = ui[comparison ? 'comparisonPredictionType' : 'predictionType'].value() === 'cas';
+    if ((x || cas) && values.includes(ui.cluster.value())) event.cancel = true;
 };
 module.exports = {
+    randomIntercept_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonRandomIntercept_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonPAvailable_changed: function(ui) { updatePControl(ui,this); },
+    comparisonStatistics_changed: function(ui) { synchronize(ui,this,false); },
+    estimation_changed: function(ui) { synchronize(ui,this,false); },
+    comparisonEstimation_changed: function(ui) { synchronize(ui,this,false); },
+    plotX_changing: function(ui,event) { roleChanging(ui,event,false,true); },
+    comparisonX_changing: function(ui,event) { roleChanging(ui,event,true,true); },
+    plotPanels_changing: function(ui,event) { roleChanging(ui,event,false,false); },
+    comparisonPanels_changing: function(ui,event) { roleChanging(ui,event,true,false); },
     graphic_changed: function(ui) { updateGhostControls(ui, this, 'mixedmodel'); },
     ghostLines_changed: function(ui) { updateGhostControls(ui, this, 'mixedmodel'); },
-    plotGroupingLayout_updated: function(ui) { synchronize(ui,this,false); },
     plotGroup_changing: function(ui, event) {
-        updateTerms.groupChanging(true,event);
+        roleChanging(ui,event,false,false);
     },
     comparisonGroup_changing: function(ui,event) {
         updateTerms.groupChanging(ui.comparisonPredictionType.value() === 'cas',event);
+        roleChanging(ui,event,true,false);
     },
     comparisonPlotSupplier_updated: function(ui) { synchronize(ui,this,false); },
-    comparisonGroupingLayout_updated: function(ui) { synchronize(ui,this,false); },
     comparisonX_changed: function(ui) { synchronize(ui,this,false); },
     comparisonPanels_changed: function(ui) { synchronize(ui,this,false); },
     comparisonGroup_changed: function(ui) { synchronize(ui,this,false); },

@@ -149,7 +149,7 @@ test_that("Mixed Model visualization switching and unsupported layouts are expli
     "prediction" %in% names(layer$data),plot$layers)[[1]]$data)
   expect_equal(unname(as.matrix(prediction[[1]][c("x","id")])),unname(as.matrix(prediction[[2]][c("x","id")])))
   expect_true(any(abs(prediction[[1]]$prediction-prediction[[2]]$prediction)>1e-4))
-  expect_error(flexplot:::jamovi_mixed_plot(state,"x","a",type="cluster"),"place the grouping variable")
+  expect_error(flexplot:::jamovi_mixed_plot(state,"x","a",type="cluster"),"place the cluster variable")
   expect_error(flexplot:::jamovi_mixed_plot(state,"z","id"),"predictors in the fitted model")
   expect_error(flexplot:::jamovi_mixed_plot(state,"id"),"model predictor on x")
   # No fixed terms is a valid random-intercept model; it has no predictor plot.
@@ -233,7 +233,7 @@ test_that("Mixed Model CAS delegates adjustment and model curves to the fitted-m
   expect_equal(actual_layers,ggplot2::ggplot_build(expected)$data)
   expect_match(plot$labels$subtitle,"Cluster-adjusted")
   expect_false(any(vapply(plot$layers,function(layer) inherits(layer$geom,"GeomSmooth"),logical(1))))
-  expect_match(analysis$results$plotExplanation$content,"All eligible fitted observations")
+  expect_match(analysis$results$plotExplanation$content,"All fitted random effects are removed from the observations.")
   expect_identical(state$model,original)
   # Exercise the actual rendering callback in the CAS mode.
   capture = new.env(parent=emptyenv())

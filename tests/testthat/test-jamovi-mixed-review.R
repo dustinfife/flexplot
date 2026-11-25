@@ -1,0 +1,96 @@
+test_that("new Mixed analyses default to independent CAS modes", {
+  options = flexplot:::mixedmodelOptions$new()
+  expect_identical(options$predictionType,"cas")
+  expect_identical(options$comparisonPredictionType,"cas")
+  analysis = jamovi_mixed_analysis(graphic=TRUE,plotX="x")
+  expect_true(analysis$run())
+  expect_identical(analysis$options$predictionType,"cas")
+  expect_match(analysis$results$plot$state$displayPlot$labels$subtitle,"Cluster-adjusted scatterplot",fixed=TRUE)
+  expect_false(analysis$options$comparisonPAvailable)
+  for(name in c("random","random2")) expect_identical(analysis$results[[name]]$getColumn("group")$title,"Cluster variable")
+})
+
+test_that("Mixed plot titles, legends and selection notes describe the actual display", {
+  analysis = jamovi_mixed_analysis(modelTerms=list("x","a"),predictionType="cluster",plotX="x",plotPanels="id",clusters=3,graphic=TRUE)
+  expect_true(analysis$run())
+  state = analysis$results$plot$state
+  plot = state$displayPlot
+  expect_identical(plot$labels$subtitle,"Cluster-specific predictions")
+  expect_identical(plot$labels$title,"Model Visualization")
+  expect_identical(plot$theme$legend.position,"none")
+  count = length(unique(as.character(plot$data$id)))
+  expect_identical(analysis$results$plotExplanation$content,flexplot:::jamovi_plot_note_paragraph(paste(count,"clusters were randomly selected.")))
+  edited = flexplot:::jamovi_mixed_apply_labels(plot,list(list(role="title",variable="",value="",label="My title")))
+  expect_identical(edited$labels$title,"My title")
+  expect_identical(lapply(edited$layers,function(layer)layer$data),lapply(plot$layers,function(layer)layer$data))
+  grouped = flexplot:::jamovi_mixed_plot(state,x="x",panels="id",group="a",type="cluster")
+  expect_false(identical(grouped$theme$legend.position,"none"))
+  all = flexplot:::jamovi_mixed_plot(state,x="x",panels="id",type="cluster",clusters=16)
+  expect_identical(flexplot:::jamovi_mixed_plot_guide(all,state,"cluster"),flexplot:::jamovi_plot_note_paragraph("All 16 clusters are displayed."))
+  pop = flexplot:::jamovi_mixed_plot(state,x="x",type="population")
+  expect_identical(pop$labels$subtitle,"Population-level predictions")
+  expect_identical(flexplot:::jamovi_mixed_plot_guide(pop,state,"population"),"")
+  expect_true(jamovi_reporting_update(analysis,list(predictionType="population",plotPanels=NULL)))
+  expect_false(analysis$results$plotExplanation$visible)
+})
+
+test_that("Mixed p availability follows valid displayed comparisons while retaining preference", {
+  analysis = jamovi_mixed_analysis(modelTerms=list("x","z"),comparisonFixed="x",comparisonTerms=list("x"),
+    includeP=TRUE,compare=FALSE,estimation="REML",comparisonEstimation="REML")
+  expect_true(analysis$run())
+  expect_false(analysis$options$comparisonPAvailable)
+  expect_true(analysis$options$includeP)
+  expect_true(jamovi_reporting_update(analysis,list(compare=TRUE)))
+  state = analysis$results$comparisonplot$state
+  expect_true(analysis$options$comparisonPAvailable)
+  expect_true(analysis$results$comparison$getColumn("p")$visible)
+  expect_true(all(vapply(list(state$model1,state$model2),lme4::isREML,logical(1))))
+  expect_true(all(!vapply(state$statistics$models,lme4::isREML,logical(1))))
+  expect_identical(analysis$results$comparison$notes$estimation$note,"Comparisons use ML; visualizations use REML estimates.")
+  expect_equal(state$statistics$p,pchisq(state$statistics$lr,state$statistics$df,lower.tail=FALSE))
+  coefficients = summary(state$model1)$coefficients
+  expect_equal(analysis$results$fixed$asDF$lower,unname(coefficients[,1]-qnorm(.975)*coefficients[,2]))
+  expect_null(analysis$results$fixed$notes$intervals)
+  before = analysis$results$comparison$asDF
+  expect_true(jamovi_reporting_update(analysis,list(includeP=FALSE)))
+  expect_false(analysis$results$comparison$getColumn("p")$visible)
+  expect_null(analysis$results$comparison$notes$column_test)
+  expect_equal(analysis$results$comparison$asDF,before[names(before)!="p"])
+  expect_equal(analysis$results$comparison$getCell("p",rowNo=1)$value,before$p[1])
+  expect_true(jamovi_reporting_update(analysis,list(includeP=TRUE,comparisonStatistics=FALSE)))
+  expect_false(analysis$options$comparisonPAvailable)
+  expect_true(analysis$options$includeP)
+  expect_true(jamovi_reporting_update(analysis,list(comparisonStatistics=TRUE,estimation="ML",comparisonEstimation="ML")))
+  expect_true(analysis$options$comparisonPAvailable)
+  expect_null(analysis$results$comparison$notes$estimation)
+  expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("z"))))
+  expect_false(analysis$options$comparisonPAvailable)
+  expect_false(analysis$results$comparison$getColumn("p")$visible)
+  expect_true(analysis$options$includeP)
+  expect_match(analysis$results$comparison$notes$unavailable$note,"nonnested|equivalent")
+})
+
+test_that("Mixed common-sample header notes only report additional exclusions", {
+  data = jamovi_mixed_test_data()
+  data$z[1:7] = NA_real_
+  analysis = jamovi_mixed_analysis(data=data,modelTerms=list("x"),comparisonFixed=c("x","z"),
+    comparisonTerms=list("x","z"),compare=TRUE,includeP=TRUE)
+  expect_true(analysis$run())
+  table = analysis$results$comparison
+  expect_identical(table$getColumn("n")$title,"Nᵃ")
+  expect_match(table$notes$column_sample$note,"7 additional observations from Model 1",fixed=TRUE)
+  expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factorᵇ")
+  expect_identical(table$getColumn("lr")$title,"Likelihood ratioᶜ")
+  expect_identical(table$getColumn("p")$title,"p")
+  expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("x","z"))))
+  expect_null(table$notes$column_sample)
+  expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factorᵃ")
+})
+
+test_that("single-model styling preserves genuinely multiple prediction-type legends", {
+  data = data.frame(x=rep(1:2,2),y=1:4,model=rep(c("population","cluster"),each=2))
+  plot = ggplot2::ggplot(data,ggplot2::aes(x=x,y=y,colour=model))+ggplot2::geom_line()
+  styled = flexplot:::jamovi_mixed_style_plot(plot,"cluster")
+  expect_false(identical(styled$theme$legend.position,"none"))
+  expect_identical(styled$data,data)
+})

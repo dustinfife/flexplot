@@ -30,8 +30,8 @@ test_that("Mixed comparisons use ML copies for nested fixed effects and preserve
   expect_equal(state$statistics$df,independent$Df[2])
   expect_equal(table$p[1],independent$`Pr(>Chisq)`[2],tolerance=1e-8)
   expect_null(analysis$results$comparison$getCell("p",rowNo=2)$value)
-  expect_match(analysis$results$comparison$notes$estimation$note,"Model comparisons use ML")
-  expect_match(analysis$results$comparison$notes$bayes$note,"Approximate BIC Bayes factor favoring the row model over the other model.")
+  expect_match(analysis$results$comparison$notes$estimation$note,"Comparisons use ML")
+  expect_match(analysis$results$comparison$notes$column_bayes$note,"Approximate BIC Bayes factor favoring the row model over the other model.")
   expect_match(analysis$results$comparisonSpecification$content,"Model 2")
 })
 
@@ -82,7 +82,7 @@ test_that("Mixed comparisons with random boundary changes or nonnested fixed eff
     comparisonTerms=list("z"),estimation="ML",comparisonEstimation="ML")
   expect_true(analysis$run())
   expect_true(is.na(analysis$results$comparisonplot$state$statistics$p))
-  expect_match(analysis$results$comparison$notes$test$note,"nonnested")
+  expect_match(analysis$results$comparison$notes$unavailable$note,"nonnested")
   expect_null(analysis$results$comparison$notes$randomP)
   expect_true(is.na(analysis$results$comparisonplot$state$statistics$lr))
   expect_false("p" %in% names(analysis$results$comparison$asDF))
@@ -231,8 +231,8 @@ test_that("Mixed comparison presentation is compact without losing model specifi
   notes = vapply(analysis$results$comparison$notes,`[[`,character(1),"note")
   expect_length(notes,3L)
   expect_lt(sum(nchar(notes)),350)
-  expect_match(notes[["estimation"]],"Model comparisons use ML on identical observations; plots use the original fitted models")
-  expect_match(notes[["bayes"]],"Approximate BIC Bayes factor favoring the row model over the other model.")
+  expect_match(notes[["estimation"]],"Comparisons use ML; visualizations use REML estimates.")
+  expect_match(notes[["column_bayes"]],"Approximate BIC Bayes factor favoring the row model over the other model.")
   expect_false(analysis$results$specification$visible)
   content = analysis$results$comparisonSpecification$content
   expect_match(content,"</strong>.*<br><strong>Model 2:")
@@ -245,7 +245,7 @@ test_that("Mixed comparison presentation is compact without losing model specifi
   expect_identical(lme4::fixef(updated$model1),first)
   expect_match(paste(deparse(formula(updated$model2)),collapse=" "),"x:z",fixed=TRUE)
   expect_match(paste(deparse(formula(updated$model2)),collapse=" "),"I(z^2)",fixed=TRUE)
-  expect_match(analysis$results$comparison$notes$test$note,"nonnested")
+  expect_match(analysis$results$comparison$notes$unavailable$note,"nonnested")
 })
 
 
@@ -259,9 +259,9 @@ test_that("Mixed Model 2 fixed selections constrain terms without selecting fixe
   expect_identical(colnames(lme4::getME(state$model2,"X")),c("(Intercept)","a.L","a.Q"))
   expect_identical(lme4::getME(state$model2,"cnms")[[1]],c("(Intercept)","x"))
   expect_true(analysis$results$plotExplanation$visible)
-  expect_match(analysis$results$plotExplanation$content,"Cluster-specific",fixed=TRUE)
+  expect_match(analysis$results$plotExplanation$content,"random effects",fixed=TRUE)
   expect_match(analysis$results$comparison$notes$estimation$note,
-    "Model comparisons use ML on identical observations; plots use the original fitted models",fixed=TRUE)
+    "Comparisons use ML; visualizations use REML estimates.",fixed=TRUE)
   expect_true(jamovi_reporting_update(analysis,list(comparisonFixed=c("x","a"),comparisonTerms=list("x","a"))))
   restored = analysis$results$comparisonplot$state
   expect_identical(lme4::fixef(restored$model1),lme4::fixef(state$model1))

@@ -36,7 +36,7 @@ jamovi_mixed_fit = function(options, data) {
     stop("Mixed Model requires a finite numeric outcome that varies.", call.=FALSE)
   }
   eligible[[options$cluster]] = droplevels(factor(eligible[[options$cluster]]))
-  if (nlevels(eligible[[options$cluster]]) < 2L) stop("The cluster variable needs at least two observed groups.", call.=FALSE)
+  if (nlevels(eligible[[options$cluster]]) < 2L) stop("The cluster variable needs at least two observed clusters.", call.=FALSE)
   warnings = new.env(parent=emptyenv())
   warnings$messages = character()
   model = withCallingHandlers(lme4::lmer(specification$formula, data=eligible,
@@ -61,7 +61,7 @@ jamovi_mixed_reset = function(results) {
   for (item in results$items) {
     item$setVisible(FALSE)
     jamovi_result_clear(item)
-    if (item$name %in% c("fixed","fixed2")) item$getColumn("p")$setVisible(FALSE)
+    if (item$name %in% c("fixed","fixed2","comparison")) item$getColumn("p")$setVisible(FALSE)
     if (inherits(item, "Image")) item$.setPath(NULL)
   }
   jamovi_plot_clear_states(results, c("plot", "comparisonplot"))
@@ -79,7 +79,6 @@ jamovi_mixed_tables = function(results, state, includeP, showCorrelations=FALSE,
   jamovi_glm_table_rows(results$fixed, fixed)
   for (name in c("lower","upper")) results$fixed$getColumn(name)$setVisible(includeCI)
   results$fixed$setNote("intervals",NULL)
-  if (includeCI && notes) results$fixed$setNote("intervals", "95% normal-Wald confidence intervals.")
   results$fixed$setNote("p",NULL)
   components = as.data.frame(lme4::VarCorr(state$model))
   components = components[is.na(components$var2), , drop=FALSE]
@@ -119,7 +118,7 @@ jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE,
   }
   formula_text = paste(deparse(stats::formula(state$model)), collapse=" ")
   information = paste0("<p>", stats::nobs(state$model), " complete observations; ",
-    nlevels(state$data[[state$cluster]]), " groups; ", state$omitted, " observations omitted.</p>")
+    nlevels(state$data[[state$cluster]]), " clusters; ", state$omitted, " observations omitted.</p>")
   results$specification$setContent(paste0("<p><strong>Model:</strong> ", jamovi_mixed_escape(formula_text),
     " (", if (lme4::isREML(state$model)) "REML" else "ML", ")</p>", information))
   invisible(information)
@@ -127,27 +126,27 @@ jamovi_mixed_report = function(results, state, includeP, showCorrelations=FALSE,
 
 jamovi_mixed_plot = function(state, x=NULL, panels=NULL, group=NULL, type="cluster", clusters=3) {
   layout = list(x=x,panels=panels,group=group,type=type,clusters=clusters)
-  if (!is.null(state$displayPlot) && identical(state$displayLayout,layout)) return(state$displayPlot)
+  if (!is.null(state$displayPlot) && identical(state$displayLayout,layout)) return(jamovi_mixed_style_plot(state$displayPlot,type,group))
   if (!type %in% c("population", "cluster", "cas")) stop("Choose population-level, cluster-specific, or cluster-adjusted visualization.", call.=FALSE)
   if (length(clusters) != 1L || !is.finite(clusters) || clusters < 1 || clusters != as.integer(clusters)) {
     stop("The number of displayed clusters must be a positive integer.", call.=FALSE)
   }
   if (type != "cas" && !identical(extract_random_term(state$model), state$cluster)) {
-    stop("The existing mixed-model plot path cannot handle this grouping-variable name. Use a simple grouping name for visualization.", call.=FALSE)
+    stop("The existing mixed-model plot path cannot handle this cluster-variable name. Use a simple cluster name for visualization.", call.=FALSE)
   }
   predictors = setdiff(all.vars(stats::formula(state$model))[-1], state$cluster)
   if (!length(predictors)) stop("This intercept-only model has no predictor for an x-axis visualization.", call.=FALSE)
   if (is.null(x)) x = predictors[1]
   if (type == "cluster" && is.null(panels) && is.null(group)) panels = state$cluster
   if (type == "cluster" && !state$cluster %in% c(x, panels, group)) {
-    stop("For cluster-specific predictions, place the grouping variable in panels or color / symbol.", call.=FALSE)
+    stop("For cluster-specific predictions, place the cluster variable in panels or color / symbol.", call.=FALSE)
   }
-  if (identical(x, state$cluster)) stop("Use a model predictor on x; place the grouping variable in panels or color / symbol.", call.=FALSE)
+  if (identical(x, state$cluster)) stop("Use a model predictor on x; place the cluster variable in panels or color / symbol.", call.=FALSE)
   formula = jamovi_model_layout(list(state$model), state$data, x, panels, group)
   if (type == "cas") {
     # Reuse CAS adjustment, model curves, and supported layouts on the original fit.
     plot = cluster_adjusted_scatter(formula, object=state$model, adjust_re="all", smooth=FALSE)
-    return(plot + ggplot2::labs(subtitle="Cluster-adjusted scatterplot (estimated random effects removed)"))
+    return(jamovi_mixed_style_plot(plot,type,group))
   }
   if (type == "population") {
     plot = compare_fits(formula, state$data, model1=state$model, re=FALSE,
@@ -163,9 +162,7 @@ jamovi_mixed_plot = function(state, x=NULL, panels=NULL, group=NULL, type="clust
     plot = flexplot(formula, observed, prediction=prediction, suppress_smooth=TRUE, se=FALSE)
     plot = plot + return_lims_geom(all.vars(formula)[1], state$data, state$model)
   }
-  label = if (type == "cluster") "Cluster-specific predictions (estimated random effects included)" else
-    "Population-level predictions (random effects excluded)"
-  plot + ggplot2::labs(subtitle=label)
+  jamovi_mixed_style_plot(plot,type,group)
 }
 
 # Keep cached plots and sampled clusters intact; ordinary ghosts copy that stream.
@@ -196,7 +193,9 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       jamovi_mixed_reset(self$results)
     },
     .run=function() {
+      jamovi_mixed_visualization_restore(self$options)
       jamovi_output_migrate(self$options, "mixedmodel")
+      jamovi_output_option(self$options,"comparisonPAvailable",FALSE)
       jamovi_plot_editor_migrate(self$options, "mixedmodel")
       previous = private$.modelState
       private$.modelState = NULL
@@ -222,6 +221,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           self$results$comparison$setError(conditionMessage(comparison))
           return(invisible(NULL))
         }
+        jamovi_output_option(self$options,"comparisonPAvailable",
+          isTRUE(self$options$comparisonStatistics) && is.finite(comparison$statistics$p))
         comparison$fitOptions = comparison_options
         comparison$inputData = self$data
         state = comparison$first
@@ -270,17 +271,14 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       self$results$plotExplanation$setVisible(self$options$graphic)
       if (plot_failed) jamovi_diagnostic(self$results$plotExplanation,
         paste("Model plot unavailable:", conditionMessage(plot))) else
-      self$results$plotExplanation$setContent(paste0("<p>",
-        if (self$options$predictionType == "cas")
-          "Cluster-adjusted scatterplot: the existing CAS implementation removes all estimated random effects from the fitted observations and draws the original model's fixed-effects curve. All eligible fitted observations are shown; the displayed-cluster count does not apply. Displayed moderators use CAS representative values, and undisplayed covariates are observation-weighted marginalized." else paste0(
-          if (self$options$predictionType == "cluster") "Cluster-specific predictions include the original model's estimated random effects." else
-            "Population-level predictions exclude random effects.",
-          " Curves use the existing marginal prediction method; undisplayed covariates retain the full eligible reference population.",
-          " Up to ", self$options$clusters, " randomly selected clusters are displayed."),
-        " No prediction confidence bands are calculated.</p>",
-        if (self$options$ghostLines && exists("display",inherits=FALSE))
-          jamovi_model_ghost_note(jamovi_mixed_apply_labels(display,self$options$plotLabels))))
-      self$results$plotExplanation$setContent(jamovi_plot_compact_notes(self$results$plotExplanation$content))
+      {
+        guide = if (self$options$graphic && exists("display",inherits=FALSE))
+          jamovi_mixed_plot_guide(display,state,self$options$predictionType) else ""
+        if (self$options$ghostLines && exists("display",inherits=FALSE)) guide = paste0(guide,
+          jamovi_model_ghost_note(jamovi_mixed_apply_labels(display,self$options$plotLabels)))
+        self$results$plotExplanation$setContent(guide)
+        self$results$plotExplanation$setVisible(self$options$graphic && nzchar(guide))
+      }
       if (!self$options$compare) return(invisible(NULL))
       jamovi_mixed_tables(list(fixed=self$results$fixed2,random=self$results$random2,
         correlations=self$results$correlations2),comparison$second,self$options$includeP,
@@ -300,7 +298,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       self$results$diagnostics$setContent(if (length(diagnostics)) paste0("<p><strong>",
         paste(jamovi_mixed_escape(diagnostics),collapse="</strong></p><p><strong>"),"</strong></p>") else "")
       self$results$diagnostics$setVisible(length(diagnostics)>0L)
-      jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP,information)
+      jamovi_mixed_comparison_report(self$results,comparison,self$options$includeP && self$options$comparisonStatistics,information)
       self$results$comparison$setVisible(self$options$comparisonStatistics)
       self$results$comparisonplot$setSize(if (self$options$comparisonPredictionType == "cas") 1100 else 700,450)
       comparison_plot_failed = FALSE
@@ -318,7 +316,9 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
           comparison$displayPlot = plot
           comparison$displayLayout = layout
           note = attr(plot,"jamovi_comparison_note")
-          if (!is.null(note)) jamovi_diagnostic(self$results$comparisonPlotNote,note)
+          guide = jamovi_mixed_plot_guide(plot,list(cluster=comparison$cluster,data=comparison$data),self$options$comparisonPredictionType,comparison=TRUE)
+          self$results$comparisonPlotNote$setContent(paste0(guide,if(length(note))jamovi_plot_note_paragraph(note) else ""))
+          self$results$comparisonPlotNote$setVisible(nzchar(self$results$comparisonPlotNote$content))
           jamovi_mixed_sync_labels(self$options,plot,layout,comparison=TRUE)
         }
       }
@@ -328,7 +328,8 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       if (self$options$comparisonGraphic && !comparison_plot_failed &&
           self$options$comparisonPredictionType == "cas" && self$options$casGhost &&
           isTRUE(attr(comparison$displayPlot,"jamovi_cas_ghost"))) {
-        self$results$comparisonPlotNote$setContent(jamovi_plot_note_paragraph("Note. Dashed line in Model 1 represents Model 2's fixed-effects predictions."))
+        self$results$comparisonPlotNote$setContent(paste0(self$results$comparisonPlotNote$content,
+          jamovi_plot_note_paragraph("Dashed line in Model 1 represents Model 2's fixed-effects predictions.")))
         self$results$comparisonPlotNote$setVisible(TRUE)
       }
     },

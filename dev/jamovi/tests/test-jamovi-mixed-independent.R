@@ -117,7 +117,7 @@ test_that("restored Mixed rendering diagnostics retain result objects, fits and 
   before = first$results$fixed$asDF
   message = first$results$asProtoBuf(status=4L,includeState=TRUE)
   image = message$group$elements[[which(vapply(message$group$elements,function(x)x$name=="plot",logical(1)))]]
-  expect_match(image$error$message,"place the grouping variable",fixed=TRUE)
+  expect_match(image$error$message,"place the cluster variable",fixed=TRUE)
   expect_identical(image$image$path,"")
   restored_options = flexplot:::mixedmodelOptions$new();restored_options$fromProtoBuf(options$asProtoBuf())
   reopened = host(restored_options)

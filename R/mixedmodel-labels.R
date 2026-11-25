@@ -19,7 +19,10 @@ jamovi_mixed_sync_labels = function(options, plot=NULL, layout=NULL, comparison=
 jamovi_mixed_apply_labels = function(plot, entries) {
   children = attr(plot,"jamovi_cas_children")
   if (!is.null(children)) return(jamovi_mixed_cas_compose(lapply(children,jamovi_mixed_apply_labels,entries=entries)))
-  jamovi_plot_apply_labels(plot,entries)
+  plot = jamovi_plot_apply_labels(plot,entries)
+  titles = Filter(function(entry)entry$role %in% c("title","subtitle") && jamovi_plot_nonblank_label(entry),entries)
+  for (entry in titles) plot = plot + do.call(ggplot2::labs,setNames(list(entry$label),entry$role))
+  plot
 }
 
 jamovi_mixed_remember_labels = function(...) jamovi_plot_remember_labels(...)
