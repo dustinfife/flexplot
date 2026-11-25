@@ -182,7 +182,12 @@ jamovi_mixed_display = function(state, options) {
 }
 
 mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
-  "mixedmodelClass", inherit=mixedmodelBase, private=list(
+  "mixedmodelClass", inherit=mixedmodelBase,
+  public=list(initialize=function(...) {
+    jamovi_flexplot_bibliography(mixedmodelResults)
+    super$initialize(...)
+  }),
+  private=list(
     .modelState=NULL,
     .comparisonState=NULL,
     .init=function() {

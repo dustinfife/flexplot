@@ -1,11 +1,13 @@
 test_that("native bibliography and output-marker renderers consume the separate response fields", {
   jmvcore:::initProtoBuf()
   records = list()
-  for (module in c("flexplota","glmbasic")) for (empty in c(FALSE,TRUE)) {
+  for (module in c("flexplota","glmbasic","glmgeneralized","mixedmodel")) for (empty in c(FALSE,TRUE)) {
     factory = get(paste0(module,"Options"),asNamespace("flexplot"))
     class = get(paste0(module,"Class"),asNamespace("flexplot"))
     options = if(empty)factory$new() else factory$new(out="y",preds="x")
-    analysis = class$new(options=options,data=if(empty)NULL else small,
+    data = if(module=="mixedmodel")jamovi_mixed_test_data() else small
+    if(!empty && module=="mixedmodel") options = factory$new(out="y",preds="x",cluster="id",graphic=FALSE)
+    analysis = class$new(options=options,data=if(empty)NULL else data,
       analysisId=1L,datasetId="citation-review")
     if(empty) {
       analysis$.setReadDatasetSource(function(columns)data.frame())

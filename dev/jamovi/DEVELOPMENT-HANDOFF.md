@@ -1460,3 +1460,33 @@ source fingerprint `9611b8c03bb4cb533ec37669fa03f93cd7eee106fa8b0d13441564e4f17e
 archive `3d1eb368cdd9eb9215f3c15060159186ae7c5324a3cb659057bd17955d1d8c24`,
 payload `b3feb9f9bec52bd4c33c2e3957ac9c5f4a846bd8410d57fdc9d386c831fae225`.
 Module left installed for manual review; recalculation refreshes cached context notes.
+
+
+## Mixed Models — remove hanging [3]/[4] bibliography callouts
+
+Completed 2026-11-25 from `3c35c8a4`. Mixed Models now installs the same public
+bibliography-only R6 policy as ordinary Flexplot, LM and GLM before constructing
+its results. `getRefs()` returns no on-result callout IDs;
+`getRefs(recurse=TRUE)` still returns the declared article IDs for the final
+AnalysisResponse bibliography. The final native References list and software
+attribution remain intact, with no replacement Method References block. No
+result/option identifiers, schemas, calculations, output choices or plots changed.
+
+Focused source and installed checks each passed 234 assertions covering the reported empty waiting
+message, fitted models with comparison on/off, repeated construction and restored
+legacy root marker IDs. Restoration retains existing result objects and identical
+numeric tables. Native bibliography/result-marker renderer checks passed six R
+wrapper assertions plus JavaScript assertions over all four modules, populated
+and empty, confirming marker-free results with full bibliography entries. Zero
+failures, test warnings or skips; existing testthat/R-build startup warning
+remains. Logs: `.jamovi-dev/manual-mixed-citations-20261125/`. Source-boundary and
+`git diff --check` checks passed. All 156 protected visual/fixture/metadata files
+are unchanged. No full suite, comprehensive E2E, visual-baseline regeneration,
+live GUI testing or jamovi window manipulation occurred.
+
+Rebuilt and installed 0.27.0 with the existing cache. Installed preflight passed:
+source fingerprint `e79291840a175c48e786376839a4652d1bd59c8d50f659988d5c62a84e944797`,
+archive `8eec02f38d476f0369875e1cad7d87d2ba396f6804f9e8b2a7e2f2c5bf74509f`,
+payload `124ad4f13323793a4b32b59c024df334e118aa4e922dd1aa13df8b4edbf3ca6d`.
+Existing cached responses need recalculation to remove their old root markers.
+Module left installed for manual review; comprehensive E2E remains paused.
