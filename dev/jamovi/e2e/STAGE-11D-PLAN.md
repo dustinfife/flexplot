@@ -5,6 +5,12 @@ Status: planned, **not run in Stage 11C**. The matrix defines 77 scenarios and
 all P1 must be executed with recorded disposition. A blocked P0 remains a blocker.
 Native/R6/renderer passes and historical pilot captures cannot replace these checks.
 
+Stage 11D.1 update (2026-11-24): the [seven-scenario pilot](STAGE-11D1-PILOT.md)
+has been executed, with failures and monitor-dependent blocks retained in its
+[ledger](stage11d1-ledger.json). No remaining 70-scenario run was launched.
+Resolve the documented diagnostic, scenario/verifier contracts and placement
+observability before accepting the pilot or starting unattended batches.
+
 ## Preflight and human ownership
 
 Use installed jamovi 2.7.41 on the desktop secondary monitor. Confirm the running

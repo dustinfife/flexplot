@@ -12,6 +12,12 @@ scenario passes. Historical pilot observations in PHASE-2A.md remain historical.
 See [the option reconciliation](STAGE-11C-COVERAGE.md) and the prioritized
 [Stage 11D campaign plan](STAGE-11D-PLAN.md). Source R/JS/YAML remains authoritative.
 
+Current campaign update (2026-11-24): [Stage 11D.1's seven-scenario pilot](STAGE-11D1-PILOT.md)
+was executed after Stage 11C. Its [separate ledger](stage11d1-ledger.json) records
+26 passed / 7 failed / 8 blocked checks; three scenarios pass declared checks,
+with shared fixture caveats. The other 70 remain unexecuted. The Stage 11C counts
+and historical Phase 2A records above/below retain their phase-specific meaning.
+
 ## Files and reproducibility
 
 | File | Purpose |

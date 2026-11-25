@@ -732,3 +732,51 @@ independent numerical comparisons. These 77 scenarios are **defined, not complet
 current-build live GUI passes**; component-native tests and historical pilot
 observations do not change that status. Release still requires the complete live
 campaign, isolated built-package checks and actual-host JASP compatibility.
+
+
+## Stage 11D.1 — live GUI pilot executed, acceptance incomplete
+
+Completed the seven-scenario execution on 2026-11-24 from `d97541e8` without
+production, manifest, harness, dependency, numerical-fixture or SVG changes.
+See the [pilot report](e2e/STAGE-11D1-PILOT.md),
+[campaign ledger](e2e/stage11d1-ledger.json) and
+[evidence hashes](e2e/stage11d1-evidence.json). Large actual native captures and
+host-saved OMVs remain ignored under `.jamovi-dev/e2e-runs/stage11d1-20261124/`.
+Installed/running 0.27.0 source fingerprint remains
+`68964d65afd6f88cbf4697301d09edc4d32412ad773ddcb1298cd965fb317550`;
+post-restart descriptors and final installed receipt pass. All 156 protected
+artifact/reference hashes are unchanged. The 24,504 package / 4,837 native /
+140 approved visual baseline is inherited, not rerun for documentation work.
+
+FP-03, LM-03, GLM-08, MM-10, LM-15, GLM-20 and MM-15 were attempted in order.
+All 27 checkpoint states were inspected, with seven final actual host reopens
+and seven subsequent native edits. LM-15's hidden comparison-group clear action is
+unavailable, so its partial action is not claimed complete. Strict results are
+**26 passed / 7 failed / 8 blocked** across 41 checks: transitions 18/5/4,
+reopens 4/1/2, subsequent edits 4/1/2. LM-03, GLM-08 and MM-10 pass their declared
+checks; all other scenario failures/blockers remain. The other 70 scenarios were
+not launched. All restored typed values and factor levels/order are preserved.
+Primary's unused literal backtick name is host-normalized, so FP-03's exact schema
+review fails; no fixture change or waiver is made.
+
+Two scenario contracts need review: LM-15 requires clearing an unavailable,
+retained ordinary comparison-group preference; GLM-20 expects stale x/group roles
+retained when native empty-term cleanup clears them. MM-15 exposes a real blank
+main-error presentation symptom with correct saved error/resource clearing and
+intact estimates; module/host-renderer responsibility is unassigned. Its comparison
+error is visibly isolated with an explanatory companion note and correct tables,
+but the verifier cannot represent HTML companion rendering-error diagnostics.
+All independently checked estimates, SE/CI and comparison N/AIC/BIC/Bayes factors
+match; nested LR/df checks pass where exposed. Population recovery succeeds.
+
+Human input opened early documents on the secondary monitor. After the operator
+requested autonomous opening and left, native `getApp` plus Open Recent reliably
+reopened the owned document. Fresh monitor coordinates are unavailable in the
+bridge; thirteen later observations explicitly leave placement unconfirmed,
+blocking eight otherwise passing checks. Do not call this unattended acceptance.
+Only owned analyses/documents were removed/closed, and the final review document
+was saved and closed. Next resolve the main diagnostic integration, review the
+two scenario contracts and companion-note verifier, establish monitor evidence
+and decide the literal-name host contract; rerun affected pilot gates before
+remaining P0 batches. Full campaign, isolated built-package release checks and
+actual-host JASP compatibility remain outstanding.
