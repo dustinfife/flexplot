@@ -86,7 +86,9 @@ test_that("GLM table help and plot explanations are concise and mode-specific", 
     expect_true(analysis$run())
     model = analysis$results$plot$state$model
     notes = analysis$results$coefficients$notes
-    expect_identical(notes$model$note,paste0("Family: ",model$family$family,"; Link: ",model$family$link,if (family=="binomial") ". Success event: 1" else ""))
+    expect_identical(notes$model$note,if(family=="negativebinomial") paste0(
+      "Family: Negative Binomial; Link: log; Estimated size (θ): ",formatC(model$theta,format="f",digits=3)) else
+      paste0("Family: ",model$family$family,"; Link: ",model$family$link,if (family=="binomial") ". Success event: 1" else ""))
     expect_false(grepl("estimates.glm",paste(vapply(notes,function(note)note$note,character(1)),collapse=" "),fixed=TRUE))
     if (family %in% c("binomial","poisson","negativebinomial")) expect_null(notes$intervals)
     expect_null(notes$uncertainty)

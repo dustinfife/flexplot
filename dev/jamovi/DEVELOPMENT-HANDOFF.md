@@ -1434,3 +1434,29 @@ source fingerprint `94b7645ac0b4b74228760fb143308895eca84ec7c5a21bda87aba54b0ba7
 archive `fe41b6a7872dce9a548bb2447f14c2184677529b8e1cb751a8e32a599b45a581`,
 payload `cf2c760adf3dcf99e8ec091903102f24d983005e4438f7bf49f14a4478f7cdc9`.
 Module left installed for manual review; comprehensive E2E remains paused.
+
+
+## GLM — explicitly label the negative-binomial size estimate
+
+Completed 2026-11-25 from `b0949ff2`. The Estimates family/context note now reads
+“Family: Negative Binomial; Link: log; Estimated size (θ): 1.438” for a model with
+that estimated size, using `model$theta` formatted to three decimal places. It no
+longer embeds an unexplained number in the family name. Each fit supplies its own
+value; no shared/fixed theta is introduced. Other families, event coding, notes,
+fitting, estimates, intervals and predictions are unchanged. Existing context
+transfer to the first visible summary remains in use.
+
+Focused note/numerical checks passed 187 source and 187 installed assertions;
+native serialization/renderer checks passed 169 assertions, with zero failures, test
+warnings or skips. Tests cover actual theta values under different specifications,
+the exact requested 1.438 wording and stable numeric tables on rerun. Installed
+checks/logs are in `.jamovi-dev/manual-nb-size-label-20261125/`. Existing testthat/
+R-build startup warning remains. All 156 protected visual/fixture/metadata files
+are unchanged. `git diff --check` passed. No full suite, comprehensive E2E,
+visual-baseline regeneration, live GUI testing or window manipulation occurred.
+
+Rebuilt and installed 0.27.0 using the existing cache. Installed preflight passed:
+source fingerprint `9611b8c03bb4cb533ec37669fa03f93cd7eee106fa8b0d13441564e4f17e45d9`,
+archive `3d1eb368cdd9eb9215f3c15060159186ae7c5324a3cb659057bd17955d1d8c24`,
+payload `b3feb9f9bec52bd4c33c2e3957ac9c5f4a846bd8410d57fdc9d386c831fae225`.
+Module left installed for manual review; recalculation refreshes cached context notes.

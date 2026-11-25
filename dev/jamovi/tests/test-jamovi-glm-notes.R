@@ -17,7 +17,7 @@ test_that("serialized GLM notes render compactly through the installed native ta
       family=family,graphic=FALSE,compare=TRUE,comparisonX="x",modelTerms=list("x","a"),comparisonTerms=list("x")),small)
     expect_true(analysis$run())
     add(analysis$results$coefficients,family,
-      expected=c(paste0("Family: ",analysis$results$plot$state$model$family$family),
+      expected=c(paste0("Family: ",if(family=="negativebinomial") "Negative Binomial" else analysis$results$plot$state$model$family$family),
         if(family=="binomial") "Success event: 1" else character()),
       forbidden=if(family!="binomial") c("odds ratios","Success event:","Std. OR") else character())
     add(analysis$results$irt,paste(family,"IRT"))

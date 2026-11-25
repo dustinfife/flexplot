@@ -116,3 +116,24 @@ test_that("binary success coding is identified once on the first visible summary
     expect_length(analysis$results$coefficients$notes,0L)
   }
 })
+
+
+test_that("negative-binomial context identifies each fitted model's estimated size explicitly", {
+  analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(out="y_pois",preds=c("x","a"),
+    family="negativebinomial",graphic=FALSE,comparisonGraphic=FALSE),small)
+  for (terms in list(list("x"),list("x","a"))) {
+    expect_true(jamovi_reporting_update(analysis,list(modelTerms=terms)))
+    model = analysis$results$plot$state$model
+    expected = paste0("Family: Negative Binomial; Link: log; Estimated size (θ): ",
+      formatC(model$theta,format="f",digits=3,decimal.mark="."))
+    expect_identical(analysis$results$coefficients$notes$model$note,expected)
+    expect_false(grepl("Negative Binomial(",expected,fixed=TRUE))
+    before = analysis$results$coefficients$asDF
+    expect_true(analysis$run())
+    expect_equal(analysis$results$coefficients$asDF,before,tolerance=0)
+    model$theta = 1.438
+    flexplot:::jamovi_glm_estimates(analysis$results,list(model=model,omitted=0L))
+    expect_identical(analysis$results$coefficients$notes$model$note,
+      "Family: Negative Binomial; Link: log; Estimated size (θ): 1.438")
+  }
+})

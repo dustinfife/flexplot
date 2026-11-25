@@ -114,7 +114,10 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
     if (is.numeric(value)) return(any(is.finite(value)))
     any(!is.na(value) & !value %in% c("", "NA", "NaN"))
   }
-  model_note = paste0("Family: ", model$family$family, "; Link: ", model$family$link)
+  model_note = if (inherits(model,"negbin")) paste0(
+    "Family: Negative Binomial; Link: ",model$family$link,"; Estimated size (θ): ",
+    formatC(model$theta,format="f",digits=3,decimal.mark=".")) else
+    paste0("Family: ", model$family$family, "; Link: ", model$family$link)
   if (model$family$family == "binomial") {
     response = stats::model.response(stats::model.frame(model))
     success = if (is.factor(response)) levels(response)[2] else "1"
