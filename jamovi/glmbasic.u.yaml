@@ -218,7 +218,7 @@ children:
         name: comparisonPlotSupplier
         label: Predictors in either model
         format: variable
-        persistentItems: true
+        persistentItems: false
         children:
           - type: TargetLayoutBox
             label: Comparison x variable

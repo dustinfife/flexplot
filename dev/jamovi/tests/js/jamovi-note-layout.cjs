@@ -16,7 +16,7 @@ const fs=require("node:fs"),path=require("node:path"),vm=require("node:vm"),asse
   Ic:class {},Fa:Annotation,_:text=>text});
  const Html=vm.runInNewContext(extract("jmv-results-html"),{Vt:{View:class {}}});
  const order={
-  glmbasic:['waiting','specification','explanation','plot','plotExplanation','glmcat','factorMeans','diff','rsq','comparisonplot','comparison','assumpplot'],
+  glmbasic:['waiting','specification','explanation','plot','plotExplanation','glmcat','factorMeans','diff','rsq','comparisonplot','comparison','assumpplot','methodReferences'],
   glmgeneralized:['waiting','specification','explanation','plot','plotExplanation','coefficients','irt','probabilities','comparisonplot','comparisonPlotExplanation','comparison'],
   mixedmodel:['waiting','specification','comparisonSpecification','explanation','diagnostics','plot','plotExplanation','model1Heading','fixed','random','correlations','model2Heading','fixed2','random2','correlations2','comparisonHeading','comparisonplot','comparisonPlotNote','comparison']};
  for(const record of JSON.parse(fs.readFileSync(fixtures,'utf8'))){

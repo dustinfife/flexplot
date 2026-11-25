@@ -437,17 +437,15 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         rsq = function() private$.items[["rsq"]],
         comparisonplot = function() private$.items[["comparisonplot"]],
         comparison = function() private$.items[["comparison"]],
-        assumpplot = function() private$.items[["assumpplot"]]),
+        assumpplot = function() private$.items[["assumpplot"]],
+        methodReferences = function() private$.items[["methodReferences"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Linear Model",
-                refs=list(
-                    "flexplot",
-                    "graphicalAnalysis"))
+                title="Linear Model")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="waiting",
@@ -466,7 +464,7 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Analysis plot",
+                title="Model Visualization",
                 width=600,
                 height=400,
                 renderFun=".plot",
@@ -595,7 +593,7 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="comparisonplot",
-                title="Model comparison plot",
+                title="Model Comparison Visualization",
                 width=700,
                 height=450,
                 renderFun=".comparisonplot",
@@ -646,7 +644,13 @@ glmbasicResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=400,
                 renderFun=".assumpplot",
-                visible="(graphicassump)"))}))
+                visible="(graphicassump)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="methodReferences",
+                title="",
+                visible=FALSE,
+                refs=list("flexplot","graphicalAnalysis")))}))
 
 glmbasicBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "glmbasicBase",

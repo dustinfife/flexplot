@@ -975,3 +975,94 @@ logs are under `.jamovi-dev/manual-flexplot-20261125/`.
 Stop here and await the next manual-feedback batch. Comprehensive GUI acceptance,
 previous Stage 11D.3 findings, isolated package checks and actual-host JASP remain
 separate outstanding release work.
+
+
+## Manual usability review — Linear Model corrections
+
+Completed 2026-11-25 from `06cdc10c` on `ggplot-objects`. Keep the comprehensive
+E2E campaign paused and await the user's GLM feedback. The immediate target is
+jamovi manual-review/release preparation; comprehensive JASP compatibility is
+**deferred**, as requested. Historical campaign ledgers remain unchanged and do
+not establish acceptance of this newly built module.
+
+1. **Conditional common-sample explanation:** LM now compares each formula's
+   independent complete-case mask against the existing common estimation mask.
+   The note appears only if at least one independent sample loses observations,
+   and gives the additional exclusion count for each affected model. Complete data
+   and identical independent complete cases have no note. The same common rows
+   still go to the same two `lm()` fits; coefficients, likelihoods, comparison
+   statistics, nested F-test calculation and eligibility rules are unchanged.
+2. **Consistent plot names:** the main section, Output Options checkbox, image
+   result heading and default plot title use `Model Visualization`; corresponding
+   comparison names use `Model Comparison Visualization`. The default is applied
+   before the existing custom-label renderer. Saved custom titles and all label
+   keys/option identifiers are preserved. The main CI label is now simply
+   `95% confidence intervals`. There is no redundant comparison CI caption to
+   remove; existing independent comparison/main uncertainty behavior is unchanged.
+3. **Include p-values:** LM passes its existing preference to the comparison table.
+   Unchecked hides that column and its F-test/unavailability explanation; checked
+   restores them. The numeric cell value and comparison statistics are retained.
+   Disabling/re-enabling comparison retains the preference. Nonnested/equivalent
+   cases still cannot acquire a newly invented F-test.
+4. **Comparison supplier:** its `persistentItems` is now false, matching the main
+   visualization supplier. The existing model-union synchronization and native
+   used-item filtering remove assigned x/panel variables from available choices,
+   return eligible removed roles, and update after replacement/reorder/model edits.
+   No parallel supplier implementation was added. The separate magnet grouping
+   supplier and temporarily unavailable stored grouping preferences are preserved.
+5. **Statistical header markers:** only LM's comparison notes changed. There is no
+   installed `Column` API for statistical header footnotes: native cell
+   `addFootnote()` would place markers on values. The reliable supported alternative
+   is literal Unicode superscripts in `Column$setTitle()` plus keyed `Table$setNote()`
+   explanations. For all three notes this produces `N¹`, `BIC Bayes factor²`, `p³`;
+   when N/p notes are absent the remaining markers renumber consecutively. Titles
+   and notes reset on every table refresh. Comparison cells carry no duplicate
+   footnotes. Column identifiers/types, row keys and numeric values remain intact.
+   The installed renderer escapes header titles as text (HTML `<sup>` is not a
+   formatting API), preserves Unicode superscripts, and renders the matching notes
+   below the table. Native serialization/restoration and R text export preserve
+   these headings. No CSS, host changes or unofficial heading-footnote mechanism.
+6. **Bibliographic placement:** `6a57fc36` moved GLM references from a table to
+   the analysis root, which still places a native reference component at the
+   analysis footer. Jamovi supports `refs` on individual results. LM now registers
+   its two article references only on an additive native HTML result,
+   `methodReferences`, following the existing outputs. Its visible **Method
+   References** text identifies Fife (2022) and Fife et al. (2021) and directs readers
+   to the full bibliography. The native numbered markers thus belong to that
+   labeled context, rather than appearing alone at the analysis footer. Full
+   bibliography and automatic jamovi/R software attribution remain. The host
+   `jmv-reference-numbers` component still appends markers after its owning result;
+   the module cannot select arbitrary pixel coordinates or an inline sentence
+   insertion point through supported result metadata. Root refs are empty, so no
+   duplicate analysis marker is created. Old caches with root refs and no new
+   block restore into the existing named results and recalculate correctly. This
+   is LM-only; ordinary Flexplot, GLM and Mixed citation placement is unchanged.
+
+Validation: **579 package assertions / 17 cases**, **248 native assertions / six
+cases**, and **99 assertions / three cases against the actually installed module**
+all passed, with zero failures/errors/test warnings/skips. Focused coverage includes
+independent/common sample masks and unchanged fits/F-test, hidden/restored p-values,
+conditional header numbering, cell-marker absence, default/custom titles and stable
+keys, interval independence, supplier filtering with the installed native method,
+model union/group retention, real protobuf options/results restoration, compiled
+UI/headers and named annotation ordering. Installed renderer methods execute against
+real serialized table fixtures and exercise Unicode headings/notes and citation
+ownership. The new Unicode header approach also passes native text export checks.
+The existing comparison-role/style, targeted statistical-note and label suites were
+used for directly affected consumers; no full package/native suite, comprehensive
+E2E campaign, JASP work or visual-baseline regeneration was run. All 140 SVGs and
+16 deterministic artifact files remain unchanged; package-test source boundaries
+pass. Initial development-test fixture/DOM-stub errors were corrected before the
+final passing native run; production behavior was not loosened to satisfy them.
+
+Built/installed 0.27.0 using the existing cache, with source fingerprint
+`5b079fa85aad012281e832b0734803316f3f51d96e500c98bbe69460792f7f6d`, archive
+`856670ea98c0ba1c947fb978c4620039dc03b9ddcc8685338804990f95e9710f`, payload
+`a63e870308d3084934e0487e18e0217301fef9ad5be1dc664fe4c41d81006aaa`.
+Installed source/archive/payload receipt verification passed. The latest module is
+left installed for the user's inspection. **No live GUI testing and no opening,
+closing or manipulation of jamovi review windows occurred.** Header and citation
+placement are renderer-level verified; the user's live visual review remains the
+next check. No claim of new live GUI or full-suite acceptance is made. Local logs,
+result summaries and installation preflight are in
+`.jamovi-dev/manual-lm-20261125/`.

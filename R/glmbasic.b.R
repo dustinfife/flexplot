@@ -21,6 +21,7 @@ jamovi_lm_display = function(model, data, options) {
   if (length(c(options$plotX,options$plotPanels,options$plotGroup)))
     layout = jamovi_model_layout(list(model),data,options$plotX,options$plotPanels,options$plotGroup)
   plot = jamovi_glm_model_plot(model,se=options$se,formula=layout,data=data)
+  plot = plot + ggplot2::labs(title="Model Visualization")
   if (!isTRUE(options$ghostLines)) return(plot)
   formula = if (is.null(layout)) jamovi_model_layout(list(model),data) else layout
   jamovi_model_reference_ghosts(plot,formula,TRUE)
@@ -98,7 +99,7 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
               return(invisible(NULL))
             }
             self$results$comparisonplot$setState(comparison)
-            jamovi_glm_comparison_table(self$results$comparison,comparison)
+            jamovi_glm_comparison_table(self$results$comparison,comparison,self$options$includeP)
             self$results$comparison$setVisible(self$options$comparisonStatistics)
             self$results$comparisonplot$setVisible(self$options$comparisonGraphic)
             if (!is.null(comparison$formula)) {
@@ -126,6 +127,10 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
           }
           jamovi_model_specification(self$results$specification,
             if (self$options$compare) list(comparison$model1, comparison$model2) else list(model))
+          self$results$methodReferences$setContent(paste0("<p><strong>Method References</strong></p>",
+            "<p>Graphical methods: Fife (2022) and Fife et al. (2021). ",
+            "Full bibliographic entries are listed in References.</p>"))
+          self$results$methodReferences$setVisible(TRUE)
           jamovi_lm_coefficients(self$results$glmcat,model,self$options$includeP)
           self$results$glmcat$setVisible(self$options$estimates)
           output = list(formula=formula,data=data)

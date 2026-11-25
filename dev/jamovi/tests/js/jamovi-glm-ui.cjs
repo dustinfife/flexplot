@@ -138,7 +138,7 @@ const {pathToFileURL} = require('node:url');
             assert.equal(controls.has('line'),false,'Generic smoothers must not appear in the LM UI');
             assert.equal(controls.has('center'),false,'Observed center/spread summaries must not appear in the LM UI');
             const definition = yaml.load(fs.readFileSync(path.join(root,'jamovi',analysis+'.a.yaml'),'utf8'));
-            assert.equal(definition.options.find(option => option.name === 'se').title,'95% confidence intervals (Model 1 plot)');
+            assert.equal(definition.options.find(option => option.name === 'se').title,'95% confidence intervals');
             for (const name of ['line','center']) assert.ok(definition.options.some(option => option.name === name),'Retain saved option: '+name);
             const main = compiled.view.layout.controls.find(c=>c.label==='Model Visualization');
             assert.ok(main.controls.some(c=>c.name==='se'));
@@ -546,6 +546,7 @@ const {pathToFileURL} = require('node:url');
             fs.writeFileSync(output+'.restored.json',JSON.stringify(restored));
         }
         await require('./jamovi-model-ghosts.cjs')(ui,view,fire,assert,analysis);
+        if(analysis==='glmbasic')await require('./jamovi-lm-manual.cjs')(ui,view,fire,assert,nodes,fs.readFileSync(runtime,'utf8'));
         fs.writeFileSync(output, records.join('\n') + '\n');
         console.log(runtime ? 'Used installed jamovi View.extend' : 'Used portable automatic-handler contract');
     } finally {

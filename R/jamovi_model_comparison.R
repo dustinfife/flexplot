@@ -22,7 +22,10 @@ jamovi_glm_comparison = function(options, data) {
   formula1 = jamovi_lm_formula(options,data)
   formula2 = jamovi_lm_formula(options,data,second=TRUE)
   variables = union(all.vars(formula1), all.vars(formula2))
-  eligible = data[stats::complete.cases(data[, variables, drop=FALSE]), , drop=FALSE]
+  common = stats::complete.cases(data[, variables, drop=FALSE])
+  additional = vapply(list(formula1,formula2),function(formula)
+    sum(stats::complete.cases(data[,all.vars(formula),drop=FALSE]) & !common),integer(1))
+  eligible = data[common, , drop=FALSE]
   if (!nrow(eligible)) stop("No complete observations are available for both models.", call.=FALSE)
   model1 = jamovi_glm_fit(formula1, eligible, "Model 1")
   model2 = jamovi_glm_fit(formula2, eligible, "Model 2")
@@ -35,12 +38,42 @@ jamovi_glm_comparison = function(options, data) {
   # Keep the F-test numeric: model.comparison formats its rounded p-value as text.
   p = get_p_value(model1, model2, check_nested(model1, model2))
   list(model1=model1, model2=model2, formula=plot_formula, plotError=plot_error, data=eligible,
-       statistics=comparison$statistics, p=if (length(p)) p[1] else NA_real_)
+       statistics=comparison$statistics, p=if (length(p)) p[1] else NA_real_, additionalExcluded=additional)
 }
 
-jamovi_glm_comparison_table = function(table, state) {
+jamovi_lm_sample_note = function(state) {
+  additional = state$additionalExcluded
+  affected = which(additional>0L)
+  if (!length(affected)) return(NULL)
+  paste0("Common-sample fitting excluded ",paste(vapply(affected,function(i)
+    paste(additional[i],"additional",if (additional[i]==1L) "observation" else "observations",
+      "from Model",i),character(1)),collapse="; "),".")
+}
+
+# Native column titles and keyed notes both serialize as text. Unicode markers
+# keep column-wide explanations out of cells, including in copied/exported tables.
+jamovi_lm_comparison_notes = function(table, state, includeP) {
+  titles = c(n="N",bayes.factor="BIC Bayes factor",p="p")
+  notes = list(n=jamovi_lm_sample_note(state),bayes.factor=jamovi_bayes_note(),
+    p=if (!includeP) NULL else if (is.finite(state$p)) "Nested-model F-test." else
+      jamovi_comparison_unavailable(state$model1,state$model2,"F-test"))
+  index = 0L
+  for (name in names(titles)) {
+    title = titles[[name]]
+    note = notes[[name]]
+    if (length(note)) {
+      index = index+1L
+      marker = c("¹","²","³")[index]
+      title = paste0(title,marker)
+      table$setNote(paste0("column_",name),paste(marker,note))
+    }
+    table$getColumn(name)$setTitle(title)
+  }
+}
+
+jamovi_glm_comparison_table = function(table, state, includeP=FALSE) {
   jamovi_result_clear(table)
-  table$getColumn("p")$setTitle("p")
+  table$getColumn("p")$setVisible(includeP)
   statistics = state$statistics
   for (i in seq_len(2L)) {
     row = list(model=paste("Model", i), n=stats::nobs(state[[paste0("model", i)]]))
@@ -51,10 +84,7 @@ jamovi_glm_comparison_table = function(table, state) {
     if (i == 1L && !is.na(state$p)) row$p = state$p
     table$addRow(rowKey=i, values=row)
   }
-  table$addFootnote(rowNo=1, col="n", note="Both models use the same complete observations across their combined variables.")
-  jamovi_table_footnote(table,"bayes.factor",jamovi_bayes_note())
-  jamovi_table_footnote(table,"p",if (is.finite(state$p)) "Nested-model F-test." else
-    jamovi_comparison_unavailable(state$model1,state$model2,"F-test"),rows=1L,missing=TRUE)
+  jamovi_lm_comparison_notes(table,state,includeP)
 }
 
 jamovi_glm_comparison_plot = function(state) {
@@ -67,6 +97,7 @@ jamovi_glm_comparison_plot = function(state) {
   plot = jamovi_comparison_style(compare_fits(formula, data=state$data, model1=model1, model2=model2))
   note = attr(formula, "jamovi_comparison_note")
   if (is.null(note)) note = attr(state$formula, "jamovi_comparison_note")
+  plot = plot + ggplot2::labs(title="Model Comparison Visualization")
   attr(plot, "jamovi_comparison_note") = note
   plot
 }

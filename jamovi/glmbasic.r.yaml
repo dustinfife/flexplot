@@ -2,7 +2,6 @@
 name:  glmbasic
 title: Linear Model
 jrs:   '1.1'
-refs: [flexplot, graphicalAnalysis]
 
 items:      
     - name: waiting
@@ -18,7 +17,7 @@ items:
       type: Html
       visible: false
     - name: plot
-      title: Analysis plot
+      title: Model Visualization
       type: Image
       width:  600
       height: 400
@@ -120,7 +119,7 @@ items:
           type: number                                                          
       visible: (estimates)
     - name: comparisonplot
-      title: Model comparison plot
+      title: Model Comparison Visualization
       type: Image
       width: 700
       height: 450
@@ -163,4 +162,9 @@ items:
       height: 400
       renderFun: .assumpplot
       visible: (graphicassump)
+    - name: methodReferences
+      title: ''
+      type: Html
+      visible: false
+      refs: [flexplot, graphicalAnalysis]
 ...

@@ -20,7 +20,7 @@ options:
       type: Variables
 
     - name: graphic
-      title: Model visualization
+      title: Model Visualization
       type: Bool
       default: true
       
@@ -38,12 +38,12 @@ options:
       title: Include p-values
       type: Bool
       default: false
-      description: Include coefficient t-test p-values in the estimates table.
+      description: Include coefficient t-test p-values and eligible model-comparison p-values.
 
     - name: se
-      title: 95% confidence intervals (Model 1 plot)
+      title: 95% confidence intervals
       type: Bool
-      description: Show 95% confidence intervals in the Model 1 plot; comparison and diagnostic plots are unchanged.
+      description: Show 95% confidence intervals in Model Visualization; comparison and diagnostic visualizations are unchanged.
       default: true           
        
     # Retained for saved-analysis compatibility; not used by model visualization.
@@ -196,7 +196,7 @@ options:
       hidden: true
       template: *plotLabel
     - name: comparisonGraphic
-      title: Model comparison plot
+      title: Model Comparison Visualization
       type: Bool
       default: true
     - name: comparisonStatistics
