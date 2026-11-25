@@ -44,6 +44,6 @@ test_that("ordinary Flexplot retains full bibliography without plot or empty-ana
   expect_identical(restored$results$itemNames,c("waiting","explanation","plot"))
   # Constructing another ordinary analysis does not change an earlier instance.
   expect_flexplot_bibliography_only(analysis)
-  lm = flexplot:::glmbasicResults$new(flexplot:::glmbasicOptions$new())
-  expect_identical(lm$methodReferences$getRefs(),c("flexplot","graphicalAnalysis"))
+  glm = flexplot:::glmgeneralizedResults$new(flexplot:::glmgeneralizedOptions$new())
+  expect_identical(glm$getRefs(),c("flexplot","graphicalAnalysis"))
 })

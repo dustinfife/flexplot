@@ -1151,3 +1151,39 @@ module left installed for manual inspection. No live GUI testing or manipulation
 of jamovi windows occurred. Local log/preflight:
 `.jamovi-dev/manual-flexplot-controls-20261125/`. Comprehensive E2E remains paused;
 stop here and wait for the user's next feedback.
+
+
+## Linear Model — remove Method References block and callouts
+
+Completed 2026-11-25 from `fc418eb4`, following the user's explicit request to
+delete the generated Method References heading, explanatory paragraph and [3] [4]
+beneath LM output. The `methodReferences` result declaration, generated binding
+and content publisher are removed. All other result/option identifiers, tables,
+fits, titles, statistical footnotes and plot controls are unchanged.
+
+LM now uses the same verified bibliography-only collection policy as ordinary
+Flexplot: the public `getRefs()` returns no on-result marker IDs, while
+`getRefs(recurse=TRUE)` delegates to the original Group collector. The existing
+helper accepts a result-class argument, preserving its ordinary default; LM
+installs it before constructing results. The root retains the two legitimate
+article declarations for full AnalysisResponse bibliography metadata. No duplicate
+reference block is added, and the final native References list plus software
+attribution remain intact. GLM and Mixed citation behavior is unchanged. This
+supersedes the earlier LM decision to introduce a labeled Method References block.
+
+Focused checks pass: 203 package assertions/five cases, 154 native assertions/four
+cases, and 203 assertions/five cases against the installed module; zero failures,
+errors, test warnings or skips. They cover marker-free LM responses with full
+bibliography metadata for populated and empty analyses, retained ordinary behavior,
+native bibliography/marker rendering, and real cached-results restoration with the
+removed HTML block injected. Unknown legacy blocks are discarded without replacing
+existing results or changing comparison numbers. Native named result ordering,
+column notes, custom titles and supplier checks remain passing. All 140 SVGs and
+16 deterministic artifact files are unchanged; no full suite/E2E or baseline
+regeneration. No live GUI testing or jamovi window manipulation occurred.
+
+Built and installed 0.27.0 using the existing cache. Source fingerprint `dbde65de53c06660df1cc79a24b3135154fee17fbcc01355fb1c65f7a48f8c34`,
+archive `d9e27e23d2fcdb8700158c5ffcd4ca5f4ea619d67cca5fa1b6803341d579a575`, payload `c11ae9af1a3d1a9f03998ef1072e58666c1d9dd2b916c3beb94c3983edb148cc`; receipt/source/payload verification passed.
+Latest module left installed. Cached output needs recalculation to receive the
+new result tree and marker-free response. Local logs/preflight:
+`.jamovi-dev/manual-lm-citations-20261125/`. Comprehensive E2E remains paused.

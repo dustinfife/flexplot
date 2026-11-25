@@ -113,6 +113,30 @@ test_that("LM default titles and user titles retain stable label keys and indepe
     expect_identical(length(intervals)>0L,se)
   }
   expect_length(analysis$results$getRefs(),0L)
-  expect_identical(analysis$results$methodReferences$getRefs(),c("flexplot","graphicalAnalysis"))
-  expect_match(analysis$results$methodReferences$content,"Method References",fixed=TRUE)
+  expect_identical(analysis$results$getRefs(recurse=TRUE),c("flexplot","graphicalAnalysis"))
+  expect_false("methodReferences" %in% analysis$results$itemNames)
+})
+
+test_that("LM serializes bibliography entries without a Method References block or callouts", {
+  jmvcore:::initProtoBuf()
+  for (empty in c(FALSE,TRUE)) {
+    options = if(empty)flexplot:::glmbasicOptions$new() else
+      flexplot:::glmbasicOptions$new(out="y",preds="x",graphic=FALSE)
+    analysis = flexplot:::glmbasicClass$new(options=options,data=if(empty)NULL else small,
+      analysisId=1L,datasetId="lm-citation-review")
+    if(empty) {
+      analysis$.setReadDatasetSource(function(columns)data.frame())
+      analysis$.setReadDatasetHeaderSource(function(columns)data.frame())
+      analysis$init()
+    } else expect_true(analysis$run())
+    response = analysis$asProtoBuf(includeState=FALSE)
+    expect_identical(vapply(response$references,function(ref)ref$name,character(1)),
+      c("flexplot","graphicalAnalysis"))
+    walk = function(element) {
+      expect_false(identical(element$name,"methodReferences"))
+      expect_length(element$refs,0L)
+      if(element$has("group"))for(child in element$group$elements)walk(child)
+    }
+    walk(response$results)
+  }
 })

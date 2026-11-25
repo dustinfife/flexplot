@@ -19,10 +19,13 @@ test_that("LM column header markers and citation ownership survive native serial
       saved = Filter(function(item)item$name==column$name,pb$table$columns)[[1]]
       expect_identical(saved$title,column$title)
     }
-    # Real historical cache: root citations, no new labeled reference result.
+    # Historical cache with root citations and the now-removed HTML block.
     cached = analysis$results$asProtoBuf(status=4L,includeState=FALSE)
     cached$refs = c("flexplot","graphicalAnalysis")
-    cached$group$elements = Filter(function(item)item$name!="methodReferences",cached$group$elements)
+    legacyBlock = jmvcore::Html$new(options=analysis$options,name="methodReferences",title="",
+      refs=c("flexplot","graphicalAnalysis"))
+    legacyBlock$setContent("<p>Method References</p>");legacyBlock$setVisible(TRUE)
+    cached$group$elements = c(cached$group$elements,list(legacyBlock$asProtoBuf(status=4L,includeState=FALSE)))
     options = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
     cell = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
     values = setNames(lapply(analysis$options$names,analysis$options$get),analysis$options$names)
@@ -39,10 +42,8 @@ test_that("LM column header markers and citation ownership survive native serial
     expect_equal(reopened$results$comparison$asDF,table$asDF,tolerance=0)
     expect_identical(reopened$options$includeP,includeP)
     expect_length(reopened$results$getRefs(),0L)
-    expect_identical(reopened$results$methodReferences$getRefs(),c("flexplot","graphicalAnalysis"))
-    expect_match(reopened$results$methodReferences$content,"Method References",fixed=TRUE)
-    expect_true(reopened$results$methodReferences$visible)
-    expect_identical(tail(reopened$results$itemNames,1),"methodReferences")
+    expect_identical(reopened$results$getRefs(recurse=TRUE),c("flexplot","graphicalAnalysis"))
+    expect_false("methodReferences" %in% reopened$results$itemNames)
     expect_match(table$asString(),if(missing)"N¹" else "BIC Bayes factor¹",fixed=TRUE)
   }
   file = withr::local_tempfile(fileext=".json")
@@ -55,11 +56,9 @@ test_that("LM column header markers and citation ownership survive native serial
 
 test_that("compiled LM definitions preserve supported result citation ownership and concise names", {
   schema = yaml::read_yaml(file.path(root,"jamovi/glmbasic.r.yaml"))
-  expect_null(schema$refs)
+  expect_identical(schema$refs,c("flexplot","graphicalAnalysis"))
   refs = Filter(function(item)length(item$refs)>0L,schema$items)
-  expect_length(refs,1L)
-  expect_identical(refs[[1]]$name,"methodReferences")
-  expect_identical(refs[[1]]$refs,c("flexplot","graphicalAnalysis"))
+  expect_length(refs,0L)
   compiler = system.file("node_modules/jamovi-compiler",package="jmvtools")
   runtime = Sys.glob("/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/analysisui-*.js")[1]
   output = withr::local_tempfile()
@@ -67,11 +66,13 @@ test_that("compiled LM definitions preserve supported result citation ownership 
   expect_null(attr(log,"status"),info=paste(log,collapse="\n"))
   expect_true(any(grepl("PASS: native comparison supplier",log,fixed=TRUE)))
   generated = new.env(parent=asNamespace("flexplot"));sys.source(paste0(output,".header.R"),generated)
-  results = generated$glmbasicResults$new(generated$glmbasicOptions$new())
+  sys.source(file.path(root,"R/glmbasic.b.R"),generated)
+  results = generated$glmbasicClass$new(options=generated$glmbasicOptions$new(),data=NULL)$results
   expect_identical(results$plot$title,"Model Visualization")
   expect_identical(results$comparisonplot$title,"Model Comparison Visualization")
   expect_length(results$getRefs(),0L)
-  expect_identical(results$methodReferences$getRefs(),c("flexplot","graphicalAnalysis"))
+  expect_identical(results$getRefs(recurse=TRUE),c("flexplot","graphicalAnalysis"))
+  expect_false("methodReferences" %in% results$itemNames)
   options = yaml::read_yaml(file.path(root,"jamovi/glmbasic.a.yaml"))$options
   title = function(name)Filter(function(item)item$name==name,options)[[1]]$title
   expect_identical(title("se"),"95% confidence intervals")

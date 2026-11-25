@@ -72,6 +72,10 @@ jamovi_lm_reset = function(results) {
 glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
     "glmbasicClass",
     inherit = glmbasicBase,
+    public = list(initialize=function(...) {
+      jamovi_flexplot_bibliography(glmbasicResults)
+      super$initialize(...)
+    }),
     private = list(
         .init = function() jamovi_lm_reset(self$results),
       
@@ -127,10 +131,6 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
           }
           jamovi_model_specification(self$results$specification,
             if (self$options$compare) list(comparison$model1, comparison$model2) else list(model))
-          self$results$methodReferences$setContent(paste0("<p><strong>Method References</strong></p>",
-            "<p>Graphical methods: Fife (2022) and Fife et al. (2021). ",
-            "Full bibliographic entries are listed in References.</p>"))
-          self$results$methodReferences$setVisible(TRUE)
           jamovi_lm_coefficients(self$results$glmcat,model,self$options$includeP)
           self$results$glmcat$setVisible(self$options$estimates)
           output = list(formula=formula,data=data)

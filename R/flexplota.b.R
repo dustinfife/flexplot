@@ -11,10 +11,10 @@ jamovi_flexplot_reset = function(results) {
 # Analysis$asProtoBuf collects the bibliography with getRefs(recurse=TRUE),
 # whereas ResultsElement$asProtoBuf calls getRefs() for on-result callouts.
 # Keep the declared references in the bibliography without repeating markers
-# below every ordinary plot or waiting message. Use the public R6 extension API
+# below a plot or waiting message. Use the public R6 extension API
 # here so compilation of the generated header preserves this behavior.
-jamovi_flexplot_bibliography = function() {
-  flexplotaResults$set("public","getRefs",function(recurse=FALSE) {
+jamovi_flexplot_bibliography = function(results=flexplotaResults) {
+  results$set("public","getRefs",function(recurse=FALSE) {
     if (isTRUE(recurse)) super$getRefs(recurse=TRUE) else character()
   },overwrite=TRUE)
 }
