@@ -17,6 +17,17 @@ main-error isolation check also passes (25 checks total). Monitor placement is
 unconfirmed and recorded operationally. The process is ready to resume P0 batches;
 the other 70 scenarios remain unexecuted and must not be treated as passed.
 
+Stage 11D.3 update (2026-11-25): the [independent-output batch](STAGE-11D3-INDEPENDENT-PLOTS.md)
+attempted LM-11, LM-16, GLM-23 and MM-19. Its [ledger](stage11d3-ledger.json)
+records 23 passed / 3 failed / 1 blocked / 13 unexecuted of 40 planned checks.
+Only LM-16 achieved full acceptance. LM-11 lacks its required comparison explanation;
+GLM-23 has a title-context mismatch and unresolved screenshot/saved-image evidence;
+MM-19 lacks the required generated title row and stopped at step 2. No production,
+manifest or harness correction was made. Resolve and rerun these findings before
+promoting acceptance. Four P0 have full current-build acceptance; 35 still require
+it (29 never attempted, three smoke-only, three unsuccessful). FP-03 is accepted P1.
+The other 66 scenarios remain unlaunched; earlier counts above are historical.
+
 ## Preflight and human ownership
 
 Use installed jamovi 2.7.41; prefer the desktop secondary monitor. Confirm the running

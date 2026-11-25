@@ -1,0 +1,697 @@
+{
+  "stage": "11D.3",
+  "date": "2026-11-25",
+  "branch": "ggplot-objects",
+  "starting_commit": "1fe5c7b2370f09b373338682909abab286b5a34e",
+  "local_root": ".jamovi-dev/e2e-runs/stage11d3-20261125",
+  "build": {
+    "status": "passed",
+    "expected": "0.27.0",
+    "installed": "0.27.0",
+    "source_sha256": "54081947f58fe59e1543ca1c1e21f3828ee34464c719ee23ba84ac7808c42d63",
+    "archive_sha256": "2a4ec202a5fe4cbedd407e8f2add73edd0b4655a21f5db4b906ecfbccec3a88e",
+    "payload_sha256": "942478e722d2baf0b8bc93412fbfee6ab98bd038b01a3d93f977b6919d0e5df6",
+    "build_hash": "source-sha256-54081947f58fe59e1543ca1c1e21f3828ee34464c719ee23ba84ac7808c42d63",
+    "running_gui_verified": true
+  },
+  "functional_counts": {
+    "passed": 23,
+    "failed": 3,
+    "blocked": 1,
+    "unexecuted": 13
+  },
+  "count_basis": "40 planned: 32 declared transitions plus four final host reopens and four subsequent native edits. Initial in-flight saves and investigation probes are excluded.",
+  "scenario_dispositions": {
+    "LM-11": "failed: 8 transitions + actual host reopen/edit; missing required ordinary comparison explanation at step6.",
+    "LM-16": "passed: all 5 transitions + actual host reopen/edit.",
+    "GLM-23": "failed: all 8 transitions attempted; step5 evidence blocked; step8 comparison title absent in new display context. Final host reopen/edit unexecuted after finding.",
+    "MM-19": "failed: initial population/conditional/numerical checks passed; step2 required generated title row absent; stopped, steps3-11/final reopen/edit unexecuted."
+  },
+  "fully_passed_new_scenarios": [
+    "LM-16"
+  ],
+  "production_changed": false,
+  "manifest_changed": false,
+  "harness_changed": false,
+  "baseline_inherited_not_rerun": {
+    "package_assertions": 24546,
+    "native_assertions": 4925,
+    "approved_visual": 140
+  },
+  "numerical_reference_keys": 156,
+  "protected_verification": {
+    "protected_files": 162,
+    "mismatches": [],
+    "prior_indexes": {
+      "stage11d1": {
+        "files": 416,
+        "mismatches": []
+      },
+      "stage11d2": {
+        "files": 316,
+        "mismatches": []
+      }
+    }
+  },
+  "campaign": {
+    "defined": 77,
+    "P0_defined": 39,
+    "P1_defined": 38,
+    "current_build_fully_passed_P0": [
+      "LM-15",
+      "GLM-20",
+      "MM-15",
+      "LM-16"
+    ],
+    "current_build_fully_passed_P1": [
+      "FP-03"
+    ],
+    "current_build_smoke_only": [
+      "LM-03",
+      "GLM-08",
+      "MM-10"
+    ],
+    "P0_still_requiring_full_acceptance": 35,
+    "P0_never_attempted_on_current_build": 29,
+    "other_never_launched_scenarios": 66
+  },
+  "release_approved": false,
+  "monitor_policy": "Unconfirmed for all new observations; exact owned disposable document/analysis checked. No human assistance or unrelated windows/settings used. Owned document saved/closed at end.",
+  "findings": [
+    "CONTRACT-D3-01: LM-11/6 ordinary comparison explanation absent; no contract waiver.",
+    "EVIDENCE-D3-01: GLM-23/5 screenshot/saved main PNG disagree on title; asynchronous save/capture versus cached-resource issue unresolved, not confirmed product defect. Initial optimistic result retained separately.",
+    "CONTRACT-D3-02: GLM-23/8 raw-context comparison title blank; earlier overlay title retained in context store; strict manifest title expectation fails.",
+    "UI-D3-01: MM-19/2 title generation missing in both legacy Mixed catalogs; cannot execute declared generated-title edit. Stop affected scenario without fix."
+  ],
+  "checkpoints": [
+    {
+      "scenario": "LM-11",
+      "name": "01",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-11/1",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-11/01-observation.json",
+      "observation_sha256": "045d12057146ed1d90abbae3a29bd49dd70c4fdaf81d67b8bab709384a0d85a4",
+      "saved_omv": "LM-11/01.omv",
+      "saved_sha256": "590bb500311f7bd3b7aa0bde4002039b97208d913381f1ebb47bc1893408579a",
+      "inspector": "LM-11/01-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-11",
+      "name": "02",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-11/2",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-11/02-observation.json",
+      "observation_sha256": "a3a54cdc8846ef5f9524623c831cade5b010efe50da98e1d8ca396cfa6782fd2",
+      "saved_omv": "LM-11/02.omv",
+      "saved_sha256": "0f7ff57440cfa2866692d1973bbcfbb4863dea34e98df95a29e3b0aaf5749bf2",
+      "inspector": "LM-11/02-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-11",
+      "name": "03",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-11/3",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-11/03-observation.json",
+      "observation_sha256": "947abd029a5f7d7001aaddc21406a50b2c7df9ed2beaa82dd57cde3125b591c9",
+      "saved_omv": "LM-11/03.omv",
+      "saved_sha256": "77cd5125f26bd36504f42490bb50ae1240477afe019be800b587a7633250a4fe",
+      "inspector": "LM-11/03-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-11",
+      "name": "04",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-11/4",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-11/04-observation.json",
+      "observation_sha256": "67f5ac320eec0d4bfa094310ee461055a52448d44a1dfb4aa4f9e66c0f835947",
+      "saved_omv": "LM-11/04.omv",
+      "saved_sha256": "80085a1dc1a46f6e717a3e19d2fcc1f1cb3a144f272f0a5f0fc045df152deb44",
+      "inspector": "LM-11/04-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-11",
+      "name": "05",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-11/5",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-11/05-observation.json",
+      "observation_sha256": "a5c1bbea615f776aa25e393851db40692e724cd9412f9d7e4985316a61f42884",
+      "saved_omv": "LM-11/05.omv",
+      "saved_sha256": "92e627c6ecaab41f82dd4ef89d4a4fdbdb56cfd128ac9f285db67a3cad7fc82d",
+      "inspector": "LM-11/05-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-11",
+      "name": "06",
+      "kind": "transition",
+      "status": "failed",
+      "checkpoint": "LM-11/6",
+      "problems": "Incorrect native observation: outputs_independent",
+      "unobserved": [],
+      "observation": "LM-11/06-observation.json",
+      "observation_sha256": "727f127658f87603e539bf055cce8116b69e36674287ab65e161f1989dc46a6a",
+      "saved_omv": "LM-11/06.omv",
+      "saved_sha256": "91ad0bc65639afe6f8a10f4bf4ef940633620eb18ac10d786188504ea150f317",
+      "inspector": "LM-11/06-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-11",
+      "name": "07",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-11/7",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-11/07-observation.json",
+      "observation_sha256": "5e692fd74bf82059798bfbacb3b4c8d34c48efcc2342245c24f487e378ae1d34",
+      "saved_omv": "LM-11/07.omv",
+      "saved_sha256": "d776e631253be21e99ac4ca14e90350df3eadf671c7c62038771505213da4927",
+      "inspector": "LM-11/07-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-11",
+      "name": "08",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-11/8",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-11/08-observation.json",
+      "observation_sha256": "0b54b298c41fac423c9dd227132d697a9641042627325717d4f766eec83be65c",
+      "saved_omv": "LM-11/08.omv",
+      "saved_sha256": "ee43fb704653b2a70827104e48de6395c270864e719b1865ec38cae1008fb8fa",
+      "inspector": "LM-11/08-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-11",
+      "name": "reopened",
+      "kind": "reopen",
+      "status": "passed",
+      "checkpoint": "LM-11/8/restored",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-11/reopened-observation.json",
+      "observation_sha256": "08d29ba217b46497dacc65db411f3b9738aede2e4773a0d8324eb666218a1709",
+      "saved_omv": "LM-11/reopened.omv",
+      "saved_sha256": "ec48c4ef44b8c45a2d2e81d062c6bd7a72c7bc707e97d5cbf51339ce564993f2",
+      "inspector": "LM-11/reopened-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-11",
+      "name": "post-reopen-edit",
+      "kind": "post_reopen_edit",
+      "status": "passed",
+      "checkpoint": "LM-11/8",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-11/post-reopen-edit-observation.json",
+      "observation_sha256": "9df0d875db20eb882c5396ad76a991b0b6a4f15b556f7686ec37245853e138ec",
+      "saved_omv": "LM-11/post-reopen-edit.omv",
+      "saved_sha256": "f0a19fa12a7c1109a279869ed4611d106b50a8f2cf9474978931fdd8f7f51cb2",
+      "inspector": "LM-11/post-reopen-edit-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-16",
+      "name": "01",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-16/1",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-16/01-observation.json",
+      "observation_sha256": "4b83a355c3ea1c5aade8a210009f02358735c2ff0b9073e7fb5a5030d405930e",
+      "saved_omv": "LM-16/01.omv",
+      "saved_sha256": "72bc60de0051964c4bdf5a29e8ed170b8b8885719664e0a32b19bc0946ff41b7",
+      "inspector": "LM-16/01-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-16",
+      "name": "02",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-16/2",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-16/02-observation.json",
+      "observation_sha256": "c9074732000c1ce0f6290e94ab6983facc50ade42e9ddb5ad78904c399553c68",
+      "saved_omv": "LM-16/02.omv",
+      "saved_sha256": "c34eae1b5f26678b9e3ac40f343a0c7eaffeb9a0a0d108831fc4c6c7841e6747",
+      "inspector": "LM-16/02-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-16",
+      "name": "03",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-16/3",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-16/03-observation.json",
+      "observation_sha256": "572e133aaecf45a07401f1120972bf66b12f407b967de4491e72cd21674b72a4",
+      "saved_omv": "LM-16/03.omv",
+      "saved_sha256": "ea1b77128dd5bc8231b2e11adccafbc64f8e577a6f359fb05e02426f52a14932",
+      "inspector": "LM-16/03-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-16",
+      "name": "04",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-16/4",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-16/04-observation.json",
+      "observation_sha256": "21d7f693d7296708dedc83755a4d098d4ab4b96220f0dfd28a0e74b03d4937f3",
+      "saved_omv": "LM-16/04.omv",
+      "saved_sha256": "b4639fba0f8e976b23a2d1cdf79a81db388a9d56f1cfc6200d8f5333c17c1486",
+      "inspector": "LM-16/04-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-16",
+      "name": "05",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "LM-16/5",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-16/05-observation.json",
+      "observation_sha256": "9a6b8bf55389ccff4d0b94cfb46eee492dac41a205d1cc5392cacdea62e64d28",
+      "saved_omv": "LM-16/05.omv",
+      "saved_sha256": "88845f35e34653c925f94b27ddd08f290161e900495a393e1d37a0247a6ac22e",
+      "inspector": "LM-16/05-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-16",
+      "name": "reopened",
+      "kind": "reopen",
+      "status": "passed",
+      "checkpoint": "LM-16/5/restored",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-16/reopened-observation.json",
+      "observation_sha256": "551bbe1d3412a39e82a58a4d888f6333f50553200cdef66fbf0b4eeed1b6b00b",
+      "saved_omv": "LM-16/reopened.omv",
+      "saved_sha256": "db13673fbdaf99f15f8bced2ccd37c2c72bc9d1a957feac980ece608a0fae4b0",
+      "inspector": "LM-16/reopened-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "LM-16",
+      "name": "post-reopen-edit",
+      "kind": "post_reopen_edit",
+      "status": "passed",
+      "checkpoint": "LM-16/5",
+      "problems": [],
+      "unobserved": [],
+      "observation": "LM-16/post-reopen-edit-observation.json",
+      "observation_sha256": "b4ee8f554cdbcb9587345ab72e5127f71961e852c9a40b5fddde6c3d6cd67819",
+      "saved_omv": "LM-16/post-reopen-edit.omv",
+      "saved_sha256": "db13673fbdaf99f15f8bced2ccd37c2c72bc9d1a957feac980ece608a0fae4b0",
+      "inspector": "LM-16/post-reopen-edit-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "01",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "GLM-23/1",
+      "problems": [],
+      "unobserved": [],
+      "observation": "GLM-23/01-observation.json",
+      "observation_sha256": "73e3acdd82957e296c6ce4be3038e0144a2f305e973c5f03590fd83c9b93890a",
+      "saved_omv": "GLM-23/01.omv",
+      "saved_sha256": "5bfcb6c0836f0d980a7ab5a2d1ccfc556459398a697f34a0f7ab118ac61e9645",
+      "inspector": "GLM-23/01-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "02",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "GLM-23/2",
+      "problems": [],
+      "unobserved": [],
+      "observation": "GLM-23/02-observation.json",
+      "observation_sha256": "c6ff875b64007390fef13885b2d362dea422507f3540c7cc8d1804303285d089",
+      "saved_omv": "GLM-23/02.omv",
+      "saved_sha256": "8967ac2d7576b3adcde978461eb5c22e8530eb2c8871aac49cb1f37b59e43b5a",
+      "inspector": "GLM-23/02-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "03",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "GLM-23/3",
+      "problems": [],
+      "unobserved": [],
+      "observation": "GLM-23/03-observation.json",
+      "observation_sha256": "3a095931b2341e7a5a48080f7187cbaf9847a4532096b27ca974192374586c82",
+      "saved_omv": "GLM-23/03.omv",
+      "saved_sha256": "bd181d4e2f5f5e8270c8e75de26b8734376abdae5216c5ecd90fbc75248c953a",
+      "inspector": "GLM-23/03-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "04",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "GLM-23/4",
+      "problems": [],
+      "unobserved": [],
+      "observation": "GLM-23/04-observation.json",
+      "observation_sha256": "8d0a5964e6dec06a2a94aa8c2572c1431834ef015a9bba1484c451bdaea73bff",
+      "saved_omv": "GLM-23/04.omv",
+      "saved_sha256": "a8cfdda198e6f42280b30f07ed2de6c318803dc4753c44fee4bce5cd86fe5daf",
+      "inspector": "GLM-23/04-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "05",
+      "kind": "transition",
+      "status": "blocked",
+      "checkpoint": "GLM-23/5",
+      "problems": [
+        "Native screenshot shows Primary custom title; copied completed saved main PNG lacks it. Save/capture synchronization versus cached-resource behavior unresolved; no product defect assigned."
+      ],
+      "unobserved": [],
+      "observation": "GLM-23/05-observation.json",
+      "observation_sha256": "ee7dabc90ef3f1d6c889f14cc64b1fbc1a1a30324ed49b8436edcfbd4da6af91",
+      "saved_omv": "GLM-23/05.omv",
+      "saved_sha256": "cd32442b299364a45a4efbb32a24fbbd6adaddab760159b5ee994840a143b311",
+      "inspector": "GLM-23/05-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "06",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "GLM-23/6",
+      "problems": [],
+      "unobserved": [],
+      "observation": "GLM-23/06-observation.json",
+      "observation_sha256": "286d2181ebb34bf868c8cc8be5453447d3ed40208c0381cdb5be3fbb65ac940c",
+      "saved_omv": "GLM-23/06.omv",
+      "saved_sha256": "9e90cc220ad371759a6762078d8a102c76c38a39ef1a5caec1d241031e4d6911",
+      "inspector": "GLM-23/06-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "07",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "GLM-23/7",
+      "problems": [],
+      "unobserved": [],
+      "observation": "GLM-23/07-observation.json",
+      "observation_sha256": "696c106d1a189dfb227430f5cdbf68d78a3b0f0ecaa61d947f7193ebeb795ffb",
+      "saved_omv": "GLM-23/07.omv",
+      "saved_sha256": "d8bb912585dc2b219c8560088e6637a123eea2ecb35a0e4d94ecec124a5e4b60",
+      "inspector": "GLM-23/07-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "08",
+      "kind": "transition",
+      "status": "failed",
+      "checkpoint": "GLM-23/8",
+      "problems": "Incorrect native observation: comparison_restored",
+      "unobserved": [],
+      "observation": "GLM-23/08-observation.json",
+      "observation_sha256": "20f3d94cfe96a396f0846fa42575f6df7c7925cdb8cbeaa2f5667bdb4fff3b0d",
+      "saved_omv": "GLM-23/08.omv",
+      "saved_sha256": "90c2eecff13e94e0eef642dc88a127ebb1d2fb1ba78d6dedefaa5733065f984b",
+      "inspector": "GLM-23/08-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "reopened",
+      "kind": "reopen",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "GLM-23",
+      "name": "post-reopen-edit",
+      "kind": "post_reopen_edit",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "01",
+      "kind": "transition",
+      "status": "passed",
+      "checkpoint": "MM-19/1",
+      "problems": [],
+      "unobserved": [],
+      "observation": "MM-19/01-observation.json",
+      "observation_sha256": "507f1dc273440897e8d9cb8be6c93dce8ba74e6323ff1d328dcd0890b98cadb6",
+      "saved_omv": "MM-19/01.omv",
+      "saved_sha256": "5b07ae9bfc18cd93548118d0d46bb7ece2704ade743f96e3ef88f14ac0054152",
+      "inspector": "MM-19/01-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "MM-19",
+      "name": "02",
+      "kind": "transition",
+      "status": "failed",
+      "checkpoint": "MM-19/2",
+      "problems": [
+        "Incorrect native observation: comparison_title",
+        "Incorrect native observation: comparison_store"
+      ],
+      "unobserved": "native rendered label review",
+      "observation": "MM-19/02-observation.json",
+      "observation_sha256": "961b7d44d1bbae39ba675634e42b651d3823a73e5ea6b405477248a4e7768a14",
+      "saved_omv": "MM-19/02.omv",
+      "saved_sha256": "a2d72ed6e911c9fb20165f3954ba26154ff33f524a918ac085c258e6084d93d4",
+      "inspector": "MM-19/02-saved.json",
+      "operations": {
+        "owned_document": true,
+        "secondary_monitor": null
+      },
+      "independent_numerical": {}
+    },
+    {
+      "scenario": "MM-19",
+      "name": "03",
+      "kind": "transition",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "04",
+      "kind": "transition",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "05",
+      "kind": "transition",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "06",
+      "kind": "transition",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "07",
+      "kind": "transition",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "08",
+      "kind": "transition",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "09",
+      "kind": "transition",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "10",
+      "kind": "transition",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "11",
+      "kind": "transition",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "reopened",
+      "kind": "reopen",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    },
+    {
+      "scenario": "MM-19",
+      "name": "post-reopen-edit",
+      "kind": "post_reopen_edit",
+      "status": "unexecuted",
+      "reason": "Affected scenario stopped after finding; no substituted reopen/edit or backend action."
+    }
+  ]
+}

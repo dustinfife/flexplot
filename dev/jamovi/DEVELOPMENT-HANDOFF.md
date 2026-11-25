@@ -838,3 +838,56 @@ strict current-build evidence. Do not begin them automatically. Comprehensive
 P0/P1 GUI acceptance, isolated built-package release checks and actual-host JASP
 compatibility still block release. The earlier Stage 11D.1 next-step paragraph is
 historical; its pilot correction gates are now resolved as described here.
+
+
+## Stage 11D.3 — independent-output GUI batch, acceptance incomplete
+
+Executed 2026-11-25 from `1fe5c7b2`; see the
+[batch report](e2e/STAGE-11D3-INDEPENDENT-PLOTS.md),
+[ledger](e2e/stage11d3-ledger.json) and [evidence index](e2e/stage11d3-evidence.json).
+Only LM-11, LM-16, GLM-23 and MM-19 were launched. Strict disposition across
+40 planned checks is **23 passed / 3 failed / 1 blocked / 13 unexecuted**.
+LM-16 passes its five transitions, actual native close/Recent reopen and subsequent
+independent main-title edit. LM-11 completes eight transitions plus reopen/edit,
+but its required ordinary comparison explanation is absent at step 6. GLM-23
+attempts all eight transitions; its raw comparison selects a new label context
+with a blank title despite the earlier title remaining in its retained store.
+Its final host reopen/edit are unexecuted after the finding. MM-19's initial
+population/conditional plots and independent numerical checks pass; step 2 exposes
+missing generated Plot title rows. That scenario stops immediately, leaving
+steps 3–11 and final reopen/edit unexecuted. No backend title injection or contract
+waiver substitutes for those actions.
+
+GLM step 5 is separately blocked: its native screenshot has the main title, but
+the copied completed saved PNG lacks it. Step 6's saved PNG has the title again.
+An asynchronous save/copy race versus cached-resource serialization remains
+unresolved; do not call this a confirmed comparison-edit rendering defect.
+The initial optimistic result/review is retained separately and superseded by the
+ledger's blocked disposition. Future evidence must establish settled disk saves,
+not infer image behavior from options or hash differences alone.
+
+Saved LM/GLM estimates and applicable comparison statistics agree with independent
+fits. LM ghost coordinates identify low as the source, without a duplicate source
+curve; nine GLM comparison coordinates pass within 1.663 pixels. Mixed REML
+coefficients/SE/limits match within `5e-16`, ML comparison references agree, and
+24 population/conditional image coordinates pass within 2.453 pixels. REML/ML
+curve differences are below pixel resolution; coefficient checks provide that
+fit distinction. No later Mixed CAS/ghost coverage is claimed.
+
+Production, tests, harness, manifest and dependencies are unchanged. Installed/
+running 0.27.0 retains fingerprint `54081947f58fe59e1543ca1c1e21f3828ee34464c719ee23ba84ac7808c42d63`.
+The **24,546 package / 4,925 native / 140 visual** baseline is inherited, not rerun.
+All 162 protected files, 156 original reference keys, and both earlier local
+indexes (416 + 316 files) are unchanged. One owned document was saved and closed;
+all monitor placements remain operationally unconfirmed. No human assistance or
+unrelated window/settings changes were needed.
+
+Four P0 now have full current-build acceptance (LM-15, GLM-20, MM-15, LM-16);
+FP-03 is accepted P1. **35 P0 still require full acceptance**, including three
+smoke-only and these three unsuccessful scenarios; 29 P0 have not been attempted
+on this build. The other 66 scenarios remain unlaunched. First resolve the Mixed
+title gap, decide LM explanation/GLM title-context requirements, and investigate
+settled-save evidence before rerunning affected scenarios. Then resume authorized
+P0/P1 batches, isolated built-package validation and actual-host JASP/.jasp checks.
+This batch supplies evidence and blockers; it neither repairs them nor approves
+release. Earlier statements about 70 unlaunched scenarios are historical.

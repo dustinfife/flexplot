@@ -413,3 +413,55 @@ verified build, narrow import policy and real reopen/edit evidence; execute and
 disposition the rest of P0/P1, then isolated package checks and actual-host JASP.
 Stage 11D.2 resolves the pilot's correction gates and makes that process ready;
 it does not authorize starting the remaining 70 here or approve release.
+
+
+## Stage 11D.3 — independent outputs and labels, strict GUI findings
+
+Executed 2026-11-25 from `1fe5c7b2`, actual jamovi 2.7.41, unchanged installed
+0.27.0 fingerprint `54081947f58fe59e1543ca1c1e21f3828ee34464c719ee23ba84ac7808c42d63`.
+The [report](e2e/STAGE-11D3-INDEPENDENT-PLOTS.md),
+[ledger](e2e/stage11d3-ledger.json) and [index](e2e/stage11d3-evidence.json)
+record **23 passed / 3 failed / 1 blocked / 13 unexecuted** of 40 planned checks.
+LM-16 alone completes full acceptance in this batch. LM-11 completes its native
+round trip but fails one contract; GLM-23 and MM-19 stop with findings and have no
+final reopen/edit passes. Original ledgers and all approved artifacts are unchanged.
+
+- **Implementation capability gap:** MM-19's enabled generated editors lack Plot
+  title rows. Required comparison-title editing cannot be performed; step 2 fails
+  and later transitions are unexecuted. Read-only inspection confirms the legacy
+  unscoped catalog lacks those roles. No production repair was attempted.
+- **Contract decisions outstanding:** LM-11/6 requires an explanation absent in
+  the valid ordinary comparison state. GLM-23/8 requires titles to persist across
+  a raw/overlay context change; the earlier title remains stored under its old
+  meaning key while the current row/image is untitled. Neither was waived or
+  repaired. Distinguish context-specific retained storage from lost labels.
+- **Evidence/operational blocker:** GLM-23/5's native screenshot and copied saved
+  image disagree on the main title despite completed saved status. Save/capture
+  synchronization versus cached-resource serialization needs investigation. Direct
+  inspection disproves the initial suspicion that step 6 removed the title: its
+  actual saved PNG contains it. Do not classify this as a confirmed product defect.
+  Initial in-flight/optimistic probes remain excluded or superseded, not deleted.
+- **Numerical/graphical observations:** checked LM/GLM estimates, uncertainty and
+  comparison statistics match independent fits. LM reference ghosts originate in
+  low without duplicating its source curve; GLM's nine probability comparison
+  coordinates pass within 1.663 pixels. Mixed's initial requested REML fixed tables
+  match within `5e-16`, independent ML comparison statistics agree, and 24 native
+  population/conditional coordinates pass within 2.453 pixels. No remaining MM-19
+  CAS/ghost or final restoration behavior is inferred from step 1.
+- **Environment and baseline:** ownership verified, monitor placement unconfirmed
+  operationally; no human assistance needed. Owned document saved/closed. No
+  production/test/harness/manifest changes or complete-suite reruns; inherited
+  **24,546 package / 4,925 native / 140 approved visuals** remain the baseline.
+  All 162 protected files and both previous indexed evidence collections remain
+  unchanged, as do 156 original numerical keys. No visual approval/regeneration.
+- **Outstanding GUI/release/JASP:** four of 39 P0 have full current-build acceptance;
+  35 require acceptance, including three smoke-only and this batch's three
+  unsuccessful scenarios. The other 66 scenarios remain unlaunched. Comprehensive
+  P0/P1 completion, isolated built-package validation and actual-host JASP menu,
+  dependency/linkage, option-transfer, output, error recovery and .jasp save/reopen/
+  edit remain release blockers. No JASP or release-package work began here.
+
+Recommended sequence: resolve the Mixed title gap and explicit explanation/title
+contracts, investigate settled-save evidence, rerun the affected native scenarios
+through host reopen/edit, then resume prioritized P0/P1 and the separate package/
+JASP release gates. This is an evidence batch with unresolved acceptance findings.
