@@ -264,10 +264,8 @@ glmbasicClass = if (requireNamespace('jmvcore')) R6::R6Class(
 				table = self$results$diff
         if (!is.data.frame(l) || !nrow(l)) return(invisible(NULL))
         table$setVisible(self$options$estimates)
-        adjustments = attr(l, "adjustments")
-        table$setNote("intervals", paste0("Pairwise interval methods: ",
-          paste(paste(names(adjustments), adjustments, sep=": "), collapse="; "),
-          ". Adjusted intervals cover the estimable pairwise family within each factor. Other numeric predictors are held at their means and categorical predictors at their modes."))
+        table$setNote("intervals", paste("95% t confidence intervals for individual pairwise contrasts.",
+          "Other numeric predictors are held at their means and categorical predictors at their modes."))
 
 
 				for (i in seq_len(nrow(l))){

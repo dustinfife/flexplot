@@ -76,16 +76,16 @@ test_that("unusual names preserve interaction and polynomial model spaces", {
   }
 })
 
-test_that("one-way nonstandard factor names retain Tukey-Kramer uncertainty", {
+test_that("one-way nonstandard factor names retain unadjusted t uncertainty", {
   data = small
   names(data)[names(data)=="b"] = "a+b"
   model = lm(y ~ `a+b`, data)
   result = estimates(model, mc=FALSE)$difference.matrix
-  reference = TukeyHSD(aov(y ~ b, small))$b
-  expect_equal(result$difference, unname(reference[,"diff"]), tolerance=1e-12)
-  expect_equal(result$lower, unname(reference[,"lwr"]), tolerance=1e-12)
-  expect_equal(result$upper, unname(reference[,"upr"]), tolerance=1e-12)
-  expect_identical(attr(result,"adjustments")[["a+b"]], "Tukey-Kramer")
+  reference = estimates(lm(y ~ b,small),mc=FALSE)$difference.matrix
+  expect_equal(result$difference,reference$difference,tolerance=1e-12)
+  expect_equal(result$lower,reference$lower,tolerance=1e-12)
+  expect_equal(result$upper,reference$upper,tolerance=1e-12)
+  expect_identical(attr(result,"adjustments")[["a+b"]],"Pointwise t")
 })
 
 test_that("actual jamovi analyses replace supplementary rows for nonstandard names", {

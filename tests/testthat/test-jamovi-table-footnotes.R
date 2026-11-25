@@ -67,8 +67,8 @@ test_that("LM notes keep interval methods and conditioning without redundant des
   expect_true(analysis$run())
   expect_match(analysis$results$glmcat$notes$intervals$note,"t confidence intervals",fixed=TRUE)
   note=analysis$results$diff$notes$intervals$note
-  expect_match(note,"Pairwise interval methods:",fixed=TRUE)
-  expect_match(note,"estimable pairwise family",fixed=TRUE)
+  expect_match(note,"95% t confidence intervals for individual pairwise contrasts.",fixed=TRUE)
+  expect_false(grepl("Bonferroni|Tukey|Adjusted intervals|estimable pairwise family",note))
   expect_match(note,"held at their means",fixed=TRUE)
   note=analysis$results$factorMeans$notes$reference$note
   expect_match(note,"Conditional predictions",fixed=TRUE)

@@ -297,13 +297,11 @@ estimates.glmerMod = function(object, mc=FALSE){
 #'   \item{difference.matrix}{All within-factor level pairs, labeled with their
 #'     signed conditional reference-prediction difference in response units.
 #'     Estimates and SEs use fitted design-matrix contrasts L: L*coef(object)
-#'     and sqrt(L*vcov(object)*t(L)). Two-level factors use pointwise 95% t
-#'     intervals with residual degrees of freedom. Classical unweighted one-way
-#'     ANOVA with more levels uses Tukey-Kramer intervals, with critical value
-#'     qtukey(.95,k,df)/sqrt(2). General adjusted comparisons use Bonferroni t
-#'     intervals over all estimable pairs within each factor. Nonestimable pairs
-#'     have NA estimates and bounds. The adjustments attribute identifies the
-#'     method per factor. These are not marginal-population contrasts.
+#'     and sqrt(L*vcov(object)*t(L)). Each estimable pair uses an unadjusted
+#'     pointwise 95% t interval with critical value qt(.975,df.residual(object)).
+#'     Nonestimable pairs have NA estimates and bounds. No multiplicity adjustment
+#'     is applied. The existing adjustments attribute records "Pointwise t" per
+#'     factor for compatibility. These are not marginal-population contrasts.
 #'     cohens.d is the signed difference divided by the full model residual SD.}
 #'   \item{sigma}{summary(object)$sigma, the residual SD in response units.}
 #'   \item{model.comparison}{NULL if mc=FALSE or fewer than two non-interaction

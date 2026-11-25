@@ -393,22 +393,13 @@ lm_factor_contrasts = function(object, variable, profiles, levels) {
   covariance = stats::vcov(object, complete=FALSE)
   standard_error = unname(sqrt(pmax(0, rowSums((contrast[,included,drop=FALSE] %*% covariance) *
     contrast[,included,drop=FALSE]))))
-  count = sum(estimable)
   df = stats::df.residual(object)
-  one_way = length(attr(stats::terms(object), "term.labels")) == 1L &&
-    identical(unname(lm_summary_columns(object)), variable) &&
-    attr(stats::terms(object), "intercept") == 1L &&
-    is.null(stats::model.weights(stats::model.frame(object))) &&
-    is.null(stats::model.offset(stats::model.frame(object)))
-  adjustment = if (length(levels) == 2L) "Pointwise t (one comparison)" else
-    if (one_way) "Tukey-Kramer" else "Bonferroni"
-  critical = if (adjustment == "Tukey-Kramer") stats::qtukey(.95, length(levels), df)/sqrt(2) else
-    stats::qt(1 - .05/(2*max(1L,count)), df)
+  critical = stats::qt(.975, df)
   estimate[!estimable] = standard_error[!estimable] = NA_real_
   result = data.frame(comparison=paste(levels[pairs[,1]], levels[pairs[,2]], sep="-"),
     difference=estimate, lower=estimate-critical*standard_error,
     upper=estimate+critical*standard_error)
-  attr(result, "adjustment") = adjustment
+  attr(result, "adjustment") = "Pointwise t"
   result
 }
 

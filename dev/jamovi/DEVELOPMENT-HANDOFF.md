@@ -1187,3 +1187,54 @@ archive `d9e27e23d2fcdb8700158c5ffcd4ca5f4ea619d67cca5fa1b6803341d579a575`, payl
 Latest module left installed. Cached output needs recalculation to receive the
 new result tree and marker-free response. Local logs/preflight:
 `.jamovi-dev/manual-lm-citations-20261125/`. Comprehensive E2E remains paused.
+
+## Linear Model — unadjusted individual pairwise confidence intervals
+
+Completed 2026-11-25 from `5c82db16`, at the user's request. History tracing
+found Tukey-based widths already in `21662581` (2019-05-01), later extracted
+into shared estimates helpers by `e44c7443` (2021-12-06). Those legacy widths
+used raw group counts and were not the correctly scaled Tukey–Kramer formula.
+Recent commit `da860b5c` (2026-11-18) introduced the current full fitted-design
+contrast covariance and estimability calculations, plus Bonferroni for general
+conditional comparisons and correctly scaled Tukey–Kramer for classical one-way
+models. Two-level factors already used pointwise t intervals.
+
+Simplified that shared helper to use `qt(.975, df.residual(object))` for every
+estimable pair. Contrast point estimates, full covariance SEs, residual df,
+nonestimability handling and signed Cohen's d are preserved. No conditional
+adjustment mode or option was added. Existing `adjustment`/`adjustments` metadata
+fields remain, reporting `Pointwise t` for compatibility. The LM table now states
+that these are individual 95% t intervals, retaining the explanation that other
+numeric predictors are held at their means and categorical predictors at their
+modes; the multiplicity/family coverage explanation is removed.
+
+This intentionally changes both jamovi LM and the shared public
+`estimates(lm(...))` pairwise interval default. Neither exposes an explicit
+multiplicity-adjustment argument; no requested public adjustment facility was
+removed. Public documentation was updated. GLM and Mixed Models use separate
+methods and do not call this LM contrast helper: no changes to their statistical
+behavior, notes or controls were made. No fitting, common-sample, model-comparison,
+coefficient CI, visualization or saved-option/result-schema changes. Existing
+cached pairwise bounds need recalculation to receive the new intervals.
+
+Focused source tests: **869 assertions passed**, zero failures/test warnings/skips,
+covering independent `L beta`, `sqrt(L V L')` and residual t critical values;
+balanced/unbalanced/sparse groups, binary ANCOVA, interaction/custom coding,
+weighted fits, rank deficiency, literal names, table notes and saved-option
+reconstruction. Installed-package contrast tests: **88 assertions passed**, zero
+failures/test warnings/skips. R emits its existing startup warning that testthat
+was built under R 4.5.2. A separate old/new implementation comparison confirmed
+identical point estimates, covariance SEs, effect sizes and all other LM summaries
+for one-way, ANCOVA and interaction models; representative binomial GLM and lmer
+outputs were exactly identical. Source-boundary check and `git diff --check`
+passed. All 140 SVGs and 16 protected fixture/metadata artifacts are unchanged.
+No full package/native suite, visual-baseline regeneration, E2E campaign or live
+GUI testing/window manipulation was performed.
+
+Compiled, built and installed module 0.27.0 using the existing cache.
+Source fingerprint `86e9541d416381c29c843994c074583c609b9f5c11780d396c3e4bcc80f56aee`,
+archive `3185bea7fd08b5c150ab25472bd2f8ab7b66a008f820347f0524f5f613efbeb1`,
+payload `a80ccaa1f4a5a8299c92a2c8e388f7a0fcfbee318a65cc281416d5d2cd3bf106`.
+Installed source/archive/payload preflight passed. Logs:
+`.jamovi-dev/manual-lm-pointwise-20261125/`. Latest module left installed for
+manual inspection; comprehensive E2E remains paused.
