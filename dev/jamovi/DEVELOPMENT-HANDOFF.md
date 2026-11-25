@@ -1238,3 +1238,36 @@ payload `a80ccaa1f4a5a8299c92a2c8e388f7a0fcfbee318a65cc281416d5d2cd3bf106`.
 Installed source/archive/payload preflight passed. Logs:
 `.jamovi-dev/manual-lm-pointwise-20261125/`. Latest module left installed for
 manual inspection; comprehensive E2E remains paused.
+
+## Linear Model — alphabetic statistical footnote markers
+
+Completed 2026-11-25 from `bae14e8f` as a small follow-up. LM comparison
+column headers and their matching table notes now use superscript ᵃ, ᵇ, ᶜ
+instead of numeric superscripts. Extracted the existing presentation loop into
+`jamovi_table_column_notes(table, titles, notes)` for later reuse by GLM/Mixed
+Models. LM is currently its only caller and requires at most three markers.
+The existing note conditions and sequence remain: absent common-sample or hidden
+p-value notes consume no letter; returning notes receive the current sequential
+letter. No note text, calculations, option/result identifiers, or numbered
+bibliographic citations changed. GLM and Mixed footnote conventions are unchanged.
+
+Only directly relevant footnote cases were executed: conditional LM header/note
+transitions, cross-module comparison footnote checks, and native protobuf,
+restoration and renderer matching. **177 assertions passed against source and
+177 against the installed module**, zero failures/test warnings/skips. Native
+rendering verifies one matching marker per heading/note, no duplicated cell
+markers, and unchanged [3]/[4] bibliography-number rendering. Restored headers,
+notes and numeric tables match their originals. Existing testthat/R-build startup
+warning remains. All 156 protected visual/fixture/metadata artifacts are unchanged.
+No full suite, comprehensive E2E, visual-baseline regeneration, live GUI testing
+or jamovi window manipulation occurred. `git diff --check` passed.
+
+Recompiled, built and installed 0.27.0, including the preceding unadjusted LM
+pairwise interval correction, using the existing cache. Installed preflight
+verified source fingerprint
+`ccc47befd0dbbb93bebe2cb9aace253cd2c9d946a0443d8f66d0cf6ba7afaadd`,
+archive `ec654585efecf5a255f5f3ea1ca1ef6f720a7f083fdb3cab7e041212ac23e71a`,
+and payload `75b1076de03883f1336c5797bad8ae46401eb9e74922e988ce45522b56e3396e`.
+Logs: `.jamovi-dev/manual-lm-letter-notes-20261125/`. Cached headers/notes
+receive the new lettering when the analysis recalculates. Module left installed
+for manual inspection; comprehensive E2E remains paused.

@@ -57,18 +57,7 @@ jamovi_lm_comparison_notes = function(table, state, includeP) {
   notes = list(n=jamovi_lm_sample_note(state),bayes.factor=jamovi_bayes_note(),
     p=if (!includeP) NULL else if (is.finite(state$p)) "Nested-model F-test." else
       jamovi_comparison_unavailable(state$model1,state$model2,"F-test"))
-  index = 0L
-  for (name in names(titles)) {
-    title = titles[[name]]
-    note = notes[[name]]
-    if (length(note)) {
-      index = index+1L
-      marker = c("¹","²","³")[index]
-      title = paste0(title,marker)
-      table$setNote(paste0("column_",name),paste(marker,note))
-    }
-    table$getColumn(name)$setTitle(title)
-  }
+  jamovi_table_column_notes(table,titles,notes)
 }
 
 jamovi_glm_comparison_table = function(table, state, includeP=FALSE) {

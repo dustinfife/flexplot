@@ -45,7 +45,7 @@ test_that("comparison p headings, conditional test reasons and BIC directions ma
     reader=jamovi_reporting_read;environment(reader)=list2env(list(data=data),parent=environment(reader))
     analysis$.setReadDatasetSource(reader);analysis$.setReadDatasetHeaderSource(reader)
     expect_true(analysis$run());table=analysis$results$comparison
-    if(module=="glmbasic") expect_match(table$getColumn("p")$title,"^p[¹²³]$") else
+    if(module=="glmbasic") expect_match(table$getColumn("p")$title,"^p[ᵃᵇᶜ]$") else
       expect_identical(table$getColumn("p")$title,"p")
     state=analysis$results$comparisonplot$state
     bic=if(module=="mixedmodel")c(BIC(lme4::refitML(state$model1)),BIC(lme4::refitML(state$model2))) else c(BIC(state$model1),BIC(state$model2));actual=table$asDF$bayes.factor

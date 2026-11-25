@@ -52,11 +52,11 @@ test_that("LM comparison header notes renumber conditionally and follow Include 
   stats = table$asDF
   expect_false(table$getColumn("p")$visible)
   expect_identical(table$getColumn("n")$title,"N")
-  expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factor¹")
+  expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factorᵃ")
   expect_identical(names(table$notes),"column_bayes.factor")
   expect_true(jamovi_reporting_update(analysis,list(includeP=TRUE)))
-  expect_identical(table$getColumn("p")$title,"p²")
-  expect_match(table$notes$column_p$note,"² Nested-model F-test.",fixed=TRUE)
+  expect_identical(table$getColumn("p")$title,"pᵇ")
+  expect_match(table$notes$column_p$note,"ᵇ Nested-model F-test.",fixed=TRUE)
   expect_equal(table$getCell("p",rowNo=1)$value,p,tolerance=0)
   expect_equal(table$asDF[names(stats)],stats,tolerance=0)
   expect_true(jamovi_reporting_update(analysis,list(compare=FALSE)))
@@ -71,15 +71,15 @@ test_that("LM comparison header notes renumber conditionally and follow Include 
   state = analysis$results$comparisonplot$state
   state$additionalExcluded = c(2L,1L)
   flexplot:::jamovi_glm_comparison_table(table,state,TRUE)
-  expect_identical(table$getColumn("n")$title,"N¹")
-  expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factor²")
-  expect_identical(table$getColumn("p")$title,"p³")
+  expect_identical(table$getColumn("n")$title,"Nᵃ")
+  expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factorᵇ")
+  expect_identical(table$getColumn("p")$title,"pᶜ")
   expect_identical(substr(vapply(table$notes,`[[`,character(1),"note"),1,1),
-    c(column_n="¹",column_bayes.factor="²",column_p="³"))
+    c(column_n="ᵃ",column_bayes.factor="ᵇ",column_p="ᶜ"))
   flexplot:::jamovi_glm_comparison_table(table,analysis$results$comparisonplot$state,FALSE)
   expect_identical(names(table$notes),"column_bayes.factor")
   expect_identical(table$getColumn("n")$title,"N")
-  expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factor¹")
+  expect_identical(table$getColumn("bayes.factor")$title,"BIC Bayes factorᵃ")
 })
 
 test_that("LM default titles and user titles retain stable label keys and independent intervals", {

@@ -41,3 +41,20 @@ jamovi_comparison_unavailable = function(model1, model2, test, comparison=NULL) 
               "the fitted-model comparison did not produce a finite p-value"
   paste0(test," unavailable: ",reason,".")
 }
+
+# Matched column-title/note markers, numbered only over the notes present.
+# Shared presentation helper; LM currently needs at most three notes.
+jamovi_table_column_notes = function(table, titles, notes) {
+  index = 0L
+  for (name in names(titles)) {
+    title = titles[[name]]
+    note = notes[[name]]
+    if (length(note)) {
+      index = index+1L
+      marker = c("ᵃ","ᵇ","ᶜ")[index]
+      title = paste0(title,marker)
+      table$setNote(paste0("column_",name),paste(marker,note))
+    }
+    table$getColumn(name)$setTitle(title)
+  }
+}

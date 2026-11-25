@@ -17,7 +17,7 @@ for(const r of records){
     const notes=footer({notes:r.notes},r.columns,[],[]);
     for(const c of r.columns)assert.ok(headings.includes(helpers.escape(c.title)));
     for(const [i,note] of r.notes.entries()){
-        const marker=['¹','²','³'][i];assert.ok(note.note.startsWith(marker+' '));
+        const marker=['ᵃ','ᵇ','ᶜ'][i];assert.ok(note.note.startsWith(marker+' '));
         assert.equal(headings.split(marker).length-1,1,'One marker in the matching heading');
         assert.equal(notes.split(marker).length-1,1,'One matching explanatory note');
         assert.ok(notes.includes(helpers.escape(note.note)));

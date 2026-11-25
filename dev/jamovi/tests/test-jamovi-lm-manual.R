@@ -40,11 +40,15 @@ test_that("LM column header markers and citation ownership survive native serial
     expect_identical(reopened$results$items,objects)
     expect_true(reopened$run())
     expect_equal(reopened$results$comparison$asDF,table$asDF,tolerance=0)
+    expect_identical(vapply(reopened$results$comparison$columns,function(column)column$title,character(1)),
+      vapply(table$columns,function(column)column$title,character(1)))
+    expect_identical(vapply(reopened$results$comparison$notes,`[[`,character(1),"note"),
+      vapply(table$notes,`[[`,character(1),"note"))
     expect_identical(reopened$options$includeP,includeP)
     expect_length(reopened$results$getRefs(),0L)
     expect_identical(reopened$results$getRefs(recurse=TRUE),c("flexplot","graphicalAnalysis"))
     expect_false("methodReferences" %in% reopened$results$itemNames)
-    expect_match(table$asString(),if(missing)"N¹" else "BIC Bayes factor¹",fixed=TRUE)
+    expect_match(table$asString(),if(missing)"Nᵃ" else "BIC Bayes factorᵃ",fixed=TRUE)
   }
   file = withr::local_tempfile(fileext=".json")
   jsonlite::write_json(records,file,auto_unbox=TRUE,null="null")
