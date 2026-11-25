@@ -1,0 +1,481 @@
+{
+  "stage": "11D.2",
+  "type": "Historical policy reassessment only; not current-build reruns",
+  "historical_commit": "9e0e39a9d494ee7449a1e61da4a9cbf6e4ff6c01",
+  "historical_build": "68964d65afd6f88cbf4697301d09edc4d32412ad773ddcb1298cd965fb317550",
+  "historical_ledger_sha256": "34a7619c48443a1776d43100471734ed0bb014dee617e6da18b67a431243efd7",
+  "scope": "Remove monitor placement as a functional gate only where ownership remains independently recorded; retain original scenario contracts and verifier findings. No original evidence, verdict, missing review or numerical expectation changed.",
+  "counts": {
+    "failed": 7,
+    "passed": 34
+  },
+  "checkpoints": [
+    {
+      "checkpoint": "FP-03/1",
+      "original_status": "failed",
+      "functional_status_without_monitor_gate": "failed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [
+        "Incorrect native observation: dataset_import"
+      ],
+      "remaining_unobserved": [],
+      "original_observation": "FP-03/01-observation.json",
+      "original_observation_sha256": "a787e27466dcc7d98c41d5c8127a391b37da283afe65ac5b384c0d5acbf7d92f"
+    },
+    {
+      "checkpoint": "FP-03/2",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "FP-03/02-observation.json",
+      "original_observation_sha256": "c3f43f1cce788d152f188bf5677da3985a055eefb5fe660f5cd3ae4fdaf4b164"
+    },
+    {
+      "checkpoint": "FP-03/3",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "FP-03/03-observation.json",
+      "original_observation_sha256": "4c83776147faeb5034c4e732d37ba33582e6dd82e8cba5ba1d9b281d92727fc2"
+    },
+    {
+      "checkpoint": "FP-03/3/restored",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "FP-03/restored-observation.json",
+      "original_observation_sha256": "cce52cbae285f61330d47ec1bb221b1dee03514529789c62248ed901c04b062b"
+    },
+    {
+      "checkpoint": "FP-03/post-reopen-edit",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "FP-03/post-reopen-edit-observation.json",
+      "original_observation_sha256": "8ad2da79be5dd0e4f3acd466265a5bee2a48938e746a0f587582004ac49f3eea"
+    },
+    {
+      "checkpoint": "LM-03/1",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "LM-03/01-observation.json",
+      "original_observation_sha256": "3e4b7cca4120add59e885d4bc2015d5f68393d7862e98b4e0afc0dff02c95c6c"
+    },
+    {
+      "checkpoint": "LM-03/2",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "LM-03/02-observation.json",
+      "original_observation_sha256": "a7574b62cfb3cfc6f85fc4ed1ea47806c7e9e83120d9ae2c25c21eb8ab94c721"
+    },
+    {
+      "checkpoint": "LM-03/3",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "LM-03/03-observation.json",
+      "original_observation_sha256": "babba77c1e466d7c0b6fa0f3ab2d6b52a8be9a88f2dfa767f75a76491385695d"
+    },
+    {
+      "checkpoint": "LM-03/4",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "LM-03/04-observation.json",
+      "original_observation_sha256": "c360f7c9f948a3bc75773c869e748a39e723bbc84446d1a60d2d303ac51c81d9"
+    },
+    {
+      "checkpoint": "LM-03/4/restored",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "LM-03/restored-observation.json",
+      "original_observation_sha256": "29bd67db22348a21a72053b225c32d282585053705586d9823622905b434aba5"
+    },
+    {
+      "checkpoint": "LM-03/post-reopen-edit",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "LM-03/post-reopen-edit-observation.json",
+      "original_observation_sha256": "9802cb525e19713c76edee1a5ce10a11aa49e560e3bc75e63aedade8c359d33c"
+    },
+    {
+      "checkpoint": "GLM-08/1",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-08/01-observation.json",
+      "original_observation_sha256": "116f44fb57a0d9de251d7bb5cab4d57cbcba6daab08867ee671612b47b62fe12"
+    },
+    {
+      "checkpoint": "GLM-08/2",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-08/02-observation.json",
+      "original_observation_sha256": "819a3126bcdd691021fb416fc8bd5275fda7e7fd60224c2f78eb20a041308064"
+    },
+    {
+      "checkpoint": "GLM-08/3",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-08/03-observation.json",
+      "original_observation_sha256": "0de6e498f9cb8eca4e12dd08c643de8d7f6b8026fa00da78813fdecc9e12c49f"
+    },
+    {
+      "checkpoint": "GLM-08/4",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-08/04-observation.json",
+      "original_observation_sha256": "248a75a832bbffea5fdc6d20543c5c7ecccc06feaa84481cec8d1134cd93fbc7"
+    },
+    {
+      "checkpoint": "GLM-08/5",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-08/05-observation.json",
+      "original_observation_sha256": "bba5ae25930b0eff97d4671ef82f430968fdc82757bb956801c450b75cd5e58e"
+    },
+    {
+      "checkpoint": "GLM-08/5/restored",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-08/restored-observation.json",
+      "original_observation_sha256": "6f84fe4904eee393fe13b2aeab355f01ed4c66c22936157253b1dea29052281b"
+    },
+    {
+      "checkpoint": "GLM-08/post-reopen-edit",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-08/post-reopen-edit-observation.json",
+      "original_observation_sha256": "cd7550ea9f2348aba1287a4e415307ce9a7bf002bf13a85da8e7a265ffcc1357"
+    },
+    {
+      "checkpoint": "MM-10/1",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-10/01-observation.json",
+      "original_observation_sha256": "2da2a5c42c508648e307cd4ca21b72166dbe1436581204a9b3406110b011a5a6"
+    },
+    {
+      "checkpoint": "MM-10/2",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-10/02-observation.json",
+      "original_observation_sha256": "1f169c955c7547c727d0d7c511dc2b6db0ec450ebabf137ad3136e996095cee6"
+    },
+    {
+      "checkpoint": "MM-10/3",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-10/03-observation.json",
+      "original_observation_sha256": "214e08a930c82490601fdd85aa9a432d5f0fe2471cb6de1c568a918b5d6c123d"
+    },
+    {
+      "checkpoint": "MM-10/4",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-10/04-observation.json",
+      "original_observation_sha256": "b25e905efe92a767b8c958af31f7c07d880d5ad2b703a582c869c56d479bb739"
+    },
+    {
+      "checkpoint": "MM-10/5",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-10/05-observation.json",
+      "original_observation_sha256": "93f4d968dea640b3af17f8f4086331face6e445839b38cc8c926fb0a7304aaf9"
+    },
+    {
+      "checkpoint": "MM-10/5/restored",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-10/restored-observation.json",
+      "original_observation_sha256": "27a80242814e1bbe132eb460635590e3351af647aa6ad3caea22a13ac28564cb"
+    },
+    {
+      "checkpoint": "MM-10/post-reopen-edit",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-10/post-reopen-edit-observation.json",
+      "original_observation_sha256": "d74b7d804bf0141d74d02c601112ee7154e4150d6d180775f55ba60ab3a629b7"
+    },
+    {
+      "checkpoint": "LM-15/1",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "LM-15/01-observation.json",
+      "original_observation_sha256": "be071edb393457db7f81f89e5e12c7b35d641ca3c3dbbf326d0e37f75f38694c"
+    },
+    {
+      "checkpoint": "LM-15/2",
+      "original_status": "passed",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "LM-15/02-observation.json",
+      "original_observation_sha256": "2cdac7440ad4680e602bbe9064a4a304ddc7b1a6a9a339f3b04bb488616ccf93"
+    },
+    {
+      "checkpoint": "LM-15/3",
+      "original_status": "failed",
+      "functional_status_without_monitor_gate": "failed",
+      "window_ownership_observed": true,
+      "secondary_monitor": true,
+      "other_problems": [
+        "Saved option mismatch: comparisonGroup"
+      ],
+      "remaining_unobserved": [],
+      "original_observation": "LM-15/03-observation.json",
+      "original_observation_sha256": "7a44c099399a0fcdbe3bc8b751776ea7e5b5b934dab99845cccda9ae04346d81"
+    },
+    {
+      "checkpoint": "LM-15/3/restored",
+      "original_status": "failed",
+      "functional_status_without_monitor_gate": "failed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [
+        "Saved option mismatch: comparisonGroup"
+      ],
+      "remaining_unobserved": [],
+      "original_observation": "LM-15/restored-observation.json",
+      "original_observation_sha256": "483ce841a168938ba077e6ddd5295dc046f47b54553dedcb0a76440419966be9"
+    },
+    {
+      "checkpoint": "LM-15/post-reopen-edit",
+      "original_status": "failed",
+      "functional_status_without_monitor_gate": "failed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [
+        "Saved option mismatch: comparisonGroup"
+      ],
+      "remaining_unobserved": [],
+      "original_observation": "LM-15/post-reopen-edit-observation.json",
+      "original_observation_sha256": "ffb89e5a60123ecba0e0bd4e0259d3beb04588f809268821c7a730f35716d7e4"
+    },
+    {
+      "checkpoint": "GLM-20/1",
+      "original_status": "blocked",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-20/01-observation.json",
+      "original_observation_sha256": "57a7076e45f65bc9879e507c2a766e9247fd5396bec07a3605c28dc46370599e"
+    },
+    {
+      "checkpoint": "GLM-20/2",
+      "original_status": "blocked",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-20/02-observation.json",
+      "original_observation_sha256": "49eff9f26cf21a1ad349f21895228540c0e059c12440de747efaefda25e6a55a"
+    },
+    {
+      "checkpoint": "GLM-20/3",
+      "original_status": "failed",
+      "functional_status_without_monitor_gate": "failed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [
+        "Saved option mismatch: plotX",
+        "Saved option mismatch: plotGroup"
+      ],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-20/03-observation.json",
+      "original_observation_sha256": "936a0bb45eb16b54dae2b61d99332516bbf0a4f4cbaa73378a979b6c30c3c76b"
+    },
+    {
+      "checkpoint": "GLM-20/4",
+      "original_status": "blocked",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-20/04-observation.json",
+      "original_observation_sha256": "a425866f10c0b76add6ad75c2bc3a23b0785d7a904dd5774cb60e95653c933ee"
+    },
+    {
+      "checkpoint": "GLM-20/4/restored",
+      "original_status": "blocked",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-20/restored-observation.json",
+      "original_observation_sha256": "e2dd0f3a5259a8a825788b33b7545cc87853790314106fee647b9b59b49be603"
+    },
+    {
+      "checkpoint": "GLM-20/post-reopen-edit",
+      "original_status": "blocked",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "GLM-20/post-reopen-edit-observation.json",
+      "original_observation_sha256": "25873aa330582a21d495d9f6c530f953fe9aa50ed9fe12068656a2eaa542f2c7"
+    },
+    {
+      "checkpoint": "MM-15/1",
+      "original_status": "failed",
+      "functional_status_without_monitor_gate": "failed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [
+        "Expected diagnostic is not visibly rendered"
+      ],
+      "remaining_unobserved": [],
+      "original_observation": "MM-15/01-observation.json",
+      "original_observation_sha256": "fdfb06d1db267f2459bbdadee64f3df2b01531878c11fd1ffce619da8953cd18"
+    },
+    {
+      "checkpoint": "MM-15/2",
+      "original_status": "failed",
+      "functional_status_without_monitor_gate": "failed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [
+        "Diagnostic phase contradicts its saved result type",
+        "Observed error diagnostic has no corresponding saved error"
+      ],
+      "remaining_unobserved": [],
+      "original_observation": "MM-15/02-observation.json",
+      "original_observation_sha256": "71c33376ed586fabcfed3720b3fbf9fa3d6ce12e67ce64dc2b8bbe26dad8ba7f"
+    },
+    {
+      "checkpoint": "MM-15/3",
+      "original_status": "blocked",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-15/03-observation.json",
+      "original_observation_sha256": "f3dee302a677e45f342844b443a5ce018f109bdbe36ff8918c0a6a89e617ca91"
+    },
+    {
+      "checkpoint": "MM-15/3/restored",
+      "original_status": "blocked",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-15/restored-observation.json",
+      "original_observation_sha256": "e80dbe15fc171223c43bbc004cbeb80e7194c2d3a4b58ade315b3ca7614c3bb8"
+    },
+    {
+      "checkpoint": "MM-15/post-reopen-edit",
+      "original_status": "blocked",
+      "functional_status_without_monitor_gate": "passed",
+      "window_ownership_observed": true,
+      "secondary_monitor": null,
+      "other_problems": [],
+      "remaining_unobserved": [],
+      "original_observation": "MM-15/post-reopen-edit-observation.json",
+      "original_observation_sha256": "fdbbc89e25d114d90c6ab8d18540d2a13d2152ade6d545613568798314ddb4fe"
+    }
+  ]
+}

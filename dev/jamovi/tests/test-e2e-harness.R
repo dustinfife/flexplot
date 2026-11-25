@@ -149,7 +149,7 @@ test_that("module-version preflight blocks missing or stale installations before
   current = yaml::read_yaml(file.path(root,"jamovi/0000.yaml"))$version
   yaml::write_yaml(list(version=current,`build-hash`="controlled-fixture"),path)
   expect_identical(e2e_module_preflight(root,path)$status,"blocked")
-  expect_match(e2e_module_preflight(root,path)$reason,"receipt|stamp|R package")
+  expect_match(e2e_module_preflight(root,path)$reason,"receipt|stamp|R package|fingerprint")
 })
 
 test_that("native option deltas reject collateral edits and identify initial host context", {
@@ -189,7 +189,7 @@ test_that("the running GUI must serve the verified installed build", {
   expect_identical(e2e_running_preflight(installed,"https://example.org/modules/flexplot")$status,"blocked")
 })
 
-test_that("restoration permits only an explicitly owned second secondary-monitor window", {
+test_that("restoration permits only an explicitly owned second window regardless of monitor", {
   original = list(id="native-instance-1",title="primary",document="/test/primary.omv",
     source="native_gui",secondary_monitor=TRUE,disposable=TRUE)
   first = e2e_register_window(list(),original)
@@ -203,8 +203,8 @@ test_that("restoration permits only an explicitly owned second secondary-monitor
   wrong = second;wrong$title = "user document"
   expect_identical(e2e_authorize_window_close(next_window$registry,wrong)$status,"blocked")
   wrong = second;wrong$secondary_monitor = FALSE
-  expect_identical(e2e_register_window(first$registry,wrong,"save_reopen")$status,"blocked")
-  expect_identical(e2e_authorize_window_close(next_window$registry,wrong)$status,"blocked")
+  expect_identical(e2e_register_window(first$registry,wrong,"save_reopen")$status,"passed")
+  expect_identical(e2e_authorize_window_close(next_window$registry,wrong)$status,"passed")
   third = second;third$id = "native-instance-3";third$title = "third"
   expect_identical(e2e_register_window(next_window$registry,third,"save_reopen")$status,"blocked")
   expect_identical(e2e_register_window(first$registry,original,"save_reopen")$status,"blocked")
@@ -409,4 +409,118 @@ test_that("saved numeric revisions survive protobuf integer/double representatio
   expect_false(e2e_option_equal(FALSE,0))
   expect_false(e2e_option_equal("2",2))
   expect_false(e2e_option_equal(2L,3))
+})
+
+test_that("companion rendering diagnostics are tied to the errored image and intact other output", {
+  s = Filter(function(s)s$id=="MM-15",jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))$scenarios)[[1]]
+  o = e2e_synthetic_observation(s,2L);o$native_status = "error"
+  message = "For cluster-specific comparisons, place the shared grouping variable in panels."
+  text = paste("Comparison plot unavailable:",message)
+  nodes = o$saved$analyses[[1]]$results$children
+  for(i in seq_along(nodes)) {
+    if(nodes[[i]]$name=="comparisonplot") {
+      nodes[[i]]$error = message;nodes[[i]]$status = "ANALYSIS_ERROR"
+      nodes[[i]]$resource = "";nodes[[i]]$resource_exists = FALSE
+    }
+    if(nodes[[i]]$type=="table") nodes[[i]]$columns = list(list(name="estimate",values=list(1)))
+  }
+  nodes[[length(nodes)+1L]] = list(name="comparisonPlotNote",type="html",status="ANALYSIS_COMPLETE",
+    visible="YES",stale=FALSE,error="",content=paste0("<p>",text,"</p>"))
+  o$saved$analyses[[1]]$results$children = nodes
+  o$diagnostics = list(list(source="accessibility",result="comparisonPlotNote",phase="rendering_error",visible=TRUE,text=text))
+  expect_identical(e2e_checkpoint(s,2L,o)$status,"passed")
+  change = function(name,field,value) {
+    bad = o;i = which(vapply(nodes,function(node)node$name==name,logical(1)))
+    bad$saved$analyses[[1]]$results$children[[i]][[field]] = value;bad
+  }
+  for(bad in list(change("comparisonPlotNote","stale",TRUE),change("comparisonPlotNote","visible","NO"),
+      change("comparisonPlotNote","content","<p>Unrelated text</p>"),
+      change("comparisonplot","error","A different plot error"),change("comparisonplot","resource_exists",TRUE),
+      change("comparisonplot","resource","old.png"),change("comparisonplot","error",""),
+      change("plot","resource_exists",FALSE),change("plot","error","Unexpected main error"),
+      change("comparisonPlotNote","error","Stale HTML error"),change("fixed","columns",list())))
+    expect_false(identical(e2e_checkpoint(s,2L,bad)$status,"passed"))
+  bad = o;bad$diagnostics[[1]]$text = "Unrelated visible text"
+  expect_identical(e2e_checkpoint(s,2L,bad)$status,"failed")
+  bad = o;bad$diagnostics[[1]]$result = "plotExplanation"
+  bad$saved$analyses[[1]]$results$children[[length(nodes)+1L]] = list(name="plotExplanation",type="html",visible="YES",
+    stale=FALSE,status="ANALYSIS_COMPLETE",error="",content=paste0("<p>",text,"</p>"))
+  expect_identical(e2e_checkpoint(s,2L,bad)$status,"failed")
+  bad = o;bad$saved$analyses[[1]]$results$children[[length(nodes)+1L]] = nodes[[length(nodes)]]
+  expect_identical(e2e_checkpoint(s,2L,bad)$status,"failed")
+})
+
+test_that("monitor confirmation is operational and ownership remains mandatory", {
+  s = Filter(function(s)s$id=="FP-03",jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))$scenarios)[[1]]
+  for(monitor in list(TRUE,FALSE,NULL)) {
+    o = e2e_synthetic_observation(s);o$desktop["secondary_monitor"] = list(monitor)
+    result = e2e_checkpoint(s,1L,o)
+    expect_identical(result$status,"passed")
+    expect_identical(result$operations$secondary_monitor,monitor)
+    expect_identical(result$operations$monitor_confirmation,if(is.null(monitor))"unconfirmed" else if(monitor)"secondary" else "other")
+    o$desktop$owned_document = FALSE
+    expect_identical(e2e_checkpoint(s,1L,o)$status,"blocked")
+  }
+})
+
+test_that("GUI name normalization accepts only the observed spelling with exact typed data", {
+  source = readRDS(file.path(root,"dev/jamovi/e2e/artifacts/fixtures.rds"))$primary
+  actual = source;names(actual)[names(actual)=="tick`name"] = "tick_name"
+  expect_identical(e2e_gui_fixture(source,source,"primary","2.7.41")$status,"passed")
+  expect_identical(e2e_gui_fixture(actual,source,"primary","2.7.41")$status,"failed")
+  check = function(data,expected=source,host="2.7.41",dataset="primary")
+    e2e_gui_fixture(data,expected,dataset,host,"jamovi-2.7.41-import")
+  expect_identical(check(actual)$status,"passed")
+  expect_identical(check(actual)$mapping,list("tick`name"="tick_name"))
+  expect_identical(check(actual,host="2.8")$status,"failed")
+  expect_identical(check(actual,dataset="sparse")$status,"failed")
+  wrong = actual;names(wrong)[1] = "unexpected"
+  expect_identical(check(wrong)$status,"failed")
+  wrong = actual;wrong$x[1] = wrong$x[1]+1
+  expect_identical(check(wrong)$status,"failed")
+  wrong = actual;wrong$group = factor(wrong$group,levels=rev(levels(wrong$group)))
+  expect_identical(check(wrong)$status,"failed")
+  wrong = actual;wrong$ordered = factor(as.character(wrong$ordered),levels=levels(wrong$ordered),ordered=FALSE)
+  expect_identical(check(wrong)$status,"failed")
+  collision = source;collision$tick_name = collision$x
+  expect_identical(check(collision,expected=collision)$status,"failed")
+  wrong = actual;names(wrong)[1] = "tick_name"
+  expect_identical(check(wrong)$status,"failed")
+  expect_identical(check(actual[-1,])$status,"failed")
+})
+
+test_that("revised LM-15 retained preference does not affect ordinary comparison geometry or fitting", {
+  m = jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))
+  scenario = Filter(function(s)s$id=="LM-15",m$scenarios)[[1]]
+  data = readRDS(file.path(root,"dev/jamovi/e2e/artifacts/fixtures.rds"))$primary
+  ref = readRDS(file.path(root,"dev/jamovi/e2e/artifacts/references.rds"))[["LM-15/3"]]
+  values = scenario$steps[[3]]$expected_options
+  for(name in c("preds","plotPanels","comparisonPanels")) values[name] = list(unlist(values[[name]],use.names=FALSE))
+  for(name in c("modelTerms","comparisonTerms")) values[name] = list(lapply(values[[name]],unlist,use.names=FALSE))
+  options = do.call(flexplot:::glmbasicOptions$new,values)
+  state = flexplot:::jamovi_glm_comparison(options,data)
+  grouped = flexplot:::jamovi_glm_comparison_plot(state)
+  expect_identical(options$comparisonGroup,"group")
+  expect_match(attr(grouped,"jamovi_comparison_note"),"not applied",fixed=TRUE)
+  roles = flexplot:::flexplot_axis_given(state$formula)
+  expect_identical(unname(roles$axis),"x")
+  expect_true("group" %in% roles$given)
+  for(i in 1:2) expect_equal(unname(coef(state[[paste0("model",i)]])),unname(ref$models[[i]]$coefficients),tolerance=1e-12)
+  option = options$option("comparisonGroup");option$value = NULL
+  plain = flexplot:::jamovi_glm_comparison_plot(flexplot:::jamovi_glm_comparison(options,data))
+  expect_equal(ggplot2::ggplot_build(grouped)$data,ggplot2::ggplot_build(plain)$data,tolerance=0)
+})
+
+test_that("GUI fixture serialization preserves declared numeric storage and factor metadata", {
+  source = readRDS(file.path(root,"dev/jamovi/e2e/artifacts/fixtures.rds"))$primary
+  file = withr::local_tempfile(fileext=".omv")
+  e2e_write_gui_fixture(source,file)
+  actual = jmvReadWrite::read_omv(file)
+  expect_identical(e2e_gui_fixture(actual,source,"primary","2.7.41")$status,"passed")
+  expect_identical(class(actual$nb_y),"numeric")
+  expect_identical(class(actual$constant),"numeric")
+  metadata = jsonlite::fromJSON(paste(readLines(unz(file,"metadata.json"),warn=FALSE),collapse="\n"),simplifyVector=FALSE)
+  for(field in metadata$dataSet$fields) if(identical(field$type,"number"))
+    expect_identical(field$dataType,"Decimal",info=field$name)
+  expect_error(e2e_write_gui_fixture(source,file),"Preserve existing GUI fixture",fixed=TRUE)
 })

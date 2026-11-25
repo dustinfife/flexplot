@@ -144,6 +144,17 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
     ui.plotLabels.setValue([]);
     assert.equal(JSON.stringify(ui.comparisonPlotLabels.value()),JSON.stringify(labelRows));
     const baseline = records.slice();
+    if (analysis === 'glmgeneralized') {
+        restore('glm20-colour-role',{out:'y',preds:['x','z'],modelTerms:[['x'],['z']],
+            plotX:'x',plotPanels:[],plotGroup:'z'});
+        ui.modelTerms.setValue([]);ui.quadratic.setValue([]);
+        assert.equal(ui.plotX.value(),null,'Empty fitted terms clear stale x');
+        assert.equal(ui.plotGroup.value(),null,'Empty fitted terms clear stale colour');
+        ui.modelTerms.setValue([['z']]);
+        assert.equal(ui.plotX.value(),'z','A restored term supplies the new automatic x');
+        assert.equal(ui.plotGroup.value(),null,'A stale colour is not resurrected');
+        console.log('PASS: GLM-20 native empty-term role cleanup and recovery.');
+    }
     baseline.interactions = require('./jamovi-interaction-controls.cjs')({ui,native,view,restore,snapshot,assert,analysis});
     if (analysis === 'glmgeneralized') baseline.polynomials = require('./jamovi-glm-polynomials.cjs')({ui,native,view,restore,snapshot,assert});
     if (analysis === 'glmgeneralized') await require('./jamovi-glm-visualization.cjs')({ui,view,handlers,restore,snapshot,assert,extract});
@@ -193,6 +204,9 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         restore('comparison-group-retained',{out:'y',preds:['x','z'],compare:true,
             modelTerms:[['x'],['z']],comparisonTerms:[['x']],comparisonX:'x',comparisonGroup:'z'});
         assert.equal(ui.comparisonGroup.value(),'z');
+        ui.comparisonPanels.setValue(['z']);
+        assert.equal(ui.comparisonGroup.value(),'z','LM-15 panel edits retain unsupported grouping preference');
+        ui.comparisonPanels.setValue([]);
         assert.equal(transfer('comparisonGroup',null),true);
         assert.equal(transfer('comparisonGroup','z'),false);
         ui.comparisonMagnet.setValue(true);

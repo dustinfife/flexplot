@@ -32,12 +32,91 @@ e2e_option_equal = function(first, second) {
   identical(canonical(first),canonical(second))
 }
 
+# Explicit GUI-import policy for this fixture and host only. Do not generalize
+# jamovi's sanitization or change the deterministic R source data.
+e2e_gui_fixture = function(actual, expected, dataset, host_version, policy="exact") {
+  problems = character()
+  wanted = names(expected)
+  mapping = character()
+  if(!policy %in% c("exact","jamovi-2.7.41-import")) problems = c(problems,"Unknown GUI name policy")
+  if(identical(policy,"jamovi-2.7.41-import")) {
+    if(!identical(dataset,"primary") || !identical(host_version,"2.7.41") ||
+        sum(wanted=="tick`name")!=1L || "tick_name" %in% wanted)
+      problems = c(problems,"Unsupported host normalization or name collision") else {
+      wanted[wanted=="tick`name"] = "tick_name"
+      mapping = c("tick`name"="tick_name")
+    }
+  }
+  if(anyDuplicated(names(actual)) || anyDuplicated(wanted) || !identical(names(actual),wanted))
+    problems = c(problems,"Unexpected GUI column names, order or collision")
+  if(nrow(actual)!=nrow(expected) || ncol(actual)!=ncol(expected)) problems = c(problems,"GUI dataset dimensions changed")
+  if(length(problems)==0L) for(i in seq_along(expected)) {
+    first = actual[[i]];second = expected[[i]]
+    if(!identical(class(first),class(second)) || !identical(levels(first),levels(second)) ||
+        !identical(is.ordered(first),is.ordered(second)) ||
+        !isTRUE(all.equal(as.vector(first),as.vector(second),tolerance=0,check.attributes=FALSE)))
+      problems = c(problems,paste("GUI typed values or factor metadata changed:",names(expected)[i]))
+  }
+  list(status=if(length(problems))"failed" else "passed",policy=policy,
+    host_version=host_version,mapping=as.list(mapping),problems=unique(problems))
+}
+
+e2e_write_gui_fixture = function(data, path) {
+  if(file.exists(path)) stop("Preserve existing GUI fixture: ",path)
+  encoded = data
+  # The existing writer otherwise stores whole-valued doubles (nb_y, constant)
+  # as integers. The explicit type controls its binary writer, but its metadata
+  # inference still overwrites dataType. Both must agree for the native reader.
+  for(name in names(encoded)) if(identical(class(encoded[[name]]),"numeric")) {
+    attr(encoded[[name]],"type") = "number"
+    attr(encoded[[name]],"dataType") = "Decimal"
+  }
+  jmvReadWrite::write_omv(dtaFrm=encoded,fleOut=path)
+  path = normalizePath(path)
+  metadata = jsonlite::fromJSON(paste(readLines(unz(path,"metadata.json"),warn=FALSE),collapse="\n"),simplifyVector=FALSE)
+  for(i in seq_along(encoded)) if(identical(class(encoded[[i]]),"numeric"))
+    metadata$dataSet$fields[[i]]$dataType = "Decimal"
+  work = tempfile("gui-fixture-metadata-");dir.create(work)
+  on.exit(unlink(work,recursive=TRUE),add=TRUE)
+  jsonlite::write_json(metadata,file.path(work,"metadata.json"),auto_unbox=TRUE,null="null",digits=NA)
+  old = setwd(work);on.exit(setwd(old),add=TRUE,after=FALSE)
+  utils::zip(path,"metadata.json",flags="-q")
+  invisible(path)
+}
+
+# Only declared adjacent notes can explain a plot's rendering error. The image
+# remains the error owner; arbitrary HTML or a retained resource is not evidence.
+e2e_companion_error = function(analysis, entry, elements) {
+  companions = switch(analysis$name, mixedmodel=c(plotExplanation="plot",
+    comparisonPlotNote="comparisonplot"), character())
+  image_name = unname(companions[entry$result])
+  if(length(image_name)!=1L || is.na(image_name)) return(FALSE)
+  find = function(name) Filter(function(node)identical(node$name,name),elements)
+  images = find(image_name);notes = find(entry$result)
+  if(length(images)!=1L || length(notes)!=1L) return(FALSE)
+  image = images[[1]];note = notes[[1]]
+  if(!identical(image$type,"image") || !isTRUE(image$visible %in% c("YES","DEFAULT_YES")) ||
+      !identical(image$status,"ANALYSIS_ERROR") || length(image$error)!=1L || !nzchar(image$error) ||
+      !identical(image$resource_exists,FALSE) || nzchar(paste(image$resource,collapse="")) ||
+      !identical(note$type,"html") || !isTRUE(note$visible %in% c("YES","DEFAULT_YES")) ||
+      !identical(note$status,"ANALYSIS_COMPLETE") || length(note$error)!=1L || nzchar(note$error) ||
+      !identical(note$stale,FALSE)) return(FALSE)
+  text = function(value) {
+    value = gsub("<[^>]*>"," ",value)
+    for(pair in list(c("&lt;","<"),c("&gt;",">"),c("&quot;",'"'),c("&#39;","'"),c("&amp;","&")))
+      value = gsub(pair[1],pair[2],value,fixed=TRUE)
+    trimws(gsub("[[:space:]]+"," ",value))
+  }
+  length(note$content)==1L && identical(text(entry$text),text(note$content)) &&
+    grepl(trimws(gsub("[[:space:]]+"," ",image$error)),text(note$content),fixed=TRUE)
+}
+
 e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous=NULL, restored=FALSE) {
   checkpoint = scenario$steps[[index]]
   problems = character();missing = character()
   if(is.null(observation)) return(list(status="blocked",reason="No native GUI observation supplied"))
   if(!identical(observation$source,"native_gui")) missing = c(missing,"native GUI provenance")
-  if(!e2e_desktop_verified(observation$desktop)) missing = c(missing,"verified disposable secondary-monitor window ownership")
+  if(!e2e_desktop_verified(observation$desktop)) missing = c(missing,"verified disposable window ownership")
   if(!nzchar(paste(observation$accessibility,collapse=""))) missing = c(missing,"native accessibility evidence")
   if(!identical(observation$checkpoint_id,paste0(scenario$id,"/",index,if(restored)"/restored")))
     problems = c(problems,"Observation belongs to a different checkpoint")
@@ -174,11 +253,27 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
         for (entry in shown) {
           if (length(entry$phase) != 1L) next
           node = visible[[match(entry$result,vapply(visible,`[[`,character(1),"name"))]]
-          if (identical(entry$phase,"rendering_error") && !identical(node$type,"image") ||
+          companion = identical(entry$phase,"rendering_error") && e2e_companion_error(analysis,entry,elements)
+          if(companion) {
+            owner = if(entry$result=="plotExplanation") "plot" else "comparisonplot"
+            other_images = Filter(function(item)identical(item$type,"image") && item$name!=owner,visible)
+            for(image in other_images) {
+              if(nzchar(image$error)) problems = c(problems,paste("Unexpected unaffected image error:",image$name))
+              if(!isTRUE(image$resource_exists)) problems = c(problems,paste("Missing unaffected image resource:",image$name))
+              if(!isTRUE(observation$rendered_images[[image$name]])) missing = c(missing,paste("actual unaffected displayed image",image$name))
+            }
+            for(name in names(checkpoint$expected_result_visibility)) {
+              tables = Filter(function(item)identical(item$name,name) && identical(item$type,"table"),visible)
+              if(isTRUE(checkpoint$expected_result_visibility[[name]]) && length(tables)==1L &&
+                  (nzchar(tables[[1]]$error) || !any(vapply(tables[[1]]$columns,function(column)length(column$values)>0L,logical(1)))))
+                problems = c(problems,paste("Unavailable unaffected table:",name))
+            }
+          }
+          if (identical(entry$phase,"rendering_error") && !identical(node$type,"image") && !companion ||
               identical(entry$phase,"fitting_error") && identical(node$type,"image") ||
               identical(entry$phase,"waiting") && !identical(entry$result,"waiting"))
             problems = c(problems,"Diagnostic phase contradicts its saved result type")
-          if (entry$phase %in% c("fitting_error","rendering_error") && !nzchar(node$error) && !nzchar(analysis$error))
+          if (entry$phase %in% c("fitting_error","rendering_error") && !nzchar(node$error) && !nzchar(analysis$error) && !companion)
             problems = c(problems,"Observed error diagnostic has no corresponding saved error")
         }
         phases = unlist(lapply(shown, `[[`, "phase"), use.names=FALSE)
@@ -238,7 +333,11 @@ e2e_checkpoint = function(scenario, index, observation, reference=NULL, previous
   }
   list(status=if(length(problems))"failed" else if(length(missing))"blocked" else "passed",
     problems=unique(problems),unobserved=unique(missing),revision=analysis$revision,
-    saved_sha256=snapshot$sha256,saved_options=analysis$options,numerical=numerical,diagnostic_phase=diagnostic_phase)
+    saved_sha256=snapshot$sha256,saved_options=analysis$options,numerical=numerical,diagnostic_phase=diagnostic_phase,
+    operations=list(window_ownership_verified=e2e_desktop_verified(observation$desktop),
+      secondary_monitor=observation$desktop$secondary_monitor,
+      monitor_confirmation=if(is.null(observation$desktop$secondary_monitor))"unconfirmed" else
+        if(isTRUE(observation$desktop$secondary_monitor))"secondary" else "other"))
 }
 
 e2e_run_scenario = function(scenario, driver, references, output, timeout=30, now=function()proc.time()[[3]],poll=function()Sys.sleep(.1)) {
@@ -383,9 +482,9 @@ e2e_register_window = function(registry, window, purpose="existing_test") {
   if(!is.character(purpose) || length(purpose)!=1L || is.na(purpose)) return(block("Window purpose must be explicit"))
   required = c("id","title","document","source","secondary_monitor","disposable")
   if(!all(required %in% names(window)) || !identical(window$source,"native_gui") ||
-      !isTRUE(window$secondary_monitor) || !isTRUE(window$disposable) ||
+      !isTRUE(window$disposable) ||
       any(!vapply(window[c("id","title","document")],function(x)is.character(x) && length(x)==1L && !is.na(x) && nzchar(x),logical(1))))
-    return(block("Exact native window/document identity and secondary-monitor ownership confirmation required"))
+    return(block("Exact native disposable window/document identity required"))
   active = Filter(function(w)!isTRUE(w$closed),registry)
   if(any(vapply(active,function(w)w$id==window$id || w$title==window$title,logical(1))))
     return(block("Duplicate or ambiguous window registration"))
@@ -402,15 +501,15 @@ e2e_authorize_window_close = function(registry, observed) {
   matches = Filter(function(w)!isTRUE(w$closed) && identical(w$id,observed$id),registry)
   if(length(matches)!=1L) return(list(status="blocked",reason="Unique registered window not observed"))
   owned = matches[[1]]
-  if(!isTRUE(owned$created_by_test) || !isTRUE(observed$secondary_monitor) ||
+  if(!isTRUE(owned$created_by_test) ||
       !identical(observed$source,"native_gui") || !identical(owned$title,observed$title) ||
       !identical(owned$document,observed$document))
-    return(list(status="blocked",reason="Refusing to close an existing, unrelated, moved or mismatched document"))
+    return(list(status="blocked",reason="Refusing to close an existing, unrelated or mismatched document"))
   list(status="passed",id=owned$id,title=owned$title,document=owned$document)
 }
 
 e2e_desktop_verified = function(desktop) {
-  if(!isTRUE(desktop$secondary_monitor) || !isTRUE(desktop$owned_document)) return(FALSE)
+  if(!isTRUE(desktop$owned_document)) return(FALSE)
   if(isTRUE(desktop$window_count==1L)) return(TRUE) # Original single-window observation contract.
   if(!isTRUE(desktop$window_count==2L)) return(FALSE)
   registry = desktop$window_registry

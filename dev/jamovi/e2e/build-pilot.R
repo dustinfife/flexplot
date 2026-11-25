@@ -11,6 +11,7 @@ home = Sys.getenv("JAMOVI_HOME","/Applications/jamovi.app")
 devtools::load_all(root,quiet=TRUE,helpers=FALSE)
 jmvcore:::initProtoBuf()
 source(file.path(root,"dev/jamovi/fixture.R"))
+source(file.path(root,"dev/jamovi/e2e/harness.R"))
 manifest = jsonlite::read_json(file.path(root,"dev/jamovi/e2e/manifest.json"))
 fixtures = readRDS(file.path(root,"dev/jamovi/e2e/artifacts/fixtures.rds"))
 ids = c("FP-03","LM-03","LM-09","GLM-08","MM-11","MM-10")
@@ -23,7 +24,7 @@ for(dataset in c("primary","common_sample")) local({
   work = tempfile("e2e-prepared-");dir.create(work)
   on.exit(unlink(work,recursive=TRUE),add=TRUE)
   archive = file.path(work,"prepared.omv")
-  jmvReadWrite::write_omv(dtaFrm=input,fleOut=archive,frcWrt=TRUE)
+  e2e_write_gui_fixture(input,archive)
   configurations = list()
   for(i in seq_along(cases)) {
     scenario = cases[[i]]

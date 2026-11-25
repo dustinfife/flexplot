@@ -8,25 +8,46 @@ Native/R6/renderer passes and historical pilot captures cannot replace these che
 Stage 11D.1 update (2026-11-24): the [seven-scenario pilot](STAGE-11D1-PILOT.md)
 has been executed, with failures and monitor-dependent blocks retained in its
 [ledger](stage11d1-ledger.json). No remaining 70-scenario run was launched.
-Resolve the documented diagnostic, scenario/verifier contracts and placement
-observability before accepting the pilot or starting unattended batches.
+That historical result is unchanged. Stage 11D.2 resolves those pilot gates as
+recorded in the [correction report](STAGE-11D2-CORRECTIONS.md) and
+[correction ledger](stage11d2-ledger.json): four affected scenarios pass all
+13 transitions, four actual host reopens and four subsequent edits; three other
+pilot scenarios pass proportionate current-build smoke checks. One supplementary
+main-error isolation check also passes (25 checks total). Monitor placement is
+unconfirmed and recorded operationally. The process is ready to resume P0 batches;
+the other 70 scenarios remain unexecuted and must not be treated as passed.
 
 ## Preflight and human ownership
 
-Use installed jamovi 2.7.41 on the desktop secondary monitor. Confirm the running
+Use installed jamovi 2.7.41; prefer the desktop secondary monitor. Confirm the running
 module endpoint, version, build hash and archive/install receipt with the existing
-preflight, not just the repository version. Production fingerprint remains the
-Stage 11B.1 build. Use the approved macOS ARM64 R 4.5.0 / ggplot2 4.0.3 / vdiffr
+preflight, not just the repository version. The Stage 11D.2 corrected production
+fingerprint is `54081947f58fe59e1543ca1c1e21f3828ee34464c719ee23ba84ac7808c42d63`. Use the approved macOS ARM64 R 4.5.0 / ggplot2 4.0.3 / vdiffr
 1.0.8 environment for reference comparison; never approve changed SVGs for a GUI
-mismatch. Import deterministic CSVs and apply data-schema.json, including factor
-order, missing values and literal variable names.
+mismatch. Prepare deterministic GUI inputs with `e2e_write_gui_fixture()` from the original
+typed RDS, or apply data-schema.json after CSV import. The existing writer needs
+matching Decimal metadata and double binary storage for whole-valued doubles;
+R-reader round-trip alone does not prove native import integrity. Preserve factor order,
+missing values and types; never regenerate source numerical artifacts for a GUI
+import difference. jamovi 2.7.41 normalizes the primary fixture's literal backtick
+name to `tick_name` on opening, even after a successful native rename/save. Only
+explicit `jamovi-2.7.41-import` verification may map that one source spelling;
+`e2e_gui_fixture()` otherwise requires exact names, classes, values and factor
+metadata and rejects collisions. Exact-name checking remains the default.
 
-Human operator confirms secondary-monitor identity, unique disposable document and
-active analysis. Reuse one owned window. Only an explicitly registered second
+Require exact identity and unambiguous ownership of the disposable document and
+active analysis. Record monitor placement separately as secondary, other or
+unconfirmed. Unknown placement alone never blocks functional acceptance. Reuse
+one owned window; do not move unrelated windows or change display settings. Only an explicitly registered second
 owned window is permitted for restoration; close it after verifying the reopen.
-Do not close user documents. Native file pickers, drag/drop destinations, dynamic
-label cells and any ambiguous/offscreen target require human assistance. Mark an
-unavailable target blocked, do not use backend setters to manufacture GUI success.
+Do not close user documents. Prefer native `getApp` and Open → Recent Files for actual reopens, verifying the
+resulting title, document and analysis before editing. A newly prepared owned file
+may be selected in the already observed in-app directory list. Avoid repeated
+failed system-picker/Finder attempts. Native drag/drop destinations, dynamic
+label cells or offscreen targets require fresh visible confirmation; request human
+help when safe targeting cannot be established. Mark unavailable actions blocked,
+never replace them with backend setters. Record binding/launch timeouts separately
+from product errors; an observed running process is not document ownership.
 
 Before each scenario enter initialization options through native controls, then
 follow steps in order. Reset to fresh owned analysis between scenarios. Keep the
@@ -96,6 +117,11 @@ inspector JSON, current native completion state, displayed image/resource eviden
 control values/visibility, diagnostic phase/text/result, independent numerical
 comparison and all required reviews with evidence paths. Record actual plot
 coordinates, cluster IDs and source/destination ghost curves, not just a checkbox.
+A rendering error may be visible in its declared adjacent companion note only
+when the expected image owns that exact error, its stale resource is absent, the
+companion is current/visible and other valid images/tables remain available. The
+verifier accepts the known Mixed `plot`/`plotExplanation` and
+`comparisonplot`/`comparisonPlotNote` relationships, not arbitrary HTML elsewhere.
 The manifest's expected_ui and derived state require independent captures; missing
 reviews are blocked and mismatches failed. `run.R verify` validates a single
 observation; the file bridge never supplies missing human work automatically.
@@ -104,7 +130,9 @@ Maintain a separate campaign ledger with defined, native-component-tested,
 live-attempted, live-executed, live-passed, failed, blocked and unexecuted columns.
 Only a fully evidenced transition may pass; a scenario passes only after every
 transition and host reopen. Keep failed/blocked captures and rerun provenance.
-Do not promote older pilot passes. Release still requires isolated built-package
+Keep Stage 11D.1's original ledger and verdicts unchanged. Record policy
+reassessment separately with original evidence hashes and old source identity;
+that reassessment is not a corrected-build GUI rerun. Do not promote older pilot passes. Release still requires isolated built-package
 checks and actual-host JASP compatibility outside this jamovi campaign.
 
 For new fitted states without a stored reference key, retain an independent R

@@ -5820,9 +5820,9 @@
         },
         {
           "action": "set_options_through_native_controls",
-          "description": "Move grouping to panels",
+          "description": "Use comparison panels while retaining the unsupported grouping preference",
           "changes": {
-            "comparisonGroup": null,
+            "comparisonGroup": "group",
             "comparisonPanels": [
               "group"
             ]
@@ -5836,7 +5836,9 @@
             ],
             "engine": "lm"
           },
-          "expected_warnings_or_errors": [],
+          "expected_warnings_or_errors": [
+            "not applied"
+          ],
           "expected_options": {
             "out": "y",
             "preds": [
@@ -5865,12 +5867,19 @@
               ]
             ],
             "comparisonX": "x",
-            "comparisonGroup": null,
+            "comparisonGroup": "group",
             "comparisonPanels": [
               "group"
             ]
           },
-          "verify_visible_against_saved_options": true
+          "verify_visible_against_saved_options": true,
+          "expected_diagnostic_phase": "warning",
+          "required_observations": {
+            "group_fallback": true
+          },
+          "observation_contracts": {
+            "group_fallback": "The unsupported grouping preference stays stored and is not applied to model identity aesthetics; the visible explanation remains, new group facets render, and unchanged fitted/comparison statistics match the independent reference."
+          }
         }
       ],
       "verification": {
@@ -10957,13 +10966,19 @@
               "group"
             ],
             "modelTerms": [],
-            "plotX": "z",
+            "plotX": null,
             "plotPanels": [],
-            "plotGroup": "group",
+            "plotGroup": null,
             "quadratic": []
           },
           "verify_visible_against_saved_options": true,
-          "expected_diagnostic_phase": "waiting"
+          "expected_diagnostic_phase": "waiting",
+          "required_observations": {
+            "empty_cleanup": true
+          },
+          "observation_contracts": {
+            "empty_cleanup": "Empty native term destination clears stale x/color roles, old plot resources and fitted tables; only the waiting instruction is displayed. Display preferences unrelated to predictor eligibility are not part of this cleanup."
+          }
         },
         {
           "action": "set_options_through_native_controls",

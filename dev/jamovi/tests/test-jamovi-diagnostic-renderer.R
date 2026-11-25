@@ -13,6 +13,11 @@ test_that("actual R6 diagnostics render through the installed jamovi HTML method
   expect_true(mixed$run())
   fixtures[[length(fixtures)+1L]] = list(name="mixed-fit",content=mixed$results$explanation$content,
     error=mixed$results$explanation$.__enclos_env__$private$.error,expected="random intercept")
+  main_error = flexplot:::mixedmodelClass$new(options=flexplot:::mixedmodelOptions$new(out="y",preds=c("x","a"),cluster="id",
+    predictionType="cluster",plotX="x",plotPanels="a"),data=jamovi_mixed_test_data())
+  expect_true(main_error$run())
+  fixtures[[length(fixtures)+1L]] = list(name="mixed-main-image-guide",content=main_error$results$plotExplanation$content,
+    error=main_error$results$plotExplanation$.__enclos_env__$private$.error,expected="place the grouping variable")
   flexplot:::jamovi_result_clear(mixed$results$explanation)
   expect_identical(mixed$results$explanation$content,"")
   expect_identical(mixed$results$explanation$status,"complete")

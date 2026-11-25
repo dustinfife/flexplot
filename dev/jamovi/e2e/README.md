@@ -12,11 +12,17 @@ scenario passes. Historical pilot observations in PHASE-2A.md remain historical.
 See [the option reconciliation](STAGE-11C-COVERAGE.md) and the prioritized
 [Stage 11D campaign plan](STAGE-11D-PLAN.md). Source R/JS/YAML remains authoritative.
 
-Current campaign update (2026-11-24): [Stage 11D.1's seven-scenario pilot](STAGE-11D1-PILOT.md)
+Historical campaign update (2026-11-24): [Stage 11D.1's seven-scenario pilot](STAGE-11D1-PILOT.md)
 was executed after Stage 11C. Its [separate ledger](stage11d1-ledger.json) records
 26 passed / 7 failed / 8 blocked checks; three scenarios pass declared checks,
 with shared fixture caveats. The other 70 remain unexecuted. The Stage 11C counts
 and historical Phase 2A records above/below retain their phase-specific meaning.
+
+Current correction (2026-11-25): [Stage 11D.2](STAGE-11D2-CORRECTIONS.md) records
+25 current-build checks passed: four fully rerun affected scenarios, including
+actual host reopening and subsequent edits, three proportionate smoke checks and
+one supplementary error-isolation check. The other 70 remain unexecuted. See the
+[separate correction ledger](stage11d2-ledger.json); these results do not approve release.
 
 ## Files and reproducibility
 
@@ -316,7 +322,7 @@ Existing coverage is substantial but mostly R6/headless:
 | Random structures, ML copies and boundary reporting | mixed/comparison tests | Real supplier controls and concise diagnostics after updates |
 | CAS adjustment/ghost coordinates | independent y-Zb and shared predictions tests | Completed actual combined plot, directional ghost and conditional note |
 | Saved option messages, compiled handlers and note layout | mandatory `dev/jamovi/tests` | Full `.omv` filesystem round-trip and legacy migration, not merely protocol round-trip |
-| Desktop ownership/cleanup | managed-session and workflow mocks | One registered secondary-monitor document; permission/timeout failures verified safely |
+| Desktop ownership/cleanup | managed-session and workflow mocks | One registered owned document; monitor recorded separately; permission/timeout failures verified safely |
 
 No comprehensive automated native drag/drop or keyboard campaign exists yet.
 A prepared `.omv` alone bypasses important fresh-control paths. Physical placement,
@@ -337,7 +343,7 @@ if unavailable, record that gap and distinguish constructed legacy-option tests.
    options. Keep the eight-analysis quick smoke document intact. Validate the
    new document's data/factor schema and expected option round-trip headlessly.
 3. **Bounded GUI driver.** Use the established registered-document workflow and
-   `gui-session.js`; one process/window, secondary monitor, no RStudio activation,
+   `gui-session.js`; one process/window, secondary monitor preferred, no RStudio activation,
    no preference edits. Reuse the existing test window when safe. Refuse ambiguous
    ownership. Never close/replace an unregistered document. Use a native fresh
    analysis for `fresh`, prepared options only for `prepared_options`, and actual
@@ -366,11 +372,12 @@ if unavailable, record that gap and distinguish constructed legacy-option tests.
    Screenshot paths and errors must not contain unrelated user-document data.
    Individual-ID reruns preserve prior records; do not auto-update references.
 8. **Cleanup.** Keep a workflow registry and cleanup in failure/finalization paths;
-   release only owned disposable analyses/documents. Never quit the app or close
-   user files. Manual `open` commands retain their existing leave-open contract;
+   release only owned disposable analyses/documents. Never issue Quit or close
+   user files; closing the last owned document may naturally end the host. Manual `open` commands retain their existing leave-open contract;
    the campaign gets explicit disposable ownership. If existing controls cannot
-   report monitor placement, confirm secondary-monitor placement before actions;
-   do not move windows speculatively. Restore no RStudio focus.
+   report monitor placement, record it as unconfirmed; this does not block
+   functional acceptance. Unambiguous ownership remains required. Do not move
+   windows speculatively. Restore no RStudio focus.
 
 Implementation estimate: small dispatcher/report layer; moderate native-control
 and saved-document adapter work. The numerical/reference layer is ready. Reliable
@@ -403,7 +410,8 @@ GUI dependency until existing installed-handler and desktop tools are assessed.
 
 Before automation starts, decide how to obtain a trustworthy live option/result
 snapshot without bypassing native controls, retain any real legacy `.omv` files
-available, and confirm the single registered window is on the secondary monitor.
+available, and verify the single registered disposable window identity. Prefer
+the secondary monitor, recording placement separately when unconfirmed.
 Stage 11C changes no statistical design or dependencies.
 
 The pre-Stage-11C matrix had 73 scenarios: GLM-22 added reference-panel ghosts;
@@ -461,3 +469,37 @@ for deterministic comparison. Stage 11C writes just inventory.json, coverage.csv
 and scenario-index.csv through `--metadata-only`; it never writes tracked numerical
 CSV/JSON/RDS, fixture schema/provenance or approved SVGs. Native design tests verify
 metadata-only output isolation, exact reference keys and all four module counts.
+
+
+## Stage 11D.2 verification policy
+
+Functional GUI verdicts require actual native actions, current output and safe
+owned-document targeting. Secondary-monitor placement is a recorded operational
+preference, never a correctness gate. `e2e_checkpoint()` returns a separate
+`operations` record; unknown placement is `unconfirmed`. Non-owned or ambiguous
+windows still block execution. Preserve Stage 11D.1's ledger; the separate
+`stage11d2-policy-reassessment.json` removes only its monitor gate using original
+evidence hashes and does not claim new-build GUI passes.
+
+Mixed rendering errors can use only their declared adjacent notes. The image must
+own the matching error and have no stale resource, while a current visible
+companion contains the observed text and other valid results remain available.
+Unrelated, hidden, stale, mismatched or duplicated companions fail verification.
+
+GUI fixture checks default to exact source names/types/values/factor metadata.
+For primary on jamovi 2.7.41 only, explicit `jamovi-2.7.41-import` policy maps
+``tick`name`` to `tick_name`, rejecting any collision or other rename. Native
+inline renaming can write the literal name, but opening the file normalizes it
+again. `e2e_write_gui_fixture()` writes source doubles as double binary values and
+sets matching Decimal metadata, including whole-valued columns. The existing
+writer otherwise re-infers Integer metadata for these columns; conflicting widths
+corrupt native imports even when its R reader succeeds. A metadata regression
+check and actual host-saved typed-data comparison cover both paths. The helper
+refuses to overwrite existing evidence. The
+original deterministic fixtures and R-side nonstandard-name tests are unchanged.
+
+Use native `getApp` followed by Open → Recent Files and verify the reopened title,
+path and analysis. Keep system file-picker/Finder failures bounded. Request human
+assistance when native binding or safe targeting remains unavailable; process
+presence alone is not proof of a usable review window. No backend setter may
+substitute for a failed native action.

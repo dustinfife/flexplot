@@ -95,3 +95,42 @@ test_that("both restored Mixed plot states reuse fits and their selected cluster
   expect_true(jamovi_reporting_update(reopened,list(graphic=FALSE,comparisonClusters=5L)))
   expect_false(reopened$results$plot$visible);expect_true(reopened$results$comparisonplot$visible)
 })
+
+test_that("restored Mixed rendering diagnostics retain result objects, fits and recovery", {
+  jmvcore:::initProtoBuf()
+  saved = list(out="y",preds=c("x","a"),cluster="id",compare=TRUE,
+    comparisonTerms=list("x","a"),plotX="x",plotPanels="a",predictionType="cluster",
+    comparisonX="x",comparisonPanels="a",comparisonPredictionType="population")
+  pb = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOptions",asNamespace("jmvcore")))
+  template = jmvcore:::RProtoBuf_new(get("jamovi.coms.AnalysisOption",asNamespace("jmvcore")))
+  pb$names = names(saved);pb$options = lapply(saved,jamovi_mixed_saved_option,option_template=template,group_template=pb)
+  options = flexplot:::mixedmodelOptions$new();options$fromProtoBuf(pb)
+  host = function(options) {
+    analysis = flexplot:::mixedmodelClass$new(options=options,data=NULL)
+    reader = jamovi_reporting_read
+    environment(reader) = list2env(list(data=jamovi_mixed_test_data()),parent=environment(reader))
+    analysis$.setReadDatasetSource(reader);analysis$.setReadDatasetHeaderSource(reader)
+    analysis
+  }
+  first = host(options)
+  expect_true(first$run())
+  before = first$results$fixed$asDF
+  message = first$results$asProtoBuf(status=4L,includeState=TRUE)
+  image = message$group$elements[[which(vapply(message$group$elements,function(x)x$name=="plot",logical(1)))]]
+  expect_match(image$error$message,"place the grouping variable",fixed=TRUE)
+  expect_identical(image$image$path,"")
+  restored_options = flexplot:::mixedmodelOptions$new();restored_options$fromProtoBuf(options$asProtoBuf())
+  reopened = host(restored_options)
+  note = reopened$results$plotExplanation
+  reopened$results$fromProtoBuf(message,character(),character())
+  expect_true(reopened$run())
+  expect_identical(reopened$results$plotExplanation,note)
+  expect_true(note$visible)
+  expect_match(note$content,"Model plot unavailable:",fixed=TRUE)
+  expect_true(reopened$results$comparisonplot$visible)
+  expect_equal(reopened$results$fixed$asDF,before,tolerance=0)
+  expect_true(jamovi_reporting_update(reopened,list(predictionType="population")))
+  expect_false(grepl("unavailable",note$content,fixed=TRUE))
+  expect_true(reopened$results$plot$visible)
+  expect_equal(reopened$results$fixed$asDF,before,tolerance=0)
+})

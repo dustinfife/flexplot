@@ -24,7 +24,8 @@ inspection. Keep stages small and preserve statistical behavior.
 | 11B.1 | GLM/LM plot-error isolation | Complete: `ba5d76e1` |
 | 11B.2 | Stale tests and artifact retirement | Complete: `55363abd` |
 | 11C | E2E coverage and validation metadata | Complete; validation below |
-| 11D | Current-build live GUI campaign | Planned; not executed |
+| 11D | Current-build live GUI campaign | Pilot executed; remaining 70 scenarios unexecuted |
+| 11D.2 | Resolve live pilot findings | Complete; [correction report](e2e/STAGE-11D2-CORRECTIONS.md) |
 | Release | Isolated package checks and actual-host JASP compatibility | Remaining |
 
 Resolve the Stage 10 implementation commit:
@@ -780,3 +781,60 @@ two scenario contracts and companion-note verifier, establish monitor evidence
 and decide the literal-name host contract; rerun affected pilot gates before
 remaining P0 batches. Full campaign, isolated built-package release checks and
 actual-host JASP compatibility remain outstanding.
+
+
+## Stage 11D.2 — pilot corrections complete, remaining campaign ready
+
+Completed 2026-11-25 from `9e0e39a9`. See the
+[correction report](e2e/STAGE-11D2-CORRECTIONS.md),
+[current-build ledger](e2e/stage11d2-ledger.json) and
+[evidence index](e2e/stage11d2-evidence.json). The Mixed main plot now uses its
+existing adjacent explanation for actionable rendering errors; late main and
+comparison callbacks clear stale image paths. Fits, inference, geometry, result
+identifiers/schemas and saved options are unchanged. LM-15 now tests intentional
+retention of unsupported comparison grouping and its supported panel fallback;
+GLM-20 tests clearing stale roles/results when fitted terms become empty. The
+verifier recognizes only matching, current declared image/companion diagnostics,
+with stale resources absent and other results intact.
+
+The four affected scenarios FP-03, LM-15, GLM-20 and MM-15 pass all 13 transitions,
+four actual native host reopens and four subsequent edits. Three current-build
+smoke checks (LM-03, GLM-08, MM-10) and a supplementary main-error/valid-comparison
+check also pass: **25 passed / 0 failed / 0 blocked**. Smokes are not comprehensive
+scenario reruns. Numerical results agree with original independent references;
+FP-03's native regression line agrees at five coordinates within 0.70 pixels.
+The other 70 scenarios were not launched.
+
+The production/installed/running fingerprint is
+`54081947f58fe59e1543ca1c1e21f3828ee34464c719ee23ba84ac7808c42d63`.
+Both complete suites passed on the approved desktop environment: **24,546 package
+assertions / 799 cases**, **4,925 native assertions / 98 cases**, zero failures,
+errors, testthat warnings or skips; **140/140 exact SVG expectations passed**.
+All four UI definitions compile and package-test source boundaries pass. All
+156 independent numerical keys, 16 fixture/metadata artifacts, 140 SVGs and
+416 indexed historical local files retain their hashes. No visual baseline was
+approved or regenerated.
+
+Native rename/save can store a literal backtick, but jamovi 2.7.41 normalizes it
+again on reopening. GUI verification permits only explicit primary-fixture
+``tick`name`` → `tick_name` mapping for that host; all typed values and factor
+metadata remain exact. Development OMV preparation also now preserves whole-valued
+doubles with matching binary and Decimal metadata. This corrects the earlier
+pilot summary's overly broad typed-storage claim for unused `nb_y`/`constant`;
+original evidence/verdicts remain unchanged. Rejected preliminary metadata-width
+experiments are retained and excluded from passes.
+
+Monitor placement is unconfirmed for these new checks and is operational only;
+exact owned disposable-document/analysis identity remains mandatory. One initial
+post-install native-binding outage required a human-assisted file open. Native
+getApp/Recent then completed the required reopens autonomously, with fresh identity
+checks and no repeated Finder/picker attempts. The review document was saved and
+closed; no unrelated windows/settings were changed. Historical monitor-only
+reassessment is separate (34/7/0), with original build/evidence provenance, and is
+not a corrected-build rerun or replacement for the original 26/7/8 ledger.
+
+The process is ready to resume prioritized P0 batches with the new policies and
+strict current-build evidence. Do not begin them automatically. Comprehensive
+P0/P1 GUI acceptance, isolated built-package release checks and actual-host JASP
+compatibility still block release. The earlier Stage 11D.1 next-step paragraph is
+historical; its pilot correction gates are now resolved as described here.

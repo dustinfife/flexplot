@@ -349,3 +349,67 @@ batches, then migrations/family/ghosts and remaining P0; execute/disposition P1.
 File any new product defect separately with captured reproduction before repair.
 Complete isolated built-package and actual-host JASP gates before release approval.
 Stage 11C completes validation-framework reconciliation, not release sign-off.
+
+
+## Stage 11D.2 — desktop pilot corrections and current baseline
+
+Completed on 2026-11-25 from `9e0e39a9`; full detail and local evidence provenance
+are in the [correction report](e2e/STAGE-11D2-CORRECTIONS.md),
+[ledger](e2e/stage11d2-ledger.json) and
+[evidence index](e2e/stage11d2-evidence.json).
+
+- **Genuine implementation defect corrected:** Mixed Models' main rendering error
+  now appears in the existing adjacent explanation in actual jamovi 2.7.41.
+  Late main/comparison exceptions explicitly clear retained resource paths.
+  Both fit tables, valid other visualizations and ML comparison statistics survive;
+  population/layout recovery and saved-analysis reopening pass. No fitting or
+  inference calculations, schemas, identifiers, host CSS/code or dependencies changed.
+- **Stale expectations corrected:** LM-15 retains its intentionally unsupported
+  comparison group while verifying the warning, supported panels, unaffected
+  comparison geometry and numerics. GLM-20 clears stale x/color roles and old
+  output on empty fitted terms, then automatically recovers x when z returns.
+  Companion-note verification now requires the matching errored image, no stale
+  resource, current visible note and other intact results; negative tests remain strict.
+- **Host/environment distinctions:** native rename saves a literal backtick but
+  real reopening normalizes it to underscore. Only explicit primary-fixture/
+  jamovi-2.7.41 mapping is allowed; typed data/factor checks remain exact.
+  The development fixture writer now uses matching double binary and Decimal
+  metadata for whole-valued doubles; malformed preliminary inputs were rejected,
+  not waived. Original deterministic artifacts are untouched. The approved ARM64
+  R 4.5.0 / ggplot2 4.0.3 / vdiffr 1.0.8 environment still matches. Monitor placement
+  is separately unconfirmed, with safe disposable ownership mandatory. An initial
+  bridge outage needed one human open; subsequent native getApp/Recent reopens worked.
+- **Current GUI evidence:** four affected scenarios pass 13 declared transitions,
+  four actual host reopens and four subsequent edits; three proportionate smoke
+  checks and one supplementary main-error isolation pass bring the total to
+  **25 passed / 0 failed / 0 blocked**. Actual saved numerical output agrees with
+  independent references; the FP regression line agrees at five native image
+  coordinates within 0.70 pixels. Smoke checks do not complete the other three
+  scenarios' entire current-build matrices. All remaining 70 scenarios are unexecuted.
+- **Outstanding release/JASP:** comprehensive P0/P1 GUI acceptance, isolated
+  built-package checks and intended actual-host JASP dependency/linkage, menu,
+  option-transfer, tables/plots, invalid-input recovery and .jasp save/reopen/edit
+  checks remain release blockers. No JASP-host acceptance is claimed.
+
+The final installed and running 0.27.0 build is
+`54081947f58fe59e1543ca1c1e21f3828ee34464c719ee23ba84ac7808c42d63`, verified
+against the archive/payload receipt and the observed native server descriptor.
+The complete package run passed **24,546 assertions / 799 cases**; the complete
+native run with final fixture correction passed **4,925 / 98**. Both have zero
+failures, errors, testthat warnings or skips. All **140 exact approved SVG checks**
+passed; all four UI definitions and source boundaries pass. The package increase
+of 42 assertions/two cases and native increase of 88/six cases are regression
+coverage over Stage 11C, without changed statistical baselines. The full native
+suite was repeated after the development-only fixture correction; package source
+and packaged tests were unchanged by that last correction.
+
+All 156 reference keys, all 16 fixture/metadata files, 140 SVGs and 416 indexed
+historical local evidence files are preserved. Stage 11D.1's original ledger is
+unchanged at 26/7/8; a separate provenance-linked monitor-only reassessment is
+34/7/0 and does not substitute for current-build validation.
+
+Recommended sequence: resume the established P0 batches with strict ownership,
+verified build, narrow import policy and real reopen/edit evidence; execute and
+disposition the rest of P0/P1, then isolated package checks and actual-host JASP.
+Stage 11D.2 resolves the pilot's correction gates and makes that process ready;
+it does not authorize starting the remaining 70 here or approve release.

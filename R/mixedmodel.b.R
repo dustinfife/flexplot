@@ -262,7 +262,9 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       private$.modelState = state
       self$results$plot$setState(if (plot_failed) NULL else state)
       self$results$plot$setVisible(self$options$graphic)
-      self$results$plotExplanation$setVisible(self$options$graphic && !plot_failed)
+      self$results$plotExplanation$setVisible(self$options$graphic)
+      if (plot_failed) jamovi_diagnostic(self$results$plotExplanation,
+        paste("Model plot unavailable:", conditionMessage(plot))) else
       self$results$plotExplanation$setContent(paste0("<p>",
         if (self$options$predictionType == "cas")
           "Cluster-adjusted scatterplot: the existing CAS implementation removes all estimated random effects from the fitted observations and draws the original model's fixed-effects curve. All eligible fitted observations are shown; the displayed-cluster count does not apply. Displayed moderators use CAS representative values, and undisplayed covariates are observation-weighted marginalized." else paste0(
@@ -337,6 +339,7 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       },error=function(error) {
         # jmvcore otherwise labels a failed image with non-null state as rendering.
         image$setState(NULL)
+        image$.setPath(NULL)
         image$setError(conditionMessage(error))
         jamovi_diagnostic(self$results$comparisonPlotNote,
           paste("Comparison plot unavailable:",conditionMessage(error)))
@@ -353,9 +356,10 @@ mixedmodelClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
       }, error=function(error) {
         # jmvcore otherwise labels a failed image with non-null state as rendering.
         image$setState(NULL)
+        image$.setPath(NULL)
         image$setError(conditionMessage(error))
-        self$results$plotExplanation$setContent("")
-        self$results$plotExplanation$setVisible(FALSE)
+        jamovi_diagnostic(self$results$plotExplanation,
+          paste("Model plot unavailable:",conditionMessage(error)))
         FALSE
       })
     }
