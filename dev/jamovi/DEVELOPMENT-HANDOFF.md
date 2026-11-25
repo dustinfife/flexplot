@@ -1271,3 +1271,99 @@ and payload `75b1076de03883f1336c5797bad8ae46401eb9e74922e988ce45522b56e3396e`.
 Logs: `.jamovi-dev/manual-lm-letter-notes-20261125/`. Cached headers/notes
 receive the new lettering when the analysis recalculates. Module left installed
 for manual inspection; comprehensive E2E remains paused.
+
+## GLM — manual review corrections
+
+Completed 2026-11-25 from synchronized `277a2d79`, preserving the ordinary
+Flexplot and LM corrections. Comprehensive E2E remains paused.
+
+- **Family selection:** the visible `familySelection` dropdown contains only
+  concrete distributions/links. Backend outcome inspection publishes the actual
+  choice, including before predictors are assigned. The existing hidden `family`
+  selector retains `auto` versus a deliberate named choice, preserving Stage 10
+  eligibility/event coding and old saved analyses without a new migration system.
+  Old Auto selections resolve to a concrete visible choice on recalculation;
+  explicit old families and the historical missing-selector Gaussian default are
+  preserved. New manual choices update the retained selector in the same native
+  option transaction. Unrelated edits never replace that choice. Automatic
+  analyses reconsider the outcome using full observed values, as before. Removed
+  the visible Automatic choice and policy paragraph. Removed the redundant
+  pre-data family publication; outcome resolution introduces no extra model fit.
+- **Plot guides:** the routine probability-overlay text is exactly “Logistic
+  overlay plot: dots represent observed proportions within bins of the x-axis
+  variable.” It appears only for the continuous-x binned logistic overlay.
+  Logit bounds/scale qualifications, raw-versus-adjusted marginal-prediction
+  qualifications, fallback messages and shared ghost explanations remain.
+  Main/comparison result and default plot titles now consistently use Model
+  Visualization / Model Comparison Visualization. Both CI checkboxes say 95%
+  confidence intervals. Saved label keys/custom labels and geometry are unchanged.
+- **Spacing:** the existing compact note wrapper and adjacent image/HTML result
+  declarations are already in use. Remaining native image/HTML spacing is left
+  unchanged: no CSS, image-dimension, host-renderer or layout workaround.
+- **Table notes:** extended LM's existing `jamovi_table_column_notes` to allow
+  one note to mark multiple relevant visible headers and to reset base titles
+  and sequential alphabetic lettering on each pass. GLM Estimates, IRT and
+  comparison tables now reuse it; no separate GLM note framework. Family/link/
+  success context remains once on the first visible summary. Retained raw-scale
+  SE/CI clarification, residual-df/theta qualifications, prediction-difference
+  endpoints, conditional interaction explanation, and Gamma-inverse reciprocal
+  qualification. Removed routine factor-contrast and multiplier definitions.
+  Standardized OR is `exp(beta * SD(fitted model-matrix column))`: conventional
+  for an ordinary numeric main effect, whose routine note is removed. Factors,
+  interactions and transformed terms are not simply a one-SD change in the
+  original predictor; a concise header note describing the actual column scaling
+  remains for those specifications. No standardized OR values were changed.
+- **IRT/marginal tables:** removed routine slope/AME/threshold-unit explanations
+  and the routine marginal-averaging footnote. IRT has at most one concise
+  reference-settings note when other predictors exist (numeric means, fitted
+  categorical reference levels). Undefined/nonunique thresholds retain a marker
+  on the specific blank cell and matching warning; † distinguishes this warning
+  from the alphabetic column note. Supplementary-summary/fitting warnings remain.
+- **Comparison/output conventions:** reused LM's conditional common-sample note:
+  N is marked only when common-sample enforcement additionally excludes rows from
+  either model. Include p-values now governs the comparison p column and its
+  test explanation as well as coefficient p columns. Test results and common
+  estimation rows are unchanged. Assigned visualization roles already disappear
+  from the persistentItems=false suppliers and return when removed; verified the
+  existing shared native handlers rather than changing them.
+- **References:** reused LM/ordinary bibliography-only collection. This follows
+  the latest manual correction that superseded the older Method References
+  block: no redundant heading or unexplained on-result [3]/[4], while full
+  AnalysisResponse bibliography metadata and final host References are retained.
+
+No statistical behavior changes: GLM coefficient uncertainty already used
+pointwise residual-df t or normal-Wald intervals, and visualization intervals use
+the existing fitted-model machinery; no multiplicity adjustment was found to
+remove. Coefficients, covariance, IRT, marginal predictions, standardized effects,
+comparison statistics, event orientation, common samples and prediction geometry
+are preserved. An independent installed-package calculation reproduced standardized
+ORs and reciprocals for numeric, factor, interaction and quadratic models at the
+existing three-decimal reporting precision. No LM/Mixed statistical behavior was changed. Existing option and
+result identifiers/table column schemas remain; the actual-family display option
+is additive. Cached output receives presentation changes on recalculation.
+
+Focused verification (no full package/native suite or E2E campaign): source group
+964 assertions passed, with one existing jmvcore `element_line(size)` ggplot2
+deprecation warning; the final review/undefined-warning cases passed 99 assertions.
+Additional directly selected GLM interval/presentation and shared LM header cases
+passed 581 + 41 assertions. Native saved-family/restoration/table-renderer checks
+passed 537 assertions; compiled/native-handler and numerical model-space checks
+passed 852 assertions. The final direct compiled UI check also passed with visible
+family projections/manual overrides and delayed-response coverage. No failures or
+skips. Native note rendering checks matched sequential header/note markers,
+escaped literal labels, conditional visibility, no duplicate column-wide cell
+markers and restoration. Numerical tests independently verify fitted-model
+intervals, standardized effects, IRT and marginal predictions. All 140 SVGs and
+16 protected fixture/metadata artifacts are unchanged. Source-boundary checks and
+`git diff --check` passed. Existing testthat/R-build startup warning remains.
+
+Compiled, built and installed 0.27.0 using the existing desktop cache. Installed
+source/archive/payload preflight passed: source fingerprint
+`b7f4c6d9b87406e009f0b24bfbbd728b0c756c55e5c1264d83b65fd4bd9b17f0`,
+archive `374c439400076dd506d0593126a1afeb2fc4e911317cd46001b55db0fa9c5da2`,
+payload `c678c76fa15944c15ee9feb9d0a99e494ca5650c23ee196cb2f7c6ee8202701a`.
+Installed-package family/note/numerical checks passed 632 assertions with zero
+failures, test warnings or skips. Results are recorded in
+`.jamovi-dev/manual-glm-20261125/focused-installed.log`; other focused logs and
+preflight are in that same directory. No live GUI testing or jamovi window
+manipulation was performed. Module left installed for the user's manual review.

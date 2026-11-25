@@ -17,7 +17,7 @@ items:
     type: Html
     visible: false
   - name: plot
-    title: Model visualization
+    title: Model Visualization
     type: Image
     width: 700
     height: 450
@@ -64,7 +64,7 @@ items:
         title: Probability
         type: number
   - name: comparisonplot
-    title: Model comparison plot
+    title: Model Comparison Visualization
     type: Image
     width: 700
     height: 450

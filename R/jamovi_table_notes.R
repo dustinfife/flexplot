@@ -42,19 +42,27 @@ jamovi_comparison_unavailable = function(model1, model2, test, comparison=NULL) 
   paste0(test," unavailable: ",reason,".")
 }
 
-# Matched column-title/note markers, numbered only over the notes present.
-# Shared presentation helper; LM currently needs at most three notes.
-jamovi_table_column_notes = function(table, titles, notes) {
+# Column-wide notes share a letter across their relevant visible headers.
+# Reset base titles on every pass so conditional notes never leave stale markers.
+jamovi_table_column_notes = function(table, titles, notes, targets=NULL) {
+  markers = c("ᵃ","ᵇ","ᶜ","ᵈ","ᵉ","ᶠ","ᵍ","ʰ","ⁱ","ʲ","ᵏ","ˡ","ᵐ","ⁿ","ᵒ","ᵖ")
+  for (name in names(titles)) table$getColumn(name)$setTitle(titles[[name]])
   index = 0L
-  for (name in names(titles)) {
-    title = titles[[name]]
+  for (name in names(notes)) {
+    columns = if (is.null(targets)) name else targets[[name]]
+    columns = intersect(columns,names(titles))
+    columns = columns[vapply(columns,function(column)isTRUE(table$getColumn(column)$visible),logical(1))]
     note = notes[[name]]
-    if (length(note)) {
-      index = index+1L
-      marker = c("ᵃ","ᵇ","ᶜ")[index]
-      title = paste0(title,marker)
-      table$setNote(paste0("column_",name),paste(marker,note))
+    key = paste0("column_",name)
+    table$setNote(key,NULL)
+    if (!length(note) || !length(columns)) next
+    index = index+1L
+    if (index>length(markers)) stop("Too many column notes for superscript lettering.",call.=FALSE)
+    marker = markers[index]
+    for (column in columns) {
+      item = table$getColumn(column)
+      item$setTitle(paste0(item$title,marker))
     }
-    table$getColumn(name)$setTitle(title)
+    table$setNote(key,paste(marker,note))
   }
 }

@@ -5,6 +5,7 @@ test_that("serialized GLM notes render compactly through the installed native ta
     element = table$asProtoBuf()
     fixtures$value[[length(fixtures$value)+1L]] = list(name=name,columns=length(element$table$columns),
       notes=lapply(element$table$notes,function(note)list(note=note$note)),
+      headings=unname(lapply(Filter(function(column)column$visible,table$columns),function(column)list(name=column$name,value=column$title,classes="",sortable=FALSE))),
       cells=unlist(lapply(Filter(function(column)isTRUE(table$getColumn(column$name)$visible),element$table$columns),function(column)
         lapply(column$cells,function(cell)list(footnotes=as.list(cell$footnotes),symbols=as.list(cell$symbols)))),recursive=FALSE),
       familyContext=if(!is.null(table$notes$model))table$notes$model$note else NULL,

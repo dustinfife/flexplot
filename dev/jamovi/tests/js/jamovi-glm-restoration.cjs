@@ -40,7 +40,7 @@ module.exports = async function(source, compilerPath, handlers, FormatDef, utils
         delete defaults.family; delete defaults.plotStyle; delete defaults.plotScale;
         Object.assign(defaults,{polynomials:false,comparisonPolynomials:false,graphicassump:false,estimates:true,comparisonGroup:null,comparisonMagnet:false});
     }
-    if (analysis === 'glmgeneralized') Object.assign(defaults,{automaticFamily:'gaussian',automaticFamilyOutcome:'',ghostLines:false,comparisonSe:true,comparisonPlotStyle:'auto',comparisonPlotScale:'probability'});
+    if (analysis === 'glmgeneralized') Object.assign(defaults,{familySelection:'gaussian',automaticFamily:'gaussian',automaticFamilyOutcome:'',ghostLines:false,comparisonSe:true,comparisonPlotStyle:'auto',comparisonPlotScale:'probability'});
     for (const [name,value] of Object.entries(defaults)) {
         const option = native[name] = new Option(value,{name});
         option.on('valuechanged',() => {

@@ -16,6 +16,7 @@ options:
     type: Variables
   - name: family
     title: Distribution and link
+    hidden: true
     type: List
     options:
       - name: auto
@@ -33,6 +34,23 @@ options:
       - name: negativebinomial
         title: Negative Binomial (log)
     default: auto
+  - name: familySelection
+    title: Distribution and link
+    type: List
+    options:
+      - name: gaussian
+        title: Gaussian (identity)
+      - name: binomial
+        title: Binomial / Logistic (logit)
+      - name: poisson
+        title: Poisson (log)
+      - name: gammaLog
+        title: Gamma (log)
+      - name: Gamma
+        title: Gamma (inverse)
+      - name: negativebinomial
+        title: Negative Binomial (log)
+    default: gaussian
   - name: automaticFamily
     type: List
     options: [gaussian, binomial, poisson, gammaLog, Gamma, negativebinomial]
@@ -71,7 +89,7 @@ options:
     type: Variables
     default: null
   - name: graphic
-    title: Model visualization
+    title: Model Visualization
     type: Bool
     default: true
   - name: plotX
@@ -100,7 +118,7 @@ options:
         title: Raw observations and model predictions
     default: auto
   - name: se
-    title: Confidence intervals
+    title: 95% confidence intervals
     type: Bool
     default: true
   - name: showEstimates
@@ -205,7 +223,7 @@ options:
     default: 0
     hidden: true
   - name: comparisonSe
-    title: Confidence intervals
+    title: 95% confidence intervals
     type: Bool
     default: true
   - name: comparisonPlotStyle

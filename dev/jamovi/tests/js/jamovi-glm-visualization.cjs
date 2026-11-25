@@ -142,6 +142,23 @@ module.exports = async function({ui,view,handlers,restore,snapshot,assert,extrac
         restore('manual-family-'+family,{out:'binary',preds:['x'],family,automaticFamily:'binomial',automaticFamilyOutcome:'binary',plotX:'x'});
         ui.out.setValue('another');await settle();assert.equal(ui.family.value(),family);
     }
+    restore('visible-family-initialization',{out:'binary',preds:['x'],family:'auto',
+        automaticFamily:'binomial',automaticFamilyOutcome:'binary',familySelection:'binomial',plotX:'x'});
+    await settle();
+    assert.equal(ui.familySelection.value(),'binomial');assert.equal(ui.family.value(),'auto');
+    // A native backend projection is not a deliberate user override.
+    view.flags.updating=true;
+    ui.automaticFamily.setValue('gaussian');ui.automaticFamilyOutcome.setValue('continuous');
+    ui.familySelection.setValue('gaussian');view.flags.updating=false;
+    assert.equal(ui.family.value(),'auto');
+    ui.out.setValue('continuous');await settle();
+    ui.familySelection.setValue('poisson');await settle();
+    assert.equal(ui.family.value(),'poisson');
+    ui.plotX.setValue('z');ui.out.setValue('binary');await settle();
+    assert.equal(ui.family.value(),'poisson');
+    const retained=JSON.parse(JSON.stringify(snapshot('manual-visible-family').options));
+    restore('manual-visible-family-reopened',retained);await settle();
+    assert.equal(ui.familySelection.value(),'poisson');assert.equal(ui.family.value(),'poisson');
     console.log('PASS: explicit Automatic/native family choices survive restoration, outcome edits and delayed metadata; handlers never overwrite the selector.');
     console.log('PASS: independent native GLM display constraints, versioned restoration, stale host replies and independent model terms.');
 };

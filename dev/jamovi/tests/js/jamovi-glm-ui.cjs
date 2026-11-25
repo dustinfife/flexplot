@@ -132,7 +132,7 @@ const {pathToFileURL} = require('node:url');
         ui.plotLabelStore = control([]);ui.comparisonPlotLabelStore = control([]);
         if (analysis === 'glmbasic') ui.comparisonMagnet = control(false);
         if (generalized || analysis === 'glmbasic') ui.mainEffects = control(null); // Legacy saved option; no visible control.
-        if (generalized) { ui.polynomials.setValue(false); ui.comparisonPolynomials.setValue(false); }
+        if (generalized) { ui.family=control('auto'); ui.automaticFamily=control('gaussian'); ui.automaticFamilyOutcome=control(''); ui.polynomials.setValue(false); ui.comparisonPolynomials.setValue(false); }
         if (analysis === 'glmbasic') {
             assert.ok(controls.has('se'));
             assert.equal(controls.has('line'),false,'Generic smoothers must not appear in the LM UI');
@@ -481,9 +481,13 @@ const {pathToFileURL} = require('node:url');
             assert.equal(visualization.findIndex(c => c.name === 'plotScale'),visualization.findIndex(c => c.name === 'plotStyle')+1);
             const top = compiled.view.layout.controls;
             assert.equal(top[0].type,'VariableSupplier');
-            assert.equal(top[1].name,'family');
-            assert.equal(top[2].type,'Label');
-            assert.equal(top[3].name,'interactions');
+            assert.equal(top[1].name,'familySelection');
+            assert.equal(top[2].name,'interactions');
+            assert.ok(!JSON.stringify(top).includes('Automatic selects'));
+            const familyOptions=yaml.load(fs.readFileSync(path.join(root,'jamovi/glmgeneralized.a.yaml'),'utf8')).options;
+            const visibleFamily=familyOptions.find(o=>o.name==='familySelection');
+            assert.ok(!visibleFamily.options.some(o=>o.name==='auto'));
+            assert.ok(familyOptions.find(o=>o.name==='family').hidden);
             const familyDefinition=yaml.load(fs.readFileSync(path.join(root,'jamovi/glmgeneralized.a.yaml'),'utf8')).options.find(o=>o.name==='family');
             assert.equal(familyDefinition.default,'auto');
             assert.ok(familyDefinition.options.some(o=>o.name==='auto'));
@@ -504,7 +508,7 @@ const {pathToFileURL} = require('node:url');
                 assert.equal(ui[name].value(),false,'Synchronization must not reset output preferences');
             }
             assert.equal(a.options.find(o => o.name === 'plotScale').default,'probability');
-            assert.equal(a.options.find(o => o.name === 'se').title,'Confidence intervals');
+            assert.equal(a.options.find(o => o.name === 'se').title,'95% confidence intervals');
             assert.equal(a.options.find(o => o.name === 'ghostLines').title,'Show ghost lines');
             assert.equal(a.options.find(o => o.name === 'ghostLines').default,false);
             assert.equal(visualization.find(c => c.name === 'ghostLines').enable,undefined);

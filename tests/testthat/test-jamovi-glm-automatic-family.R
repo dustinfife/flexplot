@@ -30,6 +30,7 @@ test_that("Automatic and explicit Binomial share event orientation and all infer
     expect_true(auto$run());expect_true(manual$run())
     expect_identical(auto$options$family,"auto")
     expect_identical(auto$options$automaticFamily,"binomial")
+    expect_identical(auto$options$familySelection,"binomial")
     expect_identical(auto$options$automaticFamilyOutcome,"y")
     tables = function(analysis)lapply(Filter(function(item)inherits(item,"Table"),analysis$results$items),function(item)item$asDF)
     expect_equal(tables(auto),tables(manual),tolerance=0)
@@ -87,4 +88,23 @@ test_that("named families remain manual across outcome edits and Automatic can b
   expect_true(jamovi_reporting_update(analysis,list(family="binomial",out="other")))
   expect_identical(analysis$options$family,"binomial")
   expect_match(analysis$results$explanation$content,"numeric 0/1",fixed=TRUE)
+})
+
+
+test_that("visible family initialization tracks outcomes without losing manual provenance", {
+  data = small
+  data$y = rep(0:1,length.out=nrow(data))
+  data$other = data$y+3
+  analysis = automatic_glm_host(data)
+  expect_true(analysis$run())
+  expect_identical(analysis$options$familySelection,"binomial")
+  expect_true(jamovi_reporting_update(analysis,list(out="other")))
+  expect_identical(analysis$options$familySelection,"gaussian")
+  expect_true(jamovi_reporting_update(analysis,list(out="y")))
+  expect_identical(analysis$options$familySelection,"binomial")
+  expect_identical(analysis$options$family,"auto")
+  expect_true(jamovi_reporting_update(analysis,list(family="poisson")))
+  expect_identical(analysis$options$familySelection,"poisson")
+  expect_true(jamovi_reporting_update(analysis,list(out="other",plotX="z",interactions=TRUE)))
+  expect_identical(analysis$options$familySelection,"poisson")
 })

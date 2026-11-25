@@ -9,6 +9,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             out = NULL,
             preds = NULL,
             family = "auto",
+            familySelection = "gaussian",
             automaticFamily = "gaussian",
             automaticFamilyOutcome = "",
             modelTerms = NULL,
@@ -84,6 +85,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..family = jmvcore::OptionList$new(
                 "family",
                 family,
+                hidden=TRUE,
                 options=list(
                     "auto",
                     "gaussian",
@@ -93,6 +95,17 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "Gamma",
                     "negativebinomial"),
                 default="auto")
+            private$..familySelection = jmvcore::OptionList$new(
+                "familySelection",
+                familySelection,
+                options=list(
+                    "gaussian",
+                    "binomial",
+                    "poisson",
+                    "gammaLog",
+                    "Gamma",
+                    "negativebinomial"),
+                default="gaussian")
             private$..automaticFamily = jmvcore::OptionList$new(
                 "automaticFamily",
                 automaticFamily,
@@ -345,6 +358,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..comparisonPlotScale)
             self$.addOption(private$..preds)
             self$.addOption(private$..family)
+            self$.addOption(private$..familySelection)
             self$.addOption(private$..automaticFamily)
             self$.addOption(private$..automaticFamilyOutcome)
             self$.addOption(private$..modelTerms)
@@ -391,6 +405,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         out = function() private$..out$value,
         preds = function() private$..preds$value,
         family = function() private$..family$value,
+        familySelection = function() private$..familySelection$value,
         automaticFamily = function() private$..automaticFamily$value,
         automaticFamilyOutcome = function() private$..automaticFamilyOutcome$value,
         modelTerms = function() private$..modelTerms$value,
@@ -436,6 +451,7 @@ glmgeneralizedOptions = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..out = NA,
         ..preds = NA,
         ..family = NA,
+        ..familySelection = NA,
         ..automaticFamily = NA,
         ..automaticFamilyOutcome = NA,
         ..modelTerms = NA,
@@ -513,7 +529,7 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="Model visualization",
+                title="Model Visualization",
                 width=700,
                 height=450,
                 visible=FALSE,
@@ -572,7 +588,7 @@ glmgeneralizedResults = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Image$new(
                 options=options,
                 name="comparisonplot",
-                title="Model comparison plot",
+                title="Model Comparison Visualization",
                 width=700,
                 height=450,
                 visible=FALSE,

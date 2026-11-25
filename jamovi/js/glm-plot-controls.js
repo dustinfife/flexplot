@@ -11,7 +11,7 @@ module.exports = function(ui, context) {
     if (typeof context.requestData !== 'function') return;
     const states = context.workspace.glmPlotControls || (context.workspace.glmPlotControls = {});
     return Promise.all(Object.entries(outputs).map(([output,names]) => {
-        const selected = ui.family.value();
+        const selected = ui.view.model.options.getOption('family').getValue();
         let family = selected;
         if (selected === 'auto') {
             const options = ui.view.model.options;

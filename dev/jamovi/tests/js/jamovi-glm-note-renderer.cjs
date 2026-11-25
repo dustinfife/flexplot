@@ -15,6 +15,9 @@ const extract=name=>{
     return common.slice(start,end);
 };
 const functions=vm.runInNewContext(extract('V')+'\n'+extract('$e')+'\n({escape:V,paragraphs:$e})');
+const hStart=renderer.indexOf('a="";for(let R of c.header)'),hEnd=renderer.indexOf('if(this.$columnHeaderRow.innerHTML=a',hStart);
+assert.ok(hStart>=0 && hEnd>hStart);
+const header=vm.runInNewContext('(function(c,e){let a;'+renderer.slice(hStart,hEnd)+'return a;})',{on:functions.escape});
 const start=renderer.indexOf('a="";for(let R=0;R<e.notes.length;R++)');
 const end=renderer.indexOf('if(this.$tableFooter.innerHTML=a',start);
 assert.ok(start>=0 && end>start,'Installed native table-note footer code must be inspectable');
@@ -27,6 +30,13 @@ const marker=vm.runInNewContext('(function(B,i,s,rd){const F={sups:""};'+rendere
 const symbols=JSON.parse(renderer.match(/,rd=(\[[^\]]+\])/)[1]);
 const records=JSON.parse(fs.readFileSync(fixtures,'utf8'));
 for(const record of records){
+    const headings=header({header:record.headings},{});
+    const columnNotes=record.notes.filter(note=>/^[ᵃᵇᶜᵈᵉᶠᵍʰⁱʲ] /.test(note.note));
+    for(const [i,note] of columnNotes.entries()) {
+        const marker=['ᵃ','ᵇ','ᶜ','ᵈ','ᵉ','ᶠ','ᵍ','ʰ','ⁱ','ʲ'][i];
+        assert.ok(note.note.startsWith(marker+' '));
+        assert.ok(headings.includes(marker),'Column-wide note has a visible marked header');
+    }
     const footnotes=[],indices={};
     let marked=0;
     for(const cell of record.cells || []) {

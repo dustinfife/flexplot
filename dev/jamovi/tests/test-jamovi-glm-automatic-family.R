@@ -11,6 +11,7 @@ test_that("real protobuf preserves legacy named families and current Automatic p
       analysis = jamovi_reporting_host(options,data)
       expect_true(analysis$run())
       expect_identical(options$family,family)
+      expect_identical(options$familySelection,if(family=="auto") "binomial" else family)
       if(family %in% c("auto","binomial","gaussian","poisson")) {
         state = analysis$results$plot$state
         expect_identical(state$model$family$family,if(family=="auto") "binomial" else family)
@@ -20,6 +21,7 @@ test_that("real protobuf preserves legacy named families and current Automatic p
       expect_true(jamovi_reporting_update(analysis,list(out="y")))
       reopened = flexplot:::glmgeneralizedOptions$new();reopened$fromProtoBuf(options$asProtoBuf())
       expect_identical(reopened$family,family)
+      expect_identical(reopened$familySelection,if(family=="auto") "binomial" else family)
       expect_identical(reopened$automaticFamilyOutcome,"y")
       options = reopened
     }

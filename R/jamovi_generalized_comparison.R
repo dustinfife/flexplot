@@ -6,7 +6,10 @@ jamovi_glm_generalized_comparison = function(options, data) {
     error=function(error) stop("Model ", i, " specification: ", conditionMessage(error), call.=FALSE)))
   family_name = jamovi_glm_family(options,data)
   variables = unique(unlist(lapply(formulas, all.vars)))
-  eligible = data[stats::complete.cases(data[, variables, drop=FALSE]), , drop=FALSE]
+  common = stats::complete.cases(data[, variables, drop=FALSE])
+  additional = vapply(formulas,function(formula)
+    sum(stats::complete.cases(data[,all.vars(formula),drop=FALSE]) & !common),integer(1))
+  eligible = data[common, , drop=FALSE]
   if (!nrow(eligible)) stop("No complete observations are available for both models.", call.=FALSE)
   primary = tryCatch(jamovi_glm_generalized_fit(options, eligible, formulas[[1]],family_name=family_name),
     error=function(error) stop("Model 1: ", conditionMessage(error), call.=FALSE))
@@ -44,12 +47,12 @@ jamovi_glm_generalized_comparison = function(options, data) {
   }
   list(model1=model1, model2=model2, primary=primary, data=primary$data,
     formula=layout, plotError=plot_error, statistics=comparison$statistics, lr=lr, df=df, p=p,
-    warnings=unique(c(primary$warnings, secondary$warnings)))
+    additionalExcluded=additional, warnings=unique(c(primary$warnings, secondary$warnings)))
 }
 
-jamovi_glm_generalized_comparison_table = function(table, state) {
+jamovi_glm_generalized_comparison_table = function(table, state, includeP=FALSE) {
   jamovi_result_clear(table)
-  table$getColumn("p")$setTitle("p")
+  table$getColumn("p")$setVisible(includeP)
   for (i in seq_len(2L)) {
     row = list(model=paste("Model", i), n=stats::nobs(state[[paste0("model", i)]]))
     for (name in c("aic", "bic", "bayes.factor")) {
@@ -63,12 +66,13 @@ jamovi_glm_generalized_comparison_table = function(table, state) {
     }
     table$addRow(rowKey=i, values=row)
   }
-  table$setNote("population", "Same complete observations for both models.")
-  table$setNote("bayes", jamovi_bayes_note())
   test_note = if (is.finite(state$p)) "Likelihood-ratio test; asymptotic chi-square reference." else
     jamovi_comparison_unavailable(state$model1,state$model2,"Likelihood-ratio test",state)
   if (inherits(state$model1, "negbin")) test_note = paste(test_note, "Size estimated separately per model.")
-  table$setNote("test", test_note)
+  jamovi_table_column_notes(table,
+    c(n="N",bayes.factor="BIC Bayes factor",lr="Likelihood ratio",df="df",p="p"),
+    list(population=jamovi_lm_sample_note(state),bayes=jamovi_bayes_note(),test=if(includeP) test_note else NULL),
+    list(population="n",bayes="bayes.factor",test=c("lr","df","p")))
 }
 
 # GLM-only presentation: retain data, scales and model legend mappings.
@@ -106,7 +110,8 @@ jamovi_glm_generalized_comparison_plot = function(state, se=TRUE, style="auto", 
       }
     }
   }
-  plot = jamovi_glm_comparison_emphasis(jamovi_comparison_style(plot))
+  plot = jamovi_glm_comparison_emphasis(jamovi_comparison_style(plot)) +
+    ggplot2::labs(title="Model Comparison Visualization")
   if (!overlay) return(plot)
   summary = convert_formula_to_logistic_bins(state$formula, plot$data, n_bins=10)$summary_data
   if (logit) {

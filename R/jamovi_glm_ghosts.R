@@ -5,7 +5,7 @@ jamovi_glm_style_ghosts = function(...) jamovi_model_style_ghosts(...)
 jamovi_glm_generalized_plot = function(state, x=NULL, panels=NULL, group=NULL, style="auto",
                                        se=TRUE, scale="probability", ghostLines=FALSE, ghost.reference=NULL) {
   arguments = list(state=state,x=x,panels=panels,group=group,style=style,se=se,scale=scale)
-  plot = do.call(jamovi_glm_generalized_render,arguments)
+  plot = do.call(jamovi_glm_generalized_render,arguments) + ggplot2::labs(title="Model Visualization")
   if (!isTRUE(ghostLines)) return(plot)
   formula = jamovi_model_layout(list(state$model),state$data,x,panels,group)
   jamovi_model_reference_ghosts(plot,formula,ghostLines,ghost.reference,render_ghost=function()

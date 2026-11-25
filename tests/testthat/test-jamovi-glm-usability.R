@@ -93,11 +93,11 @@ test_that("GLM table help and plot explanations are concise and mode-specific", 
     expect_match(paste(jamovi_test_table_notes(analysis$results$coefficients),collapse=" "),"SE")
     state = analysis$results$plot$state
     if (family=="binomial") {
-      expect_match(flexplot:::jamovi_glm_plot_guide(state,"x",panels="a"),"success proportions")
+      expect_match(flexplot:::jamovi_glm_plot_guide(state,"x",panels="a"),"observed proportions within bins of the x-axis variable.")
       expect_match(flexplot:::jamovi_glm_plot_guide(state,"x",panels="a",scale="logit"),"observed-bin logits")
       expect_match(flexplot:::jamovi_glm_plot_guide(state,"x",panels="a",style="raw",scale="logit"),"Probability scale is used")
       expect_false(grepl("observed-bin",flexplot:::jamovi_glm_plot_guide(state,"x",panels="a",style="raw")))
-      expect_match(paste(jamovi_test_table_notes(analysis$results$coefficients),collapse=" "),"one-SD")
+      expect_match(paste(jamovi_test_table_notes(analysis$results$coefficients),collapse=" "),"model-matrix column")
       expect_match(notes$model$note,"Success event")
     } else expect_identical(flexplot:::jamovi_glm_plot_guide(state,"x",panels="a"),"")
   }

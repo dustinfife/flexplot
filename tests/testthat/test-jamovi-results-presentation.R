@@ -73,7 +73,7 @@ test_that("restored Linear Model result records cannot keep empty factor tables 
   }
 })
 
-test_that("GLM native cell footnotes identify unchanged family-specific coefficient intervals", {
+test_that("GLM native header notes identify unchanged family-specific coefficient intervals", {
   skip_if_not_installed("jmvcore")
   analysis = jamovi_reporting_host(flexplot:::glmgeneralizedOptions$new(), small)
   for (family in c("gaussian","binomial","poisson","gammaLog","Gamma","negativebinomial","gaussian")) {
@@ -95,7 +95,7 @@ test_that("GLM native cell footnotes identify unchanged family-specific coeffici
     se_columns = Filter(function(name)results$coefficients$getColumn(name)$visible,se_columns)
     expect_length(se_columns,1L)
     for (column in c(se_columns,"lower","upper")) {
-      note = paste(results$coefficients$getCell(column,rowNo=1)$footnotes,collapse=" ")
+      note = results$coefficients$notes$column_uncertainty$note
       expect_match(note,"SE and confidence limits refer to raw coefficients.",fixed=TRUE)
       if (is_t) expect_match(note,paste("t reference with",df.residual(model),"residual df."),fixed=TRUE) else
         expect_false(grepl("t reference",note,fixed=TRUE))
@@ -108,15 +108,14 @@ test_that("GLM native cell footnotes identify unchanged family-specific coeffici
       paste0("<p>",paste(warnings,collapse="; "),"</p>") else "")
     expect_null(results$coefficients$notes$interpretation)
     expect_length(results$coefficients$getRefs(), 0L)
-    expect_setequal(results$getRefs(), c("flexplot","graphicalAnalysis"))
+    expect_length(results$getRefs(),0L)
+    expect_setequal(results$getRefs(recurse=TRUE),c("flexplot","graphicalAnalysis"))
     if (family == "binomial") {
       expect_match(results$coefficients$notes$model$note, "Success event")
-      expect_match(paste(results$irt$getCell("variable",rowNo=1)$footnotes,collapse=" "),"Estimates are conditional",fixed=TRUE)
-      expect_match(paste(results$irt$getCell("instantaneous_slope",rowNo=1)$footnotes,collapse=" "),"not average marginal effects",fixed=TRUE)
-      expect_match(paste(results$irt$getCell("intercept_threshold",rowNo=1)$footnotes,collapse=" "),"Thresholds are in predictor units.",fixed=TRUE)
-      expect_match(paste(results$probabilities$getCell("Probability",rowNo=1)$footnotes,collapse=" "),
-        "probabilities are averaged over the other observed predictors.",fixed=TRUE)
-      expect_length(results$irt$notes,0L)
+      expect_match(results$irt$notes$column_reference$note,"reference levels",fixed=TRUE)
+      for (column in results$irt$columns) for (row in seq_len(results$irt$rowCount))
+        expect_length(column$getCell(row)$footnotes,0L)
+      expect_length(results$probabilities$getCell("Probability",rowNo=1)$footnotes,0L)
       expect_length(results$probabilities$notes,0L)
     } else for (name in c("irt","probabilities")) {
       expect_false(results[[name]]$visible)

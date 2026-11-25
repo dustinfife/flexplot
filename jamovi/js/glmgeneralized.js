@@ -67,6 +67,16 @@ module.exports = {
     out_changed: function(ui) { updatePlotControls(ui, this); },
     ghostLines_changed: function(ui) { updatePlotControls(ui, this); },
     graphic_changed: function(ui) { updatePlotControls(ui, this); },
+    familySelection_changed: function(ui) {
+        if (this.flags && (this.flags.updating || this.flags.loaded === false)) return;
+        const options = ui.view.model.options;
+        const selected = ui.familySelection.value();
+        // Backend projections equal the published resolution. Only a different
+        // user choice changes the retained automatic/manual selector.
+        if (selected !== options.getOption('automaticFamily').getValue())
+            options.setOptionValue('family',selected);
+        updatePlotControls(ui, this);
+    },
     family_changed: function(ui) { updatePlotControls(ui, this); },
     automaticFamily_changed: function(ui) { updatePlotControls(ui, this); },
     automaticFamilyOutcome_changed: function(ui) { updatePlotControls(ui, this); },

@@ -1,4 +1,5 @@
-# Automatic is an explicit selector value; every named family is a manual choice.
+# The hidden legacy selector retains automatic/manual provenance; the visible
+# selection always shows the resolved family, never the internal auto sentinel.
 # Inspect actual observations, never declared levels or predictor-complete subsets.
 jamovi_glm_binary_outcome = function(response) {
   if (!is.null(dim(response))) return(FALSE)
@@ -27,6 +28,7 @@ jamovi_glm_family_restore = function(options) {
 jamovi_glm_family_publish = function(options, data=NULL) {
   family = jamovi_glm_family(options,data)
   jamovi_output_option(options,"automaticFamily",family)
+  jamovi_output_option(options,"familySelection",family)
   jamovi_output_option(options,"automaticFamilyOutcome",if(length(options$out)) options$out else "")
   invisible(family)
 }

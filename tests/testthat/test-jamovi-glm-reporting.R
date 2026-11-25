@@ -27,11 +27,12 @@ test_that("jamovi logistic sections reuse estimates.glm and independent conditio
     mean(predict(model,profile,type="response"))
   },numeric(1))
   expect_equal(probabilities$Probability, unname(expected), tolerance=1e-12)
-  expect_match(paste(analysis$results$irt$getCell("variable",rowNo=1)$footnotes,collapse=" "), "conditional")
+  expect_match(analysis$results$irt$notes$column_reference$note,"reference levels")
   expect_false(grepl("Unshown",analysis$results$plotExplanation$content))
   expect_length(analysis$results$plot$getRefs(),0L)
   expect_length(analysis$results$coefficients$getRefs(),0L)
-  expect_setequal(analysis$results$getRefs(),c("flexplot","graphicalAnalysis"))
+  expect_length(analysis$results$getRefs(),0L)
+  expect_setequal(analysis$results$getRefs(recurse=TRUE),c("flexplot","graphicalAnalysis"))
 })
 
 test_that("all families retain fitted-model inference and existing family summaries", {

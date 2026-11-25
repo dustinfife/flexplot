@@ -8,15 +8,15 @@ test_that("targeted GLM cell footnotes retain estimands and context across famil
     expect_identical(names(table$notes)[1],"model")
     text=paste(jamovi_test_table_notes(table),collapse=" ")
     expect_match(text,"Interaction effects depend",fixed=TRUE)
-    expect_match(paste(table$getCell("lower",rowNo=1)$footnotes,collapse=" "),"raw coefficients",fixed=TRUE)
+    expect_match(table$notes$column_uncertainty$note,"raw coefficients",fixed=TRUE)
     if(family=="negativebinomial") expect_match(text,"estimated size (theta)",fixed=TRUE)
     if(family=="Gamma") expect_match(text,"not response ratios",fixed=TRUE)
     if(family=="binomial") {
-      expect_match(paste(table$getCell("standardized.OR",rowNo=2)$footnotes,collapse=" "),"one-SD",fixed=TRUE)
-      expect_match(paste(table$getCell("Prediction Difference (+/- 1 SD)",rowNo=2)$footnotes,collapse=" "),"reference profile",fixed=TRUE)
+      expect_match(table$notes$column_standardized$note,"model-matrix column",fixed=TRUE)
+      expect_match(table$notes$column_differences$note,"reference profile",fixed=TRUE)
       expect_length(table$getCell("Prediction Difference (+/- 1 SD)",rowNo=1)$footnotes,0L)
-      expect_match(paste(results$irt$getCell("variable",rowNo=1)$footnotes,collapse=" "),"fitted reference levels",fixed=TRUE)
-      expect_match(paste(results$probabilities$getCell("Probability",rowNo=1)$footnotes,collapse=" "),"averaged",fixed=TRUE)
+      expect_match(results$irt$notes$column_reference$note,"reference levels",fixed=TRUE)
+      expect_length(results$probabilities$getCell("Probability",rowNo=1)$footnotes,0L)
     }
     before=table$asDF;notes=jamovi_test_table_notes(table)
     expect_true(analysis$run());expect_equal(table$asDF,before,tolerance=0)
@@ -45,7 +45,7 @@ test_that("comparison p headings, conditional test reasons and BIC directions ma
     reader=jamovi_reporting_read;environment(reader)=list2env(list(data=data),parent=environment(reader))
     analysis$.setReadDatasetSource(reader);analysis$.setReadDatasetHeaderSource(reader)
     expect_true(analysis$run());table=analysis$results$comparison
-    if(module=="glmbasic") expect_match(table$getColumn("p")$title,"^p[ᵃᵇᶜ]$") else
+    if(module!="mixedmodel") expect_match(table$getColumn("p")$title,"^p[ᵃᵇᶜ]$") else
       expect_identical(table$getColumn("p")$title,"p")
     state=analysis$results$comparisonplot$state
     bic=if(module=="mixedmodel")c(BIC(lme4::refitML(state$model1)),BIC(lme4::refitML(state$model2))) else c(BIC(state$model1),BIC(state$model2));actual=table$asDF$bayes.factor
@@ -83,8 +83,8 @@ test_that("unavailable GLM tests identify invalid likelihood fields without calc
   for(case in list(list(df=0,lr=1,reason="degrees of freedom"),list(df=1,lr=Inf,reason="nonfinite likelihood-ratio"),
     list(df=1,lr=-1,reason="negative likelihood-ratio"))) {
     state$df=case$df;state$lr=case$lr
-    flexplot:::jamovi_glm_generalized_comparison_table(analysis$results$comparison,state)
-    expect_match(analysis$results$comparison$notes$test$note,case$reason,fixed=TRUE)
+    flexplot:::jamovi_glm_generalized_comparison_table(analysis$results$comparison,state,TRUE)
+    expect_match(analysis$results$comparison$notes$column_test$note,case$reason,fixed=TRUE)
     expect_null(analysis$results$comparison$getCell("p",rowNo=1)$value)
   }
 })

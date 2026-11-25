@@ -120,6 +120,12 @@ jamovi_glm_label_info = function(state, options, comparison=FALSE) {
 
 glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
   "glmgeneralizedClass", inherit=glmgeneralizedBase,
+  public=list(
+    initialize=function(...) {
+      jamovi_flexplot_bibliography(glmgeneralizedResults)
+      super$initialize(...)
+    }
+  ),
   private=list(
     .init=function() jamovi_glm_reporting_reset(self$results),
     .run=function() {
@@ -129,8 +135,8 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
       jamovi_plot_sync_labels(self$options)
       jamovi_plot_sync_labels(self$options,rows="comparisonPlotLabels",retained="comparisonPlotLabelStore")
       jamovi_glm_reporting_reset(self$results)
-      jamovi_glm_family_publish(self$options)
       if (!length(self$options$out)) {
+        jamovi_glm_family_publish(self$options)
         jamovi_diagnostic(self$results$waiting, if (!length(self$options$preds))
           "Select an outcome and predictors." else "Select an outcome variable.")
         return(invisible(NULL))
@@ -162,7 +168,7 @@ glmgeneralizedClass = if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         if (is.null(comparison)) list(state$model) else list(comparison$model1, comparison$model2))
       if (!is.null(comparison)) {
         self$results$comparison$setVisible(self$options$comparisonStatistics)
-        jamovi_glm_generalized_comparison_table(self$results$comparison, comparison)
+        jamovi_glm_generalized_comparison_table(self$results$comparison, comparison,self$options$includeP)
         self$results$comparisonplot$setState(comparison)
         self$results$comparisonplot$setVisible(self$options$comparisonGraphic)
       }

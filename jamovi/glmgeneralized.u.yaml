@@ -22,9 +22,7 @@ children:
             name: preds
             isTarget: true
   - type: ComboBox
-    name: family
-  - type: Label
-    label: Automatic selects Binomial / Logistic for binary outcomes, otherwise Gaussian.
+    name: familySelection
   - type: CheckBox
     name: interactions
   - type: Supplier
