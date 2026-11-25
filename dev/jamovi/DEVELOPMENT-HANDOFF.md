@@ -1409,3 +1409,28 @@ and payload `ac95693bb4ec1d407b45a93cfb0dbbaf4ac9fe279c6dd325191835f960c2a1b2`.
 Logs and installed-package verification:
 `.jamovi-dev/manual-note-order-20261125/`. Recalculation updates cached headings
 and notes. Module left installed for manual review; comprehensive E2E remains paused.
+
+
+## GLM — remove routine interaction interpretation note
+
+Completed 2026-11-25 from `a28d08f1`. Removed “Interaction effects depend on the
+other interacting predictors.” and its Coefficient header marker. Editorial rule:
+notes should explain software-specific estimands, settings and limitations, not
+routine statistical interpretation. Retained the software-specific standardized
+column scaling and prediction-difference notes. Shared lettering automatically
+closes the gap: Std. ORᵃ, Prediction differenceᵇ and SEᶜ in the prior example;
+Coefficient is unmarked. No calculations, table schemas, bibliography citations,
+ghost wording or plot behavior changed. Cached notes clear on recalculation.
+
+Focused source and installed checks each passed 576 assertions; native GLM
+renderer/serialization checks passed 169, with zero failures, test warnings or skips. Logs are
+recorded in `.jamovi-dev/manual-glm-no-interaction-note-20261125/`. All 156 protected
+visual/fixture/metadata artifacts remain unchanged. No full suite, comprehensive
+E2E, visual-baseline regeneration, live GUI testing or window manipulation.
+Existing testthat/R-build startup warning remains. `git diff --check` passed.
+
+Rebuilt and installed 0.27.0 using the existing cache. Installed preflight passed:
+source fingerprint `94b7645ac0b4b74228760fb143308895eca84ec7c5a21bda87aba54b0ba78e1b`,
+archive `fe41b6a7872dce9a548bb2447f14c2184677529b8e1cb751a8e32a599b45a581`,
+payload `cf2c760adf3dcf99e8ec091903102f24d983005e4438f7bf49f14a4478f7cdc9`.
+Module left installed for manual review; comprehensive E2E remains paused.

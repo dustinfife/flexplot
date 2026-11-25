@@ -7,7 +7,7 @@ test_that("targeted GLM cell footnotes retain estimands and context across famil
     expect_true(analysis$run());results=analysis$results;table=results$coefficients
     expect_identical(names(table$notes)[1],"model")
     text=paste(jamovi_test_table_notes(table),collapse=" ")
-    expect_match(text,"Interaction effects depend",fixed=TRUE)
+    expect_false(grepl("Interaction effects depend",text,fixed=TRUE))
     expect_match(table$notes$column_uncertainty$note,"raw coefficients",fixed=TRUE)
     if(family=="negativebinomial") expect_match(text,"estimated size (theta)",fixed=TRUE)
     if(family=="Gamma") expect_match(text,"not response ratios",fixed=TRUE)

@@ -26,13 +26,13 @@ test_that("GLM column-wide notes use matching sequential letters and retain only
   expect_match(table$notes$column_test$note,"^ᵇ ")
   before = analysis$results$coefficients$asDF
   expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("x","a",c("x","a")),interactions=TRUE)))
-  expect_match(analysis$results$coefficients$notes$column_interaction$note,"Interaction")
+  expect_null(analysis$results$coefficients$notes$column_interaction)
   check(analysis$results$coefficients)
   coefficients = analysis$results$coefficients
-  for (name in c("raw.coefficients","standardized.OR","Prediction Difference (+/- 1 SD)","SE"))
-    expect_match(coefficients$getColumn(name)$title,switch(name,raw.coefficients="ᵃ$",standardized.OR="ᵇ$",
-      `Prediction Difference (+/- 1 SD)`="ᶜ$",SE="ᵈ$"))
-  for (name in c("inverse.standardized.OR","lower","upper"))
+  for (name in c("standardized.OR","Prediction Difference (+/- 1 SD)","SE"))
+    expect_match(coefficients$getColumn(name)$title,switch(name,standardized.OR="ᵃ$",
+      `Prediction Difference (+/- 1 SD)`="ᵇ$",SE="ᶜ$"))
+  for (name in c("raw.coefficients","inverse.standardized.OR","lower","upper"))
     expect_false(grepl("[ᵃᵇᶜᵈ]",coefficients$getColumn(name)$title))
   expect_true(jamovi_reporting_update(analysis,list(modelTerms=list("x","a"),interactions=FALSE)))
   expect_null(analysis$results$coefficients$notes$column_interaction)

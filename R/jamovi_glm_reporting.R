@@ -135,10 +135,6 @@ jamovi_glm_estimates = function(results, state, includeP=FALSE) {
     targets$differences = "Prediction Difference (+/- 1 SD)"
   }
   interaction_terms = which(attr(stats::terms(model),"order")>1L)
-  if (length(interaction_terms)) {
-    notes$interaction = "Interaction effects depend on the other interacting predictors."
-    targets$interaction = c("raw.coefficients","Estimate")
-  }
   if (model$family$family == "binomial") {
     # SD scales fitted contrast columns, not factor level changes or an
     # unconditional main effect in an interaction model.
