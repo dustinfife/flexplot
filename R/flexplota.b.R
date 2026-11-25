@@ -8,9 +8,24 @@ jamovi_flexplot_reset = function(results) {
   jamovi_diagnostic(results$waiting,"Select an outcome variable to create a plot.")
 }
 
+# Analysis$asProtoBuf collects the bibliography with getRefs(recurse=TRUE),
+# whereas ResultsElement$asProtoBuf calls getRefs() for on-result callouts.
+# Keep the declared references in the bibliography without repeating markers
+# below every ordinary plot or waiting message. Use the public R6 extension API
+# here so compilation of the generated header preserves this behavior.
+jamovi_flexplot_bibliography = function() {
+  flexplotaResults$set("public","getRefs",function(recurse=FALSE) {
+    if (isTRUE(recurse)) super$getRefs(recurse=TRUE) else character()
+  },overwrite=TRUE)
+}
+
 flexplotaClass = if (requireNamespace('jmvcore')) R6::R6Class(
     "flexplotaClass",
     inherit = flexplotaBase,
+    public = list(initialize=function(...) {
+      jamovi_flexplot_bibliography()
+      super$initialize(...)
+    }),
     private = list(
   .init = function() jamovi_flexplot_reset(self$results),
   

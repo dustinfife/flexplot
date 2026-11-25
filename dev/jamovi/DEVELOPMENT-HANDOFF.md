@@ -1066,3 +1066,48 @@ placement are renderer-level verified; the user's live visual review remains the
 next check. No claim of new live GUI or full-suite acceptance is made. Local logs,
 result summaries and installation preflight are in
 `.jamovi-dev/manual-lm-20261125/`.
+
+
+## Ordinary Flexplot — remove repeated bibliographic callouts
+
+Completed 2026-11-25 from `8f0c6c5a`, following the user's screenshot of [3] [4]
+under both a plot and an empty Flexplot analysis. The full final References list
+was already in the correct location. This supersedes the earlier ordinary-module
+conclusion that those footer callouts necessarily had to remain.
+
+The installed public API separates two paths: `ResultsElement$asProtoBuf()` calls
+`getRefs()` to serialize on-result marker references, while
+`Analysis$asProtoBuf()` calls `getRefs(recurse=TRUE)` to collect full bibliography
+entries. Ordinary `flexplotaResults` now overrides that public method through
+R6's public class-extension API: the nonrecursive call returns no marker IDs;
+the recursive call delegates to the original Group collector. The original YAML
+reference declarations remain intact. The constructor installs the method before
+creating results, so normal header compilation preserves it. There is no change
+to jmvcore, the host renderer, CSS, protobuf fields after serialization, plots,
+statistics, option/result identifiers or other submodules' citation policies.
+No extra reference block or repeated bibliography text is added to Flexplot.
+
+The actual AnalysisResponse retains both complete article references while every
+serialized ordinary result has an empty marker-reference vector. Empty analyses,
+populated plots, multiple instances and cached results with old root refs are
+covered. Existing result objects survive restoration. The installed native
+References panel's `update()` collects entries from each analysis's `references`
+metadata, independently of result-marker IDs, and automatically includes jamovi/R
+attribution. Executing that method with real response fixtures retains all four
+entries; executing the native marker component yields no [3] [4] beneath ordinary
+output. This fixes repetition rather than moving it to another ordinary result.
+Previously serialized output must be recalculated to receive the new marker-free
+response; no existing user file or review window was modified to force that.
+
+Focused validation passed 349 package assertions/nine cases (citation, conditioning
+and suppression regressions), three native renderer assertions/one case, and 45
+assertions/one case against the actually installed module. All have zero failures,
+errors, test warnings or skips. Source boundaries pass; all 140 SVGs and 16
+fixture/metadata artifacts remain unchanged. No full suite, E2E campaign or live
+GUI testing was run, and no jamovi review windows were opened, closed or manipulated.
+The campaign remains paused; user manual inspection is the next step.
+
+Built/installed 0.27.0 using the existing cache. Installed source fingerprint:
+`8348f977af3672d2eca9cb3e91b0a72e8d1456f1a609fea68b1581b8f2ceb35a`; archive `810dd01fbad6ff9c4e07108f028a1d00a6f52cf6c3e2fd2d4c980ee65405c953`; payload `975b19cabce2c94eccd1a8e0c7036f2c12ed01b9406431f2b68eea68009751c4`.
+Receipt/payload/source verification passed; the latest module is left installed.
+Local test logs/results and preflight: `.jamovi-dev/manual-flexplot-citations-20261125/`.
