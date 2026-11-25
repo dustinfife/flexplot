@@ -53,7 +53,8 @@ options:
       title: Plot method (categorical predictors)
       type: List
       options:
-        - "Jittered-density plot"
+        - name: Jittered-density plot
+          title: Beeswarm plot
         - "Boxplot"
         - "Violin plot"
       default: "Jittered-density plot"      

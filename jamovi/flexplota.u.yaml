@@ -54,6 +54,8 @@ children:
         name: line
       - type: CheckBox
         name: suppr
+        events:
+          change: './flexplota.events::onChange_suppr'
       - type: ComboBox
         name: center
       - type: ComboBox

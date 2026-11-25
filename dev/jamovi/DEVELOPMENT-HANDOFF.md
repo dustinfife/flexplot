@@ -1111,3 +1111,43 @@ Built/installed 0.27.0 using the existing cache. Installed source fingerprint:
 `8348f977af3672d2eca9cb3e91b0a72e8d1456f1a609fea68b1581b8f2ceb35a`; archive `810dd01fbad6ff9c4e07108f028a1d00a6f52cf6c3e2fd2d4c980ee65405c953`; payload `975b19cabce2c94eccd1a8e0c7036f2c12ed01b9406431f2b68eea68009751c4`.
 Receipt/payload/source verification passed; the latest module is left installed.
 Local test logs/results and preflight: `.jamovi-dev/manual-flexplot-citations-20261125/`.
+
+
+## Ordinary Flexplot — suppression control refinements and Beeswarm label
+
+Completed 2026-11-25 from `76d0eb81`, retaining the citation fix on top of the
+requested `8f0c6c5a` starting point. Only ordinary Flexplot UI definitions/handlers
+and their focused control regression test changed; plotting and R algorithms,
+saved options, other modules and citation behavior remain intact.
+
+- Suppression now disables Center/Spread immediately. Re-enabling fits restores
+  its existing first-predictor text/categorical eligibility; continuous or absent
+  first predictors leave it disabled. Its selected summary preference is retained.
+- Ghost line now requires both an existing panel role and suppression off. The
+  checked/unchecked value is never reset. Re-enabling fits makes the checkbox
+  available under its existing panel eligibility and lets the unchanged plotting
+  path restore previously enabled ghosts.
+- The first Plot method choice is displayed as **Beeswarm plot** using the native
+  option name/title mapping. Internal `plmethod`, the value/default
+  `Jittered-density plot`, Boxplot/Violin choices and all R dispatch comparisons
+  stay unchanged. Existing saved selections therefore retain their meaning.
+
+A native suppression-change binding updates both controls directly. Existing
+request-identity checks prevent a late metadata reply from re-enabling a suppressed
+Center/Spread control. The focused compiled UI/installed-handler-runtime test
+passes (one case, four R wrapper assertions plus expanded JavaScript assertions),
+with zero failures/errors/test warnings/skips. It covers both suppression
+transitions, all three summary preferences, checked/unchecked ghost preferences,
+continuous/categorical transitions, panel removal, stale replies, and the new
+label with the unchanged internal value/default. No package suite, full native
+suite, E2E campaign or visual tests/baseline regeneration was run. All 140 SVGs
+and 16 fixture/metadata artifacts remain unchanged.
+
+Built and installed 0.27.0 using the existing cache. Verified source fingerprint
+`f11021949fb9a312cee92d3633ca90314626536e0f256bd81201268dec0520ca`; archive `e08a9f072c9e257331f0cb2cc3c8737f4b361b9fb6209fe99248be9d0b11a3d0`; payload `738a5ceb9777b540a0c11737b0d2d68a9cbcafca0062d16ce7753ad2c4b3ece0`.
+Source/archive/payload preflight passed. The installed ordinary UI bundle contains
+the Beeswarm label, legacy option value and suppression-change handler. Latest
+module left installed for manual inspection. No live GUI testing or manipulation
+of jamovi windows occurred. Local log/preflight:
+`.jamovi-dev/manual-flexplot-controls-20261125/`. Comprehensive E2E remains paused;
+stop here and wait for the user's next feedback.

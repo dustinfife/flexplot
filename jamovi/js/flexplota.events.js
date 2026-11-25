@@ -10,6 +10,9 @@ const events = {
     onChange_given: function(ui) {
         updateUI(ui, this);
     },
+    onChange_suppr: function(ui) {
+        updateUI(ui, this);
+    },
     onRemoteDataChanged: function(ui) {
         updateUI(ui, this);
     }
@@ -21,9 +24,11 @@ const updateUI = function(ui, context) {
     const predictors = ui.preds.value() || [];
     const panels = ui.given.value() || [];
     const hasPanels = panels.length > 0;
+    const suppressed = ui.suppr.value() === true;
     ui.view.model.options.beginEdit();
     ui.suppr.setPropertyValue('enable', true);
-    ui.ghost.setPropertyValue('enable', hasPanels);
+    ui.ghost.setPropertyValue('enable', hasPanels && !suppressed);
+    ui.center.setPropertyValue('enable', false);
     ui.resid.setPropertyValue('enable', hasPanels);
     ui.bins.setPropertyValue('enable', false);
     ui.view.model.options.endEdit();
@@ -46,7 +51,7 @@ const updateUI = function(ui, context) {
             const numericStorage = first.dataType === 'decimal' || first.dataType === 'integer';
             ui.line.setPropertyValue('enable', numericStorage);
             ui.se.setPropertyValue('enable', numericStorage);
-            ui.center.setPropertyValue('enable', first.dataType === 'text');
+            ui.center.setPropertyValue('enable', first.dataType === 'text' && !suppressed);
             ui.plmethod.setPropertyValue('enable', first.dataType === 'text');
         }
         ui.view.model.options.endEdit();
